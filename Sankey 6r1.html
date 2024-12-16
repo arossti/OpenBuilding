@@ -1,0 +1,2536 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Keep existing head section with styles unchanged -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Energy Flow Sankey Diagram</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    /* Base Layout */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0 auto;
+      max-width: 1800px;
+      padding: 20px;
+      min-width: 400px;
+    }
+
+    /* Core Layout Components */
+    .container { 
+      display: flex; 
+      gap: 10px; 
+      margin-top: 10px; 
+      flex-direction: column; 
+    }
+    
+    .button-row { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      padding: 10px 0; 
+      border-bottom: 1px solid #eee; 
+    }
+    
+    .status-row { 
+      min-height: 24px; 
+      padding: 4px 0; 
+    }
+    
+    .file-input-group { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+    
+    .diagram-container { 
+      flex: 0 0 auto; 
+      width: 100%; 
+    }
+    
+    .controls-container {
+      flex: 1 1 400px;
+      min-width: 400px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* Sankey Elements */
+    .node {
+      stroke: #000;
+      stroke-width: 1px;
+      cursor: pointer;
+    }
+    
+    .link {
+      fill: none;
+      stroke-opacity: 0.7;
+      transition: stroke-opacity 0.2s;
+      cursor: pointer;
+    }
+    
+    .link:hover { 
+      stroke-opacity: 0.9; 
+    }
+    
+    .node-label {
+      font-size: 11px;
+      fill: black;
+      pointer-events: none;
+      font-weight: 500;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.98);
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      pointer-events: none;
+      font-size: 12px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+      max-width: 300px;
+      line-height: 1.4;
+      z-index: 1000;
+    }
+    
+    .tooltip-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .tooltip-value { 
+      color: #666; 
+      font-size: 11px; 
+    }
+    
+    .tooltip-flow {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+    }
+
+    /* Controls */
+    .controls-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    
+    .controls-table th,
+    .controls-table td {
+      padding: 1px 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    
+    .controls-table th:first-child { 
+      width: 210px; 
+      min-width: 210px; 
+    }
+    
+    .controls-table th:nth-child(2) { 
+      width: 50px; 
+    }
+    
+    .controls-table th {
+      background-color: #f5f5f5;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-weight: 600;
+    }
+
+    /* UI Elements */
+    .slider-cell { 
+      display: flex; 
+      align-items: center; 
+      gap: 5px; 
+    }
+    
+    input[type="range"] { 
+      width: 100px; 
+      accent-color: #666; 
+    }
+    
+    #widthMultiplier { 
+      height: 20px; 
+      margin: 0; 
+    }
+    
+    .value-display {
+      min-width: 70px;
+      text-align: right;
+      font-size: 11px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    /* Buttons */
+    button {
+      padding: 6px 12px;
+      cursor: pointer;
+      background-color: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 12px;
+      transition: all 0.2s;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    button:hover {
+      background-color: #e5e5e5;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Special Buttons */
+    #importButton { 
+      background-color: #2196F3; 
+      color: white; 
+      border: none; 
+    }
+    
+    #importButton:hover { 
+      background-color: #1976D2; 
+    }
+    
+    #applyButton { 
+      background-color: #4CAF50; 
+      color: white; 
+      border: none; 
+    }
+    
+    #applyButton:hover { 
+      background-color: #45a049; 
+    }
+    
+    #applyButton:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Width Toggle */
+    .width-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 3px 12px;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      height: 23px;
+    }
+    
+    .width-toggle label { 
+      font-size: 12px; 
+      color: #333; 
+    }
+
+    /* Status Indicators */
+    #fileName { 
+      color: #666; 
+      font-size: 12px; 
+      margin-left: 8px; 
+    }
+    
+    #statusMessage { 
+      font-size: 12px; 
+      padding: 4px 8px; 
+      border-radius: 4px; 
+    }
+    
+    .status-success { 
+      color: #4CAF50; 
+      background-color: #E8F5E9; 
+    }
+    
+    .status-error { 
+      color: #f44336; 
+      background-color: #FFEBEE; 
+    }
+    
+    .status-pending { 
+      color: #2196F3; 
+      background-color: #E3F2FD; 
+    }
+
+    /* Layout Elements */
+    h3, h4 { 
+      margin: 0; 
+      color: #333; 
+    }
+    
+    .tables-container { 
+      display: flex; 
+      gap: 20px; 
+      margin-top: 15px; 
+    }
+    
+    .table-section { 
+      flex: 1; 
+      min-width: 0; 
+    }
+
+    /* Responsive */
+    @media (max-width: 800px) {
+      .tables-container { 
+        flex-direction: column; 
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="button-row">
+    <div class="file-input-group">
+      <input type="file" id="csvFile" accept=".xlsx" style="display: none">
+      <button id="importButton">Import</button>
+      <span id="fileName"></span>
+      <button id="applyButton" style="display: none;">Apply Changes</button>
+    </div>
+    <button id="toggleSpacingButton">Show as Energy Balance</button>
+    <div class="width-toggle">
+      <label for="widthMultiplier">Node Width:</label>
+      <input type="range" id="widthMultiplier" min="100" max="800" value="100" step="10">
+      <span id="widthValue">100%</span>
+    </div>
+    <button id="resetButton">Reset Values</button>
+    <button id="toggleEmissionsButton" style="background-color: #808080; color: white;">Show Emissions</button>
+    <button id="heatSourceButton" style="background-color: #A9D7F2; color: white;">HP/Electric Heat+SHW</button>
+  </div>
+
+  <div class="status-row">
+    <span id="statusMessage"></span>
+  </div>
+
+  <div class="container">
+    <div class="diagram-container">
+      <svg id="sankey" height="600"></svg>
+      <div id="tooltip" class="tooltip" style="display: none;"></div>
+    </div>
+
+    <div class="controls-container">
+      <h4>Flow Control Panel</h4>
+      
+      <div class="cost-calculator" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px; border: 1px solid #e9ecef;">
+        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+          <!-- Energy Cost Section -->
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label for="energyCost" style="font-size: 12px;">Electricity $/kWh:</label>
+            <input type="number" id="energyCost" min="0" step="0.01" value="0.12" 
+                   style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+            <span style="font-size: 12px;">
+              <span style="font-weight: bold;">Total:</span> $<span id="totalEnergyCost">0.00</span>
+            </span>
+          </div>
+
+          <!-- Grid Intensity Section -->
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label for="gridIntensity" style="font-size: 12px;">Grid Intensity (g/kWh):</label>
+            <input type="number" id="gridIntensity" min="0" step="0.01" value="67.00" 
+                   style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+            <span style="font-size: 12px;">
+              <span style="font-weight: bold;">Total:</span> <span id="totalEmissions">0.00</span> MTCO2e/yr
+            </span>
+          </div>
+
+          <!-- Efficiency Settings -->
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="copHeating" style="font-size: 12px;">
+                <span id="copHeatingLabel">COP Heating</span>:
+              </label>
+              <input type="number" id="copHeating" min="0.1" max="20" step="0.1" value="3.0" 
+                     style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="copCooling" style="font-size: 12px;">COP Cooling:</label>
+              <input type="number" id="copCooling" min="0.1" max="20" step="0.1" value="2.0" 
+                     style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="mvhrEfficiency" style="font-size: 12px;">MVHR Efficiency:</label>
+              <input type="number" id="mvhrEfficiency" min="0" max="1" step="0.01" value="0.80" 
+                     style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="dwhrEfficiency" style="font-size: 12px;">DWHR Efficiency:</label>
+              <input type="number" id="dwhrEfficiency" min="0" max="0.75" step="0.01" value="0.00" 
+                     style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tables-container">
+        <div class="table-section">
+          <table class="controls-table">
+            <thead>
+              <tr>
+                <th>Energy Supplied</th>
+                <th style="width: 50px;">Value</th>
+                <th style="width: 120px;">Adjust</th>
+              </tr>
+            </thead>
+            <tbody id="gainsControlsBody"></tbody>
+          </table>
+        </div>
+
+        <div class="table-section">
+          <table class="controls-table">
+            <thead>
+              <tr>
+                <th>Energy Lost</th>
+                <th style="width: 50px;">Value</th>
+                <th style="width: 120px;">Adjust</th>
+              </tr>
+            </thead>
+            <tbody id="lossesControlsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Script Block 1: Core Configuration and Constants -->
+<script>
+// Configuration, constants, and initial data structure
+	// Script Block 1: Core Configuration and Initial Data Structure
+	const CONFIG = {
+	  // System Value Limits and Defaults
+	  VALUE_LIMITS: {
+	    COP_HEATING: { min: 0.1, max: 20, step: 0.1, default: 3.0 },
+	    COP_COOLING: { min: 0.1, max: 20, step: 0.1, default: 4.0 },
+	    MVHR: { min: 0, max: 1, step: 0.01, default: 0.80 },
+	    DWHR: { min: 0, max: 0.75, step: 0.01, default: 0.00 },
+  		GAS_EFFICIENCY: { min: 0.5, max: 0.98, step: 0.01, default: 0.90 },
+	  },
+
+	  // Emissions Factors
+	  EMISSIONS: {
+	    GAS_INTENSITY: 1921,  // gCO2e/m3
+	    GAS_ENERGY_DENSITY: 10.36  // ekWh/m3
+	  },
+
+	  // Excel/CSV Mapping Configuration
+	  EXCEL_MAPPING: {
+	    SHEETS: {
+	      ENERGY_BALANCE: "ENERGY BALANCE",
+	      REPORT: "REPORT"
+	    },
+	    NODE_VALUES: {
+	      // Sources to Building
+	      "G.1.1 Occupant Gains": "ENERGY BALANCE!D5",
+	      "G.3.1 Plug Light Equipment": "ENERGY BALANCE!D6",
+	      "W.2.D.N SHW Net Demand": "ENERGY BALANCE!D7",
+	      "G.8.1 Windows N": "ENERGY BALANCE!D9",
+	      "G.8.2 Windows E": "ENERGY BALANCE!D10",
+	      "G.8.3 Windows S": "ENERGY BALANCE!D11",
+	      "G.8.4 Windows W": "ENERGY BALANCE!D12",
+	      "M.2.2 Sink (Air/Ground)": "ENERGY BALANCE!D17",
+	      "M.2.2 Energy Input": "ENERGY BALANCE!D18",
+	      "Heating Demand": "ENERGY BALANCE!D24",
+			// TEL (Total Envelope Losses)
+	      "B.4 Roof": "ENERGY BALANCE!F5",
+	      "B.5 Walls Ae": "ENERGY BALANCE!F6",
+	      "B.6 Floor Exposed": "ENERGY BALANCE!F7",
+	      "B.7 Doors": "ENERGY BALANCE!F8",
+	      "B.8.1 Windows N": "ENERGY BALANCE!F9",
+	      "B.8.2 Windows E": "ENERGY BALANCE!F10",
+	      "B.8.3 Windows S": "ENERGY BALANCE!F11",
+	      "B.8.4 Windows W": "ENERGY BALANCE!F12",
+	      "B.10 Floor Slab": "ENERGY BALANCE!F14",
+	      "B.13.2 TB Penalty": "ENERGY BALANCE!F15",
+	      "B.19.5 Air Leakage": "ENERGY BALANCE!F16",
+	      "V.3.5 Unrecovered Ventilation": "ENERGY BALANCE!F17",
+	      "W.2.W SHW Wasted": "ENERGY BALANCE!F18",
+	      "G.7 Unusable Heating Gains": "ENERGY BALANCE!F19"
+	    },
+	    GLOBAL_VALUES: {
+	      "COPh": "REPORT!G118",
+	      "COPc": "REPORT!I118",
+	      "MVHR": "REPORT!D123",
+	      "DWHR": "REPORT!D45",
+	      "ProjectName": "REPORT!I14"
+	    }
+	  }
+	};
+
+	// Initial Data Structure
+	const INITIAL_DATA = {
+	  nodes: [
+	    { name: "Building", color: "#4A96BA" },                         // [0] Central node - all flows connect here
+	    { name: "G.1.1 Occupant Gains", color: "#FF8C00" },            // [1] Source: Internal gains from occupants
+	    { name: "G.3.1 Plug Light Equipment", color: "#A5D3ED" },      // [2] Source: Equipment & lighting gains
+	    { name: "W.2.D.N SHW Net Demand", color: "#BE343D" },          // [3] Source: Hot water demand (affected by DWHR)
+	    { name: "G.8.1 Windows N", color: "#F9DF4B" },                 // [4] Source: North solar gains
+	    { name: "G.8.2 Windows E", color: "#F9DF4B" },                 // [5] Source: East solar gains
+	    { name: "G.8.3 Windows S", color: "#F9DF4B" },                 // [6] Source: South solar gains
+	    { name: "G.8.4 Windows W", color: "#F9DF4B" },                 // [7] Source: West solar gains
+	    { name: "M.2.2 Sink (Air/Ground)", color: "#D4B26F" },         // [8] Source: Heat pump source side (air/ground)
+	    { name: "M.2.2 Energy Input", color: "#A9D7F2" },              // [9] Source: Heat pump electrical input or Gas input in Gas mode
+	    { name: "Heating Demand", color: "#BFA586" },                  // [10] Node: Heating System Demand combines source + electric - or Gas
+	    { name: "B.4 Roof", color: "#8FAFA6" },                        // [11] Target: Roof heat loss
+	    { name: "B.5 Walls Ae", color: "#8FAFA6" },                    // [12] Target: Wall heat loss
+	    { name: "B.6 Floor Exposed", color: "#8FAFA6" },               // [13] Target: Exposed floor heat loss
+	    { name: "B.7 Doors", color: "#8FAFA6" },                       // [14] Target: Door heat loss
+	    { name: "B.8.1 Windows N", color: "#F9DF4B" },                 // [15] Target: North window heat loss
+	    { name: "B.8.2 Windows E", color: "#F9DF4B" },                 // [16] Target: East window heat loss
+	    { name: "B.8.3 Windows S", color: "#F9DF4B" },                 // [17] Target: South window heat loss
+	    { name: "B.8.4 Windows W", color: "#F9DF4B" },                 // [18] Target: West window heat loss
+	    { name: "B.10 Floor Slab", color: "#8FAFA6" },                 // [19] Target: Slab heat loss
+	    { name: "B.13.2 TB Penalty", color: "#8FAFA6" },               // [20] Target: Thermal bridge heat loss
+	    { name: "B.19.5 Air Leakage", color: "#A4D3ED" },             // [21] Target: Air infiltration heat loss
+	    { name: "V.3.5 Unrecovered Ventilation", color: "#A5D3ED" },   // [22] Target: Ventilation loss (affected by MVHR)
+	    { name: "W.2.W SHW Wasted", color: "#BE343D" },               // [23] Target: Hot water waste (affected by DWHR)
+	    { name: "G.7 Unusable Heating Gains", color: "#FFA500" },      // [24] Target: Excess heat not needed
+	    { name: "TEL", color: "#8FAFA6" },                             // [25] Target: Total envelope heat loss
+	    { name: "E1 Scope 1 Emissions", color: "#808080" },           // [26] Target: Direct emissions from gas
+	    { name: "E2 Scope 2 Emissions", color: "#808080" }            // [27] Target: Indirect emissions from electricity
+	  ],
+	  links: [
+	    // Sources flowing into Building node
+	    { source: 1, target: 0, value: 12924.43 },    // Occupant gains -> Building
+	    { source: 2, target: 0, value: 13970.88 },    // Equipment gains -> Building
+	    { source: 3, target: 0, value: 3333.33 },     // Hot water demand -> Building (reduced by DWHR)
+	    { source: 4, target: 0, value: 137.55 },      // North solar -> Building
+	    { source: 5, target: 0, value: 4739.5 },      // East solar -> Building
+	    { source: 6, target: 0, value: 7427.70 },     // South solar -> Building
+	    { source: 7, target: 0, value: 1592.98 },     // West solar -> Building
+
+	    // Heat pump system flows
+	    { source: 8, target: 10, value: 28866.25 },   // Source -> Heating Demand (M22S)
+	    { source: 9, target: 10, value: 10837.55 },   // Electric -> Heating Demand (M22D)
+	    { source: 10, target: 0, value: 39703.79 },   // Heat pump -> Building (HP)
+
+	    // TEL flows to envelope components
+	    { source: 25, target: 11, value: 6152.64 },   // TEL -> Roof loss
+	    { source: 25, target: 12, value: 0.00 },      // TEL -> Wall loss
+	    { source: 25, target: 13, value: 0.00 },      // TEL -> Floor loss
+	    { source: 25, target: 14, value: 101.95 },    // TEL -> Door loss
+	    { source: 25, target: 15, value: 10704.96 },  // TEL -> North window loss
+	    { source: 25, target: 16, value: 6280.24 },   // TEL -> East window loss
+	    { source: 25, target: 17, value: 10704.96 },  // TEL -> South window loss
+	    { source: 25, target: 18, value: 6280.24 },   // TEL -> West window loss
+	    { source: 25, target: 19, value: 5037.96 },   // TEL -> Slab loss
+	    { source: 25, target: 20, value: 9032.2 },    // TEL -> Thermal bridge loss
+	    { source: 25, target: 21, value: 4718.21 },   // TEL -> Air leakage loss
+
+	    // Direct losses from Building node
+	    { source: 0, target: 22, value: 2570.04 },    // Building -> Net Ventilation loss (reduced by MVHR)
+	    { source: 0, target: 23, value: 3333.33 },    // Building -> Net Hot water waste (reduced by DWHR)
+	    { source: 0, target: 24, value: 19015.39 },   // Building -> Unusable gains
+	    { source: 0, target: 25, value: 58911.41 },   // Building -> TEL (total envelope loss)
+		 
+		// In Gas mode, waste to G7 flow via BLDG  
+	   	{ source: 10, target: 0, value: 0 },  // Main heat flow -> Building
+	    { source: 0, target: 24, value: 0 }  // Waste flow -> Unusable gains
+	  ]
+	};
+
+	// System State Variables
+	let data = JSON.parse(JSON.stringify(INITIAL_DATA));
+	let originalData = JSON.parse(JSON.stringify(INITIAL_DATA));
+	let pendingImportData = null;
+
+	// Visualization State
+	let spacingCollapsed = false;
+	let widthMultiplier = 1;
+	let showEmissions = false;
+	let isGasHeating = false;
+
+	// System Parameters
+	let COPh = CONFIG.VALUE_LIMITS.COP_HEATING.default;
+	let previousCOPh = CONFIG.VALUE_LIMITS.COP_HEATING.default;
+	let COPc = CONFIG.VALUE_LIMITS.COP_COOLING.default;
+	let MVHR = CONFIG.VALUE_LIMITS.MVHR.default;
+	let DWHR = CONFIG.VALUE_LIMITS.DWHR.default;
+
+	// Heat Pump State Variables
+	let HP = 0;    // Total heat pump output
+	let M22D = 0;  // Heat pump energy input
+	let M22S = 0;  // Heat pump source input
+</script>
+<!-- Script Block 2: Value State Management System -->
+<script>
+// Value State and State Management System: Handles three states: default, imported, and user-modified
+	// Script Block 2: 
+	class ValueState {
+	  constructor(config) {
+	    this._config = config;
+	    this._default = config.default;
+	    this._imported = null;
+	    this._userEdited = null;
+	    this._originalValue = null;
+    
+	    // Common validators for different value types
+	    this._validators = new Map([
+	      ['percentage', v => v >= 0 && v <= 1],
+	      ['positive', v => v > 0],
+	      ['range', v => v >= this._config.min && v <= this._config.max]
+	    ]);
+	  }
+
+	  get value() {
+	    return this._userEdited ?? this._imported ?? this._default;
+	  }
+
+	  get isImported() {
+	    return this._imported !== null;
+	  }
+
+	  get isUserEdited() {
+	    return this._userEdited !== null;
+	  }
+
+	  get originalValue() {
+	    return this._originalValue ?? this._default;
+	  }
+
+	  setImported(value) {
+	    const normalized = this._normalize(value);
+	    if (this._validate(normalized)) {
+	      this._imported = normalized;
+	      this._originalValue = normalized;  // Store original imported value
+	      this._userEdited = null;  // Clear user edits when importing
+	      return true;
+	    }
+	    return false;
+	  }
+
+	  setUserEdited(value) {
+	    const normalized = this._normalize(value);
+	    if (this._validate(normalized)) {
+	      this._userEdited = normalized;
+	      return true;
+	    }
+	    return false;
+	  }
+
+	  reset() {
+	    // Reset to imported value if exists, otherwise default
+	    this._userEdited = null;
+	    return this.value;
+	  }
+
+	  _normalize(value) {
+	    // Handle string inputs
+	    if (typeof value === 'string') {
+	      if (value.endsWith('%')) {
+	        value = parseFloat(value) / 100;
+	      } else {
+	        value = parseFloat(value);
+	      }
+	    }
+
+	    // Handle percentage values greater than 1
+	    if (this._config.isPercentage && value > 1 && value <= 100) {
+	      value = value / 100;
+	    }
+
+	    // Apply precision if specified
+	    if (this._config.precision !== undefined) {
+	      value = Number(value.toFixed(this._config.precision));
+	    }
+
+	    return value;
+	  }
+
+	  _validate(value) {
+	    if (isNaN(value)) return false;
+    
+	    // Apply all relevant validators based on config
+	    return Array.from(this._validators.entries())
+	      .filter(([key]) => this._config[key])
+	      .every(([_, validator]) => validator(value));
+	  }
+	}
+
+	// Global State Manager
+	const StateManager = {
+	  _states: new Map(),
+	  _listeners: new Map(),
+	  _dataState: {
+	    type: 'default',
+	    data: null,
+	    userModifications: new Map()
+	  },
+
+	  initialize() {
+	    // Initialize global value states
+	    this._states.set('copHeating', new ValueState({
+	      default: CONFIG.VALUE_LIMITS.COP_HEATING.default,
+	      min: CONFIG.VALUE_LIMITS.COP_HEATING.min,
+	      max: CONFIG.VALUE_LIMITS.COP_HEATING.max,
+	      precision: 1,
+	      positive: true,
+	      range: true
+	    }));
+		
+	    // Add this new state for isGasHeating
+	    this._states.set('isGasHeating', new ValueState({
+	      default: false,
+	      precision: 0,
+	      range: false,
+	      positive: false    // Add this to allow boolean values
+	    }));
+
+	    // Add debug log
+	    console.log("=== StateManager Init ===");
+	    console.log("Initial isGasHeating state:", this._states.get('isGasHeating'));
+
+	    this._states.set('copCooling', new ValueState({
+	      default: CONFIG.VALUE_LIMITS.COP_COOLING.default,
+	      min: CONFIG.VALUE_LIMITS.COP_COOLING.min,
+	      max: CONFIG.VALUE_LIMITS.COP_COOLING.max,
+	      precision: 1,
+	      positive: true,
+	      range: true
+	    }));
+
+	    this._states.set('mvhrEfficiency', new ValueState({
+	      default: CONFIG.VALUE_LIMITS.MVHR.default,
+	      min: CONFIG.VALUE_LIMITS.MVHR.min,
+	      max: CONFIG.VALUE_LIMITS.MVHR.max,
+	      precision: 2,
+	      isPercentage: true,
+	      range: true
+	    }));
+
+	    this._states.set('dwhrEfficiency', new ValueState({
+	      default: CONFIG.VALUE_LIMITS.DWHR.default,
+	      min: CONFIG.VALUE_LIMITS.DWHR.min,
+	      max: CONFIG.VALUE_LIMITS.DWHR.max,
+	      precision: 2,
+	      isPercentage: true,
+	      range: true
+	    }));
+
+	    // Set initial data state
+	    this._dataState.data = INITIAL_DATA;
+	  },
+
+	  // Data state management
+	  setImportedData(importedData) {
+	    if (this._validateImportedData(importedData)) {
+	      this._dataState = {
+	        type: 'imported',
+	        data: importedData,
+	        userModifications: new Map()
+	      };
+	      return true;
+	    }
+	    return false;
+	  },
+
+	  getCurrentData() {
+	    // Get base data
+	    const baseData = this._dataState.data;
+    
+	    // Apply any user modifications
+	    if (this._dataState.userModifications.size > 0) {
+	      const modifiedData = JSON.parse(JSON.stringify(baseData));
+	      this._dataState.userModifications.forEach((value, key) => {
+	        // Apply modification based on key type (node or link)
+	        this._applyModification(modifiedData, key, value);
+	      });
+	      return modifiedData;
+	    }
+    
+	    return baseData;
+	  },
+
+	  // Value state management
+	  getValue(key) {
+	    return this._states.get(key)?.value ?? null;
+	  },
+
+	  setValue(key, value, type = 'user') {
+	    const state = this._states.get(key);
+	    if (!state) return false;
+
+	    const success = type === 'import' ? 
+	      state.setImported(value) : 
+	      state.setUserEdited(value);
+
+	    if (success) {
+	      this._notifyListeners(key, state.value);
+	      return true;
+	    }
+	    return false;
+	  },
+
+	  // Reset functionality
+	  reset() {
+	    // Clear user modifications
+	    this._dataState.userModifications.clear();
+    
+	    // Reset all value states
+	    this._states.forEach(state => state.reset());
+    
+	    // Notify all listeners
+	    this._states.forEach((_, key) => {
+	      this._notifyListeners(key, this.getValue(key));
+	    });
+
+	    return this.getCurrentData();
+	  },
+
+	  // Listener management
+	  addListener(key, callback) {
+	    if (!this._listeners.has(key)) {
+	      this._listeners.set(key, new Set());
+	    }
+	    this._listeners.get(key).add(callback);
+	  },
+
+	  removeListener(key, callback) {
+	    this._listeners.get(key)?.delete(callback);
+	  },
+
+	  // Private methods
+	  _validateImportedData(data) {
+	    // Implement validation logic for imported data
+	    // Should check for all required nodes and links
+	    return data && data.nodes && data.links;
+	  },
+
+	  _applyModification(data, key, value) {
+	    // Implementation for applying modifications to data
+	    const [type, id] = key.split(':');
+	    if (type === 'node') {
+	      const node = data.nodes.find(n => n.name === id);
+	      if (node) Object.assign(node, value);
+	    } else if (type === 'link') {
+	      const [source, target] = id.split('->');
+	      const link = data.links.find(l => 
+	        l.source.name === source && l.target.name === target
+	      );
+	      if (link) Object.assign(link, value);
+	    }
+	  },
+
+	  _notifyListeners(key, value) {
+	    this._listeners.get(key)?.forEach(callback => callback(value));
+	  }
+	};
+
+	// Initialize state manager
+	StateManager.initialize();
+</script>
+
+<!-- Script Block 3: Data Management System -->
+<script>
+	// Script Block 3: Node Utilities and Data Management
+	const NodeUtils = {
+	  findNodeIndex(name) {
+	    return data.nodes.findIndex(node => node.name === name);
+	  },
+
+	  getNodeByName(name) {
+	    return data.nodes.find(node => node.name === name);
+	  },
+
+	  getNodeIndex(node) {
+	    if (!node) return null;
+	    return typeof node === 'number' ? node : 
+	           typeof node === 'object' ? (node.index ?? data.nodes.indexOf(node)) : null;
+	  },
+
+	  getSourceNodeIndex(link) {
+	    if (!link?.source) return null;
+	    return typeof link.source === 'number' ? link.source :
+	           typeof link.source === 'object' ? (link.source.index ?? data.nodes.indexOf(link.source)) : null;
+	  },
+
+	  getTargetNodeIndex(link) {
+	      if (!link?.target) return null;
+	      const index = typeof link.target === 'number' ? link.target :
+	                    typeof link.target === 'object' ? (link.target.index ?? data.nodes.indexOf(link.target)) : null;
+    
+	      // Add verification
+	      if (index === null || !data.nodes[index]) {
+	          console.error('Invalid target node index:', index, link);
+	          return null;
+	      }
+	      return index;
+	  },
+
+	  ensureNodeReferences() {
+	    data.links.forEach(link => {
+	      if (typeof link.source === 'number') link.source = data.nodes[link.source];
+	      if (typeof link.target === 'number') link.target = data.nodes[link.target];
+	    });
+	  }
+	};
+
+	const LinkUtils = {
+	  findLink(sourceIndex, targetIndex) {
+	    return data.links.find(link => 
+	      NodeUtils.getSourceNodeIndex(link) === sourceIndex && 
+	      NodeUtils.getTargetNodeIndex(link) === targetIndex
+	    );
+	  },
+
+	  findLinkIndex(sourceIndex, targetIndex) {
+	    return data.links.findIndex(link => 
+	      NodeUtils.getSourceNodeIndex(link) === sourceIndex && 
+	      NodeUtils.getTargetNodeIndex(link) === targetIndex
+	    );
+	  },
+
+	  getLinkValue(sourceName, targetName) {
+	    const sourceIndex = NodeUtils.findNodeIndex(sourceName);
+	    const targetIndex = NodeUtils.findNodeIndex(targetName);
+	    const link = this.findLink(sourceIndex, targetIndex);
+	    return link ? link.value : 0;
+	  },
+
+	  updateLink(sourceIndex, targetIndex, newValue, silent = false) {
+	    const linkIndex = this.findLinkIndex(sourceIndex, targetIndex);
+	    if (linkIndex === -1) return false;
+
+	    const sourceName = data.nodes[sourceIndex].name;
+	    const targetName = data.nodes[targetIndex].name;
+
+	    // Enforce minimum value and update
+	    newValue = Math.max(0.1, newValue);
+	    data.links[linkIndex].value = newValue;
+
+	    // Store modification in state manager
+	    StateManager._dataState.userModifications.set(
+	      `link:${sourceName}->${targetName}`, 
+	      { value: newValue }
+	    );
+
+	    if (!silent) {
+	      // Update UI display if not silent
+	      const valueDisplay = document.querySelector(
+	        `.value-display[data-source="${sourceName}"][data-target="${targetName}"]`
+	      );
+	      if (valueDisplay) {
+	        valueDisplay.textContent = newValue.toFixed(1);
+	      }
+	    }
+
+	    return true;
+	  },
+
+	  updateLinkByNames(sourceName, targetName, newValue, silent = false) {
+	    const sourceIndex = NodeUtils.findNodeIndex(sourceName);
+	    const targetIndex = NodeUtils.findNodeIndex(targetName);
+	    return this.updateLink(sourceIndex, targetIndex, newValue, silent);
+	  }
+	};
+
+	const DataManager = {
+	  isCalculatedFlow(sourceName, targetName) {
+	    const calculatedFlows = [
+	      { source: "M.2.2 Sink (Air/Ground)", target: "Heating Demand" },
+	      { source: "M.2.2 Energy Input", target: "Heating Demand" },
+	      { source: "Heating Demand", target: "Building" },
+	      { source: "Building", target: "G.7 Unusable Heating Gains" },
+	      { source: "Building", target: "TEL" }
+	    ];
+
+	    return calculatedFlows.some(flow => 
+	      flow.source === sourceName && flow.target === targetName
+	    );
+	  },
+
+	  validateData(data) {
+	    if (!data?.nodes || !data?.links) return false;
+    
+	    // Validate nodes
+	    const requiredNodes = ["Building", "Heating Demand", "TEL"];
+	    const hasRequiredNodes = requiredNodes.every(nodeName => 
+	      data.nodes.some(node => node.name === nodeName)
+	    );
+	    if (!hasRequiredNodes) return false;
+
+	    // Validate critical links
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+	    const telIndex = NodeUtils.findNodeIndex("TEL");
+    
+	    // Check building and TEL connections
+	    const hasCriticalLinks = data.links.some(link => 
+	      NodeUtils.getSourceNodeIndex(link) === buildingIndex && 
+	      NodeUtils.getTargetNodeIndex(link) === telIndex
+	    );
+    
+	    return hasCriticalLinks;
+	  },
+
+	  backup() {
+	    return {
+	      data: JSON.parse(JSON.stringify(data)),
+	      originalData: JSON.parse(JSON.stringify(originalData))
+	    };
+	  },
+
+	  restore(backup) {
+	    if (!this.validateData(backup.data) || !this.validateData(backup.originalData)) {
+	      return false;
+	    }
+    
+	    data = backup.data;
+	    originalData = backup.originalData;
+	    NodeUtils.ensureNodeReferences();
+	    return true;
+	  }
+	};
+</script>
+
+<!-- Script Block 4: Energy Calculation Engine -->
+<script>
+	// Script Block 4: Energy Calculation Engine
+	const EnergyCalculator = {
+	  // Core Energy Balance Calculation
+	  calculateEnergyBalance() {
+	    // Calculate building inputs
+	    const buildingInputs = {
+	      G11: LinkUtils.getLinkValue("G.1.1 Occupant Gains", "Building"),
+	      G31: LinkUtils.getLinkValue("G.3.1 Plug Light Equipment", "Building"),
+	      W2DN: LinkUtils.getLinkValue("W.2.D.N SHW Net Demand", "Building"),
+	      G81: LinkUtils.getLinkValue("G.8.1 Windows N", "Building"),
+	      G82: LinkUtils.getLinkValue("G.8.2 Windows E", "Building"),
+	      G83: LinkUtils.getLinkValue("G.8.3 Windows S", "Building"),
+	      G84: LinkUtils.getLinkValue("G.8.4 Windows W", "Building")
+	    };
+
+	    // Calculate heat pump values
+	    HP = LinkUtils.getLinkValue("Heating Demand", "Building");
+	    M22D = isGasHeating ? HP : HP / StateManager.getValue('copHeating');
+	    M22S = isGasHeating ? 0 : HP - M22D;
+
+	    // Sum total building energy
+	    const BLDG = Object.values(buildingInputs).reduce((sum, val) => sum + val, 0) + HP;
+
+	    // Calculate TEL components
+	    const telComponents = {
+	      B4: LinkUtils.getLinkValue("TEL", "B.4 Roof"),
+	      B5: LinkUtils.getLinkValue("TEL", "B.5 Walls Ae"),
+	      B6: LinkUtils.getLinkValue("TEL", "B.6 Floor Exposed"),
+	      B7: LinkUtils.getLinkValue("TEL", "B.7 Doors"),
+	      B81: LinkUtils.getLinkValue("TEL", "B.8.1 Windows N"),
+	      B82: LinkUtils.getLinkValue("TEL", "B.8.2 Windows E"),
+	      B83: LinkUtils.getLinkValue("TEL", "B.8.3 Windows S"),
+	      B84: LinkUtils.getLinkValue("TEL", "B.8.4 Windows W"),
+	      B10: LinkUtils.getLinkValue("TEL", "B.10 Floor Slab"),
+	      B132: LinkUtils.getLinkValue("TEL", "B.13.2 TB Penalty"),
+	      B195: LinkUtils.getLinkValue("TEL", "B.19.5 Air Leakage")
+	    };
+
+	    const TEL = Object.values(telComponents).reduce((sum, val) => sum + val, 0);
+
+	    // Calculate direct building losses
+	    const V35 = LinkUtils.getLinkValue("Building", "V.3.5 Unrecovered Ventilation");
+	    const W2W = LinkUtils.getLinkValue("Building", "W.2.W SHW Wasted");
+	    const G7 = LinkUtils.getLinkValue("Building", "G.7 Unusable Heating Gains");
+
+	    const BLDG_LOSSES = TEL + V35 + W2W + G7;
+
+	    return {
+	      BLDG,
+	      TEL,
+	      BLDG_LOSSES,
+	      isBalanced: Math.abs(BLDG - BLDG_LOSSES) < 0.1
+	    };
+	  },
+
+	  // Building Balance Updates
+	  updateBuildingBalance() {
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+
+	    // Calculate total passive gains
+	    const passiveGains = [
+	      "G.1.1 Occupant Gains", "G.3.1 Plug Light Equipment",
+	      "W.2.D.N SHW Net Demand", "G.8.1 Windows N", "G.8.2 Windows E",
+	      "G.8.3 Windows S", "G.8.4 Windows W"
+	    ].reduce((sum, source) => {
+	      return sum + LinkUtils.getLinkValue(source, "Building");
+	    }, 0);
+
+	    // Calculate total losses
+	    const telTotal = LinkUtils.getLinkValue("Building", "TEL");
+	    const ventLoss = LinkUtils.getLinkValue("Building", "V.3.5 Unrecovered Ventilation");
+	    const dhwLoss = LinkUtils.getLinkValue("Building", "W.2.W SHW Wasted");
+	    const totalLosses = telTotal + ventLoss + dhwLoss;
+
+	    // Calculate required heating
+	    const requiredHP = Math.max(0.1, totalLosses - passiveGains);
+	    HP = requiredHP;
+
+	    this.updateHeatPumpValues(requiredHP);
+
+	    // Calculate unusable gains
+	    const unusableGains = Math.max(0.1, passiveGains + requiredHP - totalLosses);
+	    LinkUtils.updateLink(
+	      buildingIndex,
+	      NodeUtils.findNodeIndex("G.7 Unusable Heating Gains"),
+	      unusableGains,
+	      true
+	    );
+	  },
+
+	  // Heat Pump Calculations
+	  updateHeatPumpValues(requiredOutput) {
+	    const heatpumpIndex = NodeUtils.findNodeIndex("Heating Demand");
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+	    const sinkNodeIndex = NodeUtils.findNodeIndex("M.2.2 Sink (Air/Ground)");
+	    const electricNodeIndex = NodeUtils.findNodeIndex("M.2.2 Energy Input");
+	    const g7Index = NodeUtils.findNodeIndex("G.7 Unusable Heating Gains");
+	    const minValue = 0.1;
+  
+	    if (isGasHeating) {
+	      // Gas heating mode calculations
+	      const efficiency = StateManager.getValue('copHeating');
+	      M22D = Math.max(minValue, requiredOutput / efficiency); // Total gas input
+	      HP = M22D * efficiency; // Useful heat output
+	      M22S = 0; // No source input in gas mode
+    
+	      // Calculate gas inefficiency losses
+	      const inefficiencyLoss = M22D * (1 - efficiency);
+    
+	      // Update all relevant flows
+	      const linkUpdates = [
+	        // Gas input to Heating Demand
+	        { source: electricNodeIndex, target: heatpumpIndex, value: M22D },
+	        // Full heating demand flow (including losses) to show complete energy path
+	        { source: heatpumpIndex, target: buildingIndex, value: M22D },
+	        // Waste portion flows through building to G7
+	        { source: buildingIndex, target: g7Index, value: inefficiencyLoss },
+	        // Zero out source flow in gas mode
+	        { source: sinkNodeIndex, target: heatpumpIndex, value: 0 }
+	      ];
+
+	      // Update main flows
+	      linkUpdates.forEach(update => {
+	        LinkUtils.updateLink(update.source, update.target, update.value, true);
+	      });
+
+	    } else {
+	      // Heat pump mode
+	      HP = Math.max(minValue, requiredOutput);
+	      M22D = HP / StateManager.getValue('copHeating');
+	      M22S = HP - M22D;
+    
+	      const linkUpdates = [
+	        { source: sinkNodeIndex, target: heatpumpIndex, value: M22S },
+	        { source: electricNodeIndex, target: heatpumpIndex, value: M22D },
+	        { source: heatpumpIndex, target: buildingIndex, value: HP }
+	      ];
+
+	      // Clear any gas mode waste flows
+	      linkUpdates.forEach(update => {
+	        LinkUtils.updateLink(update.source, update.target, update.value, true);
+	      });
+    
+	      // Ensure gas waste flow is zeroed out when returning to HP mode
+	      LinkUtils.updateLink(buildingIndex, g7Index, 0, true);
+	    }
+	  },
+
+	  // Recovery System Updates
+	  updateMVHR(newEfficiency) {
+	    const v35Link = LinkUtils.findLink(
+	      NodeUtils.findNodeIndex("Building"),
+	      NodeUtils.findNodeIndex("V.3.5 Unrecovered Ventilation")
+	    );
+
+	    if (!v35Link) return;
+
+	    v35Link.originalValue = v35Link.originalValue || v35Link.value;
+	    const newValue = Math.max(0.1, v35Link.originalValue * (1 - newEfficiency));
+    
+	    LinkUtils.updateLink(
+	      NodeUtils.findNodeIndex("Building"),
+	      NodeUtils.findNodeIndex("V.3.5 Unrecovered Ventilation"),
+	      newValue,
+	      true
+	    );
+
+	    this.updateBuildingBalance();
+	  },
+
+	  updateDWHR(newEfficiency) {
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+	    const links = {
+	      demand: LinkUtils.findLink(
+	        NodeUtils.findNodeIndex("W.2.D.N SHW Net Demand"),
+	        buildingIndex
+	      ),
+	      waste: LinkUtils.findLink(
+	        buildingIndex,
+	        NodeUtils.findNodeIndex("W.2.W SHW Wasted")
+	      )
+	    };
+
+	    if (!links.demand || !links.waste) return;
+
+	    // Store original value if not already stored
+	    links.demand.originalValue = links.demand.originalValue || links.demand.value;
+	    const baseValue = links.demand.originalValue;
+    
+	    // Calculate new value based on recovery
+	    const newValue = Math.max(0.1, baseValue * (1 - newEfficiency));
+
+	    // Update both demand and waste to maintain 1:1 relationship
+	    LinkUtils.updateLink(
+	      NodeUtils.findNodeIndex("W.2.D.N SHW Net Demand"),
+	      buildingIndex,
+	      newValue,
+	      true
+	    );
+	    LinkUtils.updateLink(
+	      buildingIndex,
+	      NodeUtils.findNodeIndex("W.2.W SHW Wasted"),
+	      newValue,
+	      true
+	    );
+	  },
+
+	  updateSHW(sourceName, targetName, newValue) {
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+  
+	    // Store this new value as the original/base value for DWHR calculations
+	    if (sourceName === "W.2.D.N SHW Net Demand") {
+	      const demandLink = LinkUtils.findLink(
+	        NodeUtils.findNodeIndex("W.2.D.N SHW Net Demand"),
+	        buildingIndex
+	      );
+	      if (demandLink) {
+	        demandLink.originalValue = newValue;  // Update the base value
+	      }
+    
+	      // If DWHR is active, apply it to the new base value
+	      const dwhrEfficiency = StateManager.getValue('dwhrEfficiency');
+	      const adjustedValue = newValue * (1 - dwhrEfficiency);
+    
+	      // Update both demand and waste
+	      LinkUtils.updateLink(
+	        NodeUtils.findNodeIndex("W.2.D.N SHW Net Demand"),
+	        buildingIndex,
+	        adjustedValue,
+	        true
+	      );
+	      LinkUtils.updateLink(
+	        buildingIndex,
+	        NodeUtils.findNodeIndex("W.2.W SHW Wasted"),
+	        adjustedValue,
+	        true
+	      );
+	    } else if (targetName === "W.2.W SHW Wasted") {
+	      // Similar handling for waste side
+	      const wasteLink = LinkUtils.findLink(
+	        buildingIndex,
+	        NodeUtils.findNodeIndex("W.2.W SHW Wasted")
+	      );
+	      if (wasteLink) {
+	        wasteLink.originalValue = newValue;  // Update the base value
+	      }
+    
+	      // If DWHR is active, apply it to the new base value
+	      const dwhrEfficiency = StateManager.getValue('dwhrEfficiency');
+	      const adjustedValue = newValue * (1 - dwhrEfficiency);
+    
+	      // Update both waste and demand
+	      LinkUtils.updateLink(
+	        buildingIndex,
+	        NodeUtils.findNodeIndex("W.2.W SHW Wasted"),
+	        adjustedValue,
+	        true
+	      );
+	      LinkUtils.updateLink(
+	        NodeUtils.findNodeIndex("W.2.D.N SHW Net Demand"),
+	        buildingIndex,
+	        adjustedValue,
+	        true
+	      );
+	    }
+	  },
+
+	  // TEL Calculations
+	  updateTEL(isInitialLoad = false) {
+	    const telIndex = NodeUtils.findNodeIndex("TEL");
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+
+	    // Calculate total TEL from components
+	    const telComponents = [
+	      "B.4 Roof", "B.5 Walls Ae", "B.6 Floor Exposed", "B.7 Doors",
+	      "B.8.1 Windows N", "B.8.2 Windows E", "B.8.3 Windows S", "B.8.4 Windows W",
+	      "B.10 Floor Slab", "B.13.2 TB Penalty", "B.19.5 Air Leakage"
+	    ];
+
+	    const telTotal = telComponents.reduce((sum, component) => {
+	      return sum + LinkUtils.getLinkValue("TEL", component);
+	    }, 0);
+
+	    // Update Building → TEL link with new total
+	    LinkUtils.updateLink(buildingIndex, telIndex, telTotal, isInitialLoad);
+
+	    // Update building balance if not initial load
+	    if (!isInitialLoad) {
+	      this.updateBuildingBalance();
+	    }
+	  }
+	};
+</script>
+
+<!-- Script Block 5: D3 Visualization System -->
+<script>
+	// Script Block 5: D3 Sankey Visualization
+	const SankeyDiagram = {
+	  svg: d3.select("#sankey"),
+	  tooltip: d3.select("#tooltip"),
+	  sankey: d3.sankey()
+	    .nodeWidth(20)
+	    .nodePadding(15)
+	    .extent([[1, 1], [1100 - 1, 600 - 1]]),
+
+	  initialize() {
+	    this.linkGroup = this.svg.append("g").attr("class", "links");
+	    this.nodeGroup = this.svg.append("g").attr("class", "nodes");
+	    this.labelGroup = this.svg.append("g").attr("class", "labels");
+	  },
+
+	  render(isInitialLoad = false) {
+	    if (!data.nodes || !data.links) {
+	      console.error("Invalid data structure:", data);
+	      updateStatus('Error: Invalid data structure', 'error');
+	      return;
+	    }
+
+	    if (showEmissions) {
+	      this.updateEmissionsFlows();
+	    }
+
+	    try {
+	      const { nodes, links } = this.sankey(data);
+
+	      nodes.forEach(node => {
+	        node.displayColor = d3.color(node.color).darker(0.3);
+	      });
+
+	      const maxX = d3.max(nodes, d => d.x0);
+	      this.renderLinks(links, isInitialLoad, maxX);
+	      this.renderNodes(nodes, isInitialLoad, maxX);
+	      this.renderLabels(nodes, isInitialLoad, maxX);
+	    } catch (error) {
+	      console.error("Error rendering chart:", error);
+	      updateStatus('Error rendering chart: ' + error.message, 'error');
+	    }
+	  },
+
+	  renderLinks(links, isInitialLoad, maxX) {
+	    const link = this.linkGroup.selectAll(".link")
+	      .data(links, d => {
+	        const source = NodeUtils.getSourceNodeIndex(d);
+	        const target = NodeUtils.getTargetNodeIndex(d);
+	        return `${source}-${target}`;
+	      });
+
+	    link.exit().remove();
+
+	    const linkEnter = link.enter()
+	      .append("path")
+	      .attr("class", "link")
+	      .on("mouseover", (event, d) => this.showLinkTooltip(event, d))
+	      .on("mouseout", () => this.hideTooltip());
+
+	    const linkUpdate = link.merge(linkEnter)
+	      .style("stroke", d => this.getLinkColor(d));
+
+	    if (isInitialLoad) {
+	      linkUpdate
+	        .attr("d", d3.sankeyLinkHorizontal())
+	        .transition()
+	        .duration(1000)
+	        .delay(d => (d.source.x0 / maxX) * 2000)
+	        .attr("stroke-width", d => Math.max(1, d.width));
+	    } else {
+	      linkUpdate
+	        .transition()
+	        .duration(1000)
+	        .attr("d", d3.sankeyLinkHorizontal())
+	        .attr("stroke-width", d => Math.max(1, d.width));
+	    }
+	  },
+
+	  // Inside the SankeyDiagram object, modify renderLinks and renderNodes:
+
+	  renderNodes(nodes, isInitialLoad, maxX) {
+	    const node = this.nodeGroup.selectAll(".node")
+	      .data(nodes, d => d.name);
+
+	    node.exit()
+	      .transition()
+	      .duration(500)
+	      .attr("width", 0)
+	      .remove();
+
+	    const nodeEnter = node.enter()
+	      .append("rect")
+	      .attr("class", "node")
+	      .style("fill", d => d.displayColor)
+	      .style("fill-opacity", 1)
+	      .on("mouseover", (event, d) => this.showNodeTooltip(event, d))
+	      .on("mouseout", () => this.hideTooltip());
+
+	    const nodeUpdate = node.merge(nodeEnter);
+
+	    if (isInitialLoad) {
+	      // Initial state
+	      nodeUpdate
+	        .attr("x", d => d.x0)
+	        .attr("y", d => d.y0)
+	        .attr("height", d => d.y1 - d.y0)
+	        .attr("width", 0)
+	        .style("opacity", 0);
+
+	      // Animated entrance
+	      nodeUpdate
+	        .transition()
+	        .duration(750)
+	        .delay(d => (d.x0 / maxX) * 1500) // Delay based on x position
+	        .style("opacity", 1)
+	        .transition()
+	        .duration(500)
+	        .attr("width", d => d.x1 - d.x0);
+	    } else {
+	      // Regular update
+	      nodeUpdate
+	        .transition()
+	        .duration(750)
+	        .attr("x", d => d.x0)
+	        .attr("y", d => d.y0)
+	        .attr("height", d => d.y1 - d.y0)
+	        .attr("width", d => d.x1 - d.x0);
+	    }
+	  },
+
+	  renderLinks(links, isInitialLoad, maxX) {
+	    const link = this.linkGroup.selectAll(".link")
+	      .data(links, d => {
+	        const source = NodeUtils.getSourceNodeIndex(d);
+	        const target = NodeUtils.getTargetNodeIndex(d);
+	        return `${source}-${target}`;
+	      });
+
+	    link.exit()
+	      .transition()
+	      .duration(500)
+	      .attr("stroke-width", 0)
+	      .remove();
+
+	    const linkEnter = link.enter()
+	      .append("path")
+	      .attr("class", "link")
+	      .style("stroke-opacity", 0)
+	      .attr("stroke-width", 0)
+	      .on("mouseover", (event, d) => this.showLinkTooltip(event, d))
+	      .on("mouseout", () => this.hideTooltip());
+
+	    const linkUpdate = link.merge(linkEnter)
+	      .style("stroke", d => this.getLinkColor(d));
+
+	    if (isInitialLoad) {
+	      // Set initial path
+	      linkUpdate
+	        .attr("d", d3.sankeyLinkHorizontal())
+	        .style("stroke-opacity", 0)
+	        .attr("stroke-width", 0);
+
+	      // Animate the flow
+	      linkUpdate
+	        .transition()
+	        .duration(750)
+	        .delay(d => (d.source.x0 / maxX) * 1500) // Match node timing
+	        .style("stroke-opacity", 0.7)
+	        .transition()
+	        .duration(500)
+	        .attr("stroke-width", d => Math.max(1, d.width));
+	    } else {
+	      // Regular update
+	      linkUpdate
+	        .transition()
+	        .duration(750)
+	        .attr("d", d3.sankeyLinkHorizontal())
+	        .style("stroke-opacity", 0.7)
+	        .attr("stroke-width", d => Math.max(1, d.width));
+	    }
+	  },
+
+	  renderLabels(nodes, isInitialLoad, maxX) {
+	    const label = this.labelGroup.selectAll(".node-label")
+	      .data(nodes, d => d.name);
+
+	    label.exit()
+	      .transition()
+	      .duration(500)
+	      .style("opacity", 0)
+	      .remove();
+
+	    const labelEnter = label.enter()
+	      .append("text")
+	      .attr("class", "node-label")
+	      .style("opacity", 0);
+
+	    const labelUpdate = label.merge(labelEnter)
+	      .attr("x", d => (d.x0 < 1100 / 2 ? d.x1 + 5 : d.x0 - 5))
+	      .attr("y", d => (d.y0 + d.y1) / 2)
+	      .attr("text-anchor", d => (d.x0 < 1100 / 2 ? "start" : "end"))
+	      .text(d => this.formatNodeLabel(d));
+
+	    if (isInitialLoad) {
+	      labelUpdate
+	        .transition()
+	        .duration(750)
+	        .delay(d => (d.x0 / maxX) * 1500 + 500) // Slightly delayed after node appears
+	        .style("opacity", 1);
+	    } else {
+	      labelUpdate
+	        .transition()
+	        .duration(750)
+	        .style("opacity", 1);
+	    }
+	  },
+	  
+	  showNodeTooltip(event, d) {
+	      const content = this.createNodeTooltip(d);
+	      this.showTooltip(content, event);
+	      d3.select(event.target).style("fill-opacity", 0.8);
+	    },
+
+	    showLinkTooltip(event, d) {
+	      const content = this.createLinkTooltip(d);
+	      this.showTooltip(content, event);
+	      d3.select(event.target).style("stroke-opacity", 0.9);
+	    },
+
+	    createNodeTooltip(d) {
+	      const incoming = data.links.filter(l => NodeUtils.getTargetNodeIndex(l) === d.index);
+	      const outgoing = data.links.filter(l => NodeUtils.getSourceNodeIndex(l) === d.index);
+
+	      let html = `<div class="tooltip-title">${d.name}</div>`;
+
+	      if (d.name.includes("Emissions")) {
+	        const totalEmissions = d.targetLinks?.reduce((sum, link) => sum + link.value, 0) || 0;
+	        const scope = d.name.includes("1") ? "Direct emissions from gas combustion" : "Indirect emissions from electricity use";
+	        html += `
+	          <div class="tooltip-value">
+	            Total: ${(totalEmissions/1000000).toFixed(2)} MT CO2e
+	            <br><small>${scope}</small>
+	          </div>`;
+	      } else {
+	        html += `<div class="tooltip-value">Total Value: ${this.formatValue(d.value)}</div>`;
+	      }
+
+	      if (incoming.length > 0) html += this.buildFlowSection("Incoming", incoming, true);
+	      if (outgoing.length > 0) html += this.buildFlowSection("Outgoing", outgoing, false);
+
+	      return html;
+	    },
+
+	    createLinkTooltip(d) {
+	      return `
+	        <div class="tooltip-title">Flow Details</div>
+	        <div class="tooltip-flow"><span>From: ${d.source.name}</span></div>
+	        <div class="tooltip-flow"><span>To: ${d.target.name}</span></div>
+	        <div class="tooltip-flow"><span>Value: ${this.formatValue(d.value)}</span></div>
+	      `;
+	    },
+
+	    buildFlowSection(title, flows, isIncoming) {
+	      let html = `<div style="margin-top: 8px;"><strong>${title}:</strong></div>`;
+	      flows.forEach(flow => {
+	        const nodeName = isIncoming ? 
+	          data.nodes[NodeUtils.getSourceNodeIndex(flow)].name :
+	          data.nodes[NodeUtils.getTargetNodeIndex(flow)].name;
+	        html += `
+	          <div class="tooltip-flow">
+	            <span>${nodeName}</span>
+	            <span>${this.formatValue(flow.value)}</span>
+	          </div>`;
+	      });
+	      return html;
+	    },
+
+	    formatValue(value) {
+	      return `${value.toFixed(1)} kWh`;
+	    },
+
+	  // Tooltip and Label Formatting
+	  formatNodeLabel(node) {
+	    if (node.name.includes("Emissions")) {
+	      const totalEmissions = node.targetLinks?.reduce((sum, link) => sum + link.value, 0) || 0;
+	      const mtValue = (totalEmissions / 1000000).toFixed(1);
+	      return `${node.name} (${mtValue} MT)`;
+	    }
+	    return node.name;
+	  },
+
+	  showTooltip(content, event) {
+	    const padding = 10;
+	    this.tooltip
+	      .style("display", "block")
+	      .style("left", `${event.pageX + padding}px`)
+	      .style("top", `${event.pageY + padding}px`)
+	      .html(content);
+
+	    const tooltipRect = this.tooltip.node().getBoundingClientRect();
+	    const viewportWidth = window.innerWidth;
+	    const viewportHeight = window.innerHeight;
+
+	    // Adjust position if tooltip goes off screen
+	    if (tooltipRect.right > viewportWidth) {
+	      this.tooltip.style("left", `${event.pageX - tooltipRect.width - padding}px`);
+	    }
+	    if (tooltipRect.bottom > viewportHeight) {
+	      this.tooltip.style("top", `${event.pageY - tooltipRect.height - padding}px`);
+	    }
+	  },
+
+	  hideTooltip() {
+	    this.tooltip.style("display", "none");
+	  },
+
+	  getLinkColor(d) {
+	    if (d.source.name === "Building" || d.target.name === "Building") {
+	      return d.source.name === "Building" ? 
+	        d3.color(d.target.color).brighter(0.2) :
+	        d3.color(d.source.color);
+	    }
+	    return d3.interpolateRgb(d.source.color, d.target.color)(0.5);
+	  },
+	  
+	  calculateElectricalEmissions(gridIntensity, scope2NodeIndex) {
+	      const electricalSources = ["G.3.1 Plug Light Equipment"];
+	      electricalSources.forEach(sourceName => {
+	        const nodeIndex = NodeUtils.findNodeIndex(sourceName);
+	        if (nodeIndex === -1) return;
+
+	        const flowValue = data.links.reduce((sum, link) => {
+	          if (NodeUtils.getSourceNodeIndex(link) === nodeIndex) {
+	            return sum + link.value;
+	          }
+	          return sum;
+	        }, 0);
+
+	        if (flowValue > 0.1) {
+	          const emissionsValue = flowValue * gridIntensity;
+	          if (emissionsValue > 0.1) {
+	            data.links.push({
+	              source: nodeIndex,
+	              target: scope2NodeIndex,
+	              value: emissionsValue
+	            });
+	          }
+	        }
+	      });
+	    },
+
+	    calculateHeatingEmissions(gridIntensity, scope1NodeIndex, scope2NodeIndex) {
+	      const heatingNodes = [
+	        { name: isGasHeating ? "Heating Demand" : "M.2.2 Energy Input" },
+	        { name: "W.2.D.N SHW Net Demand" }
+	      ];
+
+	      heatingNodes.forEach(({ name }) => {
+	        const nodeIndex = NodeUtils.findNodeIndex(name);
+	        if (nodeIndex === -1) return;
+
+	        const flowValue = data.links.reduce((sum, link) => {
+	          if (NodeUtils.getSourceNodeIndex(link) === nodeIndex) {
+	            return sum + link.value;
+	          }
+	          return sum;
+	        }, 0);
+
+	        if (flowValue > 0.1) {
+	          const emissionsValue = isGasHeating ?
+	            (flowValue / CONFIG.EMISSIONS.GAS_ENERGY_DENSITY) * CONFIG.EMISSIONS.GAS_INTENSITY :
+	            flowValue * gridIntensity;
+
+	          if (emissionsValue > 0.1) {
+	            data.links.push({
+	              source: nodeIndex,
+	              target: isGasHeating ? scope1NodeIndex : scope2NodeIndex,
+	              value: emissionsValue
+	            });
+	          }
+	        }
+	      });
+	    },       //ANDY ADDED COMMA HERE
+
+	  updateEmissionsFlows() {
+	    const scope1NodeIndex = NodeUtils.findNodeIndex("E1 Scope 1 Emissions");
+	    const scope2NodeIndex = NodeUtils.findNodeIndex("E2 Scope 2 Emissions");
+
+	    // Remove existing emissions flows
+	    data.links = data.links.filter(link => {
+	      const targetIdx = NodeUtils.getTargetNodeIndex(link);
+	      return targetIdx !== scope1NodeIndex && targetIdx !== scope2NodeIndex;
+	    });
+
+	    if (showEmissions) {
+	      const gridIntensity = parseFloat(document.getElementById('gridIntensity').value) || 0;
+      
+	      // Handle electrical loads
+	      this.calculateElectricalEmissions(gridIntensity, scope2NodeIndex);
+      
+	      // Handle heating and DHW
+	      this.calculateHeatingEmissions(gridIntensity, scope1NodeIndex, scope2NodeIndex);
+	    }
+	  },
+
+	  resize() {
+	    const width = document.querySelector('.diagram-container').clientWidth;
+	    this.svg.attr("width", width);
+	    this.sankey.extent([[1, 1], [width - 1, 600 - 1]]);
+	    this.render(false);
+	  }
+	};
+</script>
+
+<!-- Script Block 6: User Interface Manager -->
+<script>
+	// Script Block 6: Control Panel Manager - Revised
+	const ControlPanel = {
+	  initialize() {
+		  console.log("=== ControlPanel Init Start ===");
+		  console.log("All heatSourceButtons:", document.querySelectorAll('#heatSourceButton'));
+		  
+	    this.initializeControls();
+	    this.bindEventListeners();
+	    this.updateValueDisplays();
+	    this.calculateTotalEnergyCost();
+	  },
+
+	  initializeControls() {
+	    if (!data?.nodes || !data?.links) {
+	      console.error("Invalid data structure");
+	      return;
+	    }
+
+	    const gainsBody = document.getElementById("gainsControlsBody");
+	    const lossesBody = document.getElementById("lossesControlsBody");
+	    gainsBody.innerHTML = "";
+	    lossesBody.innerHTML = "";
+
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+	    const telIndex = NodeUtils.findNodeIndex("TEL");
+
+	    // Process all gains (supply side)
+	    data.links.forEach(link => {
+	      const sourceName = data.nodes[NodeUtils.getSourceNodeIndex(link)].name;
+	      const targetName = data.nodes[NodeUtils.getTargetNodeIndex(link)].name;
+      
+	      if (targetName === "Building" || 
+	          (sourceName === "M.2.2 Sink (Air/Ground)" && targetName === "Heating Demand") ||
+	          (sourceName === "M.2.2 Energy Input" && targetName === "Heating Demand")) {
+	        this.createControlRow(gainsBody, link, sourceName, targetName,
+	          DataManager.isCalculatedFlow(sourceName, targetName));
+	      }
+	    });
+
+	    // Process all losses
+	    data.links.forEach(link => {
+	      const sourceName = data.nodes[NodeUtils.getSourceNodeIndex(link)].name;
+	      const targetName = data.nodes[NodeUtils.getTargetNodeIndex(link)].name;
+      
+	      if ((sourceName === "TEL" && targetName.startsWith("B.")) || 
+	          (sourceName === "Building" && 
+	           ["TEL", "V.3.5 Unrecovered Ventilation", 
+	            "W.2.W SHW Wasted", "G.7 Unusable Heating Gains"].includes(targetName))) {
+	        this.createControlRow(lossesBody, link, sourceName, targetName,
+	          DataManager.isCalculatedFlow(sourceName, targetName));
+	      }
+	    });
+	  },
+
+	  createControlRow(tbody, link, sourceName, targetName, isCalculated) {
+	    const row = document.createElement("tr");
+    
+	    // Name cell
+	    const nameCell = document.createElement("td");
+	    nameCell.textContent = `${sourceName} → ${targetName}`;
+	    nameCell.style.fontSize = "11px";
+
+	    // Value cell
+	    const valueCell = this.createValueCell(link, sourceName, targetName);
+
+	    // Control cell (slider or calculated indicator)
+	    const controlCell = isCalculated ? 
+	      this.createCalculatedCell() :
+	      this.createSliderCell(link, sourceName, targetName);
+
+	    row.append(nameCell, valueCell, controlCell);
+	    tbody.appendChild(row);
+	  },
+
+	  createValueCell(link, sourceName, targetName) {
+	    const cell = document.createElement("td");
+	    cell.style.width = "50px";
+
+	    const display = document.createElement("span");
+	    display.className = "value-display";
+	    display.setAttribute('data-source', sourceName);
+	    display.setAttribute('data-target', targetName);
+	    display.textContent = link.value.toFixed(2);
+
+	    const sourceColor = data.nodes.find(n => n.name === sourceName).color;
+	    const targetColor = data.nodes.find(n => n.name === targetName).color;
+
+	    cell.style.background = `linear-gradient(90deg, 
+	      ${sourceColor}40 0%, 
+	      ${targetColor}40 100%
+	    )`;
+	    cell.style.borderRadius = "3px";
+	    cell.style.padding = "4px 8px";
+	    cell.appendChild(display);
+
+	    return cell;
+	  },
+
+	  createSliderCell(link, sourceName, targetName) {
+	    const cell = document.createElement("td");
+	    cell.className = "slider-cell";
+	    cell.style.height = "32px";
+	    cell.style.padding = "0 8px";
+
+	    const container = document.createElement("div");
+	    container.style.display = "flex";
+	    container.style.alignItems = "center";
+	    container.style.gap = "8px";
+	    container.style.height = "100%";
+
+	    // Slider with original 4.5 proportions
+	    const slider = document.createElement("input");
+	    slider.type = "range";
+	    slider.min = "0";
+	    slider.max = `${Math.max(link.value * 4, 300)}`;
+	    slider.step = "0.1";
+	    slider.value = link.value;
+	    slider.style.width = "100px";
+
+	    // Number input (simplified)
+	    const input = document.createElement("input");
+	    input.type = "number";
+	    input.style.width = "70px";
+	    input.style.padding = "2px 4px";
+	    input.style.fontSize = "11px";
+	    input.style.textAlign = "right";
+	    input.style.appearance = "textfield"; // Removes spinners
+	    input.step = "1.00";
+	    input.value = link.value.toFixed(2);
+
+	    // Event handlers
+		slider.addEventListener("input", (e) => {
+		  const newValue = parseFloat(e.target.value);
+		  input.value = newValue.toFixed(2);
+  
+		  // Special handling for SHW values
+		  if (sourceName === "W.2.D.N SHW Net Demand" || 
+		      targetName === "W.2.W SHW Wasted") {
+		    EnergyCalculator.updateSHW(sourceName, targetName, newValue);
+		  }
+  
+		  this.updateValue(sourceName, targetName, newValue);
+		});
+
+		input.addEventListener("change", (e) => {
+		  const newValue = parseFloat(e.target.value);
+		  if (!isNaN(newValue)) {
+		    slider.value = newValue;
+    
+		    // Special handling for SHW values
+		    if (sourceName === "W.2.D.N SHW Net Demand" || 
+		        targetName === "W.2.W SHW Wasted") {
+		      EnergyCalculator.updateSHW(sourceName, targetName, newValue);
+		    }
+    
+		    this.updateValue(sourceName, targetName, newValue);
+		  }
+		});
+
+	    input.addEventListener("change", (e) => {
+	      const newValue = parseFloat(e.target.value);
+	      if (!isNaN(newValue)) {
+	        slider.value = newValue;
+	        this.updateValue(sourceName, targetName, newValue);
+	      }
+	    });
+
+	    container.appendChild(slider);
+	    container.appendChild(input);
+	    cell.appendChild(container);
+	    return cell;
+	  },
+
+	  createCalculatedCell() {
+	    const cell = document.createElement("td");
+	    cell.className = "slider-cell";
+	    // Match styling of slider cells
+	    cell.style.height = "32px";
+	    cell.style.padding = "0 8px";
+	    cell.style.display = "flex";
+	    cell.style.alignItems = "center";
+
+	    const label = document.createElement("em");
+	    label.textContent = "Calculated";
+	    label.style.color = "#666";
+	    label.style.fontSize = "11px";
+	    label.style.marginLeft = "8px";
+
+	    cell.appendChild(label);
+	    return cell;
+	  },
+
+	  updateValue(sourceName, targetName, newValue) {
+	    const sourceIndex = NodeUtils.findNodeIndex(sourceName);
+	    const targetIndex = NodeUtils.findNodeIndex(targetName);
+    
+	    LinkUtils.updateLink(sourceIndex, targetIndex, newValue);
+    
+	    if (sourceName === "TEL") {
+	      EnergyCalculator.updateTEL();
+	    }
+    
+	    EnergyCalculator.updateBuildingBalance();
+	    this.updateValueDisplays();
+	    SankeyDiagram.render(false);
+	    this.calculateTotalEnergyCost();
+	  },
+
+	  updateValueDisplays() {
+	    document.querySelectorAll('.value-display').forEach(display => {
+	      const sourceName = display.getAttribute('data-source');
+	      const targetName = display.getAttribute('data-target');
+      
+	      let value = 0;
+	      if (sourceName === "M.2.2 Energy Input") {
+	        value = M22D;
+	      } else if (sourceName === "M.2.2 Sink (Air/Ground)") {
+	        value = M22S;
+	      } else if (sourceName === "Heating Demand") {
+	        value = HP;
+	      } else {
+	        value = LinkUtils.getLinkValue(sourceName, targetName);
+	      }
+	      display.textContent = value.toFixed(2);
+	    });
+	  },
+
+	  calculateTotalEnergyCost() {
+	    const energyCost = parseFloat(document.getElementById('energyCost').value) || 0;
+	    const gridIntensity = parseFloat(document.getElementById('gridIntensity').value) || 0;
+	    const valueDisplays = document.getElementsByClassName('value-display');
+
+	    let totalEnergy = 0;
+	    let gasEnergy = 0;
+	    let electricEnergy = 0;
+
+	    for (let display of valueDisplays) {
+	      const value = parseFloat(display.textContent);
+	      const sourceName = display.getAttribute('data-source');
+      
+	      if (isGasHeating && (sourceName === "Heating Demand" || 
+	          sourceName === "W.2.D.N SHW Net Demand")) {
+	        gasEnergy += value;
+	      } else if (sourceName !== "M.2.2 Sink (Air/Ground)") {
+	        electricEnergy += value;
+	      }
+	      totalEnergy += value;
+	    }
+
+	    totalEnergy -= M22S;
+
+	    const totalCost = totalEnergy * energyCost;
+	    document.getElementById('totalEnergyCost').textContent = 
+	      totalCost.toLocaleString('en-US', {
+	        minimumFractionDigits: 2,
+	        maximumFractionDigits: 2
+	      });
+
+	    let totalEmissions = (electricEnergy * gridIntensity) / 1000000;
+
+	    if (isGasHeating) {
+	      const gasVolume = gasEnergy / CONFIG.EMISSIONS.GAS_ENERGY_DENSITY;
+	      totalEmissions += (gasVolume * CONFIG.EMISSIONS.GAS_INTENSITY) / 1000000;
+	    }
+
+	    document.getElementById('totalEmissions').textContent = 
+	      totalEmissions.toFixed(2);
+	  },
+
+	  resetSliders() {
+	    document.querySelectorAll('.slider-cell').forEach(cell => {
+	      const slider = cell.querySelector('input[type="range"]');
+	      const input = cell.querySelector('input[type="number"]');
+	      if (slider && input) {
+	        slider.value = 50; // Center position
+	      }
+	    });
+	  },
+
+	    bindEventListeners() {
+	      // Efficiency input handlers
+		   ['energyCost', 'gridIntensity', 'copCooling', 'copHeating', 
+		    'mvhrEfficiency', 'dwhrEfficiency'].forEach(id => {
+		     const element = document.getElementById(id);
+		     if (element) {
+		       element.addEventListener('input', (e) => {
+		         // For copHeating, add special handling for decimal places
+		         if (id === 'copHeating') {
+		           const value = parseFloat(e.target.value);
+		           // Format display to always show 2 decimal places in gas mode
+		           if (isGasHeating) {
+		             e.target.value = value.toFixed(2);
+		           }
+		         }
+		         StateManager.setValue(id, parseFloat(e.target.value));
+		         this.handleEfficiencyChange(e, id);
+		       });
+		     }
+		   });
+
+	      // Import handlers
+	      document.getElementById('importButton')?.addEventListener('click', () => {
+	        document.getElementById('csvFile').click();
+	      });
+
+	      document.getElementById('csvFile')?.addEventListener('change', async (e) => {
+	        const file = e.target.files[0];
+	        if (file) await FileSystem.FileHandler.handleImport(file);
+	      });
+
+	      document.getElementById('applyButton')?.addEventListener('click', (function() {
+	        if (pendingImportData) {
+	          data = pendingImportData;
+	          originalData = JSON.parse(JSON.stringify(pendingImportData));
+	          NodeUtils.ensureNodeReferences();
+	          document.getElementById('applyButton').style.display = 'none';
+	          pendingImportData = null;
+	          this.initializeControls();
+	          SankeyDiagram.render(true);
+	          this.calculateTotalEnergyCost();
+	        }
+	      }).bind(this));
+
+	      // Layout control handlers
+	      document.getElementById('toggleSpacingButton')?.addEventListener('click', function() {
+	        spacingCollapsed = !spacingCollapsed;
+	        SankeyDiagram.sankey.nodePadding(spacingCollapsed ? 0 : 15);
+	        this.textContent = spacingCollapsed ? "Show as Sankey Diagram" : "Show as Energy Balance";
+	        SankeyDiagram.render(false);
+	      });
+		  
+		  // HEAT SOURCE BUTTON HANDLER 
+		  document.getElementById('heatSourceButton')?.addEventListener('click', (function() {
+		    try {
+		      console.log("=== Button Click ===");
+		      console.log("Starting state:", { isGasHeating });
+    
+		      // Toggle state
+		      isGasHeating = !isGasHeating;
+		      console.log("After toggle:", { isGasHeating });
+
+		      const button = document.getElementById('heatSourceButton');
+		      if(button) {
+		        button.style.backgroundColor = isGasHeating ? '#BE343D' : '#A9D7F2';
+		        button.textContent = isGasHeating ? 'Gas Heat + SHW' : 'HP/Electric Heat+SHW';
+		      }
+      
+		      const copHeatingInput = document.getElementById('copHeating');
+		      const copHeatingLabel = document.getElementById('copHeatingLabel');
+
+		      console.log("Current COP:", StateManager.getValue('copHeating'));
+
+		      if (isGasHeating) {
+		        previousCOPh = StateManager.getValue('copHeating');
+		        console.log("Switching to Gas mode - saved previous COP:", previousCOPh);
+		        const newEfficiency = 0.90;
+		        COPh = newEfficiency;
+		        StateManager.setValue('copHeating', newEfficiency);
+      
+		        if(copHeatingInput && copHeatingLabel) {
+		          copHeatingInput.value = newEfficiency.toFixed(2);
+		          copHeatingInput.min = 0.50;
+		          copHeatingInput.max = 0.98;
+		          copHeatingInput.step = 0.01;
+		          copHeatingLabel.textContent = 'Heat+SHW Efficiency';
+		        }
+		      } else {
+		        console.log("Switching to HP mode - restoring COP:", previousCOPh);
+		        COPh = previousCOPh;
+		        StateManager.setValue('copHeating', previousCOPh);
+      
+		        if(copHeatingInput && copHeatingLabel) {
+		          copHeatingInput.value = previousCOPh.toFixed(1);
+		          copHeatingInput.min = 0.1;
+		          copHeatingInput.max = 20;
+		          copHeatingInput.step = 0.1;
+		          copHeatingLabel.textContent = 'COP Heating';
+		        }
+		      }
+
+		      console.log("About to update heat pump values. isGasHeating:", isGasHeating);
+		      EnergyCalculator.updateHeatPumpValues(HP);
+		      this.updateValueDisplays();
+		      this.calculateTotalEnergyCost();
+		      SankeyDiagram.render(false);
+
+		      console.log("Final state:", {
+		        isGasHeating,
+		        COP: StateManager.getValue('copHeating')
+		      });
+		    } catch (error) {
+		      console.error("Handler error:", error);
+		      console.error(error.stack);
+		    }
+		  }).bind(this));
+
+	      // Reset handler
+	      document.getElementById('resetButton')?.addEventListener('click', (function() {
+	        StateManager.reset();
+	        data = JSON.parse(JSON.stringify(originalData));
+	        NodeUtils.ensureNodeReferences();
+	        EnergyCalculator.updateBuildingBalance();
+	        this.initializeControls();
+	        SankeyDiagram.render(true);
+	        this.calculateTotalEnergyCost();
+	      }).bind(this));
+
+	      // Emissions and heat source handlers
+	      document.getElementById('toggleEmissionsButton')?.addEventListener('click', function() {
+	        showEmissions = !showEmissions;
+	        this.textContent = showEmissions ? 'Hide Emissions' : 'Show Emissions';
+	        SankeyDiagram.updateEmissionsFlows();
+	        SankeyDiagram.render(false);
+	      });
+	    },
+
+	  handleEfficiencyChange(e, id) {
+	    const value = parseFloat(e.target.value);
+	    if (isNaN(value)) return;
+
+	    switch(id) {
+	      case 'copHeating':
+	        EnergyCalculator.updateHeatPumpValues(HP);
+	        break;
+	      case 'mvhrEfficiency':
+	        EnergyCalculator.updateMVHR(Math.max(0, Math.min(1, value)));
+	        break;
+	      case 'dwhrEfficiency':
+	        EnergyCalculator.updateDWHR(Math.max(0, Math.min(0.75, value)));
+	        break;
+	    }
+
+	    this.updateValueDisplays();
+	    SankeyDiagram.render(false);
+	    this.calculateTotalEnergyCost();
+	  }
+	};
+</script>
+
+<!-- Script Block 7: File Import/Export System -->
+<script>
+	// Script Block 7: File Import/Export System
+	const FileSystem = {
+	  FileHandler: {
+	    async handleImport(file) {
+	      if (!file) return;
+
+	      try {
+	        const extension = file.name.split('.').pop().toLowerCase();
+	        let importedData;
+
+	        if (extension === 'xlsx') {
+	          importedData = await this.handleExcelImport(file);
+	        } else if (extension === 'csv') {
+	          importedData = await this.handleCSVImport(file);
+	        } else {
+	          throw new Error('Unsupported file type. Please use .xlsx or .csv');
+	        }
+
+	        // Validate imported data
+	        if (!DataManager.validateData(importedData)) {
+	          throw new Error('Invalid data structure in imported file');
+	        }
+
+	        // Handle global values first
+	        if (importedData.globalUpdates) {
+	          StateManager.updateFromImport(importedData.globalUpdates);
+	        }
+
+	        // Reset UI elements for new data
+	        ControlPanel.resetSliders();
+
+	        return importedData;
+	      } catch (error) {
+	        console.error('Import error:', error);
+	        throw error;
+	      }
+	    },
+
+	    async handleExcelImport(file) {
+	      return new Promise((resolve, reject) => {
+	        const reader = new FileReader();
+        
+	        reader.onload = async (e) => {
+	          try {
+	            const data = new Uint8Array(e.target.result);
+	            const workbook = XLSX.read(data, { type: 'array' });
+            
+	            // Process global values
+	            const globalUpdates = this.processExcelGlobals(workbook);
+            
+	            // Process node values
+	            const nodeUpdates = this.processExcelNodes(workbook);
+            
+	            // Create complete import data
+	            const importedData = {
+	              nodes: [...originalData.nodes],  // Preserve node structure
+	              links: this.generateUpdatedLinks(nodeUpdates),
+	              globalUpdates: globalUpdates,
+	              projectName: this.extractProjectName(workbook)
+	            };
+
+	            resolve(importedData);
+	          } catch (error) {
+	            reject(error);
+	          }
+	        };
+
+	        reader.onerror = (error) => reject(error);
+	        reader.readAsArrayBuffer(file);
+	      });
+	    },
+
+	    processExcelGlobals(workbook) {
+	      const updates = {};
+      
+	      Object.entries(CONFIG.EXCEL_MAPPING.GLOBAL_VALUES).forEach(([variable, cellRef]) => {
+	        if (variable === 'ProjectName') return;
+        
+	        const [sheetName, cellAddr] = this.parseExcelReference(cellRef);
+	        const sheet = workbook.Sheets[sheetName];
+        
+	        if (sheet && sheet[cellAddr]) {
+	          let value = sheet[cellAddr].v;
+          
+	          // Handle Excel's number formats
+	          if (typeof value === 'number') {
+	            if (variable === 'MVHR' || variable === 'DWHR') {
+	              value = value > 1 ? value / 100 : value;
+	            }
+	          } else if (typeof value === 'string' && value.endsWith('%')) {
+	            value = parseFloat(value) / 100;
+	          }
+          
+	          updates[variable] = value;
+	        }
+	      });
+      
+	      return updates;
+	    },
+
+	    processExcelNodes(workbook) {
+	      const nodeUpdates = new Map();
+      
+	      Object.entries(CONFIG.EXCEL_MAPPING.NODE_VALUES).forEach(([nodeName, cellRef]) => {
+	        const [sheetName, cellAddr] = this.parseExcelReference(cellRef);
+	        const sheet = workbook.Sheets[sheetName];
+        
+	        if (sheet && sheet[cellAddr]) {
+	          const value = sheet[cellAddr].v;
+	          nodeUpdates.set(nodeName, value);
+	        }
+	      });
+      
+	      return nodeUpdates;
+	    },
+
+	    generateUpdatedLinks(nodeUpdates) {
+	      // Create new links based on node updates while preserving structure
+	      const newLinks = originalData.links.map(link => {
+	        const sourceName = data.nodes[link.source].name;
+	        const targetName = data.nodes[link.target].name;
+        
+	        // Check if we have an update for this link
+	        if (nodeUpdates.has(sourceName)) {
+	          return {
+	            ...link,
+	            value: nodeUpdates.get(sourceName)
+	          };
+	        }
+        
+	        return { ...link };
+	      });
+      
+	      return newLinks;
+	    },
+
+	    parseExcelReference(ref) {
+	      const [sheetName, cellAddr] = ref.split('!');
+	      return [sheetName, cellAddr];
+	    },
+
+	    extractProjectName(workbook) {
+	      const projectNameRef = CONFIG.EXCEL_MAPPING.GLOBAL_VALUES.ProjectName;
+	      if (projectNameRef) {
+	        const [sheetName, cellAddr] = this.parseExcelReference(projectNameRef);
+	        const sheet = workbook.Sheets[sheetName];
+	        if (sheet && sheet[cellAddr]) {
+	          return sheet[cellAddr].v.toString();
+	        }
+	      }
+	      return "Unnamed Project";
+	    },
+
+	    async handleCSVImport(file) {
+	      return new Promise((resolve, reject) => {
+	        const reader = new FileReader();
+        
+	        reader.onload = (event) => {
+	          try {
+	            const csv = event.target.result;
+	            const sections = csv.split('##').map(s => s.trim());
+            
+	            const nodeLinks = sections.find(s => s.includes('Node and Link Alignment'));
+	            if (!nodeLinks) throw new Error('Node and Link Alignment section not found');
+            
+	            const links = this.parseCSVLinks(nodeLinks);
+	            const globalUpdates = this.parseCSVGlobals(sections);
+	            const projectName = this.parseCSVProjectInfo(sections);
+
+	            const importedData = {
+	              nodes: [...originalData.nodes],
+	              links,
+	              globalUpdates,
+	              projectName
+	            };
+
+	            resolve(importedData);
+	          } catch(error) {
+	            reject(error);
+	          }
+	        };
+
+	        reader.onerror = (error) => reject(error);
+	        reader.readAsText(file);
+	      });
+	    },
+
+	    parseCSVLinks(nodeLinks) {
+	      return nodeLinks.split('\n')
+	        .filter(line => line.includes(',') && line.includes('[') && line.includes(']'))
+	        .map(line => {
+	          const parts = line.split(',');
+	          const sourceMatch = parts[0].match(/\[(\d+)\]/);
+	          const targetMatch = parts[1].match(/\[(\d+)\]/);
+          
+	          if (!sourceMatch || !targetMatch) return null;
+          
+	          return {
+	            source: parseInt(sourceMatch[1]),
+	            target: parseInt(targetMatch[1]),
+	            value: parseFloat(parts[2])
+	          };
+	        })
+	        .filter(link => link !== null);
+	    },
+
+	    parseCSVGlobals(sections) {
+	      const globalsSection = sections.find(s => s.includes('Global Variables'));
+	      const updates = {};
+
+	      if (globalsSection) {
+	        globalsSection.split('\n')
+	          .filter(line => line.includes(',') && !line.includes('Variable,Value'))
+	          .forEach(line => {
+	            const [variable, value] = line.split(',').map(v => v.trim());
+	            updates[variable] = this.normalizeValue(value);
+	          });
+	      }
+
+	      return updates;
+	    },
+
+	    parseCSVProjectInfo(sections) {
+	      const projectSection = sections.find(s => s.includes('Project Information'));
+	      if (projectSection) {
+	        const projectLine = projectSection.split('\n').find(line => line.includes('ProjectName'));
+	        if (projectLine) return projectLine.split(',')[1].trim();
+	      }
+	      return "Unnamed Project";
+	    },
+
+	    normalizeValue(value) {
+	      if (value === undefined || value === null) return null;
+
+	      if (typeof value === 'string') {
+	        if (value.endsWith('%')) {
+	          return parseFloat(value) / 100;
+	        }
+	        return parseFloat(value);
+	      }
+
+	      return value;
+	    }
+	  }
+	};
+</script>
+
+<!-- Script Block 8: Application Controller -->
+<script>
+	// Script Block 8: Application Controller
+	const Application = {
+	  async initialize() {
+	    try {
+		    console.log("=== Application Init Start ===");
+		    console.log("All heatSourceButtons:", document.querySelectorAll('#heatSourceButton'));
+	      // First, ensure initial data is properly set
+	      data = JSON.parse(JSON.stringify(INITIAL_DATA));
+	      originalData = JSON.parse(JSON.stringify(INITIAL_DATA));
+      
+	      // Then initialize core systems
+	      await this.initializeComponents();
+      
+	      // Initialize state after data is ready
+	      await this.initializeState();
+      
+	      // Finally perform render
+	      await this.performInitialRender();
+      
+	      const balance = EnergyCalculator.calculateEnergyBalance();
+	      updateStatus(
+	        balance.isBalanced ? 'Diagram ready - Energy balanced' : 'Diagram ready - Check energy balance',
+	        balance.isBalanced ? 'success' : 'warning'
+	      );
+	    } catch (error) {
+	      console.error("Application initialization failed:", error);
+	      updateStatus('Initialization error: ' + error.message, 'error');
+	    }
+	  },
+
+	  async initializeComponents() {
+	    try {
+	      // Verify data exists before proceeding
+	      if (!data?.nodes || !data?.links) {
+	        throw new Error('Data structure not properly initialized');
+	      }
+
+	      // Initialize node references first
+	      NodeUtils.ensureNodeReferences();
+
+	      // Then initialize systems
+	      StateManager.initialize();
+	      SankeyDiagram.initialize();
+	      ControlPanel.initialize();
+
+	      return true;
+	    } catch (error) {
+	      console.error("Component initialization failed:", error);
+	      throw new Error(`Component initialization failed: ${error.message}`);
+	    }
+	  },
+	  
+	  async initializeState() {
+	    try {
+	      // Set initial system values from state manager
+	      COPh = StateManager.getValue('copHeating');
+	      COPc = StateManager.getValue('copCooling');
+	      MVHR = StateManager.getValue('mvhrEfficiency');
+	      DWHR = StateManager.getValue('dwhrEfficiency');
+
+	      // Ensure node references are properly set
+	      NodeUtils.ensureNodeReferences();
+    
+	      // Initialize core calculations in proper order
+	      EnergyCalculator.updateDWHR(DWHR);
+	      EnergyCalculator.updateMVHR(MVHR);
+	      EnergyCalculator.updateTEL(true);
+	      EnergyCalculator.updateHeatPumpValues(HP);
+	      EnergyCalculator.updateBuildingBalance();
+
+	      return true;
+	    } catch (error) {
+	      console.error("State initialization failed:", error);
+	      throw new Error(`State initialization failed: ${error.message}`);
+	    }
+	  },
+
+	  async performInitialRender() {
+	    try {
+	      const container = document.querySelector('.diagram-container');
+	      const width = container.clientWidth;
+    
+	      // Configure Sankey layout immediately
+	      SankeyDiagram.svg.attr("width", width);
+	      SankeyDiagram.sankey.extent([[1, 1], [width - 1, 600 - 1]]);
+    
+	      // Start render on next animation frame
+	      requestAnimationFrame(() => {
+	        SankeyDiagram.render(true);
+	        ControlPanel.calculateTotalEnergyCost();
+	      });
+
+	      return true;
+	    } catch (error) {
+	      console.error("Initial render failed:", error);
+	      throw new Error(`Initial render failed: ${error.message}`);
+	    }
+	  },
+
+	  // Application state management
+	  getState() {
+	    return {
+	      currentData: StateManager.getCurrentData(),
+	      globalValues: StateManager.getAllValues(),
+	      uiState: {
+	        showEmissions,
+	        isGasHeating,
+	        spacingCollapsed,
+	        widthMultiplier
+	      }
+	    };
+	  },
+
+	  // Error handling utilities
+	  handleError(error, context) {
+	    console.error(`Error in ${context}:`, error);
+	    updateStatus(`Error in ${context}: ${error.message}`, 'error');
+	  }
+	};
+
+	// Update status utility function
+	function updateStatus(message, type = 'pending') {
+	  const statusElement = document.getElementById('statusMessage');
+	  statusElement.textContent = message;
+	  statusElement.className = `status-${type}`;
+	}
+
+	// Application startup
+	document.addEventListener('DOMContentLoaded', () => {
+	  Application.initialize().catch(error => {
+	    console.error("Application startup failed:", error);
+	    updateStatus('Application startup failed: ' + error.message, 'error');
+	  });
+	});
+</script>
+
+</body>
+</html>
