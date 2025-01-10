@@ -1,0 +1,4254 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- v3029 to Fix GX and TED calculations - finalize xlsx import to match csv -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Energy Flow Sankey Diagram</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    /* Base Layout */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0 auto;
+      max-width: 1800px;
+      padding: 20px;
+      min-width: 400px;
+    }
+
+    /* Core Layout Components */
+    .container { display: flex; gap: 10px; margin-top: 10px; flex-direction: column; }
+    .button-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #eee; }
+    .status-row { min-height: 24px; padding: 4px 0; }
+    .file-input-group { display: flex; align-items: center; gap: 8px; }
+    .diagram-container { flex: 0 0 auto; width: 100%; }
+    .controls-container {
+      flex: 1 1 400px;
+      min-width: 400px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* Sankey Elements */
+    .node {
+      stroke: #000;
+      stroke-width: 1px;
+      cursor: pointer;
+    }
+    
+    .link {
+      fill: none;
+      stroke-opacity: 0.7;
+      transition: stroke-opacity 0.2s;
+      cursor: pointer;
+    }
+    
+    .link:hover { 
+      stroke-opacity: 0.9; 
+    }
+    
+    .node-label {
+      font-size: 11px;
+      fill: black;
+      pointer-events: none;
+      font-weight: 500;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.98);
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      pointer-events: none;
+      font-size: 12px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+      max-width: 300px;
+      line-height: 1.4;
+      z-index: 1000;
+    }
+    
+    .tooltip-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .tooltip-value { 
+      color: #666; 
+      font-size: 11px; 
+    }
+    
+    .tooltip-flow {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+    }
+
+    /* Controls */
+    .controls-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+    }
+    
+    .controls-table th,
+    .controls-table td {
+      padding: 1px 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    
+    .controls-table th:first-child { 
+      width: 200px; 
+      min-width: 200px; 
+    }
+    
+    .controls-table th:nth-child(2) { 
+      width: 50px; 
+    }
+    
+    .controls-table th {
+      background-color: #f5f5f5;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-weight: 600;
+    }
+
+    /* UI Elements */
+    .slider-cell { 
+      display: flex; 
+      align-items: center; 
+      gap: 5px; 
+    }
+    
+    input[type="range"] { 
+      width: 100px; 
+      accent-color: #666; 
+    }
+    
+    #widthMultiplier { 
+      height: 20px; 
+      margin: 0; 
+    }
+    
+    .value-display {
+      min-width: 70px;
+      text-align: right;
+      font-size: 11px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    /* Buttons */
+    button {
+      padding: 6px 12px;
+      cursor: pointer;
+      background-color: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 12px;
+      transition: all 0.2s;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    button:hover {
+      background-color: #e5e5e5;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Special Buttons */
+    #importButton { 
+      background-color: #2196F3; 
+      color: white; 
+      border: none; 
+    }
+    
+    #importButton:hover { 
+      background-color: #1976D2; 
+    }
+    
+    #applyButton { 
+      background-color: #4CAF50; 
+      color: white; 
+      border: none; 
+    }
+    
+    #applyButton:hover { 
+      background-color: #45a049; 
+    }
+    
+    #applyButton:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Width Toggle */
+    .width-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 3px 12px;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      height: 23px;
+    }
+    
+    .width-toggle label { 
+      font-size: 12px; 
+      color: #333; 
+    }
+
+    /* Status Indicators */
+    #fileName { 
+      color: #666; 
+      font-size: 12px; 
+      margin-left: 8px; 
+    }
+    
+    #statusMessage { 
+      font-size: 12px; 
+      padding: 4px 8px; 
+      border-radius: 4px; 
+    }
+    
+    .status-success { 
+      color: #4CAF50; 
+      background-color: #E8F5E9; 
+    }
+    
+    .status-error { 
+      color: #f44336; 
+      background-color: #FFEBEE; 
+    }
+    
+    .status-pending { 
+      color: #2196F3; 
+      background-color: #E3F2FD; 
+    }
+
+    /* Layout Elements */
+    h3, h4 { margin: 0; color: #333; }
+    .tables-container { display: flex; gap: 20px; margin-top: 15px; }
+    .table-section { flex: 1; min-width: 0; }
+
+    /* Responsive */
+    @media (max-width: 800px) {
+      .tables-container { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="button-row">
+  <div class="file-input-group">
+	<input type="file" id="csvFile" accept=".xlsx,.csv" style="display: none">
+    <button id="importButton">Import</button>
+    <span id="fileName"></span>
+    <button id="applyButton" style="display: none;">Apply</button>
+  </div>
+  <button id="toggleSpacingButton">Show as Energy Balance</button>
+  <div class="width-toggle">
+    <label for="widthMultiplier">Node Width:</label>
+    <input type="range" id="widthMultiplier" min="100" max="800" value="100" step="10">
+    <span id="widthValue">100%</span>
+  </div>
+  <button id="resetButton">Reset Values</button>
+  <button id="toggleEmissionsButton" style="background-color: #808080; color: white;">Show Emissions</button>
+  <button id="heatSourceButton" style="background-color: #A9D7F2; color: white;">Electric Heat+SHW</button>
+<!-- New cost summary section -->
+<div style="display: flex; align-items: center; gap: 12px; margin-left: 12px; padding: 0 12px; background: #f8f9fa; border-radius: 4px; border: 1px solid #e9ecef; height: 30px;">
+  <div style="font-size: 14px; display: flex; align-items: center; gap: 4px;">
+    <span>Gas Cost/yr:</span>
+    <span style="font-weight: bold;">$<span id="gasCostDisplay">0.00</span>
+    <span style="margin: 0 4px">+</span>
+  </div>
+  <div style="font-size: 14px; display: flex; align-items: center; gap: 4px;">
+    <span>Electricity Cost/yr:</span>
+    <span style="font-weight: bold;">$<span id="electricityCostDisplay">0.00</span>
+    <span style="margin: 0 4px">=</span>
+  </div>
+  <div style="font-size: 14px; display: flex; align-items: center; gap: 4px;">
+    <span>Total Cost/yr:</span>
+    <span style="font-weight: bold;">$<span id="totalEnergyCost">0.00</span></span>
+  </div>
+</div>
+  </div>
+</div>
+
+  <div class="status-row">
+    <span id="statusMessage"></span>
+  </div>
+
+  <div class="container">
+    <div class="diagram-container">
+      <svg id="sankey" height="600"></svg>
+      <div id="tooltip" class="tooltip" style="display: none;"></div>
+    </div>
+
+    <div class="controls-container">  
+	  <div class="cost-calculator" style="margin-bottom: 15px; padding: 5px; background: #f8f9fa; border-radius: 4px; border: 1px solid #e9ecef;">
+		  <style>
+		  .efficiency-controls {
+		    transition: max-height 0.3s ease-in-out;
+		    overflow: hidden;
+		  }
+
+		  .efficiency-controls.collapsed {
+		    max-height: 0;
+		  }
+
+		  .efficiency-controls.expanded {
+		    max-height: 500px;
+		  }
+
+		  .toggle-button {
+		    display: flex;
+		    align-items: center;
+		    gap: 8px;
+		    padding: 8px;
+		    background: #f8f9fa;
+		    border: none;
+		    width: 100%;
+		    cursor: pointer;
+			justify-content: flex-start;
+		  }
+
+		  .toggle-button i {
+		    transition: transform 0.3s ease;
+		  }
+
+		  .toggle-button.collapsed i {
+		    transform: rotate(-90deg);
+		  }
+		  </style>
+		  <div class="efficiency-section">
+		    <button class="toggle-button">
+		      <i>▼</i>
+		      <span>System Efficiencies & Parameters</span>
+		    </button>
+		    <div class="efficiency-controls expanded">
+	    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+	      <!-- Energy Cost Section -->
+	      <div style="display: flex; align-items: center; gap: 8px;">
+	        <label for="energyCost" style="font-size: 12px;">Electricity $/kWh:</label>
+	        <input type="number" id="energyCost" min="0" step="0.001" value="0.12" 
+	               style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+	      </div>
+
+	      <!-- Gas Cost Section -->
+	      <div style="display: flex; align-items: center; gap: 8px;">
+	        <label for="gasCost" style="font-size: 12px;">Gas $/m³:</label>
+	        <input type="number" id="gasCost" min="0" step="0.001" value="0.393" 
+	               style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+	      </div>
+
+		  <!-- Grid Intensity Section -->
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label for="gridIntensity" style="font-size: 12px;">Grid Intensity (g/kWh):</label>
+            <input type="number" id="gridIntensity" min="0" step="0.01" value="67.00" 
+                   style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+            <span style="font-size: 12px;">
+              <span style="font-weight: bold;">Total:</span> <span id="totalEmissions">0.00</span> MTCO2e/yr
+            </span>
+          </div>
+		  <!-- Building Parameters Section -->
+		  <div style="margin-left: 12px; display: flex; align-items: center; gap: 8px;">
+		    <label for="conditionedArea" style="font-size: 12px;">B.3 Conditioned Area (m²):</label>
+		    <input type="number" id="conditionedArea" min="0.1" step="0.01" value="528.0" 
+		           style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+		    <label for="heatingDegreeDays" style="font-size: 12px;">HDD:</label>
+		    <input type="number" id="heatingDegreeDays" min="0" max="9999" step="1" value="3540" 
+		           style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+		    <label for="groundFacingHeatingDegreeDays" style="font-size: 12px;">GFHDD:</label>
+		    <input type="number" id="groundFacingHeatingDegreeDays" min="0" max="9999" step="1" value="1960" 
+		           style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+		    <span style="font-size: 12px;">
+		      <span style="font-weight: bold;">TEUI:</span> 
+		      <span id="teuiValue">0.0</span> kWh/m²·yr
+		    </span>
+		  </div>
+          <!-- Efficiency Settings -->
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="copHeating" style="font-size: 12px;">
+                <span id="copHeatingLabel">COP Heating</span>:
+              </label>
+              <input type="number" id="copHeating" min="0.1" max="20" step="0.01" value="3.66" 
+                     style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="copCooling" style="font-size: 12px;">COP Cooling:</label>
+              <input type="number" id="copCooling" min="0.1" max="20" step="0.01" value="2.66" 
+                     style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="mvhrEfficiency" style="font-size: 12px;">MVHR Efficiency:</label>
+              <input type="number" id="mvhrEfficiency" min="0" max="1.00" step="0.01" value="0.80" 
+                     style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="dwhrEfficiency" style="font-size: 12px;">DWHR Efficiency:</label>
+              <input type="number" id="dwhrEfficiency" min="0" max="1.00" step="0.01" value="0.00" 
+                     style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+            </div>
+			<!-- Add after DWHR Efficiency control -->
+			<div style="display: flex; align-items: center; gap: 8px;">
+			  <label for="gainsFactorMethod" style="font-size: 12px;">G.4.1 Usable Gains:</label>
+			  <select id="gainsFactorMethod" 
+			          style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+			    <option value="0.00001">0%</option>
+			    <option value="0.4">40%</option>
+			    <option value="0.5">50%</option>
+			    <option value="0.6" selected>60%</option>
+			    <option value="phpp">PHPP</option>
+			  </select>
+			  <span id="calculatedGainsFactor" style="font-size: 12px; color: #666; min-width: 60px;">(60%)</span>
+			</div>
+          </div>
+        </div>
+      </div>
+	</div>
+
+<div class="tables-container">
+  <div class="table-section">
+    <table class="controls-table">
+      <thead>
+        <tr>
+          <th>Energy Supplied</th>
+          <th style="width: 50px;">kWh/yr</th>
+          <th>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 12px; min-width: 450px; max-width: 600px;">
+              <span style="flex: 1; white-space: nowrap;">Use Sliders to Adjust</span>
+              <span style="flex: 1; white-space: nowrap; text-align: center;">...</span>
+              <span style="flex: 1; white-space: nowrap; text-align: right;">...</span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="gainsControlsBody"></tbody>
+    </table>
+  </div>
+  <div class="table-section">
+    <table class="controls-table">
+      <thead>
+        <tr>
+          <th>Energy Lost</th>
+          <th style="width: 50px;">kWh/yr</th>
+          <th>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 12px; min-width: 450px; max-width: 600px;">
+              <span style="flex: 1; white-space: nowrap;">Area (m²)</span>
+              <span style="flex: 1; white-space: nowrap; text-align: center;">RSI (K·m²/W)</span>
+              <span style="flex: 1; white-space: nowrap; text-align: right;">U-Value (W/m²·K)</span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="lossesControlsBody"></tbody>
+    </table>
+  </div>
+</div>
+    </div>
+  </div>
+<script defer>
+	// Script Block 1: Core Configuration and Initial Data Structure
+	const CONFIG = {
+	  // System Value Limits and Defaults
+	  VALUE_LIMITS: {
+	    COP_HEATING: { min: 0.001, max: 20, step: 0.01, default: 3.66 },
+	    COP_COOLING: { min: 0.001, max: 20, step: 0.01, default: 2.66 },
+	    MVHR: { min: 0, max: 1.00, step: 0.01, default: 0.80 },
+	    DWHR: { min: 0, max: 1.00, step: 0.01, default: 0.00 },
+  		GAS_EFFICIENCY: { min: 0.5, max: 0.98, step: 0.01, default: 0.90 },
+		GAINS_FACTOR: { min: 0, max: 1.00, step: 0.01, default: 0.60 },
+	  },
+
+	  // Emissions and Cost Factors
+	  EMISSIONS: {
+	    GAS_INTENSITY: 1921,  // gCO2e/m3
+	    GAS_ENERGY_DENSITY: 10.36,  // ekWh/m3
+	    DEFAULT_GAS_COST: 0.393,  // $/m3
+	    DEFAULT_ELECTRICITY_COST: 0.12  // $/kWh
+	  },
+	  
+	// Building Elements Configuration
+	  BUILDING_ELEMENTS: {
+	    // Degree Days configurations
+	    HDD: {
+	      default: 3540,
+	      min: 0,
+	      max: 9999,
+	      step: 1
+	    },
+	    GFHDD: {
+	      default: 1960, // Tset-10ºC*Days in Htg Season
+	      min: 0,
+	      max: 9999,
+	      step: 1
+	    },
+
+	// Component types mapped to their calculation method
+	    COMPONENT_TYPES: {
+	      ABOVE_GRADE: ["B.4 Roof", "B.5 Walls Above Grade", "B.6 Floor Exposed", "B.7.0 Doors", 
+	                    "B.8.1 Windows N", "B.8.2 Windows E", "B.8.3 Windows S", "B.8.4 Windows W"],
+	      GROUND_FACING: ["B.9 Walls Below Grade", "B.10 Floor Slab"]
+	    },	
+
+	    // Component configurations
+	    COMPONENTS: {
+	      ROOF: {
+	        name: "B.4 Roof",
+	        elementArea: { default: 528.00, min: 0, max: 2000, step: 0.01 },
+	        uValue: { default: 0.137, min: 0.001, max: 3.000, step: 0.001 },
+	        rsi: { default: 7.29, min: 0.1, max: 100.0, step: 0.01 },
+	        type: "ABOVE_GRADE"
+	      },
+	      WALLS_ABOVE_GRADE: {
+	        name: "B.5 Walls Above Grade",
+	        elementArea: { default: 0.00, min: 0, max: 2000, step: 0.01 },
+	        uValue: { default: 0.176, min: 0.001, max: 3.000, step: 0.001 },
+	        rsi: { default: 23.00, min: 0.1, max: 100.0, step: 0.01 },
+	        type: "ABOVE_GRADE"
+	      },
+	      FLOOR_EXPOSED: {
+	        name: "B.6 Floor Exposed",
+	        elementArea: { default: 0.00, min: 0, max: 2000, step: 0.01 },
+	        uValue: { default: 0.105, min: 0.001, max: 3.000, step: 0.001 },
+	        rsi: { default: 23.00, min: 0.1, max: 100.0, step: 0.01 },
+	        type: "ABOVE_GRADE"
+	      },
+	      DOORS: {
+	        name: "B.7.0 Doors",
+	        elementArea: { default: 2.00, min: 0, max: 100, step: 0.01 },
+	        uValue: { default: 1.200, min: 0.001, max: 3.000, step: 0.001 },
+			rsi: { default: 0.83, min: 0.1, max: 5.0, step: 0.01 },
+	        type: "ABOVE_GRADE"
+	      },
+	      WINDOWS_N: {
+	        name: "B.8.1 Windows N",
+	        elementArea: { default: 105.00, min: 0, max: 500, step: 0.01 },
+	        uValue: { default: 1.200, min: 0.001, max: 3.000, step: 0.001 },
+			rsi: { default: 0.83, min: 0.1, max: 5.0, step: 0.01 },
+	        type: "ABOVE_GRADE"
+	      },
+	      WINDOWS_E: {
+	        name: "B.8.2 Windows E",
+	        elementArea: { default: 61.60, min: 0, max: 500, step: 0.01 },
+	        uValue: { default: 1.200, min: 0.001, max: 3.000, step: 0.001 },
+			rsi: { default: 0.83, min: 0.1, max: 5.0, step: 0.01 },
+	        type: "ABOVE_GRADE"
+	      },
+	      WINDOWS_S: {
+	        name: "B.8.3 Windows S",
+	        elementArea: { default: 105.00, min: 0, max: 500, step: 0.01 },
+	        uValue: { default: 1.200, min: 0.001, max: 3.000, step: 0.001 },
+			rsi: { default: 0.83, min: 0.1, max: 5.0, step: 0.01 },
+	        type: "ABOVE_GRADE"
+	      },
+	      WINDOWS_W: {
+	        name: "B.8.4 Windows W",
+	        elementArea: { default: 61.60, min: 0, max: 500, step: 0.01 },
+	        uValue: { default: 1.200, min: 0.001, max: 3.000, step: 0.001 },
+			rsi: { default: 0.83, min: 0.1, max: 5.0, step: 0.01 },
+	        type: "ABOVE_GRADE"
+	      },
+	      WALLS_BELOW_GRADE: {
+	        name: "B.9 Walls Below Grade",
+	        elementArea: { default: 0.00, min: 0, max: 2000, step: 0.01 },
+	        uValue: { default: 0.220, min: 0.001, max: 3.000, step: 0.001 },
+	        rsi: { default: 23.00, min: 0.1, max: 100.0, step: 0.01 },
+	        type: "GROUND_FACING"
+	      },
+	      FLOOR_SLAB: {
+	        name: "B.10 Floor Slab",
+	        elementArea: { default: 528.00, min: 0, max: 2000, step: 0.01 },
+	        uValue: { default: 0.203, min: 0.001, max: 3.000, step: 0.001 },
+	        rsi: { default: 23.00, min: 0.1, max: 100.0, step: 0.01 },
+	        type: "GROUND_FACING"
+	      }
+	    }
+	  },
+
+	  // Excel/CSV Mapping Configuration
+	  EXCEL_MAPPING: {
+	    SHEETS: {
+	      ENERGY_BALANCE: "ENERGY BALANCE",
+	      REPORT: "REPORT"
+	    },
+	    NODE_VALUES: {
+	      // Sources to Building
+	      "G.1.1 Occupant Gains": "REPORT!D100",
+	      "G.3.1 Plug Light Equipment": "REPORT!D110",
+	      "W.2.D.N SHW Net Demand": "REPORT!H44",
+	      "G.8.1 Windows N": "REPORT!J106",
+	      "G.8.2 Windows E": "REPORT!K106",
+	      "G.8.3 Windows S": "REPORT!L106",
+	      "G.8.4 Windows W": "REPORT!M106",
+		  "G.7.0 Doors": "REPORT!I106",
+	      "M.2.2 Sink (Air/Ground)": "REPORT!I119",
+	      "M.2.2 Energy Input": "REPORT!D119",
+	      "Thermal Energy Demand": "ENERGY BALANCE!D24",
+			// TEL (Total Envelope Losses in kWh)
+	      "B.4 Roof": "REPORT!I66",
+	      "B.5 Walls Ae": "REPORT!I67",
+	      "B.6 Floor Exposed": "REPORT!I68",
+	      "B.7.0 Doors": "REPORT!I69",
+	      "B.8.1 Windows N": "REPORT!I70",
+	      "B.8.2 Windows E": "REPORT!I71",
+	      "B.8.3 Windows S": "REPORT!I72",
+	      "B.8.4 Windows W": "REPORT!I73",
+		  "B.9 Walls Below Grade": "REPORT!I74",
+	      "B.10 Floor Slab": "REPORT!I75",
+	      "B.13.2 TB Penalty": "REPORT!E83",
+	      "B.19.5 Air Leakage": "REPORT!D94",
+			// TEL (Total Envelope Losses by Area and U-value)
+		  "Total Envelope Losses": "ENERGY BALANCE!F22",
+ 		  "B.4 Roof_area": "REPORT!D66",
+		  "B.5 Walls Above Grade_area": "REPORT!D67",
+   		  "B.6 Floor Exposed_area": "REPORT!D68", 
+		  "B.7.0 Doors_area": "REPORT!D69",
+   		  "B.8.1 Windows N_area": "REPORT!D70",
+   		  "B.8.2 Windows E_area": "REPORT!D71",
+   		  "B.8.3 Windows S_area": "REPORT!D72",
+   		  "B.8.4 Windows W_area": "REPORT!D73",
+   		  "B.9 Walls Below Grade_area": "REPORT!D74",
+   		  "B.10 Floor Slab_area": "REPORT!D75",
+			// U-Values + RSI Values
+ 		  "B.4 Roof_rsi": "REPORT!F66",
+		  "B.5 Walls Above Grade_rsi": "REPORT!F67",
+ 		  "B.6 Floor Exposed_rsi": "REPORT!F68",
+ 		  "B.7.0 Doors_uvalue": "REPORT!G69",
+  		  "B.8.1 Windows N_uvalue": "REPORT!G70",
+  		  "B.8.2 Windows E_uvalue": "REPORT!G71",
+  		  "B.8.3 Windows S_uvalue": "REPORT!G72",
+   		  "B.8.4 Windows W_uvalue": "REPORT!G73",
+ 		  "B.7.0 Doors_rsi": "REPORT!F69",
+  		  "B.8.1 Windows N_rsi": "REPORT!F70",
+  		  "B.8.2 Windows E_rsi": "REPORT!F71",
+  		  "B.8.3 Windows S_rsi": "REPORT!F72",
+   		  "B.8.4 Windows W_rsi": "REPORT!F73",
+   		  "B.9 Walls Below Grade_rsi": "REPORT!F74",
+   		  "B.10 Floor Slab_rsi": "REPORT!F75",
+	      "V.2.4 Unrecovered Ventilation": "REPORT!D128",
+	      "W.2.W SHW Wasted": "REPORT!H45",
+	      "G.X Unusable Gains": "REPORT!D115"
+	    },
+	    GLOBAL_VALUES: {
+	      "COPh": "REPORT!G118",
+	      "COPc": "REPORT!I118",
+	      "MVHR": "REPORT!D123",
+	      "DWHR": "REPORT!D45",
+	      "ProjectName": "REPORT!I14",
+		  "ElectricityCost": "REPORT!D160",  			// $/kWh
+		  "GasCost": "REPORT!G160",          			// $/m³
+		  "GridIntensity": "REPORT!L20",      			// gCO2e/kWh
+		  "B.3 Conditioned Area": "REPORT!I17",      	// Conditioned Area Field for TEUI Calc
+		  "HDD": "REPORT!D56",  						// Add mapping for HDD
+		  "GFHDD": "REPORT!D58", 						// Add mapping for ground-facing HDD
+		  "nGainsFactor": "REPORT!D112"  				// Net Usable Gains Factor as % value
+	    }
+	  }
+	};
+	
+	const NodeReferenceHandler = {
+	  convertToIndices(links, nodes) {
+	    return links.map(link => ({
+	      source: typeof link.source === 'object' ? nodes.indexOf(link.source) : link.source,
+	      target: typeof link.target === 'object' ? nodes.indexOf(link.target) : link.target,
+	      value: link.value,
+	      isEmissions: link.isEmissions // Preserve emissions flag if present
+	    }));
+	  },
+
+	  convertToObjects(links, nodes) {
+	    return links.map(link => ({
+	      source: typeof link.source === 'number' ? nodes[link.source] : link.source,
+	      target: typeof link.target === 'number' ? nodes[link.target] : link.target,
+	      value: link.value,
+	      isEmissions: link.isEmissions // Preserve emissions flag if present
+	    }));
+	  },
+
+	  validateNodeReferences(links, nodes) {
+	    return links.every(link => {
+	      const sourceValid = typeof link.source === 'number' ? 
+	        link.source >= 0 && link.source < nodes.length :
+	        nodes.includes(link.source);
+      
+	      const targetValid = typeof link.target === 'number' ? 
+	        link.target >= 0 && link.target < nodes.length :
+	        nodes.includes(link.target);
+        
+	      return sourceValid && targetValid;
+	    });
+	  }
+	};
+
+	// Initial Data Structure
+	const INITIAL_DATA = {
+	  nodes: [
+	    { name: "Building", color: "#4A96BA" },                       // [0] Central node - all flows connect here
+	    { name: "G.1.1 Occupant Gains", color: "#FF8C00" },           // [1] Source: Internal gains from occupants
+	    { name: "G.3.1 Plug Light Equipment", color: "#A5D3ED" },     // [2] Source: Equipment & lighting gains
+	    { name: "W.2.D.N SHW Net Demand", color: "#BE343D" },         // [3] Source: Hot water demand (affected by DWHR)
+	    { name: "G.8.1 Windows N", color: "#F9DF4B" },                // [4] Source: North solar gains
+	    { name: "G.8.2 Windows E", color: "#F9DF4B" },                // [5] Source: East solar gains
+	    { name: "G.8.3 Windows S", color: "#F9DF4B" },                // [6] Source: South solar gains
+	    { name: "G.8.4 Windows W", color: "#F9DF4B" },                // [7] Source: West solar gains
+		{ name: "G.7.0 Doors", color: "#F9DF4B" },                    // [8] Target: Door gains  
+	    { name: "M.2.2 Sink (Air/Ground)", color: "#D4B26F" },        // [9] Source: Heat pump source side (air/ground)
+	    { name: "M.2.2 Energy Input", color: "#A9D7F2" },             // [10] Source: Heat pump electrical input or Gas input in Gas mode
+	    { name: "Thermal Energy Demand", color: "#BFA586" },          // [11] Node: TED combines source + electric - or Gas
+	    { name: "B.4 Roof", color: "#8FAFA6" },                       // [12] Target: Roof heat loss
+	    { name: "B.5 Walls Above Grade", color: "#8FAFA6" },          // [13] Target: Wall heat loss
+	    { name: "B.6 Floor Exposed", color: "#8FAFA6" },              // [14] Target: Exposed floor heat loss
+	    { name: "B.7.0 Doors", color: "#8FAFA6" },                    // [15] Target: Door heat loss
+	    { name: "B.8.1 Windows N", color: "#F9DF4B" },                // [16] Target: North window heat loss
+	    { name: "B.8.2 Windows E", color: "#F9DF4B" },                // [17] Target: East window heat loss
+	    { name: "B.8.3 Windows S", color: "#F9DF4B" },                // [18] Target: South window heat loss
+	    { name: "B.8.4 Windows W", color: "#F9DF4B" },                // [19] Target: West window heat loss
+		{ name: "B.9 Walls Below Grade", color: "#8FAFA6" },          // [20] Target: Below grade wall loss  
+	    { name: "B.10 Floor Slab", color: "#8FAFA6" },                // [21] Target: Slab heat loss
+	    { name: "B.13.2 TB Penalty", color: "#8FAFA6" },              // [22] Target: Thermal bridge heat loss
+	    { name: "B.19.5 Air Leakage", color: "#A4D3ED" },             // [23] Target: Air infiltration heat loss
+	    { name: "V.2.4 Unrecovered Ventilation", color: "#A5D3ED" },  // [24] Target: Ventilation loss (affected by MVHR)
+	    { name: "W.2.W SHW Wasted", color: "#BE343D" },               // [25] Target: Hot water waste (affected by DWHR)
+	    { name: "G.X Unusable Gains", color: "#FFA500" },             // [26] Target: Excess heat gains unused
+	    { name: "GasExhaust", color: "#BE343D", hidden: true },       // [27] Target: Gas system exhaust heat
+	    { name: "Total Envelope Losses", color: "#8FAFA6" },          // [28] Target: Total envelope heat loss
+	    { name: "E1 Scope 1 Emissions", color: "#808080" },           // [29] Target: Direct emissions from gas
+	    { name: "E2 Scope 2 Emissions", color: "#808080" }            // [30] Target: Indirect emissions from electricity
+	  ],
+	  links: [
+	    // Sources flowing into Building node
+	    { source: 1, target: 0, value: 12924.43 },    // 1 Occupant gains -> Building
+	    { source: 2, target: 0, value: 13970.88 },    // 2 Equipment gains -> Building
+	    { source: 3, target: 0, value: 4000.00 },     // 3 Hot water demand -> Building (reduced by DWHR)
+	    { source: 4, target: 0, value: 137.55 },      // 4 North solar -> Building
+	    { source: 5, target: 0, value: 4739.50 },      // 5 East solar -> Building
+	    { source: 6, target: 0, value: 7427.70 },     // 6 South solar -> Building
+	    { source: 7, target: 0, value: 1592.98 },     // 7 West solar -> Building
+	    { source: 8, target: 0, value: 2.62 },        // 8 Door Gains -> Building
+
+	    // Thermal Energy Demand system flows
+	    { source: 9, target: 11, value: 27089.29 },    // Source -> Thermal Energy Demand (M22S)
+	    { source: 10, target: 11, value: 10170.41 },   // Electric -> Thermal Energy Demand (M22D)
+	    { source: 11, target: 0, value: 37259.69 },    // Heat pump -> Building (TED)
+
+	    // TEL flows to envelope components
+	    { source: 28, target: 12, value: 6152.64 },   // TEL -> Roof loss
+	    { source: 28, target: 13, value: 0.001 },     // TEL -> Wall loss
+	    { source: 28, target: 14, value: 0.001 },     // TEL -> Floor Exposed loss
+	    { source: 28, target: 15, value: 203.90 },    // TEL -> Door loss
+	    { source: 28, target: 16, value: 10704.96 },  // TEL -> North window loss
+		{ source: 28, target: 17, value: 6280.24 },   // TEL -> East window loss
+		{ source: 28, target: 18, value: 10704.96 },  // TEL -> South window loss
+		{ source: 28, target: 19, value: 6280.24 },   // TEL -> West window loss
+		{ source: 28, target: 20, value: 0.001 },     // TEL -> Below grade wall loss	  
+		{ source: 28, target: 21, value: 5037.96 },   // TEL -> Slab loss
+		{ source: 28, target: 22, value: 9072.98 },   // TEL -> Thermal bridge heat loss
+		{ source: 28, target: 23, value: 4729.17 },   // TEL -> Air leakage loss
+
+	    // Direct losses from Building node
+	    { source: 0, target: 24, value: 2570.04 },    // Building -> Net Ventilation loss (reduced by MVHR efficiency)
+	    { source: 0, target: 25, value: 4000.00 },    // Building -> Net Hot water waste (reduced by DWHR)
+	    { source: 0, target: 26, value: 16318.27 },   // Building -> G.X Net Unusable gains
+		{ source: 0, target: 27, value: 0.001 },	  // Where Building is index 0 and GasExhaust is index 27 - check where we fixed this in 6.7
+	    { source: 0, target: 28, value: 59167.05 },   // Building -> TEL (total envelope loss)
+
+	    // Gas mode flows
+	    { source: 11, target: 27, value: 0.001 },     // Thermal Energy Demand -> GasExhaust
+	    { source: 3, target: 27, value: 0.001 }       // SHW -> GasExhaust
+	    ]
+	  };
+
+	// System State Variables
+	let data = JSON.parse(JSON.stringify(INITIAL_DATA));
+	let originalData = JSON.parse(JSON.stringify(INITIAL_DATA));
+	let pendingImportData = null;
+
+	// System Parameters
+	let COPh = CONFIG.VALUE_LIMITS.COP_HEATING.default;
+	let previousCOPh = CONFIG.VALUE_LIMITS.COP_HEATING.default;
+	let COPc = CONFIG.VALUE_LIMITS.COP_COOLING.default;
+	let MVHR = CONFIG.VALUE_LIMITS.MVHR.default;
+	let DWHR = CONFIG.VALUE_LIMITS.DWHR.default;
+
+	// Heat Pump State Variables
+	let TED = 0;    // Total heat pump output
+	let M22D = 0;  // Heat pump energy input
+	let M22S = 0;  // Heat pump source input
+
+	// Visualization State
+	let spacingCollapsed = false;
+	let widthMultiplier = 1;
+	let showEmissions = false;
+	let isGasHeating = false;
+</script>
+<!-- Script Block 2: Value State Management System -->
+<script defer>
+	class ValueState {
+	  constructor(config) {
+	    this._config = config;
+	    this._default = config.default;
+	    this._imported = null;
+	    this._userEdited = null;
+	    this._originalValue = null;
+    
+	    this._validators = new Map([
+	      ['percentage', v => v >= 0 && v <= 1],
+	      ['positive', v => v > 0],
+	      ['range', v => v >= this._config.min && v <= this._config.max]
+	    ]);
+	  }
+  
+	  reset() {
+	    console.log(`Resetting value - imported: ${this._imported}, default: ${this._default}`);
+	    this._userEdited = null;
+	    // If we have an imported value, restore to that, otherwise use default
+	    if (this._imported !== null) {
+	      console.log(`Reset to imported value: ${this._imported}`);
+	      return this._imported;
+	    }
+	    console.log(`No imported value, reset to default: ${this._default}`);
+	    return this._default;
+	  }
+
+	  get value() {
+	    return this._userEdited ?? this._imported ?? this._default;
+	  }
+
+	  get isImported() {
+	    return this._imported !== null;
+	  }
+
+	  get isUserEdited() {
+	    return this._userEdited !== null;
+	  }
+
+	  get originalValue() {
+	    return this._originalValue ?? this._default;
+	  }
+
+	  setImported(value) {
+	    const normalized = this._normalize(value);
+	    if (this._validate(normalized)) {
+	      this._imported = normalized;
+	      this._originalValue = normalized;
+	      this._userEdited = null;
+	      return true;
+	    }
+	    return false;
+	  }
+
+	  setUserEdited(value) {
+	    const normalized = this._normalize(value);
+	    if (this._validate(normalized)) {
+	      this._userEdited = normalized;
+	      return true;
+	    }
+	    return false;
+	  }
+
+	  _normalize(value) {
+	    if (typeof value === 'string') {
+	      if (value.endsWith('%')) {
+	        value = parseFloat(value) / 100;
+	      } else {
+	        value = parseFloat(value);
+	      }
+	    }
+
+	    if (this._config.isPercentage && value > 1 && value <= 100) {
+	      value = value / 100;
+	    }
+
+	    if (this._config.precision !== undefined) {
+	      value = Number(value.toFixed(this._config.precision));
+	    }
+
+	    return value;
+	  }
+
+	  _validate(value) {
+	    if (isNaN(value)) return false;
+	    return Array.from(this._validators.entries())
+	      .filter(([key]) => this._config[key])
+	      .every(([_, validator]) => validator(value));
+	  }
+	}
+
+const StateManager = {
+  _states: new Map(),
+  _listeners: new Map(),
+  _dataState: {
+    type: 'default',
+    data: null,
+    userModifications: new Map()
+  },
+  
+  // NEW CODE
+  _importedBaseline: null,
+
+  setImportedBaseline(data) {
+    this._importedBaseline = {
+      nodes: data.nodes.map(node => ({...node})),
+      links: data.links.map(link => ({...link})),
+      componentUpdates: new Map(data.componentUpdates),
+      globalUpdates: {...data.globalUpdates}
+    };
+    console.log("New baseline set from import:", this._importedBaseline);
+  },
+
+  getBaselineData() {
+    return this._importedBaseline || INITIAL_DATA;
+  },
+  // END NEW CODE
+
+  initialize() {
+    // System states
+    const systemStates = {
+      copHeating: {
+        default: CONFIG.VALUE_LIMITS.COP_HEATING.default,
+        min: CONFIG.VALUE_LIMITS.COP_HEATING.min,
+        max: CONFIG.VALUE_LIMITS.COP_HEATING.max,
+        precision: 1,
+        positive: true,
+        range: true
+      },
+      isGasHeating: {
+        default: false,
+        precision: 0,
+        range: false,
+        positive: false
+      },
+      copCooling: {
+        default: CONFIG.VALUE_LIMITS.COP_COOLING.default,
+        min: CONFIG.VALUE_LIMITS.COP_COOLING.min,
+        max: CONFIG.VALUE_LIMITS.COP_COOLING.max,
+        precision: 1,
+        positive: true,
+        range: true
+      },
+      mvhrEfficiency: {
+        default: CONFIG.VALUE_LIMITS.MVHR.default,
+        min: CONFIG.VALUE_LIMITS.MVHR.min,
+        max: CONFIG.VALUE_LIMITS.MVHR.max,
+        precision: 2,
+        isPercentage: true,
+        range: true
+      },
+      dwhrEfficiency: {
+        default: CONFIG.VALUE_LIMITS.DWHR.default,
+        min: CONFIG.VALUE_LIMITS.DWHR.min,
+        max: CONFIG.VALUE_LIMITS.DWHR.max,
+        precision: 2,
+        isPercentage: true,
+        range: true
+      },
+      conditionedArea: {
+        default: 528.0,
+        min: 0.001,
+        max: 100000,
+        precision: 0.01,
+        positive: true,
+        range: true
+      },
+      heatingDegreeDays: {
+        default: CONFIG.BUILDING_ELEMENTS.HDD.default,
+        min: CONFIG.BUILDING_ELEMENTS.HDD.min,
+        max: CONFIG.BUILDING_ELEMENTS.HDD.max,
+        step: CONFIG.BUILDING_ELEMENTS.HDD.step,
+        precision: 0,
+        positive: true,
+        range: true
+      },
+      groundFacingHeatingDegreeDays: {
+        default: CONFIG.BUILDING_ELEMENTS.GFHDD.default,
+        min: CONFIG.BUILDING_ELEMENTS.GFHDD.min,
+        max: CONFIG.BUILDING_ELEMENTS.GFHDD.max,
+        step: CONFIG.BUILDING_ELEMENTS.GFHDD.step,
+        precision: 0,
+        positive: true,
+        range: true
+      },
+	  nGainsFactor: {
+	    default: CONFIG.VALUE_LIMITS.GAINS_FACTOR.default,
+	    min: CONFIG.VALUE_LIMITS.GAINS_FACTOR.min,
+	    max: CONFIG.VALUE_LIMITS.GAINS_FACTOR.max,
+	    precision: 2,
+	    isPercentage: true,
+	    range: true
+	  },
+    };
+
+    // Initialize system states
+    Object.entries(systemStates).forEach(([key, config]) => {
+      this._states.set(key, new ValueState(config));
+    });
+
+    // Initialize component states
+    Object.entries(CONFIG.BUILDING_ELEMENTS.COMPONENTS).forEach(([key, component]) => {
+      this._states.set(`${key.toLowerCase()}Area`, new ValueState({
+        default: component.elementArea.default,
+        min: component.elementArea.min,
+        max: component.elementArea.max,
+        precision: 2, // Changed from component.elementArea.step
+		step: 0.01,   // Added explicit step
+        positive: true,
+        range: true
+      }));
+	  
+	  // In StateManager.initialize()
+	  Object.entries(CONFIG.BUILDING_ELEMENTS.COMPONENTS).forEach(([key, component]) => {
+	    this._states.set(`${key.toLowerCase()}Rsi`, new ValueState({
+	      default: component.rsi.default,
+	      min: component.rsi.min,
+	      max: component.rsi.max,
+	      precision: 2,
+	      positive: true,
+	      range: true
+	    }));
+	  });
+
+      this._states.set(`${key.toLowerCase()}UValue`, new ValueState({
+        default: component.uValue.default,
+        min: component.uValue.min,
+        max: component.uValue.max,
+        precision: 3, // Changed from component.uValue.step
+		step: 0.001,  // Added explicit step
+        positive: true,
+        range: true
+      }));
+    });
+
+    console.log("=== StateManager Init ===");
+    this.debugStates();
+  },
+
+  debugStates() {
+    console.log("Current states:");
+    this._states.forEach((state, key) => {
+      console.log(`${key}:`, {
+        value: state.value,
+        imported: state.isImported,
+        edited: state.isUserEdited
+      });
+    });
+  },
+
+  getCurrentData() {
+    const baseData = this._dataState.data;
+    if (this._dataState.userModifications.size > 0) {
+      const modifiedData = JSON.parse(JSON.stringify(baseData));
+      this._dataState.userModifications.forEach((value, key) => {
+        this._applyModification(modifiedData, key, value);
+      });
+      return modifiedData;
+    }
+    return baseData;
+  },
+
+  getValue(key) {
+    return this._states.get(key)?.value ?? null;
+  },
+
+  // 2. In StateManager, ensure we're storing RSI as primary value:
+  setValue(key, value, type = 'user') {
+    const state = this._states.get(key);
+    if (!state) return false;
+
+    // If this is a U-value being set, convert it to RSI first
+    if (key.toLowerCase().includes('uvalue')) {
+      console.warn('Attempting to set U-value directly - this should not happen');
+      // Convert to RSI if a U-value is mistakenly provided
+      const rsiKey = key.replace('UValue', 'Rsi');
+      const rsiState = this._states.get(rsiKey);
+      if (rsiState) {
+        const rsiValue = 1 / value;
+        const success = type === 'import' ? 
+          rsiState.setImported(rsiValue) : 
+          rsiState.setUserEdited(rsiValue);
+        if (success) {
+          this._notifyListeners(rsiKey, rsiState.value);
+          return true;
+        }
+      }
+      return false;
+    }
+
+    const success = type === 'import' ? 
+      state.setImported(value) : 
+      state.setUserEdited(value);
+
+    if (success) {
+      this._notifyListeners(key, state.value);
+      return true;
+    }
+    return false;
+  },
+
+  // In StateManager, update reset method
+  reset() {
+        console.log("=== StateManager Reset ===");
+        console.log("Reset - Imported baseline:", this._importedBaseline);
+        console.log("Reset - Component updates:", this._importedBaseline?.componentUpdates);
+      
+        const baselineData = this._importedBaseline || INITIAL_DATA;
+      
+        // Clear user modifications but keep imported data
+        this._dataState.userModifications.clear();
+  
+        // Reset component states but preserve imported values
+        this._states.forEach((state, key) => {
+          if (this._importedBaseline?.componentUpdates?.has(key)) {
+            // Use imported value
+            const importedValue = this._importedBaseline.componentUpdates.get(key);
+            state.setImported(importedValue);
+          } else {
+            // Reset to default
+            state.reset();
+          }
+        });
+
+        // Trigger recalculation
+        EnergyCalculator.updateTEL(false);
+        EnergyCalculator.updateBuildingBalance();
+
+        return baselineData;
+      },
+
+  addListener(key, callback) {
+    if (!this._listeners.has(key)) {
+      this._listeners.set(key, new Set());
+    }
+    this._listeners.get(key).add(callback);
+  },
+
+  removeListener(key, callback) {
+    this._listeners.get(key)?.delete(callback);
+  },
+
+  _validateStateData(data) {
+    if (!data || typeof data !== 'object') {
+      console.log("State data validation failed: not an object", data);
+      return false;
+    }
+
+    if (!data.globalUpdates || typeof data.globalUpdates !== 'object') {
+      console.log("Data validation failed: missing globalUpdates");
+      return false;
+    }
+
+    if (!data.componentUpdates || !(data.componentUpdates instanceof Map)) {
+      console.log("Data validation failed: missing componentUpdates");
+      return false;
+    }
+
+    if (data.componentUpdates.size === 0) {
+      console.log("Data validation failed: no component data");
+      return false;
+    }
+
+    console.log("Data validation passed", data);
+    return true;
+  },
+
+  _applyModification(data, key, value) {
+    const [type, id] = key.split(':');
+    if (type === 'node') {
+      const node = data.nodes.find(n => n.name === id);
+      if (node) Object.assign(node, value);
+    } else if (type === 'link') {
+      const [source, target] = id.split('->');
+      const link = data.links.find(l => 
+        l.source.name === source && l.target.name === target
+      );
+      if (link) Object.assign(link, value);
+    }
+  },
+
+  _notifyListeners(key, value) {
+    this._listeners.get(key)?.forEach(callback => callback(value));
+  }
+};
+
+StateManager.initialize();
+
+</script>
+	<!-- Script Block 3: Data Management System -->
+	<script defer>
+	// Script Block 3: Node Utilities and Data Management
+	const NodeUtils = {
+	  findNodeIndex(name) {
+	    return data.nodes.findIndex(node => node.name === name);
+	  },
+
+	  getNodeByName(name) {
+	    return data.nodes.find(node => node.name === name);
+	  },
+
+	  getNodeIndex(node) {
+	    if (!node) return null;
+	    return typeof node === 'number' ? node : 
+	           typeof node === 'object' ? (node.index ?? data.nodes.indexOf(node)) : null;
+	  },
+
+	  getSourceNodeIndex(link) {
+	    if (!link?.source) return null;
+	    return typeof link.source === 'number' ? link.source :
+	           typeof link.source === 'object' ? (link.source.index ?? data.nodes.indexOf(link.source)) : null;
+	  },
+
+	  getTargetNodeIndex(link) {
+	    if (!link?.target) return null;
+	    const index = typeof link.target === 'number' ? link.target :
+	                  typeof link.target === 'object' ? (link.target.index ?? data.nodes.indexOf(link.target)) : null;
+    
+	    // Add verification
+	    if (index === null || !data.nodes[index]) {
+	      console.error('Invalid target node index:', index, link);
+	      return null;
+	    }
+	    return index;
+	  },
+
+	  ensureNodeReferences() {
+	    data.links.forEach(link => {
+	      if (typeof link.source === 'number') link.source = data.nodes[link.source];
+	      if (typeof link.target === 'number') link.target = data.nodes[link.target];
+	    });
+	  },
+
+	  validateLinkStructure(link) {
+	    // Ensure link has proper object references
+	    if (typeof link.source === 'number') {
+	      link.source = data.nodes[link.source];
+	    }
+	    if (typeof link.target === 'number') {
+	      link.target = data.nodes[link.target];
+	    }
+    
+	    // Ensure value is numeric and valid
+	    if (typeof link.value !== 'number' || isNaN(link.value)) {
+	      console.warn(`Invalid link value for ${link.source.name} -> ${link.target.name}`);
+	      link.value = 0.001; // Minimum valid value
+	    }
+    
+	    return link;
+	  }
+	};
+
+	const LinkUtils = {
+	  findLink(sourceIndex, targetIndex) {
+	    return data.links.find(link => {
+	      const linkSourceIndex = typeof link.source === 'number' ? link.source : 
+	                            data.nodes.indexOf(link.source);
+	      const linkTargetIndex = typeof link.target === 'number' ? link.target : 
+	                            data.nodes.indexOf(link.target);
+	      return linkSourceIndex === sourceIndex && linkTargetIndex === targetIndex;
+	    });
+	  },
+
+	  findLinkIndex(sourceIndex, targetIndex) {
+	    return data.links.findIndex(link => 
+	      NodeUtils.getSourceNodeIndex(link) === sourceIndex && 
+	      NodeUtils.getTargetNodeIndex(link) === targetIndex
+	    );
+	  },
+
+	  getLinkValue(sourceName, targetName) {
+	    const sourceIndex = NodeUtils.findNodeIndex(sourceName);
+	    const targetIndex = NodeUtils.findNodeIndex(targetName);
+	    const link = this.findLink(sourceIndex, targetIndex);
+	    return link ? link.value : 0;
+	  },
+
+	  updateLink(sourceIndex, targetIndex, newValue, silent = false) {
+	    console.log(`=== Link Update ===`);
+	    console.log(`Updating link: ${sourceIndex} → ${targetIndex} = ${newValue}`);
+    
+	    const linkIndex = this.findLinkIndex(sourceIndex, targetIndex);
+	    if (linkIndex === -1) {
+	      console.error('Link not found for update');
+	      return false;
+	    }
+
+	    // Get node objects
+	    const sourceNode = data.nodes[sourceIndex];
+	    const targetNode = data.nodes[targetIndex];
+    
+		console.log(`Source node: ${sourceNode.name}`);
+		console.log(`Target node: ${targetNode.name}`);
+
+	    // Enforce minimum value and update while maintaining object references
+	    newValue = Math.max(0.1, newValue);
+	    data.links[linkIndex] = {
+	      ...data.links[linkIndex],
+	      source: sourceNode,  // Use node object, not index
+	      target: targetNode,  // Use node object, not index
+	      value: newValue
+	    };
+
+	    if (!silent) {
+	      // Update UI display
+	      const valueDisplay = document.querySelector(
+	        `.value-display[data-source="${sourceNode.name}"][data-target="${targetNode.name}"]`
+	      );
+	      if (valueDisplay) {
+	        valueDisplay.textContent = newValue.toFixed(2);
+	      }
+	    }
+
+	    console.log(`Link updated successfully`);
+	    return true;
+	  },
+
+	  verifyNodeReferences() {
+	    console.log(`=== Verifying Node References ===`);
+	    let needsUpdate = false;
+    
+	    data.links.forEach((link, index) => {
+	      if (typeof link.source === 'number' || typeof link.target === 'number') {
+	        console.log(`Link ${index} needs object references updated`);
+	        needsUpdate = true;
+	      }
+	    });
+    
+	    if (needsUpdate) {
+	      NodeUtils.ensureNodeReferences();
+	      console.log('Node references updated');
+	    } else {
+	      console.log('All node references are valid');
+	    }
+	  },
+	  
+	  ensureValidLinkStructure(links = data.links) {
+	    return links.map(link => NodeUtils.validateLinkStructure({...link}));
+	  },
+
+	  updateLinkByNames(sourceName, targetName, newValue, silent = false) {
+	    const sourceIndex = NodeUtils.findNodeIndex(sourceName);
+	    const targetIndex = NodeUtils.findNodeIndex(targetName);
+	    return this.updateLink(sourceIndex, targetIndex, newValue, silent);
+	  }
+	};
+
+	const DataManager = {
+	  isCalculatedFlow(sourceName, targetName) {
+	    const calculatedFlows = [
+	      { source: "M.2.2 Sink (Air/Ground)", target: "Thermal Energy Demand" },
+	      { source: "M.2.2 Energy Input", target: "Thermal Energy Demand" },
+	      { source: "Thermal Energy Demand", target: "Building" },
+	      { source: "Thermal Energy Demand", target: "GasExhaust" },
+	      { source: "Building", target: "G.X Unusable Gains" },
+	      { source: "Building", target: "Total Envelope Losses" }
+	    ];
+
+	    return calculatedFlows.some(flow => 
+	      flow.source === sourceName && flow.target === targetName
+	    );
+	  },
+
+	  validateData(data) {
+	    if (!data?.nodes || !data?.links) return false;
+    
+	    // Validate nodes
+	    const requiredNodes = ["Building", "Thermal Energy Demand", "Total Envelope Losses"];
+	    const hasRequiredNodes = requiredNodes.every(nodeName => 
+	      data.nodes.some(node => node.name === nodeName)
+	    );
+	    if (!hasRequiredNodes) return false;
+
+	    // Validate critical links
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+	    const telIndex = NodeUtils.findNodeIndex("Total Envelope Losses");
+    
+	    // Check building and TEL connections
+	    const hasCriticalLinks = data.links.some(link => 
+	      NodeUtils.getSourceNodeIndex(link) === buildingIndex && 
+	      NodeUtils.getTargetNodeIndex(link) === telIndex
+	    );
+    
+	    return hasCriticalLinks;
+	  },
+
+	  backup() {
+	    // Create a decycled version of the data structure
+	    const decycledData = {
+	      nodes: data.nodes.map(node => ({
+	        name: node.name,
+	        color: node.color,
+	        hidden: node.hidden
+	      })),
+	      links: data.links.map(link => ({
+	        source: typeof link.source === 'object' ? link.source.index : link.source,
+	        target: typeof link.target === 'object' ? link.target.index : link.target,
+	        value: link.value,
+	        isEmissions: link.isEmissions
+	      }))
+	    };
+
+	    const decycledOriginal = {
+	      nodes: originalData.nodes.map(node => ({
+	        name: node.name,
+	        color: node.color,
+	        hidden: node.hidden
+	      })),
+	      links: originalData.links.map(link => ({
+	        source: typeof link.source === 'object' ? link.source.index : link.source,
+	        target: typeof link.target === 'object' ? link.target.index : link.target,
+	        value: link.value,
+	        isEmissions: link.isEmissions
+	      }))
+	    };
+
+	    return {
+	      data: decycledData,
+	      originalData: decycledOriginal
+	    };
+	  },
+
+	  restore(backup) {
+	    if (!this.validateData(backup.data) || !this.validateData(backup.originalData)) {
+	      return false;
+	    }
+
+	    // Restore data with proper node references
+	    data = {
+	      nodes: backup.data.nodes,
+	      links: backup.data.links.map(link => ({
+	        source: backup.data.nodes[typeof link.source === 'number' ? link.source : link.source.index],
+	        target: backup.data.nodes[typeof link.target === 'number' ? link.target : link.target.index],
+	        value: link.value,
+	        isEmissions: link.isEmissions
+	      }))
+	    };
+
+	    originalData = {
+	      nodes: backup.originalData.nodes,
+	      links: backup.originalData.links.map(link => ({
+	        source: backup.originalData.nodes[typeof link.source === 'number' ? link.source : link.source.index],
+	        target: backup.originalData.nodes[typeof link.target === 'number' ? link.target : link.target.index],
+	        value: link.value,
+	        isEmissions: link.isEmissions
+	      }))
+	    };
+
+	    NodeUtils.ensureNodeReferences();
+	    return true;
+	  },
+
+	  validateData(data) {
+	    if (!data?.nodes || !data?.links) return false;
+    
+	    // Validate nodes
+	    const requiredNodes = ["Building", "Thermal Energy Demand", "Total Envelope Losses"];
+	    const hasRequiredNodes = requiredNodes.every(nodeName => 
+	      data.nodes.some(node => node?.name === nodeName && typeof node.color === 'string')
+	    );
+	    if (!hasRequiredNodes) return false;
+
+	    // Validate critical links
+	    const buildingNode = data.nodes.findIndex(n => n.name === "Building");
+	    const telNode = data.nodes.findIndex(n => n.name === "Total Envelope Losses");
+    
+	    // Check building and TEL connections exist
+	    const hasCriticalLinks = data.links.some(link => {
+	      const sourceIndex = typeof link.source === 'number' ? link.source : link.source.index;
+	      const targetIndex = typeof link.target === 'number' ? link.target : link.target.index;
+	      return sourceIndex === buildingNode && targetIndex === telNode;
+	    });
+    
+	    return hasCriticalLinks;
+	  }
+	};
+</script>
+<!-- Script Block 4: Energy Calculation Engine -->
+<script defer>
+	// Script Block 4: Energy Calculation Engine
+	const EnergyCalculator = {
+	    PRECISION: {
+	      AREA: 2,       // Area to 2 decimal places
+	      U_VALUE: 3,    // U-value to 3 decimal places 
+	      ENERGY: 2      // Energy values to 2 decimal places
+	    },
+		
+	    InitialBalance: {
+	      targetValues: {
+	        TED: 37259.69,      // Total heat pump output
+	        M22D: 10170.41,     // Heat pump energy input
+	        M22S: 27089.29,     // Heat pump source input
+	        GX: 16318.27,       // Unusable gains
+	        COPh: 3.66          // Heat pump COP
+	      },
+    
+	      validateBalance() {
+	        // Check if values match expected relationships
+	        const tedSum = Math.abs(this.targetValues.M22D + this.targetValues.M22S - this.targetValues.TED);
+	        const copRatio = Math.abs(this.targetValues.TED / this.targetValues.M22D - this.targetValues.COPh);
+      
+	        return {
+	          isBalanced: tedSum < 0.1 && copRatio < 0.01,
+	          tedDeviation: tedSum,
+	          copDeviation: copRatio
+	        };
+	      },
+
+	      applyInitialValues() {
+	        console.log("Applying initial balanced values");
+      
+	        // Set global variables
+	        TED = this.targetValues.TED;
+	        M22D = this.targetValues.M22D;
+	        M22S = this.targetValues.M22S;
+	        COPh = this.targetValues.COPh;
+      
+	        // Update links with initial values
+	        LinkUtils.updateLinkByNames(
+	          "M.2.2 Sink (Air/Ground)", 
+	          "Thermal Energy Demand", 
+	          this.targetValues.M22S,
+	          true
+	        );
+      
+	        LinkUtils.updateLinkByNames(
+	          "M.2.2 Energy Input",
+	          "Thermal Energy Demand",
+	          this.targetValues.M22D,
+	          true
+	        );
+      
+	        LinkUtils.updateLinkByNames(
+	          "Thermal Energy Demand",
+	          "Building",
+	          this.targetValues.TED,
+	          true
+	        );
+      
+	        LinkUtils.updateLinkByNames(
+	          "Building",
+	          "G.X Unusable Gains",
+	          this.targetValues.GX,
+	          true
+	        );
+      
+	        const balance = this.validateBalance();
+	        console.log("Initial balance check:", balance);
+      
+	        return balance.isBalanced;
+	      }
+	    },
+		
+	  // Start of disaggregated SHW calculations
+	  updateSHWSystem() {
+	    const minValue = 0.001;
+	    const shwIndex = NodeUtils.findNodeIndex("W.2.D.N SHW Net Demand");
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+	    const gasExhaustIndex = NodeUtils.findNodeIndex("GasExhaust");
+
+	    // Get base SHW demand
+	    const dhwDemand = LinkUtils.getLinkValue("W.2.D.N SHW Net Demand", "Building") || minValue;
+
+	    if (isGasHeating) {
+	      const efficiency = StateManager.getValue('copHeating'); // Same efficiency used for emissions calc
+	      const dhwInput = dhwDemand / efficiency;
+	      const dhwLoss = dhwInput - dhwDemand;
+
+	      // These flows will be used by calculateHeatingEmissions for proper gas emissions
+	      LinkUtils.updateLink(shwIndex, buildingIndex, dhwDemand, true);
+	      LinkUtils.updateLink(shwIndex, gasExhaustIndex, dhwLoss, true);
+	    } else {
+	      // In electric mode, SHW is direct electric and emissions are handled by calculateElectricalEmissions
+	      LinkUtils.updateLink(shwIndex, buildingIndex, dhwDemand, true);
+	      LinkUtils.updateLink(shwIndex, gasExhaustIndex, minValue, true);
+	    }
+	  },
+
+	  // Core Energy Balance Calculation
+	  calculateEnergyBalance() {
+	    // First verify all node references are valid
+	    LinkUtils.verifyNodeReferences();
+    
+	    console.log(`=== Energy Balance Calculation ===`);
+    
+	    // Calculate building inputs with logging
+	    const buildingInputs = {
+	      G11: LinkUtils.getLinkValue("G.1.1 Occupant Gains", "Building"),
+	      G31: LinkUtils.getLinkValue("G.3.1 Plug Light Equipment", "Building"),
+	      W2DN: LinkUtils.getLinkValue("W.2.D.N SHW Net Demand", "Building"),
+	      G81: LinkUtils.getLinkValue("G.8.1 Windows N", "Building"),
+	      G82: LinkUtils.getLinkValue("G.8.2 Windows E", "Building"),
+	      G83: LinkUtils.getLinkValue("G.8.3 Windows S", "Building"),
+	      G84: LinkUtils.getLinkValue("G.8.4 Windows W", "Building"),
+	      G70: LinkUtils.getLinkValue("G.7.0 Doors", "Building")
+	    };
+
+	    // Get space heating and SHW values separately
+	    const spaceHeating = LinkUtils.getLinkValue("Thermal Energy Demand", "Building");
+	    const shwDemand = LinkUtils.getLinkValue("W.2.D.N SHW Net Demand", "Building");
+
+	    // Sum total building energy (now explicitly separate)
+	    const BLDG = Object.values(buildingInputs).reduce((sum, val) => sum + val, 0) + 
+	                 spaceHeating +  // Space heating demand
+	                 shwDemand;     // SHW demand
+
+	    // Calculate TEL components
+	    const telComponents = {
+	      B4: LinkUtils.getLinkValue("Total Envelope Losses", "B.4 Roof"),
+	      B5: LinkUtils.getLinkValue("Total Envelope Losses", "B.5 Walls Above Grade"),
+	      B6: LinkUtils.getLinkValue("Total Envelope Losses", "B.6 Floor Exposed"),
+	      B7: LinkUtils.getLinkValue("Total Envelope Losses", "B.7.0 Doors"),
+	      B81: LinkUtils.getLinkValue("Total Envelope Losses", "B.8.1 Windows N"),
+	      B82: LinkUtils.getLinkValue("Total Envelope Losses", "B.8.2 Windows E"),
+	      B83: LinkUtils.getLinkValue("Total Envelope Losses", "B.8.3 Windows S"),
+	      B84: LinkUtils.getLinkValue("Total Envelope Losses", "B.8.4 Windows W"),
+	      B10: LinkUtils.getLinkValue("Total Envelope Losses", "B.10 Floor Slab"),
+	      B132: LinkUtils.getLinkValue("Total Envelope Losses", "B.13.2 TB Penalty"),
+	      B195: LinkUtils.getLinkValue("Total Envelope Losses", "B.19.5 Air Leakage")
+	    };
+
+	    const TEL = Object.values(telComponents).reduce((sum, val) => sum + val, 0);
+
+	    // Calculate direct building losses
+	    const V24 = LinkUtils.getLinkValue("Building", "V.2.4 Unrecovered Ventilation");
+	    const W2W = LinkUtils.getLinkValue("Building", "W.2.W SHW Wasted");
+	    const GX = LinkUtils.getLinkValue("Building", "G.X Unusable Gains");
+
+	    const BLDG_LOSSES = TEL + V24 + W2W + GX;
+
+	    // Log key values for debugging
+	    console.log('Space Heating Value:', spaceHeating);
+	    console.log('SHW Demand Value:', shwDemand);
+	    console.log('Total Building Energy:', BLDG);
+	    console.log('Total Building Losses:', BLDG_LOSSES);
+
+	    return {
+	      BLDG,
+	      TEL,
+	      BLDG_LOSSES,
+	      isBalanced: Math.abs(BLDG - BLDG_LOSSES) < 0.1
+	    };
+	  },
+
+	  updateBuildingBalance() {
+	      const buildingIndex = NodeUtils.findNodeIndex("Building");
+  
+	      // Get all required components for PHPP and standard calculations
+	      const G11 = LinkUtils.getLinkValue("G.1.1 Occupant Gains", "Building");
+	      const G31 = LinkUtils.getLinkValue("G.3.1 Plug Light Equipment", "Building");
+	      const G23 = ["G.8.1 Windows N", "G.8.2 Windows E", 
+	                   "G.8.3 Windows S", "G.8.4 Windows W", 
+	                   "G.7.0 Doors"].reduce((sum, source) => {
+	        return sum + LinkUtils.getLinkValue(source, "Building");
+	      }, 0);
+    
+	      // Total passive gains remains the same
+	      const passiveGains = G11 + G31 + G23;
+
+	      // Get losses for both methods
+	      const T63 = LinkUtils.getLinkValue("Building", "Total Envelope Losses");
+	      const V24 = LinkUtils.getLinkValue("Building", "V.2.4 Unrecovered Ventilation");
+	      const totalLosses = T63 + V24;
+
+	      // Calculate usable gains based on selected method
+	      let usableGains;
+	      const gainsFactorMethod = document.getElementById('gainsFactorMethod').value;
+		  
+		  // ADD THE LOGGING HERE - after all values are defined
+		  console.log("Passive Gains Detailed:", {
+		    G11: G11,
+		    G31: G31,
+		    G23: G23,
+		    passiveGains: passiveGains,
+		    gainsFactorMethod: gainsFactorMethod,
+		    T63: T63,
+		    V24: V24
+		  });
+		  //THEN DELETE THE LOGGING ABOVE AFTER
+
+		  if (gainsFactorMethod === 'phpp') {
+		    // Add logging here too
+		    const ratio = (G11 + G23 + G31)/(T63 + V24);
+		    const factor = (1 - Math.pow(ratio, 5))/(1 - Math.pow(ratio, 6));
+		    usableGains = passiveGains * factor;
+		    console.log("PHPP Calculation:", {
+		      ratio,
+		      factor,
+		      usableGains
+		    });
+		  } else {
+		    const nGainsFactor = parseFloat(gainsFactorMethod) || 0.6;
+		    usableGains = passiveGains * nGainsFactor;
+		    console.log("Standard Calculation:", {
+		      nGainsFactor,
+		      usableGains
+		    });
+		  }
+
+	      // Calculate TED based on losses minus usable gains
+	      const requiredTED = Math.max(0.1, totalLosses - usableGains);
+	      TED = requiredTED;
+
+	      // Calculate unusable gains as remainder
+	      const unusableGains = Math.max(0.1, passiveGains - usableGains);
+
+	      // Update TED components
+	      this.updateHeatPumpValues(requiredTED);
+
+	      // Update GX link with unusable gains
+	      LinkUtils.updateLink(
+	        buildingIndex,
+	        NodeUtils.findNodeIndex("G.X Unusable Gains"),
+	        unusableGains,
+	        true
+	      );
+	  },
+
+	  // Heat Pump Calculations
+	  updateHeatPumpValues(requiredOutput) {
+	      // NEW CODE
+	      if (!this.InitialBalance.isInitialized) {
+	        if (this.InitialBalance.applyInitialValues()) {
+	          console.log("Using initial balanced values");
+	          this.InitialBalance.isInitialized = true;
+	          return;
+	        }
+	      }
+
+	    const minValue = 0.001;
+	    const heatpumpIndex = NodeUtils.findNodeIndex("Thermal Energy Demand");
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+	    const sinkNodeIndex = NodeUtils.findNodeIndex("M.2.2 Sink (Air/Ground)");
+	    const electricNodeIndex = NodeUtils.findNodeIndex("M.2.2 Energy Input");
+	    const gasExhaustIndex = NodeUtils.findNodeIndex("GasExhaust");
+
+	    // Get the current efficiency/COP from state
+	    const currentCOPh = StateManager.getValue('copHeating');
+	    console.log("Current COP/Efficiency:", currentCOPh);
+
+	    if (isGasHeating) {
+	      // Space heating calculations only (no SHW)
+	      const spaceHeatingDemand = Math.max(minValue, requiredOutput);
+	      const spaceHeatingInput = spaceHeatingDemand / currentCOPh;
+	      const spaceHeatingOutput = spaceHeatingDemand;  // Full demand is met
+	      const spaceHeatingLoss = spaceHeatingInput - spaceHeatingOutput;
+
+	      console.log("Gas mode calculations:", {
+	        demand: spaceHeatingDemand,
+	        input: spaceHeatingInput,
+	        output: spaceHeatingOutput,
+	        loss: spaceHeatingLoss
+	      });
+
+	      // Update global values
+	      M22D = spaceHeatingInput;
+	      TED = spaceHeatingOutput;
+	      M22S = 0;
+
+	      const linkUpdates = [
+	        { source: electricNodeIndex, target: heatpumpIndex, value: spaceHeatingInput },
+	        { source: heatpumpIndex, target: buildingIndex, value: spaceHeatingOutput },
+	        { source: heatpumpIndex, target: gasExhaustIndex, value: spaceHeatingLoss },
+	        { source: sinkNodeIndex, target: heatpumpIndex, value: minValue }
+	      ];
+
+	      // Make gas exhaust node visible
+	      const gasExhaustNode = NodeUtils.getNodeByName("GasExhaust");
+	      if (gasExhaustNode) {
+	        gasExhaustNode.hidden = false;
+	        gasExhaustNode.color = "#BE343D";
+	      }
+
+	      // Update all flows
+	      linkUpdates.forEach(update => {
+	        LinkUtils.updateLink(update.source, update.target, update.value, true);
+	      });
+
+	    } else {
+	      // Heat pump mode
+	      TED = Math.max(minValue, requiredOutput);
+	      M22D = TED / currentCOPh;
+	      M22S = TED - M22D;
+
+	      console.log("Heat pump mode calculations:", {
+	        TED,
+	        M22D,
+	        M22S,
+	        COP: currentCOPh
+	      });
+
+	      // Hide gas exhaust node and minimize its flows
+	      const gasExhaustNode = NodeUtils.getNodeByName("GasExhaust");
+	      if (gasExhaustNode) {
+	        gasExhaustNode.hidden = true;
+	      }
+
+	      const linkUpdates = [
+	        { source: sinkNodeIndex, target: heatpumpIndex, value: M22S },
+	        { source: electricNodeIndex, target: heatpumpIndex, value: M22D },
+	        { source: heatpumpIndex, target: buildingIndex, value: TED },
+	        { source: heatpumpIndex, target: gasExhaustIndex, value: minValue }
+	      ];
+
+	      linkUpdates.forEach(update => {
+	        LinkUtils.updateLink(update.source, update.target, update.value, true);
+	      });
+	    }
+
+	    // Update SHW system separately
+	    this.updateSHWSystem();
+	  },
+
+	  // Recovery System Updates
+	  updateMVHR(newEfficiency) {
+	    const v24Link = LinkUtils.findLink(
+	      NodeUtils.findNodeIndex("Building"),
+	      NodeUtils.findNodeIndex("V.2.4 Unrecovered Ventilation")
+	    );
+
+	    if (!v24Link) return;
+
+	    v24Link.originalValue = v24Link.originalValue || v24Link.value;
+	    const newValue = Math.max(0.1, v24Link.originalValue * (1 - newEfficiency));
+    
+	    LinkUtils.updateLink(
+	      NodeUtils.findNodeIndex("Building"),
+	      NodeUtils.findNodeIndex("V.2.4 Unrecovered Ventilation"),
+	      newValue,
+	      true
+	    );
+
+	    this.updateBuildingBalance();
+	  },
+
+	  updateDWHR(newEfficiency) {
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+	    const links = {
+	      demand: LinkUtils.findLink(
+	        NodeUtils.findNodeIndex("W.2.D.N SHW Net Demand"),
+	        buildingIndex
+	      ),
+	      waste: LinkUtils.findLink(
+	        buildingIndex,
+	        NodeUtils.findNodeIndex("W.2.W SHW Wasted")
+	      )
+	    };
+
+	    if (!links.demand || !links.waste) return;
+
+	    // Store original value if not already stored
+	    links.demand.originalValue = links.demand.originalValue || links.demand.value;
+	    const baseValue = links.demand.originalValue;
+    
+	    // Calculate new value based on recovery
+	    const newValue = Math.max(0.1, baseValue * (1 - newEfficiency));
+
+	    // Update both demand and waste to maintain 1:1 relationship
+	    LinkUtils.updateLink(
+	      NodeUtils.findNodeIndex("W.2.D.N SHW Net Demand"),
+	      buildingIndex,
+	      newValue,
+	      true
+	    );
+	    LinkUtils.updateLink(
+	      buildingIndex,
+	      NodeUtils.findNodeIndex("W.2.W SHW Wasted"),
+	      newValue,
+	      true
+	    );
+	  },
+
+	  updateSHW(sourceName, targetName, newValue) {
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+	    const minValue = 0.001;
+  
+	    // Store this new value as the original/base value for DWHR calculations
+	    if (sourceName === "W.2.D.N SHW Net Demand") {
+	      const demandLink = LinkUtils.findLink(
+	        NodeUtils.findNodeIndex("W.2.D.N SHW Net Demand"),
+	        buildingIndex
+	      );
+	      if (demandLink) {
+	        demandLink.originalValue = newValue;
+	      }
+
+	      // If DWHR is active, apply it to the new base value
+	      const dwhrEfficiency = StateManager.getValue('dwhrEfficiency');
+	      const adjustedValue = Math.max(minValue, newValue * (1 - dwhrEfficiency));
+
+	      // Update both demand and waste
+	      LinkUtils.updateLink(
+	        NodeUtils.findNodeIndex("W.2.D.N SHW Net Demand"),
+	        buildingIndex,
+	        adjustedValue,
+	        true
+	      );
+	      LinkUtils.updateLink(
+	        buildingIndex,
+	        NodeUtils.findNodeIndex("W.2.W SHW Wasted"),
+	        adjustedValue,
+	        true
+	      );
+	    } else if (targetName === "W.2.W SHW Wasted") {
+	      const wasteLink = LinkUtils.findLink(
+	        buildingIndex,
+	        NodeUtils.findNodeIndex("W.2.W SHW Wasted")
+	      );
+	      if (wasteLink) {
+	        wasteLink.originalValue = newValue;
+	      }
+
+	      const dwhrEfficiency = StateManager.getValue('dwhrEfficiency');
+	      const adjustedValue = Math.max(minValue, newValue * (1 - dwhrEfficiency));
+
+	      LinkUtils.updateLink(
+	        buildingIndex,
+	        NodeUtils.findNodeIndex("W.2.W SHW Wasted"),
+	        adjustedValue,
+	        true
+	      );
+	      LinkUtils.updateLink(
+	        NodeUtils.findNodeIndex("W.2.D.N SHW Net Demand"),
+	        buildingIndex,
+	        adjustedValue, 
+	        true
+	      );
+	    }
+	  },
+
+	  updateTEL(isInitialLoad = false) {
+	    console.log(`=== TEL Update ===`);
+	    const telIndex = NodeUtils.findNodeIndex("Total Envelope Losses");
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+
+	    // Calculate total TEL from components
+	    const telComponents = [
+	      "B.4 Roof", "B.5 Walls Above Grade", "B.6 Floor Exposed", "B.7.0 Doors",
+	      "B.8.1 Windows N", "B.8.2 Windows E", "B.8.3 Windows S", "B.8.4 Windows W",
+	      "B.10 Floor Slab", "B.13.2 TB Penalty", "B.19.5 Air Leakage"
+	    ];
+
+	    const telTotal = telComponents.reduce((sum, component) => {
+	      const value = LinkUtils.getLinkValue("Total Envelope Losses", component);
+	      console.log(`Component ${component}: ${value}`);
+	      return sum + value;
+	    }, 0);
+
+	    console.log(`TEL Total: ${telTotal}`);
+
+	    // Update Building → TEL link with new total
+	    LinkUtils.updateLink(buildingIndex, telIndex, telTotal, isInitialLoad);
+    
+	    // Verify node references after update
+	    LinkUtils.verifyNodeReferences();
+
+	    if (!isInitialLoad) {
+	      this.updateBuildingBalance();
+	    }
+	  },
+
+	  // 1. In EnergyCalculator object, let's modify calculateElementHeatLoss to log more details:
+	  calculateElementHeatLoss(componentKey, elementArea, rsiValue) {
+	    const component = CONFIG.BUILDING_ELEMENTS.COMPONENTS[componentKey];
+	    if (!component) {
+	      console.error(`Component configuration not found for ${componentKey}`);
+	      return 0.001;
+	    }
+
+	    // Parse area with precision control
+	    const area = Number(parseFloat(elementArea || 
+	                  StateManager.getValue(`${componentKey.toLowerCase()}Area`) || 
+	                  component.elementArea.default).toFixed(this.PRECISION.AREA));
+
+	    // Get RSI value - maintain full precision for calculation
+	    const rsi = parseFloat(rsiValue || 
+	                StateManager.getValue(`${componentKey.toLowerCase()}Rsi`) || 
+	                component.rsi.default);
+
+	    // U-value is only for display
+	    const uValue = Number((1 / rsi).toFixed(3));  // U-value to 3 decimal places
+
+	    const degreedays = Math.round(component.type === "GROUND_FACING" ? 
+	      StateManager.getValue('groundFacingHeatingDegreeDays') || CONFIG.BUILDING_ELEMENTS.GFHDD.default :
+	      StateManager.getValue('heatingDegreeDays') || CONFIG.BUILDING_ELEMENTS.HDD.default);
+
+	    // Log all calculation steps
+	    console.log(`Heat loss calculation for ${componentKey}:`, {
+	      area,
+	      rsi,
+	      uValue: `${uValue} (derived from RSI)`,
+	      degreedays,
+	      type: component.type,
+	      intermediateValue: area * (degreedays * 24),
+	      divisor: rsi * 1000,
+	      calculation: `(${area} * (${degreedays} * 24)) / (${rsi} * 1000)`
+	    });
+
+	    // Calculate heat loss using RSI formula with stepped calculation
+	    const intermediate = area * (degreedays * 24);
+	    const divisor = rsi * 1000;
+	    const heatLoss = (intermediate / divisor).toFixed(2);
+
+	    console.log(`Final heat loss: ${heatLoss} kWh`);
+	    return Math.max(0.001, parseFloat(heatLoss));
+	  },
+	  // Code Above to be revised 3029r3 to RSI method: const heatloss = (area * (degreedays * 24) / (RSI * 1000)).toFixed(2); bracketed to limit intermediate values
+  
+	  // Validation method remains unchanged
+	  validateStoredValues() {
+	    const components = Object.keys(CONFIG.BUILDING_ELEMENTS.COMPONENTS);
+	    components.forEach(key => {
+	      const area = StateManager.getValue(`${key.toLowerCase()}Area`);
+	      const isRSIComponent = key.match(/ROOF|WALLS|FLOOR/);
+    
+	      if (isRSIComponent) {
+	        const rsi = StateManager.getValue(`${key.toLowerCase()}Rsi`);
+	        const uValue = rsi ? (1 / rsi) : StateManager.getValue(`${key.toLowerCase()}UValue`);
+	        console.log(`Component ${key}:`, {
+	          area,
+	          rsi,
+	          calculatedUValue: uValue
+	        });
+	      } else {
+	        const uValue = StateManager.getValue(`${key.toLowerCase()}UValue`);
+	        console.log(`Component ${key}:`, {
+	          area,
+	          uValue
+	        });
+	      }
+	    });
+	  }
+	  }; 
+	  // End of EnergyCalculator object
+</script>		
+<!-- Script Block 5: D3 Visualization System -->
+<script defer>
+	// Script Block 5: D3 Sankey Visualization
+	const SankeyDiagram = {
+	  svg: d3.select("#sankey"),
+	  tooltip: d3.select("#tooltip"),
+	  sankey: d3.sankey()
+	    .nodeWidth(20)
+	    .nodePadding(15)
+	    .extent([[1, 1], [1100 - 1, 600 - 1]]),
+
+	  initialize() {
+	    this.linkGroup = this.svg.append("g").attr("class", "links");
+	    this.nodeGroup = this.svg.append("g").attr("class", "nodes");
+	    this.labelGroup = this.svg.append("g").attr("class", "labels");
+	  },
+
+	  // Replace both render and renderLinks methods in SankeyDiagram object
+	  render(isInitialLoad = false) {
+	    if (!data.nodes || !data.links) {
+	      console.error("Invalid data structure:", data);
+	      updateStatus('Error: Invalid data structure', 'error');
+	      return;
+	    }
+
+	    // NEW CODE
+	    // Validate all links before rendering
+	    const validatedLinks = LinkUtils.ensureValidLinkStructure();
+	    // END NEW CODE
+
+	    if (showEmissions) {
+	      this.updateEmissionsFlows();
+	    }
+
+	    try {
+	      // Ensure nodes are properly indexed
+	      data.nodes.forEach((node, index) => {
+	        node.index = index;
+	      });
+
+	      // MODIFIED: Use validatedLinks in working copy
+	      const workingData = {
+	        nodes: data.nodes,
+	        links: validatedLinks.map(l => ({
+	          source: typeof l.source === 'object' ? l.source.index : l.source,
+	          target: typeof l.target === 'object' ? l.target.index : l.target,
+	          value: l.value,
+	          isEmissions: l.isEmissions
+	        })).filter(l => l.source !== undefined && l.target !== undefined)
+	      };
+
+	      // Debug output
+	      console.log("Rendering Sankey with validated data:", {
+	        gXLink: workingData.links.find(l => 
+	          (typeof l.source === 'number' ? data.nodes[l.source].name : l.source.name) === "Building" && 
+	          (typeof l.target === 'number' ? data.nodes[l.target].name : l.target.name) === "G.X Unusable Gains"
+	        ),
+	        tedLinks: workingData.links.filter(l => 
+	          (typeof l.source === 'number' ? data.nodes[l.source].name : l.source.name) === "Thermal Energy Demand" ||
+	          (typeof l.target === 'number' ? data.nodes[l.target].name : l.target.name) === "Thermal Energy Demand"
+	        )
+	      });
+
+	      const { nodes, links } = this.sankey(workingData);
+
+	      nodes.forEach(node => {
+	        node.displayColor = d3.color(node.color).darker(0.3);
+	      });
+
+	      const maxX = d3.max(nodes, d => d.x0);
+	      this.renderLinks(links, isInitialLoad, maxX);
+	      this.renderNodes(nodes, isInitialLoad, maxX);
+	      this.renderLabels(nodes, isInitialLoad, maxX);
+
+	    } catch (error) {
+	      console.error("Error rendering chart:", error, "\nData:", workingData);
+	      updateStatus('Error rendering chart: ' + error.message, 'error');
+	    }
+	  },
+
+	  renderLinks(links, isInitialLoad, maxX) {
+	    const link = this.linkGroup.selectAll(".link")
+	      .data(links, d => {
+	        const sourceIndex = typeof d.source === 'number' ? d.source : data.nodes.indexOf(d.source);
+	        const targetIndex = typeof d.target === 'number' ? d.target : data.nodes.indexOf(d.target);
+	        return `${sourceIndex}-${targetIndex}`;
+	      });
+
+	    link.exit().remove();
+
+	    const linkEnter = link.enter()
+	      .append("path")
+	      .attr("class", "link")
+	      .style("stroke-opacity", 0)
+	      .attr("stroke-width", 0)
+	      .on("mouseover", (event, d) => this.showLinkTooltip(event, d))
+	      .on("mouseout", () => this.hideTooltip());
+
+	    const linkUpdate = link.merge(linkEnter)
+	      .style("stroke", d => this.getLinkColor(d));
+
+	    if (isInitialLoad) {
+	      linkUpdate
+	        .attr("d", d3.sankeyLinkHorizontal())
+	        .style("stroke-opacity", 0)
+	        .attr("stroke-width", 0)
+	        .transition()
+	        .duration(750)
+	        .delay(d => (d.source.x0 / maxX) * 1500)
+	        .style("stroke-opacity", 0.7)
+	        .transition()
+	        .duration(500)
+	        .attr("stroke-width", d => Math.max(1, d.width));
+	    } else {
+	      linkUpdate
+	        .transition()
+	        .duration(750)
+	        .attr("d", d3.sankeyLinkHorizontal())
+	        .style("stroke-opacity", 0.7)
+	        .attr("stroke-width", d => Math.max(1, d.width));
+	    }
+	  },
+
+	  // Inside the SankeyDiagram object, modify renderLinks and renderNodes:
+
+	  renderNodes(nodes, isInitialLoad, maxX) {
+	    const node = this.nodeGroup.selectAll(".node")
+	      .data(nodes, d => d.name);
+
+	    node.exit()
+	      .transition()
+	      .duration(500)
+	      .attr("width", 0)
+	      .remove();
+
+	    const nodeEnter = node.enter()
+	      .append("rect")
+	      .attr("class", "node")
+	      .style("fill", d => d.displayColor)
+	      .style("fill-opacity", 1)
+	      .on("mouseover", (event, d) => this.showNodeTooltip(event, d))
+	      .on("mouseout", () => this.hideTooltip());
+
+	    const nodeUpdate = node.merge(nodeEnter);
+
+	    if (isInitialLoad) {
+	      // Initial state
+	      nodeUpdate
+	        .attr("x", d => d.x0)
+	        .attr("y", d => d.y0)
+	        .attr("height", d => d.y1 - d.y0)
+	        .attr("width", 0)
+	        .style("opacity", 0);
+
+	      // Animated entrance
+	      nodeUpdate
+	        .transition()
+	        .duration(750)
+	        .delay(d => (d.x0 / maxX) * 1500) // Delay based on x position
+	        .style("opacity", 1)
+	        .transition()
+	        .duration(500)
+	        .attr("width", d => d.x1 - d.x0);
+	    } else {
+	      // Regular update
+	      nodeUpdate
+	        .transition()
+	        .duration(750)
+	        .attr("x", d => d.x0)
+	        .attr("y", d => d.y0)
+	        .attr("height", d => d.y1 - d.y0)
+	        .attr("width", d => d.x1 - d.x0);
+	    }
+	  },
+
+	  renderLinks(links, isInitialLoad, maxX) {
+	    const link = this.linkGroup.selectAll(".link")
+	      .data(links, d => {
+	        const source = NodeUtils.getSourceNodeIndex(d);
+	        const target = NodeUtils.getTargetNodeIndex(d);
+	        return `${source}-${target}`;
+	      });
+
+	    link.exit()
+	      .transition()
+	      .duration(500)
+	      .attr("stroke-width", 0)
+	      .remove();
+
+	    const linkEnter = link.enter()
+	      .append("path")
+	      .attr("class", "link")
+	      .style("stroke-opacity", 0)
+	      .attr("stroke-width", 0)
+	      .on("mouseover", (event, d) => this.showLinkTooltip(event, d))
+	      .on("mouseout", () => this.hideTooltip());
+
+	    const linkUpdate = link.merge(linkEnter)
+	      .style("stroke", d => this.getLinkColor(d));
+
+	    if (isInitialLoad) {
+	      // Set initial path
+	      linkUpdate
+	        .attr("d", d3.sankeyLinkHorizontal())
+	        .style("stroke-opacity", 0)
+	        .attr("stroke-width", 0);
+
+	      // Animate the flow
+	      linkUpdate
+	        .transition()
+	        .duration(750)
+	        .delay(d => (d.source.x0 / maxX) * 1500) // Match node timing
+	        .style("stroke-opacity", 0.7)
+	        .transition()
+	        .duration(500)
+	        .attr("stroke-width", d => Math.max(1, d.width));
+	    } else {
+	      // Regular update
+	      linkUpdate
+	        .transition()
+	        .duration(750)
+	        .attr("d", d3.sankeyLinkHorizontal())
+	        .style("stroke-opacity", 0.7)
+	        .attr("stroke-width", d => Math.max(1, d.width));
+	    }
+	  },
+
+	  renderLabels(nodes, isInitialLoad, maxX) {
+	    const label = this.labelGroup.selectAll(".node-label")
+	      .data(nodes, d => d.name);
+
+	    label.exit()
+	      .transition()
+	      .duration(500)
+	      .style("opacity", 0)
+	      .remove();
+
+	    const labelEnter = label.enter()
+	      .append("text")
+	      .attr("class", "node-label")
+	      .style("opacity", 0);
+
+	    const labelUpdate = label.merge(labelEnter)
+	      .attr("x", d => (d.x0 < 1100 / 2 ? d.x1 + 5 : d.x0 - 5))
+	      .attr("y", d => (d.y0 + d.y1) / 2)
+	      .attr("text-anchor", d => (d.x0 < 1100 / 2 ? "start" : "end"))
+	      .text(d => this.formatNodeLabel(d));
+
+	    if (isInitialLoad) {
+	      labelUpdate
+	        .transition()
+	        .duration(750)
+	        .delay(d => (d.x0 / maxX) * 1500 + 500) // Slightly delayed after node appears
+	        .style("opacity", 1);
+	    } else {
+	      labelUpdate
+	        .transition()
+	        .duration(750)
+	        .style("opacity", 1);
+	    }
+	  },
+	  
+	  showNodeTooltip(event, d) {
+	      const content = this.createNodeTooltip(d);
+	      this.showTooltip(content, event);
+	      d3.select(event.target).style("fill-opacity", 0.8);
+	    },
+
+	    showLinkTooltip(event, d) {
+	      const content = this.createLinkTooltip(d);
+	      this.showTooltip(content, event);
+	      d3.select(event.target).style("stroke-opacity", 0.9);
+	    },
+
+	    createNodeTooltip(d) {
+	      const incoming = data.links.filter(l => NodeUtils.getTargetNodeIndex(l) === d.index);
+	      const outgoing = data.links.filter(l => NodeUtils.getSourceNodeIndex(l) === d.index);
+
+	      let html = `<div class="tooltip-title">${d.name}</div>`;
+
+		  if (d.name.includes("Emissions")) {
+		    const totalEmissions = incoming.reduce((sum, link) => sum + link.value, 0);
+		    const mtValue = (totalEmissions / 1000000).toFixed(2);  // Force 2 decimals
+		    const scope = d.name.includes("1") ? "Direct emissions from gas combustion" : "Indirect emissions from electricity use";
+		    html += `
+		      <div class="tooltip-value">
+		        Total: ${mtValue} MT CO2e
+		        <br><small>${scope}</small>
+		      </div>`;
+		  } else {
+	        html += `<div class="tooltip-value">Total Value: ${this.formatValue(d.value)}</div>`;
+	      }
+
+	      if (incoming.length > 0) html += this.buildFlowSection("Incoming", incoming, true);
+	      if (outgoing.length > 0) html += this.buildFlowSection("Outgoing", outgoing, false);
+
+	      return html;
+	    },
+
+		createLinkTooltip(d) {
+		  return `
+		    <div class="tooltip-title">Flow Details</div>
+		    <div class="tooltip-flow"><span>From: ${d.source.name}</span></div>
+		    <div class="tooltip-flow"><span>To: ${d.target.name}</span></div>
+		    <div class="tooltip-flow"><span>Value: ${d.isEmissions ? 
+		      `${d.value.toFixed(2)} grams CO2e` : 
+		      `${d.value.toFixed(2)} kWh`}</span></div>
+		  `;
+		},
+
+		buildFlowSection(title, flows, isIncoming) {
+		  let html = `<div style="margin-top: 8px;"><strong>${title}:</strong></div>`;
+		  flows.forEach(flow => {
+		    const nodeName = isIncoming ? 
+		      data.nodes[NodeUtils.getSourceNodeIndex(flow)].name :
+		      data.nodes[NodeUtils.getTargetNodeIndex(flow)].name;
+		    // Add line break between node name and value
+		    html += `
+		      <div class="tooltip-flow">
+		        <span style="width: 160px;">${nodeName}</span>
+		        <span>${flow.isEmissions ? 
+		          `${(flow.value / 1000).toFixed(2)} kg CO2e` : 
+		          `${flow.value.toFixed(2)} kWh`}</span>
+		      </div>`;
+		  });
+		  return html;
+		},
+
+	    formatValue(value) {
+	      return `${value.toFixed(2)} kWh`;
+	    },
+
+	  // Tooltip and Label Formatting
+		formatNodeLabel(node) {
+		  if (node.name.includes("Emissions")) {
+		    const totalEmissions = node.targetLinks?.reduce((sum, link) => sum + link.value, 0) || 0;
+		    const mtValue = (totalEmissions / 1000000).toFixed(2);  // Force 2 decimals
+		    return `${node.name} (${mtValue} MT)`;
+		  }
+		  return node.name;
+		},
+
+	  showTooltip(content, event) {
+	    const padding = 10;
+	    this.tooltip
+	      .style("display", "block")
+	      .style("left", `${event.pageX + padding}px`)
+	      .style("top", `${event.pageY + padding}px`)
+	      .html(content);
+
+	    const tooltipRect = this.tooltip.node().getBoundingClientRect();
+	    const viewportWidth = window.innerWidth;
+	    const viewportHeight = window.innerHeight;
+
+	    // Adjust position if tooltip goes off screen
+	    if (tooltipRect.right > viewportWidth) {
+	      this.tooltip.style("left", `${event.pageX - tooltipRect.width - padding}px`);
+	    }
+	    if (tooltipRect.bottom > viewportHeight) {
+	      this.tooltip.style("top", `${event.pageY - tooltipRect.height - padding}px`);
+	    }
+	  },
+
+	  hideTooltip() {
+	    this.tooltip.style("display", "none");
+	  },
+
+	  getLinkColor(d) {
+	    // Special case for exhaust flows
+	    if (d.target.name === "GasExhaust") {
+	      return "#BE343D";  // Always make exhaust flows red
+	    }
+  
+	    if (d.source.name === "Building" || d.target.name === "Building") {
+	      return d.source.name === "Building" ? 
+	        d3.color(d.target.color).brighter(0.2) :
+	        d3.color(d.source.color);
+	    }
+	    return d3.interpolateRgb(d.source.color, d.target.color)(0.5);
+	  },
+	  
+	  // No longer double counting
+	  calculateElectricalEmissions(gridIntensity, scope2NodeIndex) {
+	      console.log("Starting electrical emissions calculation");
+  
+	      // G31 is always electrical
+	      const g31Value = LinkUtils.getLinkValue("G.3.1 Plug Light Equipment", "Building");
+	      console.log("G31 value:", g31Value, "kWh");
+	      if (g31Value > 0.1) {
+	        const g31Emissions = Math.round(g31Value * gridIntensity * 100) / 100;
+	        console.log("G31 emissions:", g31Emissions, "grams CO2e");
+	        if (g31Emissions > 0.1) {
+	          data.links.push({
+	            source: NodeUtils.findNodeIndex("G.3.1 Plug Light Equipment"),
+	            target: scope2NodeIndex,
+	            value: g31Emissions,
+	            isEmissions: true
+	          });
+	        }
+	      }
+
+	      // M22D is only electrical in heat pump mode
+	      if (!isGasHeating) {
+	        const m22dValue = LinkUtils.getLinkValue("M.2.2 Energy Input", "Thermal Energy Demand");
+	        console.log("M22D value:", m22dValue, "kWh");
+	        if (m22dValue > 0.1) {
+	          const m22dEmissions = Math.round(m22dValue * gridIntensity * 100) / 100;
+	          console.log("M22D emissions:", m22dEmissions, "grams CO2e");
+	          if (m22dEmissions > 0.1) {
+	            data.links.push({
+	              source: NodeUtils.findNodeIndex("M.2.2 Energy Input"),
+	              target: scope2NodeIndex,
+	              value: m22dEmissions,
+	              isEmissions: true
+	            });
+	          }
+	        }
+
+	        // Add SHW emissions in electric mode
+	        const shwValue = LinkUtils.getLinkValue("W.2.D.N SHW Net Demand", "Building");
+	        console.log("SHW value:", shwValue, "kWh");
+	        if (shwValue > 0.1) {
+	          const shwEmissions = Math.round(shwValue * gridIntensity * 100) / 100;
+	          console.log("SHW emissions:", shwEmissions, "grams CO2e");
+	          if (shwEmissions > 0.1) {
+	            data.links.push({
+	              source: NodeUtils.findNodeIndex("W.2.D.N SHW Net Demand"),
+	              target: scope2NodeIndex,
+	              value: shwEmissions,
+	              isEmissions: true
+	            });
+	          }
+	        }
+	      }
+	      console.log("Completed electrical emissions calculation");
+	    },
+
+	  // REPLACE existing calculateHeatingEmissions method with:
+	  calculateHeatingEmissions(gridIntensity, scope1NodeIndex, scope2NodeIndex) {
+	    // In electric mode, we don't calculate any heating emissions here
+	    // since they're handled in calculateElectricalEmissions
+	    if (!isGasHeating) {
+	      return; // Skip entirely in electric mode
+	    }
+
+	    const heatingNodes = [
+	      { name: "Thermal Energy Demand" },
+	      { name: "W.2.D.N SHW Net Demand" }
+	    ];
+
+	    heatingNodes.forEach(({ name }) => {
+	      const nodeIndex = NodeUtils.findNodeIndex(name);
+	      if (nodeIndex === -1) return;
+	      const flowValue = LinkUtils.getLinkValue(name, "Building");
+    
+	      if (flowValue > 0.1) {
+	        // Gas emissions in grams with precise calculation
+	        const gasVolume = Math.round((flowValue / CONFIG.EMISSIONS.GAS_ENERGY_DENSITY) * 1000) / 1000;
+	        const emissionsValue = Math.round(gasVolume * CONFIG.EMISSIONS.GAS_INTENSITY * 100) / 100;
+
+	        if (emissionsValue > 0.1) {
+	          data.links.push({
+	            source: nodeIndex,
+	            target: scope1NodeIndex,
+	            value: emissionsValue,
+	            isEmissions: true
+	          });
+	        }
+	      }
+	    });
+
+	    // Handle gas exhaust emissions
+	    const gasExhaustValue = LinkUtils.getLinkValue("Building", "GasExhaust");
+	    if (gasExhaustValue > 0.1) {
+	      const gasVolume = Math.round((gasExhaustValue / CONFIG.EMISSIONS.GAS_ENERGY_DENSITY) * 1000) / 1000;
+	      const exhaustEmissions = Math.round(gasVolume * CONFIG.EMISSIONS.GAS_INTENSITY * 100) / 100;
+    
+	      if (exhaustEmissions > 0.1) {
+	        data.links.push({
+	          source: NodeUtils.findNodeIndex("GasExhaust"),
+	          target: scope1NodeIndex,
+	          value: exhaustEmissions,
+	          isEmissions: true
+	        });
+	      }
+	    }
+	  },
+
+		// Updated updateEmissionsFlows method
+		updateEmissionsFlows() {
+		  const scope1NodeIndex = NodeUtils.findNodeIndex("E1 Scope 1 Emissions");
+		  const scope2NodeIndex = NodeUtils.findNodeIndex("E2 Scope 2 Emissions");
+
+		  // Remove existing emissions flows
+		  data.links = data.links.filter(link => {
+		    const targetIdx = NodeUtils.getTargetNodeIndex(link);
+		    return targetIdx !== scope1NodeIndex && targetIdx !== scope2NodeIndex;
+		  });
+
+		  if (showEmissions) {
+		    const gridIntensity = parseFloat(document.getElementById('gridIntensity').value) || 0;
+    
+		    // Handle electrical loads
+		    this.calculateElectricalEmissions(gridIntensity, scope2NodeIndex);
+    
+		    // Handle heating and DHW
+		    this.calculateHeatingEmissions(gridIntensity, scope1NodeIndex, scope2NodeIndex);
+		  }
+		},
+
+	  resize() {
+	    const width = document.querySelector('.diagram-container').clientWidth;
+	    this.svg.attr("width", width);
+	    this.sankey.extent([[1, 1], [width - 1, 600 - 1]]);
+	    this.render(false);
+	  }
+	};
+</script>
+<!-- Script Block 6: User Interface Manager -->
+<script defer>
+	// Script Block 6: User Interface Manager
+	const ControlPanel = {
+		updateAllComponentHeatLosses() {
+		  console.log("=== Updating All Component Heat Losses ===");
+
+		  // Update above-grade components with HDD
+		  Object.keys(CONFIG.BUILDING_ELEMENTS.COMPONENTS)
+		    .filter(key => CONFIG.BUILDING_ELEMENTS.COMPONENTS[key].type === "ABOVE_GRADE")
+		    .forEach(componentKey => {
+		      const component = CONFIG.BUILDING_ELEMENTS.COMPONENTS[componentKey];
+		      const area = StateManager.getValue(`${componentKey.toLowerCase()}Area`) || component.elementArea.default;
+		      const rsi = StateManager.getValue(`${componentKey.toLowerCase()}Rsi`) || component.rsi.default;
+    
+		      console.log(`Updating ${componentKey} - Area: ${area}, RSI: ${rsi}`);
+		      const heatLoss = EnergyCalculator.calculateElementHeatLoss(componentKey, area, rsi);
+		      console.log(`New heat loss: ${heatLoss}`);
+    
+		      LinkUtils.updateLinkByNames(
+		        "Total Envelope Losses",
+		        component.name,
+		        heatLoss
+		      );
+		    });
+
+		  // Update ground-facing components with GFHDD
+		  Object.keys(CONFIG.BUILDING_ELEMENTS.COMPONENTS)
+		    .filter(key => CONFIG.BUILDING_ELEMENTS.COMPONENTS[key].type === "GROUND_FACING")
+		    .forEach(componentKey => {
+		      const component = CONFIG.BUILDING_ELEMENTS.COMPONENTS[componentKey];
+		      const area = StateManager.getValue(`${componentKey.toLowerCase()}Area`) || component.elementArea.default;
+		      const rsi = StateManager.getValue(`${componentKey.toLowerCase()}Rsi`) || component.rsi.default;
+    
+		      console.log(`Updating ${componentKey} - Area: ${area}, RSI: ${rsi}`);
+		      const heatLoss = EnergyCalculator.calculateElementHeatLoss(componentKey, area, rsi);
+		      console.log(`New heat loss: ${heatLoss}`);
+    
+		      LinkUtils.updateLinkByNames(
+		        "Total Envelope Losses",
+		        component.name,
+		        heatLoss
+		      );
+		    });
+
+		  // Update overall TEL and energy balance
+		  EnergyCalculator.updateTEL();
+		  EnergyCalculator.updateBuildingBalance();
+		},
+
+	  initialize() {
+	    console.log("=== ControlPanel Init Start ===");
+	    console.log("All heatSourceButtons:", document.querySelectorAll('#heatSourceButton'));
+    
+	    this.initializeControls();
+	    this.bindEventListeners();
+	    this.updateValueDisplays();
+	    this.calculateTotalEnergyCost();
+	    this.calculateTEUI();
+	  },
+
+	  initializeControls() {
+	    if (!data?.nodes || !data?.links) {
+	      console.error("Invalid data structure");
+	      return;
+	    }
+
+	    const gainsBody = document.getElementById("gainsControlsBody");
+	    const lossesBody = document.getElementById("lossesControlsBody");
+	    gainsBody.innerHTML = "";
+	    lossesBody.innerHTML = "";
+
+	    // Update the headers for thermal properties
+	    const controlsTable = document.querySelector('.controls-table');
+		if (controlsTable) {
+		  const headerRow = controlsTable.querySelector('tr');
+		  if (headerRow) {
+		    // Update first header to be wider for component names
+		    const firstHeader = headerRow.querySelector('th:first-child');
+		    if (firstHeader) {
+		      firstHeader.style.width = '220px';
+		      firstHeader.style.minWidth = '220px';
+		    }
+    
+		    // Update second header for values
+		    const secondHeader = headerRow.querySelector('th:nth-child(2)');
+		    if (secondHeader) {
+		      secondHeader.style.width = '60px';
+		    }
+    
+		    // Update third header width if needed
+		    const thirdHeader = headerRow.querySelector('th:nth-child(3)');
+		    if (thirdHeader) {
+		      thirdHeader.style.width = 'auto';
+		    }
+		  }
+		}
+
+
+	    const buildingIndex = NodeUtils.findNodeIndex("Building");
+	    const telIndex = NodeUtils.findNodeIndex("Total Envelope Losses");
+
+	    // Process all gains (supply side)
+	    data.links.forEach(link => {
+	      const sourceName = data.nodes[NodeUtils.getSourceNodeIndex(link)].name;
+	      const targetName = data.nodes[NodeUtils.getTargetNodeIndex(link)].name;
+    
+	      if (targetName === "Building" || 
+	          (sourceName === "M.2.2 Sink (Air/Ground)" && targetName === "Thermal Energy Demand") ||
+	          (sourceName === "M.2.2 Energy Input" && targetName === "Thermal Energy Demand")) {
+	        this.createControlRow(gainsBody, link, sourceName, targetName,
+	          DataManager.isCalculatedFlow(sourceName, targetName));
+	      }
+	    });
+		
+	    this.addTotalsRow(gainsBody, true);
+
+	    // Process all losses
+	    data.links.forEach(link => {
+	      const sourceName = data.nodes[NodeUtils.getSourceNodeIndex(link)].name;
+	      const targetName = data.nodes[NodeUtils.getTargetNodeIndex(link)].name;
+      
+	      if ((sourceName === "Total Envelope Losses" && targetName.startsWith("B.")) || 
+	          (sourceName === "Building" && 
+	           ["Total Envelope Losses", "V.2.4 Unrecovered Ventilation", 
+	            "W.2.W SHW Wasted", "G.X Unusable Gains"].includes(targetName))) {
+	        this.createControlRow(lossesBody, link, sourceName, targetName,
+	          DataManager.isCalculatedFlow(sourceName, targetName));
+	      }
+	    });
+
+	    this.addTotalsRow(lossesBody, false);
+	    this.updateTotals();
+
+	  },
+	  
+	  addTotalsRow(tbody, isGains) {
+	    const row = document.createElement("tr");
+	    row.style.borderTop = "2px solid #ddd";
+    
+	    const nameCell = document.createElement("td");
+	    nameCell.textContent = "Total";
+	    nameCell.style.fontWeight = "bold";
+	    nameCell.style.fontSize = "11px";
+    
+	    const valueCell = document.createElement("td");
+	    valueCell.style.fontWeight = "bold";
+	    const totalSpan = document.createElement("span");
+	    totalSpan.className = isGains ? "gains-total" : "losses-total";
+	    totalSpan.style.padding = "4px 8px";
+	    totalSpan.style.display = "inline-block";
+	    valueCell.appendChild(totalSpan);
+    
+	    const controlCell = document.createElement("td");
+    
+	    row.append(nameCell, valueCell, controlCell);
+	    tbody.appendChild(row);
+	  },
+	  
+	  updateTotals() {
+	    // Calculate gains total
+	    const gainsTotal = data.links.reduce((sum, link) => {
+	      const sourceName = data.nodes[NodeUtils.getSourceNodeIndex(link)].name;
+	      const targetName = data.nodes[NodeUtils.getTargetNodeIndex(link)].name;
+    
+	      // Include direct inputs to Building (except TED) plus M22S and M22D
+	      if ((targetName === "Building" && 
+	           sourceName !== "Thermal Energy Demand") ||  // Direct to Building
+	          (targetName === "Thermal Energy Demand" &&   // Include M22S and M22D
+	           ["M.2.2 Sink (Air/Ground)", "M.2.2 Energy Input"].includes(sourceName))) {
+	        return sum + link.value;
+	      }
+	      return sum;
+	    }, 0);
+
+	    // Calculate losses total (excluding TEL components)
+		const lossesTotal = data.links.reduce((sum, link) => {
+		  const sourceName = data.nodes[NodeUtils.getSourceNodeIndex(link)].name;
+		  const targetName = data.nodes[NodeUtils.getTargetNodeIndex(link)].name;
+  
+		  // Include TEL components
+		  if ((sourceName === "Total Envelope Losses" && 
+		       targetName.startsWith("B.")) || // All B.X components
+		      (sourceName === "Building" && 
+		       ["V.2.4 Unrecovered Ventilation", "W.2.W SHW Wasted", "G.X Unusable Gains"].includes(targetName))) {
+		    return sum + link.value;
+		  }
+		  return sum;
+		}, 0);
+
+	    // Update UI
+	    const gainsTotalSpan = document.querySelector('.gains-total');
+	    const lossTotalSpan = document.querySelector('.losses-total');
+  
+	    if (gainsTotalSpan) gainsTotalSpan.textContent = gainsTotal.toFixed(2);
+	    if (lossTotalSpan) lossTotalSpan.textContent = lossesTotal.toFixed(2);
+  
+	    // Visual indicator if totals don't match
+	    const mismatch = Math.abs(gainsTotal - lossesTotal) > 0.1;
+	    if (gainsTotalSpan) gainsTotalSpan.style.color = mismatch ? '#ff0000' : '#000000';
+	    if (lossTotalSpan) lossTotalSpan.style.color = mismatch ? '#ff0000' : '#000000';
+
+	    // Make sure table shows M22S, M22D, and TED values
+	    document.querySelectorAll('.value-display').forEach(display => {
+	      const sourceName = display.getAttribute('data-source');
+	      const targetName = display.getAttribute('data-target');
+    
+	      let value = 0;
+	      if (sourceName === "M.2.2 Energy Input") {
+	        value = M22D;
+	      } else if (sourceName === "M.2.2 Sink (Air/Ground)") {
+	        value = M22S;
+	      } else if (sourceName === "Thermal Energy Demand") {
+	        value = TED;
+	      } else {
+	        value = LinkUtils.getLinkValue(sourceName, targetName);
+	      }
+	      display.textContent = value.toFixed(2);
+	    });
+	  },
+
+	  createControlRow(tbody, link, sourceName, targetName, isCalculated) {
+	    const row = document.createElement("tr");
+    
+	    // Name cell
+	    const nameCell = document.createElement("td");
+	    nameCell.textContent = `${sourceName} → ${targetName}`;
+	    nameCell.style.fontSize = "11px";
+
+	    // Value cell
+	    const valueCell = this.createValueCell(link, sourceName, targetName);
+
+	    // Control cell (slider or calculated indicator)
+	    const controlCell = isCalculated ? 
+	      this.createCalculatedCell() :
+	      this.createSliderCell(link, sourceName, targetName);
+
+	    row.append(nameCell, valueCell, controlCell);
+	    tbody.appendChild(row);
+	  },
+
+	  createValueCell(link, sourceName, targetName) {
+	    const cell = document.createElement("td");
+	    cell.style.width = "50px";
+
+	    const display = document.createElement("span");
+	    display.className = "value-display";
+	    display.setAttribute('data-source', sourceName);
+	    display.setAttribute('data-target', targetName);
+	    display.textContent = link.value.toFixed(2);
+
+	    const sourceColor = data.nodes.find(n => n.name === sourceName).color;
+	    const targetColor = data.nodes.find(n => n.name === targetName).color;
+
+	    cell.style.background = `linear-gradient(90deg, 
+	      ${sourceColor}40 0%, 
+	      ${targetColor}40 100%
+	    )`;
+	    cell.style.borderRadius = "3px";
+	    cell.style.padding = "4px 8px";
+	    cell.appendChild(display);
+
+	    return cell;
+	  },
+
+	  createSliderCell(link, sourceName, targetName) {
+	    const cell = document.createElement("td");
+	    cell.className = "slider-cell";
+	    // Check if this is a TEL component
+	    if (sourceName === "Total Envelope Losses" && 
+	        CONFIG.BUILDING_ELEMENTS.COMPONENTS[this.getComponentKey(targetName)]) {
+	      return this.createTELComponentControls(link, targetName);
+	    }
+
+	    const container = document.createElement("div");
+	    container.style.display = "flex";
+	    container.style.alignItems = "center";
+	    container.style.gap = "8px";
+	    container.style.height = "100%";
+
+	    const slider = document.createElement("input");
+	    slider.type = "range";
+	    slider.min = "0";
+	    slider.max = `${Math.max(link.value * 4, 300)}`;
+	    slider.step = "0.001";
+	    slider.value = link.value;
+	    slider.style.width = "100px";
+
+	    const input = document.createElement("input");
+	    input.type = "number";
+	    input.style.width = "70px";
+	    input.style.padding = "2px 4px";
+	    input.style.fontSize = "11px";
+	    input.style.textAlign = "right";
+	    input.style.appearance = "textfield";
+	    input.step = "0.001";
+	    input.value = link.value.toFixed(2);
+
+	    slider.addEventListener("input", (e) => {
+	      const newValue = parseFloat(e.target.value);
+	      input.value = newValue.toFixed(2);
+
+	      if (sourceName === "W.2.D.N SHW Net Demand" || 
+	          targetName === "W.2.W SHW Wasted") {
+	        EnergyCalculator.updateSHW(sourceName, targetName, newValue);
+	      }
+
+	      this.updateValue(sourceName, targetName, newValue);
+	    });
+
+	    input.addEventListener("change", (e) => {
+	      const newValue = parseFloat(e.target.value);
+	      if (!isNaN(newValue)) {
+	        slider.value = newValue;
+	        if (sourceName === "W.2.D.N SHW Net Demand" || 
+	            targetName === "W.2.W SHW Wasted") {
+	          EnergyCalculator.updateSHW(sourceName, targetName, newValue);
+	        }
+	        this.updateValue(sourceName, targetName, newValue);
+	      }
+	    });
+
+	    container.appendChild(slider);
+	    container.appendChild(input);
+	    cell.appendChild(container);
+	    return cell;
+	  },
+
+	  createCalculatedCell() {
+	    const cell = document.createElement("td");
+	    cell.className = "slider-cell";
+	    cell.style.height = "32px";
+	    cell.style.padding = "0 8px";
+	    cell.style.display = "flex";
+	    cell.style.alignItems = "center";
+
+	    const label = document.createElement("em");
+	    label.textContent = "Calculated";
+	    label.style.color = "#666";
+	    label.style.fontSize = "11px";
+	    label.style.marginLeft = "8px";
+
+	    cell.appendChild(label);
+	    return cell;
+	  },
+
+	  // Add to ControlPanel object after createCalculatedCell()
+	  getComponentKey(nodeName) {
+	    return {
+	      "B.4 Roof": "ROOF",
+	      "B.5 Walls Above Grade": "WALLS_ABOVE_GRADE",
+	      "B.6 Floor Exposed": "FLOOR_EXPOSED", 
+	      "B.7.0 Doors": "DOORS",
+	      "B.8.1 Windows N": "WINDOWS_N",
+	      "B.8.2 Windows E": "WINDOWS_E",
+	      "B.8.3 Windows S": "WINDOWS_S",
+	      "B.8.4 Windows W": "WINDOWS_W",
+	      "B.9 Walls Below Grade": "WALLS_BELOW_GRADE",
+	      "B.10 Floor Slab": "FLOOR_SLAB"
+	    }[nodeName];
+	  },
+	  
+	  getComponentArea(targetName) {
+	    const componentKey = this.getComponentKey(targetName);
+	    const config = CONFIG.BUILDING_ELEMENTS.COMPONENTS[componentKey];
+	    return StateManager.getValue(`${componentKey.toLowerCase()}Area`) || config.elementArea.default;
+	  },
+
+	  getComponentUValue(targetName) {
+	    const componentKey = this.getComponentKey(targetName);
+	    const config = CONFIG.BUILDING_ELEMENTS.COMPONENTS[componentKey];
+	    return StateManager.getValue(`${componentKey.toLowerCase()}UValue`) || config.uValue.default;
+	  },
+	  
+	  // 2. Update ControlPanel - Modify createTELComponentControls method
+	  createTELComponentControls(link, targetName) {
+	    const cell = document.createElement("td");
+	    cell.className = "slider-cell";
+	    const componentKey = this.getComponentKey(targetName);
+
+	    const container = document.createElement("div");
+	    container.style.display = "flex";
+	    container.style.gap = "12px";
+	    container.style.alignItems = "center";
+
+	    // Area control group (unchanged)
+	    const areaGroup = document.createElement("div");
+	    areaGroup.style.display = "flex";
+	    areaGroup.style.alignItems = "center";
+	    areaGroup.style.gap = "4px";
+	    areaGroup.style.minWidth = "120px";
+
+	    const areaSlider = document.createElement("input");
+	    areaSlider.type = "range";
+	    areaSlider.min = "0";
+	    areaSlider.max = "1000";
+	    areaSlider.step = "0.01";
+	    areaSlider.value = this.getComponentArea(targetName);
+	    areaSlider.style.width = "60px";
+	    areaSlider.setAttribute('data-component', componentKey);
+	    areaSlider.setAttribute('data-type', 'area');
+
+	    const areaInput = document.createElement("input");
+	    areaInput.type = "number";
+	    areaInput.style.width = "50px";
+	    areaInput.step = "0.01";
+	    areaInput.value = StateManager.getValue(`${componentKey.toLowerCase()}Area`) || 
+	                      this.getComponentArea(targetName);
+	    areaInput.setAttribute('data-component', componentKey);
+	    areaInput.setAttribute('data-type', 'area');
+
+		const areaLabel = document.createElement("span");
+		areaLabel.textContent = "";  // Remove m² from here
+		areaLabel.style.fontSize = "11px";
+
+	    // RSI/U-value control group
+	    const thermalGroup = document.createElement("div");
+	    thermalGroup.style.display = "flex";
+	    thermalGroup.style.alignItems = "center";
+	    thermalGroup.style.gap = "8px";
+	    thermalGroup.style.minWidth = "240px";
+
+	    // RSI input and label
+	    const rsiDiv = document.createElement("div");
+	    rsiDiv.style.display = "flex";
+	    rsiDiv.style.alignItems = "center";
+	    rsiDiv.style.gap = "4px";
+
+		const rsiLabel = document.createElement("span");
+		rsiLabel.textContent = "";  // Remove RSI from here
+		rsiLabel.style.fontSize = "11px";
+
+	    const rsiInput = document.createElement("input");
+	    rsiInput.type = "number";
+	    rsiInput.style.width = "60px";
+	    rsiInput.step = "0.01";
+	    rsiInput.min = "0.01";
+	    rsiInput.value = StateManager.getValue(`${componentKey.toLowerCase()}Rsi`) || 
+	                     (1 / this.getComponentUValue(targetName)).toFixed(2);
+	    rsiInput.setAttribute('data-component', componentKey);
+	    rsiInput.setAttribute('data-type', 'rsi');
+
+	    // Common thermal resistance slider
+	    const thermalSlider = document.createElement("input");
+	    thermalSlider.type = "range";
+	    thermalSlider.min = "0.01";
+	    thermalSlider.max = "20";
+	    thermalSlider.step = "0.01";
+	    thermalSlider.value = rsiInput.value;
+	    thermalSlider.style.width = "60px";
+	    thermalSlider.setAttribute('data-component', componentKey);
+
+	    // U-value input and label
+	    const uValueDiv = document.createElement("div");
+	    uValueDiv.style.display = "flex";
+	    uValueDiv.style.alignItems = "center";
+	    uValueDiv.style.gap = "4px";
+
+		const uValueLabel = document.createElement("span");
+		uValueLabel.textContent = "";  // Remove U: from here
+		uValueLabel.style.fontSize = "11px";
+
+	    const uValueInput = document.createElement("input");
+	    uValueInput.type = "number";
+	    uValueInput.style.width = "60px";
+	    uValueInput.step = "0.001";
+	    uValueInput.min = "0.001";
+	    uValueInput.value = (1 / parseFloat(rsiInput.value)).toFixed(3);
+	    uValueInput.setAttribute('data-component', componentKey);
+	    uValueInput.setAttribute('data-type', 'uvalue');
+		uValueInput.readOnly = false;  // Make editable
+		uValueInput.addEventListener("change", (e) => {
+		  const newUValue = parseFloat(e.target.value);
+		  if (!isNaN(newUValue) && newUValue > 0) {
+		    const newRsi = 1 / newUValue;
+		    handleThermalUpdate(newRsi);
+		  }
+		});
+
+		const unitLabel = document.createElement("span");
+		unitLabel.textContent = "";  // Remove W/m²·K from here
+		unitLabel.style.fontSize = "11px";
+
+		// In createTELComponentControls, modify display rounding:
+		const handleThermalUpdate = (newRsi) => {
+		  const rsi = parseFloat(newRsi);  // Keep full precision for calculation
+		  const uValue = (1 / rsi).toFixed(3);  // Round only for display
+
+		  // Display with two decimal places but keep full precision internally
+		  rsiInput.value = rsi.toFixed(2);
+		  uValueInput.value = uValue;
+		  thermalSlider.value = rsi;
+
+		  const area = parseFloat(areaInput.value);
+		  if (!isNaN(area) && !isNaN(rsi)) {
+		    const heatLoss = EnergyCalculator.calculateElementHeatLoss(
+		      componentKey,
+		      area,
+		      rsi  // Pass full precision value
+		    );
+		    LinkUtils.updateLinkByNames("Total Envelope Losses", targetName, heatLoss);
+		    EnergyCalculator.updateTEL();
+		    this.calculateTotalEnergyCost();
+		    this.calculateTEUI();
+		    this.updateValueDisplays();
+		    SankeyDiagram.render(false);
+		  }
+		};
+
+	    // Event listeners
+	    thermalSlider.addEventListener("input", (e) => {
+	      handleThermalUpdate(e.target.value);
+	    });
+
+	    rsiInput.addEventListener("change", (e) => {
+	      handleThermalUpdate(e.target.value);
+	    });
+
+	    areaSlider.addEventListener("input", (e) => {
+	      areaInput.value = e.target.value;
+	      handleThermalUpdate(rsiInput.value);
+	    });
+
+	    areaInput.addEventListener("change", (e) => {
+	      areaSlider.value = e.target.value;
+	      handleThermalUpdate(rsiInput.value);
+	    });
+
+	    // Assemble the controls
+	    areaGroup.append(areaSlider, areaInput, areaLabel);
+	    rsiDiv.append(rsiLabel, rsiInput);
+	    uValueDiv.append(uValueLabel, uValueInput, unitLabel);
+	    thermalGroup.append(rsiDiv, thermalSlider, uValueDiv);
+	    container.append(areaGroup, thermalGroup);
+	    cell.appendChild(container);
+
+	    return cell;
+	  },
+ 
+	  // MODIFY existing updateValue method
+	  updateValue(sourceName, targetName, newValue) {
+	    const sourceIndex = NodeUtils.findNodeIndex(sourceName);
+	    const targetIndex = NodeUtils.findNodeIndex(targetName);
+  
+	    LinkUtils.updateLink(sourceIndex, targetIndex, newValue);
+  
+	    if (sourceName === "Total Envelope Losses") {
+	      EnergyCalculator.updateTEL();
+	    }
+  
+	    EnergyCalculator.updateBuildingBalance();
+	    this.updateValueDisplays();
+	    this.updateTotals(); // NEW LINE
+	    SankeyDiagram.render(false);
+	    this.calculateTotalEnergyCost(); // RESTORE THIS LINE
+	    this.calculateTEUI(); // RESTORE THIS LINE
+	  },
+
+	  updateValueDisplays() {
+	    document.querySelectorAll('.value-display').forEach(display => {
+	      const sourceName = display.getAttribute('data-source');
+	      const targetName = display.getAttribute('data-target');
+      
+	      let value = 0;
+	      if (sourceName === "M.2.2 Energy Input") {
+	        value = M22D;
+	      } else if (sourceName === "M.2.2 Sink (Air/Ground)") {
+	        value = M22S;
+	      } else if (sourceName === "Thermal Energy Demand") {
+	        value = TED;
+	      } else {
+	        value = LinkUtils.getLinkValue(sourceName, targetName);
+	      }
+	      display.textContent = value.toFixed(2);
+	    });
+	  },
+
+	  calculateTotalEnergyCost() {
+	    const electricityCost = parseFloat(document.getElementById('energyCost').value) || CONFIG.EMISSIONS.DEFAULT_ELECTRICITY_COST;
+	    const gasCost = parseFloat(document.getElementById('gasCost').value) || CONFIG.EMISSIONS.DEFAULT_GAS_COST;
+	    const gridIntensity = parseFloat(document.getElementById('gridIntensity').value) || 0;
+
+	    // Get electrical loads
+	    const g31Value = LinkUtils.getLinkValue("G.3.1 Plug Light Equipment", "Building") || 0;
+	    let electricalCost = g31Value * electricityCost;
+	    let gasCostTotal = 0;
+    
+	    // Get Thermal Energy Demands for emissions calculation
+	    const heatingDemand = LinkUtils.getLinkValue("Thermal Energy Demand", "Building") || 0;
+	    const dhwDemand = LinkUtils.getLinkValue("W.2.D.N SHW Net Demand", "Building") || 0;
+
+	    if (isGasHeating) {
+	      const efficiency = StateManager.getValue('copHeating');
+	      const totalGasEnergy = (heatingDemand + dhwDemand) / efficiency;
+	      const gasVolume = totalGasEnergy / CONFIG.EMISSIONS.GAS_ENERGY_DENSITY;
+	      gasCostTotal = gasVolume * gasCost;
+	    } else {
+	      const heatPumpElectrical = M22D || 0;
+	      electricalCost += heatPumpElectrical * electricityCost;
+	    }
+
+	    // Calculate emissions
+	    let totalEmissionsGrams = g31Value * gridIntensity;
+
+	    if (isGasHeating) {
+	      const gasVolume = (heatingDemand + dhwDemand) / CONFIG.EMISSIONS.GAS_ENERGY_DENSITY;
+	      totalEmissionsGrams += gasVolume * CONFIG.EMISSIONS.GAS_INTENSITY;
+	    } else {
+	      const heatPumpElectrical = M22D || 0;
+	      totalEmissionsGrams += heatPumpElectrical * gridIntensity;
+	    }
+
+	    const totalEmissionsMT = totalEmissionsGrams / 1000000;
+
+	    try {
+	      document.getElementById('electricityCostDisplay').textContent = 
+	        electricalCost.toLocaleString('en-US', {
+	          minimumFractionDigits: 2,
+	          maximumFractionDigits: 2
+	        });
+
+	      document.getElementById('gasCostDisplay').textContent = 
+	        gasCostTotal.toLocaleString('en-US', {
+	          minimumFractionDigits: 2,
+	          maximumFractionDigits: 2
+	        });
+
+	      document.getElementById('totalEnergyCost').textContent = 
+	        (electricalCost + gasCostTotal).toLocaleString('en-US', {
+	          minimumFractionDigits: 2,
+	          maximumFractionDigits: 2
+	        });
+
+	      document.getElementById('totalEmissions').textContent = totalEmissionsMT.toFixed(2);
+	    } catch (error) {
+	      console.error("Error updating cost/emissions displays:", error);
+	    }
+	  },
+	  //Revised in 7r6 to represent purchased energy only
+	  calculateTEUI() {
+	    const area = parseFloat(document.getElementById('conditionedArea').value) || 528.0;
+  
+	    // Get only purchased energy components
+	    const plugLoads = LinkUtils.getLinkValue("G.3.1 Plug Light Equipment", "Building");
+	    const heatInput = LinkUtils.getLinkValue("M.2.2 Energy Input", "Thermal Energy Demand");
+	    const shwDemand = LinkUtils.getLinkValue("W.2.D.N SHW Net Demand", "Building");
+  
+	    const totalEnergy = plugLoads + heatInput + shwDemand;
+	    const teui = totalEnergy / area;
+  
+	    const teuiDisplay = document.getElementById('teuiValue');
+	    if (teuiDisplay) {
+	      teuiDisplay.textContent = teui.toFixed(2);
+	    }
+  
+	    return teui;
+	  },
+
+	  bindEventListeners() {
+	    // Energy cost input handlers
+	    ['energyCost', 'gasCost'].forEach(id => {
+	      const element = document.getElementById(id);
+	      if (element) {
+	        element.addEventListener('input', () => {
+	          this.calculateTotalEnergyCost();
+	        });
+	      }
+	    });
+		
+		document.getElementById('gainsFactorMethod')?.addEventListener('change', (e) => {
+		    const selectedValue = e.target.value;
+		    const calculatedDisplay = document.getElementById('calculatedGainsFactor');
+    
+		    if (selectedValue === 'phpp') {
+		        // Get values for PHPP calculation
+		        const G11 = LinkUtils.getLinkValue("G.1.1 Occupant Gains", "Building");
+		        const G31 = LinkUtils.getLinkValue("G.3.1 Plug Light Equipment", "Building");
+		        const G23 = ["G.8.1 Windows N", "G.8.2 Windows E", 
+		                    "G.8.3 Windows S", "G.8.4 Windows W", 
+		                    "G.7.0 Doors"].reduce((sum, source) => {
+		            return sum + LinkUtils.getLinkValue(source, "Building");
+		        }, 0);
+		        const T63 = LinkUtils.getLinkValue("Building", "Total Envelope Losses");
+		        const V24 = LinkUtils.getLinkValue("Building", "V.2.4 Unrecovered Ventilation");
+        
+		        // Calculate PHPP factor
+		        const ratio = (G11 + G23 + G31)/(T63 + V24);
+		        const factor = (1 - Math.pow(ratio, 5))/(1 - Math.pow(ratio, 6));
+        
+		        if (calculatedDisplay) {
+		            calculatedDisplay.textContent = `(${(factor * 100).toFixed(2)}%)`; // Added .toFixed(2)
+		        }
+		        StateManager.setValue('nGainsFactor', factor);
+		    } else {
+		        const value = parseFloat(selectedValue);
+		        if (!isNaN(value)) {
+		            if (calculatedDisplay) {
+		                calculatedDisplay.textContent = `(${(value * 100).toFixed(2)}%)`;  // Added .toFixed(2)
+		            }
+		            StateManager.setValue('nGainsFactor', value);
+		        }
+		    }
+    
+		    // Update the system
+		    EnergyCalculator.updateBuildingBalance();
+		    this.updateValueDisplays();
+		    this.updateTotals();
+		    SankeyDiagram.render(false);
+		    this.calculateTotalEnergyCost();
+		    this.calculateTEUI();
+		});
+		
+	    document.querySelector('.toggle-button')?.addEventListener('click', function() {
+	      const controls = document.querySelector('.efficiency-controls');
+	      const isExpanded = controls.classList.contains('expanded');
+      
+	      controls.classList.toggle('expanded');
+	      controls.classList.toggle('collapsed');
+	      this.classList.toggle('collapsed');
+      
+	      // Trigger Sankey resize after animation
+	      setTimeout(() => {
+	        SankeyDiagram.resize();
+	      }, 300);
+	    });
+
+	    // Add conditioned area input handler
+	    document.getElementById('conditionedArea')?.addEventListener('input', (e) => {
+	      const value = parseFloat(e.target.value);
+	      if (!isNaN(value)) {
+	        StateManager.setValue('conditionedArea', value);
+	        this.calculateTEUI();
+	      }
+	    });
+		
+		//New HDD and Component Listeners
+		document.getElementById('heatingDegreeDays')?.addEventListener('input', (e) => {
+		  const value = parseFloat(e.target.value);
+		  if (!isNaN(value)) {
+		    console.log(`HDD event listener triggered with value: ${value}`);
+		    StateManager.setValue('heatingDegreeDays', value);
+    
+		    // Update all heat loss calculations
+		    this.updateAllComponentHeatLosses();
+    
+		    // Update building balance and displays
+		    EnergyCalculator.updateBuildingBalance();
+		    this.updateValueDisplays();
+		    this.updateTotals();
+    
+		    // Update derived calculations
+		    this.calculateTotalEnergyCost();
+		    this.calculateTEUI();
+    
+		    // Render the updated diagram
+		    SankeyDiagram.render(false);
+		  }
+		});
+		//New GFHDD and Component Listeners
+		document.getElementById('groundFacingHeatingDegreeDays')?.addEventListener('input', (e) => {
+		  const value = parseFloat(e.target.value);
+		  if (!isNaN(value)) {
+		    StateManager.setValue('groundFacingHeatingDegreeDays', value);
+		    this.updateAllComponentHeatLosses();
+		    EnergyCalculator.updateBuildingBalance();
+		    this.updateValueDisplays();
+		    this.updateTotals();
+		    this.calculateTotalEnergyCost();
+		    this.calculateTEUI();
+		    SankeyDiagram.render(false);
+		  }
+		});
+
+	    // Efficiency input handlers
+	    ['gridIntensity', 'copCooling', 'copHeating', 
+	     'mvhrEfficiency', 'dwhrEfficiency', 'nGainsFactor'].forEach(id => {
+	      const element = document.getElementById(id);
+	      if (element) {
+	        element.addEventListener('input', (e) => {
+	          if (id === 'copHeating') {
+	            const value = parseFloat(e.target.value);
+	            if (isGasHeating) {
+	              e.target.value = value.toFixed(2);
+	              e.target.step = "0.01";
+	            } else {
+	              e.target.step = "0.01";
+	            }
+	          }
+	          StateManager.setValue(id, parseFloat(e.target.value));
+	          this.handleEfficiencyChange(e, id);
+	        });
+	      }
+	    });
+
+	    // Import handlers
+	    document.getElementById('importButton')?.addEventListener('click', () => {
+	      document.getElementById('csvFile').click();
+	    });
+
+	    document.getElementById('csvFile')?.addEventListener('change', async (e) => {
+	      const file = e.target.files[0];
+	      if (file) await FileSystem.FileHandler.handleImport(file);
+	    });
+
+	    document.getElementById('applyButton')?.addEventListener('click', 
+	      this.handleApplyButtonClick.bind(this));
+
+	    // Layout control handlers
+	    document.getElementById('toggleSpacingButton')?.addEventListener('click', function() {
+	      spacingCollapsed = !spacingCollapsed;
+	      SankeyDiagram.sankey.nodePadding(spacingCollapsed ? 0 : 15);
+	      this.textContent = spacingCollapsed ? "Show as Sankey Diagram" : "Show as Energy Balance";
+	      SankeyDiagram.render(false);
+	    });
+
+	    document.getElementById('widthMultiplier')?.addEventListener('input', (function(e) {
+	      widthMultiplier = e.target.value / 100;
+		  document.getElementById('widthValue').textContent = `${e.target.value}%`;
+		        SankeyDiagram.sankey.nodeWidth(20 * widthMultiplier);
+		        SankeyDiagram.render(false);
+		      }).bind(this));
+
+		      // Heat source button handler 7r3
+		      document.getElementById('heatSourceButton')?.addEventListener('click', (function() {
+		        try {
+		          console.log("=== Button Click ===");
+		          console.log("Starting state:", { isGasHeating });
+
+		          // Toggle state
+		          isGasHeating = !isGasHeating;
+		          console.log("After toggle:", { isGasHeating });
+
+		          const button = document.getElementById('heatSourceButton');
+		          if(button) {
+		            button.style.backgroundColor = isGasHeating ? '#BE343D' : '#A9D7F2';
+		            button.textContent = isGasHeating ? 'Gas Heat + SHW' : 'Electric Heat+SHW';
+		          }
+      
+		          const copHeatingInput = document.getElementById('copHeating');
+		          const copHeatingLabel = document.getElementById('copHeatingLabel');
+
+		          console.log("Current COP:", StateManager.getValue('copHeating'));
+
+		          if (isGasHeating) {
+		            previousCOPh = StateManager.getValue('copHeating');
+		            console.log("Switching to Gas mode - saved previous COP:", previousCOPh);
+		            const newEfficiency = 0.90;
+		            COPh = newEfficiency;
+		            StateManager.setValue('copHeating', newEfficiency);
+      
+		            if(copHeatingInput && copHeatingLabel) {
+		              copHeatingInput.value = newEfficiency.toFixed(2);
+		              copHeatingInput.min = 0.50;
+		              copHeatingInput.max = 0.98;
+		              copHeatingInput.step = 0.01;
+		              copHeatingLabel.textContent = 'Heat+SHW Efficiency';
+		            }
+		          } else {
+		            console.log("Switching to HP mode - restoring COP:", previousCOPh);
+		            COPh = previousCOPh;
+		            StateManager.setValue('copHeating', previousCOPh);
+      
+		            if(copHeatingInput && copHeatingLabel) {
+		              copHeatingInput.value = previousCOPh.toFixed(2);
+		              copHeatingInput.min = 0.1;
+		              copHeatingInput.max = 20;
+		              copHeatingInput.step = 0.01;
+		              copHeatingLabel.textContent = 'COP Heating';
+		            }
+		          }
+
+		          console.log("About to update heat pump and SHW systems. isGasHeating:", isGasHeating);
+          
+		          // Update both systems explicitly
+		          EnergyCalculator.updateHeatPumpValues(TED);
+		          EnergyCalculator.updateSHWSystem();  // Explicit SHW update
+          
+		          this.updateValueDisplays();
+		          this.calculateTotalEnergyCost();
+		          SankeyDiagram.render(false);
+
+		          console.log("Final state:", {
+		            isGasHeating,
+		            COP: StateManager.getValue('copHeating')
+		          });
+		        } catch (error) {
+		          console.error("Handler error:", error);
+		          console.error(error.stack);
+		        }
+		      }).bind(this));
+
+			  // Updated Reset handler 3029r4
+			  document.getElementById('resetButton')?.addEventListener('click', (function() {
+			    try {
+			      console.log("=== Reset Handler Start ===");
+    
+			      // If we have an imported baseline, treat it like a new import
+			      if (StateManager._importedBaseline) {
+			        console.log("Resetting to imported baseline state");
+			        pendingImportData = StateManager.getBaselineData();
+			        this.handleApplyButtonClick();
+			      } else {
+			        console.log("No imported data found, resetting to defaults");
+			        data = JSON.parse(JSON.stringify(originalData));
+			        NodeUtils.ensureNodeReferences();
+			        this.initializeControls();
+			        EnergyCalculator.updateTEL(false);
+			        EnergyCalculator.updateBuildingBalance();
+			        this.calculateTotalEnergyCost();
+			        this.calculateTEUI();
+			        SankeyDiagram.render(true);
+			      }
+    
+			      console.log("=== Reset Handler Complete ===");
+			    } catch (error) {
+			      console.error("Error in reset handler:", error);
+			      console.error(error.stack);
+			      // Try to recover UI if there's an error
+			      this.initializeControls();
+			    }
+			  }).bind(this));
+			  
+		      // Emissions handler
+		      document.getElementById('toggleEmissionsButton')?.addEventListener('click', function() {
+		        showEmissions = !showEmissions;
+		        this.textContent = showEmissions ? 'Hide Emissions' : 'Show Emissions';
+		        SankeyDiagram.updateEmissionsFlows();
+		        SankeyDiagram.render(false);
+		      });
+		    },
+
+		    updateComponentControls(componentKey, updates) {
+		      const selector = `input[data-component="${componentKey}"]`;
+		      document.querySelectorAll(selector).forEach(input => {
+		        const type = input.getAttribute('data-type');
+		        if (type === 'area' && updates.area !== undefined) {
+		          const formattedValue = parseFloat(updates.area).toFixed(2);
+		          input.value = formattedValue;
+		          input.setAttribute('data-original-value', formattedValue);
+		        } else if (type === 'uvalue' && updates.uvalue !== undefined) {
+		          const formattedValue = parseFloat(updates.uvalue).toFixed(3);
+		          input.value = formattedValue;
+		          input.setAttribute('data-original-value', formattedValue);
+		        }
+		        const event = new Event('input', { bubbles: true });
+		        input.dispatchEvent(event);
+		      });
+		    },
+
+		    handleEfficiencyChange(e, id) {
+		      const value = parseFloat(e.target.value);
+		      if (isNaN(value)) return;
+
+		      switch(id) {
+		        case 'copHeating':
+		          EnergyCalculator.updateHeatPumpValues(TED);
+		          break;
+		        case 'mvhrEfficiency':
+		          EnergyCalculator.updateMVHR(Math.max(0, Math.min(1, value)));
+		          break;
+		        case 'dwhrEfficiency':
+		          EnergyCalculator.updateDWHR(Math.max(0, Math.min(1, value)));
+		          break;
+		      	case 'nGainsFactor':  // NEW CASE
+		          EnergyCalculator.updateBuildingBalance();
+		          break;
+		      }
+
+		      this.updateValueDisplays();
+		      SankeyDiagram.render(false);
+		      this.calculateTotalEnergyCost();
+		      this.calculateTEUI();
+		    },
+
+			// Modify the handleApplyButtonClick method in ControlPanel
+			handleApplyButtonClick() {
+			  if (!pendingImportData) {
+			    console.warn("No pending import data to apply");
+			    updateStatus('No import data to apply', 'error');
+			    return;
+			  }
+
+			  try {
+			    updateStatus('Applying import...', 'pending');
+
+			    // Create a backup before modifications
+			    const backup = DataManager.backup();
+			    console.log("Created backup:", backup);
+
+			    // Flag to track if this is initial import vs user modification
+			    const isInitialImport = true;
+
+			    // Handle nodes and links first - direct application without recalculation
+			    if (pendingImportData.nodes && pendingImportData.links) {
+			      console.log("Directly applying node and link updates");
+			      data = {
+			        nodes: pendingImportData.nodes.map(node => ({...node})),
+			        links: pendingImportData.links.map(link => ({...link}))
+			      };
+			      NodeUtils.ensureNodeReferences();
+			    }
+
+			    // Process global updates first
+			    if (pendingImportData.globalUpdates) {
+			      console.log("Applying global updates:", pendingImportData.globalUpdates);
+      
+			      const inputMappings = {
+			        'ElectricityCost': 'energyCost',
+			        'GasCost': 'gasCost',
+			        'GridIntensity': 'gridIntensity',
+			        'COPh': 'copHeating',
+			        'COPc': 'copCooling',
+			        'MVHR': 'mvhrEfficiency',
+			        'DWHR': 'dwhrEfficiency',
+			        'HDD': 'heatingDegreeDays',
+			        'GFHDD': 'groundFacingHeatingDegreeDays',
+			        'conditionedArea': 'conditionedArea'
+			      };
+
+			      Object.entries(pendingImportData.globalUpdates).forEach(([key, value]) => {
+			        if (value !== undefined && value !== null) {
+			          const elementId = inputMappings[key] || key.toLowerCase();
+			          const element = document.getElementById(elementId);
+			          if (element) {
+			            console.log(`Updating ${elementId} to ${value}`);
+			            element.value = typeof value === 'number' ? value.toFixed(2) : value;
+            
+			            if (!isInitialImport) {
+			              const event = new Event('input', { bubbles: true });
+			              element.dispatchEvent(event);
+			            }
+            
+			            const stateKey = inputMappings[key] || key.toLowerCase();
+			            StateManager.setValue(stateKey, value, 'import');
+			          }
+			        }
+			      });
+			    }
+
+				if (pendingImportData.componentUpdates && pendingImportData.componentUpdates.size > 0) {
+				  console.log('Applying component updates');
+				  const isImporting = true;
+
+				  try {
+				    pendingImportData.componentUpdates.forEach((updates, componentName) => {
+				      const componentKey = Object.keys(CONFIG.BUILDING_ELEMENTS.COMPONENTS)
+				        .find(key => CONFIG.BUILDING_ELEMENTS.COMPONENTS[key].name === componentName);
+      
+				      if (componentKey) {
+				        // Debug state before update
+				        console.log(`${componentKey} before update:`, {
+				          storedArea: StateManager.getValue(`${componentKey.toLowerCase()}Area`),
+				          storedUValue: StateManager.getValue(`${componentKey.toLowerCase()}UValue`),
+				          updateArea: updates.area,
+				          updateUValue: updates.uvalue
+				        });
+
+				        if (updates.area !== undefined) {
+				          StateManager.setValue(`${componentKey.toLowerCase()}Area`, updates.area, 'import');
+				        }
+				        if (updates.uvalue !== undefined) {
+				          StateManager.setValue(`${componentKey.toLowerCase()}UValue`, updates.uvalue, 'import');
+				        }
+
+				        // Debug state after update  
+				        console.log(`${componentKey} after update:`, {
+				          storedArea: StateManager.getValue(`${componentKey.toLowerCase()}Area`),
+				          storedUValue: StateManager.getValue(`${componentKey.toLowerCase()}UValue`) 
+				        });
+				      }
+				    });
+				  } catch (error) {
+				    console.error("Error processing component updates:", error);
+				  }
+				}
+
+			    // These updates should always happen
+			    this.initializeControls();
+			    this.calculateTotalEnergyCost();
+			    this.calculateTEUI();
+    
+			    LinkUtils.verifyNodeReferences();
+				// Add our new balance step HERE, before the render:
+				// Recalculate energy balance after import
+				EnergyCalculator.updateTEL(false);  // First update TEL from components
+				const balance = EnergyCalculator.calculateEnergyBalance();
+				if (!balance.isBalanced) {
+				  console.log("Rebalancing energy after import");
+				  EnergyCalculator.updateBuildingBalance();
+				}
+			    SankeyDiagram.render(!isInitialImport);
+
+			    // Final state verification
+			    console.log('Final state verification:');
+			    pendingImportData.componentUpdates.forEach((updates, componentName) => {
+			      console.log(`${componentName} - Area: ${updates.area}, U-Value: ${updates.uvalue}`);
+			    });
+
+			    pendingImportData = null;
+			    document.getElementById('applyButton').style.display = 'none';
+			    updateStatus('Import applied successfully', 'success');
+
+			  } catch (error) {
+			    console.error("Error applying import:", error);
+			    updateStatus('Error applying import: ' + error.message, 'error');
+
+			    try {
+			      if (typeof backup !== 'undefined' && backup) {
+			        DataManager.restore(backup);
+			        this.initializeControls();
+			        SankeyDiagram.render(true);
+			        updateStatus('Restored to previous state', 'warning');
+			      }
+			    } catch (restoreError) {
+			      console.error("Error during restore:", restoreError);
+			      updateStatus('Error during restore: ' + restoreError.message, 'error');
+			    }
+			  }
+			}
+		}; // End of ControlPanel object
+</script>
+<!-- Script Block 7: File Import/Export System -->
+<script defer>
+		const FileSystem = {
+		  FileHandler: {
+		    async handleImport(file) {
+		      if (!file) {
+		        updateStatus('No file selected', 'error');
+		        return;
+		      }
+
+		      try {
+		        updateStatus('Processing import...', 'pending');
+		        pendingImportData = null;
+		        document.getElementById('applyButton').style.display = 'none';
+
+		        const fileType = file.name.toLowerCase().split('.').pop();
+		        let importedData;
+
+		        if (fileType === 'csv') {
+		          importedData = await this.handleCSVImport(file);
+		        } else if (fileType === 'xlsx') {
+		          importedData = await this.handleXLSXImport(file);
+		        } else {
+		          throw new Error('Please use a CSV or XLSX file');
+		        }
+
+		        if (importedData) {
+		          StateManager.setImportedBaseline(importedData);
+		          pendingImportData = importedData;
+		          document.getElementById('applyButton').style.display = 'inline-block';
+		          document.getElementById('fileName').textContent = file.name;
+		          updateStatus('Import ready. Click Apply to update diagram.', 'success');
+		        }
+		      } catch (error) {
+		        console.error('Import error:', error);
+		        updateStatus(`Import failed: ${error.message}`, 'error');
+		        pendingImportData = null;
+		        document.getElementById('applyButton').style.display = 'none';
+		      }
+		    },
+			
+			normalizeValue(value, type) {
+			  if (value === undefined || value === null) return null;
+  
+			  const numValue = parseFloat(value);
+			  if (isNaN(numValue)) return null;
+  
+			  switch(type) {
+			    case 'area':
+			      return Number(numValue.toFixed(EnergyCalculator.PRECISION.AREA));
+			    case 'uvalue':
+			      return Number(numValue.toFixed(EnergyCalculator.PRECISION.U_VALUE));
+			    case 'energy':
+			      return Number(numValue.toFixed(EnergyCalculator.PRECISION.ENERGY));
+			    case 'degreedays':
+			      return Math.round(numValue);
+			    default:
+			      return numValue;
+			  }
+			},
+
+		    async handleCSVImport(file) {
+		      return new Promise((resolve, reject) => {
+		        const reader = new FileReader();
+
+		        reader.onload = (event) => {
+		          try {
+		            const csv = event.target.result;
+		            const sections = csv.split('##').map(s => s.trim());
+        
+		            const importedData = {
+		              nodes: JSON.parse(JSON.stringify(originalData.nodes)),
+		              links: JSON.parse(JSON.stringify(originalData.links)),
+		              globalUpdates: {},
+		              componentUpdates: new Map()
+		            };
+
+		            const nodeLinks = sections.find(s => s.includes('Node and Link Alignment'));
+		            if (!nodeLinks) {
+		              throw new Error('Node and Link Alignment section not found');
+		            }
+
+		            nodeLinks.split('\n')
+		              .filter(line => line.includes(',') && line.includes('['))
+		              .forEach(line => {
+		                const parts = line.split(',').map(p => p.trim());
+		                const sourceMatch = parts[0].match(/\[(\d+)\]/);
+		                const targetMatch = parts[1].match(/\[(\d+)\]/);
+		                const value = parseFloat(parts[2]);
+            
+		                if (sourceMatch && targetMatch && !isNaN(value)) {
+		                  const sourceIndex = parseInt(sourceMatch[1]);
+		                  const targetIndex = parseInt(targetMatch[1]);
+              
+		                  const linkIndex = importedData.links.findIndex(link => 
+		                    (link.source === sourceIndex || link.source.index === sourceIndex) && 
+		                    (link.target === targetIndex || link.target.index === targetIndex)
+		                  );
+                  
+		                  if (linkIndex !== -1) {
+		                    importedData.links[linkIndex].value = Math.max(0.001, value);
+		                  }
+		                }
+		              });
+
+		            const globalsSection = sections.find(s => s.includes('Global Variables'));
+		            if (globalsSection) {
+		              globalsSection.split('\n')
+		                .filter(line => line.includes(',') && !line.includes('Variable,Value'))
+		                .forEach(line => {
+		                  const [variable, value] = line.split(',').map(v => v.trim());
+		                  if (variable && value) {
+		                    const numValue = parseFloat(value);
+		                    if (!isNaN(numValue)) {
+		                      importedData.globalUpdates[variable] = variable === 'HDD' || variable === 'GFHDD' ? 
+		                        Math.round(numValue) : parseFloat(numValue.toFixed(3));
+		                    }
+		                  }
+		                });
+		            }
+
+		            const buildingSection = sections.find(s => s.includes('Building Parameters'));
+		            if (buildingSection) {
+		              buildingSection.split('\n')
+		                .filter(line => line.includes(',') && !line.includes('Parameter,Value'))
+		                .forEach(line => {
+		                  const [parameter, value] = line.split(',').map(v => v.trim());
+		                  if (parameter === 'B.3 Conditioned Area') {
+		                    const numValue = parseFloat(value);
+		                    if (!isNaN(numValue)) {
+		                      importedData.globalUpdates['conditionedArea'] = Math.max(0.001, numValue);
+		                    }
+		                  }
+		                });
+		            }
+
+		            const componentAreasSection = sections.find(s => s.includes('Component Areas'));
+		            if (componentAreasSection) {
+		              componentAreasSection.split('\n')
+		                .filter(line => line.includes(',') && !line.includes('Component,Area'))
+		                .forEach(line => {
+		                  const [component, areaStr] = line.split(',').map(v => v.trim());
+		                  const area = parseFloat(areaStr);
+		                  if (!isNaN(area)) {
+		                    const componentKey = Object.keys(CONFIG.BUILDING_ELEMENTS.COMPONENTS)
+		                      .find(key => CONFIG.BUILDING_ELEMENTS.COMPONENTS[key].name === component);
+                    
+		                    if (componentKey) {
+		                      if (!importedData.componentUpdates.has(component)) {
+		                        importedData.componentUpdates.set(component, {});
+		                      }
+		                      const updates = importedData.componentUpdates.get(component);
+		                      updates.area = Math.max(0.001, area);
+		                    }
+		                  }
+		                });
+		            }
+
+		            const componentUValuesSection = sections.find(s => s.includes('Component U-Values'));
+		            if (componentUValuesSection) {
+		              componentUValuesSection.split('\n')
+		                .filter(line => line.includes(',') && !line.includes('Component,U-Value'))
+		                .forEach(line => {
+		                  const [component, uValueStr] = line.split(',').map(v => v.trim());
+		                  const uValue = parseFloat(uValueStr);
+		                  if (!isNaN(uValue)) {
+		                    const componentKey = Object.keys(CONFIG.BUILDING_ELEMENTS.COMPONENTS)
+		                      .find(key => CONFIG.BUILDING_ELEMENTS.COMPONENTS[key].name === component);
+                    
+		                    if (componentKey) {
+		                      if (!importedData.componentUpdates.has(component)) {
+		                        importedData.componentUpdates.set(component, {});
+		                      }
+		                      const updates = importedData.componentUpdates.get(component);
+		                      updates.uvalue = Math.max(0.001, uValue);
+		                    }
+		                  }
+		                });
+		            }
+
+		            resolve(importedData);
+		          } catch (error) {
+		            console.error('CSV parsing error:', error);
+		            reject(error);
+		          }
+		        };
+
+		        reader.onerror = reject;
+		        reader.readAsText(file);
+		      });
+		    },
+
+			async handleXLSXImport(file) {
+			  return new Promise((resolve, reject) => {
+			    const reader = new FileReader();
+    
+			    reader.onload = async (event) => {
+			      try {
+			        console.log("=== Starting XLSX Import ===");
+			        const data = new Uint8Array(event.target.result);
+			        const workbook = XLSX.read(data, {
+			          cellStyles: true,
+			          cellFormulas: true,
+			          cellDates: true,
+			          cellNF: true,
+			          sheetStubs: true
+			        });
+
+			        const importedData = {
+			          nodes: JSON.parse(JSON.stringify(originalData.nodes)),
+			          links: JSON.parse(JSON.stringify(originalData.links)),
+			          globalUpdates: {},
+			          componentUpdates: new Map()
+			        };
+
+			        // First process global values including conditioned area and nGainsFactor
+			        console.log("\nProcessing Global Values...");
+			        Object.entries(CONFIG.EXCEL_MAPPING.GLOBAL_VALUES).forEach(([key, cellRef]) => {
+			          const [sheet, cell] = cellRef.split('!');
+			          const value = workbook.Sheets[sheet]?.[cell]?.v;
+          
+			          if (value !== undefined) {
+			            const numValue = parseFloat(value);
+			            if (!isNaN(numValue)) {
+			              if (key === 'HDD' || key === 'GFHDD') {
+			                importedData.globalUpdates[key] = Math.round(numValue);
+			              } else {
+			                importedData.globalUpdates[key] = parseFloat(numValue.toFixed(3));
+			              }
+			              // Special handling for conditioned area
+			              if (key === 'B.3 Conditioned Area') {
+			                importedData.globalUpdates['conditionedArea'] = numValue;
+			              }
+			              // Special handling for nGainsFactor
+			              if (key === 'nGainsFactor') {
+			                const gainsFactor = numValue;
+			                importedData.globalUpdates['nGainsFactor'] = gainsFactor;
+			                // Set the dropdown selection
+			                const selector = document.getElementById('gainsFactorMethod');
+			                if (selector) {
+			                  if (gainsFactor <= 0.0) selector.value = "0.0";
+			                  else if (gainsFactor <= 0.4) selector.value = "0.4";
+			                  else if (gainsFactor <= 0.5) selector.value = "0.5";
+			                  else if (gainsFactor <= 0.6) selector.value = "0.6";
+			                  else selector.value = "phpp";
+                  
+			                  // Update the calculated display
+			                  const display = document.getElementById('calculatedGainsFactor');
+			                  if (display) {
+			                    display.textContent = gainsFactor > 0.6 ? 
+			                      `(${(gainsFactor * 100).toFixed(2)}%)` : 
+			                      `(${selector.value * 100}%)`;
+			                  }
+			                }
+			              }
+			              console.log(`Global Value ${key}: ${importedData.globalUpdates[key]}`);
+			            }
+			          }
+			        });
+
+			        // Process direct node values (kWh values)
+			        console.log("\nProcessing Direct kWh Values...");
+			        const telComponents = [
+			          "B.4 Roof", "B.5 Walls Above Grade", "B.6 Floor Exposed", "B.7.0 Doors",
+			          "B.8.1 Windows N", "B.8.2 Windows E", "B.8.3 Windows S", "B.8.4 Windows W",
+			          "B.9 Walls Below Grade", "B.10 Floor Slab", "B.13.2 TB Penalty", "B.19.5 Air Leakage"
+			        ];
+
+			        // Map TEL total directly
+			        const telValue = parseFloat(workbook.Sheets["ENERGY BALANCE"]?.["F22"]?.v);
+			        if (!isNaN(telValue)) {
+			          const telLink = importedData.links.find(l => 
+			            l.source === NodeUtils.findNodeIndex("Building") && 
+			            l.target === NodeUtils.findNodeIndex("Total Envelope Losses")
+			          );
+			          if (telLink) {
+			            telLink.value = Math.max(0.001, telValue);
+			            console.log(`Updated Total TEL: ${telValue}`);
+			          }
+			        }
+
+			        Object.entries(CONFIG.EXCEL_MAPPING.NODE_VALUES).forEach(([nodeName, cellRef]) => {
+			          // Skip _area and _uvalue entries
+			          if (!nodeName.includes('_area') && !nodeName.includes('_uvalue')) {
+			            const [sheet, cell] = cellRef.split('!');
+			            const value = workbook.Sheets[sheet]?.[cell]?.v;
+            
+			            if (value !== undefined) {
+			              const numValue = parseFloat(value);
+			              if (!isNaN(numValue)) {
+			                // Special handling for M22S/M22D/TED/GX
+			                if (nodeName === "M.2.2 Sink (Air/Ground)") {
+			                  const link = importedData.links.find(l => 
+			                    l.source === NodeUtils.findNodeIndex("M.2.2 Sink (Air/Ground)") && 
+			                    l.target === NodeUtils.findNodeIndex("Thermal Energy Demand")
+			                  );
+			                  if (link) {
+			                    link.value = Math.max(0.001, numValue);
+			                    console.log(`Updated M22S: ${numValue}`);
+			                  }
+			                } 
+			                else if (nodeName === "M.2.2 Energy Input") {
+			                  const link = importedData.links.find(l => 
+			                    l.source === NodeUtils.findNodeIndex("M.2.2 Energy Input") && 
+			                    l.target === NodeUtils.findNodeIndex("Thermal Energy Demand")
+			                  );
+			                  if (link) {
+			                    link.value = Math.max(0.001, numValue);
+			                    console.log(`Updated M22D: ${numValue}`);
+			                  }
+			                }
+			                else if (nodeName === "Thermal Energy Demand") {
+			                  const link = importedData.links.find(l => 
+			                    l.source === NodeUtils.findNodeIndex("Thermal Energy Demand") && 
+			                    l.target === NodeUtils.findNodeIndex("Building")
+			                  );
+			                  if (link) {
+			                    link.value = Math.max(0.001, numValue);
+			                    console.log(`Updated TED: ${numValue}`);
+			                  }
+			                }
+			                // Handle TEL components
+			                else if (telComponents.includes(nodeName)) {
+			                  const link = importedData.links.find(l => 
+			                    l.source === NodeUtils.findNodeIndex("Total Envelope Losses") && 
+			                    l.target === NodeUtils.findNodeIndex(nodeName)
+			                  );
+			                  if (link) {
+			                    link.value = Math.max(0.001, numValue);
+			                    console.log(`Updated TEL component ${nodeName}: ${numValue}`);
+			                  }
+			                }
+			                // Handle other gains/losses
+			                else {
+			                  const isLoss = nodeName.startsWith('B.') || 
+			                               nodeName === 'V.2.4 Unrecovered Ventilation' ||
+			                               nodeName === 'W.2.W SHW Wasted' ||
+			                               nodeName === 'G.X Unusable Gains';
+
+			                  if (isLoss) {
+			                    const link = importedData.links.find(l => 
+			                      l.source === NodeUtils.findNodeIndex("Building") && 
+			                      l.target === NodeUtils.findNodeIndex(nodeName)
+			                    );
+			                    if (link) {
+			                      link.value = Math.max(0.001, numValue);
+			                      console.log(`Updated loss link ${nodeName}: ${numValue}`);
+			                    }
+			                  } else {
+			                    const link = importedData.links.find(l =>
+			                      l.source === NodeUtils.findNodeIndex(nodeName) &&
+			                      l.target === NodeUtils.findNodeIndex("Building")
+			                    );
+			                    if (link) {
+			                      link.value = Math.max(0.001, numValue);
+			                      console.log(`Updated gain link ${nodeName}: ${numValue}`);
+			                    }
+			                  }
+			                }
+			              }
+			            }
+			          }
+			        });
+
+					// In handleXLSXImport, modify the component processing:
+					Object.keys(CONFIG.BUILDING_ELEMENTS.COMPONENTS).forEach(componentKey => {
+					  const component = CONFIG.BUILDING_ELEMENTS.COMPONENTS[componentKey];
+					  const areaRef = CONFIG.EXCEL_MAPPING.NODE_VALUES[`${component.name}_area`];
+					  const rsiRef = CONFIG.EXCEL_MAPPING.NODE_VALUES[`${component.name}_rsi`];
+					  const uValueRef = CONFIG.EXCEL_MAPPING.NODE_VALUES[`${component.name}_uvalue`];
+
+					  if (!importedData.componentUpdates.has(component.name)) {
+					    importedData.componentUpdates.set(component.name, {});
+					  }
+  
+					  const updates = importedData.componentUpdates.get(component.name);
+  
+					  // Process area if available
+					  if (areaRef) {
+					    const [areaSheet, areaCell] = areaRef.split('!');
+					    const areaValue = workbook.Sheets[areaSheet]?.[areaCell]?.v;
+					    if (areaValue !== undefined) {
+					      updates.area = areaValue;
+					    }
+					  }
+
+					  // Process RSI if available 
+					  if (rsiRef) {
+					    const [rsiSheet, rsiCell] = rsiRef.split('!');
+					    const rsiValue = workbook.Sheets[rsiSheet]?.[rsiCell]?.v;
+					    if (rsiValue !== undefined && rsiValue > 0) {
+					      updates.rsi = rsiValue;
+					      updates.uvalue = 1 / rsiValue; // Calculate U-value for display only
+					    }
+					  }
+					}); //,--DO I NEED THE REST OF THIS SHIT BEFORE THE END OF THE BLOCK?
+
+			        resolve(importedData);
+			      } catch (error) {
+			        console.error('XLSX parsing error:', error);
+			        reject(error);
+			      }
+			    };
+
+			    reader.onerror = reject;
+			    reader.readAsArrayBuffer(file);
+			  });
+			}
+		  }
+		};
+</script>
+	<!-- Script Block 8: Application Controller -->
+<script defer>
+	const Application = {
+	  async initialize() {
+	    try {
+	      console.log("=== Application Init Start ===");
+      
+	      data = JSON.parse(JSON.stringify(INITIAL_DATA));
+	      originalData = JSON.parse(JSON.stringify(INITIAL_DATA));
+      
+	      // Initialize global variables
+	      TED = 0;
+	      M22D = 0;
+	      M22S = 0;
+      
+	      COPh = CONFIG.VALUE_LIMITS.COP_HEATING.default;
+	      previousCOPh = CONFIG.VALUE_LIMITS.COP_HEATING.default;
+	      COPc = CONFIG.VALUE_LIMITS.COP_COOLING.default;
+	      MVHR = CONFIG.VALUE_LIMITS.MVHR.default;
+	      DWHR = CONFIG.VALUE_LIMITS.DWHR.default;
+      
+	      spacingCollapsed = false;
+	      widthMultiplier = 1;
+	      showEmissions = false;
+	      isGasHeating = false;
+      
+	      await this.initializeComponents();
+	      await this.initializeState();
+	      await this.performInitialRender();
+      
+	      const balance = EnergyCalculator.calculateEnergyBalance();
+	      updateStatus(
+	        balance.isBalanced ? 'Diagram ready - Energy balanced' : 'Diagram ready - Check energy balance',
+	        balance.isBalanced ? 'success' : 'warning'
+	      );
+	    } catch (error) {
+	      console.error("Application initialization failed:", error);
+	      updateStatus('Initialization error: ' + error.message, 'error');
+	    }
+	  },
+
+	  async initializeComponents() {
+	    try {
+	      if (!data?.nodes || !data?.links) {
+	        throw new Error('Data structure not properly initialized');
+	      }
+
+	      NodeUtils.ensureNodeReferences();
+	      StateManager.initialize();
+	      SankeyDiagram.initialize();
+	      ControlPanel.initialize();
+
+	      return true;
+	    } catch (error) {
+	      console.error("Component initialization failed:", error);
+	      throw new Error(`Component initialization failed: ${error.message}`);
+	    }
+	  },
+
+	  // REPLACE EXISTING initializeState() method
+	  async initializeState() {
+	    try {
+	      // First validate all links in initial data
+	      data.links = LinkUtils.ensureValidLinkStructure();
+    
+	      // Store initial values in state
+	      const initialValues = {
+	        gX: LinkUtils.getLinkValue("Building", "G.X Unusable Gains"),
+	        ted: LinkUtils.getLinkValue("Thermal Energy Demand", "Building"),
+	        m22s: LinkUtils.getLinkValue("M.2.2 Sink (Air/Ground)", "Thermal Energy Demand"),
+	        m22d: LinkUtils.getLinkValue("M.2.2 Energy Input", "Thermal Energy Demand")
+	      };
+
+	      console.log("Initial values stored:", initialValues);
+    
+	      COPh = StateManager.getValue('copHeating');
+	      COPc = StateManager.getValue('copCooling');
+	      MVHR = StateManager.getValue('mvhrEfficiency');
+	      DWHR = StateManager.getValue('dwhrEfficiency');
+
+	      NodeUtils.ensureNodeReferences();
+    
+	      // Only update if values different from initial
+	      if (Math.abs(TED - initialValues.ted) > 0.1) {
+	        EnergyCalculator.updateTEL(true);
+	        EnergyCalculator.updateHeatPumpValues(initialValues.ted);
+	        EnergyCalculator.updateBuildingBalance();
+	      }
+	      // Force update of all displays after initialization
+	      ControlPanel.updateValueDisplays();
+	      ControlPanel.updateTotals();
+
+	      return true;
+	    } catch (error) {
+	      console.error("State initialization failed:", error);
+	      throw new Error(`State initialization failed: ${error.message}`);
+	    }
+	  },
+
+	  async performInitialRender() {
+	    try {
+	      const container = document.querySelector('.diagram-container');
+	      const width = container.clientWidth;
+      
+	      SankeyDiagram.svg.attr("width", width);
+	      SankeyDiagram.sankey.extent([[1, 1], [width - 1, 600 - 1]]);
+      
+	      requestAnimationFrame(() => {
+	        SankeyDiagram.render(true);
+	        ControlPanel.calculateTotalEnergyCost();
+	        ControlPanel.calculateTEUI();  // Add initial TEUI calculation
+	      });
+
+	      return true;
+	    } catch (error) {
+	      console.error("Initial render failed:", error);
+	      throw new Error(`Initial render failed: ${error.message}`);
+	    }
+	  }
+	};
+
+	// Update status utility function
+	function updateStatus(message, type = 'pending') {
+	  const statusElement = document.getElementById('statusMessage');
+	  statusElement.textContent = message;
+	  statusElement.className = `status-${type}`;
+	}
+
+	// Application startup
+	document.addEventListener('DOMContentLoaded', () => {
+	  Application.initialize().catch(error => {
+	    console.error("Application startup failed:", error);
+	    updateStatus('Application startup failed: ' + error.message, 'error');
+	  });
+	});
+
+	// Debug TEUI function
+	function debugTEUI() {
+	  const teui = ControlPanel.calculateTEUI();
+	  console.log("Debug - TEUI calculation:", teui);
+	}
+
+	// Debug function to trace value flow
+	function debugValueFlow(componentName) {
+	  console.log(`=== Value Flow Debug ===`);
+	  console.log(`Component: ${componentName}`);
+  
+	  // Check link values
+	  const telValue = LinkUtils.getLinkValue("Total Envelope Losses", componentName);
+	  console.log(`TEL → ${componentName}: ${telValue}`);
+  
+	  // Check building balance
+	  const buildingBalance = EnergyCalculator.calculateEnergyBalance();
+	  console.log(`Building balance:`, buildingBalance);
+  
+	  // Check node references
+	  LinkUtils.verifyNodeReferences();
+  
+	  // Check TEUI calculation
+	  const teui = ControlPanel.calculateTEUI();
+	  console.log(`Final TEUI: ${teui}`);
+	}
+	//Copyright OpenBuilding.ca 2025. All rights reserved. See Terms and Conditions at https://openbuilding.ca/about/terms-of-use/
+	//NOTES - 3029r4 STABLE. Add TEDI next. Fix GX.  
+</script>
+</body>
+</html>
