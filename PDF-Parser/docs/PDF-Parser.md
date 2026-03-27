@@ -472,27 +472,62 @@ var project = {
 - [x] Loading progress bar: "Reading page 1/30..." with visual fill bar
 - [ ] Vertex handle sizing relative to zoom level (future)
 
-### Step 5 — Vector Snap & Outline Detection (NEXT)
+### Step 5 — Measurement Methods & Area Management (NEXT)
+
+Expand the measure tool from polygon-only to multiple methods, and add area naming/merging.
+
+#### 5.1 Measurement Method Dropdown
+The M (Measure) tool gets a method selector — either in the toolbar or as a floating dropdown near the cursor:
+
+| Method | Interaction | Use case |
+|---|---|---|
+| **Polygon** (default) | Click vertices, close near first point | Complex shapes, irregular rooms |
+| **Bounding Rectangle** | Click start corner, click opposite corner | Fast orthogonal areas — most rooms, floor plates |
+
+- **Bounding Rectangle** creates a 4-vertex polygon from just 2 clicks (diagonally opposite corners)
+- The resulting polygon is editable — user can drag vertices to adjust after creation
+- Rectangle edges align to the page axes (orthogonal) — no rotation for v1
+
+#### 5.2 Area Renaming
+Default label "Area 1", "Area 2" etc. should be user-editable:
+
+- **Click label pill** on the drawing → inline text input appears, user types new name, Enter to confirm
+- **Click label in sidebar** measurement table → same inline edit
+- Whichever is easier to implement first; both should update the same underlying label
+- Common names: "Main Level", "Upper Level", "Garage", "South Elevation", "Foundation"
+- Name persists to ProjectStore and appears in CSV/JSON export
+
+#### 5.3 Area Merging / Healing
+When multiple polygons partially overlap on the same page:
+
+- **"Merge overlapping"** toggle/button — computes the union of all overlapping polygons into a single combined polygon
+- Use case: user traces a main floor and a bump-out separately, wants the total combined area
+- Implementation: detect polygon intersection, compute union outline, replace overlapping polygons with merged result
+- Display merged area as a single entry in the measurement panel with summed label
+- Non-overlapping polygons remain separate
+- This is a **nice-to-have** for v1 — the running total in the sidebar already gives the combined area. True geometric union is complex. Consider a simpler approach first: a "Group" function that logically combines selected polygons under one label while keeping them visually separate, and shows their sum as the group total.
+
+### Step 6 — Vector Snap & Outline Detection
 - [ ] PDF operator stream parsing for line geometry
 - [ ] Spatial index of line segments
 - [ ] Cursor snap to nearby endpoints/intersections
 - [ ] Heuristic building outline detection
 - [ ] User confirm/adjust workflow ("Does this look correct?" with adjustable vertices)
 
-### Step 6 — Schedule Extraction & Cross-Validation
+### Step 7 — Schedule Extraction & Cross-Validation
 - [ ] Text clustering into table rows/columns
 - [ ] Room schedule parser
 - [ ] Cross-validation: "Schedule says Office = 27.80 m²; your polygon = 28.1 m² (1.1% variance)"
 
-### Step 7 — Section Analysis & Volume (Phase 2)
+### Step 8 — Section Analysis & Volume (Phase 2)
 - [ ] Level detection on section sheets
 - [ ] Floor-to-floor height extraction
 - [ ] Volume = area × height per storey
 - [ ] Cross-validation against energy model data (A0.10)
 
-### Step 8 — Polish & Export
+### Step 9 — Polish & Export
 - [ ] Print-friendly summary view
-- [ ] Improved project save/load
+- [ ] Improved project save/load (restore polygons + calibrations from JSON)
 - [ ] Error handling and edge cases
 - [ ] Testing against multiple CD sets (different firms, scales, formats)
 
