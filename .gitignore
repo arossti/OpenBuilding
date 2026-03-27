@@ -5,3 +5,9 @@
 # Large binary files (will be managed with DVC)
 *.ifc
 *.ifc.zip
+
+# Documents — kept locally, not tracked in git
+*.pdf
+*.docx
+*.xlsx
+*.xls
