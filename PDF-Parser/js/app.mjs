@@ -22,6 +22,7 @@ var _measureMethod = "polygon";   // "polygon" or "rectangle"
 var _calibPoint1 = null;
 var _rectStart = null;            // first corner for bounding rectangle
 var _rectCurrent = null;          // live cursor position for rubber-band preview
+var _snapTarget = null;           // current snap indicator {x, y, type}
 
 /* ── Boot ─────────────────────────────────────────────── */
 
@@ -44,6 +45,7 @@ function init() {
   Viewer.setDrawCallback(function(ctx, pageNum) {
     PolygonTool.draw(ctx, pageNum);
     _drawRectPreview(ctx);
+    _drawSnapIndicator(ctx);
   });
   Viewer.onOverlayClick(_handleOverlayClick);
   Viewer.onOverlayMouseMove(_handleOverlayMouseMove);
@@ -311,7 +313,9 @@ function _handleOverlayClick(e) {
     }
   }
 
-  var snap = VectorSnap.findNearestEndpoint(_currentPage, pt, SNAP_RADIUS_PX);
+  // Snap to drawing geometry (endpoints and lines)
+  var snapRadius = 12 / (Viewer.getZoom() * (150 / 72));
+  var snap = VectorSnap.findSnap(_currentPage, pt, snapRadius);
   if (snap) pt = { x: snap.x, y: snap.y };
 
   if (_currentTool === "measure") _handleMeasureClick(pt);
@@ -501,18 +505,29 @@ function _parseDistanceInput(str) {
 
 function _handleOverlayMouseMove(e) {
   var pt = Viewer.eventToPdfCoords(e);
+  var hitRadius = 10 / (Viewer.getZoom() * (150 / 72));
+  var snapRadius = 12 / (Viewer.getZoom() * (150 / 72));
+
+  // Track snap target for visual indicator (during measure/calibrate modes)
+  var prevSnap = _snapTarget;
+  _snapTarget = null;
+  if (_currentTool === "measure" || _currentTool === "calibrate") {
+    _snapTarget = VectorSnap.findSnap(_currentPage, pt, snapRadius);
+  }
 
   // Rubber-band rectangle preview
   if (_rectStart && _currentTool === "measure" && _measureMethod === "rectangle") {
-    _rectCurrent = pt;
+    _rectCurrent = _snapTarget ? { x: _snapTarget.x, y: _snapTarget.y } : pt;
     Viewer.requestRedraw();
     return;
   }
 
+  // Redraw if snap state changed (to show/hide indicator)
+  if (_snapTarget !== prevSnap) Viewer.requestRedraw();
+
   // Show contextual cursor when hovering near draggable geometry
-  var hitRadius = 10 / (Viewer.getZoom() * (150 / 72));
   var wrap = document.getElementById("viewer-wrap");
-  if (!PolygonTool.isDrawing()) {
+  if (!PolygonTool.isDrawing() && !_rectStart) {
     var vertHit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
     if (vertHit) {
       if (wrap) wrap.style.cursor = "move";
@@ -520,12 +535,46 @@ function _handleOverlayMouseMove(e) {
     }
     var edgeHit = PolygonTool.hitTestEdge(_currentPage, pt, hitRadius);
     if (edgeHit) {
-      if (wrap) wrap.style.cursor = "cell";  // + cursor — indicates "add point here"
+      if (wrap) wrap.style.cursor = "cell";
       return;
     }
   }
   var cursorMap = { measure: "crosshair", calibrate: "crosshair", navigate: "default" };
   if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
+}
+
+function _drawSnapIndicator(ctx) {
+  if (!_snapTarget) return;
+  var p = Viewer.pdfToCanvas(_snapTarget);
+  ctx.save();
+
+  if (_snapTarget.type === "endpoint") {
+    // Square indicator for endpoint snap
+    ctx.strokeStyle = "#ff0";
+    ctx.lineWidth = 2;
+    var s = 8;
+    ctx.strokeRect(p.x - s, p.y - s, s * 2, s * 2);
+    // Crosshair
+    ctx.beginPath();
+    ctx.moveTo(p.x - s - 3, p.y); ctx.lineTo(p.x + s + 3, p.y);
+    ctx.moveTo(p.x, p.y - s - 3); ctx.lineTo(p.x, p.y + s + 3);
+    ctx.stroke();
+  } else {
+    // X indicator for line snap
+    ctx.strokeStyle = "#0f0";
+    ctx.lineWidth = 2;
+    var r = 6;
+    ctx.beginPath();
+    ctx.moveTo(p.x - r, p.y - r); ctx.lineTo(p.x + r, p.y + r);
+    ctx.moveTo(p.x + r, p.y - r); ctx.lineTo(p.x - r, p.y + r);
+    ctx.stroke();
+    // Circle
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, r + 2, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  ctx.restore();
 }
 
 function _drawRectPreview(ctx) {
@@ -669,6 +718,7 @@ function _bindKeyboard() {
           setStatus("Polygon deleted", "ready");
         }
         break;
+      case "d": autoDetect(); break;
       case "s": openScalePanel(); break;
       case "m": setTool("measure"); break;
       case "r":
@@ -877,6 +927,89 @@ function setStatus(msg, type) {
   els.statusBar.className = "status-bar" + (type ? " status-" + type : "");
 }
 
+/* ── Auto-detect building outline ──────────────────────── */
+
+var _detectCandidates = [];  // cached candidates from last detect
+var _detectIndex = 0;        // which candidate we're showing
+
+function autoDetect() {
+  if (!Loader.isLoaded()) return;
+
+  // If we already scanned this page, cycle through candidates or bail
+  if (_detectCandidates._page === _currentPage) {
+    if (_detectCandidates.length > 0) {
+      _detectIndex = (_detectIndex + 1) % _detectCandidates.length;
+      _placeDetectedOutline(_detectCandidates[_detectIndex], _detectIndex, _detectCandidates.length);
+    } else {
+      setStatus("No vector geometry on this page. This may be a scanned/raster PDF — use manual measurement (M/R).", "error");
+    }
+    return;
+  }
+
+  setStatus("Scanning vector geometry...", "busy");
+
+  VectorSnap.extractGeometry(_currentPage).then(function(geo) {
+    return Loader.getPageSize(_currentPage).then(function(size) {
+      var candidates = VectorSnap.getClosedPathsByArea(_currentPage, size.width, size.height);
+      candidates._page = _currentPage;
+      _detectCandidates = candidates;
+      _detectIndex = 0;
+
+      // Log diagnostics
+      console.log("[Auto-detect] Page " + _currentPage + ": " +
+        geo.segments.length + " line segments, " +
+        geo.endpoints.length + " endpoints, " +
+        geo.closedPaths.length + " closed paths total, " +
+        candidates.length + " candidates (filtered by area)");
+
+      if (candidates.length > 0) {
+        for (var i = 0; i < Math.min(candidates.length, 5); i++) {
+          var areaM2 = ScaleManager.pdfAreaToM2(_currentPage, candidates[i].area);
+          console.log("  Candidate " + (i + 1) + ": " + candidates[i].path.length + " vertices, " +
+            (areaM2 ? areaM2.toFixed(1) + " m²" : "uncalibrated"));
+        }
+        _placeDetectedOutline(candidates[0], 0, candidates.length);
+      } else if (geo.segments.length === 0) {
+        // No vector geometry at all — likely a scanned/raster PDF
+        setStatus("No vector data found — this appears to be a scanned/raster PDF. Use manual measurement (M or R).", "error");
+        console.log("[Auto-detect] Page has zero vector geometry. This is a raster/scanned PDF.");
+      } else {
+        setStatus("No closed outlines found (" + geo.segments.length + " line segments, but no closed shapes). Use manual measurement (M or R).", "error");
+        console.log("[Auto-detect] " + geo.segments.length + " segments, " +
+          geo.closedPaths.length + " closed paths (likely hatching/fills). " +
+          "Building walls drawn as individual segments, not closed polylines.");
+      }
+    });
+  });
+}
+
+function _placeDetectedOutline(candidate, idx, total) {
+  // Remove the previous detected polygon if cycling
+  var polys = PolygonTool.getPolygons(_currentPage);
+  for (var i = polys.length - 1; i >= 0; i--) {
+    if (polys[i].label && polys[i].label.indexOf("Detected") === 0) {
+      PolygonTool.deletePolygon(_currentPage, i);
+      break;
+    }
+  }
+
+  var verts = candidate.path;
+  PolygonTool.startPolygon(_currentPage, "Detected " + (idx + 1) + "/" + total);
+  for (var j = 0; j < verts.length; j++) {
+    PolygonTool.addVertex({ x: verts[j].x, y: verts[j].y });
+  }
+  PolygonTool.closePolygon();
+
+  _refreshMeasurements();
+  ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
+  Viewer.requestRedraw();
+
+  var areaM2 = ScaleManager.pdfAreaToM2(_currentPage, candidate.area);
+  var areaStr = areaM2 !== null ? (areaM2.toFixed(1) + " m\u00B2") : "(uncalibrated)";
+  var hint = total > 1 ? " Press D again to cycle (" + (idx + 1) + "/" + total + ")." : "";
+  setStatus("Outline: " + areaStr + ", " + verts.length + " vertices." + hint, "ready");
+}
+
 /* ── Export ────────────────────────────────────────────── */
 
 function exportCSV() {
@@ -897,7 +1030,9 @@ window.PP = {
   openScalePanel: openScalePanel, closeScalePanel: closeScalePanel,
   setScaleSystem: setScaleSystem, acceptScale: acceptScale, verifyScale: verifyScale,
   // Measure method
-  setMeasureMethod: setMeasureMethod
+  setMeasureMethod: setMeasureMethod,
+  // Auto-detect
+  autoDetect: autoDetect
 };
 
 /* ── Boot ─────────────────────────────────────────────── */
