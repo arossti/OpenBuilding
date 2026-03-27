@@ -30,6 +30,7 @@ export function setMarqueeMode(on) { _marqueeMode = on; }
 export function showPage(pageNum) {
   _currentPage = pageNum;
   return Loader.renderPage(pageNum, _pdfCanvas, _renderDpi * _zoom).then(function(result) {
+    if (!result) return null;  // render was cancelled
     _viewport = result.viewport;
     _syncOverlaySize();
     _redrawOverlay();
@@ -89,9 +90,16 @@ export function zoomFit() {
   });
 }
 
+var _zoomTimer = null;
+
 export function setZoom(z) {
   _zoom = Math.max(0.25, Math.min(z, 5.0));
-  if (_currentPage > 0) showPage(_currentPage);
+  // Debounce rapid zoom (scroll wheel) — wait 80ms before re-rendering
+  if (_zoomTimer) clearTimeout(_zoomTimer);
+  _zoomTimer = setTimeout(function() {
+    _zoomTimer = null;
+    if (_currentPage > 0) showPage(_currentPage);
+  }, 80);
 }
 
 export function getZoom() { return _zoom; }

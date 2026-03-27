@@ -31,15 +31,29 @@ export function getPage(pageNum) {
   });
 }
 
+var _currentRenderTask = null;
+
 export function renderPage(pageNum, canvas, dpi) {
   dpi = dpi || DEFAULT_DPI;
+  // Cancel any in-progress render to avoid "Cannot use same canvas" error
+  if (_currentRenderTask) {
+    _currentRenderTask.cancel();
+    _currentRenderTask = null;
+  }
   return getPage(pageNum).then(function(page) {
     var viewport = page.getViewport({ scale: dpi / 72 });
     canvas.width = viewport.width;
     canvas.height = viewport.height;
     var ctx = canvas.getContext("2d");
-    return page.render({ canvasContext: ctx, viewport: viewport }).promise.then(function() {
+    var task = page.render({ canvasContext: ctx, viewport: viewport });
+    _currentRenderTask = task;
+    return task.promise.then(function() {
+      _currentRenderTask = null;
       return { width: viewport.width, height: viewport.height, viewport: viewport };
+    }).catch(function(err) {
+      _currentRenderTask = null;
+      if (err && err.name === "RenderingCancelledException") return null;
+      throw err;
     });
   });
 }
