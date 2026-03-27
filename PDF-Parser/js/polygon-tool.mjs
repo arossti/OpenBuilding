@@ -297,6 +297,65 @@ export function hitTestVertex(pageNum, pt, radiusPdf) {
 }
 
 /**
+ * Hit-test: find an edge near the given PDF coordinate.
+ * Returns the edge (defined by the index of its first vertex) and
+ * the closest point on that edge.
+ * @param {number} pageNum
+ * @param {Object} pt — {x, y} in PDF coords
+ * @param {number} radiusPdf — search radius in PDF points
+ * @returns {Object|null} — { polyIdx, edgeIdx, point: {x,y} } or null
+ */
+export function hitTestEdge(pageNum, pt, radiusPdf) {
+  var polys = _polygons[pageNum] || [];
+  var best = null;
+  var bestDist = radiusPdf;
+
+  for (var i = 0; i < polys.length; i++) {
+    if (!polys[i].closed) continue;
+    var verts = polys[i].vertices;
+    var n = verts.length;
+    for (var j = 0; j < n; j++) {
+      var k = (j + 1) % n;
+      var proj = _projectPointOnSegment(pt, verts[j], verts[k]);
+      if (proj.distance < bestDist) {
+        bestDist = proj.distance;
+        best = { polyIdx: i, edgeIdx: j, point: { x: proj.x, y: proj.y } };
+      }
+    }
+  }
+  return best;
+}
+
+function _projectPointOnSegment(pt, a, b) {
+  var dx = b.x - a.x, dy = b.y - a.y;
+  var len2 = dx * dx + dy * dy;
+  if (len2 === 0) {
+    var d = Math.sqrt(Math.pow(pt.x - a.x, 2) + Math.pow(pt.y - a.y, 2));
+    return { x: a.x, y: a.y, distance: d };
+  }
+  var t = Math.max(0, Math.min(1, ((pt.x - a.x) * dx + (pt.y - a.y) * dy) / len2));
+  var px = a.x + t * dx, py = a.y + t * dy;
+  return { x: px, y: py, distance: Math.sqrt(Math.pow(pt.x - px, 2) + Math.pow(pt.y - py, 2)) };
+}
+
+/**
+ * Insert a new vertex on an edge of a closed polygon.
+ * @param {number} pageNum
+ * @param {number} polyIdx
+ * @param {number} edgeIdx — index of the first vertex of the edge
+ * @param {Object} pt — {x, y} position for the new vertex
+ * @returns {number} — the index of the newly inserted vertex
+ */
+export function insertVertex(pageNum, polyIdx, edgeIdx, pt) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) return -1;
+  _pushUndo(pageNum);
+  var insertIdx = edgeIdx + 1;
+  polys[polyIdx].vertices.splice(insertIdx, 0, { x: pt.x, y: pt.y });
+  return insertIdx;
+}
+
+/**
  * Start dragging a vertex. Saves undo state.
  */
 export function startDrag(pageNum, polyIdx, vertIdx) {
@@ -315,10 +374,39 @@ export function moveDrag(pt) {
 }
 
 /**
- * End the drag.
+ * End the drag. If the dragged vertex is near another vertex on the
+ * same polygon, merge them (remove the dragged vertex).
+ * @param {number} mergeRadiusPdf — distance threshold for merge
+ * @returns {boolean} — true if a merge occurred
  */
-export function endDrag() {
+export function endDrag(mergeRadiusPdf) {
+  if (!_dragState) return false;
+  mergeRadiusPdf = mergeRadiusPdf || 5;
+
+  var polys = _polygons[_dragState.pageNum];
+  var poly = polys && polys[_dragState.polyIdx];
+  var merged = false;
+
+  if (poly && poly.vertices.length > 3) {
+    var dragVert = poly.vertices[_dragState.vertIdx];
+    var n = poly.vertices.length;
+
+    for (var i = 0; i < n; i++) {
+      if (i === _dragState.vertIdx) continue;
+      var other = poly.vertices[i];
+      var dx = dragVert.x - other.x;
+      var dy = dragVert.y - other.y;
+      if (Math.sqrt(dx * dx + dy * dy) < mergeRadiusPdf) {
+        // Remove the dragged vertex — it collapses onto the other one
+        poly.vertices.splice(_dragState.vertIdx, 1);
+        merged = true;
+        break;
+      }
+    }
+  }
+
   _dragState = null;
+  return merged;
 }
 
 export function isDragging() { return _dragState !== null; }

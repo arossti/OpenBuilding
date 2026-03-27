@@ -283,9 +283,9 @@ function verifyScale() {
 
 function _handleOverlayClick(e) {
   var pt = Viewer.eventToPdfCoords(e);
-
-  // Check if clicking near an existing vertex — start drag regardless of tool
   var hitRadius = 10 / (Viewer.getZoom() * (150 / 72));  // ~10 screen pixels → PDF units
+
+  // Priority 1: Click near an existing vertex — start drag
   var hit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
   if (hit && !PolygonTool.isDrawing()) {
     PolygonTool.startDrag(_currentPage, hit.polyIdx, hit.vertIdx);
@@ -294,6 +294,21 @@ function _handleOverlayClick(e) {
     var wrap = document.getElementById("viewer-wrap");
     if (wrap) wrap.style.cursor = "move";
     return;
+  }
+
+  // Priority 2: Click near an edge — insert vertex and start dragging it
+  var edgeHit = PolygonTool.hitTestEdge(_currentPage, pt, hitRadius);
+  if (edgeHit && !PolygonTool.isDrawing()) {
+    var newIdx = PolygonTool.insertVertex(_currentPage, edgeHit.polyIdx, edgeHit.edgeIdx, edgeHit.point);
+    if (newIdx >= 0) {
+      PolygonTool.startDrag(_currentPage, edgeHit.polyIdx, newIdx);
+      Viewer.onOverlayMouseMove(_handleDragMove);
+      _bindDragEnd();
+      Viewer.requestRedraw();
+      var wrap2 = document.getElementById("viewer-wrap");
+      if (wrap2) wrap2.style.cursor = "move";
+      return;
+    }
   }
 
   var snap = VectorSnap.findNearestEndpoint(_currentPage, pt, SNAP_RADIUS_PX);
@@ -314,7 +329,9 @@ function _bindDragEnd() {
   function onUp() {
     window.removeEventListener("mouseup", onUp);
     if (PolygonTool.isDragging()) {
-      PolygonTool.endDrag();
+      var mergeRadius = 10 / (Viewer.getZoom() * (150 / 72));  // ~10 screen pixels
+      var merged = PolygonTool.endDrag(mergeRadius);
+      if (merged) setStatus("Vertices merged", "ready");
       // Restore normal mousemove handler
       Viewer.onOverlayMouseMove(_handleOverlayMouseMove);
       var wrap = document.getElementById("viewer-wrap");
@@ -492,16 +509,23 @@ function _handleOverlayMouseMove(e) {
     return;
   }
 
-  // Show move cursor when hovering near a draggable vertex
+  // Show contextual cursor when hovering near draggable geometry
   var hitRadius = 10 / (Viewer.getZoom() * (150 / 72));
-  var hit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
   var wrap = document.getElementById("viewer-wrap");
-  if (hit && !PolygonTool.isDrawing()) {
-    if (wrap) wrap.style.cursor = "move";
-  } else {
-    var cursorMap = { measure: "crosshair", calibrate: "crosshair", navigate: "default" };
-    if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
+  if (!PolygonTool.isDrawing()) {
+    var vertHit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
+    if (vertHit) {
+      if (wrap) wrap.style.cursor = "move";
+      return;
+    }
+    var edgeHit = PolygonTool.hitTestEdge(_currentPage, pt, hitRadius);
+    if (edgeHit) {
+      if (wrap) wrap.style.cursor = "cell";  // + cursor — indicates "add point here"
+      return;
+    }
   }
+  var cursorMap = { measure: "crosshair", calibrate: "crosshair", navigate: "default" };
+  if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
 }
 
 function _drawRectPreview(ctx) {
@@ -599,13 +623,43 @@ function _bindKeyboard() {
 
     switch (e.key) {
       case "Escape":
+        // Cascade: cancel the most immediate in-progress action
+        // 1. Scale panel open? Close it.
+        if (document.getElementById("scale-panel").classList.contains("visible")) {
+          closeScalePanel();
+          setStatus("Scale panel closed", "ready");
+          break;
+        }
+        // 2. Rectangle in progress? Cancel it.
+        if (_rectStart) {
+          _rectStart = null;
+          _rectCurrent = null;
+          Viewer.requestRedraw();
+          setStatus("Rectangle cancelled", "ready");
+          break;
+        }
+        // 3. Polygon being drawn? Delete the in-progress polygon.
         if (PolygonTool.isDrawing()) {
-          // Cancel in-progress polygon — delete it
           PolygonTool.deleteLastPolygon(_currentPage);
           Viewer.requestRedraw();
           setStatus("Polygon cancelled", "ready");
+          break;
         }
-        setTool("navigate"); break;
+        // 4. Calibration first-point set? Cancel it.
+        if (_calibPoint1) {
+          _calibPoint1 = null;
+          _pendingRatio = null;
+          setStatus("Calibration cancelled", "ready");
+          setTool("navigate");
+          break;
+        }
+        // 5. If in a tool mode, return to navigate
+        if (_currentTool !== "navigate") {
+          setTool("navigate");
+          setStatus("", "ready");
+          break;
+        }
+        break;
       case "Delete": case "Backspace":
         // Delete last polygon on current page
         if (!PolygonTool.isDrawing()) {
