@@ -192,43 +192,53 @@ function _drawPoly(ctx, poly) {
     for (var k = 0; k < verts.length; k++) { cx += verts[k].x; cy += verts[k].y; }
     var center = Viewer.pdfToCanvas({ x: cx / verts.length, y: cy / verts.length });
 
-    // Compute area text for the label
+    // Compute area text for the label — show both m² and ft²
     var areaPdf = computeAreaPdf(verts);
     var areaM2 = ScaleManager.pdfAreaToM2(poly._pageNum || 0, areaPdf);
-    var areaText = "";
+    var line2 = "", line3 = "";
     if (areaM2 !== null) {
-      areaText = areaM2.toFixed(1) + " m\u00B2";
+      var areaFt2 = areaM2 * M2_TO_FT2;
+      line2 = areaM2.toFixed(1) + " m\u00B2";
+      line3 = areaFt2.toFixed(1) + " ft\u00B2";
     } else {
-      areaText = "(uncalibrated)";
+      line2 = "(uncalibrated)";
     }
 
-    // Background pill — large, high-contrast
-    ctx.font = "bold 26px Helvetica Neue, sans-serif";
+    // Background pill — large, high-contrast, 3 lines
     var line1 = poly.label;
-    ctx.font = "24px Helvetica Neue, sans-serif";
-    var line2 = areaText;
-    // Measure with the larger font
-    ctx.font = "bold 26px Helvetica Neue, sans-serif";
+    ctx.font = "bold 24px Helvetica Neue, sans-serif";
     var w1 = ctx.measureText(line1).width;
-    ctx.font = "24px Helvetica Neue, sans-serif";
+    ctx.font = "20px Helvetica Neue, sans-serif";
     var w2 = ctx.measureText(line2).width;
-    var maxW = Math.max(w1, w2);
+    var w3 = line3 ? ctx.measureText(line3).width : 0;
+    var maxW = Math.max(w1, w2, w3);
     var pillW = maxW + 20;
-    var pillH = 64;
+    var pillH = line3 ? 80 : 58;
+    var pillTop = center.y - pillH / 2 - 2;
     ctx.fillStyle = "rgba(0,0,0,0.75)";
     ctx.beginPath();
-    ctx.roundRect(center.x - pillW / 2, center.y - pillH / 2 - 2, pillW, pillH, 6);
+    ctx.roundRect(center.x - pillW / 2, pillTop, pillW, pillH, 6);
     ctx.fill();
 
-    // Label line — white
-    ctx.font = "bold 26px Helvetica Neue, sans-serif";
+    // Line 1: label — white
+    ctx.font = "bold 24px Helvetica Neue, sans-serif";
     ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
-    ctx.fillText(line1, center.x, center.y - 4);
-    // Area line — cyan for legibility over any background
-    ctx.font = "24px Helvetica Neue, sans-serif";
+    var y1 = pillTop + 22;
+    ctx.fillText(line1, center.x, y1);
+
+    // Line 2: metric area — cyan
+    ctx.font = "20px Helvetica Neue, sans-serif";
     ctx.fillStyle = "#00e5ff";
-    ctx.fillText(line2, center.x, center.y + 24);
+    var y2 = y1 + 24;
+    ctx.fillText(line2, center.x, y2);
+
+    // Line 3: imperial area — lighter cyan
+    if (line3) {
+      ctx.fillStyle = "rgba(0, 229, 255, 0.65)";
+      var y3 = y2 + 22;
+      ctx.fillText(line3, center.x, y3);
+    }
   }
 
   ctx.restore();
