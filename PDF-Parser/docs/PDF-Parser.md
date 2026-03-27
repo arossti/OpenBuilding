@@ -507,6 +507,14 @@ When multiple polygons partially overlap on the same page:
 - Non-overlapping polygons remain separate
 - This is a **nice-to-have** for v1 — the running total in the sidebar already gives the combined area. True geometric union is complex. Consider a simpler approach first: a "Group" function that logically combines selected polygons under one label while keeping them visually separate, and shows their sum as the group total.
 
+#### 5.4 Additive/Subtractive Areas (Future)
+- Polygons can be tagged as **additive** (default, cyan fill) or **subtractive** (red/orange fill)
+- Subtractive polygons deduct from overlapping additive areas — e.g., windows subtract from wall area
+- Use case: trace a wall elevation, then trace window openings as subtractive → net wall area = wall − windows
+- Display: additive areas cyan, subtractive areas red/orange, net area shown in sidebar
+- This supports assembly-level takeoff: gross wall area, opening area, net wall area
+- Implementation deferred until BOM/assembly features (Step 8+)
+
 ### Step 6 — Vector Snap & Outline Detection
 - [ ] PDF operator stream parsing for line geometry
 - [ ] Spatial index of line segments

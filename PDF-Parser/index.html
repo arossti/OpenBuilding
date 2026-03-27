@@ -107,6 +107,18 @@
     .tool-btn:hover { background: var(--bg-panel); border-color: var(--accent); }
     .tool-btn.active { background: var(--accent); border-color: var(--accent-lit); color: #fff; }
 
+    #measure-method {
+      background: var(--bg-panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 11px;
+      font-family: var(--font);
+      cursor: pointer;
+    }
+    #measure-method:focus { border-color: var(--accent); outline: none; }
+
     .toolbar-sep {
       width: 1px;
       height: 20px;
@@ -251,6 +263,22 @@
       margin-top: 6px;
       font-size: 10px;
       color: var(--text-dim);
+    }
+    .label-cell {
+      cursor: pointer;
+      border-radius: 2px;
+      padding: 2px 4px;
+    }
+    .label-cell:hover { background: var(--bg-surface); }
+    .label-edit-input {
+      background: var(--bg-surface);
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: 2px;
+      padding: 1px 4px;
+      font-size: 11px;
+      font-family: var(--font);
+      outline: none;
     }
     .empty { color: var(--text-dim); font-style: italic; }
 
@@ -515,6 +543,10 @@
       <span class="app-title">PDF-Parser</span>
       <button class="tool-btn active" data-tool="navigate" title="Navigate / Pan (V)">Navigate <span class="key-hint">V</span></button>
       <button class="tool-btn" data-tool="measure" title="Measure Area (M)">Measure <span class="key-hint">M</span></button>
+      <select id="measure-method" title="Measurement method" onchange="PP.setMeasureMethod(this.value)">
+        <option value="polygon">Polygon</option>
+        <option value="rectangle">Rectangle</option>
+      </select>
       <button class="tool-btn" data-tool="checkscale" title="Check Scale (S)">Scale <span class="key-hint">S</span></button>
       <button class="tool-btn" data-tool="calibrate" title="Manual Calibrate (C)">Calibrate <span class="key-hint">C</span></button>
       <div class="toolbar-sep"></div>

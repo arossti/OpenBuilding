@@ -18,7 +18,10 @@ import * as ProjectStore from "./project-store.mjs";
 var els = {};
 var _currentPage = 0;
 var _currentTool = "navigate";
+var _measureMethod = "polygon";   // "polygon" or "rectangle"
 var _calibPoint1 = null;
+var _rectStart = null;            // first corner for bounding rectangle
+var _rectCurrent = null;          // live cursor position for rubber-band preview
 
 /* ── Boot ─────────────────────────────────────────────── */
 
@@ -38,7 +41,10 @@ function init() {
   els.toolBtns     = document.querySelectorAll(".tool-btn");
 
   Viewer.init("viewer-container", "pdf-canvas", "overlay-canvas");
-  Viewer.setDrawCallback(function(ctx, pageNum) { PolygonTool.draw(ctx, pageNum); });
+  Viewer.setDrawCallback(function(ctx, pageNum) {
+    PolygonTool.draw(ctx, pageNum);
+    _drawRectPreview(ctx);
+  });
   Viewer.onOverlayClick(_handleOverlayClick);
   Viewer.onOverlayMouseMove(_handleOverlayMouseMove);
 
@@ -323,26 +329,66 @@ function _bindDragEnd() {
   window.addEventListener("mouseup", onUp);
 }
 
+function setMeasureMethod(method) {
+  _measureMethod = method;
+  _rectStart = null;  // reset any in-progress rectangle
+  document.getElementById("measure-method").value = method;
+}
+
 function _handleMeasureClick(pt) {
   // Warn if no confirmed scale
-  if (!ScaleManager.isCalibrated(_currentPage) && !PolygonTool.isDrawing()) {
+  if (!ScaleManager.isCalibrated(_currentPage) && !PolygonTool.isDrawing() && !_rectStart) {
     setStatus("No confirmed scale. Press S to set scale first, or measurements will be uncalibrated.", "error");
   }
 
+  if (_measureMethod === "rectangle") {
+    _handleRectangleClick(pt);
+  } else {
+    _handlePolygonClick(pt);
+  }
+}
+
+function _handlePolygonClick(pt) {
   if (!PolygonTool.isDrawing()) {
     PolygonTool.startPolygon(_currentPage);
     PolygonTool.addVertex(pt);
+    setStatus("Click vertices... close near first point to finish", "busy");
   } else {
     if (PolygonTool.isNearFirstVertex(pt, 12)) {
       PolygonTool.closePolygon();
-      setStatus("Polygon closed" + (ScaleManager.isCalibrated(_currentPage) ? "" : " (uncalibrated)"), "ready");
-      _refreshMeasurements();
-      ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
+      _onPolygonComplete();
     } else {
       PolygonTool.addVertex(pt);
     }
   }
   Viewer.requestRedraw();
+}
+
+function _handleRectangleClick(pt) {
+  if (!_rectStart) {
+    _rectStart = pt;
+    setStatus("Click opposite corner to complete rectangle", "busy");
+  } else {
+    // Create a 4-vertex polygon from the two diagonal corners
+    var x1 = _rectStart.x, y1 = _rectStart.y;
+    var x2 = pt.x, y2 = pt.y;
+    PolygonTool.startPolygon(_currentPage);
+    PolygonTool.addVertex({ x: x1, y: y1 });
+    PolygonTool.addVertex({ x: x2, y: y1 });
+    PolygonTool.addVertex({ x: x2, y: y2 });
+    PolygonTool.addVertex({ x: x1, y: y2 });
+    PolygonTool.closePolygon();
+    _rectStart = null;
+    _rectCurrent = null;
+    _onPolygonComplete();
+  }
+  Viewer.requestRedraw();
+}
+
+function _onPolygonComplete() {
+  setStatus("Area measured" + (ScaleManager.isCalibrated(_currentPage) ? "" : " (uncalibrated)"), "ready");
+  _refreshMeasurements();
+  ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
 }
 
 function _handleCalibrateClick(pt) {
@@ -437,8 +483,16 @@ function _parseDistanceInput(str) {
 }
 
 function _handleOverlayMouseMove(e) {
-  // Show move cursor when hovering near a draggable vertex
   var pt = Viewer.eventToPdfCoords(e);
+
+  // Rubber-band rectangle preview
+  if (_rectStart && _currentTool === "measure" && _measureMethod === "rectangle") {
+    _rectCurrent = pt;
+    Viewer.requestRedraw();
+    return;
+  }
+
+  // Show move cursor when hovering near a draggable vertex
   var hitRadius = 10 / (Viewer.getZoom() * (150 / 72));
   var hit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
   var wrap = document.getElementById("viewer-wrap");
@@ -448,6 +502,50 @@ function _handleOverlayMouseMove(e) {
     var cursorMap = { measure: "crosshair", calibrate: "crosshair", navigate: "default" };
     if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
   }
+}
+
+function _drawRectPreview(ctx) {
+  if (!_rectStart || !_rectCurrent) return;
+  var p1 = Viewer.pdfToCanvas(_rectStart);
+  var p2 = Viewer.pdfToCanvas(_rectCurrent);
+  var x = Math.min(p1.x, p2.x);
+  var y = Math.min(p1.y, p2.y);
+  var w = Math.abs(p2.x - p1.x);
+  var h = Math.abs(p2.y - p1.y);
+
+  ctx.save();
+  ctx.strokeStyle = "#00e5ff";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 4]);
+  ctx.fillStyle = "rgba(0, 229, 255, 0.08)";
+  ctx.fillRect(x, y, w, h);
+  ctx.strokeRect(x, y, w, h);
+
+  // Show live dimensions if calibrated
+  if (ScaleManager.isCalibrated(_currentPage)) {
+    var dx = Math.abs(_rectCurrent.x - _rectStart.x);
+    var dy = Math.abs(_rectCurrent.y - _rectStart.y);
+    var widthM = ScaleManager.pdfToMetres(_currentPage, dx);
+    var heightM = ScaleManager.pdfToMetres(_currentPage, dy);
+    var areaM2 = widthM * heightM;
+    if (areaM2 > 0.01) {
+      var label = areaM2.toFixed(1) + " m\u00B2";
+      ctx.setLineDash([]);
+      ctx.font = "bold 18px Helvetica Neue, sans-serif";
+      var tw = ctx.measureText(label).width;
+      var cx = x + w / 2;
+      var cy = y + h / 2;
+      ctx.fillStyle = "rgba(0,0,0,0.7)";
+      ctx.beginPath();
+      ctx.roundRect(cx - tw / 2 - 8, cy - 12, tw + 16, 26, 4);
+      ctx.fill();
+      ctx.fillStyle = "#00e5ff";
+      ctx.textAlign = "center";
+      ctx.fillText(label, cx, cy + 7);
+    }
+  }
+
+  ctx.restore();
 }
 
 /* ── Toolbar ──────────────────────────────────────────── */
@@ -519,6 +617,11 @@ function _bindKeyboard() {
         break;
       case "s": openScalePanel(); break;
       case "m": setTool("measure"); break;
+      case "r":
+        setMeasureMethod(_measureMethod === "polygon" ? "rectangle" : "polygon");
+        setTool("measure");
+        setStatus("Measure: " + _measureMethod, "ready");
+        break;
       case "c": setTool("calibrate"); break;
       case "v": setTool("navigate"); break;
       case "f": Viewer.zoomFit(); break;
@@ -647,7 +750,7 @@ function _updateMeasurements(measurements) {
 
   for (var i = 0; i < measurements.length; i++) {
     var m = measurements[i];
-    html += "<tr><td>" + m.label + "</td>";
+    html += "<tr><td class='label-cell' data-poly-idx='" + i + "' title='Click to rename'>" + m.label + "</td>";
     if (hasScale && m.areaM2 !== null) {
       html += "<td class='num'>" + m.areaM2.toFixed(2) + "</td>";
       html += "<td class='num'>" + m.areaFt2.toFixed(2) + "</td>";
@@ -676,6 +779,41 @@ function _updateMeasurements(measurements) {
   html += "</div>";
 
   els.measurePanel.innerHTML = html;
+
+  // Bind click-to-rename on label cells
+  var labelCells = els.measurePanel.querySelectorAll(".label-cell");
+  for (var lc = 0; lc < labelCells.length; lc++) {
+    labelCells[lc].addEventListener("click", function(e) {
+      _startLabelEdit(this, parseInt(this.dataset.polyIdx, 10));
+    });
+  }
+}
+
+function _startLabelEdit(cell, polyIdx) {
+  var currentLabel = cell.textContent;
+  var input = document.createElement("input");
+  input.type = "text";
+  input.value = currentLabel;
+  input.className = "label-edit-input";
+  input.style.width = "100%";
+  cell.textContent = "";
+  cell.appendChild(input);
+  input.focus();
+  input.select();
+
+  function commit() {
+    var newLabel = input.value.trim() || currentLabel;
+    PolygonTool.renamePolygon(_currentPage, polyIdx, newLabel);
+    ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
+    Viewer.requestRedraw();
+    _refreshMeasurements();
+  }
+
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") { e.preventDefault(); commit(); }
+    if (e.key === "Escape") { e.preventDefault(); _refreshMeasurements(); }
+  });
+  input.addEventListener("blur", commit);
 }
 
 /* ── Status bar ───────────────────────────────────────── */
@@ -703,7 +841,9 @@ window.PP = {
   exportCSV: exportCSV, exportJSON: exportJSON,
   // Scale panel
   openScalePanel: openScalePanel, closeScalePanel: closeScalePanel,
-  setScaleSystem: setScaleSystem, acceptScale: acceptScale, verifyScale: verifyScale
+  setScaleSystem: setScaleSystem, acceptScale: acceptScale, verifyScale: verifyScale,
+  // Measure method
+  setMeasureMethod: setMeasureMethod
 };
 
 /* ── Boot ─────────────────────────────────────────────── */
