@@ -1,21 +1,44 @@
 /**
- * PDF-Parser — Canvas Viewer
- * Two-canvas architecture: PDF render layer + interactive overlay.
+ * PDF-Parser — Canvas Viewer (CAD-style controls)
+ *
+ * Architecture:
+ *   - #viewer-wrap: viewport (clips content, receives wheel/mouse events)
+ *   - #viewer-container: transformed layer (CSS scale + translate for zoom/pan)
+ *     - #pdf-canvas: PDF render at a fixed high DPI
+ *     - #overlay-canvas: annotation layer (polygons, measurements)
+ *
+ * Zoom/pan is pure CSS transform — no re-render on zoom.
+ * PDF is rendered once per page at a fixed resolution, then scaled via CSS.
+ * Re-render only when changing pages or when user requests high-res (future).
+ *
+ * Controls:
+ *   - Scroll wheel: zoom centered on cursor
+ *   - Middle-mouse drag: pan
+ *   - F key / Fit button: fit page to viewport
  */
 
 import * as Loader from "./pdf-loader.mjs";
 import { DEFAULT_DPI } from "./config.mjs";
-// Loader also used by zoomFit for page dimensions
 
 var _pdfCanvas = null, _overlay = null, _container = null, _wrap = null;
-var _currentPage = 0, _zoom = 1.0;
-var _panX = 0, _panY = 0, _isPanning = false, _panStartX = 0, _panStartY = 0;
-var _viewport = null, _renderDpi = DEFAULT_DPI;
+var _currentPage = 0;
+var _renderDpi = 150;          // fixed render resolution — high enough for detail
+var _viewport = null;
+
+// Transform state (applied as CSS transform on _container)
+var _scale = 1.0;              // visual zoom (CSS scale)
+var _panX = 0, _panY = 0;     // translation in screen pixels
+
+// Interaction state
+var _isPanning = false;
+var _panStartMouseX = 0, _panStartMouseY = 0;
+var _panStartX = 0, _panStartY = 0;
+
+// Callbacks
 var _onOverlayClick = null, _onOverlayMouseMove = null;
 var _drawOverlayFn = null;
-// Marquee zoom state
-var _isMarquee = false, _marqueeMode = false;
-var _marqueeStart = null, _marqueeEnd = null;
+
+/* ── Init ─────────────────────────────────────────────── */
 
 export function init(containerId, pdfCanvasId, overlayCanvasId) {
   _container = document.getElementById(containerId);
@@ -25,14 +48,15 @@ export function init(containerId, pdfCanvasId, overlayCanvasId) {
   _bindEvents();
 }
 
-export function setMarqueeMode(on) { _marqueeMode = on; }
+/* ── Page rendering ───────────────────────────────────── */
 
 export function showPage(pageNum) {
   _currentPage = pageNum;
-  return Loader.renderPage(pageNum, _pdfCanvas, _renderDpi * _zoom).then(function(result) {
-    if (!result) return null;  // render was cancelled
+  return Loader.renderPage(pageNum, _pdfCanvas, _renderDpi).then(function(result) {
+    if (!result) return null;
     _viewport = result.viewport;
     _syncOverlaySize();
+    _applyTransform();
     _redrawOverlay();
     return result;
   });
@@ -41,25 +65,101 @@ export function showPage(pageNum) {
 function _syncOverlaySize() {
   _overlay.width  = _pdfCanvas.width;
   _overlay.height = _pdfCanvas.height;
-  _overlay.style.width  = _pdfCanvas.width + "px";
-  _overlay.style.height = _pdfCanvas.height + "px";
+  // Overlay must exactly cover the PDF canvas — no explicit CSS size needed
+  // since both are inside the same positioned container
 }
 
+/* ── Transform (zoom + pan via CSS) ───────────────────── */
+
+function _applyTransform() {
+  // transform-origin is top-left; we translate then scale
+  _container.style.transform =
+    "translate(" + _panX + "px, " + _panY + "px) scale(" + _scale + ")";
+}
+
+/**
+ * Zoom centered on a screen-space point (cursor position).
+ * @param {number} newScale
+ * @param {number} screenX — cursor X relative to _wrap
+ * @param {number} screenY — cursor Y relative to _wrap
+ */
+function _zoomAtPoint(newScale, screenX, screenY) {
+  newScale = Math.max(0.1, Math.min(newScale, 10.0));
+  var ratio = newScale / _scale;
+
+  // The point under the cursor should stay fixed.
+  // Before zoom: screenPt = containerPt * _scale + _panX
+  // After zoom:  screenPt = containerPt * newScale + newPanX
+  // So: newPanX = screenPt - (screenPt - _panX) * ratio
+  _panX = screenX - (screenX - _panX) * ratio;
+  _panY = screenY - (screenY - _panY) * ratio;
+  _scale = newScale;
+  _applyTransform();
+}
+
+/* ── Public zoom/pan API ──────────────────────────────── */
+
+export function zoomIn() {
+  var cx = _wrap ? _wrap.clientWidth / 2 : 400;
+  var cy = _wrap ? _wrap.clientHeight / 2 : 300;
+  _zoomAtPoint(_scale * 1.25, cx, cy);
+}
+
+export function zoomOut() {
+  var cx = _wrap ? _wrap.clientWidth / 2 : 400;
+  var cy = _wrap ? _wrap.clientHeight / 2 : 300;
+  _zoomAtPoint(_scale / 1.25, cx, cy);
+}
+
+export function zoomFit() {
+  if (!_currentPage) return Promise.resolve();
+  return Loader.getPageSize(_currentPage).then(function(size) {
+    if (!_wrap) return;
+    var canvasW = size.width * (_renderDpi / 72);
+    var canvasH = size.height * (_renderDpi / 72);
+    var availW = _wrap.clientWidth;
+    var availH = _wrap.clientHeight;
+    var fitScale = Math.min(availW / canvasW, availH / canvasH) * 0.95; // 5% margin
+    _scale = fitScale;
+    // Center the page
+    _panX = (availW - canvasW * _scale) / 2;
+    _panY = (availH - canvasH * _scale) / 2;
+    _applyTransform();
+  });
+}
+
+export function setZoom(z) {
+  var cx = _wrap ? _wrap.clientWidth / 2 : 400;
+  var cy = _wrap ? _wrap.clientHeight / 2 : 300;
+  _zoomAtPoint(z, cx, cy);
+}
+
+export function getZoom() { return _scale; }
+
+/* ── Coordinate conversion ────────────────────────────── */
+
+/**
+ * Convert a mouse event to PDF coordinate space.
+ */
 export function eventToPdfCoords(e) {
-  var rect = _overlay.getBoundingClientRect();
-  var canvasX = (e.clientX - rect.left) * (_overlay.width / rect.width);
-  var canvasY = (e.clientY - rect.top)  * (_overlay.height / rect.height);
-  var scale = (_renderDpi * _zoom) / 72;
-  return { x: canvasX / scale, y: canvasY / scale };
+  var rect = _container.getBoundingClientRect();
+  // Mouse position relative to the container's top-left, accounting for CSS scale
+  var containerX = (e.clientX - rect.left) / _scale;
+  var containerY = (e.clientY - rect.top) / _scale;
+  // Container pixels → PDF points
+  var pdfScale = _renderDpi / 72;
+  return { x: containerX / pdfScale, y: containerY / pdfScale };
 }
 
+/**
+ * Convert PDF coordinates to canvas pixel coordinates (for drawing on overlay).
+ */
 export function pdfToCanvas(pt) {
-  var scale = (_renderDpi * _zoom) / 72;
-  return { x: pt.x * scale, y: pt.y * scale };
+  var pdfScale = _renderDpi / 72;
+  return { x: pt.x * pdfScale, y: pt.y * pdfScale };
 }
 
 export function getOverlayCtx() { return _overlay.getContext("2d"); }
-
 export function setDrawCallback(fn) { _drawOverlayFn = fn; }
 
 function _redrawOverlay() {
@@ -70,120 +170,77 @@ function _redrawOverlay() {
 
 export function requestRedraw() { _redrawOverlay(); }
 
-export function zoomIn()  { setZoom(_zoom * 1.25); }
-export function zoomOut() { setZoom(_zoom / 1.25); }
-
-export function zoomFit() {
-  if (!_currentPage) { setZoom(1.0); return; }
-  // Calculate zoom to fit the page in the visible viewport area
-  var wrap = document.getElementById("viewer-wrap");
-  if (!wrap) { setZoom(1.0); return; }
-  var availW = wrap.clientWidth - 32;   // padding
-  var availH = wrap.clientHeight - 32;
-
-  Loader.getPageSize(_currentPage).then(function(size) {
-    // size is in PDF points; at zoom=1 we render at _renderDpi/72 scale
-    var basePixelW = size.width * (_renderDpi / 72);
-    var basePixelH = size.height * (_renderDpi / 72);
-    var fitZoom = Math.min(availW / basePixelW, availH / basePixelH);
-    setZoom(fitZoom);
-  });
-}
-
-var _zoomTimer = null;
-
-export function setZoom(z) {
-  _zoom = Math.max(0.25, Math.min(z, 5.0));
-  // Debounce rapid zoom (scroll wheel) — wait 80ms before re-rendering
-  if (_zoomTimer) clearTimeout(_zoomTimer);
-  _zoomTimer = setTimeout(function() {
-    _zoomTimer = null;
-    if (_currentPage > 0) showPage(_currentPage);
-  }, 80);
-}
-
-export function getZoom() { return _zoom; }
+/* ── Event binding ────────────────────────────────────── */
 
 function _bindEvents() {
-  _container.addEventListener("wheel", function(e) {
+  // ── Scroll wheel: zoom centered on cursor ──
+  _wrap.addEventListener("wheel", function(e) {
     e.preventDefault();
-    if (e.deltaY < 0) zoomIn(); else zoomOut();
+    var rect = _wrap.getBoundingClientRect();
+    var mouseX = e.clientX - rect.left;
+    var mouseY = e.clientY - rect.top;
+    var factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+    _zoomAtPoint(_scale * factor, mouseX, mouseY);
   }, { passive: false });
 
-  _overlay.addEventListener("mousedown", function(e) {
-    // Pan: middle-click or ctrl+click
-    if (e.button === 1 || (e.button === 0 && e.ctrlKey)) {
-      _isPanning = true;
-      _panStartX = e.clientX - _panX;
-      _panStartY = e.clientY - _panY;
+  // ── Mouse down ──
+  _wrap.addEventListener("mousedown", function(e) {
+    // Middle-click pan (button 2 is right-click, button 1 is middle)
+    if (e.button === 1) {
       e.preventDefault();
+      _startPan(e);
       return;
     }
-    // Marquee zoom: Z tool mode
-    if (_marqueeMode && e.button === 0) {
-      _isMarquee = true;
-      var rect = _overlay.getBoundingClientRect();
-      _marqueeStart = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-      _marqueeEnd = _marqueeStart;
+    // Left-click: forward to tool handler, unless ctrl held (pan)
+    if (e.button === 0 && e.ctrlKey) {
       e.preventDefault();
+      _startPan(e);
       return;
     }
-    if (_onOverlayClick) _onOverlayClick(e);
+    if (e.button === 0 && _onOverlayClick) {
+      _onOverlayClick(e);
+    }
   });
 
-  _overlay.addEventListener("mousemove", function(e) {
+  // ── Mouse move ──
+  _wrap.addEventListener("mousemove", function(e) {
     if (_isPanning) {
-      _panX = e.clientX - _panStartX;
-      _panY = e.clientY - _panStartY;
-      _container.style.transform = "translate(" + _panX + "px," + _panY + "px)";
-      return;
-    }
-    if (_isMarquee) {
-      var rect = _overlay.getBoundingClientRect();
-      _marqueeEnd = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-      _redrawOverlay();
-      // Draw marquee rectangle
-      var ctx = _overlay.getContext("2d");
-      ctx.save();
-      ctx.strokeStyle = "#3a7c5f";
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([4, 4]);
-      ctx.fillStyle = "rgba(42, 92, 63, 0.15)";
-      var mx = Math.min(_marqueeStart.x, _marqueeEnd.x);
-      var my = Math.min(_marqueeStart.y, _marqueeEnd.y);
-      var mw = Math.abs(_marqueeEnd.x - _marqueeStart.x);
-      var mh = Math.abs(_marqueeEnd.y - _marqueeStart.y);
-      ctx.fillRect(mx, my, mw, mh);
-      ctx.strokeRect(mx, my, mw, mh);
-      ctx.restore();
+      _panX = _panStartX + (e.clientX - _panStartMouseX);
+      _panY = _panStartY + (e.clientY - _panStartMouseY);
+      _applyTransform();
       return;
     }
     if (_onOverlayMouseMove) _onOverlayMouseMove(e);
   });
 
+  // ── Mouse up ──
   window.addEventListener("mouseup", function(e) {
-    if (_isMarquee && _marqueeStart && _marqueeEnd) {
-      _isMarquee = false;
-      var mw = Math.abs(_marqueeEnd.x - _marqueeStart.x);
-      var mh = Math.abs(_marqueeEnd.y - _marqueeStart.y);
-      if (mw > 20 && mh > 20 && _wrap) {
-        // Calculate zoom to fit the marquee area into the viewport
-        var availW = _wrap.clientWidth - 32;
-        var availH = _wrap.clientHeight - 32;
-        var zoomX = availW / mw;
-        var zoomY = availH / mh;
-        var newZoom = _zoom * Math.min(zoomX, zoomY);
-        setZoom(newZoom);
-      }
-      _marqueeStart = null;
-      _marqueeEnd = null;
-      _redrawOverlay();
-      return;
+    if (_isPanning) {
+      _isPanning = false;
+      _wrap.style.cursor = "";
     }
-    _isPanning = false;
+  });
+
+  // Prevent middle-click auto-scroll (browser default)
+  _wrap.addEventListener("auxclick", function(e) {
+    if (e.button === 1) e.preventDefault();
   });
 }
+
+function _startPan(e) {
+  _isPanning = true;
+  _panStartMouseX = e.clientX;
+  _panStartMouseY = e.clientY;
+  _panStartX = _panX;
+  _panStartY = _panY;
+  _wrap.style.cursor = "grabbing";
+}
+
+/* ── Public callbacks ─────────────────────────────────── */
 
 export function onOverlayClick(fn)     { _onOverlayClick = fn; }
 export function onOverlayMouseMove(fn) { _onOverlayMouseMove = fn; }
 export function getCurrentPage()       { return _currentPage; }
+
+// Legacy — no-op, marquee removed
+export function setMarqueeMode(on) {}

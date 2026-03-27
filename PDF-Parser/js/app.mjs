@@ -129,7 +129,10 @@ function goToPage(pageNum) {
   if (pageNum < 1 || pageNum > pageCount) return;
   _currentPage = pageNum;
 
-  Viewer.showPage(pageNum).then(function() {
+  Viewer.showPage(pageNum).then(function(result) {
+    if (!result) return;
+    // Fit page to viewport on navigation
+    Viewer.zoomFit();
     _highlightThumb(pageNum);
     els.pageLabel.textContent = "Page " + pageNum + " / " + pageCount;
     els.zoomLabel.textContent = Math.round(Viewer.getZoom() * 100) + "%";
@@ -361,10 +364,9 @@ function setTool(tool) {
     els.toolBtns[i].classList.toggle("active", els.toolBtns[i].dataset.tool === tool);
   }
   var viewer = document.getElementById("viewer-container");
-  var cursorMap = { measure: "crosshair", calibrate: "crosshair", zoom: "zoom-in", navigate: "default" };
-  if (viewer) viewer.style.cursor = cursorMap[tool] || "default";
-  // Toggle marquee mode on canvas viewer
-  Viewer.setMarqueeMode(tool === "zoom");
+  var cursorMap = { measure: "crosshair", calibrate: "crosshair", navigate: "default" };
+  var wrap = document.getElementById("viewer-wrap");
+  if (wrap) wrap.style.cursor = cursorMap[tool] || "default";
 }
 
 /* ── Keyboard ─────────────────────────────────────────── */
@@ -416,7 +418,6 @@ function _bindKeyboard() {
       case "s": openScalePanel(); break;
       case "m": setTool("measure"); break;
       case "c": setTool("calibrate"); break;
-      case "z": setTool("zoom"); break;
       case "v": setTool("navigate"); break;
       case "f": Viewer.zoomFit(); break;
       case "ArrowRight": case "PageDown": e.preventDefault(); nextPage(); break;

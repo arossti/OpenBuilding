@@ -253,32 +253,35 @@
     }
     .empty { color: var(--text-dim); font-style: italic; }
 
-    /* ── Viewer ───────────────────────────────────────── */
+    /* ── Viewer (CAD-style: CSS transform zoom/pan) ─── */
     #viewer-wrap {
       flex: 1;
-      overflow: auto;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
+      overflow: hidden;       /* no scrollbars — zoom/pan via CSS transform */
+      position: relative;
       background: #111114;
-      padding: 16px;
+      cursor: default;
     }
 
     #viewer-container {
-      position: relative;
-      display: inline-block;
-      box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;  /* scale/translate from top-left */
+      will-change: transform;  /* GPU compositing hint */
     }
 
     #pdf-canvas {
       display: block;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.5);
     }
 
     #overlay-canvas {
       position: absolute;
       top: 0;
       left: 0;
-      pointer-events: auto;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;   /* clicks pass through to wrap, which forwards to handlers */
     }
 
     /* ── Drop Zone ────────────────────────────────────── */
@@ -470,7 +473,6 @@
       <button class="tool-btn" data-tool="measure" title="Measure Area (M)">Measure <span class="key-hint">M</span></button>
       <button class="tool-btn" data-tool="checkscale" title="Check Scale (S)">Scale <span class="key-hint">S</span></button>
       <button class="tool-btn" data-tool="calibrate" title="Manual Calibrate (C)">Calibrate <span class="key-hint">C</span></button>
-      <button class="tool-btn" data-tool="zoom" title="Marquee Zoom (Z)">Zoom <span class="key-hint">Z</span></button>
       <div class="toolbar-sep"></div>
       <button class="tool-btn" onclick="PP.zoomIn()" title="Zoom In (+)">+</button>
       <button class="tool-btn" onclick="PP.zoomOut()" title="Zoom Out (-)">&#8722;</button>
@@ -508,11 +510,12 @@
           <button class="browse-btn" onclick="document.getElementById('file-input').click()">Browse Files</button>
           <input type="file" id="file-input" accept="application/pdf">
           <div class="drop-hint" style="margin-top: 24px;">
-            Keyboard: <span class="key-hint">M</span> Measure &nbsp;
+            <span class="key-hint">S</span> Scale &nbsp;
+            <span class="key-hint">M</span> Measure &nbsp;
             <span class="key-hint">C</span> Calibrate &nbsp;
-            <span class="key-hint">V</span> Navigate &nbsp;
-            <span class="key-hint">Esc</span> Cancel &nbsp;
-            <span class="key-hint">+/-</span> Zoom &nbsp;
+            <span class="key-hint">F</span> Fit &nbsp;
+            <span class="key-hint">Scroll</span> Zoom at cursor &nbsp;
+            <span class="key-hint">Mid-click</span> Pan &nbsp;
             <span class="key-hint">&larr;&rarr;</span> Pages
           </div>
         </div>

@@ -422,35 +422,66 @@ var project = {
 
 ### Step 1 — Skeleton + PDF Loading ✅ (2026-03-27)
 - [x] Multi-file HTML app: `index.html` + 10 ESM modules (`.mjs`) + `serve.sh`
-- [x] PDF.js 4.9.155 ESM build in `lib/` (upgraded from 3.x UMD — `file://` doesn't work for multi-file apps)
+- [x] PDF.js 4.9.155 ESM build in `lib/`
 - [x] Local dev server via `python3 -m http.server 8000`
 - [x] File upload (browse + drag-and-drop) via FileReader API
-- [x] Two-canvas viewer (PDF layer + overlay) with pan/zoom
+- [x] Two-canvas viewer (PDF layer + overlay)
 - [x] Page thumbnails in sidebar, click to navigate
 - [x] Sheet classification (title block parsing, sheet ID, type tags)
 - [x] Dark UI with toolbar, sidebar, status bar
-- [x] Keyboard shortcuts (M/C/V/Z/F/Esc/Del/Cmd+Z/arrows/+-)
 - [x] Polygon measurement tool (click-to-trace, shoelace area, close near first vertex)
 - [x] Area labels on polygons (dark pill overlay with m² or "uncalibrated")
 - [x] Measurement panel in sidebar with running total
 - [x] Undo/redo stack (50 levels, Cmd+Z / Cmd+Shift+Z)
 - [x] CSV export of measurements
-- [x] JSON project save/load
+- [x] JSON project save/load with calibration data
 
-### Step 2 — Scale Confirmation Workflow (NEXT)
-- [ ] "Check Scale" button (S key) — triggers scale detection + confirmation panel
-- [ ] Scale confirmation panel: detected scale pre-selected in dropdown, metric/imperial toggle
-- [ ] Common scale dropdowns (metric 1:10–1:200, imperial 1"=1' through 3/16"=1')
-- [ ] Empirical calibration after ratio confirmed: scale bar detection → dimension string cross-ref → two-point fallback
-- [ ] Scale badge on sheet info (green ✓ confirmed, amber ? unconfirmed, red ✗ no scale)
-- [ ] Multi-viewport awareness: detect multiple scales per page, let user choose
-- [ ] Persist calibration per page
+### Step 2 — Scale Confirmation Workflow ✅ (2026-03-27)
+- [x] "Check Scale" button (S key) — triggers scale detection + confirmation panel
+- [x] Scale confirmation panel: detected scale pre-selected in dropdown, metric/imperial toggle
+- [x] Common scale dropdowns (metric 1:10–1:200, imperial 1"=1' through 3/16"=1')
+- [x] Empirical two-point calibration after ratio confirmed
+- [x] Scale badge on sheet info (green ✓ confirmed, amber ? unconfirmed)
+- [x] Flexible dimension input parser (19-6 1/2, 19.55', 8500 mm, bare numbers, etc.)
+- [x] Calibration persisted to ProjectStore (included in JSON export)
+- [ ] Multi-viewport awareness: detect multiple scales per page (future)
+- [ ] Scale bar auto-detection from vector geometry (future)
 
-### Step 3 — Rendering & Zoom Fixes
-- [ ] Fix marquee zoom: zoom to selected area (currently zooms incrementally but not to the right region)
-- [ ] Fix overlay after zoom: polygon overlay desyncs from PDF canvas after zoom changes (black background, "polygon in space")
-- [ ] Use Fit (F) as non-destructive refresh (re-renders without losing stored data)
-- [ ] Ensure polygons survive zoom/pan changes cleanly (vertices in PDF coords, overlay redrawn)
+### Step 3 — CAD-Style Viewer Controls ✅ (2026-03-27)
+- [x] **Scroll-wheel zoom centered on cursor** (like AutoCAD/Bluebeam)
+- [x] **Middle-mouse-button pan** (drag to pan, no modifier needed)
+- [x] Ctrl+left-click pan (trackpad fallback)
+- [x] CSS transform-based zoom/pan (no re-render on zoom — instant)
+- [x] Infinite workspace — no scroll boundaries, can zoom to any corner
+- [x] F key fits page to viewport
+- [x] +/- buttons retained as accessibility fallback
+- [x] Removed broken marquee zoom tool (Z)
+- [x] Render cancellation prevents "Cannot use same canvas" crash on rapid zoom
+- [x] Zoom debounce (80ms) for scroll wheel
+- [x] Auto-fit on page navigation
+
+### Step 4 — Visual Polish (NEXT)
+- [ ] Polygon label: larger text, cyan colour for legibility over red area fills
+- [ ] Polygon fill: reduce opacity or use contrasting colour
+- [ ] Vertex handle sizing relative to zoom level
+
+### Step 5 — Vector Snap & Outline Detection
+- [ ] PDF operator stream parsing for line geometry
+- [ ] Spatial index of line segments
+- [ ] Cursor snap to nearby endpoints/intersections
+- [ ] Heuristic building outline detection
+- [ ] User confirm/adjust workflow ("Does this look correct?" with adjustable vertices)
+
+### Step 6 — Schedule Extraction & Cross-Validation
+- [ ] Text clustering into table rows/columns
+- [ ] Room schedule parser
+- [ ] Cross-validation: "Schedule says Office = 27.80 m²; your polygon = 28.1 m² (1.1% variance)"
+
+### Step 7 — Section Analysis & Volume (Phase 2)
+- [ ] Level detection on section sheets
+- [ ] Floor-to-floor height extraction
+- [ ] Volume = area × height per storey
+- [ ] Cross-validation against energy model data (A0.10)
 
 ### Step 4 — Vector Snap & Outline Detection
 - [ ] PDF operator stream parsing for line geometry
@@ -478,14 +509,15 @@ var project = {
 
 ---
 
-## Known Bugs (2026-03-27)
+## Known Bugs / Resolved
 
-| # | Severity | Description | Root Cause |
+| # | Status | Description | Resolution |
 |---|---|---|---|
-| 1 | **Critical** | Area values wildly wrong (1.22 m² for a ~200 m² house) | Auto-scale assumes PDF coordinate unit system; needs empirical calibration instead. Fix: Step 2 scale workflow. |
-| 2 | **Major** | Marquee zoom (Z tool) zooms incrementally but not to the selected area | Zoom calculation doesn't account for scroll position or correctly map marquee rect to PDF viewport. |
-| 3 | **Major** | After zoom, drawing gets black background with "polygon in space" | Overlay canvas desyncs from PDF canvas on re-render. Canvas size/transform not properly reset on zoom. |
-| 4 | **Minor** | Fit (F) works as a workaround refresh for bug #3 | Not a bug per se — Fit resets zoom to fit-page and re-renders both canvases cleanly. |
+| 1 | **FIXED** | Area values wildly wrong (1.22 m² for a ~200 m² house) | Replaced theoretical unit conversion with empirical two-point calibration (Step 2). |
+| 2 | **FIXED** | Marquee zoom broken — wrong location | Removed marquee zoom; replaced with cursor-centered scroll-wheel zoom (Step 3). |
+| 3 | **FIXED** | Black background / "polygon in space" after zoom | Replaced scroll-based zoom with CSS transform zoom/pan — no re-render on zoom (Step 3). |
+| 4 | **FIXED** | "Cannot use same canvas" crash on rapid scroll-wheel zoom | Added render cancellation + 80ms debounce. |
+| 5 | **Minor** | Polygon label (red text) hard to read over red-tinted area fills | Planned: Step 4 — cyan text, larger labels. |
 
 ---
 
