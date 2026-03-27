@@ -83,41 +83,74 @@ function loadPdf(buffer, fileName) {
 
   Loader.reset(); PolygonTool.reset(); ScaleManager.reset(); VectorSnap.reset(); ProjectStore.reset();
 
+  var loadingOverlay = document.getElementById("loading-overlay");
+  var loadingBar     = document.getElementById("loading-bar-fill");
+  var loadingLabel   = document.getElementById("loading-label");
+
   Loader.loadFromBuffer(buffer).then(function(result) {
     console.log("[PDF-Parser] Loaded:", result.pageCount, "pages");
     ProjectStore.initFromPdf(fileName, result.pageCount);
-    setStatus("Loaded " + fileName + " — " + result.pageCount + " pages. Classifying sheets...", "busy");
 
+    // Show loading overlay, hide drop zone
     els.dropZone.style.display = "none";
-    els.viewerWrap.style.display = "";
+    loadingOverlay.style.display = "";
 
-    _buildThumbnails(result.pageCount);
+    var total = result.pageCount;
 
-    return SheetClassifier.classifyAll().then(function(results) {
-      ProjectStore.setClassifications(results);
-      _updateThumbnailLabels(results);
+    // Build thumbnail placeholders
+    _buildThumbnailPlaceholders(total);
 
-      var planCount = 0;
-      for (var i = 0; i < results.length; i++) {
-        if (results[i].scale && results[i].scale.ratio) {
-          // Store as pending — user must confirm via Check Scale before area math works
-          ScaleManager.setPending(results[i].pageNum, results[i].scale.ratio, results[i].scale.raw);
-        }
-        if (results[i].classification === "plan") planCount++;
+    // Render thumbnails one by one with progress bar
+    function renderNext(p) {
+      if (p > total) {
+        // All done — classify sheets, then show first page
+        loadingLabel.textContent = "Classifying sheets...";
+        loadingBar.style.width = "100%";
+
+        return SheetClassifier.classifyAll().then(function(results) {
+          ProjectStore.setClassifications(results);
+          _updateThumbnailLabels(results);
+
+          var planCount = 0;
+          for (var i = 0; i < results.length; i++) {
+            if (results[i].scale && results[i].scale.ratio) {
+              ScaleManager.setPending(results[i].pageNum, results[i].scale.ratio, results[i].scale.raw);
+            }
+            if (results[i].classification === "plan") planCount++;
+          }
+
+          // Hide loading, show viewer
+          loadingOverlay.style.display = "none";
+          els.viewerWrap.style.display = "";
+
+          setStatus("Found " + planCount + " plan sheets. Press S to confirm scale.", "ready");
+          goToPage(1);
+
+          // Background: find room schedule
+          ScheduleParser.findRoomScheduleInDocument().then(function(schedData) {
+            if (schedData) {
+              ProjectStore.setRoomSchedule(schedData.rooms);
+              console.log("[PDF-Parser] Room schedule on page", schedData.pageNum, "—", schedData.rooms.length, "rooms");
+            }
+          });
+        });
       }
 
-      setStatus("Found " + planCount + " plan sheets. Press S to confirm scale before measuring.", "ready");
-      goToPage(1);
+      // Update progress
+      var pct = Math.round((p / total) * 100);
+      loadingBar.style.width = pct + "%";
+      loadingLabel.textContent = "Reading page " + p + " / " + total;
 
-      ScheduleParser.findRoomScheduleInDocument().then(function(schedData) {
-        if (schedData) {
-          ProjectStore.setRoomSchedule(schedData.rooms);
-          console.log("[PDF-Parser] Room schedule found on page", schedData.pageNum, "—", schedData.rooms.length, "rooms");
-        }
+      var canvas = els.thumbStrip.querySelectorAll(".thumb-canvas")[p - 1];
+      return Loader.renderThumbnail(p, canvas, 120).then(function() {
+        return renderNext(p + 1);
       });
-    });
+    }
+
+    return renderNext(1);
   }).catch(function(err) {
     setStatus("Error loading PDF: " + err.message, "error");
+    loadingOverlay.style.display = "none";
     console.error(err);
   });
 }
@@ -205,7 +238,28 @@ function _populateScaleDropdown(preselect) {
   }
 }
 
+/** Accept scale provisionally — enables area math immediately. */
 function acceptScale() {
+  var sel = document.getElementById("scale-select");
+  var ratio = parseInt(sel.value, 10);
+  if (!ratio) {
+    setStatus("Please select a scale from the dropdown", "error");
+    return;
+  }
+  ScaleManager.accept(_currentPage, ratio);
+  ProjectStore.saveCalibration(_currentPage, ScaleManager.getCalibration(_currentPage));
+  closeScalePanel();
+
+  _updateSheetInfo(ProjectStore.getPage(_currentPage));
+  _updateScaleLabel();
+  _refreshMeasurements();
+  Viewer.requestRedraw();
+
+  setStatus("Scale 1:" + ratio + " accepted. You can now measure. Press C to verify with calibration.", "ready");
+}
+
+/** Accept + immediately enter calibration mode for empirical verification. */
+function verifyScale() {
   var sel = document.getElementById("scale-select");
   var ratio = parseInt(sel.value, 10);
   if (!ratio) {
@@ -215,20 +269,58 @@ function acceptScale() {
   _pendingRatio = ratio;
   closeScalePanel();
 
-  // Enter verify mode: user clicks two points on a known dimension
   setTool("calibrate");
-  setStatus("Scale 1:" + ratio + " selected. Click two endpoints of a known dimension to verify.", "busy");
+  setStatus("Click two endpoints of a known dimension to verify 1:" + ratio, "busy");
 }
 
 /* ── Overlay click handling ───────────────────────────── */
 
 function _handleOverlayClick(e) {
   var pt = Viewer.eventToPdfCoords(e);
+
+  // Check if clicking near an existing vertex — start drag regardless of tool
+  var hitRadius = 10 / (Viewer.getZoom() * (150 / 72));  // ~10 screen pixels → PDF units
+  var hit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
+  if (hit && !PolygonTool.isDrawing()) {
+    PolygonTool.startDrag(_currentPage, hit.polyIdx, hit.vertIdx);
+    Viewer.onOverlayMouseMove(_handleDragMove);
+    _bindDragEnd();
+    var wrap = document.getElementById("viewer-wrap");
+    if (wrap) wrap.style.cursor = "move";
+    return;
+  }
+
   var snap = VectorSnap.findNearestEndpoint(_currentPage, pt, SNAP_RADIUS_PX);
   if (snap) pt = { x: snap.x, y: snap.y };
 
   if (_currentTool === "measure") _handleMeasureClick(pt);
   else if (_currentTool === "calibrate") _handleCalibrateClick(pt);
+}
+
+function _handleDragMove(e) {
+  if (!PolygonTool.isDragging()) return;
+  var pt = Viewer.eventToPdfCoords(e);
+  PolygonTool.moveDrag(pt);
+  Viewer.requestRedraw();
+}
+
+function _bindDragEnd() {
+  function onUp() {
+    window.removeEventListener("mouseup", onUp);
+    if (PolygonTool.isDragging()) {
+      PolygonTool.endDrag();
+      // Restore normal mousemove handler
+      Viewer.onOverlayMouseMove(_handleOverlayMouseMove);
+      var wrap = document.getElementById("viewer-wrap");
+      var cursorMap = { measure: "crosshair", calibrate: "crosshair", navigate: "default" };
+      if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
+      // Update measurements and save
+      _refreshMeasurements();
+      ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
+      Viewer.requestRedraw();
+    }
+  }
+  window.addEventListener("mouseup", onUp);
 }
 
 function _handleMeasureClick(pt) {
@@ -345,7 +437,17 @@ function _parseDistanceInput(str) {
 }
 
 function _handleOverlayMouseMove(e) {
-  // Future: snap indicator, live preview
+  // Show move cursor when hovering near a draggable vertex
+  var pt = Viewer.eventToPdfCoords(e);
+  var hitRadius = 10 / (Viewer.getZoom() * (150 / 72));
+  var hit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
+  var wrap = document.getElementById("viewer-wrap");
+  if (hit && !PolygonTool.isDrawing()) {
+    if (wrap) wrap.style.cursor = "move";
+  } else {
+    var cursorMap = { measure: "crosshair", calibrate: "crosshair", navigate: "default" };
+    if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
+  }
 }
 
 /* ── Toolbar ──────────────────────────────────────────── */
@@ -430,7 +532,7 @@ function _bindKeyboard() {
 
 /* ── Thumbnails ───────────────────────────────────────── */
 
-function _buildThumbnails(pageCount) {
+function _buildThumbnailPlaceholders(pageCount) {
   els.thumbStrip.innerHTML = "";
   for (var p = 1; p <= pageCount; p++) {
     var wrapper = document.createElement("div");
@@ -438,14 +540,14 @@ function _buildThumbnails(pageCount) {
     wrapper.dataset.page = p;
     var canvas = document.createElement("canvas");
     canvas.className = "thumb-canvas";
+    canvas.width = 120;
+    canvas.height = 85;
     var label = document.createElement("span");
     label.className = "thumb-label";
     label.textContent = "Page " + p;
     wrapper.appendChild(canvas);
     wrapper.appendChild(label);
     els.thumbStrip.appendChild(wrapper);
-
-    (function(pageNum, c) { Loader.renderThumbnail(pageNum, c); })(p, canvas);
     wrapper.addEventListener("click", function() {
       goToPage(parseInt(this.dataset.page, 10));
     });
@@ -479,15 +581,19 @@ function _updateSheetInfo(pageData) {
   html += " <span class='sheet-class tag-" + pageData.classification + "'>" + pageData.classification + "</span>";
   if (pageData.sheetTitle) html += "<br>" + pageData.sheetTitle;
 
-  // Scale badge
+  // Scale badge — three states
   var pageNum = pageData.pageNum;
-  if (ScaleManager.isCalibrated(pageNum)) {
-    var ratioLabel = ScaleManager.getRatioLabel(pageNum) || "calibrated";
-    html += "<br><span class='scale-badge scale-confirmed'>" + ratioLabel + " \u2713</span>";
-  } else if (ScaleManager.isPending(pageNum)) {
-    var pendingLabel = ScaleManager.getRatioLabel(pageNum) || "1:" + ScaleManager.getRatio(pageNum);
-    html += "<br><span class='scale-badge scale-pending'>" + pendingLabel + " ?</span>";
-    html += " <span style='font-size:10px;color:var(--text-dim);'>Press S to confirm</span>";
+  var scaleState = ScaleManager.getState(pageNum);
+  var ratioLabel = ScaleManager.getRatioLabel(pageNum) || "";
+
+  if (scaleState === "verified") {
+    html += "<br><span class='scale-badge scale-verified'>" + ratioLabel + " \u2713</span>";
+  } else if (scaleState === "accepted") {
+    html += "<br><span class='scale-badge scale-accepted'>" + ratioLabel + " \u2713</span>";
+    html += " <span style='font-size:10px;color:var(--text-dim);'>C to verify</span>";
+  } else if (scaleState === "pending") {
+    html += "<br><span class='scale-badge scale-pending'>" + ratioLabel + " ?</span>";
+    html += " <span style='font-size:10px;color:var(--text-dim);'>Press S</span>";
   } else {
     html += "<br><span class='scale-badge scale-none'>No scale</span>";
   }
@@ -499,13 +605,18 @@ function _updateSheetInfo(pageData) {
 }
 
 function _updateScaleLabel() {
-  if (ScaleManager.isCalibrated(_currentPage)) {
-    var label = ScaleManager.getRatioLabel(_currentPage) || "calibrated";
-    els.scaleLabel.textContent = label + " \u2713";
+  var state = ScaleManager.getState(_currentPage);
+  var label = ScaleManager.getRatioLabel(_currentPage) || "";
+
+  if (state === "verified") {
+    els.scaleLabel.textContent = label + " \u2713 verified";
     els.scaleLabel.style.color = "var(--accent-lit)";
-  } else if (ScaleManager.isPending(_currentPage)) {
-    els.scaleLabel.textContent = (ScaleManager.getRatioLabel(_currentPage) || "?") + " (unconfirmed)";
-    els.scaleLabel.style.color = "var(--gold)";
+  } else if (state === "accepted") {
+    els.scaleLabel.textContent = label + " \u2713";
+    els.scaleLabel.style.color = "#e9c46a";
+  } else if (state === "pending") {
+    els.scaleLabel.textContent = label + " ?";
+    els.scaleLabel.style.color = "#888";
   } else {
     els.scaleLabel.textContent = "No scale";
     els.scaleLabel.style.color = "";
@@ -592,7 +703,7 @@ window.PP = {
   exportCSV: exportCSV, exportJSON: exportJSON,
   // Scale panel
   openScalePanel: openScalePanel, closeScalePanel: closeScalePanel,
-  setScaleSystem: setScaleSystem, acceptScale: acceptScale
+  setScaleSystem: setScaleSystem, acceptScale: acceptScale, verifyScale: verifyScale
 };
 
 /* ── Boot ─────────────────────────────────────────────── */

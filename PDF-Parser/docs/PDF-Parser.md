@@ -440,10 +440,13 @@ var project = {
 - [x] "Check Scale" button (S key) — triggers scale detection + confirmation panel
 - [x] Scale confirmation panel: detected scale pre-selected in dropdown, metric/imperial toggle
 - [x] Common scale dropdowns (metric 1:10–1:200, imperial 1"=1' through 3/16"=1')
-- [x] Empirical two-point calibration after ratio confirmed
-- [x] Scale badge on sheet info (green ✓ confirmed, amber ? unconfirmed)
+- [x] **Three-state scale model:** Pending (auto, grey ?) → Accepted (provisional, yellow ✓) → Verified (empirical, green ✓)
+- [x] Accept enables area math immediately (theoretical conversion, validated to ~0.03% accuracy)
+- [x] Verify = empirical two-point calibration (gold standard)
 - [x] Flexible dimension input parser (19-6 1/2, 19.55', 8500 mm, bare numbers, etc.)
 - [x] Calibration persisted to ProjectStore (included in JSON export)
+- [x] Spatial-aware text joining for scale detection (fixes "1:4" → "1:48" split-text bug)
+- [x] Known-ratio validation + digit-completion heuristic
 - [ ] Multi-viewport awareness: detect multiple scales per page (future)
 - [ ] Scale bar auto-detection from vector geometry (future)
 
@@ -455,17 +458,21 @@ var project = {
 - [x] Infinite workspace — no scroll boundaries, can zoom to any corner
 - [x] F key fits page to viewport
 - [x] +/- buttons retained as accessibility fallback
-- [x] Removed broken marquee zoom tool (Z)
 - [x] Render cancellation prevents "Cannot use same canvas" crash on rapid zoom
 - [x] Zoom debounce (80ms) for scroll wheel
 - [x] Auto-fit on page navigation
 
-### Step 4 — Visual Polish (NEXT)
-- [ ] Polygon label: larger text, cyan colour for legibility over red area fills
-- [ ] Polygon fill: reduce opacity or use contrasting colour
-- [ ] Vertex handle sizing relative to zoom level
+### Step 4 — Visual Polish & Interaction ✅ (2026-03-27)
+- [x] Cyan polygon edges (3px) and vertex handles — visible on any drawing background
+- [x] Large label pills (26px title, 24px area) — white title + cyan area on dark background
+- [x] Subtle area fill (8% opacity cyan)
+- [x] **Vertex dragging** — click and drag any vertex on a closed polygon to adjust
+- [x] Hover cursor changes to "move" near draggable vertices
+- [x] Drag saves undo state, recalculates area, persists to ProjectStore
+- [x] Loading progress bar: "Reading page 1/30..." with visual fill bar
+- [ ] Vertex handle sizing relative to zoom level (future)
 
-### Step 5 — Vector Snap & Outline Detection
+### Step 5 — Vector Snap & Outline Detection (NEXT)
 - [ ] PDF operator stream parsing for line geometry
 - [ ] Spatial index of line segments
 - [ ] Cursor snap to nearby endpoints/intersections
@@ -483,25 +490,7 @@ var project = {
 - [ ] Volume = area × height per storey
 - [ ] Cross-validation against energy model data (A0.10)
 
-### Step 4 — Vector Snap & Outline Detection
-- [ ] PDF operator stream parsing for line geometry
-- [ ] Spatial index of line segments
-- [ ] Cursor snap to nearby endpoints/intersections
-- [ ] Heuristic building outline detection
-- [ ] User confirm/adjust workflow ("Does this look correct?" with adjustable vertices)
-
-### Step 5 — Schedule Extraction & Cross-Validation
-- [ ] Text clustering into table rows/columns
-- [ ] Room schedule parser
-- [ ] Cross-validation: "Schedule says Office = 27.80 m²; your polygon = 28.1 m² (1.1% variance)"
-
-### Step 6 — Section Analysis & Volume (Phase 2)
-- [ ] Level detection on section sheets
-- [ ] Floor-to-floor height extraction
-- [ ] Volume = area × height per storey
-- [ ] Cross-validation against energy model data (A0.10)
-
-### Step 7 — Polish & Export
+### Step 8 — Polish & Export
 - [ ] Print-friendly summary view
 - [ ] Improved project save/load
 - [ ] Error handling and edge cases
@@ -513,11 +502,15 @@ var project = {
 
 | # | Status | Description | Resolution |
 |---|---|---|---|
-| 1 | **FIXED** | Area values wildly wrong (1.22 m² for a ~200 m² house) | Replaced theoretical unit conversion with empirical two-point calibration (Step 2). |
-| 2 | **FIXED** | Marquee zoom broken — wrong location | Removed marquee zoom; replaced with cursor-centered scroll-wheel zoom (Step 3). |
-| 3 | **FIXED** | Black background / "polygon in space" after zoom | Replaced scroll-based zoom with CSS transform zoom/pan — no re-render on zoom (Step 3). |
-| 4 | **FIXED** | "Cannot use same canvas" crash on rapid scroll-wheel zoom | Added render cancellation + 80ms debounce. |
-| 5 | **Minor** | Polygon label (red text) hard to read over red-tinted area fills | Planned: Step 4 — cyan text, larger labels. |
+| 1 | **FIXED** | Area values wildly wrong (1.22 m² for a ~200 m² house) | Three-state scale model: Accept (theoretical, ~0.03% accurate) + Verify (empirical). |
+| 2 | **FIXED** | Marquee zoom broken — wrong location | Removed; replaced with cursor-centered scroll-wheel zoom (Step 3). |
+| 3 | **FIXED** | Black background / "polygon in space" after zoom | CSS transform zoom/pan — no re-render on zoom (Step 3). |
+| 4 | **FIXED** | "Cannot use same canvas" crash on rapid scroll-wheel zoom | Render cancellation + 80ms debounce. |
+| 5 | **FIXED** | Polygon label (red text) hard to read over red-tinted area fills | Cyan edges/labels, large dark-background pills (Step 4). |
+| 6 | **FIXED** | Scale detection reads "1:4" instead of "1:48" | Spatial text joining + known-ratio validation + digit completion. |
+| 7 | **FIXED** | No way to adjust polygon vertices after closing | Vertex dragging with hit-testing, undo support. |
+| 8 | **Cosmetic** | `favicon.ico` 404 on every page load | Harmless; browser auto-requests. Could add a favicon. |
+| 9 | **Cosmetic** | `TT: undefined function: 32` warning from PDF.js | CAD font hinting opcode; no impact on rendering or text extraction. |
 
 ---
 

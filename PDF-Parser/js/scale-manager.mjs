@@ -1,27 +1,69 @@
 /**
  * PDF-Parser — Scale Manager
  *
- * All calibrations are empirical: pdfUnitsPerMetre is always derived
- * from measuring a known reference in PDF coordinates.
- * Never converts theoretically from scale ratio + assumed PDF unit system.
+ * Three scale states per page:
+ *   1. PENDING  — auto-detected from title block, unconfirmed (amber ?)
+ *   2. ACCEPTED — user accepted a ratio via Check Scale (yellow ✓) — area math works
+ *   3. VERIFIED — empirical two-point calibration (green ✓) — highest confidence
+ *
+ * For ACCEPTED: we derive pdfUnitsPerMetre from the ratio using a best-guess
+ * page-unit assumption. Not perfect, but good enough to work with.
+ *
+ * For VERIFIED: pdfUnitsPerMetre is measured empirically. Gold standard.
  */
 
 import { UNITS } from "./config.mjs";
 
-var _calibrations = {};  // keyed by pageNum
+var _calibrations = {};
 
-/**
- * Store an empirical calibration from two points + a known real-world distance.
- * This is the gold standard — used by both manual calibration (C tool)
- * and the "Check Scale" verification flow.
- *
- * @param {number} pageNum
- * @param {Object} p1 — {x, y} in PDF coordinates
- * @param {Object} p2 — {x, y} in PDF coordinates
- * @param {number} realDistance — real-world distance between p1 and p2
- * @param {string} unit — "m", "mm", "ft", "in"
- * @param {Object} meta — optional metadata {ratio, source, raw}
- */
+// State constants
+export var STATE = {
+  NONE:     "none",
+  PENDING:  "pending",
+  ACCEPTED: "accepted",
+  VERIFIED: "verified"
+};
+
+/* ── Auto-detection (from sheet classifier) ───────────── */
+
+export function setPending(pageNum, ratio, raw) {
+  var cal = _calibrations[pageNum];
+  if (cal && (cal.state === STATE.ACCEPTED || cal.state === STATE.VERIFIED)) return;
+  _calibrations[pageNum] = {
+    state:            STATE.PENDING,
+    ratio:            ratio,
+    ratioLabel:       raw || ("1:" + ratio),
+    pdfUnitsPerMetre: null
+  };
+}
+
+/* ── User accepts a ratio (provisional) ───────────────── */
+
+export function accept(pageNum, ratio) {
+  // Derive a theoretical pdfUnitsPerMetre from the ratio.
+  // We don't know the PDF unit system, so we estimate from the page dimensions.
+  // This uses the "PDF points" assumption (1 pt = 1/72 inch = 0.3528mm).
+  // May be off by a constant factor, but enables working with approximate areas.
+  // User can verify later with empirical calibration for exact values.
+  var mmPerPdfUnit = 25.4 / 72;  // standard PDF point assumption
+  var realMmPerPdfUnit = mmPerPdfUnit * ratio;
+  var realMPerPdfUnit = realMmPerPdfUnit / 1000;
+  var pdfUnitsPerMetre = 1 / realMPerPdfUnit;
+
+  _calibrations[pageNum] = {
+    state:            STATE.ACCEPTED,
+    ratio:            ratio,
+    ratioLabel:       "1:" + ratio,
+    pdfUnitsPerMetre: pdfUnitsPerMetre,
+    source:           "accepted"
+  };
+
+  console.log("[ScaleManager] Page " + pageNum + " ACCEPTED 1:" + ratio +
+    " (theoretical: " + pdfUnitsPerMetre.toFixed(2) + " units/m)");
+}
+
+/* ── Empirical two-point calibration (verified) ───────── */
+
 export function calibrate(pageNum, p1, p2, realDistance, unit, meta) {
   var dx = p2.x - p1.x;
   var dy = p2.y - p1.y;
@@ -30,94 +72,66 @@ export function calibrate(pageNum, p1, p2, realDistance, unit, meta) {
   var pdfUnitsPerMetre = pdfDistance / realMetres;
 
   _calibrations[pageNum] = {
+    state:            STATE.VERIFIED,
+    ratio:            (meta && meta.ratio) || (_calibrations[pageNum] && _calibrations[pageNum].ratio) || null,
+    ratioLabel:       (meta && meta.raw) || (_calibrations[pageNum] && _calibrations[pageNum].ratioLabel) || "calibrated",
     pdfUnitsPerMetre: pdfUnitsPerMetre,
-    source:           (meta && meta.source) || "manual",
-    ratio:            (meta && meta.ratio) || null,
-    ratioLabel:       (meta && meta.raw) || null,
+    source:           "verified",
     refPoints:        [p1, p2],
     refDistance:       realDistance,
-    refUnit:          unit,
-    confirmed:        true
+    refUnit:          unit
   };
 
-  console.log("[ScaleManager] Page " + pageNum + " calibrated: " +
+  console.log("[ScaleManager] Page " + pageNum + " VERIFIED: " +
     pdfDistance.toFixed(1) + " PDF units = " + realDistance + " " + unit +
-    " → " + pdfUnitsPerMetre.toFixed(2) + " units/m" +
-    (meta && meta.ratio ? " (ratio 1:" + meta.ratio + ")" : ""));
+    " → " + pdfUnitsPerMetre.toFixed(2) + " units/m");
 }
 
-/**
- * Set a "pending" scale from auto-detection (unconfirmed).
- * This stores the detected ratio but does NOT enable area calculation.
- * The user must confirm via Check Scale before measurements work.
- */
-export function setPending(pageNum, ratio, raw) {
-  if (_calibrations[pageNum] && _calibrations[pageNum].confirmed) return; // don't overwrite confirmed
-  _calibrations[pageNum] = {
-    pdfUnitsPerMetre: null,   // NOT calibrated yet
-    source:           "auto-pending",
-    ratio:            ratio,
-    ratioLabel:       raw || ("1:" + ratio),
-    confirmed:        false
-  };
-}
+/* ── Conversion (works for ACCEPTED and VERIFIED) ─────── */
 
-/**
- * Convert a distance in PDF units to real-world metres.
- * Returns null if page is not calibrated (confirmed).
- */
 export function pdfToMetres(pageNum, pdfDistance) {
   var cal = _calibrations[pageNum];
-  if (!cal || !cal.confirmed || !cal.pdfUnitsPerMetre) return null;
+  if (!cal || !cal.pdfUnitsPerMetre) return null;
   return pdfDistance / cal.pdfUnitsPerMetre;
 }
 
-/**
- * Convert an area in PDF units² to real-world m².
- * Returns null if page is not calibrated (confirmed).
- */
 export function pdfAreaToM2(pageNum, pdfArea) {
   var cal = _calibrations[pageNum];
-  if (!cal || !cal.confirmed || !cal.pdfUnitsPerMetre) return null;
+  if (!cal || !cal.pdfUnitsPerMetre) return null;
   var ppm = cal.pdfUnitsPerMetre;
   return pdfArea / (ppm * ppm);
 }
 
-/**
- * Check if a page has a confirmed (empirical) calibration.
- */
+/* ── State queries ────────────────────────────────────── */
+
+export function getState(pageNum) {
+  var cal = _calibrations[pageNum];
+  return cal ? cal.state : STATE.NONE;
+}
+
 export function isCalibrated(pageNum) {
-  var cal = _calibrations[pageNum];
-  return cal && cal.confirmed && cal.pdfUnitsPerMetre !== null;
+  var state = getState(pageNum);
+  return state === STATE.ACCEPTED || state === STATE.VERIFIED;
 }
 
-/**
- * Check if a page has a pending (unconfirmed) scale detection.
- */
+export function isVerified(pageNum) {
+  return getState(pageNum) === STATE.VERIFIED;
+}
+
 export function isPending(pageNum) {
-  var cal = _calibrations[pageNum];
-  return cal && !cal.confirmed;
+  return getState(pageNum) === STATE.PENDING;
 }
 
-/**
- * Get the detected/confirmed ratio for a page (for display).
- */
 export function getRatio(pageNum) {
   var cal = _calibrations[pageNum];
   return cal ? cal.ratio : null;
 }
 
-/**
- * Get the ratio label (e.g., "1:48", "Scale: 1:48") for display.
- */
 export function getRatioLabel(pageNum) {
   var cal = _calibrations[pageNum];
   return cal ? cal.ratioLabel : null;
 }
 
-/**
- * Get full calibration data for a page.
- */
 export function getCalibration(pageNum) {
   return _calibrations[pageNum] || null;
 }

@@ -259,6 +259,60 @@ export function renamePolygon(pageNum, polyIdx, newLabel) {
 export function getPolygons(pageNum) { return _polygons[pageNum] || []; }
 export function isDrawing() { return _activePolyId !== null; }
 
+/* ── Vertex dragging ──────────────────────────────────── */
+
+var _dragState = null;  // { pageNum, polyIdx, vertIdx }
+
+/**
+ * Hit-test: find a vertex near the given PDF coordinate.
+ * @param {number} pageNum
+ * @param {Object} pt — {x, y} in PDF coords
+ * @param {number} radiusPdf — search radius in PDF points
+ * @returns {Object|null} — { polyIdx, vertIdx, poly } or null
+ */
+export function hitTestVertex(pageNum, pt, radiusPdf) {
+  var polys = _polygons[pageNum] || [];
+  for (var i = 0; i < polys.length; i++) {
+    if (!polys[i].closed) continue;
+    var verts = polys[i].vertices;
+    for (var j = 0; j < verts.length; j++) {
+      var dx = verts[j].x - pt.x;
+      var dy = verts[j].y - pt.y;
+      if (Math.sqrt(dx * dx + dy * dy) < radiusPdf) {
+        return { polyIdx: i, vertIdx: j, poly: polys[i] };
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Start dragging a vertex. Saves undo state.
+ */
+export function startDrag(pageNum, polyIdx, vertIdx) {
+  _pushUndo(pageNum);
+  _dragState = { pageNum: pageNum, polyIdx: polyIdx, vertIdx: vertIdx };
+}
+
+/**
+ * Move the dragged vertex to a new position.
+ */
+export function moveDrag(pt) {
+  if (!_dragState) return;
+  var polys = _polygons[_dragState.pageNum];
+  if (!polys || !polys[_dragState.polyIdx]) return;
+  polys[_dragState.polyIdx].vertices[_dragState.vertIdx] = { x: pt.x, y: pt.y };
+}
+
+/**
+ * End the drag.
+ */
+export function endDrag() {
+  _dragState = null;
+}
+
+export function isDragging() { return _dragState !== null; }
+
 function _getActivePoly() {
   if (!_activePolyId) return null;
   var polys = _polygons[_activePage] || [];

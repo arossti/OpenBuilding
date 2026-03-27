@@ -3,7 +3,12 @@
  */
 
 import * as Loader from "./pdf-loader.mjs";
-import { SCALE_PATTERNS, SHEET_PREFIXES, CLASS } from "./config.mjs";
+import { SCALE_PATTERNS, SHEET_PREFIXES, CLASS, METRIC_SCALES, IMPERIAL_SCALES } from "./config.mjs";
+
+// All known scale ratios for validation
+var KNOWN_RATIOS = {};
+METRIC_SCALES.forEach(function(s) { KNOWN_RATIOS[s.ratio] = true; });
+IMPERIAL_SCALES.forEach(function(s) { KNOWN_RATIOS[s.ratio] = true; });
 
 export function parseTitleBlock(textItems, pageWidth, pageHeight) {
   var tbItems = textItems.filter(function(item) {
@@ -32,16 +37,86 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
   return result;
 }
 
+/**
+ * Join text items spatially — only insert a space when items are
+ * far enough apart. This prevents "48" split across two items
+ * from becoming "4 8".
+ */
+function _spatialJoin(textItems) {
+  if (textItems.length === 0) return "";
+
+  // Sort by Y (row), then X (column)
+  var sorted = textItems.slice().sort(function(a, b) {
+    if (Math.abs(a.y - b.y) > 3) return a.y - b.y;
+    return a.x - b.x;
+  });
+
+  var parts = [sorted[0].str];
+  for (var i = 1; i < sorted.length; i++) {
+    var prev = sorted[i - 1];
+    var curr = sorted[i];
+    // Different line? Insert space.
+    if (Math.abs(curr.y - prev.y) > 3) {
+      parts.push(" ");
+    } else {
+      // Same line — check horizontal gap
+      var prevRight = prev.x + (prev.width || 0);
+      var gap = curr.x - prevRight;
+      var charWidth = prev.fontSize ? prev.fontSize * 0.5 : 4;
+      // Only add space if gap is more than ~half a character width
+      if (gap > charWidth) {
+        parts.push(" ");
+      }
+    }
+    parts.push(curr.str);
+  }
+  return parts.join("");
+}
+
 export function detectScale(textItems) {
-  var allText = textItems.map(function(item) { return item.str; }).join(" ");
+  var allText = _spatialJoin(textItems);
+
+  var bestResult = null;
+
   for (var i = 0; i < SCALE_PATTERNS.length; i++) {
     var pat = SCALE_PATTERNS[i];
-    var match = allText.match(pat.regex);
-    if (match) {
-      return { ratio: pat.extract(match), type: pat.type, source: "auto", raw: match[0] };
+    // Find ALL matches, not just the first
+    var regex = new RegExp(pat.regex.source, pat.regex.flags + (pat.regex.flags.indexOf("g") >= 0 ? "" : "g"));
+    var match;
+    while ((match = regex.exec(allText)) !== null) {
+      var ratio = pat.extract(match);
+      if (ratio === null) {
+        // NTS match
+        return { ratio: null, type: "nts", source: "auto", raw: match[0] };
+      }
+      // Prefer known common scales
+      if (KNOWN_RATIOS[ratio]) {
+        return { ratio: ratio, type: pat.type, source: "auto", raw: match[0] };
+      }
+      // Store first match as fallback
+      if (!bestResult) {
+        bestResult = { ratio: ratio, type: pat.type, source: "auto", raw: match[0] };
+      }
     }
   }
-  return null;
+
+  // If we found a ratio but it's not in the known list, check if
+  // appending common suffixes makes it known (e.g., 4 → 48)
+  if (bestResult && !KNOWN_RATIOS[bestResult.ratio]) {
+    var r = bestResult.ratio;
+    // Try common completions
+    for (var suffix = 0; suffix <= 9; suffix++) {
+      var candidate = parseInt("" + r + suffix, 10);
+      if (KNOWN_RATIOS[candidate]) {
+        console.log("[SheetClassifier] Corrected scale 1:" + r + " → 1:" + candidate + " (known scale match)");
+        bestResult.ratio = candidate;
+        bestResult.raw = "1:" + candidate;
+        break;
+      }
+    }
+  }
+
+  return bestResult;
 }
 
 export function classifySheet(sheetId, sheetTitle) {
