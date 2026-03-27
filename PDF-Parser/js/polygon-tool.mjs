@@ -154,8 +154,12 @@ function _drawPoly(ctx, poly) {
   if (verts.length === 0) return;
 
   ctx.save();
-  ctx.strokeStyle = poly.color;
-  ctx.lineWidth = 2;
+
+  // Edge colour: cyan for visibility on any drawing background
+  var edgeColor = "#00e5ff";
+  var fillColor = "rgba(0, 229, 255, 0.08)";
+  ctx.strokeStyle = edgeColor;
+  ctx.lineWidth = 3;
 
   ctx.beginPath();
   var p0 = Viewer.pdfToCanvas(verts[0]);
@@ -166,20 +170,19 @@ function _drawPoly(ctx, poly) {
   }
   if (poly.closed) {
     ctx.closePath();
-    ctx.globalAlpha = 0.12;
-    ctx.fillStyle = poly.color;
+    ctx.fillStyle = fillColor;
     ctx.fill();
-    ctx.globalAlpha = 1.0;
   }
   ctx.stroke();
 
+  // Vertex handles
   for (var j = 0; j < verts.length; j++) {
     var pj = Viewer.pdfToCanvas(verts[j]);
     ctx.beginPath();
-    ctx.arc(pj.x, pj.y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = (j === 0 && !poly.closed && verts.length >= 3) ? "#00ff00" : poly.color;
+    ctx.arc(pj.x, pj.y, 6, 0, Math.PI * 2);
+    ctx.fillStyle = (j === 0 && !poly.closed && verts.length >= 3) ? "#00ff00" : edgeColor;
     ctx.fill();
-    ctx.strokeStyle = "#fff";
+    ctx.strokeStyle = "#000";
     ctx.lineWidth = 1.5;
     ctx.stroke();
   }
@@ -199,26 +202,33 @@ function _drawPoly(ctx, poly) {
       areaText = "(uncalibrated)";
     }
 
-    // Background pill for readability
-    ctx.font = "bold 13px Helvetica Neue, sans-serif";
+    // Background pill — large, high-contrast
+    ctx.font = "bold 26px Helvetica Neue, sans-serif";
     var line1 = poly.label;
+    ctx.font = "24px Helvetica Neue, sans-serif";
     var line2 = areaText;
+    // Measure with the larger font
+    ctx.font = "bold 26px Helvetica Neue, sans-serif";
     var w1 = ctx.measureText(line1).width;
+    ctx.font = "24px Helvetica Neue, sans-serif";
     var w2 = ctx.measureText(line2).width;
     var maxW = Math.max(w1, w2);
-    var pillW = maxW + 12;
-    var pillH = 36;
-    ctx.fillStyle = "rgba(0,0,0,0.7)";
+    var pillW = maxW + 20;
+    var pillH = 64;
+    ctx.fillStyle = "rgba(0,0,0,0.75)";
     ctx.beginPath();
-    ctx.roundRect(center.x - pillW / 2, center.y - pillH / 2 - 2, pillW, pillH, 4);
+    ctx.roundRect(center.x - pillW / 2, center.y - pillH / 2 - 2, pillW, pillH, 6);
     ctx.fill();
 
-    ctx.fillStyle = "#fff";
+    // Label line — white
+    ctx.font = "bold 26px Helvetica Neue, sans-serif";
+    ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
-    ctx.fillText(line1, center.x, center.y - 3);
-    ctx.font = "12px Helvetica Neue, sans-serif";
-    ctx.fillStyle = poly.color;
-    ctx.fillText(line2, center.x, center.y + 14);
+    ctx.fillText(line1, center.x, center.y - 4);
+    // Area line — cyan for legibility over any background
+    ctx.font = "24px Helvetica Neue, sans-serif";
+    ctx.fillStyle = "#00e5ff";
+    ctx.fillText(line2, center.x, center.y + 24);
   }
 
   ctx.restore();
