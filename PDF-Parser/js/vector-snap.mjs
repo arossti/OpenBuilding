@@ -12,6 +12,23 @@ export function extractGeometry(pageNum) {
 
   return Loader.getOperatorList(pageNum).then(function(ops) {
     var OPS = Loader.getOPS();
+
+    // Diagnostic: log what OPS constants we're using and what's in the stream
+    if (!_geometry._logged) {
+      _geometry._logged = true;
+      var fnCounts = {};
+      for (var d = 0; d < ops.fnArray.length; d++) {
+        fnCounts[ops.fnArray[d]] = (fnCounts[ops.fnArray[d]] || 0) + 1;
+      }
+      console.log("[VectorSnap] OPS constants:", JSON.stringify({
+        moveTo: OPS.moveTo, lineTo: OPS.lineTo, rectangle: OPS.rectangle,
+        closePath: OPS.closePath, stroke: OPS.stroke, fill: OPS.fill,
+        constructPath: OPS.constructPath
+      }));
+      console.log("[VectorSnap] Operator frequency on page " + pageNum + ":", JSON.stringify(fnCounts));
+      console.log("[VectorSnap] Total operators:", ops.fnArray.length);
+    }
+
     var segments = [], closedPaths = [];
     var currentPath = [];
     var curX = 0, curY = 0, pathStartX = 0, pathStartY = 0;
@@ -19,6 +36,52 @@ export function extractGeometry(pageNum) {
     for (var i = 0; i < ops.fnArray.length; i++) {
       var fn = ops.fnArray[i], args = ops.argsArray[i];
 
+      // PDF.js 4.x batches path ops into constructPath
+      if (fn === OPS.constructPath) {
+        // args[0] = array of sub-op codes, args[1] = array of coordinates
+        var subOps = args[0];
+        var coords = args[1];
+        var ci = 0;  // coordinate index
+
+        for (var s = 0; s < subOps.length; s++) {
+          var subOp = subOps[s];
+
+          if (subOp === OPS.moveTo) {
+            curX = coords[ci++]; curY = coords[ci++];
+            pathStartX = curX; pathStartY = curY;
+            if (currentPath.length >= 2) _addPathSegments(currentPath, segments);
+            currentPath = [{ x: curX, y: curY }];
+          } else if (subOp === OPS.lineTo) {
+            curX = coords[ci++]; curY = coords[ci++];
+            currentPath.push({ x: curX, y: curY });
+          } else if (subOp === OPS.curveTo || subOp === OPS.curveTo2 || subOp === OPS.curveTo3) {
+            // Bezier curves: approximate with endpoint
+            // curveTo has 6 coords (3 control points), curveTo2/3 have 4
+            var numCoords = (subOp === OPS.curveTo) ? 6 : 4;
+            curX = coords[ci + numCoords - 2];
+            curY = coords[ci + numCoords - 1];
+            ci += numCoords;
+            currentPath.push({ x: curX, y: curY });
+          } else if (subOp === OPS.rectangle) {
+            var rx = coords[ci++], ry = coords[ci++], rw = coords[ci++], rh = coords[ci++];
+            if (currentPath.length >= 2) _addPathSegments(currentPath, segments);
+            currentPath = [];
+            var rect = [{ x: rx, y: ry }, { x: rx + rw, y: ry }, { x: rx + rw, y: ry + rh }, { x: rx, y: ry + rh }];
+            closedPaths.push(rect);
+            _addPathSegments(rect.concat([rect[0]]), segments);
+          } else if (subOp === OPS.closePath) {
+            if (currentPath.length >= 3) {
+              currentPath.push({ x: pathStartX, y: pathStartY });
+              closedPaths.push(currentPath.slice());
+              _addPathSegments(currentPath, segments);
+            }
+            currentPath = [];
+          }
+        }
+        continue;
+      }
+
+      // Legacy individual operators (PDF.js 3.x or simple PDFs)
       switch (fn) {
         case OPS.moveTo:
           curX = args[0]; curY = args[1];
@@ -31,10 +94,10 @@ export function extractGeometry(pageNum) {
           curX = args[0]; curY = args[1];
           break;
         case OPS.rectangle:
-          var rx = args[0], ry = args[1], rw = args[2], rh = args[3];
-          var rect = [{ x: rx, y: ry }, { x: rx + rw, y: ry }, { x: rx + rw, y: ry + rh }, { x: rx, y: ry + rh }];
-          closedPaths.push(rect);
-          _addPathSegments(rect.concat([rect[0]]), segments);
+          var rx2 = args[0], ry2 = args[1], rw2 = args[2], rh2 = args[3];
+          var rect2 = [{ x: rx2, y: ry2 }, { x: rx2 + rw2, y: ry2 }, { x: rx2 + rw2, y: ry2 + rh2 }, { x: rx2, y: ry2 + rh2 }];
+          closedPaths.push(rect2);
+          _addPathSegments(rect2.concat([rect2[0]]), segments);
           break;
         case OPS.closePath:
           if (currentPath.length >= 3) {
