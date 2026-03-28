@@ -158,6 +158,20 @@ html, body {
 }
 .export-btn:hover { color: var(--text); border-color: var(--accent); }
 
+.nav-btn {
+  background: var(--accent);
+  border: 1px solid var(--accent-lit);
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--font);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.nav-btn:hover { background: var(--accent-lit); }
+
 /* ── Sidebar ──────────────────────────────────────────── */
 #sidebar-header {
   padding: 10px 12px;
