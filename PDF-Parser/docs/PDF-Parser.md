@@ -34,22 +34,24 @@ The reference document (`2024.09.09 _ Issued for Permit (B-Frame 4.4 M&K).pdf`) 
 
 ### Multi-file HTML app with local JS modules
 
-- `index.html` — main shell (CSS + HTML + `<script>` tags)
-- `js/` — 10 vanilla JS modules loaded via `<script>` tags (no ES modules, no build step)
-- `lib/` — PDF.js 3.11.174 UMD build (local copy, no CDN dependency)
+- `index.html` — PDF-Parser app shell (links `bfcastyles.css` + `pdfparser.css`)
+- `matrix.html` — EC Matrix app (links `bfcastyles.css` + `matrix.css`)
+- `bfcastyles.css` — shared design system (reset, brand tokens, header, logo, nav)
+- `pdfparser.css` — PDF-Parser dark-theme styles
+- `matrix.css` — EC Matrix light-theme styles
+- `js/` — 10 vanilla JS ESM modules (`.mjs`)
+- `lib/` — PDF.js 4.9.155 ESM build (local copy, no CDN dependency)
 - `docs/` — workplan and documentation
 - `PDF resources/` — reference PDFs (not tracked in git)
-- Opens directly from `file://` protocol — no server required for development
+- Requires local dev server (`python3 -m http.server 8000` or `./serve.sh`) for ESM imports
 
 ### PDF.js Version Strategy
 
-Currently using **PDF.js 3.11.174** (UMD/legacy build) for `file://` compatibility. The modern v4.x+ ESM build offers real advantages for large construction PDFs (38MB+):
+Using **PDF.js 4.9.155** (ESM build) with `<script type="module">`. Requires a local dev server (`python3 -m http.server 8000`). Benefits over the legacy 3.x UMD build:
 - **OffscreenCanvas** — renders in a Web Worker, keeps UI thread smooth during page loads
 - **Structured clone transfers** — faster worker ↔ main thread data passing
 - **Active security patches** — 3.x is end-of-life
 - **Better CMap/font handling** — matters for CAD-exported PDFs with custom fonts
-
-**Plan:** Stay on 3.11 UMD for early builds. When a local dev server is introduced (even `python3 -m http.server 8000`), swap to v4.x with `<script type="module">` — a 15-minute change. No urgency.
 
 ### Core Libraries
 
@@ -436,7 +438,7 @@ var project = {
 - [x] CSV export of measurements
 - [x] JSON project save/load with calibration data
 
-### Step 2 — Scale Confirmation Workflow ✅ (2026-03-27)
+### Step 2 — Scale Confirmation Workflow ✅ (2026-03-27, refined 2026-03-28)
 - [x] "Check Scale" button (S key) — triggers scale detection + confirmation panel
 - [x] Scale confirmation panel: detected scale pre-selected in dropdown, metric/imperial toggle
 - [x] Common scale dropdowns (metric 1:10–1:200, imperial 1"=1' through 3/16"=1')
@@ -447,6 +449,11 @@ var project = {
 - [x] Calibration persisted to ProjectStore (included in JSON export)
 - [x] Spatial-aware text joining for scale detection (fixes "1:4" → "1:48" split-text bug)
 - [x] Known-ratio validation + digit-completion heuristic
+- [x] **Guided scale workflow** — auto-prompt scale panel on unscaled pages with "Set or Accept Scale for This Page" title
+- [x] **Accept confirmation** — "Scale Accepted (Provisional)" feedback dialogue after Accept
+- [x] **Verify instruction** — calibration instruction dialogue after Accept & Verify, with "Don't show again" (localStorage)
+- [x] **"Scale Verified!" confirmation** — feedback dialogue after successful calibration (both flows)
+- [x] **Auto-detect metric/imperial** — infers system from detected label (inch/foot marks) or ratio and pre-selects correct toggle
 - [ ] Multi-viewport awareness: detect multiple scales per page (future)
 - [ ] Scale bar auto-detection from vector geometry (future)
 
@@ -508,6 +515,17 @@ var project = {
 - [x] Shared drawing code between ruler and calibrate (`_drawRulerLine`)
 - [x] Escape cancels in-progress ruler, Delete removes last ruler
 - [x] Multiple rulers per page, snap-to-vertex works during placement
+
+### Step 7.5 — Design System Refactor & UX Polish ✅ (2026-03-28)
+
+- [x] **CSS refactor** — split monolithic `bfcastyles.css` into 3-file architecture:
+  - `bfcastyles.css` (shared foundation: reset, brand tokens, header, logo, nav button)
+  - `pdfparser.css` (dark theme: viewer, toolbar, sidebar, measure panel, scale panel, feedback dialogues)
+  - `matrix.css` (light theme: cards, phases, flow model, legends, actor lens, persona chips)
+- [x] Extracted 1,418 lines of inline CSS from `matrix.html` into `matrix.css`
+- [x] Matrix logo switched from inline style to shared `.header-logo` class
+- [x] **Default measurement method changed to Rectangle** (more frequently used than Polygon)
+- [x] Scale feedback dialogue CSS + HTML added to PDF-Parser
 
 ### Step 8 — Window/Opening Measurement & Netting
 
@@ -594,8 +612,13 @@ Net Total     38.10    410.09
 
 ```
 PDF-Parser/
-├── index.html              ← main app shell (CSS + HTML)
+├── index.html              ← PDF-Parser app shell
+├── matrix.html             ← EC Matrix app (cards + flow views)
+├── bfcastyles.css           ← shared design system (reset, tokens, header, logo)
+├── pdfparser.css            ← PDF-Parser dark-theme styles
+├── matrix.css               ← EC Matrix light-theme styles
 ├── serve.sh                ← dev server launcher (python3 http.server)
+├── graphics/               ← logos and images
 ├── lib/
 │   ├── pdf.min.mjs         ← PDF.js 4.9.155 ESM (349 KB)
 │   └── pdf.worker.min.mjs  ← PDF.js web worker (1.3 MB)
