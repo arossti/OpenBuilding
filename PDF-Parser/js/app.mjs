@@ -1486,7 +1486,7 @@ function _updateMeasurements() {
       this.textContent = expanded ? "\u25B6" : "\u25BC";
       var details = els.measurePanel.querySelectorAll(".detail-row[data-parent='" + wallIdx + "']");
       for (var d = 0; d < details.length; d++) {
-        details[d].style.display = expanded ? "none" : "";
+        details[d].style.display = expanded ? "none" : "table-row";
       }
     });
   }
