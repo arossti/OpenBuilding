@@ -100,6 +100,41 @@ body {
   color: #fff;
 }
 
+/* Icon sizing in toolbar buttons */
+.tool-btn i,
+.export-btn i {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* ── Toolbar Tooltips (data-tip attribute) ────────────── */
+[data-tip] {
+  position: relative;
+}
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: var(--font);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 200;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+[data-tip]:hover::after {
+  opacity: 1;
+}
+
 #measure-method,
 #window-mode {
   background: var(--bg-panel);
