@@ -94,6 +94,18 @@ function _loadFile(file) {
   reader.readAsArrayBuffer(file);
 }
 
+function loadSample() {
+  setStatus("Loading sample PDF...", "busy");
+  fetch("sample.pdf").then(function(resp) {
+    if (!resp.ok) throw new Error("Could not fetch sample.pdf (" + resp.status + ")");
+    return resp.arrayBuffer();
+  }).then(function(buffer) {
+    loadPdf(buffer, "Calgary-DP-BP-new-home-sample-drawings.pdf");
+  }).catch(function(err) {
+    setStatus("Error: " + err.message, "error");
+  });
+}
+
 function loadPdf(buffer, fileName) {
   console.log("[PDF-Parser] Loading:", fileName, "(" + (buffer.byteLength / 1048576).toFixed(1) + " MB)");
 
@@ -1236,7 +1248,9 @@ window.PP = {
   // Measure method
   setMeasureMethod: setMeasureMethod,
   // Auto-detect
-  autoDetect: autoDetect
+  autoDetect: autoDetect,
+  // Sample
+  loadSample: loadSample
 };
 
 /* ── Boot ─────────────────────────────────────────────── */

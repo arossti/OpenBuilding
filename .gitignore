@@ -8,6 +8,7 @@
 
 # Documents — kept locally, not tracked in git
 *.pdf
+!PDF-Parser/sample.pdf
 *.docx
 *.xlsx
 *.xls
