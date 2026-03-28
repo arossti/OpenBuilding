@@ -647,18 +647,47 @@ A2.1,NET TOTAL,,,,,42.53,,457.87,
 - [x] `loadPolygons` in polygon-tool, `restoreCalibration` in scale-manager
 - [x] Status message: "Imported: X areas, Y windows, Z rulers from project.json"
 
-### Step 10 — Schedule Extraction & Cross-Validation
+### Step 10 — Volumetric Calculation (Priority — BEAM Integration)
+
+**Purpose:** Compute concrete and material volumes from plan-view cross-sectional areas for embodied carbon analysis in BEAM. This is the critical path feature — BEAM needs volume data to calculate EC for foundations, walls, and slabs.
+
+**Approach:** The auto-detect system (Step 6) already identifies filled quads (wall faces, foundation outlines) from CAD-exported PDFs. The volume workflow extends this by allowing the user to select or group detected face quads as a cross-sectional area, then multiply by a height to produce a volume.
+
+#### 10.1 Cross-Section Area from Detected Quads
+- [ ] **Select detected quads** — user clicks or lasso-selects multiple auto-detected filled quads on a plan sheet
+- [ ] **Group as cross-section** — selected quads combine into a single cross-sectional area (union of faces)
+- [ ] **Label as material type** — user assigns a label (e.g., "Foundation Wall", "Slab on Grade", "Bearing Wall")
+- [ ] **Display combined area** in measurement panel with distinct styling (e.g., concrete grey)
+
+#### 10.2 Height Input & Volume Calculation
+- [ ] **Manual height entry** — user enters height/depth per cross-section (e.g., "1200 mm" for a foundation wall, "150 mm" for a slab)
+- [ ] **Section sheet reference** — optionally pull height from a section sheet annotation (floor-to-floor, footing depth, wall height)
+- [ ] **Volume = cross-section area × height** — computed and displayed in m³ and ft³
+- [ ] **Volume summary** — per-element and total, grouped by material type
+
+#### 10.3 Export for BEAM
+- [ ] Volume data included in CSV and JSON export
+- [ ] Format compatible with BEAM's material input (element type, volume m³, material)
+- [ ] Summary: total concrete volume, total wood framing volume, etc.
+
+#### 10.4 Implementation Notes
+- Reuse `buildAssociationMap` pattern for grouping quads with parent cross-sections
+- Reuse existing auto-detect candidates (`closedPaths` from vector-snap.mjs) as selectable elements
+- Height could be stored as a new field on polygon objects: `height` (mm), `volumeM3` (computed)
+- Consider a "Volume" tool mode (V key? — conflicts with Navigate, use Shift+V or new key)
+
+### Step 11 — Schedule Extraction & Cross-Validation
 - [ ] Text clustering into table rows/columns
 - [ ] Room schedule parser
 - [ ] Cross-validation: "Schedule says Office = 27.80 m²; your polygon = 28.1 m² (1.1% variance)"
 
-### Step 11 — Section Analysis & Volume (Phase 2)
+### Step 12 — Section Analysis & Automated Heights
 - [ ] Level detection on section sheets
 - [ ] Floor-to-floor height extraction
-- [ ] Volume = area × height per storey
+- [ ] Auto-populate heights for volumetric calculations from section annotations
 - [ ] Cross-validation against energy model data (A0.10)
 
-### Step 12 — Polish & Testing
+### Step 13 — Polish & Testing
 - [ ] Print-friendly summary view
 - [ ] Error handling and edge cases
 - [ ] Testing against multiple CD sets (different firms, scales, formats)
