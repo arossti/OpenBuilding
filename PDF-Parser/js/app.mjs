@@ -3,7 +3,16 @@
  * Main entry point. Wires all modules together.
  */
 
-import { VERSION, SNAP_RADIUS_PX, METRIC_SCALES, IMPERIAL_SCALES, AREA_EDGE, AREA_FILL, WIN_EDGE, WIN_FILL } from "./config.mjs";
+import {
+  VERSION,
+  SNAP_RADIUS_PX,
+  METRIC_SCALES,
+  IMPERIAL_SCALES,
+  AREA_EDGE,
+  AREA_FILL,
+  WIN_EDGE,
+  WIN_FILL
+} from "./config.mjs";
 import * as Loader from "./pdf-loader.mjs";
 import * as SheetClassifier from "./sheet-classifier.mjs";
 import * as ScaleManager from "./scale-manager.mjs";
@@ -18,14 +27,14 @@ import * as ProjectStore from "./project-store.mjs";
 var els = {};
 var _currentPage = 0;
 var _currentTool = "navigate";
-var _measureMethod = "rectangle";   // "polygon" or "rectangle"
-var _windowMode = "net";            // "net" or "add"
+var _measureMethod = "rectangle"; // "polygon" or "rectangle"
+var _windowMode = "net"; // "net" or "add"
 var _calibPoint1 = null;
-var _rectStart = null;            // first corner for bounding rectangle
-var _rectCurrent = null;          // live cursor position for rubber-band preview
-var _snapTarget = null;           // current snap indicator {x, y, type}
-var _rulerStart = null;           // first point for ruler/calibrate rubber-band
-var _rulerCurrent = null;         // live cursor position for ruler preview
+var _rectStart = null; // first corner for bounding rectangle
+var _rectCurrent = null; // live cursor position for rubber-band preview
+var _snapTarget = null; // current snap indicator {x, y, type}
+var _rulerStart = null; // first point for ruler/calibrate rubber-band
+var _rulerCurrent = null; // live cursor position for ruler preview
 
 // Persistent ruler lines per page: _rulers[pageNum] = [{p1, p2, label, lengthM}, ...]
 var _rulers = {};
@@ -36,20 +45,20 @@ var _nextRulerId = 1;
 function init() {
   console.log("[PDF-Parser] Booting v" + VERSION);
 
-  els.fileInput    = document.getElementById("file-input");
-  els.dropZone     = document.getElementById("drop-zone");
-  els.viewerWrap   = document.getElementById("viewer-wrap");
-  els.thumbStrip   = document.getElementById("thumb-strip");
-  els.sheetInfo    = document.getElementById("sheet-info");
+  els.fileInput = document.getElementById("file-input");
+  els.dropZone = document.getElementById("drop-zone");
+  els.viewerWrap = document.getElementById("viewer-wrap");
+  els.thumbStrip = document.getElementById("thumb-strip");
+  els.sheetInfo = document.getElementById("sheet-info");
   els.measurePanel = document.getElementById("measure-panel");
-  els.statusBar    = document.getElementById("status-bar");
-  els.zoomLabel    = document.getElementById("zoom-label");
-  els.scaleLabel   = document.getElementById("scale-label");
-  els.pageLabel    = document.getElementById("page-label");
-  els.toolBtns     = document.querySelectorAll(".tool-btn");
+  els.statusBar = document.getElementById("status-bar");
+  els.zoomLabel = document.getElementById("zoom-label");
+  els.scaleLabel = document.getElementById("scale-label");
+  els.pageLabel = document.getElementById("page-label");
+  els.toolBtns = document.querySelectorAll(".tool-btn");
 
   Viewer.init("viewer-container", "pdf-canvas", "overlay-canvas");
-  Viewer.setDrawCallback(function(ctx, pageNum) {
+  Viewer.setDrawCallback(function (ctx, pageNum) {
     PolygonTool.draw(ctx, pageNum);
     _drawRulers(ctx, pageNum);
     _drawRulerPreview(ctx);
@@ -70,118 +79,138 @@ function init() {
 /* ── File loading ─────────────────────────────────────── */
 
 function _bindFileInput() {
-  els.fileInput.addEventListener("change", function(e) {
+  els.fileInput.addEventListener("change", function (e) {
     if (e.target.files.length > 0) _loadFile(e.target.files[0]);
   });
-  els.dropZone.addEventListener("dragover", function(e) {
-    e.preventDefault(); els.dropZone.classList.add("drag-over");
+  els.dropZone.addEventListener("dragover", function (e) {
+    e.preventDefault();
+    els.dropZone.classList.add("drag-over");
   });
-  els.dropZone.addEventListener("dragleave", function() {
+  els.dropZone.addEventListener("dragleave", function () {
     els.dropZone.classList.remove("drag-over");
   });
-  els.dropZone.addEventListener("drop", function(e) {
-    e.preventDefault(); els.dropZone.classList.remove("drag-over");
+  els.dropZone.addEventListener("drop", function (e) {
+    e.preventDefault();
+    els.dropZone.classList.remove("drag-over");
     if (e.dataTransfer.files.length > 0) _loadFile(e.dataTransfer.files[0]);
   });
 }
 
 function _loadFile(file) {
   if (file.type !== "application/pdf") {
-    setStatus("Error: not a PDF file", "error"); return;
+    setStatus("Error: not a PDF file", "error");
+    return;
   }
   setStatus("Loading " + file.name + "...", "busy");
   var reader = new FileReader();
-  reader.onload = function(e) { loadPdf(e.target.result, file.name); };
+  reader.onload = function (e) {
+    loadPdf(e.target.result, file.name);
+  };
   reader.readAsArrayBuffer(file);
 }
 
 function loadSample() {
   setStatus("Loading sample PDF...", "busy");
-  fetch("sample.pdf").then(function(resp) {
-    if (!resp.ok) throw new Error("Could not fetch sample.pdf (" + resp.status + ")");
-    return resp.arrayBuffer();
-  }).then(function(buffer) {
-    loadPdf(buffer, "Calgary-DP-BP-new-home-sample-drawings.pdf");
-  }).catch(function(err) {
-    setStatus("Error: " + err.message, "error");
-  });
+  fetch("sample.pdf")
+    .then(function (resp) {
+      if (!resp.ok) throw new Error("Could not fetch sample.pdf (" + resp.status + ")");
+      return resp.arrayBuffer();
+    })
+    .then(function (buffer) {
+      loadPdf(buffer, "Calgary-DP-BP-new-home-sample-drawings.pdf");
+    })
+    .catch(function (err) {
+      setStatus("Error: " + err.message, "error");
+    });
 }
 
 function loadPdf(buffer, fileName) {
   console.log("[PDF-Parser] Loading:", fileName, "(" + (buffer.byteLength / 1048576).toFixed(1) + " MB)");
 
-  Loader.reset(); PolygonTool.reset(); ScaleManager.reset(); VectorSnap.reset(); ProjectStore.reset();
+  Loader.reset();
+  PolygonTool.reset();
+  ScaleManager.reset();
+  VectorSnap.reset();
+  ProjectStore.reset();
 
   var loadingOverlay = document.getElementById("loading-overlay");
-  var loadingBar     = document.getElementById("loading-bar-fill");
-  var loadingLabel   = document.getElementById("loading-label");
+  var loadingBar = document.getElementById("loading-bar-fill");
+  var loadingLabel = document.getElementById("loading-label");
 
-  Loader.loadFromBuffer(buffer).then(function(result) {
-    console.log("[PDF-Parser] Loaded:", result.pageCount, "pages");
-    ProjectStore.initFromPdf(fileName, result.pageCount);
+  Loader.loadFromBuffer(buffer)
+    .then(function (result) {
+      console.log("[PDF-Parser] Loaded:", result.pageCount, "pages");
+      ProjectStore.initFromPdf(fileName, result.pageCount);
 
-    // Show loading overlay, hide drop zone
-    els.dropZone.style.display = "none";
-    loadingOverlay.style.display = "";
+      // Show loading overlay, hide drop zone
+      els.dropZone.style.display = "none";
+      loadingOverlay.style.display = "";
 
-    var total = result.pageCount;
+      var total = result.pageCount;
 
-    // Build thumbnail placeholders
-    _buildThumbnailPlaceholders(total);
+      // Build thumbnail placeholders
+      _buildThumbnailPlaceholders(total);
 
-    // Render thumbnails one by one with progress bar
-    function renderNext(p) {
-      if (p > total) {
-        // All done — classify sheets, then show first page
-        loadingLabel.textContent = "Classifying sheets...";
-        loadingBar.style.width = "100%";
+      // Render thumbnails one by one with progress bar
+      function renderNext(p) {
+        if (p > total) {
+          // All done — classify sheets, then show first page
+          loadingLabel.textContent = "Classifying sheets...";
+          loadingBar.style.width = "100%";
 
-        return SheetClassifier.classifyAll().then(function(results) {
-          ProjectStore.setClassifications(results);
-          _updateThumbnailLabels(results);
+          return SheetClassifier.classifyAll().then(function (results) {
+            ProjectStore.setClassifications(results);
+            _updateThumbnailLabels(results);
 
-          var planCount = 0;
-          for (var i = 0; i < results.length; i++) {
-            if (results[i].scale && results[i].scale.ratio) {
-              ScaleManager.setPending(results[i].pageNum, results[i].scale.ratio, results[i].scale.raw);
+            var planCount = 0;
+            for (var i = 0; i < results.length; i++) {
+              if (results[i].scale && results[i].scale.ratio) {
+                ScaleManager.setPending(results[i].pageNum, results[i].scale.ratio, results[i].scale.raw);
+              }
+              if (results[i].classification === "plan") planCount++;
             }
-            if (results[i].classification === "plan") planCount++;
-          }
 
-          // Hide loading, show viewer
-          loadingOverlay.style.display = "none";
-          els.viewerWrap.style.display = "";
+            // Hide loading, show viewer
+            loadingOverlay.style.display = "none";
+            els.viewerWrap.style.display = "";
 
-          setStatus("Found " + planCount + " plan sheets. Press S to confirm scale.", "ready");
-          goToPage(1);
+            setStatus("Found " + planCount + " plan sheets. Press S to confirm scale.", "ready");
+            goToPage(1);
 
-          // Background: find room schedule
-          ScheduleParser.findRoomScheduleInDocument().then(function(schedData) {
-            if (schedData) {
-              ProjectStore.setRoomSchedule(schedData.rooms);
-              console.log("[PDF-Parser] Room schedule on page", schedData.pageNum, "—", schedData.rooms.length, "rooms");
-            }
+            // Background: find room schedule
+            ScheduleParser.findRoomScheduleInDocument().then(function (schedData) {
+              if (schedData) {
+                ProjectStore.setRoomSchedule(schedData.rooms);
+                console.log(
+                  "[PDF-Parser] Room schedule on page",
+                  schedData.pageNum,
+                  "—",
+                  schedData.rooms.length,
+                  "rooms"
+                );
+              }
+            });
           });
+        }
+
+        // Update progress
+        var pct = Math.round((p / total) * 100);
+        loadingBar.style.width = pct + "%";
+        loadingLabel.textContent = "Reading page " + p + " / " + total;
+
+        var canvas = els.thumbStrip.querySelectorAll(".thumb-canvas")[p - 1];
+        return Loader.renderThumbnail(p, canvas, 120).then(function () {
+          return renderNext(p + 1);
         });
       }
 
-      // Update progress
-      var pct = Math.round((p / total) * 100);
-      loadingBar.style.width = pct + "%";
-      loadingLabel.textContent = "Reading page " + p + " / " + total;
-
-      var canvas = els.thumbStrip.querySelectorAll(".thumb-canvas")[p - 1];
-      return Loader.renderThumbnail(p, canvas, 120).then(function() {
-        return renderNext(p + 1);
-      });
-    }
-
-    return renderNext(1);
-  }).catch(function(err) {
-    setStatus("Error loading PDF: " + err.message, "error");
-    loadingOverlay.style.display = "none";
-    console.error(err);
-  });
+      return renderNext(1);
+    })
+    .catch(function (err) {
+      setStatus("Error loading PDF: " + err.message, "error");
+      loadingOverlay.style.display = "none";
+      console.error(err);
+    });
 }
 
 /* ── Navigation ───────────────────────────────────────── */
@@ -191,7 +220,7 @@ function goToPage(pageNum) {
   if (pageNum < 1 || pageNum > pageCount) return;
   _currentPage = pageNum;
 
-  Viewer.showPage(pageNum).then(function(result) {
+  Viewer.showPage(pageNum).then(function (result) {
     if (!result) return;
     // Fit page to viewport on navigation
     Viewer.zoomFit();
@@ -210,20 +239,26 @@ function goToPage(pageNum) {
     var scaleState = ScaleManager.getState(pageNum);
     if (scaleState === "none" || scaleState === "pending") {
       // Small delay so the page renders visibly first
-      setTimeout(function() { openScalePanel(true); }, 350);
+      setTimeout(function () {
+        openScalePanel(true);
+      }, 350);
     }
   });
 }
 
-function nextPage() { goToPage(_currentPage + 1); }
-function prevPage() { goToPage(_currentPage - 1); }
+function nextPage() {
+  goToPage(_currentPage + 1);
+}
+function prevPage() {
+  goToPage(_currentPage - 1);
+}
 
 /* ── Overlay click handling ───────────────────────────── */
 
 /* ── Scale Confirmation Panel ─────────────────────────── */
 
-var _scaleSystem = "metric";   // "metric" or "imperial"
-var _pendingRatio = null;      // ratio selected in the Check Scale panel
+var _scaleSystem = "metric"; // "metric" or "imperial"
+var _pendingRatio = null; // ratio selected in the Check Scale panel
 
 function openScalePanel(autoPrompt) {
   if (!Loader.isLoaded()) return;
@@ -250,7 +285,8 @@ function openScalePanel(autoPrompt) {
   // Show detection info
   var detEl = document.getElementById("scale-detected");
   if (detectedRatio) {
-    detEl.innerHTML = "Detected: <strong>" + (detectedLabel || "1:" + detectedRatio) + "</strong> (from title block text)";
+    detEl.innerHTML =
+      "Detected: <strong>" + (detectedLabel || "1:" + detectedRatio) + "</strong> (from title block text)";
   } else {
     detEl.innerHTML = "No scale detected on this page.";
   }
@@ -306,7 +342,11 @@ function closeScaleFeedback() {
   // Save "don't show again" preference if checked
   var rememberCheck = document.getElementById("scale-feedback-remember");
   if (rememberCheck.checked) {
-    try { localStorage.setItem("pp_skip_calibrate_hint", "1"); } catch (e) { /* ignore */ }
+    try {
+      localStorage.setItem("pp_skip_calibrate_hint", "1");
+    } catch (e) {
+      /* ignore */
+    }
   }
 
   // Fire callback (e.g., enter calibration mode)
@@ -338,7 +378,7 @@ function _inferScaleSystem(ratio, label) {
   if (label && (/["']/.test(label) || /\/\d+"/.test(label))) return "imperial";
 
   // Imperial-only ratios (not in metric list)
-  var imperialOnly = { 12:1, 16:1, 32:1, 64:1, 96:1, 128:1, 192:1 };
+  var imperialOnly = { 12: 1, 16: 1, 32: 1, 64: 1, 96: 1, 128: 1, 192: 1 };
   if (imperialOnly[ratio]) return "imperial";
 
   // Everything else is metric (including 48 without imperial label)
@@ -379,11 +419,13 @@ function acceptScale() {
 
   // Show "Accepted but not Verified" feedback
   _showScaleFeedback(
-    "\u2713",                          // checkmark icon
+    "\u2713", // checkmark icon
     "Scale Accepted (Provisional)",
-    "Scale 1:" + ratio + " is set for this page. Area measurements will work, but for highest accuracy you can verify by calibrating against a known dimension.<br><br>Press <b>C</b> at any time to calibrate.",
-    "#e9c46a",                         // gold title colour
-    false                              // no "don't show again" for accept
+    "Scale 1:" +
+      ratio +
+      " is set for this page. Area measurements will work, but for highest accuracy you can verify by calibrating against a known dimension.<br><br>Press <b>C</b> at any time to calibrate.",
+    "#e9c46a", // gold title colour
+    false // no "don't show again" for accept
   );
 }
 
@@ -400,7 +442,11 @@ function verifyScale() {
 
   // Check if user has opted out of the calibration instruction
   var skipHint = false;
-  try { skipHint = localStorage.getItem("pp_skip_calibrate_hint") === "1"; } catch (e) { /* ignore */ }
+  try {
+    skipHint = localStorage.getItem("pp_skip_calibrate_hint") === "1";
+  } catch (e) {
+    /* ignore */
+  }
 
   if (skipHint) {
     // Go straight to calibration mode
@@ -409,12 +455,12 @@ function verifyScale() {
   } else {
     // Show instruction dialogue first
     _showScaleFeedback(
-      "\u{1F4CF}",                       // ruler icon
+      "\u{1F4CF}", // ruler icon
       "Calibrate: Verify Scale",
       "Click any <b>two points</b> on the drawing where you know the real-world distance (e.g., a dimension line, a door width, a grid spacing).<br><br>You\u2019ll be asked to enter the distance after clicking both points.",
-      "var(--accent-lit)",               // green title
-      true,                              // show "don't show again" checkbox
-      function() {
+      "var(--accent-lit)", // green title
+      true, // show "don't show again" checkbox
+      function () {
         // Callback when OK is clicked
         setTool("calibrate");
         setStatus("Click two endpoints of a known dimension to verify 1:" + ratio, "busy");
@@ -427,7 +473,7 @@ function verifyScale() {
 
 function _handleOverlayClick(e) {
   var pt = Viewer.eventToPdfCoords(e);
-  var hitRadius = 10 / (Viewer.getZoom() * (150 / 72));  // ~10 screen pixels → PDF units
+  var hitRadius = 10 / (Viewer.getZoom() * (150 / 72)); // ~10 screen pixels → PDF units
 
   // Priority 1: Click near an existing vertex — start drag
   var hit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
@@ -485,10 +531,16 @@ function _bindDragEnd() {
       var mergeRadius = 10 / (Viewer.getZoom() * (150 / 72));
       var merged = PolygonTool.endDrag(mergeRadius);
       if (merged) setStatus("Vertices merged", "ready");
-      _snapTarget = null;  // clear snap indicator
+      _snapTarget = null; // clear snap indicator
       Viewer.onOverlayMouseMove(_handleOverlayMouseMove);
       var wrap = document.getElementById("viewer-wrap");
-      var cursorMap = { measure: "crosshair", window: "crosshair", calibrate: "crosshair", ruler: "crosshair", navigate: "default" };
+      var cursorMap = {
+        measure: "crosshair",
+        window: "crosshair",
+        calibrate: "crosshair",
+        ruler: "crosshair",
+        navigate: "default"
+      };
       if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
       // Update measurements and save
       _refreshMeasurements();
@@ -501,7 +553,7 @@ function _bindDragEnd() {
 
 function setMeasureMethod(method) {
   _measureMethod = method;
-  _rectStart = null;  // reset any in-progress rectangle
+  _rectStart = null; // reset any in-progress rectangle
   document.getElementById("measure-method").value = method;
 }
 
@@ -533,8 +585,10 @@ function _handleGenericRectangleClick(pt, opts) {
     _rectStart = pt;
     setStatus("Click opposite corner to complete rectangle", "busy");
   } else {
-    var x1 = _rectStart.x, y1 = _rectStart.y;
-    var x2 = pt.x, y2 = pt.y;
+    var x1 = _rectStart.x,
+      y1 = _rectStart.y;
+    var x2 = pt.x,
+      y2 = pt.y;
     PolygonTool.startPolygon(_currentPage, null, opts);
     PolygonTool.addVertex({ x: x1, y: y1 });
     PolygonTool.addVertex({ x: x2, y: y1 });
@@ -574,7 +628,10 @@ function _handleWindowClick(pt) {
 
 function _onPolygonComplete(opts) {
   var isWindow = opts && opts.type === "window";
-  setStatus((isWindow ? "Window" : "Area") + " measured" + (ScaleManager.isCalibrated(_currentPage) ? "" : " (uncalibrated)"), "ready");
+  setStatus(
+    (isWindow ? "Window" : "Area") + " measured" + (ScaleManager.isCalibrated(_currentPage) ? "" : " (uncalibrated)"),
+    "ready"
+  );
   _refreshMeasurements();
   ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
 }
@@ -582,16 +639,23 @@ function _onPolygonComplete(opts) {
 function _handleCalibrateClick(pt) {
   if (!_calibPoint1) {
     _calibPoint1 = pt;
-    _rulerStart = pt;  // show rubber-band
+    _rulerStart = pt; // show rubber-band
     setStatus("Click second point of the dimension...", "busy");
   } else {
-    _rulerStart = null; _rulerCurrent = null;  // clear rubber-band
+    _rulerStart = null;
+    _rulerCurrent = null; // clear rubber-band
     var hint = _pendingRatio ? " (at 1:" + _pendingRatio + ")" : "";
-    var input = prompt("Enter the real-world distance between the two points" + hint + "\n\nExamples: '10.5 m', '35 ft', '8500 mm', '39-1 ft'");
+    var input = prompt(
+      "Enter the real-world distance between the two points" +
+        hint +
+        "\n\nExamples: '10.5 m', '35 ft', '8500 mm', '39-1 ft'"
+    );
     if (input) {
       var parsed = _parseDistanceInput(input);
       if (parsed) {
-        var meta = _pendingRatio ? { ratio: _pendingRatio, source: "check-scale", raw: "1:" + _pendingRatio } : { source: "manual" };
+        var meta = _pendingRatio
+          ? { ratio: _pendingRatio, source: "check-scale", raw: "1:" + _pendingRatio }
+          : { source: "manual" };
         ScaleManager.calibrate(_currentPage, _calibPoint1, pt, parsed.value, parsed.unit, meta);
 
         var badgeText = _pendingRatio ? "1:" + _pendingRatio : "calibrated";
@@ -607,7 +671,13 @@ function _handleCalibrateClick(pt) {
         _showScaleFeedback(
           "\u2713",
           "Scale Verified!",
-          "Scale <b>" + badgeText + "</b> has been empirically calibrated using your reference dimension (" + parsed.value + " " + parsed.unit + ").<br><br>All area measurements on this page now use the verified scale.",
+          "Scale <b>" +
+            badgeText +
+            "</b> has been empirically calibrated using your reference dimension (" +
+            parsed.value +
+            " " +
+            parsed.unit +
+            ").<br><br>All area measurements on this page now use the verified scale.",
           "var(--accent-lit)",
           false
         );
@@ -632,14 +702,16 @@ function _handleRulerClick(pt) {
     // Create persistent ruler line
     var p1 = _rulerStart;
     var p2 = pt;
-    var dx = p2.x - p1.x, dy = p2.y - p1.y;
+    var dx = p2.x - p1.x,
+      dy = p2.y - p1.y;
     var pdfLen = Math.sqrt(dx * dx + dy * dy);
     var lengthM = ScaleManager.pdfToMetres(_currentPage, pdfLen);
 
     if (!_rulers[_currentPage]) _rulers[_currentPage] = [];
     _rulers[_currentPage].push({
-      id: "ruler_" + (_nextRulerId++),
-      p1: p1, p2: p2,
+      id: "ruler_" + _nextRulerId++,
+      p1: p1,
+      p2: p2,
       pdfLength: pdfLen,
       lengthM: lengthM
     });
@@ -647,9 +719,10 @@ function _handleRulerClick(pt) {
     _rulerStart = null;
     _rulerCurrent = null;
 
-    var lenStr = lengthM !== null
-      ? (lengthM.toFixed(2) + " m / " + (lengthM * 3.28084).toFixed(2) + " ft")
-      : pdfLen.toFixed(1) + " (uncalibrated)";
+    var lenStr =
+      lengthM !== null
+        ? lengthM.toFixed(2) + " m / " + (lengthM * 3.28084).toFixed(2) + " ft"
+        : pdfLen.toFixed(1) + " (uncalibrated)";
     setStatus("Ruler: " + lenStr, "ready");
     Viewer.requestRedraw();
   }
@@ -693,7 +766,7 @@ function _parseDistanceInput(str) {
   // "10.5 m" or "8500 mm" or "35 ft" — number + explicit unit
   m = str.match(/^([\d.]+)\s*(m|mm|ft|feet|in|inches|metres|meters)\s*$/i);
   if (m) {
-    var unitMap = { m: "m", mm: "mm", ft: "ft", feet: "ft", "in": "in", inches: "in", metres: "m", meters: "m" };
+    var unitMap = { m: "m", mm: "mm", ft: "ft", feet: "ft", in: "in", inches: "in", metres: "m", meters: "m" };
     return { value: parseFloat(m[1]), unit: unitMap[m[2].toLowerCase()] || "m" };
   }
 
@@ -702,7 +775,7 @@ function _parseDistanceInput(str) {
   if (m) {
     // If value > 100, likely mm. If < 100, likely metres or feet.
     var val = parseFloat(m[1]);
-    var guessUnit = _scaleSystem === "imperial" ? "ft" : (val > 100 ? "mm" : "m");
+    var guessUnit = _scaleSystem === "imperial" ? "ft" : val > 100 ? "mm" : "m";
     return { value: val, unit: guessUnit };
   }
 
@@ -717,7 +790,12 @@ function _handleOverlayMouseMove(e) {
   // Track snap target for visual indicator
   var prevSnap = _snapTarget;
   _snapTarget = null;
-  if (_currentTool === "measure" || _currentTool === "window" || _currentTool === "calibrate" || _currentTool === "ruler") {
+  if (
+    _currentTool === "measure" ||
+    _currentTool === "window" ||
+    _currentTool === "calibrate" ||
+    _currentTool === "ruler"
+  ) {
     _snapTarget = VectorSnap.findSnap(_currentPage, pt, snapRadius);
   }
 
@@ -752,7 +830,13 @@ function _handleOverlayMouseMove(e) {
       return;
     }
   }
-  var cursorMap = { measure: "crosshair", window: "crosshair", calibrate: "crosshair", ruler: "crosshair", navigate: "default" };
+  var cursorMap = {
+    measure: "crosshair",
+    window: "crosshair",
+    calibrate: "crosshair",
+    ruler: "crosshair",
+    navigate: "default"
+  };
   if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
 }
 
@@ -761,13 +845,16 @@ function _handleOverlayMouseMove(e) {
 function _drawRulerLine(ctx, p1, p2, lengthM, color, showTicks) {
   var a = Viewer.pdfToCanvas(p1);
   var b = Viewer.pdfToCanvas(p2);
-  var dx = b.x - a.x, dy = b.y - a.y;
+  var dx = b.x - a.x,
+    dy = b.y - a.y;
   var len = Math.sqrt(dx * dx + dy * dy);
   if (len < 2) return;
 
   // Unit vector along the line and perpendicular
-  var ux = dx / len, uy = dy / len;
-  var px = -uy, py = ux;  // perpendicular
+  var ux = dx / len,
+    uy = dy / len;
+  var px = -uy,
+    py = ux; // perpendicular
 
   ctx.save();
   ctx.strokeStyle = color;
@@ -793,8 +880,8 @@ function _drawRulerLine(ctx, p1, p2, lengthM, color, showTicks) {
   if (showTicks && lengthM !== null && lengthM > 0) {
     // Determine tick interval based on scale system
     var isImperial = _scaleSystem === "imperial";
-    var tickM = isImperial ? 0.3048 : 1.0;  // 1 foot or 1 metre
-    if (lengthM / tickM > 50) tickM *= 5;    // avoid too many ticks
+    var tickM = isImperial ? 0.3048 : 1.0; // 1 foot or 1 metre
+    if (lengthM / tickM > 50) tickM *= 5; // avoid too many ticks
     if (lengthM / tickM > 50) tickM *= 2;
     if (lengthM / tickM < 3) tickM /= 2;
 
@@ -822,7 +909,10 @@ function _drawRulerLine(ctx, p1, p2, lengthM, color, showTicks) {
       var totalFt = lengthM * 3.28084;
       var feet = Math.floor(totalFt);
       var inches = Math.round((totalFt - feet) * 12);
-      if (inches === 12) { feet++; inches = 0; }
+      if (inches === 12) {
+        feet++;
+        inches = 0;
+      }
       labelText = feet + "'-" + inches + '"';
     } else {
       labelText = lengthM < 1 ? (lengthM * 1000).toFixed(0) + " mm" : lengthM.toFixed(2) + " m";
@@ -862,12 +952,9 @@ function _drawRulers(ctx, pageNum) {
 /** Draw the rubber-band preview while placing a ruler or calibrating. */
 function _drawRulerPreview(ctx) {
   if (!_rulerStart || !_rulerCurrent) return;
-  var pdfLen = Math.sqrt(
-    Math.pow(_rulerCurrent.x - _rulerStart.x, 2) +
-    Math.pow(_rulerCurrent.y - _rulerStart.y, 2)
-  );
+  var pdfLen = Math.sqrt(Math.pow(_rulerCurrent.x - _rulerStart.x, 2) + Math.pow(_rulerCurrent.y - _rulerStart.y, 2));
   var lengthM = ScaleManager.pdfToMetres(_currentPage, pdfLen);
-  var color = _currentTool === "ruler" ? "#ffd700" : "#ff8c00";  // gold for ruler, orange for calibrate
+  var color = _currentTool === "ruler" ? "#ffd700" : "#ff8c00"; // gold for ruler, orange for calibrate
   _drawRulerLine(ctx, _rulerStart, _rulerCurrent, lengthM, color, true);
 }
 
@@ -884,8 +971,10 @@ function _drawSnapIndicator(ctx) {
     ctx.strokeRect(p.x - s, p.y - s, s * 2, s * 2);
     // Crosshair
     ctx.beginPath();
-    ctx.moveTo(p.x - s - 3, p.y); ctx.lineTo(p.x + s + 3, p.y);
-    ctx.moveTo(p.x, p.y - s - 3); ctx.lineTo(p.x, p.y + s + 3);
+    ctx.moveTo(p.x - s - 3, p.y);
+    ctx.lineTo(p.x + s + 3, p.y);
+    ctx.moveTo(p.x, p.y - s - 3);
+    ctx.lineTo(p.x, p.y + s + 3);
     ctx.stroke();
   } else {
     // X indicator for line snap
@@ -893,8 +982,10 @@ function _drawSnapIndicator(ctx) {
     ctx.lineWidth = 2;
     var r = 6;
     ctx.beginPath();
-    ctx.moveTo(p.x - r, p.y - r); ctx.lineTo(p.x + r, p.y + r);
-    ctx.moveTo(p.x + r, p.y - r); ctx.lineTo(p.x - r, p.y + r);
+    ctx.moveTo(p.x - r, p.y - r);
+    ctx.lineTo(p.x + r, p.y + r);
+    ctx.moveTo(p.x + r, p.y - r);
+    ctx.lineTo(p.x - r, p.y + r);
     ctx.stroke();
     // Circle
     ctx.beginPath();
@@ -914,7 +1005,7 @@ function _drawRectPreview(ctx) {
   var w = Math.abs(p2.x - p1.x);
   var h = Math.abs(p2.y - p1.y);
 
-  var isWin = (_currentTool === "window");
+  var isWin = _currentTool === "window";
   var edgeCol = isWin ? WIN_EDGE : AREA_EDGE;
   var fillCol = isWin ? WIN_FILL : AREA_FILL;
 
@@ -957,7 +1048,7 @@ function _drawRectPreview(ctx) {
 
 function _bindToolbar() {
   for (var i = 0; i < els.toolBtns.length; i++) {
-    els.toolBtns[i].addEventListener("click", function() {
+    els.toolBtns[i].addEventListener("click", function () {
       setTool(this.dataset.tool);
     });
   }
@@ -969,7 +1060,13 @@ function setTool(tool) {
     els.toolBtns[i].classList.toggle("active", els.toolBtns[i].dataset.tool === tool);
   }
   var viewer = document.getElementById("viewer-container");
-  var cursorMap = { measure: "crosshair", window: "crosshair", calibrate: "crosshair", ruler: "crosshair", navigate: "default" };
+  var cursorMap = {
+    measure: "crosshair",
+    window: "crosshair",
+    calibrate: "crosshair",
+    ruler: "crosshair",
+    navigate: "default"
+  };
   var wrap = document.getElementById("viewer-wrap");
   if (wrap) wrap.style.cursor = cursorMap[tool] || "default";
 }
@@ -977,7 +1074,7 @@ function setTool(tool) {
 /* ── Keyboard ─────────────────────────────────────────── */
 
 function _bindKeyboard() {
-  document.addEventListener("keydown", function(e) {
+  document.addEventListener("keydown", function (e) {
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
     // Undo: Cmd+Z / Ctrl+Z
     if ((e.metaKey || e.ctrlKey) && e.key === "z" && !e.shiftKey) {
@@ -1054,7 +1151,8 @@ function _bindKeyboard() {
           break;
         }
         break;
-      case "Delete": case "Backspace":
+      case "Delete":
+      case "Backspace":
         // Delete last ruler if in ruler mode, otherwise last polygon
         if (_currentTool === "ruler" && _rulers[_currentPage] && _rulers[_currentPage].length > 0) {
           _rulers[_currentPage].pop();
@@ -1069,23 +1167,52 @@ function _bindKeyboard() {
           setStatus("Polygon deleted", "ready");
         }
         break;
-      case "d": autoDetect(); break;
-      case "l": setTool("ruler"); break;
-      case "s": openScalePanel(); break;
-      case "m": setTool("measure"); break;
-      case "w": setTool("window"); break;
+      case "d":
+        autoDetect();
+        break;
+      case "l":
+        setTool("ruler");
+        break;
+      case "s":
+        openScalePanel();
+        break;
+      case "m":
+        setTool("measure");
+        break;
+      case "w":
+        setTool("window");
+        break;
       case "r":
         setMeasureMethod(_measureMethod === "polygon" ? "rectangle" : "polygon");
         setTool("measure");
         setStatus("Measure: " + _measureMethod, "ready");
         break;
-      case "c": setTool("calibrate"); break;
-      case "v": setTool("navigate"); break;
-      case "f": Viewer.zoomFit(); break;
-      case "ArrowRight": case "PageDown": e.preventDefault(); nextPage(); break;
-      case "ArrowLeft":  case "PageUp":   e.preventDefault(); prevPage(); break;
-      case "+": case "=": Viewer.zoomIn(); break;
-      case "-": Viewer.zoomOut(); break;
+      case "c":
+        setTool("calibrate");
+        break;
+      case "v":
+        setTool("navigate");
+        break;
+      case "f":
+        Viewer.zoomFit();
+        break;
+      case "ArrowRight":
+      case "PageDown":
+        e.preventDefault();
+        nextPage();
+        break;
+      case "ArrowLeft":
+      case "PageUp":
+        e.preventDefault();
+        prevPage();
+        break;
+      case "+":
+      case "=":
+        Viewer.zoomIn();
+        break;
+      case "-":
+        Viewer.zoomOut();
+        break;
     }
   });
 }
@@ -1108,7 +1235,7 @@ function _buildThumbnailPlaceholders(pageCount) {
     wrapper.appendChild(canvas);
     wrapper.appendChild(label);
     els.thumbStrip.appendChild(wrapper);
-    wrapper.addEventListener("click", function() {
+    wrapper.addEventListener("click", function () {
       goToPage(parseInt(this.dataset.page, 10));
     });
   }
@@ -1120,7 +1247,7 @@ function _updateThumbnailLabels(classResults) {
     var cr = classResults[i];
     if (wrappers[cr.pageNum - 1]) {
       var lbl = wrappers[cr.pageNum - 1].querySelector(".thumb-label");
-      lbl.textContent = cr.sheetId || ("Page " + cr.pageNum);
+      lbl.textContent = cr.sheetId || "Page " + cr.pageNum;
       lbl.title = cr.sheetTitle || "";
     }
   }
@@ -1136,7 +1263,10 @@ function _highlightThumb(pageNum) {
 /* ── Info panels ──────────────────────────────────────── */
 
 function _updateSheetInfo(pageData) {
-  if (!pageData) { els.sheetInfo.innerHTML = ""; return; }
+  if (!pageData) {
+    els.sheetInfo.innerHTML = "";
+    return;
+  }
   var html = "<strong>" + (pageData.sheetId || "\u2014") + "</strong>";
   html += " <span class='sheet-class tag-" + pageData.classification + "'>" + pageData.classification + "</span>";
   if (pageData.sheetTitle) html += "<br>" + pageData.sheetTitle;
@@ -1184,31 +1314,28 @@ function _updateScaleLabel() {
 }
 
 function _refreshMeasurements() {
-  _updateMeasurements(PolygonTool.getAllMeasurements(_currentPage));
+  _updateMeasurements();
 }
 
-function _updateMeasurements(measurements) {
-  if (!measurements || measurements.length === 0) {
-    els.measurePanel.innerHTML = "<p class='empty'>No measurements on this page.<br><span style='font-size:10px;color:var(--text-dim);'>Press <b>M</b> to measure areas, <b>W</b> for windows.</span></p>";
+function _updateMeasurements() {
+  var assoc = PolygonTool.buildAssociationMap(_currentPage);
+  var walls = assoc.walls;
+  var orphans = assoc.orphanWindows;
+
+  if (walls.length === 0 && orphans.length === 0) {
+    els.measurePanel.innerHTML =
+      "<p class='empty'>No measurements on this page.<br><span style='font-size:10px;color:var(--text-dim);'>Press <b>M</b> to measure areas, <b>W</b> for windows.</span></p>";
     return;
   }
 
-  // Partition into areas and windows, preserving original polyIdx
-  var areas = [], windows = [];
-  for (var i = 0; i < measurements.length; i++) {
-    var entry = { m: measurements[i], polyIdx: i };
-    if (measurements[i].type === "window") {
-      windows.push(entry);
-    } else {
-      areas.push(entry);
-    }
-  }
-
-  var hasScale = measurements[0].calibrated;
+  var hasScale =
+    (walls.length > 0 && walls[0].measurement.calibrated) || (orphans.length > 0 && orphans[0].measurement.calibrated);
   var html = "";
+  var netTotalM2 = 0,
+    netTotalFt2 = 0;
 
-  // ── Areas section ──
-  if (areas.length > 0) {
+  // ── Wall / Area rows ──
+  if (walls.length > 0) {
     html += "<div class='measure-header'>Areas</div>";
     html += "<table><thead><tr><th>Label</th>";
     if (hasScale) {
@@ -1218,91 +1345,125 @@ function _updateMeasurements(measurements) {
     }
     html += "<th></th></tr></thead><tbody>";
 
-    var grossM2 = 0, grossFt2 = 0;
-    for (var a = 0; a < areas.length; a++) {
-      var am = areas[a].m;
-      html += "<tr><td class='label-cell' data-poly-idx='" + areas[a].polyIdx + "' title='Click to rename'>" + am.label + "</td>";
-      if (hasScale && am.areaM2 !== null) {
-        html += "<td class='num'>" + am.areaM2.toFixed(2) + "</td>";
-        html += "<td class='num'>" + am.areaFt2.toFixed(2) + "</td>";
-        grossM2 += am.areaM2;
-        grossFt2 += am.areaFt2;
+    for (var a = 0; a < walls.length; a++) {
+      var wall = walls[a];
+      var wm = wall.measurement;
+      var hasChildren = wall.children.length > 0;
+
+      // Compute net area for this wall
+      var wallNetM2 = wm.areaM2;
+      var wallNetFt2 = wm.areaFt2;
+      if (hasChildren && wm.areaM2 !== null) {
+        for (var ci = 0; ci < wall.children.length; ci++) {
+          var ch = wall.children[ci].measurement;
+          if (ch.areaM2 !== null) {
+            if (ch.mode !== "add") {
+              wallNetM2 -= ch.areaM2;
+              wallNetFt2 -= ch.areaFt2;
+            } else {
+              wallNetM2 += ch.areaM2;
+              wallNetFt2 += ch.areaFt2;
+            }
+          }
+        }
+      }
+
+      // Wall row — shows net area if it has children, gross otherwise
+      var chevron = hasChildren
+        ? "<span class='wall-toggle' data-wall-idx='" + a + "' data-expanded='0'>\u25B6</span> "
+        : "";
+      var netSuffix = hasChildren ? " <span class='net-label'>net</span>" : "";
+      html +=
+        "<tr><td class='label-cell' data-poly-idx='" +
+        wall.polyIdx +
+        "' title='Click to rename'>" +
+        chevron +
+        wm.label +
+        netSuffix +
+        "</td>";
+      if (hasScale && wallNetM2 !== null) {
+        html += "<td class='num'>" + wallNetM2.toFixed(2) + "</td>";
+        html += "<td class='num'>" + wallNetFt2.toFixed(2) + "</td>";
+        netTotalM2 += wallNetM2;
+        netTotalFt2 += wallNetFt2;
       } else {
         html += "<td class='num' colspan='2'>\u2014</td>";
       }
-      html += "<td class='del-cell' data-poly-idx='" + areas[a].polyIdx + "' title='Delete'>\u00D7</td></tr>";
+      html += "<td class='del-cell' data-poly-idx='" + wall.polyIdx + "' title='Delete'>\u00D7</td></tr>";
+
+      // Detail rows (hidden by default): gross + child windows
+      if (hasChildren) {
+        html +=
+          "<tr class='detail-row' data-parent='" +
+          a +
+          "'><td style='padding-left:18px;font-size:10px;color:var(--text-dim);'>Gross</td>";
+        if (hasScale && wm.areaM2 !== null) {
+          html += "<td class='num' style='font-size:10px;color:var(--text-dim);'>" + wm.areaM2.toFixed(2) + "</td>";
+          html += "<td class='num' style='font-size:10px;color:var(--text-dim);'>" + wm.areaFt2.toFixed(2) + "</td>";
+        } else {
+          html += "<td colspan='2'></td>";
+        }
+        html += "<td></td></tr>";
+
+        for (var cj = 0; cj < wall.children.length; cj++) {
+          var child = wall.children[cj];
+          var cm = child.measurement;
+          var cPrefix = cm.mode !== "add" ? "\u2212" : "+";
+          html += "<tr class='detail-row' data-parent='" + a + "' style='color:" + WIN_EDGE + ";'>";
+          html +=
+            "<td class='label-cell' data-poly-idx='" +
+            child.polyIdx +
+            "' style='padding-left:18px;font-size:10px;' title='Click to rename'>" +
+            cPrefix +
+            " " +
+            cm.label +
+            "</td>";
+          if (hasScale && cm.areaM2 !== null) {
+            html += "<td class='num' style='font-size:10px;'>" + cPrefix + cm.areaM2.toFixed(2) + "</td>";
+            html += "<td class='num' style='font-size:10px;'>" + cPrefix + cm.areaFt2.toFixed(2) + "</td>";
+          } else {
+            html += "<td colspan='2'></td>";
+          }
+          html +=
+            "<td class='del-cell' data-poly-idx='" +
+            child.polyIdx +
+            "' title='Delete' style='font-size:10px;'>\u00D7</td></tr>";
+        }
+      }
     }
-    if (hasScale && areas.length > 1) {
-      html += "<tr class='total-row'><td><strong>Gross</strong></td>";
-      html += "<td class='num'><strong>" + grossM2.toFixed(2) + "</strong></td>";
-      html += "<td class='num'><strong>" + grossFt2.toFixed(2) + "</strong></td><td></td></tr>";
+
+    // Net total row
+    if (hasScale && walls.length > 1) {
+      html += "<tr class='total-row'><td><strong>Net Total</strong></td>";
+      html += "<td class='num'><strong>" + netTotalM2.toFixed(2) + "</strong></td>";
+      html += "<td class='num'><strong>" + netTotalFt2.toFixed(2) + "</strong></td><td></td></tr>";
     }
     html += "</tbody></table>";
   }
 
-  // ── Windows section ──
-  if (windows.length > 0) {
-    html += "<div class='measure-header' style='margin-top:8px;color:" + WIN_EDGE + ";'>Windows / Openings</div>";
-    html += "<table><thead><tr><th>Label</th>";
-    if (hasScale) {
-      html += "<th>m\u00B2</th><th>ft\u00B2</th>";
-    } else {
-      html += "<th colspan='2'>\u2014</th>";
-    }
-    html += "<th></th></tr></thead><tbody>";
-
-    var winNetM2 = 0, winNetFt2 = 0;
-    var winAddM2 = 0, winAddFt2 = 0;
-    for (var w = 0; w < windows.length; w++) {
-      var wm = windows[w].m;
-      var isNet = (wm.mode !== "add");
-      var prefix = isNet ? "\u2212" : "+";
+  // ── Orphan windows (not inside any wall) ──
+  if (orphans.length > 0) {
+    html += "<div class='measure-header' style='margin-top:8px;color:" + WIN_EDGE + ";'>Unassociated Windows</div>";
+    html += "<table><tbody>";
+    for (var o = 0; o < orphans.length; o++) {
+      var om = orphans[o].measurement;
+      var oPrefix = om.mode !== "add" ? "\u2212" : "+";
       html += "<tr style='color:" + WIN_EDGE + ";'>";
-      html += "<td class='label-cell' data-poly-idx='" + windows[w].polyIdx + "' title='Click to rename'>" + wm.label + "</td>";
-      if (hasScale && wm.areaM2 !== null) {
-        html += "<td class='num'>" + prefix + wm.areaM2.toFixed(2) + "</td>";
-        html += "<td class='num'>" + prefix + wm.areaFt2.toFixed(2) + "</td>";
-        if (isNet) { winNetM2 += wm.areaM2; winNetFt2 += wm.areaFt2; }
-        else { winAddM2 += wm.areaM2; winAddFt2 += wm.areaFt2; }
+      html +=
+        "<td class='label-cell' data-poly-idx='" +
+        orphans[o].polyIdx +
+        "' title='Click to rename'>" +
+        om.label +
+        "</td>";
+      if (hasScale && om.areaM2 !== null) {
+        html += "<td class='num'>" + oPrefix + om.areaM2.toFixed(2) + "</td>";
+        html += "<td class='num'>" + oPrefix + om.areaFt2.toFixed(2) + "</td>";
       } else {
         html += "<td class='num' colspan='2'>\u2014</td>";
       }
-      html += "<td class='del-cell' data-poly-idx='" + windows[w].polyIdx + "' title='Delete'>\u00D7</td></tr>";
-    }
-    if (hasScale && windows.length > 1) {
-      var winTotalM2 = winAddM2 - winNetM2;
-      var winTotalFt2 = winAddFt2 - winNetFt2;
-      var winPrefix = winTotalM2 >= 0 ? "+" : "\u2212";
-      html += "<tr class='total-row' style='color:" + WIN_EDGE + ";'><td><strong>Windows</strong></td>";
-      html += "<td class='num'><strong>" + winPrefix + Math.abs(winTotalM2).toFixed(2) + "</strong></td>";
-      html += "<td class='num'><strong>" + winPrefix + Math.abs(winTotalFt2).toFixed(2) + "</strong></td><td></td></tr>";
+      html += "<td class='del-cell' data-poly-idx='" + orphans[o].polyIdx + "' title='Delete'>\u00D7</td></tr>";
     }
     html += "</tbody></table>";
-  }
-
-  // ── Net Total ──
-  if (hasScale && (areas.length > 0 || windows.length > 0)) {
-    var grossM2Total = 0, grossFt2Total = 0;
-    for (var ga = 0; ga < areas.length; ga++) {
-      if (areas[ga].m.areaM2 !== null) { grossM2Total += areas[ga].m.areaM2; grossFt2Total += areas[ga].m.areaFt2; }
-    }
-    var netWinM2 = 0, netWinFt2 = 0;
-    for (var gw = 0; gw < windows.length; gw++) {
-      if (windows[gw].m.areaM2 !== null) {
-        if (windows[gw].m.mode !== "add") { netWinM2 += windows[gw].m.areaM2; netWinFt2 += windows[gw].m.areaFt2; }
-        else { netWinM2 -= windows[gw].m.areaM2; netWinFt2 -= windows[gw].m.areaFt2; }
-      }
-    }
-    var netM2 = grossM2Total - netWinM2;
-    var netFt2 = grossFt2Total - netWinFt2;
-
-    // Only show net total if there are both areas and windows, or multiple of either
-    if (areas.length + windows.length > 1) {
-      var totalLabel = windows.length > 0 ? "Net Total" : "Total";
-      html += "<table><tbody><tr class='total-row'><td><strong>" + totalLabel + "</strong></td>";
-      html += "<td class='num'><strong>" + netM2.toFixed(2) + "</strong></td>";
-      html += "<td class='num'><strong>" + netFt2.toFixed(2) + "</strong></td><td></td></tr></tbody></table>";
-    }
   }
 
   // Undo hint
@@ -1314,10 +1475,26 @@ function _updateMeasurements(measurements) {
 
   els.measurePanel.innerHTML = html;
 
+  // Bind expand/collapse toggles
+  var toggles = els.measurePanel.querySelectorAll(".wall-toggle");
+  for (var t = 0; t < toggles.length; t++) {
+    toggles[t].addEventListener("click", function (e) {
+      e.stopPropagation(); // don't trigger label edit
+      var wallIdx = this.dataset.wallIdx;
+      var expanded = this.dataset.expanded === "1";
+      this.dataset.expanded = expanded ? "0" : "1";
+      this.textContent = expanded ? "\u25B6" : "\u25BC";
+      var details = els.measurePanel.querySelectorAll(".detail-row[data-parent='" + wallIdx + "']");
+      for (var d = 0; d < details.length; d++) {
+        details[d].style.display = expanded ? "none" : "";
+      }
+    });
+  }
+
   // Bind click-to-rename on label cells
   var labelCells = els.measurePanel.querySelectorAll(".label-cell");
   for (var lc = 0; lc < labelCells.length; lc++) {
-    labelCells[lc].addEventListener("click", function(e) {
+    labelCells[lc].addEventListener("click", function (e) {
       _startLabelEdit(this, parseInt(this.dataset.polyIdx, 10));
     });
   }
@@ -1325,7 +1502,7 @@ function _updateMeasurements(measurements) {
   // Bind delete buttons
   var delCells = els.measurePanel.querySelectorAll(".del-cell");
   for (var dc = 0; dc < delCells.length; dc++) {
-    delCells[dc].addEventListener("click", function(e) {
+    delCells[dc].addEventListener("click", function (e) {
       var idx = parseInt(this.dataset.polyIdx, 10);
       PolygonTool.deletePolygon(_currentPage, idx);
       ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
@@ -1356,9 +1533,15 @@ function _startLabelEdit(cell, polyIdx) {
     _refreshMeasurements();
   }
 
-  input.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") { e.preventDefault(); commit(); }
-    if (e.key === "Escape") { e.preventDefault(); _refreshMeasurements(); }
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commit();
+    }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      _refreshMeasurements();
+    }
   });
   input.addEventListener("blur", commit);
 }
@@ -1372,8 +1555,8 @@ function setStatus(msg, type) {
 
 /* ── Auto-detect building outline ──────────────────────── */
 
-var _detectCandidates = [];  // cached candidates from last detect
-var _detectIndex = 0;        // which candidate we're showing
+var _detectCandidates = []; // cached candidates from last detect
+var _detectIndex = 0; // which candidate we're showing
 
 function autoDetect() {
   if (!Loader.isLoaded()) return;
@@ -1384,43 +1567,73 @@ function autoDetect() {
       _detectIndex = (_detectIndex + 1) % _detectCandidates.length;
       _placeDetectedOutline(_detectCandidates[_detectIndex], _detectIndex, _detectCandidates.length);
     } else {
-      setStatus("No vector geometry on this page. This may be a scanned/raster PDF — use manual measurement (M/R).", "error");
+      setStatus(
+        "No vector geometry on this page. This may be a scanned/raster PDF — use manual measurement (M/R).",
+        "error"
+      );
     }
     return;
   }
 
   setStatus("Scanning vector geometry...", "busy");
 
-  VectorSnap.extractGeometry(_currentPage).then(function(geo) {
-    return Loader.getPageSize(_currentPage).then(function(size) {
+  VectorSnap.extractGeometry(_currentPage).then(function (geo) {
+    return Loader.getPageSize(_currentPage).then(function (size) {
       var candidates = VectorSnap.getClosedPathsByArea(_currentPage, size.width, size.height);
       candidates._page = _currentPage;
       _detectCandidates = candidates;
       _detectIndex = 0;
 
       // Log diagnostics
-      console.log("[Auto-detect] Page " + _currentPage + ": " +
-        geo.segments.length + " line segments, " +
-        geo.endpoints.length + " endpoints, " +
-        geo.closedPaths.length + " closed paths total, " +
-        candidates.length + " candidates (filtered by area)");
+      console.log(
+        "[Auto-detect] Page " +
+          _currentPage +
+          ": " +
+          geo.segments.length +
+          " line segments, " +
+          geo.endpoints.length +
+          " endpoints, " +
+          geo.closedPaths.length +
+          " closed paths total, " +
+          candidates.length +
+          " candidates (filtered by area)"
+      );
 
       if (candidates.length > 0) {
         for (var i = 0; i < Math.min(candidates.length, 5); i++) {
           var areaM2 = ScaleManager.pdfAreaToM2(_currentPage, candidates[i].area);
-          console.log("  Candidate " + (i + 1) + ": " + candidates[i].path.length + " vertices, " +
-            (areaM2 ? areaM2.toFixed(1) + " m²" : "uncalibrated"));
+          console.log(
+            "  Candidate " +
+              (i + 1) +
+              ": " +
+              candidates[i].path.length +
+              " vertices, " +
+              (areaM2 ? areaM2.toFixed(1) + " m²" : "uncalibrated")
+          );
         }
         _placeDetectedOutline(candidates[0], 0, candidates.length);
       } else if (geo.segments.length === 0) {
         // No vector geometry at all — likely a scanned/raster PDF
-        setStatus("No vector data found — this appears to be a scanned/raster PDF. Use manual measurement (M or R).", "error");
+        setStatus(
+          "No vector data found — this appears to be a scanned/raster PDF. Use manual measurement (M or R).",
+          "error"
+        );
         console.log("[Auto-detect] Page has zero vector geometry. This is a raster/scanned PDF.");
       } else {
-        setStatus("No closed outlines found (" + geo.segments.length + " line segments, but no closed shapes). Use manual measurement (M or R).", "error");
-        console.log("[Auto-detect] " + geo.segments.length + " segments, " +
-          geo.closedPaths.length + " closed paths (likely hatching/fills). " +
-          "Building walls drawn as individual segments, not closed polylines.");
+        setStatus(
+          "No closed outlines found (" +
+            geo.segments.length +
+            " line segments, but no closed shapes). Use manual measurement (M or R).",
+          "error"
+        );
+        console.log(
+          "[Auto-detect] " +
+            geo.segments.length +
+            " segments, " +
+            geo.closedPaths.length +
+            " closed paths (likely hatching/fills). " +
+            "Building walls drawn as individual segments, not closed polylines."
+        );
       }
     });
   });
@@ -1439,12 +1652,17 @@ function _placeDetectedOutline(candidate, idx, total) {
   var verts = candidate.path;
   console.log("[Auto-detect] Placing polygon with " + verts.length + " vertices:");
   console.log("  First vertex: (" + verts[0].x.toFixed(1) + ", " + verts[0].y.toFixed(1) + ")");
-  if (verts.length > 1) console.log("  Last vertex: (" + verts[verts.length-1].x.toFixed(1) + ", " + verts[verts.length-1].y.toFixed(1) + ")");
+  if (verts.length > 1)
+    console.log(
+      "  Last vertex: (" + verts[verts.length - 1].x.toFixed(1) + ", " + verts[verts.length - 1].y.toFixed(1) + ")"
+    );
 
   // Log what pdfToCanvas would produce for the first vertex
   var testCanvas = Viewer.pdfToCanvas(verts[0]);
   console.log("  First vertex in canvas px: (" + testCanvas.x.toFixed(1) + ", " + testCanvas.y.toFixed(1) + ")");
-  console.log("  Canvas size: " + document.getElementById("pdf-canvas").width + "x" + document.getElementById("pdf-canvas").height);
+  console.log(
+    "  Canvas size: " + document.getElementById("pdf-canvas").width + "x" + document.getElementById("pdf-canvas").height
+  );
 
   PolygonTool.startPolygon(_currentPage, "Detected " + (idx + 1) + "/" + total);
   for (var j = 0; j < verts.length; j++) {
@@ -1457,7 +1675,7 @@ function _placeDetectedOutline(candidate, idx, total) {
   Viewer.requestRedraw();
 
   var areaM2 = ScaleManager.pdfAreaToM2(_currentPage, candidate.area);
-  var areaStr = areaM2 !== null ? (areaM2.toFixed(1) + " m\u00B2") : "(uncalibrated)";
+  var areaStr = areaM2 !== null ? areaM2.toFixed(1) + " m\u00B2" : "(uncalibrated)";
   var hint = total > 1 ? " Press D again to cycle (" + (idx + 1) + "/" + total + ")." : "";
   setStatus("Outline: " + areaStr + ", " + verts.length + " vertices." + hint, "ready");
 }
@@ -1475,12 +1693,26 @@ function exportJSON() {
 /* ── Public API (exposed to HTML onclick handlers) ────── */
 
 window.PP = {
-  goToPage: goToPage, nextPage: nextPage, prevPage: prevPage,
-  zoomIn: function() { Viewer.zoomIn(); }, zoomOut: function() { Viewer.zoomOut(); }, zoomFit: function() { Viewer.zoomFit(); },
-  exportCSV: exportCSV, exportJSON: exportJSON,
+  goToPage: goToPage,
+  nextPage: nextPage,
+  prevPage: prevPage,
+  zoomIn: function () {
+    Viewer.zoomIn();
+  },
+  zoomOut: function () {
+    Viewer.zoomOut();
+  },
+  zoomFit: function () {
+    Viewer.zoomFit();
+  },
+  exportCSV: exportCSV,
+  exportJSON: exportJSON,
   // Scale panel
-  openScalePanel: openScalePanel, closeScalePanel: closeScalePanel,
-  setScaleSystem: setScaleSystem, acceptScale: acceptScale, verifyScale: verifyScale,
+  openScalePanel: openScalePanel,
+  closeScalePanel: closeScalePanel,
+  setScaleSystem: setScaleSystem,
+  acceptScale: acceptScale,
+  verifyScale: verifyScale,
   closeScaleFeedback: closeScaleFeedback,
   // Measure method
   setMeasureMethod: setMeasureMethod,

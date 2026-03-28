@@ -1,6 +1,8 @@
 .DS_Store
 *.tgz
 .obsidian
+node_modules/
+PDF-Parser/logs/
 
 # Large binary files (will be managed with DVC)
 *.ifc

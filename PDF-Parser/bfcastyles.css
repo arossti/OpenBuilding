@@ -3,41 +3,47 @@
    ══════════════════════════════════════════════════════════ */
 
 /* ── Reset ────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 /* ── Shared Design Tokens ─────────────────────────────── */
 :root {
   /* Brand */
-  --accent:      #2a5c3f;
-  --accent-lit:  #3a7c5f;
-  --accent-lt:   #e6f0ea;
+  --accent: #2a5c3f;
+  --accent-lit: #3a7c5f;
+  --accent-lt: #e6f0ea;
 
   /* Shared semantic */
-  --red:         #e63946;
-  --gold:        #e9c46a;
-  --blue:        #457b9d;
-  --teal:        #2a9d8f;
-  --cyan:        #00e5ff;
+  --red: #e63946;
+  --gold: #e9c46a;
+  --blue: #457b9d;
+  --teal: #2a9d8f;
+  --cyan: #00e5ff;
 
   /* Typography */
-  --font-head:   'Georgia', 'Times New Roman', serif;
-  --font-body:   'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --font-mono:   'Courier New', Courier, monospace;
+  --font-head: "Georgia", "Times New Roman", serif;
+  --font-body: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "Courier New", Courier, monospace;
 
   /* Aliases (PDF-Parser uses --font, Matrix uses --font-body) */
-  --font:        var(--font-body);
+  --font: var(--font-body);
 
   /* Status palette (shared by Matrix card/flow views) */
-  --c-none:        #e8e7e3;
-  --c-none-txt:    #6b6b63;
-  --c-vol:         #fef3c7;
-  --c-vol-txt:     #78450a;
-  --c-cond:        #dbeafe;
-  --c-cond-txt:    #1e3a6e;
-  --c-emerg:       #ffedd5;
-  --c-emerg-txt:   #7c2d12;
-  --c-mand:        #fee2e2;
-  --c-mand-txt:    #7f1d1d;
+  --c-none: #e8e7e3;
+  --c-none-txt: #6b6b63;
+  --c-vol: #fef3c7;
+  --c-vol-txt: #78450a;
+  --c-cond: #dbeafe;
+  --c-cond-txt: #1e3a6e;
+  --c-emerg: #ffedd5;
+  --c-emerg-txt: #7c2d12;
+  --c-mand: #fee2e2;
+  --c-mand-txt: #7f1d1d;
 }
 
 /* ── Shared Header Bar (dark chrome) ──────────────────── */
@@ -81,7 +87,9 @@
   text-decoration: none;
   transition: background 0.15s;
 }
-.nav-btn:hover { background: var(--accent-lit); }
+.nav-btn:hover {
+  background: var(--accent-lit);
+}
 
 /* ── Key Hint Badges ──────────────────────────────────── */
 .key-hint {

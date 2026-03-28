@@ -1,161 +1,169 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF-Parser — Construction Document Area Extraction</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF-Parser — Construction Document Area Extraction</title>
 
-  <link rel="stylesheet" href="bfcastyles.css">
-  <link rel="stylesheet" href="pdfparser.css">
-</head>
+    <link rel="stylesheet" href="bfcastyles.css" />
+    <link rel="stylesheet" href="pdfparser.css" />
+  </head>
 
-<body>
-  <div id="app">
+  <body>
+    <div id="app">
+      <!-- ── Toolbar ──────────────────────────────────── -->
+      <div id="toolbar">
+        <img src="graphics/BFCA-LOGO-sm.png" alt="BfCA" class="header-logo" />
+        <button class="tool-btn active" data-tool="navigate" title="Navigate / Pan (V)">
+          Navigate <span class="key-hint">V</span>
+        </button>
+        <button class="tool-btn" data-tool="measure" title="Measure Area (M)">
+          Measure <span class="key-hint">M</span>
+        </button>
+        <select id="measure-method" title="Measurement method" onchange="PP.setMeasureMethod(this.value)">
+          <option value="rectangle">Rectangle</option>
+          <option value="polygon">Polygon</option>
+        </select>
+        <button class="tool-btn" data-tool="window" title="Measure Window (W)">
+          Window <span class="key-hint">W</span>
+        </button>
+        <select id="window-mode" title="Window mode" onchange="PP.setWindowMode(this.value)">
+          <option value="net">Net (subtract)</option>
+          <option value="add">Add</option>
+        </select>
+        <button class="tool-btn" data-tool="ruler" title="Ruler (L)">Ruler <span class="key-hint">L</span></button>
+        <button class="tool-btn" data-tool="checkscale" title="Check Scale (S)">
+          Scale <span class="key-hint">S</span>
+        </button>
+        <button class="tool-btn" data-tool="calibrate" title="Manual Calibrate (C)">
+          Calibrate <span class="key-hint">C</span>
+        </button>
+        <button class="export-btn" onclick="PP.autoDetect()" title="Auto-detect building outline (D)">
+          Detect <span class="key-hint">D</span>
+        </button>
+        <div class="toolbar-sep"></div>
+        <button class="tool-btn" onclick="PP.zoomIn()" title="Zoom In (+)">+</button>
+        <button class="tool-btn" onclick="PP.zoomOut()" title="Zoom Out (-)">&#8722;</button>
+        <button class="tool-btn" onclick="PP.zoomFit()" title="Zoom Fit">Fit</button>
+        <div class="toolbar-sep"></div>
+        <button class="tool-btn" onclick="PP.prevPage()" title="Previous Page">&larr;</button>
+        <button class="tool-btn" onclick="PP.nextPage()" title="Next Page">&rarr;</button>
+        <span class="toolbar-label" id="page-label"></span>
 
-    <!-- ── Toolbar ──────────────────────────────────── -->
-    <div id="toolbar">
-      <img src="graphics/BFCA-LOGO-sm.png" alt="BfCA" class="header-logo">
-      <button class="tool-btn active" data-tool="navigate" title="Navigate / Pan (V)">Navigate <span class="key-hint">V</span></button>
-      <button class="tool-btn" data-tool="measure" title="Measure Area (M)">Measure <span class="key-hint">M</span></button>
-      <select id="measure-method" title="Measurement method" onchange="PP.setMeasureMethod(this.value)">
-        <option value="rectangle">Rectangle</option>
-        <option value="polygon">Polygon</option>
-      </select>
-      <button class="tool-btn" data-tool="window" title="Measure Window (W)">Window <span class="key-hint">W</span></button>
-      <select id="window-mode" title="Window mode" onchange="PP.setWindowMode(this.value)">
-        <option value="net">Net (subtract)</option>
-        <option value="add">Add</option>
-      </select>
-      <button class="tool-btn" data-tool="ruler" title="Ruler (L)">Ruler <span class="key-hint">L</span></button>
-      <button class="tool-btn" data-tool="checkscale" title="Check Scale (S)">Scale <span class="key-hint">S</span></button>
-      <button class="tool-btn" data-tool="calibrate" title="Manual Calibrate (C)">Calibrate <span class="key-hint">C</span></button>
-      <button class="export-btn" onclick="PP.autoDetect()" title="Auto-detect building outline (D)">Detect <span class="key-hint">D</span></button>
-      <div class="toolbar-sep"></div>
-      <button class="tool-btn" onclick="PP.zoomIn()" title="Zoom In (+)">+</button>
-      <button class="tool-btn" onclick="PP.zoomOut()" title="Zoom Out (-)">&#8722;</button>
-      <button class="tool-btn" onclick="PP.zoomFit()" title="Zoom Fit">Fit</button>
-      <div class="toolbar-sep"></div>
-      <button class="tool-btn" onclick="PP.prevPage()" title="Previous Page">&larr;</button>
-      <button class="tool-btn" onclick="PP.nextPage()" title="Next Page">&rarr;</button>
-      <span class="toolbar-label" id="page-label"></span>
+        <div class="toolbar-spacer"></div>
 
-      <div class="toolbar-spacer"></div>
-
-      <button class="export-btn" onclick="PP.exportCSV()" title="Export measurements as CSV">CSV</button>
-      <button class="export-btn" onclick="PP.exportJSON()" title="Save project as JSON">JSON</button>
-      <div class="toolbar-sep"></div>
-      <a href="matrix.html" class="nav-btn" title="EC Compliance Matrix">Matrix</a>
-    </div>
-
-    <!-- ── Main Area ────────────────────────────────── -->
-    <div id="main">
-
-      <!-- Sidebar -->
-      <div id="sidebar">
-        <div id="sidebar-header">Sheets</div>
-        <div id="sheet-info"></div>
-        <div id="thumb-strip"></div>
-        <div id="measure-panel"><p class="empty">No measurements yet.</p></div>
+        <button class="export-btn" onclick="PP.exportCSV()" title="Export measurements as CSV">CSV</button>
+        <button class="export-btn" onclick="PP.exportJSON()" title="Save project as JSON">JSON</button>
+        <div class="toolbar-sep"></div>
+        <a href="matrix.html" class="nav-btn" title="EC Compliance Matrix">Matrix</a>
       </div>
 
-      <!-- Viewer -->
-      <div id="viewer-area">
-
-        <!-- Drop zone (shown before a PDF is loaded) -->
-        <div id="drop-zone">
-          <img src="graphics/BFCA-LOGO.png" alt="Builders for Climate Action" class="splash-logo">
-          <div class="drop-text">Drop a construction PDF here</div>
-          <div class="drop-hint">or</div>
-          <button class="browse-btn" onclick="document.getElementById('file-input').click()">Browse Files</button>
-          <button class="browse-btn" style="background:var(--bg-panel);border:1px solid var(--border);margin-top:8px;" onclick="PP.loadSample()">Load Sample PDF</button>
-          <input type="file" id="file-input" accept="application/pdf">
-          <div class="drop-hint" style="margin-top: 24px;">
-            <span class="key-hint">S</span> Scale &nbsp;
-            <span class="key-hint">M</span> Measure &nbsp;
-            <span class="key-hint">W</span> Window &nbsp;
-            <span class="key-hint">C</span> Calibrate &nbsp;
-            <span class="key-hint">F</span> Fit &nbsp;
-            <span class="key-hint">Scroll</span> Zoom at cursor &nbsp;
-            <span class="key-hint">Mid-click</span> Pan &nbsp;
-            <span class="key-hint">&larr;&rarr;</span> Pages
-          </div>
+      <!-- ── Main Area ────────────────────────────────── -->
+      <div id="main">
+        <!-- Sidebar -->
+        <div id="sidebar">
+          <div id="sidebar-header">Sheets</div>
+          <div id="sheet-info"></div>
+          <div id="thumb-strip"></div>
+          <div id="measure-panel"><p class="empty">No measurements yet.</p></div>
         </div>
 
-        <!-- Loading overlay -->
-        <div id="loading-overlay" style="display: none;">
-          <div class="loading-content">
-            <div class="loading-title">Reading PDF...</div>
-            <div class="loading-bar-track">
-              <div class="loading-bar-fill" id="loading-bar-fill"></div>
+        <!-- Viewer -->
+        <div id="viewer-area">
+          <!-- Drop zone (shown before a PDF is loaded) -->
+          <div id="drop-zone">
+            <img src="graphics/BFCA-LOGO.png" alt="Builders for Climate Action" class="splash-logo" />
+            <div class="drop-text">Drop a construction PDF here</div>
+            <div class="drop-hint">or</div>
+            <button class="browse-btn" onclick="document.getElementById('file-input').click()">Browse Files</button>
+            <button
+              class="browse-btn"
+              style="background: var(--bg-panel); border: 1px solid var(--border); margin-top: 8px"
+              onclick="PP.loadSample()"
+            >
+              Load Sample PDF
+            </button>
+            <input type="file" id="file-input" accept="application/pdf" />
+            <div class="drop-hint" style="margin-top: 24px">
+              <span class="key-hint">S</span> Scale &nbsp; <span class="key-hint">M</span> Measure &nbsp;
+              <span class="key-hint">W</span> Window &nbsp; <span class="key-hint">C</span> Calibrate &nbsp;
+              <span class="key-hint">F</span> Fit &nbsp; <span class="key-hint">Scroll</span> Zoom at cursor &nbsp;
+              <span class="key-hint">Mid-click</span> Pan &nbsp; <span class="key-hint">&larr;&rarr;</span> Pages
             </div>
-            <div class="loading-label" id="loading-label">Preparing...</div>
+          </div>
+
+          <!-- Loading overlay -->
+          <div id="loading-overlay" style="display: none">
+            <div class="loading-content">
+              <div class="loading-title">Reading PDF...</div>
+              <div class="loading-bar-track">
+                <div class="loading-bar-fill" id="loading-bar-fill"></div>
+              </div>
+              <div class="loading-label" id="loading-label">Preparing...</div>
+            </div>
+          </div>
+
+          <!-- Canvas viewer (hidden until PDF loaded) -->
+          <div id="viewer-wrap" style="display: none">
+            <div id="viewer-container">
+              <canvas id="pdf-canvas"></canvas>
+              <canvas id="overlay-canvas"></canvas>
+            </div>
           </div>
         </div>
+      </div>
 
-        <!-- Canvas viewer (hidden until PDF loaded) -->
-        <div id="viewer-wrap" style="display: none;">
-          <div id="viewer-container">
-            <canvas id="pdf-canvas"></canvas>
-            <canvas id="overlay-canvas"></canvas>
-          </div>
+      <!-- ── Scale Confirmation Panel (modal) ───────── -->
+      <div id="scale-backdrop"></div>
+      <div id="scale-panel">
+        <div class="scale-panel-title" id="scale-panel-title">Check Scale</div>
+        <div id="scale-detected" class="scale-panel-detected"></div>
+
+        <div class="scale-toggle">
+          <button id="scale-toggle-metric" class="active" onclick="PP.setScaleSystem('metric')">Metric</button>
+          <button id="scale-toggle-imperial" onclick="PP.setScaleSystem('imperial')">Imperial</button>
         </div>
 
+        <select id="scale-select"></select>
+
+        <div class="scale-panel-actions">
+          <button class="btn-cancel" onclick="PP.closeScalePanel()">Cancel</button>
+          <button class="btn-accept" onclick="PP.acceptScale()">Accept</button>
+          <button class="btn-verify" onclick="PP.verifyScale()">Accept &amp; Verify</button>
+        </div>
+
+        <div class="scale-panel-hint">
+          <b>Accept</b> — start measuring with this scale (provisional).<br />
+          <b>Accept &amp; Verify</b> — also calibrate against a known dimension (most accurate).
+        </div>
+      </div>
+
+      <!-- ── Scale Feedback Dialogue (toast/instruction) ─── -->
+      <div id="scale-feedback-backdrop"></div>
+      <div id="scale-feedback-panel">
+        <div class="scale-feedback-icon" id="scale-feedback-icon"></div>
+        <div class="scale-feedback-title" id="scale-feedback-title"></div>
+        <div class="scale-feedback-body" id="scale-feedback-body"></div>
+        <div class="scale-feedback-actions">
+          <label class="scale-feedback-remember" id="scale-feedback-remember-wrap" style="display: none">
+            <input type="checkbox" id="scale-feedback-remember" /> Don't show this again
+          </label>
+          <button id="scale-feedback-ok" onclick="PP.closeScaleFeedback()">OK</button>
+        </div>
+      </div>
+
+      <!-- ── Status Bar ───────────────────────────────── -->
+      <div id="status-bar">
+        <span id="zoom-label"></span>
+        <span id="scale-label"></span>
+        <span style="flex: 1"></span>
+        <span>PDF-Parser v0.1.0 — Step 1</span>
       </div>
     </div>
 
-    <!-- ── Scale Confirmation Panel (modal) ───────── -->
-    <div id="scale-backdrop"></div>
-    <div id="scale-panel">
-      <div class="scale-panel-title" id="scale-panel-title">Check Scale</div>
-      <div id="scale-detected" class="scale-panel-detected"></div>
-
-      <div class="scale-toggle">
-        <button id="scale-toggle-metric" class="active" onclick="PP.setScaleSystem('metric')">Metric</button>
-        <button id="scale-toggle-imperial" onclick="PP.setScaleSystem('imperial')">Imperial</button>
-      </div>
-
-      <select id="scale-select"></select>
-
-      <div class="scale-panel-actions">
-        <button class="btn-cancel" onclick="PP.closeScalePanel()">Cancel</button>
-        <button class="btn-accept" onclick="PP.acceptScale()">Accept</button>
-        <button class="btn-verify" onclick="PP.verifyScale()">Accept &amp; Verify</button>
-      </div>
-
-      <div class="scale-panel-hint">
-        <b>Accept</b> — start measuring with this scale (provisional).<br>
-        <b>Accept &amp; Verify</b> — also calibrate against a known dimension (most accurate).
-      </div>
-    </div>
-
-    <!-- ── Scale Feedback Dialogue (toast/instruction) ─── -->
-    <div id="scale-feedback-backdrop"></div>
-    <div id="scale-feedback-panel">
-      <div class="scale-feedback-icon" id="scale-feedback-icon"></div>
-      <div class="scale-feedback-title" id="scale-feedback-title"></div>
-      <div class="scale-feedback-body" id="scale-feedback-body"></div>
-      <div class="scale-feedback-actions">
-        <label class="scale-feedback-remember" id="scale-feedback-remember-wrap" style="display:none;">
-          <input type="checkbox" id="scale-feedback-remember"> Don't show this again
-        </label>
-        <button id="scale-feedback-ok" onclick="PP.closeScaleFeedback()">OK</button>
-      </div>
-    </div>
-
-    <!-- ── Status Bar ───────────────────────────────── -->
-    <div id="status-bar">
-      <span id="zoom-label"></span>
-      <span id="scale-label"></span>
-      <span style="flex:1;"></span>
-      <span>PDF-Parser v0.1.0 — Step 1</span>
-    </div>
-
-  </div>
-
-  <!-- ── Application ───────────────────────────────── -->
-  <!-- Single ESM entry point — imports all modules, including PDF.js 4.x -->
-  <!-- Requires: python3 -m http.server 8000 (or ./serve.sh) -->
-  <script type="module" src="js/app.mjs"></script>
-
-</body>
+    <!-- ── Application ───────────────────────────────── -->
+    <!-- Single ESM entry point — imports all modules, including PDF.js 4.x -->
+    <!-- Requires: python3 -m http.server 8000 (or ./serve.sh) -->
+    <script type="module" src="js/app.mjs"></script>
+  </body>
 </html>

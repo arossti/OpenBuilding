@@ -20,22 +20,29 @@
 import * as Loader from "./pdf-loader.mjs";
 import { DEFAULT_DPI } from "./config.mjs";
 
-var _pdfCanvas = null, _overlay = null, _container = null, _wrap = null;
+var _pdfCanvas = null,
+  _overlay = null,
+  _container = null,
+  _wrap = null;
 var _currentPage = 0;
-var _renderDpi = 150;          // fixed render resolution — high enough for detail
+var _renderDpi = 150; // fixed render resolution — high enough for detail
 var _viewport = null;
 
 // Transform state (applied as CSS transform on _container)
-var _scale = 1.0;              // visual zoom (CSS scale)
-var _panX = 0, _panY = 0;     // translation in screen pixels
+var _scale = 1.0; // visual zoom (CSS scale)
+var _panX = 0,
+  _panY = 0; // translation in screen pixels
 
 // Interaction state
 var _isPanning = false;
-var _panStartMouseX = 0, _panStartMouseY = 0;
-var _panStartX = 0, _panStartY = 0;
+var _panStartMouseX = 0,
+  _panStartMouseY = 0;
+var _panStartX = 0,
+  _panStartY = 0;
 
 // Callbacks
-var _onOverlayClick = null, _onOverlayMouseMove = null;
+var _onOverlayClick = null,
+  _onOverlayMouseMove = null;
 var _drawOverlayFn = null;
 
 /* ── Init ─────────────────────────────────────────────── */
@@ -43,8 +50,8 @@ var _drawOverlayFn = null;
 export function init(containerId, pdfCanvasId, overlayCanvasId) {
   _container = document.getElementById(containerId);
   _pdfCanvas = document.getElementById(pdfCanvasId);
-  _overlay   = document.getElementById(overlayCanvasId);
-  _wrap      = document.getElementById("viewer-wrap");
+  _overlay = document.getElementById(overlayCanvasId);
+  _wrap = document.getElementById("viewer-wrap");
   _bindEvents();
 }
 
@@ -52,7 +59,7 @@ export function init(containerId, pdfCanvasId, overlayCanvasId) {
 
 export function showPage(pageNum) {
   _currentPage = pageNum;
-  return Loader.renderPage(pageNum, _pdfCanvas, _renderDpi).then(function(result) {
+  return Loader.renderPage(pageNum, _pdfCanvas, _renderDpi).then(function (result) {
     if (!result) return null;
     _viewport = result.viewport;
     _syncOverlaySize();
@@ -63,7 +70,7 @@ export function showPage(pageNum) {
 }
 
 function _syncOverlaySize() {
-  _overlay.width  = _pdfCanvas.width;
+  _overlay.width = _pdfCanvas.width;
   _overlay.height = _pdfCanvas.height;
   // Overlay must exactly cover the PDF canvas — no explicit CSS size needed
   // since both are inside the same positioned container
@@ -73,8 +80,7 @@ function _syncOverlaySize() {
 
 function _applyTransform() {
   // transform-origin is top-left; we translate then scale
-  _container.style.transform =
-    "translate(" + _panX + "px, " + _panY + "px) scale(" + _scale + ")";
+  _container.style.transform = "translate(" + _panX + "px, " + _panY + "px) scale(" + _scale + ")";
 }
 
 /**
@@ -113,7 +119,7 @@ export function zoomOut() {
 
 export function zoomFit() {
   if (!_currentPage) return Promise.resolve();
-  return Loader.getPageSize(_currentPage).then(function(size) {
+  return Loader.getPageSize(_currentPage).then(function (size) {
     if (!_wrap) return;
     var canvasW = size.width * (_renderDpi / 72);
     var canvasH = size.height * (_renderDpi / 72);
@@ -134,7 +140,9 @@ export function setZoom(z) {
   _zoomAtPoint(z, cx, cy);
 }
 
-export function getZoom() { return _scale; }
+export function getZoom() {
+  return _scale;
+}
 
 /* ── Coordinate conversion ────────────────────────────── */
 
@@ -159,8 +167,12 @@ export function pdfToCanvas(pt) {
   return { x: pt.x * pdfScale, y: pt.y * pdfScale };
 }
 
-export function getOverlayCtx() { return _overlay.getContext("2d"); }
-export function setDrawCallback(fn) { _drawOverlayFn = fn; }
+export function getOverlayCtx() {
+  return _overlay.getContext("2d");
+}
+export function setDrawCallback(fn) {
+  _drawOverlayFn = fn;
+}
 
 function _redrawOverlay() {
   var ctx = _overlay.getContext("2d");
@@ -168,23 +180,29 @@ function _redrawOverlay() {
   if (_drawOverlayFn) _drawOverlayFn(ctx, _currentPage);
 }
 
-export function requestRedraw() { _redrawOverlay(); }
+export function requestRedraw() {
+  _redrawOverlay();
+}
 
 /* ── Event binding ────────────────────────────────────── */
 
 function _bindEvents() {
   // ── Scroll wheel: zoom centered on cursor ──
-  _wrap.addEventListener("wheel", function(e) {
-    e.preventDefault();
-    var rect = _wrap.getBoundingClientRect();
-    var mouseX = e.clientX - rect.left;
-    var mouseY = e.clientY - rect.top;
-    var factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
-    _zoomAtPoint(_scale * factor, mouseX, mouseY);
-  }, { passive: false });
+  _wrap.addEventListener(
+    "wheel",
+    function (e) {
+      e.preventDefault();
+      var rect = _wrap.getBoundingClientRect();
+      var mouseX = e.clientX - rect.left;
+      var mouseY = e.clientY - rect.top;
+      var factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+      _zoomAtPoint(_scale * factor, mouseX, mouseY);
+    },
+    { passive: false }
+  );
 
   // ── Mouse down ──
-  _wrap.addEventListener("mousedown", function(e) {
+  _wrap.addEventListener("mousedown", function (e) {
     // Middle-click pan (button 2 is right-click, button 1 is middle)
     if (e.button === 1) {
       e.preventDefault();
@@ -203,7 +221,7 @@ function _bindEvents() {
   });
 
   // ── Mouse move ──
-  _wrap.addEventListener("mousemove", function(e) {
+  _wrap.addEventListener("mousemove", function (e) {
     if (_isPanning) {
       _panX = _panStartX + (e.clientX - _panStartMouseX);
       _panY = _panStartY + (e.clientY - _panStartMouseY);
@@ -214,7 +232,7 @@ function _bindEvents() {
   });
 
   // ── Mouse up ──
-  window.addEventListener("mouseup", function(e) {
+  window.addEventListener("mouseup", function (e) {
     if (_isPanning) {
       _isPanning = false;
       _wrap.style.cursor = "";
@@ -222,7 +240,7 @@ function _bindEvents() {
   });
 
   // Prevent middle-click auto-scroll (browser default)
-  _wrap.addEventListener("auxclick", function(e) {
+  _wrap.addEventListener("auxclick", function (e) {
     if (e.button === 1) e.preventDefault();
   });
 }
@@ -238,9 +256,15 @@ function _startPan(e) {
 
 /* ── Public callbacks ─────────────────────────────────── */
 
-export function onOverlayClick(fn)     { _onOverlayClick = fn; }
-export function onOverlayMouseMove(fn) { _onOverlayMouseMove = fn; }
-export function getCurrentPage()       { return _currentPage; }
+export function onOverlayClick(fn) {
+  _onOverlayClick = fn;
+}
+export function onOverlayMouseMove(fn) {
+  _onOverlayMouseMove = fn;
+}
+export function getCurrentPage() {
+  return _currentPage;
+}
 
 // Legacy — no-op, marquee removed
 export function setMarqueeMode(on) {}

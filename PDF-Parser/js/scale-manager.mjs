@@ -18,8 +18,8 @@ var _calibrations = {};
 
 // State constants
 export var STATE = {
-  NONE:     "none",
-  PENDING:  "pending",
+  NONE: "none",
+  PENDING: "pending",
   ACCEPTED: "accepted",
   VERIFIED: "verified"
 };
@@ -30,9 +30,9 @@ export function setPending(pageNum, ratio, raw) {
   var cal = _calibrations[pageNum];
   if (cal && (cal.state === STATE.ACCEPTED || cal.state === STATE.VERIFIED)) return;
   _calibrations[pageNum] = {
-    state:            STATE.PENDING,
-    ratio:            ratio,
-    ratioLabel:       raw || ("1:" + ratio),
+    state: STATE.PENDING,
+    ratio: ratio,
+    ratioLabel: raw || "1:" + ratio,
     pdfUnitsPerMetre: null
   };
 }
@@ -45,21 +45,28 @@ export function accept(pageNum, ratio) {
   // This uses the "PDF points" assumption (1 pt = 1/72 inch = 0.3528mm).
   // May be off by a constant factor, but enables working with approximate areas.
   // User can verify later with empirical calibration for exact values.
-  var mmPerPdfUnit = 25.4 / 72;  // standard PDF point assumption
+  var mmPerPdfUnit = 25.4 / 72; // standard PDF point assumption
   var realMmPerPdfUnit = mmPerPdfUnit * ratio;
   var realMPerPdfUnit = realMmPerPdfUnit / 1000;
   var pdfUnitsPerMetre = 1 / realMPerPdfUnit;
 
   _calibrations[pageNum] = {
-    state:            STATE.ACCEPTED,
-    ratio:            ratio,
-    ratioLabel:       "1:" + ratio,
+    state: STATE.ACCEPTED,
+    ratio: ratio,
+    ratioLabel: "1:" + ratio,
     pdfUnitsPerMetre: pdfUnitsPerMetre,
-    source:           "accepted"
+    source: "accepted"
   };
 
-  console.log("[ScaleManager] Page " + pageNum + " ACCEPTED 1:" + ratio +
-    " (theoretical: " + pdfUnitsPerMetre.toFixed(2) + " units/m)");
+  console.log(
+    "[ScaleManager] Page " +
+      pageNum +
+      " ACCEPTED 1:" +
+      ratio +
+      " (theoretical: " +
+      pdfUnitsPerMetre.toFixed(2) +
+      " units/m)"
+  );
 }
 
 /* ── Empirical two-point calibration (verified) ───────── */
@@ -72,19 +79,29 @@ export function calibrate(pageNum, p1, p2, realDistance, unit, meta) {
   var pdfUnitsPerMetre = pdfDistance / realMetres;
 
   _calibrations[pageNum] = {
-    state:            STATE.VERIFIED,
-    ratio:            (meta && meta.ratio) || (_calibrations[pageNum] && _calibrations[pageNum].ratio) || null,
-    ratioLabel:       (meta && meta.raw) || (_calibrations[pageNum] && _calibrations[pageNum].ratioLabel) || "calibrated",
+    state: STATE.VERIFIED,
+    ratio: (meta && meta.ratio) || (_calibrations[pageNum] && _calibrations[pageNum].ratio) || null,
+    ratioLabel: (meta && meta.raw) || (_calibrations[pageNum] && _calibrations[pageNum].ratioLabel) || "calibrated",
     pdfUnitsPerMetre: pdfUnitsPerMetre,
-    source:           "verified",
-    refPoints:        [p1, p2],
-    refDistance:       realDistance,
-    refUnit:          unit
+    source: "verified",
+    refPoints: [p1, p2],
+    refDistance: realDistance,
+    refUnit: unit
   };
 
-  console.log("[ScaleManager] Page " + pageNum + " VERIFIED: " +
-    pdfDistance.toFixed(1) + " PDF units = " + realDistance + " " + unit +
-    " → " + pdfUnitsPerMetre.toFixed(2) + " units/m");
+  console.log(
+    "[ScaleManager] Page " +
+      pageNum +
+      " VERIFIED: " +
+      pdfDistance.toFixed(1) +
+      " PDF units = " +
+      realDistance +
+      " " +
+      unit +
+      " → " +
+      pdfUnitsPerMetre.toFixed(2) +
+      " units/m"
+  );
 }
 
 /* ── Conversion (works for ACCEPTED and VERIFIED) ─────── */
@@ -136,4 +153,6 @@ export function getCalibration(pageNum) {
   return _calibrations[pageNum] || null;
 }
 
-export function reset() { _calibrations = {}; }
+export function reset() {
+  _calibrations = {};
+}
