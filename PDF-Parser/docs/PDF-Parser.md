@@ -527,87 +527,92 @@ var project = {
 - [x] **Default measurement method changed to Rectangle** (more frequently used than Polygon)
 - [x] Scale feedback dialogue CSS + HTML added to PDF-Parser
 
-### Step 8 — Window/Opening Measurement & Netting
+### Step 8 — Window/Opening Measurement & Netting ✅ (2026-03-28)
 
 #### 8.1 Data Model
-Add `type` and `mode` fields to the polygon data model:
-
-| Field | Values | Default | Purpose |
-|---|---|---|---|
-| `type` | `"area"` \| `"window"` | `"area"` | Distinguishes wall areas from openings |
-| `mode` | `"net"` \| `"add"` | `"net"` | Window behaviour: subtract from gross (net) or add as separate entity |
-
-Backward compatible: existing saved projects without these fields load as `type: "area"`, `mode: "net"`.
+- [x] `type` field on polygons: `"area"` (default) or `"window"`
+- [x] `mode` field on windows: `"net"` (subtract from wall, default) or `"add"`
+- [x] Separate auto-increment counter: "Window 1", "Window 2", etc.
+- [x] Backward compatible: existing projects without type/mode load as `area`/`net`
 
 #### 8.2 Toolbar — Window Button
-- New **Window** toolbar button (`W` key) alongside Measure
-- Reuses the existing Rectangle/Polygon method dropdown — same drawing methods, different polygon type
-- **Net/Add** dropdown (`#window-mode`) for window behaviour toggle
-- Window tool creates polygons with `{type: "window", mode: _windowMode}`
+- [x] New **Window** button (`W` key) alongside Measure
+- [x] Reuses the Rectangle/Polygon method dropdown — same drawing methods, different polygon type
+- [x] **Net/Add** dropdown (`#window-mode`) for window behaviour toggle
+- [x] Refactored click handlers: generic `_handleGenericPolygonClick` / `_handleGenericRectangleClick` shared by both tools
 
 #### 8.3 Visual Distinction
-- **Area polygons**: cyan edges (3px), cyan fill (8% opacity), cyan label text — *unchanged*
-- **Window polygons**: gold edges (`#ffd700`, 3px), gold fill (8% opacity), gold label text
-- **Rectangle preview**: gold dashed outline when in Window mode
-- **Vertex handles**: match polygon type colour (cyan for areas, gold for windows)
-- **Labels**: same 3-line pill format (name, m², ft²) but gold text for windows
+- [x] **Area polygons**: cyan edges (3px), cyan fill (8% opacity), cyan label text
+- [x] **Window polygons**: gold edges (`#ffd700`, 3px), gold fill (8% opacity), gold label text
+- [x] **Rectangle preview**: gold dashed outline when in Window mode
+- [x] **Vertex handles**: match polygon type colour
+- [x] Colour constants centralised in `config.mjs` (`AREA_EDGE`, `AREA_FILL`, `WIN_EDGE`, `WIN_FILL`)
 
-#### 8.4 Netting in Measurement Panel
-The sidebar measurement panel shows three sections:
+#### 8.4 Auto-Association — Windows to Walls
+Windows are automatically associated with their parent wall polygon using spatial containment:
+
+- [x] **`pointInPolygon(pt, vertices)`** — ray-casting algorithm in `polygon-tool.mjs`
+- [x] **`centroid(vertices)`** — arithmetic mean centroid utility
+- [x] **`buildAssociationMap(pageNum)`** — computes wall→window parent-child relationships:
+  1. For each window, compute its centroid
+  2. Test centroid against every wall polygon using ray-casting
+  3. If centroid falls inside multiple walls, assign to the **smallest** (most specific — handles room-inside-floor nesting)
+  4. Returns `{ walls: [{ measurement, polyIdx, children }], orphanWindows: [...] }`
+- [x] **Computed dynamically** — never stored. Automatically updates on vertex drag, delete, undo/redo
+- [x] **Canvas labels**: wall polygons with children show **net area** with "net" suffix (cached per draw cycle via `_netAreaCache`)
+
+#### 8.5 Measurement Panel — Expandable Wall Rows
+Wall rows show **net area** (gross minus child windows):
 
 ```
 AREAS
-  Area 1        45.20 m²    486.65 ft²    ×
-  Area 2        32.10 m²    345.48 ft²    ×
-  Gross         77.30       832.13
+▶ Wall A       42.53 m²   457.87 ft²   ×    ← net area
+    Gross       50.12      539.53            ← hidden, click ▶ to expand
+    − Window 1  −4.20      −45.22       ×
+    − Window 2  −3.39      −36.44       ×
+  Wall B       28.10 m²   302.45 ft²   ×    ← no children, net = gross
+  Net Total    70.63      760.32
 
-WINDOWS
-  Window 1      -2.40 m²    -25.83 ft²  net  ×
-  Window 2      +1.80 m²    +19.38 ft²  add  ×
-  Windows       -0.60        -6.46
-
-NET TOTAL       76.70 m²    825.67 ft²
+Unassociated Windows                         ← only if orphans exist
+  Window 3     −2.50 m²   −26.91 ft²   ×
 ```
 
-**Calculation:**
-- `gross` = sum of all `type === "area"` polygons
-- `windowNet` = sum of `type === "window"` where `mode === "net"` (subtractive)
-- `windowAdd` = sum of `type === "window"` where `mode === "add"` (additive)
-- `netTotal` = gross − windowNet + windowAdd
+- [x] Walls with children get a `▶`/`▼` chevron toggle (expand/collapse detail rows)
+- [x] Detail rows show gross area + individual window deductions
+- [x] "net" label suffix on wall rows with children
+- [x] Orphan windows (not inside any wall) shown in separate gold section
+- [x] Delete/rename still work via `data-poly-idx` (raw polygon array index)
 
-#### 8.5 Interaction — Full Parity with Areas
-Windows support all existing polygon features:
+#### 8.6 Interaction — Full Parity with Areas
 - [x] Polygon and Rectangle drawing methods
-- [x] Vertex dragging (click & drag any vertex)
-- [x] Edge vertex insertion (click edge to add vertex)
-- [x] Vertex merging (drag vertex onto another)
+- [x] Vertex dragging, edge insertion, vertex merging
 - [x] Inline label renaming (click label in panel)
 - [x] Delete (× button or Delete key)
-- [x] Undo/redo (JSON deep copy preserves type/mode automatically)
+- [x] Undo/redo (JSON deep copy preserves type/mode; association recomputed)
 - [x] Vector snap (endpoint + line snap work in window mode)
 
-#### 8.6 CSV Export
-Updated columns with type/mode and summary rows:
+#### 8.7 CSV Export
+Hierarchical output with Gross/Net columns:
 
 ```
-Sheet,Label,Type,Mode,Area (m²),Area (ft²),Perimeter (m)
-Page 1,"Area 1",Area,,45.20,486.65,27.20
-Page 1,"Window 1",Window,net,2.40,25.83,6.20
-Page 1,GROSS TOTAL,,,77.30,832.13,
-Page 1,WINDOW NET,,,-0.60,-6.46,
-Page 1,NET TOTAL,,,76.70,825.67,
+Sheet,Label,Type,Mode,Gross (m²),Net (m²),Gross (ft²),Net (ft²),Perimeter (m)
+A2.1,"Wall A",area,,50.12,42.53,539.53,457.87,28.50
+A2.1,"  Window 1",window,net,4.20,,45.22,,8.20
+A2.1,"  Window 2",window,net,3.39,,36.44,,7.40
+A2.1,GROSS TOTAL,,,,50.12,,539.53,
+A2.1,NET TOTAL,,,,,42.53,,457.87,
 ```
 
-#### 8.7 Implementation Files
+#### 8.8 Implementation Files
 
 | File | Changes |
 |---|---|
-| `js/config.mjs` | Window colour constants (`WIN_EDGE`, `WIN_FILL`) |
-| `js/polygon-tool.mjs` | `type`/`mode` on polygon, `startPolygon(pageNum, label, opts)`, yellow rendering |
-| `js/app.mjs` | Window tool mode, refactored click handlers, measurement panel redesign |
-| `index.html` | Window button + Net/Add dropdown |
-| `pdfparser.css` | Net/Add dropdown styling |
-| `js/project-store.mjs` | Persist type/mode, CSV with type column + summary rows |
+| `js/config.mjs` | `AREA_EDGE`, `AREA_FILL`, `WIN_EDGE`, `WIN_FILL` colour constants |
+| `js/polygon-tool.mjs` | `type`/`mode` on polygon, `pointInPolygon`, `centroid`, `buildAssociationMap`, net-area cache in `draw` |
+| `js/app.mjs` | Window tool, generic click handlers, association-based measurement panel with expandable rows |
+| `index.html` | Window button + Net/Add dropdown + W key hint |
+| `pdfparser.css` | Window-mode dropdown, `.wall-toggle`, `.detail-row`, `.net-label` styles |
+| `js/project-store.mjs` | Persist type/mode, hierarchical CSV with Gross/Net columns |
 
 ### Step 9 — Schedule Extraction & Cross-Validation
 - [ ] Text clustering into table rows/columns
@@ -643,11 +648,10 @@ Page 1,NET TOTAL,,,76.70,825.67,
 | 9 | **FIXED** | Vector geometry extraction returns 0 segments | PDF.js 4.x uses constructPath operator — parser updated to unpack batched ops. |
 | 10 | **FIXED** | Detected polygons drawn off-screen (negative/huge coordinates) | CTM tracking (save/restore/transform) + viewport transform composition. |
 | 11 | **Known** | Auto-detect finds wall fills, not building outlines | Most CAD PDFs draw walls as individual quads. Edge-tracing needed for outline assembly. |
-| 12 | **Cosmetic** | `favicon.ico` 404 on every page load | Harmless; browser auto-requests. |
-| 13 | **Cosmetic** | `TT: undefined function: 32` warning from PDF.js | CAD font hinting opcode; no impact. |
-| 7 | **FIXED** | No way to adjust polygon vertices after closing | Vertex dragging with hit-testing, undo support. |
-| 8 | **Cosmetic** | `favicon.ico` 404 on every page load | Harmless; browser auto-requests. Could add a favicon. |
-| 9 | **Cosmetic** | `TT: undefined function: 32` warning from PDF.js | CAD font hinting opcode; no impact on rendering or text extraction. |
+| 12 | **FIXED** | `var s` redeclared in vector-snap.mjs | Renamed to `si` — caught by ESLint `no-redeclare`. |
+| 13 | **FIXED** | Detail rows not visible when expanding wall chevron | CSS `.detail-row { display: none }` overrode empty inline style. Fixed: set `display: table-row` explicitly. |
+| 14 | **Cosmetic** | `favicon.ico` 404 on every page load | Harmless; browser auto-requests. |
+| 15 | **Cosmetic** | `TT: undefined function: 32` warning from PDF.js | CAD font hinting opcode; no impact on rendering. |
 
 ---
 
@@ -660,6 +664,9 @@ PDF-Parser/
 ├── bfcastyles.css           ← shared design system (reset, tokens, header, logo)
 ├── pdfparser.css            ← PDF-Parser dark-theme styles
 ├── matrix.css               ← EC Matrix light-theme styles
+├── package.json            ← npm scripts: lint, format, serve
+├── eslint.config.mjs       ← ESLint flat config (ES5 rules + Prettier)
+├── .prettierrc             ← Prettier config (120col, 2-space, double quotes)
 ├── serve.sh                ← dev server launcher (python3 http.server)
 ├── graphics/               ← logos and images
 ├── lib/
