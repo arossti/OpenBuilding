@@ -4,11 +4,11 @@
 
 import * as Viewer from "./canvas-viewer.mjs";
 import * as ScaleManager from "./scale-manager.mjs";
-import { POLY_COLORS, DEFAULT_DPI, M2_TO_FT2 } from "./config.mjs";
+import { POLY_COLORS, DEFAULT_DPI, M2_TO_FT2, AREA_EDGE, AREA_FILL, WIN_EDGE, WIN_FILL } from "./config.mjs";
 
 var _polygons = {};
 var _activePolyId = null, _activePage = 0;
-var _colorIdx = 0, _nextId = 1;
+var _colorIdx = 0, _nextId = 1, _nextWinId = 1;
 var _undoStack = [];   // snapshots for undo
 var _redoStack = [];
 
@@ -50,13 +50,21 @@ export function redo() {
 export function canUndo() { return _undoStack.length > 0; }
 export function canRedo() { return _redoStack.length > 0; }
 
-export function startPolygon(pageNum, label) {
+export function startPolygon(pageNum, label, opts) {
   if (!_polygons[pageNum]) _polygons[pageNum] = [];
   _pushUndo(pageNum);
-  var id = "poly_" + (_nextId++);
+  var type = (opts && opts.type) || "area";
+  var mode = (opts && opts.mode) || "net";
+  var defaultLabel = type === "window"
+    ? "Window " + (_nextWinId++)
+    : "Area " + (_nextId++);
+  // Keep counters in sync — only increment the relevant one
+  if (type !== "window") { /* _nextId already incremented */ }
+  var id = (type === "window" ? "win_" : "poly_") + Date.now();
   _polygons[pageNum].push({
-    id: id, label: label || "Area " + (_nextId - 1),
+    id: id, label: label || defaultLabel,
     vertices: [], closed: false,
+    type: type, mode: mode,
     color: POLY_COLORS[_colorIdx % POLY_COLORS.length],
     _pageNum: pageNum
   });
@@ -128,6 +136,7 @@ export function getMeasurement(pageNum, polyIdx) {
   var calibrated = ScaleManager.isCalibrated(pageNum);
   return {
     id: poly.id, label: poly.label,
+    type: poly.type || "area", mode: poly.mode || "net",
     areaM2: areaM2, areaFt2: areaM2 !== null ? areaM2 * M2_TO_FT2 : null,
     perimeterM: perimM, vertexCount: poly.vertices.length,
     areaPdf: areaPdf, perimPdf: perimPdf, calibrated: calibrated
@@ -155,9 +164,10 @@ function _drawPoly(ctx, poly) {
 
   ctx.save();
 
-  // Edge colour: cyan for visibility on any drawing background
-  var edgeColor = "#00e5ff";
-  var fillColor = "rgba(0, 229, 255, 0.08)";
+  // Edge colour: cyan for areas, gold for windows
+  var isWindow = (poly.type === "window");
+  var edgeColor = isWindow ? WIN_EDGE : AREA_EDGE;
+  var fillColor = isWindow ? WIN_FILL : AREA_FILL;
   ctx.strokeStyle = edgeColor;
   ctx.lineWidth = 3;
 
@@ -227,15 +237,15 @@ function _drawPoly(ctx, poly) {
     var y1 = pillTop + 22;
     ctx.fillText(line1, center.x, y1);
 
-    // Line 2: metric area — cyan
+    // Line 2: metric area — cyan for areas, gold for windows
     ctx.font = "20px Helvetica Neue, sans-serif";
-    ctx.fillStyle = "#00e5ff";
+    ctx.fillStyle = isWindow ? WIN_EDGE : AREA_EDGE;
     var y2 = y1 + 24;
     ctx.fillText(line2, center.x, y2);
 
-    // Line 3: imperial area — lighter cyan
+    // Line 3: imperial area — lighter variant
     if (line3) {
-      ctx.fillStyle = "rgba(0, 229, 255, 0.65)";
+      ctx.fillStyle = isWindow ? "rgba(255, 215, 0, 0.65)" : "rgba(0, 229, 255, 0.65)";
       var y3 = y2 + 22;
       ctx.fillText(line3, center.x, y3);
     }

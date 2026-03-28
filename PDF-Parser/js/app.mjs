@@ -3,7 +3,7 @@
  * Main entry point. Wires all modules together.
  */
 
-import { VERSION, SNAP_RADIUS_PX, METRIC_SCALES, IMPERIAL_SCALES } from "./config.mjs";
+import { VERSION, SNAP_RADIUS_PX, METRIC_SCALES, IMPERIAL_SCALES, AREA_EDGE, AREA_FILL, WIN_EDGE, WIN_FILL } from "./config.mjs";
 import * as Loader from "./pdf-loader.mjs";
 import * as SheetClassifier from "./sheet-classifier.mjs";
 import * as ScaleManager from "./scale-manager.mjs";
@@ -19,6 +19,7 @@ var els = {};
 var _currentPage = 0;
 var _currentTool = "navigate";
 var _measureMethod = "rectangle";   // "polygon" or "rectangle"
+var _windowMode = "net";            // "net" or "add"
 var _calibPoint1 = null;
 var _rectStart = null;            // first corner for bounding rectangle
 var _rectCurrent = null;          // live cursor position for rubber-band preview
@@ -460,6 +461,7 @@ function _handleOverlayClick(e) {
   if (snap) pt = { x: snap.x, y: snap.y };
 
   if (_currentTool === "measure") _handleMeasureClick(pt);
+  else if (_currentTool === "window") _handleWindowClick(pt);
   else if (_currentTool === "calibrate") _handleCalibrateClick(pt);
   else if (_currentTool === "ruler") _handleRulerClick(pt);
 }
@@ -486,7 +488,7 @@ function _bindDragEnd() {
       _snapTarget = null;  // clear snap indicator
       Viewer.onOverlayMouseMove(_handleOverlayMouseMove);
       var wrap = document.getElementById("viewer-wrap");
-      var cursorMap = { measure: "crosshair", calibrate: "crosshair", ruler: "crosshair", navigate: "default" };
+      var cursorMap = { measure: "crosshair", window: "crosshair", calibrate: "crosshair", ruler: "crosshair", navigate: "default" };
       if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
       // Update measurements and save
       _refreshMeasurements();
@@ -503,28 +505,22 @@ function setMeasureMethod(method) {
   document.getElementById("measure-method").value = method;
 }
 
-function _handleMeasureClick(pt) {
-  // Warn if no confirmed scale
-  if (!ScaleManager.isCalibrated(_currentPage) && !PolygonTool.isDrawing() && !_rectStart) {
-    setStatus("No confirmed scale. Press S to set scale first, or measurements will be uncalibrated.", "error");
-  }
-
-  if (_measureMethod === "rectangle") {
-    _handleRectangleClick(pt);
-  } else {
-    _handlePolygonClick(pt);
-  }
+function setWindowMode(mode) {
+  _windowMode = mode;
+  document.getElementById("window-mode").value = mode;
 }
 
-function _handlePolygonClick(pt) {
+/* ── Generic polygon/rectangle handlers (shared by Measure + Window) ── */
+
+function _handleGenericPolygonClick(pt, opts) {
   if (!PolygonTool.isDrawing()) {
-    PolygonTool.startPolygon(_currentPage);
+    PolygonTool.startPolygon(_currentPage, null, opts);
     PolygonTool.addVertex(pt);
     setStatus("Click vertices... close near first point to finish", "busy");
   } else {
     if (PolygonTool.isNearFirstVertex(pt, 12)) {
       PolygonTool.closePolygon();
-      _onPolygonComplete();
+      _onPolygonComplete(opts);
     } else {
       PolygonTool.addVertex(pt);
     }
@@ -532,15 +528,14 @@ function _handlePolygonClick(pt) {
   Viewer.requestRedraw();
 }
 
-function _handleRectangleClick(pt) {
+function _handleGenericRectangleClick(pt, opts) {
   if (!_rectStart) {
     _rectStart = pt;
     setStatus("Click opposite corner to complete rectangle", "busy");
   } else {
-    // Create a 4-vertex polygon from the two diagonal corners
     var x1 = _rectStart.x, y1 = _rectStart.y;
     var x2 = pt.x, y2 = pt.y;
-    PolygonTool.startPolygon(_currentPage);
+    PolygonTool.startPolygon(_currentPage, null, opts);
     PolygonTool.addVertex({ x: x1, y: y1 });
     PolygonTool.addVertex({ x: x2, y: y1 });
     PolygonTool.addVertex({ x: x2, y: y2 });
@@ -548,13 +543,38 @@ function _handleRectangleClick(pt) {
     PolygonTool.closePolygon();
     _rectStart = null;
     _rectCurrent = null;
-    _onPolygonComplete();
+    _onPolygonComplete(opts);
   }
   Viewer.requestRedraw();
 }
 
-function _onPolygonComplete() {
-  setStatus("Area measured" + (ScaleManager.isCalibrated(_currentPage) ? "" : " (uncalibrated)"), "ready");
+function _handleMeasureClick(pt) {
+  if (!ScaleManager.isCalibrated(_currentPage) && !PolygonTool.isDrawing() && !_rectStart) {
+    setStatus("No confirmed scale. Press S to set scale first, or measurements will be uncalibrated.", "error");
+  }
+  var opts = { type: "area" };
+  if (_measureMethod === "rectangle") {
+    _handleGenericRectangleClick(pt, opts);
+  } else {
+    _handleGenericPolygonClick(pt, opts);
+  }
+}
+
+function _handleWindowClick(pt) {
+  if (!ScaleManager.isCalibrated(_currentPage) && !PolygonTool.isDrawing() && !_rectStart) {
+    setStatus("No confirmed scale. Press S to set scale first, or measurements will be uncalibrated.", "error");
+  }
+  var opts = { type: "window", mode: _windowMode };
+  if (_measureMethod === "rectangle") {
+    _handleGenericRectangleClick(pt, opts);
+  } else {
+    _handleGenericPolygonClick(pt, opts);
+  }
+}
+
+function _onPolygonComplete(opts) {
+  var isWindow = opts && opts.type === "window";
+  setStatus((isWindow ? "Window" : "Area") + " measured" + (ScaleManager.isCalibrated(_currentPage) ? "" : " (uncalibrated)"), "ready");
   _refreshMeasurements();
   ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
 }
@@ -697,7 +717,7 @@ function _handleOverlayMouseMove(e) {
   // Track snap target for visual indicator
   var prevSnap = _snapTarget;
   _snapTarget = null;
-  if (_currentTool === "measure" || _currentTool === "calibrate" || _currentTool === "ruler") {
+  if (_currentTool === "measure" || _currentTool === "window" || _currentTool === "calibrate" || _currentTool === "ruler") {
     _snapTarget = VectorSnap.findSnap(_currentPage, pt, snapRadius);
   }
 
@@ -709,7 +729,7 @@ function _handleOverlayMouseMove(e) {
   }
 
   // Rubber-band rectangle preview
-  if (_rectStart && _currentTool === "measure" && _measureMethod === "rectangle") {
+  if (_rectStart && (_currentTool === "measure" || _currentTool === "window") && _measureMethod === "rectangle") {
     _rectCurrent = _snapTarget ? { x: _snapTarget.x, y: _snapTarget.y } : pt;
     Viewer.requestRedraw();
     return;
@@ -732,7 +752,7 @@ function _handleOverlayMouseMove(e) {
       return;
     }
   }
-  var cursorMap = { measure: "crosshair", calibrate: "crosshair", ruler: "crosshair", navigate: "default" };
+  var cursorMap = { measure: "crosshair", window: "crosshair", calibrate: "crosshair", ruler: "crosshair", navigate: "default" };
   if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
 }
 
@@ -894,11 +914,15 @@ function _drawRectPreview(ctx) {
   var w = Math.abs(p2.x - p1.x);
   var h = Math.abs(p2.y - p1.y);
 
+  var isWin = (_currentTool === "window");
+  var edgeCol = isWin ? WIN_EDGE : AREA_EDGE;
+  var fillCol = isWin ? WIN_FILL : AREA_FILL;
+
   ctx.save();
-  ctx.strokeStyle = "#00e5ff";
+  ctx.strokeStyle = edgeCol;
   ctx.lineWidth = 2;
   ctx.setLineDash([6, 4]);
-  ctx.fillStyle = "rgba(0, 229, 255, 0.08)";
+  ctx.fillStyle = fillCol;
   ctx.fillRect(x, y, w, h);
   ctx.strokeRect(x, y, w, h);
 
@@ -920,7 +944,7 @@ function _drawRectPreview(ctx) {
       ctx.beginPath();
       ctx.roundRect(cx - tw / 2 - 8, cy - 12, tw + 16, 26, 4);
       ctx.fill();
-      ctx.fillStyle = "#00e5ff";
+      ctx.fillStyle = edgeCol;
       ctx.textAlign = "center";
       ctx.fillText(label, cx, cy + 7);
     }
@@ -945,7 +969,7 @@ function setTool(tool) {
     els.toolBtns[i].classList.toggle("active", els.toolBtns[i].dataset.tool === tool);
   }
   var viewer = document.getElementById("viewer-container");
-  var cursorMap = { measure: "crosshair", calibrate: "crosshair", ruler: "crosshair", navigate: "default" };
+  var cursorMap = { measure: "crosshair", window: "crosshair", calibrate: "crosshair", ruler: "crosshair", navigate: "default" };
   var wrap = document.getElementById("viewer-wrap");
   if (wrap) wrap.style.cursor = cursorMap[tool] || "default";
 }
@@ -1049,6 +1073,7 @@ function _bindKeyboard() {
       case "l": setTool("ruler"); break;
       case "s": openScalePanel(); break;
       case "m": setTool("measure"); break;
+      case "w": setTool("window"); break;
       case "r":
         setMeasureMethod(_measureMethod === "polygon" ? "rectangle" : "polygon");
         setTool("measure");
@@ -1164,45 +1189,121 @@ function _refreshMeasurements() {
 
 function _updateMeasurements(measurements) {
   if (!measurements || measurements.length === 0) {
-    els.measurePanel.innerHTML = "<p class='empty'>No measurements on this page.<br><span style='font-size:10px;color:var(--text-dim);'>Press <b>M</b> then click to trace an area.</span></p>";
+    els.measurePanel.innerHTML = "<p class='empty'>No measurements on this page.<br><span style='font-size:10px;color:var(--text-dim);'>Press <b>M</b> to measure areas, <b>W</b> for windows.</span></p>";
     return;
   }
 
-  var hasScale = measurements[0].calibrated;
-  var html = "<div class='measure-header'>Measurements — this page</div>";
-  html += "<table><thead><tr><th>Label</th>";
-  if (hasScale) {
-    html += "<th>m\u00B2</th><th>ft\u00B2</th>";
-  } else {
-    html += "<th colspan='2' style='color:var(--gold);font-size:10px;'>No scale — press S</th>";
-  }
-  html += "<th></th></tr></thead><tbody>";
-
-  var totalM2 = 0, totalFt2 = 0;
-
+  // Partition into areas and windows, preserving original polyIdx
+  var areas = [], windows = [];
   for (var i = 0; i < measurements.length; i++) {
-    var m = measurements[i];
-    html += "<tr><td class='label-cell' data-poly-idx='" + i + "' title='Click to rename'>" + m.label + "</td>";
-    if (hasScale && m.areaM2 !== null) {
-      html += "<td class='num'>" + m.areaM2.toFixed(2) + "</td>";
-      html += "<td class='num'>" + m.areaFt2.toFixed(2) + "</td>";
-      totalM2 += m.areaM2;
-      totalFt2 += m.areaFt2;
+    var entry = { m: measurements[i], polyIdx: i };
+    if (measurements[i].type === "window") {
+      windows.push(entry);
     } else {
-      html += "<td class='num' colspan='2'>\u2014</td>";
+      areas.push(entry);
     }
-    html += "<td class='del-cell' data-poly-idx='" + i + "' title='Delete this area'>\u00D7</td>";
-    html += "</tr>";
   }
 
-  // Running total
-  if (hasScale && measurements.length > 1) {
-    html += "<tr class='total-row'><td><strong>Total</strong></td>";
-    html += "<td class='num'><strong>" + totalM2.toFixed(2) + "</strong></td>";
-    html += "<td class='num'><strong>" + totalFt2.toFixed(2) + "</strong></td></tr>";
+  var hasScale = measurements[0].calibrated;
+  var html = "";
+
+  // ── Areas section ──
+  if (areas.length > 0) {
+    html += "<div class='measure-header'>Areas</div>";
+    html += "<table><thead><tr><th>Label</th>";
+    if (hasScale) {
+      html += "<th>m\u00B2</th><th>ft\u00B2</th>";
+    } else {
+      html += "<th colspan='2' style='color:var(--gold);font-size:10px;'>No scale \u2014 press S</th>";
+    }
+    html += "<th></th></tr></thead><tbody>";
+
+    var grossM2 = 0, grossFt2 = 0;
+    for (var a = 0; a < areas.length; a++) {
+      var am = areas[a].m;
+      html += "<tr><td class='label-cell' data-poly-idx='" + areas[a].polyIdx + "' title='Click to rename'>" + am.label + "</td>";
+      if (hasScale && am.areaM2 !== null) {
+        html += "<td class='num'>" + am.areaM2.toFixed(2) + "</td>";
+        html += "<td class='num'>" + am.areaFt2.toFixed(2) + "</td>";
+        grossM2 += am.areaM2;
+        grossFt2 += am.areaFt2;
+      } else {
+        html += "<td class='num' colspan='2'>\u2014</td>";
+      }
+      html += "<td class='del-cell' data-poly-idx='" + areas[a].polyIdx + "' title='Delete'>\u00D7</td></tr>";
+    }
+    if (hasScale && areas.length > 1) {
+      html += "<tr class='total-row'><td><strong>Gross</strong></td>";
+      html += "<td class='num'><strong>" + grossM2.toFixed(2) + "</strong></td>";
+      html += "<td class='num'><strong>" + grossFt2.toFixed(2) + "</strong></td><td></td></tr>";
+    }
+    html += "</tbody></table>";
   }
 
-  html += "</tbody></table>";
+  // ── Windows section ──
+  if (windows.length > 0) {
+    html += "<div class='measure-header' style='margin-top:8px;color:" + WIN_EDGE + ";'>Windows / Openings</div>";
+    html += "<table><thead><tr><th>Label</th>";
+    if (hasScale) {
+      html += "<th>m\u00B2</th><th>ft\u00B2</th>";
+    } else {
+      html += "<th colspan='2'>\u2014</th>";
+    }
+    html += "<th></th></tr></thead><tbody>";
+
+    var winNetM2 = 0, winNetFt2 = 0;
+    var winAddM2 = 0, winAddFt2 = 0;
+    for (var w = 0; w < windows.length; w++) {
+      var wm = windows[w].m;
+      var isNet = (wm.mode !== "add");
+      var prefix = isNet ? "\u2212" : "+";
+      html += "<tr style='color:" + WIN_EDGE + ";'>";
+      html += "<td class='label-cell' data-poly-idx='" + windows[w].polyIdx + "' title='Click to rename'>" + wm.label + "</td>";
+      if (hasScale && wm.areaM2 !== null) {
+        html += "<td class='num'>" + prefix + wm.areaM2.toFixed(2) + "</td>";
+        html += "<td class='num'>" + prefix + wm.areaFt2.toFixed(2) + "</td>";
+        if (isNet) { winNetM2 += wm.areaM2; winNetFt2 += wm.areaFt2; }
+        else { winAddM2 += wm.areaM2; winAddFt2 += wm.areaFt2; }
+      } else {
+        html += "<td class='num' colspan='2'>\u2014</td>";
+      }
+      html += "<td class='del-cell' data-poly-idx='" + windows[w].polyIdx + "' title='Delete'>\u00D7</td></tr>";
+    }
+    if (hasScale && windows.length > 1) {
+      var winTotalM2 = winAddM2 - winNetM2;
+      var winTotalFt2 = winAddFt2 - winNetFt2;
+      var winPrefix = winTotalM2 >= 0 ? "+" : "\u2212";
+      html += "<tr class='total-row' style='color:" + WIN_EDGE + ";'><td><strong>Windows</strong></td>";
+      html += "<td class='num'><strong>" + winPrefix + Math.abs(winTotalM2).toFixed(2) + "</strong></td>";
+      html += "<td class='num'><strong>" + winPrefix + Math.abs(winTotalFt2).toFixed(2) + "</strong></td><td></td></tr>";
+    }
+    html += "</tbody></table>";
+  }
+
+  // ── Net Total ──
+  if (hasScale && (areas.length > 0 || windows.length > 0)) {
+    var grossM2Total = 0, grossFt2Total = 0;
+    for (var ga = 0; ga < areas.length; ga++) {
+      if (areas[ga].m.areaM2 !== null) { grossM2Total += areas[ga].m.areaM2; grossFt2Total += areas[ga].m.areaFt2; }
+    }
+    var netWinM2 = 0, netWinFt2 = 0;
+    for (var gw = 0; gw < windows.length; gw++) {
+      if (windows[gw].m.areaM2 !== null) {
+        if (windows[gw].m.mode !== "add") { netWinM2 += windows[gw].m.areaM2; netWinFt2 += windows[gw].m.areaFt2; }
+        else { netWinM2 -= windows[gw].m.areaM2; netWinFt2 -= windows[gw].m.areaFt2; }
+      }
+    }
+    var netM2 = grossM2Total - netWinM2;
+    var netFt2 = grossFt2Total - netWinFt2;
+
+    // Only show net total if there are both areas and windows, or multiple of either
+    if (areas.length + windows.length > 1) {
+      var totalLabel = windows.length > 0 ? "Net Total" : "Total";
+      html += "<table><tbody><tr class='total-row'><td><strong>" + totalLabel + "</strong></td>";
+      html += "<td class='num'><strong>" + netM2.toFixed(2) + "</strong></td>";
+      html += "<td class='num'><strong>" + netFt2.toFixed(2) + "</strong></td><td></td></tr></tbody></table>";
+    }
+  }
 
   // Undo hint
   html += "<div class='measure-hint'>";
@@ -1230,7 +1331,7 @@ function _updateMeasurements(measurements) {
       ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
       _refreshMeasurements();
       Viewer.requestRedraw();
-      setStatus("Area deleted", "ready");
+      setStatus("Measurement deleted", "ready");
     });
   }
 }
@@ -1383,6 +1484,7 @@ window.PP = {
   closeScaleFeedback: closeScaleFeedback,
   // Measure method
   setMeasureMethod: setMeasureMethod,
+  setWindowMode: setWindowMode,
   // Auto-detect
   autoDetect: autoDetect,
   // Sample

@@ -21,6 +21,11 @@
         <option value="rectangle">Rectangle</option>
         <option value="polygon">Polygon</option>
       </select>
+      <button class="tool-btn" data-tool="window" title="Measure Window (W)">Window <span class="key-hint">W</span></button>
+      <select id="window-mode" title="Window mode" onchange="PP.setWindowMode(this.value)">
+        <option value="net">Net (subtract)</option>
+        <option value="add">Add</option>
+      </select>
       <button class="tool-btn" data-tool="ruler" title="Ruler (L)">Ruler <span class="key-hint">L</span></button>
       <button class="tool-btn" data-tool="checkscale" title="Check Scale (S)">Scale <span class="key-hint">S</span></button>
       <button class="tool-btn" data-tool="calibrate" title="Manual Calibrate (C)">Calibrate <span class="key-hint">C</span></button>
@@ -67,6 +72,7 @@
           <div class="drop-hint" style="margin-top: 24px;">
             <span class="key-hint">S</span> Scale &nbsp;
             <span class="key-hint">M</span> Measure &nbsp;
+            <span class="key-hint">W</span> Window &nbsp;
             <span class="key-hint">C</span> Calibrate &nbsp;
             <span class="key-hint">F</span> Fit &nbsp;
             <span class="key-hint">Scroll</span> Zoom at cursor &nbsp;

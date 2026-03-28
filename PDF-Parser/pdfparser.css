@@ -90,7 +90,8 @@ html, body {
 .tool-btn:hover { background: var(--bg-panel); border-color: var(--accent); }
 .tool-btn.active { background: var(--accent); border-color: var(--accent-lit); color: #fff; }
 
-#measure-method {
+#measure-method,
+#window-mode {
   background: var(--bg-panel);
   color: var(--text);
   border: 1px solid var(--border);
@@ -100,7 +101,8 @@ html, body {
   font-family: var(--font);
   cursor: pointer;
 }
-#measure-method:focus { border-color: var(--accent); outline: none; }
+#measure-method:focus,
+#window-mode:focus { border-color: var(--accent); outline: none; }
 
 .toolbar-sep {
   width: 1px;

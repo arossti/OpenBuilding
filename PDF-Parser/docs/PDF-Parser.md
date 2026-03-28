@@ -529,42 +529,85 @@ var project = {
 
 ### Step 8 — Window/Opening Measurement & Netting
 
-#### 8.1 Measurement Types
-Extend the method dropdown to include area types:
+#### 8.1 Data Model
+Add `type` and `mode` fields to the polygon data model:
 
-| Type | Colour | Behaviour |
-|---|---|---|
-| **Area** (default) | Cyan fill + edges | Additive — counts toward total |
-| **Window/Opening** | Dark blue or yellow fill + edges | Subtractive — deducted from overlapping areas |
+| Field | Values | Default | Purpose |
+|---|---|---|---|
+| `type` | `"area"` \| `"window"` | `"area"` | Distinguishes wall areas from openings |
+| `mode` | `"net"` \| `"add"` | `"net"` | Window behaviour: subtract from gross (net) or add as separate entity |
 
-- User selects "Window" from the method dropdown before measuring
-- Window polygons drawn with distinct colour (dark blue fill, yellow edges)
-- Both polygon and rectangle methods work for windows
+Backward compatible: existing saved projects without these fields load as `type: "area"`, `mode: "net"`.
 
-#### 8.2 Netting in Measurement Panel
-The sidebar measurement panel shows:
-
-```
-Measurements — this page
-Label           m²       ft²
-South Wall    42.30    455.30
-Window 1      -2.40    -25.83
-Window 2      -1.80    -19.38
-──────────────────────────
-Net Wall      38.10    410.09
-Total Gross   42.30    455.30
-Total Windows -4.20    -45.21
-Net Total     38.10    410.09
-```
-
-- Windows shown with negative values and distinct colour in the table
-- Net total = gross areas − window areas
-- Export includes both gross, window, and net columns
+#### 8.2 Toolbar — Window Button
+- New **Window** toolbar button (`W` key) alongside Measure
+- Reuses the existing Rectangle/Polygon method dropdown — same drawing methods, different polygon type
+- **Net/Add** dropdown (`#window-mode`) for window behaviour toggle
+- Window tool creates polygons with `{type: "window", mode: _windowMode}`
 
 #### 8.3 Visual Distinction
-- Additive areas: cyan edges (3px), cyan fill (8% opacity)
-- Window/opening areas: yellow edges (3px), dark blue fill (10% opacity)
-- Labels: windows show "Window 1" with blue pill background instead of dark
+- **Area polygons**: cyan edges (3px), cyan fill (8% opacity), cyan label text — *unchanged*
+- **Window polygons**: gold edges (`#ffd700`, 3px), gold fill (8% opacity), gold label text
+- **Rectangle preview**: gold dashed outline when in Window mode
+- **Vertex handles**: match polygon type colour (cyan for areas, gold for windows)
+- **Labels**: same 3-line pill format (name, m², ft²) but gold text for windows
+
+#### 8.4 Netting in Measurement Panel
+The sidebar measurement panel shows three sections:
+
+```
+AREAS
+  Area 1        45.20 m²    486.65 ft²    ×
+  Area 2        32.10 m²    345.48 ft²    ×
+  Gross         77.30       832.13
+
+WINDOWS
+  Window 1      -2.40 m²    -25.83 ft²  net  ×
+  Window 2      +1.80 m²    +19.38 ft²  add  ×
+  Windows       -0.60        -6.46
+
+NET TOTAL       76.70 m²    825.67 ft²
+```
+
+**Calculation:**
+- `gross` = sum of all `type === "area"` polygons
+- `windowNet` = sum of `type === "window"` where `mode === "net"` (subtractive)
+- `windowAdd` = sum of `type === "window"` where `mode === "add"` (additive)
+- `netTotal` = gross − windowNet + windowAdd
+
+#### 8.5 Interaction — Full Parity with Areas
+Windows support all existing polygon features:
+- [x] Polygon and Rectangle drawing methods
+- [x] Vertex dragging (click & drag any vertex)
+- [x] Edge vertex insertion (click edge to add vertex)
+- [x] Vertex merging (drag vertex onto another)
+- [x] Inline label renaming (click label in panel)
+- [x] Delete (× button or Delete key)
+- [x] Undo/redo (JSON deep copy preserves type/mode automatically)
+- [x] Vector snap (endpoint + line snap work in window mode)
+
+#### 8.6 CSV Export
+Updated columns with type/mode and summary rows:
+
+```
+Sheet,Label,Type,Mode,Area (m²),Area (ft²),Perimeter (m)
+Page 1,"Area 1",Area,,45.20,486.65,27.20
+Page 1,"Window 1",Window,net,2.40,25.83,6.20
+Page 1,GROSS TOTAL,,,77.30,832.13,
+Page 1,WINDOW NET,,,-0.60,-6.46,
+Page 1,NET TOTAL,,,76.70,825.67,
+```
+
+#### 8.7 Implementation Files
+
+| File | Changes |
+|---|---|
+| `js/config.mjs` | Window colour constants (`WIN_EDGE`, `WIN_FILL`) |
+| `js/polygon-tool.mjs` | `type`/`mode` on polygon, `startPolygon(pageNum, label, opts)`, yellow rendering |
+| `js/app.mjs` | Window tool mode, refactored click handlers, measurement panel redesign |
+| `index.html` | Window button + Net/Add dropdown |
+| `pdfparser.css` | Net/Add dropdown styling |
+| `js/project-store.mjs` | Persist type/mode, CSV with type column + summary rows |
 
 ### Step 9 — Schedule Extraction & Cross-Validation
 - [ ] Text clustering into table rows/columns

@@ -47,6 +47,13 @@ export var POLY_COLORS = [
   "#f4a261", "#264653", "#a8dadc", "#6a0572"
 ];
 
+/* ── Type-specific colours ────────────────────────────── */
+
+export var AREA_EDGE = "#00e5ff";
+export var AREA_FILL = "rgba(0, 229, 255, 0.08)";
+export var WIN_EDGE  = "#ffd700";
+export var WIN_FILL  = "rgba(255, 215, 0, 0.08)";
+
 /* ── Unit conversion ──────────────────────────────────── */
 
 export var UNITS = {
