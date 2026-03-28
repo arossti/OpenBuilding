@@ -1102,7 +1102,12 @@ function _bindKeyboard() {
     switch (e.key) {
       case "Escape":
         // Cascade: cancel the most immediate in-progress action
-        // 0. Scale feedback dialogue open? Close it.
+        // 0a. Summary table open? Close it.
+        if (document.getElementById("summary-panel").classList.contains("visible")) {
+          closeSummaryTable();
+          break;
+        }
+        // 0b. Scale feedback dialogue open? Close it.
         if (document.getElementById("scale-feedback-panel").classList.contains("visible")) {
           closeScaleFeedback();
           break;
@@ -1680,6 +1685,310 @@ function _placeDetectedOutline(candidate, idx, total) {
   setStatus("Outline: " + areaStr + ", " + verts.length + " vertices." + hint, "ready");
 }
 
+/* ── Summary Table Modal ──────────────────────────────── */
+
+function openSummaryTable() {
+  if (!Loader.isLoaded()) return;
+  _renderSummaryTable();
+  document.getElementById("summary-backdrop").classList.add("visible");
+  document.getElementById("summary-panel").classList.add("visible");
+}
+
+function closeSummaryTable() {
+  document.getElementById("summary-backdrop").classList.remove("visible");
+  document.getElementById("summary-panel").classList.remove("visible");
+}
+
+function _renderSummaryTable() {
+  var project = ProjectStore.getProject();
+  var html = "<table><thead><tr>";
+  html += "<th>Sheet</th><th>Label</th>";
+  html += "<th>Gross m\u00B2</th><th>Net m\u00B2</th>";
+  html += "<th>Gross ft\u00B2</th><th>Net ft\u00B2</th>";
+  html += "<th>Perimeter m</th><th></th>";
+  html += "</tr></thead><tbody>";
+
+  var grandGrossM2 = 0,
+    grandNetM2 = 0,
+    grandGrossFt2 = 0,
+    grandNetFt2 = 0;
+  var hasAnyData = false;
+  var toggleIdx = 0;
+
+  for (var p = 0; p < project.pages.length; p++) {
+    var page = project.pages[p];
+    var pageNum = page.pageNum;
+    var assoc = PolygonTool.buildAssociationMap(pageNum);
+    if (assoc.walls.length === 0 && assoc.orphanWindows.length === 0) continue;
+
+    var sheetLabel = page.sheetId || "Page " + pageNum;
+    var sheetTitle = page.sheetTitle ? " \u2014 " + page.sheetTitle : "";
+    hasAnyData = true;
+
+    // Sheet header row
+    html += "<tr class='summary-sheet-row'><td colspan='8'>" + sheetLabel + sheetTitle + "</td></tr>";
+
+    var pageGrossM2 = 0,
+      pageNetM2 = 0,
+      pageGrossFt2 = 0,
+      pageNetFt2 = 0;
+
+    // Wall rows
+    for (var w = 0; w < assoc.walls.length; w++) {
+      var wall = assoc.walls[w];
+      var wm = wall.measurement;
+      var hasChildren = wall.children.length > 0;
+
+      // Compute net
+      var wallNetM2 = wm.areaM2;
+      var wallNetFt2 = wm.areaFt2;
+      if (hasChildren && wm.areaM2 !== null) {
+        for (var ci = 0; ci < wall.children.length; ci++) {
+          var ch = wall.children[ci].measurement;
+          if (ch.areaM2 !== null) {
+            if (ch.mode !== "add") {
+              wallNetM2 -= ch.areaM2;
+              wallNetFt2 -= ch.areaFt2;
+            } else {
+              wallNetM2 += ch.areaM2;
+              wallNetFt2 += ch.areaFt2;
+            }
+          }
+        }
+      }
+
+      if (wm.areaM2 !== null) {
+        pageGrossM2 += wm.areaM2;
+        pageGrossFt2 += wm.areaFt2;
+        pageNetM2 += wallNetM2;
+        pageNetFt2 += wallNetFt2;
+      }
+
+      // Wall row
+      var chevron = hasChildren
+        ? "<span class='wall-toggle' data-wall-idx='st" + toggleIdx + "' data-expanded='0'>\u25B6</span> "
+        : "";
+      var netSuffix = hasChildren ? " <span class='net-label'>net</span>" : "";
+      html += "<tr>";
+      html += "<td></td>";
+      html +=
+        "<td class='label-cell' data-poly-idx='" +
+        wall.polyIdx +
+        "' data-page-num='" +
+        pageNum +
+        "' title='Click to rename'>" +
+        chevron +
+        wm.label +
+        netSuffix +
+        "</td>";
+      if (wm.areaM2 !== null) {
+        html += "<td class='num'>" + wm.areaM2.toFixed(2) + "</td>";
+        html += "<td class='num'>" + wallNetM2.toFixed(2) + "</td>";
+        html += "<td class='num'>" + wm.areaFt2.toFixed(2) + "</td>";
+        html += "<td class='num'>" + wallNetFt2.toFixed(2) + "</td>";
+      } else {
+        html += "<td class='num' colspan='4'>\u2014</td>";
+      }
+      html += "<td class='num'>" + (wm.perimeterM !== null ? wm.perimeterM.toFixed(2) : "") + "</td>";
+      html +=
+        "<td class='del-cell' data-poly-idx='" +
+        wall.polyIdx +
+        "' data-page-num='" +
+        pageNum +
+        "' title='Delete'>\u00D7</td>";
+      html += "</tr>";
+
+      // Detail rows (children)
+      if (hasChildren) {
+        for (var cj = 0; cj < wall.children.length; cj++) {
+          var child = wall.children[cj];
+          var cm = child.measurement;
+          var cPrefix = cm.mode !== "add" ? "\u2212" : "+";
+          html += "<tr class='detail-row' data-parent='st" + toggleIdx + "' style='color:" + WIN_EDGE + ";'>";
+          html += "<td></td>";
+          html +=
+            "<td class='label-cell' data-poly-idx='" +
+            child.polyIdx +
+            "' data-page-num='" +
+            pageNum +
+            "' style='padding-left:24px;font-size:10px;' title='Click to rename'>" +
+            cPrefix +
+            " " +
+            cm.label +
+            "</td>";
+          if (cm.areaM2 !== null) {
+            html += "<td class='num' style='font-size:10px;'>" + cPrefix + cm.areaM2.toFixed(2) + "</td>";
+            html += "<td class='num' style='font-size:10px;'></td>";
+            html += "<td class='num' style='font-size:10px;'>" + cPrefix + cm.areaFt2.toFixed(2) + "</td>";
+            html += "<td class='num' style='font-size:10px;'></td>";
+          } else {
+            html += "<td colspan='4'></td>";
+          }
+          html +=
+            "<td class='num' style='font-size:10px;'>" +
+            (cm.perimeterM !== null ? cm.perimeterM.toFixed(2) : "") +
+            "</td>";
+          html +=
+            "<td class='del-cell' data-poly-idx='" +
+            child.polyIdx +
+            "' data-page-num='" +
+            pageNum +
+            "' title='Delete' style='font-size:10px;'>\u00D7</td>";
+          html += "</tr>";
+        }
+        toggleIdx++;
+      }
+    }
+
+    // Orphan windows
+    for (var o = 0; o < assoc.orphanWindows.length; o++) {
+      var om = assoc.orphanWindows[o].measurement;
+      var oPrefix = om.mode !== "add" ? "\u2212" : "+";
+      html += "<tr style='color:" + WIN_EDGE + ";'>";
+      html += "<td></td>";
+      html +=
+        "<td class='label-cell' data-poly-idx='" +
+        assoc.orphanWindows[o].polyIdx +
+        "' data-page-num='" +
+        pageNum +
+        "' title='Click to rename'>" +
+        om.label +
+        " (unassociated)</td>";
+      if (om.areaM2 !== null) {
+        html += "<td class='num'>" + oPrefix + om.areaM2.toFixed(2) + "</td><td class='num'></td>";
+        html += "<td class='num'>" + oPrefix + om.areaFt2.toFixed(2) + "</td><td class='num'></td>";
+      } else {
+        html += "<td colspan='4'>\u2014</td>";
+      }
+      html += "<td class='num'>" + (om.perimeterM !== null ? om.perimeterM.toFixed(2) : "") + "</td>";
+      html +=
+        "<td class='del-cell' data-poly-idx='" +
+        assoc.orphanWindows[o].polyIdx +
+        "' data-page-num='" +
+        pageNum +
+        "' title='Delete'>\u00D7</td>";
+      html += "</tr>";
+    }
+
+    // Page subtotal
+    if (assoc.walls.length > 1 || assoc.orphanWindows.length > 0) {
+      html += "<tr class='summary-total-row'><td></td><td>" + sheetLabel + " Total</td>";
+      html += "<td class='num'>" + pageGrossM2.toFixed(2) + "</td>";
+      html += "<td class='num'>" + pageNetM2.toFixed(2) + "</td>";
+      html += "<td class='num'>" + pageGrossFt2.toFixed(2) + "</td>";
+      html += "<td class='num'>" + pageNetFt2.toFixed(2) + "</td>";
+      html += "<td colspan='2'></td></tr>";
+    }
+
+    grandGrossM2 += pageGrossM2;
+    grandNetM2 += pageNetM2;
+    grandGrossFt2 += pageGrossFt2;
+    grandNetFt2 += pageNetFt2;
+  }
+
+  // Grand total
+  if (hasAnyData) {
+    html += "<tr class='summary-grand-total'><td></td><td>Grand Total</td>";
+    html += "<td class='num'>" + grandGrossM2.toFixed(2) + "</td>";
+    html += "<td class='num'>" + grandNetM2.toFixed(2) + "</td>";
+    html += "<td class='num'>" + grandGrossFt2.toFixed(2) + "</td>";
+    html += "<td class='num'>" + grandNetFt2.toFixed(2) + "</td>";
+    html += "<td colspan='2'></td></tr>";
+  }
+
+  html += "</tbody></table>";
+
+  if (!hasAnyData) {
+    html =
+      "<p class='empty' style='padding:2rem;text-align:center;'>No measurements yet. Press <b>M</b> to measure areas.</p>";
+  }
+
+  document.getElementById("summary-content").innerHTML = html;
+
+  // Bind chevron toggles
+  var panel = document.getElementById("summary-content");
+  var toggles = panel.querySelectorAll(".wall-toggle");
+  for (var t = 0; t < toggles.length; t++) {
+    toggles[t].addEventListener("click", function (e) {
+      e.stopPropagation();
+      var wallIdx = this.dataset.wallIdx;
+      var expanded = this.dataset.expanded === "1";
+      this.dataset.expanded = expanded ? "0" : "1";
+      this.textContent = expanded ? "\u25B6" : "\u25BC";
+      var details = panel.querySelectorAll(".detail-row[data-parent='" + wallIdx + "']");
+      for (var d = 0; d < details.length; d++) {
+        details[d].style.display = expanded ? "none" : "table-row";
+      }
+    });
+  }
+
+  // Bind label rename
+  var labelCells = panel.querySelectorAll(".label-cell");
+  for (var lc = 0; lc < labelCells.length; lc++) {
+    labelCells[lc].addEventListener("click", function (e) {
+      var polyIdx = parseInt(this.dataset.polyIdx, 10);
+      var pageNum = parseInt(this.dataset.pageNum, 10);
+      _startSummaryLabelEdit(this, pageNum, polyIdx);
+    });
+  }
+
+  // Bind delete buttons
+  var delCells = panel.querySelectorAll(".del-cell");
+  for (var dc = 0; dc < delCells.length; dc++) {
+    delCells[dc].addEventListener("click", function (e) {
+      var idx = parseInt(this.dataset.polyIdx, 10);
+      var pg = parseInt(this.dataset.pageNum, 10);
+      PolygonTool.deletePolygon(pg, idx);
+      ProjectStore.savePolygons(pg, PolygonTool.getPolygons(pg));
+      _renderSummaryTable();
+      if (pg === _currentPage) {
+        _refreshMeasurements();
+        Viewer.requestRedraw();
+      }
+      setStatus("Measurement deleted", "ready");
+    });
+  }
+}
+
+function _startSummaryLabelEdit(cell, pageNum, polyIdx) {
+  var currentLabel = cell.textContent
+    .replace(/^[\u25B6\u25BC]\s*/, "")
+    .replace(/\s*net$/, "")
+    .trim();
+  var input = document.createElement("input");
+  input.type = "text";
+  input.value = currentLabel;
+  input.className = "label-edit-input";
+  input.style.width = "100%";
+  cell.textContent = "";
+  cell.appendChild(input);
+  input.focus();
+  input.select();
+
+  function commit() {
+    var newLabel = input.value.trim() || currentLabel;
+    PolygonTool.renamePolygon(pageNum, polyIdx, newLabel);
+    ProjectStore.savePolygons(pageNum, PolygonTool.getPolygons(pageNum));
+    if (pageNum === _currentPage) {
+      Viewer.requestRedraw();
+      _refreshMeasurements();
+    }
+    _renderSummaryTable();
+  }
+
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commit();
+    }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      _renderSummaryTable();
+    }
+  });
+  input.addEventListener("blur", commit);
+}
+
 /* ── Export ────────────────────────────────────────────── */
 
 function exportCSV() {
@@ -1719,6 +2028,9 @@ window.PP = {
   setWindowMode: setWindowMode,
   // Auto-detect
   autoDetect: autoDetect,
+  // Summary table
+  openSummaryTable: openSummaryTable,
+  closeSummaryTable: closeSummaryTable,
   // Sample
   loadSample: loadSample
 };

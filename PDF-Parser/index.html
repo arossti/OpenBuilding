@@ -52,6 +52,7 @@
 
         <div class="toolbar-spacer"></div>
 
+        <button class="export-btn" onclick="PP.openSummaryTable()" title="View summary table">Summary</button>
         <button class="export-btn" onclick="PP.exportCSV()" title="Export measurements as CSV">CSV</button>
         <button class="export-btn" onclick="PP.exportJSON()" title="Save project as JSON">JSON</button>
         <div class="toolbar-sep"></div>
@@ -149,6 +150,20 @@
             <input type="checkbox" id="scale-feedback-remember" /> Don't show this again
           </label>
           <button id="scale-feedback-ok" onclick="PP.closeScaleFeedback()">OK</button>
+        </div>
+      </div>
+
+      <!-- ── Summary Table Modal ──────────────────────── -->
+      <div id="summary-backdrop"></div>
+      <div id="summary-panel">
+        <div class="summary-header">
+          <span class="summary-title">Measurement Summary</span>
+          <button class="summary-close" onclick="PP.closeSummaryTable()">&times;</button>
+        </div>
+        <div id="summary-content"></div>
+        <div class="summary-footer">
+          <button class="export-btn" onclick="PP.exportCSV()">Download CSV</button>
+          <button class="export-btn" onclick="PP.closeSummaryTable()">Close</button>
         </div>
       </div>
 
