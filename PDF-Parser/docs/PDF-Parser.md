@@ -472,68 +472,100 @@ var project = {
 - [x] Loading progress bar: "Reading page 1/30..." with visual fill bar
 - [ ] Vertex handle sizing relative to zoom level (future)
 
-### Step 5 — Measurement Methods & Area Management (NEXT)
+### Step 5 — Measurement Methods & Area Management ✅ (2026-03-27)
 
-Expand the measure tool from polygon-only to multiple methods, and add area naming/merging.
+- [x] **Bounding Rectangle** method (2-click orthogonal area, R key toggle)
+- [x] Method dropdown in toolbar (Polygon / Rectangle)
+- [x] Rubber-band preview with live area readout during rectangle placement
+- [x] **Area renaming** — click label in sidebar measurement table for inline edit
+- [x] Dual-unit labels on polygons (m² + ft²)
+- [x] **Edge vertex insertion** — click polygon edge to add new vertex + drag
+- [x] **Vertex merging** — drag vertex onto another to collapse/simplify
+- [x] **Cascading Escape** — cancels most immediate action (panel → rectangle → polygon → calibration → tool)
+- [ ] Area grouping / merging (future — running total covers most use cases)
 
-#### 5.1 Measurement Method Dropdown
-The M (Measure) tool gets a method selector — either in the toolbar or as a floating dropdown near the cursor:
+### Step 6 — Vector Snap & Outline Detection ✅ (2026-03-28)
 
-| Method | Interaction | Use case |
+- [x] **PDF.js 4.x constructPath parsing** — extracts geometry from batched operators
+- [x] **CTM tracking** — save/restore/transform operators tracked for correct coordinate transforms
+- [x] **Viewport transform composition** — CTM × viewport → canvas-space coordinates
+- [x] **Endpoint snap** (yellow square + crosshair) — confirmed working on Calgary vector PDF
+- [x] **Line snap** (green circle + X) — snaps to nearest point on line segments
+- [x] **Snap priority** — endpoints over lines, visual indicator on overlay
+- [x] **Auto-detect outline** (D key) — finds closed paths, cycles candidates, shows on-canvas
+- [x] Area filter diagnostics (logs rejection reasons: too small / too big / too few vertices)
+- **Limitation:** Most CAD PDFs draw walls as individual filled quads, not closed outlines. Auto-detect finds wall fills, not building footprints. Manual measurement with snap is the correct workflow for these PDFs. Auto-detect works best on BIM exports with clean closed polylines.
+- [ ] Edge-tracing algorithm: walk connected segments to build outline from individual wall segments (future, complex)
+
+### Step 7 — Ruler & Line Measurement (NEXT)
+
+#### 7.1 Ruler Tool
+- **Ruler button** in toolbar — two-click linear measurement between any two points
+- Uses same snap infrastructure as polygon/calibrate tools
+- Rubber-band preview line from first click to cursor (like rectangle preview)
+- On second click: displays **persistent yellow line** with:
+  - Measurement in feet/metres (based on accepted/verified scale system)
+  - Tick marks at regular intervals (1' ticks for imperial, 1m or 500mm ticks for metric)
+  - Length label at midpoint
+- Ruler lines persist as named objects (editable, undoable, included in export)
+- Multiple rulers per page
+
+#### 7.2 Calibration Visual Feedback
+- When using the Calibrate (C) tool, show the **same rubber-band line** from first point to cursor
+- After calibration completes, the line **vanishes** (not persisted — it was just for verification)
+- This reuses the Ruler drawing code but doesn't create a persistent object
+
+### Step 8 — Window/Opening Measurement & Netting
+
+#### 8.1 Measurement Types
+Extend the method dropdown to include area types:
+
+| Type | Colour | Behaviour |
 |---|---|---|
-| **Polygon** (default) | Click vertices, close near first point | Complex shapes, irregular rooms |
-| **Bounding Rectangle** | Click start corner, click opposite corner | Fast orthogonal areas — most rooms, floor plates |
+| **Area** (default) | Cyan fill + edges | Additive — counts toward total |
+| **Window/Opening** | Dark blue or yellow fill + edges | Subtractive — deducted from overlapping areas |
 
-- **Bounding Rectangle** creates a 4-vertex polygon from just 2 clicks (diagonally opposite corners)
-- The resulting polygon is editable — user can drag vertices to adjust after creation
-- Rectangle edges align to the page axes (orthogonal) — no rotation for v1
+- User selects "Window" from the method dropdown before measuring
+- Window polygons drawn with distinct colour (dark blue fill, yellow edges)
+- Both polygon and rectangle methods work for windows
 
-#### 5.2 Area Renaming
-Default label "Area 1", "Area 2" etc. should be user-editable:
+#### 8.2 Netting in Measurement Panel
+The sidebar measurement panel shows:
 
-- **Click label pill** on the drawing → inline text input appears, user types new name, Enter to confirm
-- **Click label in sidebar** measurement table → same inline edit
-- Whichever is easier to implement first; both should update the same underlying label
-- Common names: "Main Level", "Upper Level", "Garage", "South Elevation", "Foundation"
-- Name persists to ProjectStore and appears in CSV/JSON export
+```
+Measurements — this page
+Label           m²       ft²
+South Wall    42.30    455.30
+Window 1      -2.40    -25.83
+Window 2      -1.80    -19.38
+──────────────────────────
+Net Wall      38.10    410.09
+Total Gross   42.30    455.30
+Total Windows -4.20    -45.21
+Net Total     38.10    410.09
+```
 
-#### 5.3 Area Merging / Healing
-When multiple polygons partially overlap on the same page:
+- Windows shown with negative values and distinct colour in the table
+- Net total = gross areas − window areas
+- Export includes both gross, window, and net columns
 
-- **"Merge overlapping"** toggle/button — computes the union of all overlapping polygons into a single combined polygon
-- Use case: user traces a main floor and a bump-out separately, wants the total combined area
-- Implementation: detect polygon intersection, compute union outline, replace overlapping polygons with merged result
-- Display merged area as a single entry in the measurement panel with summed label
-- Non-overlapping polygons remain separate
-- This is a **nice-to-have** for v1 — the running total in the sidebar already gives the combined area. True geometric union is complex. Consider a simpler approach first: a "Group" function that logically combines selected polygons under one label while keeping them visually separate, and shows their sum as the group total.
+#### 8.3 Visual Distinction
+- Additive areas: cyan edges (3px), cyan fill (8% opacity)
+- Window/opening areas: yellow edges (3px), dark blue fill (10% opacity)
+- Labels: windows show "Window 1" with blue pill background instead of dark
 
-#### 5.4 Additive/Subtractive Areas (Future)
-- Polygons can be tagged as **additive** (default, cyan fill) or **subtractive** (red/orange fill)
-- Subtractive polygons deduct from overlapping additive areas — e.g., windows subtract from wall area
-- Use case: trace a wall elevation, then trace window openings as subtractive → net wall area = wall − windows
-- Display: additive areas cyan, subtractive areas red/orange, net area shown in sidebar
-- This supports assembly-level takeoff: gross wall area, opening area, net wall area
-- Implementation deferred until BOM/assembly features (Step 8+)
-
-### Step 6 — Vector Snap & Outline Detection
-- [ ] PDF operator stream parsing for line geometry
-- [ ] Spatial index of line segments
-- [ ] Cursor snap to nearby endpoints/intersections
-- [ ] Heuristic building outline detection
-- [ ] User confirm/adjust workflow ("Does this look correct?" with adjustable vertices)
-
-### Step 7 — Schedule Extraction & Cross-Validation
+### Step 9 — Schedule Extraction & Cross-Validation
 - [ ] Text clustering into table rows/columns
 - [ ] Room schedule parser
 - [ ] Cross-validation: "Schedule says Office = 27.80 m²; your polygon = 28.1 m² (1.1% variance)"
 
-### Step 8 — Section Analysis & Volume (Phase 2)
+### Step 10 — Section Analysis & Volume (Phase 2)
 - [ ] Level detection on section sheets
 - [ ] Floor-to-floor height extraction
 - [ ] Volume = area × height per storey
 - [ ] Cross-validation against energy model data (A0.10)
 
-### Step 9 — Polish & Export
+### Step 11 — Polish & Export
 - [ ] Print-friendly summary view
 - [ ] Improved project save/load (restore polygons + calibrations from JSON)
 - [ ] Error handling and edge cases
@@ -551,6 +583,13 @@ When multiple polygons partially overlap on the same page:
 | 4 | **FIXED** | "Cannot use same canvas" crash on rapid scroll-wheel zoom | Render cancellation + 80ms debounce. |
 | 5 | **FIXED** | Polygon label (red text) hard to read over red-tinted area fills | Cyan edges/labels, large dark-background pills (Step 4). |
 | 6 | **FIXED** | Scale detection reads "1:4" instead of "1:48" | Spatial text joining + known-ratio validation + digit completion. |
+| 7 | **FIXED** | No way to adjust polygon vertices after closing | Vertex dragging, edge insertion, vertex merging. |
+| 8 | **FIXED** | Escape doesn't cancel in-progress operations cleanly | Cascading Escape: panel → rectangle → polygon → calibration → tool. |
+| 9 | **FIXED** | Vector geometry extraction returns 0 segments | PDF.js 4.x uses constructPath operator — parser updated to unpack batched ops. |
+| 10 | **FIXED** | Detected polygons drawn off-screen (negative/huge coordinates) | CTM tracking (save/restore/transform) + viewport transform composition. |
+| 11 | **Known** | Auto-detect finds wall fills, not building outlines | Most CAD PDFs draw walls as individual quads. Edge-tracing needed for outline assembly. |
+| 12 | **Cosmetic** | `favicon.ico` 404 on every page load | Harmless; browser auto-requests. |
+| 13 | **Cosmetic** | `TT: undefined function: 32` warning from PDF.js | CAD font hinting opcode; no impact. |
 | 7 | **FIXED** | No way to adjust polygon vertices after closing | Vertex dragging with hit-testing, undo support. |
 | 8 | **Cosmetic** | `favicon.ico` 404 on every page load | Harmless; browser auto-requests. Could add a favicon. |
 | 9 | **Cosmetic** | `TT: undefined function: 32` warning from PDF.js | CAD font hinting opcode; no impact on rendering or text extraction. |
