@@ -97,6 +97,18 @@ export function getOperatorList(pageNum) {
   });
 }
 
+/**
+ * Get the viewport transform matrix for a page at scale 1.
+ * This transforms PDF user-space coordinates → canvas coordinates.
+ * Returns [a, b, c, d, e, f] (standard 2D affine transform).
+ */
+export function getViewportTransform(pageNum) {
+  return getPage(pageNum).then(function(page) {
+    var vp = page.getViewport({ scale: 1 });
+    return vp.transform;  // [scaleX, skewY, skewX, scaleY, translateX, translateY]
+  });
+}
+
 export function getPageSize(pageNum) {
   return getPage(pageNum).then(function(page) {
     var vp = page.getViewport({ scale: 1 });

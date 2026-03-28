@@ -10,7 +10,39 @@ var _geometry = {};
 export function extractGeometry(pageNum) {
   if (_geometry[pageNum]) return Promise.resolve(_geometry[pageNum]);
 
-  return Loader.getOperatorList(pageNum).then(function(ops) {
+  return Promise.all([
+    Loader.getOperatorList(pageNum),
+    Loader.getViewportTransform(pageNum),
+    Loader.getPageSize(pageNum)
+  ]).then(function(results) {
+    var ops = results[0];
+    var vpTx = results[1];  // [a, b, c, d, e, f]
+    var pageSize = results[2];
+
+    // Log the viewport transform for debugging
+    if (!_geometry._txLogged) {
+      _geometry._txLogged = true;
+      console.log("[VectorSnap] Viewport transform:", JSON.stringify(vpTx));
+      console.log("[VectorSnap] Page size:", pageSize.width + "x" + pageSize.height);
+    }
+
+    // The viewport transform converts PDF user-space → rendered canvas space.
+    // For a standard page: [1, 0, 0, -1, 0, pageHeight] (scale 1, flip Y, translate)
+    // For rotated or offset pages this will differ.
+    //
+    // However, getOperatorList returns coords in the page's content stream space,
+    // which may already include page-level transforms. PDF.js's canvas renderer
+    // applies the viewport transform during rendering.
+    //
+    // For our purposes: apply the viewport transform to get canvas-space coords
+    // that match what eventToPdfCoords returns (which divides canvas pixels by renderScale).
+    function tp(x, y) {
+      // Apply viewport transform then divide by 1 (scale=1 viewport)
+      // This gives us coordinates in PDF points as seen on the rendered canvas
+      var cx = vpTx[0] * x + vpTx[2] * y + vpTx[4];
+      var cy = vpTx[1] * x + vpTx[3] * y + vpTx[5];
+      return { x: cx, y: cy };
+    }
     var OPS = Loader.getOPS();
 
     // Diagnostic: log what OPS constants we're using and what's in the stream
@@ -47,26 +79,28 @@ export function extractGeometry(pageNum) {
           var subOp = subOps[s];
 
           if (subOp === OPS.moveTo) {
-            curX = coords[ci++]; curY = coords[ci++];
+            var mp = tp(coords[ci++], coords[ci++]);
+            curX = mp.x; curY = mp.y;
             pathStartX = curX; pathStartY = curY;
             if (currentPath.length >= 2) _addPathSegments(currentPath, segments);
             currentPath = [{ x: curX, y: curY }];
           } else if (subOp === OPS.lineTo) {
-            curX = coords[ci++]; curY = coords[ci++];
+            var lp = tp(coords[ci++], coords[ci++]);
+            curX = lp.x; curY = lp.y;
             currentPath.push({ x: curX, y: curY });
           } else if (subOp === OPS.curveTo || subOp === OPS.curveTo2 || subOp === OPS.curveTo3) {
-            // Bezier curves: approximate with endpoint
-            // curveTo has 6 coords (3 control points), curveTo2/3 have 4
             var numCoords = (subOp === OPS.curveTo) ? 6 : 4;
-            curX = coords[ci + numCoords - 2];
-            curY = coords[ci + numCoords - 1];
+            var cp = tp(coords[ci + numCoords - 2], coords[ci + numCoords - 1]);
+            curX = cp.x; curY = cp.y;
             ci += numCoords;
             currentPath.push({ x: curX, y: curY });
           } else if (subOp === OPS.rectangle) {
-            var rx = coords[ci++], ry = coords[ci++], rw = coords[ci++], rh = coords[ci++];
+            var rawX = coords[ci++], rawY = coords[ci++], rawW = coords[ci++], rawH = coords[ci++];
             if (currentPath.length >= 2) _addPathSegments(currentPath, segments);
             currentPath = [];
-            var rect = [{ x: rx, y: ry }, { x: rx + rw, y: ry }, { x: rx + rw, y: ry + rh }, { x: rx, y: ry + rh }];
+            var r0 = tp(rawX, rawY), r1 = tp(rawX + rawW, rawY);
+            var r2 = tp(rawX + rawW, rawY + rawH), r3 = tp(rawX, rawY + rawH);
+            var rect = [r0, r1, r2, r3];
             closedPaths.push(rect);
             _addPathSegments(rect.concat([rect[0]]), segments);
           } else if (subOp === OPS.closePath) {
@@ -84,18 +118,21 @@ export function extractGeometry(pageNum) {
       // Legacy individual operators (PDF.js 3.x or simple PDFs)
       switch (fn) {
         case OPS.moveTo:
-          curX = args[0]; curY = args[1];
+          var lmp = tp(args[0], args[1]);
+          curX = lmp.x; curY = lmp.y;
           pathStartX = curX; pathStartY = curY;
           if (currentPath.length >= 2) _addPathSegments(currentPath, segments);
           currentPath = [{ x: curX, y: curY }];
           break;
         case OPS.lineTo:
-          currentPath.push({ x: args[0], y: args[1] });
-          curX = args[0]; curY = args[1];
+          var llp = tp(args[0], args[1]);
+          currentPath.push({ x: llp.x, y: llp.y });
+          curX = llp.x; curY = llp.y;
           break;
         case OPS.rectangle:
-          var rx2 = args[0], ry2 = args[1], rw2 = args[2], rh2 = args[3];
-          var rect2 = [{ x: rx2, y: ry2 }, { x: rx2 + rw2, y: ry2 }, { x: rx2 + rw2, y: ry2 + rh2 }, { x: rx2, y: ry2 + rh2 }];
+          var lr0 = tp(args[0], args[1]), lr1 = tp(args[0] + args[2], args[1]);
+          var lr2 = tp(args[0] + args[2], args[1] + args[3]), lr3 = tp(args[0], args[1] + args[3]);
+          var rect2 = [lr0, lr1, lr2, lr3];
           closedPaths.push(rect2);
           _addPathSegments(rect2.concat([rect2[0]]), segments);
           break;
@@ -232,3 +269,4 @@ export function detectOutline(pageNum) {
 }
 
 export function reset() { _geometry = {}; }
+export function clearPage(pageNum) { delete _geometry[pageNum]; }

@@ -994,6 +994,15 @@ function _placeDetectedOutline(candidate, idx, total) {
   }
 
   var verts = candidate.path;
+  console.log("[Auto-detect] Placing polygon with " + verts.length + " vertices:");
+  console.log("  First vertex: (" + verts[0].x.toFixed(1) + ", " + verts[0].y.toFixed(1) + ")");
+  if (verts.length > 1) console.log("  Last vertex: (" + verts[verts.length-1].x.toFixed(1) + ", " + verts[verts.length-1].y.toFixed(1) + ")");
+
+  // Log what pdfToCanvas would produce for the first vertex
+  var testCanvas = Viewer.pdfToCanvas(verts[0]);
+  console.log("  First vertex in canvas px: (" + testCanvas.x.toFixed(1) + ", " + testCanvas.y.toFixed(1) + ")");
+  console.log("  Canvas size: " + document.getElementById("pdf-canvas").width + "x" + document.getElementById("pdf-canvas").height);
+
   PolygonTool.startPolygon(_currentPage, "Detected " + (idx + 1) + "/" + total);
   for (var j = 0; j < verts.length; j++) {
     PolygonTool.addVertex({ x: verts[j].x, y: verts[j].y });
