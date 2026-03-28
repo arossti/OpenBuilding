@@ -23,6 +23,12 @@ var _calibPoint1 = null;
 var _rectStart = null;            // first corner for bounding rectangle
 var _rectCurrent = null;          // live cursor position for rubber-band preview
 var _snapTarget = null;           // current snap indicator {x, y, type}
+var _rulerStart = null;           // first point for ruler/calibrate rubber-band
+var _rulerCurrent = null;         // live cursor position for ruler preview
+
+// Persistent ruler lines per page: _rulers[pageNum] = [{p1, p2, label, lengthM}, ...]
+var _rulers = {};
+var _nextRulerId = 1;
 
 /* ── Boot ─────────────────────────────────────────────── */
 
@@ -44,6 +50,8 @@ function init() {
   Viewer.init("viewer-container", "pdf-canvas", "overlay-canvas");
   Viewer.setDrawCallback(function(ctx, pageNum) {
     PolygonTool.draw(ctx, pageNum);
+    _drawRulers(ctx, pageNum);
+    _drawRulerPreview(ctx);
     _drawRectPreview(ctx);
     _drawSnapIndicator(ctx);
   });
@@ -320,6 +328,7 @@ function _handleOverlayClick(e) {
 
   if (_currentTool === "measure") _handleMeasureClick(pt);
   else if (_currentTool === "calibrate") _handleCalibrateClick(pt);
+  else if (_currentTool === "ruler") _handleRulerClick(pt);
 }
 
 function _handleDragMove(e) {
@@ -339,7 +348,7 @@ function _bindDragEnd() {
       // Restore normal mousemove handler
       Viewer.onOverlayMouseMove(_handleOverlayMouseMove);
       var wrap = document.getElementById("viewer-wrap");
-      var cursorMap = { measure: "crosshair", calibrate: "crosshair", navigate: "default" };
+      var cursorMap = { measure: "crosshair", calibrate: "crosshair", ruler: "crosshair", navigate: "default" };
       if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
       // Update measurements and save
       _refreshMeasurements();
@@ -415,9 +424,10 @@ function _onPolygonComplete() {
 function _handleCalibrateClick(pt) {
   if (!_calibPoint1) {
     _calibPoint1 = pt;
+    _rulerStart = pt;  // show rubber-band
     setStatus("Click second point of the dimension...", "busy");
   } else {
-    // Ask for the real-world distance
+    _rulerStart = null; _rulerCurrent = null;  // clear rubber-band
     var hint = _pendingRatio ? " (at 1:" + _pendingRatio + ")" : "";
     var input = prompt("Enter the real-world distance between the two points" + hint + "\n\nExamples: '10.5 m', '35 ft', '8500 mm', '39-1 ft'");
     if (input) {
@@ -429,14 +439,9 @@ function _handleCalibrateClick(pt) {
         var badgeText = _pendingRatio ? "1:" + _pendingRatio : "calibrated";
         setStatus("Scale verified: " + badgeText + " (" + parsed.value + " " + parsed.unit + ")", "ready");
 
-        // Persist calibration to project store
         ProjectStore.saveCalibration(_currentPage, ScaleManager.getCalibration(_currentPage));
-
-        // Update sheet info with confirmed badge
         _updateSheetInfo(ProjectStore.getPage(_currentPage));
         _updateScaleLabel();
-
-        // Re-calculate any existing measurements on this page
         _refreshMeasurements();
         Viewer.requestRedraw();
       } else {
@@ -445,7 +450,41 @@ function _handleCalibrateClick(pt) {
     }
     _calibPoint1 = null;
     _pendingRatio = null;
+    Viewer.requestRedraw();
     setTool("navigate");
+  }
+}
+
+/* ── Ruler tool ───────────────────────────────────────── */
+
+function _handleRulerClick(pt) {
+  if (!_rulerStart) {
+    _rulerStart = pt;
+    setStatus("Click second point to complete ruler measurement", "busy");
+  } else {
+    // Create persistent ruler line
+    var p1 = _rulerStart;
+    var p2 = pt;
+    var dx = p2.x - p1.x, dy = p2.y - p1.y;
+    var pdfLen = Math.sqrt(dx * dx + dy * dy);
+    var lengthM = ScaleManager.pdfToMetres(_currentPage, pdfLen);
+
+    if (!_rulers[_currentPage]) _rulers[_currentPage] = [];
+    _rulers[_currentPage].push({
+      id: "ruler_" + (_nextRulerId++),
+      p1: p1, p2: p2,
+      pdfLength: pdfLen,
+      lengthM: lengthM
+    });
+
+    _rulerStart = null;
+    _rulerCurrent = null;
+
+    var lenStr = lengthM !== null
+      ? (lengthM.toFixed(2) + " m / " + (lengthM * 3.28084).toFixed(2) + " ft")
+      : pdfLen.toFixed(1) + " (uncalibrated)";
+    setStatus("Ruler: " + lenStr, "ready");
+    Viewer.requestRedraw();
   }
 }
 
@@ -508,11 +547,18 @@ function _handleOverlayMouseMove(e) {
   var hitRadius = 10 / (Viewer.getZoom() * (150 / 72));
   var snapRadius = 12 / (Viewer.getZoom() * (150 / 72));
 
-  // Track snap target for visual indicator (during measure/calibrate modes)
+  // Track snap target for visual indicator
   var prevSnap = _snapTarget;
   _snapTarget = null;
-  if (_currentTool === "measure" || _currentTool === "calibrate") {
+  if (_currentTool === "measure" || _currentTool === "calibrate" || _currentTool === "ruler") {
     _snapTarget = VectorSnap.findSnap(_currentPage, pt, snapRadius);
+  }
+
+  // Rubber-band for ruler / calibrate
+  if (_rulerStart && (_currentTool === "ruler" || _currentTool === "calibrate")) {
+    _rulerCurrent = _snapTarget ? { x: _snapTarget.x, y: _snapTarget.y } : pt;
+    Viewer.requestRedraw();
+    return;
   }
 
   // Rubber-band rectangle preview
@@ -539,8 +585,123 @@ function _handleOverlayMouseMove(e) {
       return;
     }
   }
-  var cursorMap = { measure: "crosshair", calibrate: "crosshair", navigate: "default" };
+  var cursorMap = { measure: "crosshair", calibrate: "crosshair", ruler: "crosshair", navigate: "default" };
   if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
+}
+
+/* ── Ruler drawing ─────────────────────────────────────── */
+
+function _drawRulerLine(ctx, p1, p2, lengthM, color, showTicks) {
+  var a = Viewer.pdfToCanvas(p1);
+  var b = Viewer.pdfToCanvas(p2);
+  var dx = b.x - a.x, dy = b.y - a.y;
+  var len = Math.sqrt(dx * dx + dy * dy);
+  if (len < 2) return;
+
+  // Unit vector along the line and perpendicular
+  var ux = dx / len, uy = dy / len;
+  var px = -uy, py = ux;  // perpendicular
+
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.fillStyle = color;
+
+  // Main line
+  ctx.beginPath();
+  ctx.moveTo(a.x, a.y);
+  ctx.lineTo(b.x, b.y);
+  ctx.stroke();
+
+  // End caps (small perpendicular lines)
+  var capLen = 8;
+  ctx.beginPath();
+  ctx.moveTo(a.x + px * capLen, a.y + py * capLen);
+  ctx.lineTo(a.x - px * capLen, a.y - py * capLen);
+  ctx.moveTo(b.x + px * capLen, b.y + py * capLen);
+  ctx.lineTo(b.x - px * capLen, b.y - py * capLen);
+  ctx.stroke();
+
+  // Tick marks
+  if (showTicks && lengthM !== null && lengthM > 0) {
+    // Determine tick interval based on scale system
+    var isImperial = _scaleSystem === "imperial";
+    var tickM = isImperial ? 0.3048 : 1.0;  // 1 foot or 1 metre
+    if (lengthM / tickM > 50) tickM *= 5;    // avoid too many ticks
+    if (lengthM / tickM > 50) tickM *= 2;
+    if (lengthM / tickM < 3) tickM /= 2;
+
+    var tickCount = Math.floor(lengthM / tickM);
+    var tickLen = 5;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (var t = 1; t <= tickCount; t++) {
+      var frac = (t * tickM) / lengthM;
+      var tx = a.x + dx * frac;
+      var ty = a.y + dy * frac;
+      ctx.moveTo(tx + px * tickLen, ty + py * tickLen);
+      ctx.lineTo(tx - px * tickLen, ty - py * tickLen);
+    }
+    ctx.stroke();
+  }
+
+  // Label at midpoint
+  var mx = (a.x + b.x) / 2;
+  var my = (a.y + b.y) / 2;
+  var labelText = "";
+  if (lengthM !== null) {
+    var isImp = _scaleSystem === "imperial";
+    if (isImp) {
+      var totalFt = lengthM * 3.28084;
+      var feet = Math.floor(totalFt);
+      var inches = Math.round((totalFt - feet) * 12);
+      if (inches === 12) { feet++; inches = 0; }
+      labelText = feet + "'-" + inches + '"';
+    } else {
+      labelText = lengthM < 1 ? (lengthM * 1000).toFixed(0) + " mm" : lengthM.toFixed(2) + " m";
+    }
+  }
+
+  if (labelText) {
+    // Offset label to one side of the line
+    var labelOffset = 14;
+    var lx = mx + px * labelOffset;
+    var ly = my + py * labelOffset;
+
+    ctx.font = "bold 14px Helvetica Neue, sans-serif";
+    var tw = ctx.measureText(labelText).width;
+    ctx.fillStyle = "rgba(0,0,0,0.75)";
+    ctx.beginPath();
+    ctx.roundRect(lx - tw / 2 - 6, ly - 10, tw + 12, 22, 4);
+    ctx.fill();
+
+    ctx.fillStyle = color;
+    ctx.textAlign = "center";
+    ctx.fillText(labelText, lx, ly + 5);
+  }
+
+  ctx.restore();
+}
+
+/** Draw persistent ruler lines for a page. */
+function _drawRulers(ctx, pageNum) {
+  var rulers = _rulers[pageNum] || [];
+  for (var i = 0; i < rulers.length; i++) {
+    var r = rulers[i];
+    _drawRulerLine(ctx, r.p1, r.p2, r.lengthM, "#ffd700", true);
+  }
+}
+
+/** Draw the rubber-band preview while placing a ruler or calibrating. */
+function _drawRulerPreview(ctx) {
+  if (!_rulerStart || !_rulerCurrent) return;
+  var pdfLen = Math.sqrt(
+    Math.pow(_rulerCurrent.x - _rulerStart.x, 2) +
+    Math.pow(_rulerCurrent.y - _rulerStart.y, 2)
+  );
+  var lengthM = ScaleManager.pdfToMetres(_currentPage, pdfLen);
+  var color = _currentTool === "ruler" ? "#ffd700" : "#ff8c00";  // gold for ruler, orange for calibrate
+  _drawRulerLine(ctx, _rulerStart, _rulerCurrent, lengthM, color, true);
 }
 
 function _drawSnapIndicator(ctx) {
@@ -637,7 +798,7 @@ function setTool(tool) {
     els.toolBtns[i].classList.toggle("active", els.toolBtns[i].dataset.tool === tool);
   }
   var viewer = document.getElementById("viewer-container");
-  var cursorMap = { measure: "crosshair", calibrate: "crosshair", navigate: "default" };
+  var cursorMap = { measure: "crosshair", calibrate: "crosshair", ruler: "crosshair", navigate: "default" };
   var wrap = document.getElementById("viewer-wrap");
   if (wrap) wrap.style.cursor = cursorMap[tool] || "default";
 }
@@ -679,7 +840,15 @@ function _bindKeyboard() {
           setStatus("Scale panel closed", "ready");
           break;
         }
-        // 2. Rectangle in progress? Cancel it.
+        // 2. Ruler in progress? Cancel it.
+        if (_rulerStart) {
+          _rulerStart = null;
+          _rulerCurrent = null;
+          Viewer.requestRedraw();
+          setStatus("Ruler cancelled", "ready");
+          break;
+        }
+        // 3. Rectangle in progress? Cancel it.
         if (_rectStart) {
           _rectStart = null;
           _rectCurrent = null;
@@ -710,7 +879,13 @@ function _bindKeyboard() {
         }
         break;
       case "Delete": case "Backspace":
-        // Delete last polygon on current page
+        // Delete last ruler if in ruler mode, otherwise last polygon
+        if (_currentTool === "ruler" && _rulers[_currentPage] && _rulers[_currentPage].length > 0) {
+          _rulers[_currentPage].pop();
+          Viewer.requestRedraw();
+          setStatus("Ruler deleted", "ready");
+          break;
+        }
         if (!PolygonTool.isDrawing()) {
           PolygonTool.deleteLastPolygon(_currentPage);
           _refreshMeasurements();
@@ -719,6 +894,7 @@ function _bindKeyboard() {
         }
         break;
       case "d": autoDetect(); break;
+      case "l": setTool("ruler"); break;
       case "s": openScalePanel(); break;
       case "m": setTool("measure"); break;
       case "r":

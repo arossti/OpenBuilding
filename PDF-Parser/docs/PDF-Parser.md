@@ -497,23 +497,17 @@ var project = {
 - **Limitation:** Most CAD PDFs draw walls as individual filled quads, not closed outlines. Auto-detect finds wall fills, not building footprints. Manual measurement with snap is the correct workflow for these PDFs. Auto-detect works best on BIM exports with clean closed polylines.
 - [ ] Edge-tracing algorithm: walk connected segments to build outline from individual wall segments (future, complex)
 
-### Step 7 — Ruler & Line Measurement (NEXT)
+### Step 7 — Ruler & Line Measurement ✅ (2026-03-28)
 
-#### 7.1 Ruler Tool
-- **Ruler button** in toolbar — two-click linear measurement between any two points
-- Uses same snap infrastructure as polygon/calibrate tools
-- Rubber-band preview line from first click to cursor (like rectangle preview)
-- On second click: displays **persistent yellow line** with:
-  - Measurement in feet/metres (based on accepted/verified scale system)
-  - Tick marks at regular intervals (1' ticks for imperial, 1m or 500mm ticks for metric)
-  - Length label at midpoint
-- Ruler lines persist as named objects (editable, undoable, included in export)
-- Multiple rulers per page
-
-#### 7.2 Calibration Visual Feedback
-- When using the Calibrate (C) tool, show the **same rubber-band line** from first point to cursor
-- After calibration completes, the line **vanishes** (not persisted — it was just for verification)
-- This reuses the Ruler drawing code but doesn't create a persistent object
+- [x] **Ruler tool** (L key) — two-click linear measurement with snap
+- [x] Persistent **gold ruler lines** with end caps, tick marks, length label at midpoint
+- [x] Tick marks at 1' intervals (imperial) or 1m intervals (metric), auto-scales for long/short lines
+- [x] Length label in feet-inches (e.g., "26'-4"") or metres depending on scale system
+- [x] **Rubber-band preview** during placement (gold for ruler, orange for calibrate)
+- [x] Calibrate (C) tool now shows rubber-band too — line vanishes after calibration (not persisted)
+- [x] Shared drawing code between ruler and calibrate (`_drawRulerLine`)
+- [x] Escape cancels in-progress ruler, Delete removes last ruler
+- [x] Multiple rulers per page, snap-to-vertex works during placement
 
 ### Step 8 — Window/Opening Measurement & Netting
 
