@@ -12,35 +12,38 @@ export function extractGeometry(pageNum) {
 
   return Promise.all([
     Loader.getOperatorList(pageNum),
-    Loader.getViewportTransform(pageNum),
-    Loader.getPageSize(pageNum)
+    Loader.getViewportTransform(pageNum)
   ]).then(function(results) {
     var ops = results[0];
-    var vpTx = results[1];  // [a, b, c, d, e, f]
-    var pageSize = results[2];
+    var vpTx = results[1];  // viewport transform [a,b,c,d,e,f]
 
-    // Log the viewport transform for debugging
-    if (!_geometry._txLogged) {
-      _geometry._txLogged = true;
-      console.log("[VectorSnap] Viewport transform:", JSON.stringify(vpTx));
-      console.log("[VectorSnap] Page size:", pageSize.width + "x" + pageSize.height);
+    // ── CTM (Current Transformation Matrix) tracking ──
+    // The content stream has transform operators (cm) that scale/translate
+    // coordinates. We must track these and compose with the viewport transform.
+    // Matrix format: [a, b, c, d, e, f] representing:
+    //   | a c e |
+    //   | b d f |
+    //   | 0 0 1 |
+
+    var ctm = [1, 0, 0, 1, 0, 0];  // identity
+    var ctmStack = [];
+
+    function multiplyMatrix(m1, m2) {
+      return [
+        m1[0]*m2[0] + m1[2]*m2[1],         m1[1]*m2[0] + m1[3]*m2[1],
+        m1[0]*m2[2] + m1[2]*m2[3],         m1[1]*m2[2] + m1[3]*m2[3],
+        m1[0]*m2[4] + m1[2]*m2[5] + m1[4], m1[1]*m2[4] + m1[3]*m2[5] + m1[5]
+      ];
     }
 
-    // The viewport transform converts PDF user-space → rendered canvas space.
-    // For a standard page: [1, 0, 0, -1, 0, pageHeight] (scale 1, flip Y, translate)
-    // For rotated or offset pages this will differ.
-    //
-    // However, getOperatorList returns coords in the page's content stream space,
-    // which may already include page-level transforms. PDF.js's canvas renderer
-    // applies the viewport transform during rendering.
-    //
-    // For our purposes: apply the viewport transform to get canvas-space coords
-    // that match what eventToPdfCoords returns (which divides canvas pixels by renderScale).
+    // Compose viewport transform with current CTM, then apply to a point
     function tp(x, y) {
-      // Apply viewport transform then divide by 1 (scale=1 viewport)
-      // This gives us coordinates in PDF points as seen on the rendered canvas
-      var cx = vpTx[0] * x + vpTx[2] * y + vpTx[4];
-      var cy = vpTx[1] * x + vpTx[3] * y + vpTx[5];
+      // Apply CTM first: content-space → page user-space
+      var px = ctm[0]*x + ctm[2]*y + ctm[4];
+      var py = ctm[1]*x + ctm[3]*y + ctm[5];
+      // Apply viewport transform: page user-space → canvas-space (PDF points)
+      var cx = vpTx[0]*px + vpTx[2]*py + vpTx[4];
+      var cy = vpTx[1]*px + vpTx[3]*py + vpTx[5];
       return { x: cx, y: cy };
     }
     var OPS = Loader.getOPS();
@@ -55,7 +58,8 @@ export function extractGeometry(pageNum) {
       console.log("[VectorSnap] OPS constants:", JSON.stringify({
         moveTo: OPS.moveTo, lineTo: OPS.lineTo, rectangle: OPS.rectangle,
         closePath: OPS.closePath, stroke: OPS.stroke, fill: OPS.fill,
-        constructPath: OPS.constructPath
+        constructPath: OPS.constructPath,
+        save: OPS.save, restore: OPS.restore, transform: OPS.transform
       }));
       console.log("[VectorSnap] Operator frequency on page " + pageNum + ":", JSON.stringify(fnCounts));
       console.log("[VectorSnap] Total operators:", ops.fnArray.length);
@@ -67,6 +71,21 @@ export function extractGeometry(pageNum) {
 
     for (var i = 0; i < ops.fnArray.length; i++) {
       var fn = ops.fnArray[i], args = ops.argsArray[i];
+
+      // CTM tracking: save/restore/transform
+      if (fn === OPS.save) {
+        ctmStack.push(ctm.slice());
+        continue;
+      }
+      if (fn === OPS.restore) {
+        if (ctmStack.length > 0) ctm = ctmStack.pop();
+        continue;
+      }
+      if (fn === OPS.transform) {
+        // args = [a, b, c, d, e, f] — concatenate with current CTM
+        ctm = multiplyMatrix(ctm, args);
+        continue;
+      }
 
       // PDF.js 4.x batches path ops into constructPath
       if (fn === OPS.constructPath) {
@@ -239,15 +258,30 @@ export function getClosedPathsByArea(pageNum, pageWidth, pageHeight) {
   if (!geo) return [];
   var pageBorderArea = pageWidth * pageHeight;
   var results = [];
+  var tooSmall = 0, tooBig = 0, tooFew = 0;
+
   for (var i = 0; i < geo.closedPaths.length; i++) {
     var path = geo.closedPaths[i];
-    if (path.length < 4) continue;
+    if (path.length < 4) { tooFew++; continue; }
     var area = computeAreaPdf(path);
-    // Skip page borders (>85% of page) and tiny paths (<0.5% of page)
-    if (area > pageBorderArea * 0.85 || area < pageBorderArea * 0.005) continue;
+    // Skip page borders (>95% of page) and very tiny paths (<0.1% of page)
+    if (area > pageBorderArea * 0.95) { tooBig++; continue; }
+    if (area < pageBorderArea * 0.001) { tooSmall++; continue; }
     results.push({ path: path, area: area });
   }
+
+  console.log("[VectorSnap] Closed path filter: " + geo.closedPaths.length + " total, " +
+    tooFew + " too few verts, " + tooSmall + " too small (<0.1%), " +
+    tooBig + " too big (>95%), " + results.length + " candidates passed." +
+    " Page area: " + pageBorderArea.toFixed(0) + " pts²");
+
+  // Log top 5 areas for debugging
   results.sort(function(a, b) { return b.area - a.area; });
+  for (var j = 0; j < Math.min(5, results.length); j++) {
+    console.log("  Candidate " + (j+1) + ": " + results[j].path.length + " verts, area=" +
+      results[j].area.toFixed(1) + " pts² (" + (results[j].area / pageBorderArea * 100).toFixed(2) + "% of page)");
+  }
+
   return results;
 }
 
