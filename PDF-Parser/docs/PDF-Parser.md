@@ -515,6 +515,9 @@ var project = {
 - [x] Shared drawing code between ruler and calibrate (`_drawRulerLine`)
 - [x] Escape cancels in-progress ruler, Delete removes last ruler
 - [x] Multiple rulers per page, snap-to-vertex works during placement
+- [x] **Ruler undo/redo** — unified undo stack tracks interleaved polygon + ruler operations (added Step 9)
+- [x] **Clear Rulers** — Shift+Delete clears all rulers on current page, undoable (added Step 9)
+- [x] **Ruler persistence** — rulers saved to JSON export and restored on import (added Step 9)
 
 ### Step 7.5 — Design System Refactor & UX Polish ✅ (2026-03-28)
 
@@ -614,20 +617,78 @@ A2.1,NET TOTAL,,,,,42.53,,457.87,
 | `pdfparser.css` | Window-mode dropdown, `.wall-toggle`, `.detail-row`, `.net-label` styles |
 | `js/project-store.mjs` | Persist type/mode, hierarchical CSV with Gross/Net columns |
 
-### Step 9 — Schedule Extraction & Cross-Validation
+### Step 9 — Summary Table & Project Management ✅ (2026-03-28)
+
+#### 9.1 Summary Table Modal
+- [x] **Summary** button in toolbar opens full-viewport modal overlay
+- [x] Shows all pages with measurements, grouped by sheet name/ID
+- [x] Columns: Sheet, Label, Gross m², Net m², Gross ft², Net ft², Perimeter m
+- [x] Hierarchical wall→window structure with expandable chevrons
+- [x] Per-page subtotals + grand total row
+- [x] Inline **delete** and **rename** from summary (syncs mini-table + canvas)
+- [x] Download CSV button in footer
+- [x] Close via × button, Close button, or Escape key
+
+#### 9.2 Ruler Undo/Redo & Clear Rulers
+- [x] **Unified undo stack** — Cmd+Z / Cmd+Shift+Z dispatches to correct stack (polygon or ruler) based on action order
+- [x] Polygon tool fires `onUndoPush` callback for unified tracking
+- [x] **Shift+Delete** clears all rulers on current page (undoable)
+- [x] Fix: rulers now reset when loading a new PDF (previously persisted across loads)
+
+#### 9.3 Ruler Persistence
+- [x] Rulers saved to project JSON alongside polygons and calibrations
+- [x] `saveRulers`/`getRulers` in project-store
+- [x] Auto-saved after create, delete, undo, redo, and clear
+
+#### 9.4 JSON Import
+- [x] **Import** button in toolbar opens file picker for `.json` project files
+- [x] Validates project structure, warns on page count mismatch with loaded PDF
+- [x] Restores per page: polygons (with type/mode), calibrations, and rulers
+- [x] `loadPolygons` in polygon-tool, `restoreCalibration` in scale-manager
+- [x] Status message: "Imported: X areas, Y windows, Z rulers from project.json"
+
+### Step 10 — Volumetric Calculation (Priority — BEAM Integration)
+
+**Purpose:** Compute concrete and material volumes from plan-view cross-sectional areas for embodied carbon analysis in BEAM. This is the critical path feature — BEAM needs volume data to calculate EC for foundations, walls, and slabs.
+
+**Approach:** The auto-detect system (Step 6) already identifies filled quads (wall faces, foundation outlines) from CAD-exported PDFs. The volume workflow extends this by allowing the user to select or group detected face quads as a cross-sectional area, then multiply by a height to produce a volume.
+
+#### 10.1 Cross-Section Area from Detected Quads
+- [ ] **Select detected quads** — user clicks or lasso-selects multiple auto-detected filled quads on a plan sheet
+- [ ] **Group as cross-section** — selected quads combine into a single cross-sectional area (union of faces)
+- [ ] **Label as material type** — user assigns a label (e.g., "Foundation Wall", "Slab on Grade", "Bearing Wall")
+- [ ] **Display combined area** in measurement panel with distinct styling (e.g., concrete grey)
+
+#### 10.2 Height Input & Volume Calculation
+- [ ] **Manual height entry** — user enters height/depth per cross-section (e.g., "1200 mm" for a foundation wall, "150 mm" for a slab)
+- [ ] **Section sheet reference** — optionally pull height from a section sheet annotation (floor-to-floor, footing depth, wall height)
+- [ ] **Volume = cross-section area × height** — computed and displayed in m³ and ft³
+- [ ] **Volume summary** — per-element and total, grouped by material type
+
+#### 10.3 Export for BEAM
+- [ ] Volume data included in CSV and JSON export
+- [ ] Format compatible with BEAM's material input (element type, volume m³, material)
+- [ ] Summary: total concrete volume, total wood framing volume, etc.
+
+#### 10.4 Implementation Notes
+- Reuse `buildAssociationMap` pattern for grouping quads with parent cross-sections
+- Reuse existing auto-detect candidates (`closedPaths` from vector-snap.mjs) as selectable elements
+- Height could be stored as a new field on polygon objects: `height` (mm), `volumeM3` (computed)
+- Consider a "Volume" tool mode (V key? — conflicts with Navigate, use Shift+V or new key)
+
+### Step 11 — Schedule Extraction & Cross-Validation
 - [ ] Text clustering into table rows/columns
 - [ ] Room schedule parser
 - [ ] Cross-validation: "Schedule says Office = 27.80 m²; your polygon = 28.1 m² (1.1% variance)"
 
-### Step 10 — Section Analysis & Volume (Phase 2)
+### Step 12 — Section Analysis & Automated Heights
 - [ ] Level detection on section sheets
 - [ ] Floor-to-floor height extraction
-- [ ] Volume = area × height per storey
+- [ ] Auto-populate heights for volumetric calculations from section annotations
 - [ ] Cross-validation against energy model data (A0.10)
 
-### Step 11 — Polish & Export
+### Step 13 — Polish & Testing
 - [ ] Print-friendly summary view
-- [ ] Improved project save/load (restore polygons + calibrations from JSON)
 - [ ] Error handling and edge cases
 - [ ] Testing against multiple CD sets (different firms, scales, formats)
 
@@ -650,8 +711,9 @@ A2.1,NET TOTAL,,,,,42.53,,457.87,
 | 11 | **Known** | Auto-detect finds wall fills, not building outlines | Most CAD PDFs draw walls as individual quads. Edge-tracing needed for outline assembly. |
 | 12 | **FIXED** | `var s` redeclared in vector-snap.mjs | Renamed to `si` — caught by ESLint `no-redeclare`. |
 | 13 | **FIXED** | Detail rows not visible when expanding wall chevron | CSS `.detail-row { display: none }` overrode empty inline style. Fixed: set `display: table-row` explicitly. |
-| 14 | **Cosmetic** | `favicon.ico` 404 on every page load | Harmless; browser auto-requests. |
-| 15 | **Cosmetic** | `TT: undefined function: 32` warning from PDF.js | CAD font hinting opcode; no impact on rendering. |
+| 14 | **FIXED** | Rulers not reset when loading a new PDF | Added `_rulers = {}` reset in `loadPdf()`. |
+| 15 | **Cosmetic** | `favicon.ico` 404 on every page load | Harmless; browser auto-requests. |
+| 16 | **Cosmetic** | `TT: undefined function: 32` warning from PDF.js | CAD font hinting opcode; no impact on rendering. |
 
 ---
 

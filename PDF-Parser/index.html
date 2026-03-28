@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PDF-Parser — Construction Document Area Extraction</title>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="bfcastyles.css" />
     <link rel="stylesheet" href="pdfparser.css" />
   </head>
@@ -14,46 +15,78 @@
       <!-- ── Toolbar ──────────────────────────────────── -->
       <div id="toolbar">
         <img src="graphics/BFCA-LOGO-sm.png" alt="BfCA" class="header-logo" />
-        <button class="tool-btn active" data-tool="navigate" title="Navigate / Pan (V)">
-          Navigate <span class="key-hint">V</span>
+
+        <!-- Tools -->
+        <button class="tool-btn active" data-tool="navigate" data-tip="Navigate / Pan [V]">
+          <i class="bi bi-hand-index"></i>
         </button>
-        <button class="tool-btn" data-tool="measure" title="Measure Area (M)">
-          Measure <span class="key-hint">M</span>
+        <button class="tool-btn" data-tool="measure" data-tip="Measure Area [M] — draw rectangle or polygon">
+          <i class="bi bi-building-add"></i>
         </button>
         <select id="measure-method" title="Measurement method" onchange="PP.setMeasureMethod(this.value)">
           <option value="rectangle">Rectangle</option>
           <option value="polygon">Polygon</option>
         </select>
-        <button class="tool-btn" data-tool="window" title="Measure Window (W)">
-          Window <span class="key-hint">W</span>
+        <button class="tool-btn" data-tool="window" data-tip="Measure Window [W] — subtract from wall area">
+          <i class="bi bi-border-all"></i>
         </button>
         <select id="window-mode" title="Window mode" onchange="PP.setWindowMode(this.value)">
           <option value="net">Net (subtract)</option>
           <option value="add">Add</option>
         </select>
-        <button class="tool-btn" data-tool="ruler" title="Ruler (L)">Ruler <span class="key-hint">L</span></button>
-        <button class="tool-btn" data-tool="checkscale" title="Check Scale (S)">
-          Scale <span class="key-hint">S</span>
+        <button class="tool-btn" data-tool="ruler" data-tip="Ruler [L] — measure a linear distance">
+          <i class="bi bi-rulers"></i>
         </button>
-        <button class="tool-btn" data-tool="calibrate" title="Manual Calibrate (C)">
-          Calibrate <span class="key-hint">C</span>
+        <button class="tool-btn" data-tool="checkscale" data-tip="Check Scale [S] — set or verify page scale">
+          <i class="bi bi-aspect-ratio"></i>
         </button>
-        <button class="export-btn" onclick="PP.autoDetect()" title="Auto-detect building outline (D)">
-          Detect <span class="key-hint">D</span>
+        <button class="tool-btn" data-tool="calibrate" data-tip="Calibrate [C] — two-point scale verification">
+          <i class="bi bi-crosshair2"></i>
         </button>
+        <button class="tool-btn" onclick="PP.autoDetect()" data-tip="Auto-Detect [D] — detect building outline">
+          <i class="bi bi-magic"></i>
+        </button>
+
         <div class="toolbar-sep"></div>
-        <button class="tool-btn" onclick="PP.zoomIn()" title="Zoom In (+)">+</button>
-        <button class="tool-btn" onclick="PP.zoomOut()" title="Zoom Out (-)">&#8722;</button>
-        <button class="tool-btn" onclick="PP.zoomFit()" title="Zoom Fit">Fit</button>
+
+        <!-- Zoom -->
+        <button class="tool-btn" onclick="PP.zoomIn()" data-tip="Zoom In [+]"><i class="bi bi-zoom-in"></i></button>
+        <button class="tool-btn" onclick="PP.zoomOut()" data-tip="Zoom Out [-]"><i class="bi bi-zoom-out"></i></button>
+        <button class="tool-btn" onclick="PP.zoomFit()" data-tip="Fit to View [F]">
+          <i class="bi bi-fullscreen"></i>
+        </button>
+
         <div class="toolbar-sep"></div>
-        <button class="tool-btn" onclick="PP.prevPage()" title="Previous Page">&larr;</button>
-        <button class="tool-btn" onclick="PP.nextPage()" title="Next Page">&rarr;</button>
+
+        <!-- Page nav -->
+        <button class="tool-btn" onclick="PP.prevPage()" data-tip="Previous Page [&larr;]">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="tool-btn" onclick="PP.nextPage()" data-tip="Next Page [&rarr;]">
+          <i class="bi bi-chevron-right"></i>
+        </button>
         <span class="toolbar-label" id="page-label"></span>
 
         <div class="toolbar-spacer"></div>
 
-        <button class="export-btn" onclick="PP.exportCSV()" title="Export measurements as CSV">CSV</button>
-        <button class="export-btn" onclick="PP.exportJSON()" title="Save project as JSON">JSON</button>
+        <!-- Export / Import -->
+        <button class="export-btn" onclick="PP.openSummaryTable()" data-tip="View measurement summary table">
+          <i class="bi bi-table"></i>
+        </button>
+        <button class="export-btn" onclick="PP.exportCSV()" data-tip="Export measurements as CSV">
+          <i class="bi bi-filetype-csv"></i>
+        </button>
+        <button class="export-btn" onclick="PP.exportJSON()" data-tip="Save project as JSON">
+          <i class="bi bi-filetype-json"></i>
+        </button>
+        <button
+          class="export-btn"
+          onclick="document.getElementById('json-input').click()"
+          data-tip="Import saved project JSON"
+        >
+          <i class="bi bi-upload"></i>
+        </button>
+        <input type="file" id="json-input" accept=".json" style="display: none" />
         <div class="toolbar-sep"></div>
         <a href="matrix.html" class="nav-btn" title="EC Compliance Matrix">Matrix</a>
       </div>
@@ -149,6 +182,20 @@
             <input type="checkbox" id="scale-feedback-remember" /> Don't show this again
           </label>
           <button id="scale-feedback-ok" onclick="PP.closeScaleFeedback()">OK</button>
+        </div>
+      </div>
+
+      <!-- ── Summary Table Modal ──────────────────────── -->
+      <div id="summary-backdrop"></div>
+      <div id="summary-panel">
+        <div class="summary-header">
+          <span class="summary-title">Measurement Summary</span>
+          <button class="summary-close" onclick="PP.closeSummaryTable()">&times;</button>
+        </div>
+        <div id="summary-content"></div>
+        <div class="summary-footer">
+          <button class="export-btn" onclick="PP.exportCSV()">Download CSV</button>
+          <button class="export-btn" onclick="PP.closeSummaryTable()">Close</button>
         </div>
       </div>
 

@@ -33,7 +33,8 @@ export function initFromPdf(fileName, pageCount) {
       sheetTitle: null,
       classification: null,
       scale: null,
-      polygons: []
+      polygons: [],
+      rulers: []
     });
   }
 }
@@ -67,6 +68,21 @@ export function savePolygons(pageNum, polygons) {
     });
     _touch();
   }
+}
+
+export function saveRulers(pageNum, rulers) {
+  var page = _project.pages[pageNum - 1];
+  if (page) {
+    page.rulers = (rulers || []).map(function (r) {
+      return { id: r.id, p1: r.p1, p2: r.p2, pdfLength: r.pdfLength, lengthM: r.lengthM };
+    });
+    _touch();
+  }
+}
+
+export function getRulers(pageNum) {
+  var page = _project.pages[pageNum - 1];
+  return page && page.rulers ? page.rulers : [];
 }
 
 /**

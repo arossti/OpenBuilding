@@ -156,3 +156,21 @@ export function getCalibration(pageNum) {
 export function reset() {
   _calibrations = {};
 }
+
+/**
+ * Restore a calibration from a saved project (import).
+ * Accepts the calibration object as saved by ProjectStore.
+ */
+export function restoreCalibration(pageNum, calData) {
+  if (!calData || !calData.pdfUnitsPerMetre) return;
+  _calibrations[pageNum] = {
+    state: calData.source === "verified" ? STATE.VERIFIED : STATE.ACCEPTED,
+    ratio: calData.ratio,
+    ratioLabel: calData.ratioLabel || "1:" + calData.ratio,
+    pdfUnitsPerMetre: calData.pdfUnitsPerMetre,
+    source: calData.source || "accepted",
+    refPoints: calData.refPoints || null,
+    refDistance: calData.refDistance || null,
+    refUnit: calData.refUnit || null
+  };
+}

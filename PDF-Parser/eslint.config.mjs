@@ -42,6 +42,7 @@ export default [
         Event: "readonly",
         prompt: "readonly",
         alert: "readonly",
+        confirm: "readonly",
         // App globals
         PP: "writable"
       }
