@@ -18,7 +18,7 @@ import * as ProjectStore from "./project-store.mjs";
 var els = {};
 var _currentPage = 0;
 var _currentTool = "navigate";
-var _measureMethod = "polygon";   // "polygon" or "rectangle"
+var _measureMethod = "rectangle";   // "polygon" or "rectangle"
 var _calibPoint1 = null;
 var _rectStart = null;            // first corner for bounding rectangle
 var _rectCurrent = null;          // live cursor position for rubber-band preview
@@ -204,6 +204,13 @@ function goToPage(pageNum) {
     _updateMeasurements(PolygonTool.getAllMeasurements(pageNum));
 
     VectorSnap.extractGeometry(pageNum);
+
+    // Auto-prompt scale panel on unscaled pages
+    var scaleState = ScaleManager.getState(pageNum);
+    if (scaleState === "none" || scaleState === "pending") {
+      // Small delay so the page renders visibly first
+      setTimeout(function() { openScalePanel(true); }, 350);
+    }
   });
 }
 
@@ -217,11 +224,27 @@ function prevPage() { goToPage(_currentPage - 1); }
 var _scaleSystem = "metric";   // "metric" or "imperial"
 var _pendingRatio = null;      // ratio selected in the Check Scale panel
 
-function openScalePanel() {
+function openScalePanel(autoPrompt) {
   if (!Loader.isLoaded()) return;
   var cal = ScaleManager.getCalibration(_currentPage);
   var detectedRatio = cal ? cal.ratio : null;
   var detectedLabel = cal ? cal.ratioLabel : null;
+
+  // Dynamic title: guided prompt for unscaled pages, standard for manual S-key
+  var titleEl = document.getElementById("scale-panel-title");
+  if (autoPrompt) {
+    titleEl.textContent = "Set or Accept Scale for This Page";
+  } else {
+    titleEl.textContent = "Check Scale";
+  }
+
+  // Auto-detect metric vs imperial from the detected label or ratio
+  if (detectedRatio) {
+    var inferredSystem = _inferScaleSystem(detectedRatio, detectedLabel);
+    if (inferredSystem !== _scaleSystem) {
+      setScaleSystem(inferredSystem);
+    }
+  }
 
   // Show detection info
   var detEl = document.getElementById("scale-detected");
@@ -244,6 +267,55 @@ function closeScalePanel() {
   document.getElementById("scale-panel").classList.remove("visible");
 }
 
+/* ── Scale Feedback Dialogue ────────────────────────── */
+
+var _scaleFeedbackCallback = null;
+
+/**
+ * Show a feedback/instruction dialogue after scale accept or verify.
+ * @param {string} icon - emoji or text icon
+ * @param {string} title - heading text
+ * @param {string} bodyHtml - HTML body content
+ * @param {string} titleColor - CSS colour for the title
+ * @param {boolean} showRemember - show "Don't show again" checkbox
+ * @param {Function} [onOk] - callback when OK is clicked (after closing)
+ */
+function _showScaleFeedback(icon, title, bodyHtml, titleColor, showRemember, onOk) {
+  document.getElementById("scale-feedback-icon").textContent = icon;
+  var titleEl = document.getElementById("scale-feedback-title");
+  titleEl.textContent = title;
+  titleEl.style.color = titleColor || "var(--text)";
+  document.getElementById("scale-feedback-body").innerHTML = bodyHtml;
+
+  var rememberWrap = document.getElementById("scale-feedback-remember-wrap");
+  var rememberCheck = document.getElementById("scale-feedback-remember");
+  rememberWrap.style.display = showRemember ? "flex" : "none";
+  rememberCheck.checked = false;
+
+  _scaleFeedbackCallback = onOk || null;
+
+  document.getElementById("scale-feedback-backdrop").classList.add("visible");
+  document.getElementById("scale-feedback-panel").classList.add("visible");
+}
+
+function closeScaleFeedback() {
+  document.getElementById("scale-feedback-backdrop").classList.remove("visible");
+  document.getElementById("scale-feedback-panel").classList.remove("visible");
+
+  // Save "don't show again" preference if checked
+  var rememberCheck = document.getElementById("scale-feedback-remember");
+  if (rememberCheck.checked) {
+    try { localStorage.setItem("pp_skip_calibrate_hint", "1"); } catch (e) { /* ignore */ }
+  }
+
+  // Fire callback (e.g., enter calibration mode)
+  if (_scaleFeedbackCallback) {
+    var cb = _scaleFeedbackCallback;
+    _scaleFeedbackCallback = null;
+    cb();
+  }
+}
+
 function setScaleSystem(system) {
   _scaleSystem = system;
   document.getElementById("scale-toggle-metric").classList.toggle("active", system === "metric");
@@ -251,6 +323,25 @@ function setScaleSystem(system) {
 
   var cal = ScaleManager.getCalibration(_currentPage);
   _populateScaleDropdown(cal ? cal.ratio : null);
+}
+
+/**
+ * Infer metric vs imperial from detected ratio and label text.
+ * Imperial labels contain " or ' characters (e.g., 3/16"=1'-0").
+ * Imperial-only ratios: 12, 16, 32, 64, 96, 128, 192.
+ * Metric-only ratios: 1, 2, 5, 10, 20, 25, 50, 75, 100, 125, 150, 200, 250, 500, 1000.
+ * Shared: 48 (both lists) — fall back to label text.
+ */
+function _inferScaleSystem(ratio, label) {
+  // Label text is most reliable — imperial labels have inch/foot marks
+  if (label && (/["']/.test(label) || /\/\d+"/.test(label))) return "imperial";
+
+  // Imperial-only ratios (not in metric list)
+  var imperialOnly = { 12:1, 16:1, 32:1, 64:1, 96:1, 128:1, 192:1 };
+  if (imperialOnly[ratio]) return "imperial";
+
+  // Everything else is metric (including 48 without imperial label)
+  return "metric";
 }
 
 function _populateScaleDropdown(preselect) {
@@ -284,6 +375,15 @@ function acceptScale() {
   Viewer.requestRedraw();
 
   setStatus("Scale 1:" + ratio + " accepted. You can now measure. Press C to verify with calibration.", "ready");
+
+  // Show "Accepted but not Verified" feedback
+  _showScaleFeedback(
+    "\u2713",                          // checkmark icon
+    "Scale Accepted (Provisional)",
+    "Scale 1:" + ratio + " is set for this page. Area measurements will work, but for highest accuracy you can verify by calibrating against a known dimension.<br><br>Press <b>C</b> at any time to calibrate.",
+    "#e9c46a",                         // gold title colour
+    false                              // no "don't show again" for accept
+  );
 }
 
 /** Accept + immediately enter calibration mode for empirical verification. */
@@ -297,8 +397,29 @@ function verifyScale() {
   _pendingRatio = ratio;
   closeScalePanel();
 
-  setTool("calibrate");
-  setStatus("Click two endpoints of a known dimension to verify 1:" + ratio, "busy");
+  // Check if user has opted out of the calibration instruction
+  var skipHint = false;
+  try { skipHint = localStorage.getItem("pp_skip_calibrate_hint") === "1"; } catch (e) { /* ignore */ }
+
+  if (skipHint) {
+    // Go straight to calibration mode
+    setTool("calibrate");
+    setStatus("Click two endpoints of a known dimension to verify 1:" + ratio, "busy");
+  } else {
+    // Show instruction dialogue first
+    _showScaleFeedback(
+      "\u{1F4CF}",                       // ruler icon
+      "Calibrate: Verify Scale",
+      "Click any <b>two points</b> on the drawing where you know the real-world distance (e.g., a dimension line, a door width, a grid spacing).<br><br>You\u2019ll be asked to enter the distance after clicking both points.",
+      "var(--accent-lit)",               // green title
+      true,                              // show "don't show again" checkbox
+      function() {
+        // Callback when OK is clicked
+        setTool("calibrate");
+        setStatus("Click two endpoints of a known dimension to verify 1:" + ratio, "busy");
+      }
+    );
+  }
 }
 
 /* ── Overlay click handling ───────────────────────────── */
@@ -461,6 +582,15 @@ function _handleCalibrateClick(pt) {
         _updateScaleLabel();
         _refreshMeasurements();
         Viewer.requestRedraw();
+
+        // Show "Scale Verified!" confirmation
+        _showScaleFeedback(
+          "\u2713",
+          "Scale Verified!",
+          "Scale <b>" + badgeText + "</b> has been empirically calibrated using your reference dimension (" + parsed.value + " " + parsed.unit + ").<br><br>All area measurements on this page now use the verified scale.",
+          "var(--accent-lit)",
+          false
+        );
       } else {
         setStatus("Could not parse. Use: '10.5 m', '35 ft', '8500 mm'", "error");
       }
@@ -851,6 +981,11 @@ function _bindKeyboard() {
     switch (e.key) {
       case "Escape":
         // Cascade: cancel the most immediate in-progress action
+        // 0. Scale feedback dialogue open? Close it.
+        if (document.getElementById("scale-feedback-panel").classList.contains("visible")) {
+          closeScaleFeedback();
+          break;
+        }
         // 1. Scale panel open? Close it.
         if (document.getElementById("scale-panel").classList.contains("visible")) {
           closeScalePanel();
@@ -1245,6 +1380,7 @@ window.PP = {
   // Scale panel
   openScalePanel: openScalePanel, closeScalePanel: closeScalePanel,
   setScaleSystem: setScaleSystem, acceptScale: acceptScale, verifyScale: verifyScale,
+  closeScaleFeedback: closeScaleFeedback,
   // Measure method
   setMeasureMethod: setMeasureMethod,
   // Auto-detect

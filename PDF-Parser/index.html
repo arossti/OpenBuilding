@@ -18,8 +18,8 @@
       <button class="tool-btn active" data-tool="navigate" title="Navigate / Pan (V)">Navigate <span class="key-hint">V</span></button>
       <button class="tool-btn" data-tool="measure" title="Measure Area (M)">Measure <span class="key-hint">M</span></button>
       <select id="measure-method" title="Measurement method" onchange="PP.setMeasureMethod(this.value)">
-        <option value="polygon">Polygon</option>
         <option value="rectangle">Rectangle</option>
+        <option value="polygon">Polygon</option>
       </select>
       <button class="tool-btn" data-tool="ruler" title="Ruler (L)">Ruler <span class="key-hint">L</span></button>
       <button class="tool-btn" data-tool="checkscale" title="Check Scale (S)">Scale <span class="key-hint">S</span></button>
@@ -100,7 +100,7 @@
     <!-- ── Scale Confirmation Panel (modal) ───────── -->
     <div id="scale-backdrop"></div>
     <div id="scale-panel">
-      <div class="scale-panel-title">Check Scale</div>
+      <div class="scale-panel-title" id="scale-panel-title">Check Scale</div>
       <div id="scale-detected" class="scale-panel-detected"></div>
 
       <div class="scale-toggle">
@@ -119,6 +119,20 @@
       <div class="scale-panel-hint">
         <b>Accept</b> — start measuring with this scale (provisional).<br>
         <b>Accept &amp; Verify</b> — also calibrate against a known dimension (most accurate).
+      </div>
+    </div>
+
+    <!-- ── Scale Feedback Dialogue (toast/instruction) ─── -->
+    <div id="scale-feedback-backdrop"></div>
+    <div id="scale-feedback-panel">
+      <div class="scale-feedback-icon" id="scale-feedback-icon"></div>
+      <div class="scale-feedback-title" id="scale-feedback-title"></div>
+      <div class="scale-feedback-body" id="scale-feedback-body"></div>
+      <div class="scale-feedback-actions">
+        <label class="scale-feedback-remember" id="scale-feedback-remember-wrap" style="display:none;">
+          <input type="checkbox" id="scale-feedback-remember"> Don't show this again
+        </label>
+        <button class="btn-verify" id="scale-feedback-ok" onclick="PP.closeScaleFeedback()">OK</button>
       </div>
     </div>
 
