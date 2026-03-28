@@ -34,22 +34,24 @@ The reference document (`2024.09.09 _ Issued for Permit (B-Frame 4.4 M&K).pdf`) 
 
 ### Multi-file HTML app with local JS modules
 
-- `index.html` — main shell (CSS + HTML + `<script>` tags)
-- `js/` — 10 vanilla JS modules loaded via `<script>` tags (no ES modules, no build step)
-- `lib/` — PDF.js 3.11.174 UMD build (local copy, no CDN dependency)
+- `index.html` — PDF-Parser app shell (links `bfcastyles.css` + `pdfparser.css`)
+- `matrix.html` — EC Matrix app (links `bfcastyles.css` + `matrix.css`)
+- `bfcastyles.css` — shared design system (reset, brand tokens, header, logo, nav)
+- `pdfparser.css` — PDF-Parser dark-theme styles
+- `matrix.css` — EC Matrix light-theme styles
+- `js/` — 10 vanilla JS ESM modules (`.mjs`)
+- `lib/` — PDF.js 4.9.155 ESM build (local copy, no CDN dependency)
 - `docs/` — workplan and documentation
 - `PDF resources/` — reference PDFs (not tracked in git)
-- Opens directly from `file://` protocol — no server required for development
+- Requires local dev server (`python3 -m http.server 8000` or `./serve.sh`) for ESM imports
 
 ### PDF.js Version Strategy
 
-Currently using **PDF.js 3.11.174** (UMD/legacy build) for `file://` compatibility. The modern v4.x+ ESM build offers real advantages for large construction PDFs (38MB+):
+Using **PDF.js 4.9.155** (ESM build) with `<script type="module">`. Requires a local dev server (`python3 -m http.server 8000`). Benefits over the legacy 3.x UMD build:
 - **OffscreenCanvas** — renders in a Web Worker, keeps UI thread smooth during page loads
 - **Structured clone transfers** — faster worker ↔ main thread data passing
 - **Active security patches** — 3.x is end-of-life
 - **Better CMap/font handling** — matters for CAD-exported PDFs with custom fonts
-
-**Plan:** Stay on 3.11 UMD for early builds. When a local dev server is introduced (even `python3 -m http.server 8000`), swap to v4.x with `<script type="module">` — a 15-minute change. No urgency.
 
 ### Core Libraries
 
@@ -436,7 +438,7 @@ var project = {
 - [x] CSV export of measurements
 - [x] JSON project save/load with calibration data
 
-### Step 2 — Scale Confirmation Workflow ✅ (2026-03-27)
+### Step 2 — Scale Confirmation Workflow ✅ (2026-03-27, refined 2026-03-28)
 - [x] "Check Scale" button (S key) — triggers scale detection + confirmation panel
 - [x] Scale confirmation panel: detected scale pre-selected in dropdown, metric/imperial toggle
 - [x] Common scale dropdowns (metric 1:10–1:200, imperial 1"=1' through 3/16"=1')
@@ -447,6 +449,11 @@ var project = {
 - [x] Calibration persisted to ProjectStore (included in JSON export)
 - [x] Spatial-aware text joining for scale detection (fixes "1:4" → "1:48" split-text bug)
 - [x] Known-ratio validation + digit-completion heuristic
+- [x] **Guided scale workflow** — auto-prompt scale panel on unscaled pages with "Set or Accept Scale for This Page" title
+- [x] **Accept confirmation** — "Scale Accepted (Provisional)" feedback dialogue after Accept
+- [x] **Verify instruction** — calibration instruction dialogue after Accept & Verify, with "Don't show again" (localStorage)
+- [x] **"Scale Verified!" confirmation** — feedback dialogue after successful calibration (both flows)
+- [x] **Auto-detect metric/imperial** — infers system from detected label (inch/foot marks) or ratio and pre-selects correct toggle
 - [ ] Multi-viewport awareness: detect multiple scales per page (future)
 - [ ] Scale bar auto-detection from vector geometry (future)
 
@@ -509,44 +516,103 @@ var project = {
 - [x] Escape cancels in-progress ruler, Delete removes last ruler
 - [x] Multiple rulers per page, snap-to-vertex works during placement
 
-### Step 8 — Window/Opening Measurement & Netting
+### Step 7.5 — Design System Refactor & UX Polish ✅ (2026-03-28)
 
-#### 8.1 Measurement Types
-Extend the method dropdown to include area types:
+- [x] **CSS refactor** — split monolithic `bfcastyles.css` into 3-file architecture:
+  - `bfcastyles.css` (shared foundation: reset, brand tokens, header, logo, nav button)
+  - `pdfparser.css` (dark theme: viewer, toolbar, sidebar, measure panel, scale panel, feedback dialogues)
+  - `matrix.css` (light theme: cards, phases, flow model, legends, actor lens, persona chips)
+- [x] Extracted 1,418 lines of inline CSS from `matrix.html` into `matrix.css`
+- [x] Matrix logo switched from inline style to shared `.header-logo` class
+- [x] **Default measurement method changed to Rectangle** (more frequently used than Polygon)
+- [x] Scale feedback dialogue CSS + HTML added to PDF-Parser
 
-| Type | Colour | Behaviour |
-|---|---|---|
-| **Area** (default) | Cyan fill + edges | Additive — counts toward total |
-| **Window/Opening** | Dark blue or yellow fill + edges | Subtractive — deducted from overlapping areas |
+### Step 8 — Window/Opening Measurement & Netting ✅ (2026-03-28)
 
-- User selects "Window" from the method dropdown before measuring
-- Window polygons drawn with distinct colour (dark blue fill, yellow edges)
-- Both polygon and rectangle methods work for windows
+#### 8.1 Data Model
+- [x] `type` field on polygons: `"area"` (default) or `"window"`
+- [x] `mode` field on windows: `"net"` (subtract from wall, default) or `"add"`
+- [x] Separate auto-increment counter: "Window 1", "Window 2", etc.
+- [x] Backward compatible: existing projects without type/mode load as `area`/`net`
 
-#### 8.2 Netting in Measurement Panel
-The sidebar measurement panel shows:
-
-```
-Measurements — this page
-Label           m²       ft²
-South Wall    42.30    455.30
-Window 1      -2.40    -25.83
-Window 2      -1.80    -19.38
-──────────────────────────
-Net Wall      38.10    410.09
-Total Gross   42.30    455.30
-Total Windows -4.20    -45.21
-Net Total     38.10    410.09
-```
-
-- Windows shown with negative values and distinct colour in the table
-- Net total = gross areas − window areas
-- Export includes both gross, window, and net columns
+#### 8.2 Toolbar — Window Button
+- [x] New **Window** button (`W` key) alongside Measure
+- [x] Reuses the Rectangle/Polygon method dropdown — same drawing methods, different polygon type
+- [x] **Net/Add** dropdown (`#window-mode`) for window behaviour toggle
+- [x] Refactored click handlers: generic `_handleGenericPolygonClick` / `_handleGenericRectangleClick` shared by both tools
 
 #### 8.3 Visual Distinction
-- Additive areas: cyan edges (3px), cyan fill (8% opacity)
-- Window/opening areas: yellow edges (3px), dark blue fill (10% opacity)
-- Labels: windows show "Window 1" with blue pill background instead of dark
+- [x] **Area polygons**: cyan edges (3px), cyan fill (8% opacity), cyan label text
+- [x] **Window polygons**: gold edges (`#ffd700`, 3px), gold fill (8% opacity), gold label text
+- [x] **Rectangle preview**: gold dashed outline when in Window mode
+- [x] **Vertex handles**: match polygon type colour
+- [x] Colour constants centralised in `config.mjs` (`AREA_EDGE`, `AREA_FILL`, `WIN_EDGE`, `WIN_FILL`)
+
+#### 8.4 Auto-Association — Windows to Walls
+Windows are automatically associated with their parent wall polygon using spatial containment:
+
+- [x] **`pointInPolygon(pt, vertices)`** — ray-casting algorithm in `polygon-tool.mjs`
+- [x] **`centroid(vertices)`** — arithmetic mean centroid utility
+- [x] **`buildAssociationMap(pageNum)`** — computes wall→window parent-child relationships:
+  1. For each window, compute its centroid
+  2. Test centroid against every wall polygon using ray-casting
+  3. If centroid falls inside multiple walls, assign to the **smallest** (most specific — handles room-inside-floor nesting)
+  4. Returns `{ walls: [{ measurement, polyIdx, children }], orphanWindows: [...] }`
+- [x] **Computed dynamically** — never stored. Automatically updates on vertex drag, delete, undo/redo
+- [x] **Canvas labels**: wall polygons with children show **net area** with "net" suffix (cached per draw cycle via `_netAreaCache`)
+
+#### 8.5 Measurement Panel — Expandable Wall Rows
+Wall rows show **net area** (gross minus child windows):
+
+```
+AREAS
+▶ Wall A       42.53 m²   457.87 ft²   ×    ← net area
+    Gross       50.12      539.53            ← hidden, click ▶ to expand
+    − Window 1  −4.20      −45.22       ×
+    − Window 2  −3.39      −36.44       ×
+  Wall B       28.10 m²   302.45 ft²   ×    ← no children, net = gross
+  Net Total    70.63      760.32
+
+Unassociated Windows                         ← only if orphans exist
+  Window 3     −2.50 m²   −26.91 ft²   ×
+```
+
+- [x] Walls with children get a `▶`/`▼` chevron toggle (expand/collapse detail rows)
+- [x] Detail rows show gross area + individual window deductions
+- [x] "net" label suffix on wall rows with children
+- [x] Orphan windows (not inside any wall) shown in separate gold section
+- [x] Delete/rename still work via `data-poly-idx` (raw polygon array index)
+
+#### 8.6 Interaction — Full Parity with Areas
+- [x] Polygon and Rectangle drawing methods
+- [x] Vertex dragging, edge insertion, vertex merging
+- [x] Inline label renaming (click label in panel)
+- [x] Delete (× button or Delete key)
+- [x] Undo/redo (JSON deep copy preserves type/mode; association recomputed)
+- [x] Vector snap (endpoint + line snap work in window mode)
+
+#### 8.7 CSV Export
+Hierarchical output with Gross/Net columns:
+
+```
+Sheet,Label,Type,Mode,Gross (m²),Net (m²),Gross (ft²),Net (ft²),Perimeter (m)
+A2.1,"Wall A",area,,50.12,42.53,539.53,457.87,28.50
+A2.1,"  Window 1",window,net,4.20,,45.22,,8.20
+A2.1,"  Window 2",window,net,3.39,,36.44,,7.40
+A2.1,GROSS TOTAL,,,,50.12,,539.53,
+A2.1,NET TOTAL,,,,,42.53,,457.87,
+```
+
+#### 8.8 Implementation Files
+
+| File | Changes |
+|---|---|
+| `js/config.mjs` | `AREA_EDGE`, `AREA_FILL`, `WIN_EDGE`, `WIN_FILL` colour constants |
+| `js/polygon-tool.mjs` | `type`/`mode` on polygon, `pointInPolygon`, `centroid`, `buildAssociationMap`, net-area cache in `draw` |
+| `js/app.mjs` | Window tool, generic click handlers, association-based measurement panel with expandable rows |
+| `index.html` | Window button + Net/Add dropdown + W key hint |
+| `pdfparser.css` | Window-mode dropdown, `.wall-toggle`, `.detail-row`, `.net-label` styles |
+| `js/project-store.mjs` | Persist type/mode, hierarchical CSV with Gross/Net columns |
 
 ### Step 9 — Schedule Extraction & Cross-Validation
 - [ ] Text clustering into table rows/columns
@@ -582,11 +648,10 @@ Net Total     38.10    410.09
 | 9 | **FIXED** | Vector geometry extraction returns 0 segments | PDF.js 4.x uses constructPath operator — parser updated to unpack batched ops. |
 | 10 | **FIXED** | Detected polygons drawn off-screen (negative/huge coordinates) | CTM tracking (save/restore/transform) + viewport transform composition. |
 | 11 | **Known** | Auto-detect finds wall fills, not building outlines | Most CAD PDFs draw walls as individual quads. Edge-tracing needed for outline assembly. |
-| 12 | **Cosmetic** | `favicon.ico` 404 on every page load | Harmless; browser auto-requests. |
-| 13 | **Cosmetic** | `TT: undefined function: 32` warning from PDF.js | CAD font hinting opcode; no impact. |
-| 7 | **FIXED** | No way to adjust polygon vertices after closing | Vertex dragging with hit-testing, undo support. |
-| 8 | **Cosmetic** | `favicon.ico` 404 on every page load | Harmless; browser auto-requests. Could add a favicon. |
-| 9 | **Cosmetic** | `TT: undefined function: 32` warning from PDF.js | CAD font hinting opcode; no impact on rendering or text extraction. |
+| 12 | **FIXED** | `var s` redeclared in vector-snap.mjs | Renamed to `si` — caught by ESLint `no-redeclare`. |
+| 13 | **FIXED** | Detail rows not visible when expanding wall chevron | CSS `.detail-row { display: none }` overrode empty inline style. Fixed: set `display: table-row` explicitly. |
+| 14 | **Cosmetic** | `favicon.ico` 404 on every page load | Harmless; browser auto-requests. |
+| 15 | **Cosmetic** | `TT: undefined function: 32` warning from PDF.js | CAD font hinting opcode; no impact on rendering. |
 
 ---
 
@@ -594,8 +659,16 @@ Net Total     38.10    410.09
 
 ```
 PDF-Parser/
-├── index.html              ← main app shell (CSS + HTML)
+├── index.html              ← PDF-Parser app shell
+├── matrix.html             ← EC Matrix app (cards + flow views)
+├── bfcastyles.css           ← shared design system (reset, tokens, header, logo)
+├── pdfparser.css            ← PDF-Parser dark-theme styles
+├── matrix.css               ← EC Matrix light-theme styles
+├── package.json            ← npm scripts: lint, format, serve
+├── eslint.config.mjs       ← ESLint flat config (ES5 rules + Prettier)
+├── .prettierrc             ← Prettier config (120col, 2-space, double quotes)
 ├── serve.sh                ← dev server launcher (python3 http.server)
+├── graphics/               ← logos and images
 ├── lib/
 │   ├── pdf.min.mjs         ← PDF.js 4.9.155 ESM (349 KB)
 │   └── pdf.worker.min.mjs  ← PDF.js web worker (1.3 MB)

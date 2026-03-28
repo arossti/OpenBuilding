@@ -4,12 +4,15 @@
 
 import * as Viewer from "./canvas-viewer.mjs";
 import * as ScaleManager from "./scale-manager.mjs";
-import { POLY_COLORS, DEFAULT_DPI, M2_TO_FT2 } from "./config.mjs";
+import { POLY_COLORS, DEFAULT_DPI, M2_TO_FT2, AREA_EDGE, AREA_FILL, WIN_EDGE, WIN_FILL } from "./config.mjs";
 
 var _polygons = {};
-var _activePolyId = null, _activePage = 0;
-var _colorIdx = 0, _nextId = 1;
-var _undoStack = [];   // snapshots for undo
+var _activePolyId = null,
+  _activePage = 0;
+var _colorIdx = 0,
+  _nextId = 1,
+  _nextWinId = 1;
+var _undoStack = []; // snapshots for undo
 var _redoStack = [];
 
 function _pushUndo(pageNum) {
@@ -18,7 +21,7 @@ function _pushUndo(pageNum) {
     pageNum: pageNum,
     snapshot: JSON.parse(JSON.stringify(polys))
   });
-  _redoStack = [];  // clear redo on new action
+  _redoStack = []; // clear redo on new action
   if (_undoStack.length > 50) _undoStack.shift();
 }
 
@@ -47,16 +50,31 @@ export function redo() {
   return entry.pageNum;
 }
 
-export function canUndo() { return _undoStack.length > 0; }
-export function canRedo() { return _redoStack.length > 0; }
+export function canUndo() {
+  return _undoStack.length > 0;
+}
+export function canRedo() {
+  return _redoStack.length > 0;
+}
 
-export function startPolygon(pageNum, label) {
+export function startPolygon(pageNum, label, opts) {
   if (!_polygons[pageNum]) _polygons[pageNum] = [];
   _pushUndo(pageNum);
-  var id = "poly_" + (_nextId++);
+  var type = (opts && opts.type) || "area";
+  var mode = (opts && opts.mode) || "net";
+  var defaultLabel = type === "window" ? "Window " + _nextWinId++ : "Area " + _nextId++;
+  // Keep counters in sync — only increment the relevant one
+  if (type !== "window") {
+    /* _nextId already incremented */
+  }
+  var id = (type === "window" ? "win_" : "poly_") + Date.now();
   _polygons[pageNum].push({
-    id: id, label: label || "Area " + (_nextId - 1),
-    vertices: [], closed: false,
+    id: id,
+    label: label || defaultLabel,
+    vertices: [],
+    closed: false,
+    type: type,
+    mode: mode,
     color: POLY_COLORS[_colorIdx % POLY_COLORS.length],
     _pageNum: pageNum
   });
@@ -85,7 +103,8 @@ export function isNearFirstVertex(pt, thresholdPx) {
   var first = poly.vertices[0];
   var scale = (DEFAULT_DPI * Viewer.getZoom()) / 72;
   var threshPdf = thresholdPx / scale;
-  var dx = pt.x - first.x, dy = pt.y - first.y;
+  var dx = pt.x - first.x,
+    dy = pt.y - first.y;
   return Math.sqrt(dx * dx + dy * dy) < threshPdf;
 }
 
@@ -116,21 +135,110 @@ export function computePerimeterPdf(vertices, closed) {
   return perim;
 }
 
+/**
+ * Ray-casting point-in-polygon test.
+ */
+export function pointInPolygon(pt, vertices) {
+  var inside = false;
+  for (var i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
+    var xi = vertices[i].x,
+      yi = vertices[i].y;
+    var xj = vertices[j].x,
+      yj = vertices[j].y;
+    if (yi > pt.y !== yj > pt.y && pt.x < ((xj - xi) * (pt.y - yi)) / (yj - yi) + xi) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+/**
+ * Arithmetic-mean centroid of a polygon.
+ */
+export function centroid(vertices) {
+  var cx = 0,
+    cy = 0;
+  for (var i = 0; i < vertices.length; i++) {
+    cx += vertices[i].x;
+    cy += vertices[i].y;
+  }
+  return { x: cx / vertices.length, y: cy / vertices.length };
+}
+
+/**
+ * Build wall-to-window association map for a page.
+ * Windows are assigned to the smallest wall polygon whose boundary
+ * contains the window's centroid. Unmatched windows are orphans.
+ */
+export function buildAssociationMap(pageNum) {
+  var polys = _polygons[pageNum] || [];
+  var walls = [],
+    windowEntries = [];
+
+  // Partition closed polygons — polyIdx is the raw array index for delete/rename
+  for (var i = 0; i < polys.length; i++) {
+    if (!polys[i].closed) continue;
+    var m = getMeasurement(pageNum, i);
+    if (!m) continue;
+    var entry = { measurement: m, polyIdx: i, vertices: polys[i].vertices };
+    if (polys[i].type === "window") {
+      windowEntries.push(entry);
+    } else {
+      entry.children = [];
+      walls.push(entry);
+    }
+  }
+
+  var orphanWindows = [];
+
+  for (var w = 0; w < windowEntries.length; w++) {
+    var win = windowEntries[w];
+    var winCenter = centroid(win.vertices);
+    var bestWall = null;
+    var bestArea = Infinity;
+
+    for (var a = 0; a < walls.length; a++) {
+      if (pointInPolygon(winCenter, walls[a].vertices)) {
+        var wallArea = walls[a].measurement.areaPdf || Infinity;
+        if (wallArea < bestArea) {
+          bestArea = wallArea;
+          bestWall = walls[a];
+        }
+      }
+    }
+
+    if (bestWall) {
+      bestWall.children.push({ measurement: win.measurement, polyIdx: win.polyIdx });
+    } else {
+      orphanWindows.push({ measurement: win.measurement, polyIdx: win.polyIdx });
+    }
+  }
+
+  return { walls: walls, orphanWindows: orphanWindows };
+}
+
 export function getMeasurement(pageNum, polyIdx) {
   var polys = _polygons[pageNum];
   if (!polys || !polys[polyIdx]) return null;
   var poly = polys[polyIdx];
   if (!poly.closed) return null;
-  var areaPdf  = computeAreaPdf(poly.vertices);
+  var areaPdf = computeAreaPdf(poly.vertices);
   var perimPdf = computePerimeterPdf(poly.vertices, true);
-  var areaM2   = ScaleManager.pdfAreaToM2(pageNum, areaPdf);
-  var perimM   = ScaleManager.pdfToMetres(pageNum, perimPdf);
+  var areaM2 = ScaleManager.pdfAreaToM2(pageNum, areaPdf);
+  var perimM = ScaleManager.pdfToMetres(pageNum, perimPdf);
   var calibrated = ScaleManager.isCalibrated(pageNum);
   return {
-    id: poly.id, label: poly.label,
-    areaM2: areaM2, areaFt2: areaM2 !== null ? areaM2 * M2_TO_FT2 : null,
-    perimeterM: perimM, vertexCount: poly.vertices.length,
-    areaPdf: areaPdf, perimPdf: perimPdf, calibrated: calibrated
+    id: poly.id,
+    label: poly.label,
+    type: poly.type || "area",
+    mode: poly.mode || "net",
+    areaM2: areaM2,
+    areaFt2: areaM2 !== null ? areaM2 * M2_TO_FT2 : null,
+    perimeterM: perimM,
+    vertexCount: poly.vertices.length,
+    areaPdf: areaPdf,
+    perimPdf: perimPdf,
+    calibrated: calibrated
   };
 }
 
@@ -144,8 +252,35 @@ export function getAllMeasurements(pageNum) {
   return results;
 }
 
+var _netAreaCache = {}; // populated per draw cycle, keyed by polygon id
+
 export function draw(ctx, pageNum) {
   var polys = _polygons[pageNum] || [];
+
+  // Build net-area cache for walls with child windows
+  _netAreaCache = {};
+  var assoc = buildAssociationMap(pageNum);
+  for (var w = 0; w < assoc.walls.length; w++) {
+    var wall = assoc.walls[w];
+    if (wall.children.length > 0 && wall.measurement.areaM2 !== null) {
+      var netM2 = wall.measurement.areaM2;
+      var netFt2 = wall.measurement.areaFt2;
+      for (var c = 0; c < wall.children.length; c++) {
+        var child = wall.children[c];
+        if (child.measurement.areaM2 !== null) {
+          if (child.measurement.mode !== "add") {
+            netM2 -= child.measurement.areaM2;
+            netFt2 -= child.measurement.areaFt2;
+          } else {
+            netM2 += child.measurement.areaM2;
+            netFt2 += child.measurement.areaFt2;
+          }
+        }
+      }
+      _netAreaCache[wall.measurement.id] = { netM2: netM2, netFt2: netFt2 };
+    }
+  }
+
   for (var i = 0; i < polys.length; i++) _drawPoly(ctx, polys[i]);
 }
 
@@ -155,9 +290,10 @@ function _drawPoly(ctx, poly) {
 
   ctx.save();
 
-  // Edge colour: cyan for visibility on any drawing background
-  var edgeColor = "#00e5ff";
-  var fillColor = "rgba(0, 229, 255, 0.08)";
+  // Edge colour: cyan for areas, gold for windows
+  var isWindow = poly.type === "window";
+  var edgeColor = isWindow ? WIN_EDGE : AREA_EDGE;
+  var fillColor = isWindow ? WIN_FILL : AREA_FILL;
   ctx.strokeStyle = edgeColor;
   ctx.lineWidth = 3;
 
@@ -180,7 +316,7 @@ function _drawPoly(ctx, poly) {
     var pj = Viewer.pdfToCanvas(verts[j]);
     ctx.beginPath();
     ctx.arc(pj.x, pj.y, 6, 0, Math.PI * 2);
-    ctx.fillStyle = (j === 0 && !poly.closed && verts.length >= 3) ? "#00ff00" : edgeColor;
+    ctx.fillStyle = j === 0 && !poly.closed && verts.length >= 3 ? "#00ff00" : edgeColor;
     ctx.fill();
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1.5;
@@ -188,18 +324,25 @@ function _drawPoly(ctx, poly) {
   }
 
   if (poly.closed && verts.length > 0) {
-    var cx = 0, cy = 0;
-    for (var k = 0; k < verts.length; k++) { cx += verts[k].x; cy += verts[k].y; }
+    var cx = 0,
+      cy = 0;
+    for (var k = 0; k < verts.length; k++) {
+      cx += verts[k].x;
+      cy += verts[k].y;
+    }
     var center = Viewer.pdfToCanvas({ x: cx / verts.length, y: cy / verts.length });
 
-    // Compute area text for the label — show both m² and ft²
+    // Compute area text — walls with children show net area
     var areaPdf = computeAreaPdf(verts);
     var areaM2 = ScaleManager.pdfAreaToM2(poly._pageNum || 0, areaPdf);
-    var line2 = "", line3 = "";
+    var netOverride = _netAreaCache[poly.id];
+    var line2 = "",
+      line3 = "";
     if (areaM2 !== null) {
-      var areaFt2 = areaM2 * M2_TO_FT2;
-      line2 = areaM2.toFixed(1) + " m\u00B2";
-      line3 = areaFt2.toFixed(1) + " ft\u00B2";
+      var displayM2 = netOverride && !isWindow ? netOverride.netM2 : areaM2;
+      var displayFt2 = netOverride && !isWindow ? netOverride.netFt2 : areaM2 * M2_TO_FT2;
+      line2 = displayM2.toFixed(1) + " m\u00B2" + (netOverride && !isWindow ? " net" : "");
+      line3 = displayFt2.toFixed(1) + " ft\u00B2";
     } else {
       line2 = "(uncalibrated)";
     }
@@ -227,15 +370,15 @@ function _drawPoly(ctx, poly) {
     var y1 = pillTop + 22;
     ctx.fillText(line1, center.x, y1);
 
-    // Line 2: metric area — cyan
+    // Line 2: metric area — cyan for areas, gold for windows
     ctx.font = "20px Helvetica Neue, sans-serif";
-    ctx.fillStyle = "#00e5ff";
+    ctx.fillStyle = isWindow ? WIN_EDGE : AREA_EDGE;
     var y2 = y1 + 24;
     ctx.fillText(line2, center.x, y2);
 
-    // Line 3: imperial area — lighter cyan
+    // Line 3: imperial area — lighter variant
     if (line3) {
-      ctx.fillStyle = "rgba(0, 229, 255, 0.65)";
+      ctx.fillStyle = isWindow ? "rgba(255, 215, 0, 0.65)" : "rgba(0, 229, 255, 0.65)";
       var y3 = y2 + 22;
       ctx.fillText(line3, center.x, y3);
     }
@@ -266,12 +409,16 @@ export function renamePolygon(pageNum, polyIdx, newLabel) {
   if (polys && polys[polyIdx]) polys[polyIdx].label = newLabel;
 }
 
-export function getPolygons(pageNum) { return _polygons[pageNum] || []; }
-export function isDrawing() { return _activePolyId !== null; }
+export function getPolygons(pageNum) {
+  return _polygons[pageNum] || [];
+}
+export function isDrawing() {
+  return _activePolyId !== null;
+}
 
 /* ── Vertex dragging ──────────────────────────────────── */
 
-var _dragState = null;  // { pageNum, polyIdx, vertIdx }
+var _dragState = null; // { pageNum, polyIdx, vertIdx }
 
 /**
  * Hit-test: find a vertex near the given PDF coordinate.
@@ -327,14 +474,16 @@ export function hitTestEdge(pageNum, pt, radiusPdf) {
 }
 
 function _projectPointOnSegment(pt, a, b) {
-  var dx = b.x - a.x, dy = b.y - a.y;
+  var dx = b.x - a.x,
+    dy = b.y - a.y;
   var len2 = dx * dx + dy * dy;
   if (len2 === 0) {
     var d = Math.sqrt(Math.pow(pt.x - a.x, 2) + Math.pow(pt.y - a.y, 2));
     return { x: a.x, y: a.y, distance: d };
   }
   var t = Math.max(0, Math.min(1, ((pt.x - a.x) * dx + (pt.y - a.y) * dy) / len2));
-  var px = a.x + t * dx, py = a.y + t * dy;
+  var px = a.x + t * dx,
+    py = a.y + t * dy;
   return { x: px, y: py, distance: Math.sqrt(Math.pow(pt.x - px, 2) + Math.pow(pt.y - py, 2)) };
 }
 
@@ -409,7 +558,9 @@ export function endDrag(mergeRadiusPdf) {
   return merged;
 }
 
-export function isDragging() { return _dragState !== null; }
+export function isDragging() {
+  return _dragState !== null;
+}
 
 function _getActivePoly() {
   if (!_activePolyId) return null;

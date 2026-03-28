@@ -10,12 +10,9 @@ var _geometry = {};
 export function extractGeometry(pageNum) {
   if (_geometry[pageNum]) return Promise.resolve(_geometry[pageNum]);
 
-  return Promise.all([
-    Loader.getOperatorList(pageNum),
-    Loader.getViewportTransform(pageNum)
-  ]).then(function(results) {
+  return Promise.all([Loader.getOperatorList(pageNum), Loader.getViewportTransform(pageNum)]).then(function (results) {
     var ops = results[0];
-    var vpTx = results[1];  // viewport transform [a,b,c,d,e,f]
+    var vpTx = results[1]; // viewport transform [a,b,c,d,e,f]
 
     // ── CTM (Current Transformation Matrix) tracking ──
     // The content stream has transform operators (cm) that scale/translate
@@ -25,25 +22,28 @@ export function extractGeometry(pageNum) {
     //   | b d f |
     //   | 0 0 1 |
 
-    var ctm = [1, 0, 0, 1, 0, 0];  // identity
+    var ctm = [1, 0, 0, 1, 0, 0]; // identity
     var ctmStack = [];
 
     function multiplyMatrix(m1, m2) {
       return [
-        m1[0]*m2[0] + m1[2]*m2[1],         m1[1]*m2[0] + m1[3]*m2[1],
-        m1[0]*m2[2] + m1[2]*m2[3],         m1[1]*m2[2] + m1[3]*m2[3],
-        m1[0]*m2[4] + m1[2]*m2[5] + m1[4], m1[1]*m2[4] + m1[3]*m2[5] + m1[5]
+        m1[0] * m2[0] + m1[2] * m2[1],
+        m1[1] * m2[0] + m1[3] * m2[1],
+        m1[0] * m2[2] + m1[2] * m2[3],
+        m1[1] * m2[2] + m1[3] * m2[3],
+        m1[0] * m2[4] + m1[2] * m2[5] + m1[4],
+        m1[1] * m2[4] + m1[3] * m2[5] + m1[5]
       ];
     }
 
     // Compose viewport transform with current CTM, then apply to a point
     function tp(x, y) {
       // Apply CTM first: content-space → page user-space
-      var px = ctm[0]*x + ctm[2]*y + ctm[4];
-      var py = ctm[1]*x + ctm[3]*y + ctm[5];
+      var px = ctm[0] * x + ctm[2] * y + ctm[4];
+      var py = ctm[1] * x + ctm[3] * y + ctm[5];
       // Apply viewport transform: page user-space → canvas-space (PDF points)
-      var cx = vpTx[0]*px + vpTx[2]*py + vpTx[4];
-      var cy = vpTx[1]*px + vpTx[3]*py + vpTx[5];
+      var cx = vpTx[0] * px + vpTx[2] * py + vpTx[4];
+      var cy = vpTx[1] * px + vpTx[3] * py + vpTx[5];
       return { x: cx, y: cy };
     }
     var OPS = Loader.getOPS();
@@ -55,22 +55,36 @@ export function extractGeometry(pageNum) {
       for (var d = 0; d < ops.fnArray.length; d++) {
         fnCounts[ops.fnArray[d]] = (fnCounts[ops.fnArray[d]] || 0) + 1;
       }
-      console.log("[VectorSnap] OPS constants:", JSON.stringify({
-        moveTo: OPS.moveTo, lineTo: OPS.lineTo, rectangle: OPS.rectangle,
-        closePath: OPS.closePath, stroke: OPS.stroke, fill: OPS.fill,
-        constructPath: OPS.constructPath,
-        save: OPS.save, restore: OPS.restore, transform: OPS.transform
-      }));
+      console.log(
+        "[VectorSnap] OPS constants:",
+        JSON.stringify({
+          moveTo: OPS.moveTo,
+          lineTo: OPS.lineTo,
+          rectangle: OPS.rectangle,
+          closePath: OPS.closePath,
+          stroke: OPS.stroke,
+          fill: OPS.fill,
+          constructPath: OPS.constructPath,
+          save: OPS.save,
+          restore: OPS.restore,
+          transform: OPS.transform
+        })
+      );
       console.log("[VectorSnap] Operator frequency on page " + pageNum + ":", JSON.stringify(fnCounts));
       console.log("[VectorSnap] Total operators:", ops.fnArray.length);
     }
 
-    var segments = [], closedPaths = [];
+    var segments = [],
+      closedPaths = [];
     var currentPath = [];
-    var curX = 0, curY = 0, pathStartX = 0, pathStartY = 0;
+    var curX = 0,
+      curY = 0,
+      pathStartX = 0,
+      pathStartY = 0;
 
     for (var i = 0; i < ops.fnArray.length; i++) {
-      var fn = ops.fnArray[i], args = ops.argsArray[i];
+      var fn = ops.fnArray[i],
+        args = ops.argsArray[i];
 
       // CTM tracking: save/restore/transform
       if (fn === OPS.save) {
@@ -92,33 +106,42 @@ export function extractGeometry(pageNum) {
         // args[0] = array of sub-op codes, args[1] = array of coordinates
         var subOps = args[0];
         var coords = args[1];
-        var ci = 0;  // coordinate index
+        var ci = 0; // coordinate index
 
         for (var s = 0; s < subOps.length; s++) {
           var subOp = subOps[s];
 
           if (subOp === OPS.moveTo) {
             var mp = tp(coords[ci++], coords[ci++]);
-            curX = mp.x; curY = mp.y;
-            pathStartX = curX; pathStartY = curY;
+            curX = mp.x;
+            curY = mp.y;
+            pathStartX = curX;
+            pathStartY = curY;
             if (currentPath.length >= 2) _addPathSegments(currentPath, segments);
             currentPath = [{ x: curX, y: curY }];
           } else if (subOp === OPS.lineTo) {
             var lp = tp(coords[ci++], coords[ci++]);
-            curX = lp.x; curY = lp.y;
+            curX = lp.x;
+            curY = lp.y;
             currentPath.push({ x: curX, y: curY });
           } else if (subOp === OPS.curveTo || subOp === OPS.curveTo2 || subOp === OPS.curveTo3) {
-            var numCoords = (subOp === OPS.curveTo) ? 6 : 4;
+            var numCoords = subOp === OPS.curveTo ? 6 : 4;
             var cp = tp(coords[ci + numCoords - 2], coords[ci + numCoords - 1]);
-            curX = cp.x; curY = cp.y;
+            curX = cp.x;
+            curY = cp.y;
             ci += numCoords;
             currentPath.push({ x: curX, y: curY });
           } else if (subOp === OPS.rectangle) {
-            var rawX = coords[ci++], rawY = coords[ci++], rawW = coords[ci++], rawH = coords[ci++];
+            var rawX = coords[ci++],
+              rawY = coords[ci++],
+              rawW = coords[ci++],
+              rawH = coords[ci++];
             if (currentPath.length >= 2) _addPathSegments(currentPath, segments);
             currentPath = [];
-            var r0 = tp(rawX, rawY), r1 = tp(rawX + rawW, rawY);
-            var r2 = tp(rawX + rawW, rawY + rawH), r3 = tp(rawX, rawY + rawH);
+            var r0 = tp(rawX, rawY),
+              r1 = tp(rawX + rawW, rawY);
+            var r2 = tp(rawX + rawW, rawY + rawH),
+              r3 = tp(rawX, rawY + rawH);
             var rect = [r0, r1, r2, r3];
             closedPaths.push(rect);
             _addPathSegments(rect.concat([rect[0]]), segments);
@@ -138,19 +161,24 @@ export function extractGeometry(pageNum) {
       switch (fn) {
         case OPS.moveTo:
           var lmp = tp(args[0], args[1]);
-          curX = lmp.x; curY = lmp.y;
-          pathStartX = curX; pathStartY = curY;
+          curX = lmp.x;
+          curY = lmp.y;
+          pathStartX = curX;
+          pathStartY = curY;
           if (currentPath.length >= 2) _addPathSegments(currentPath, segments);
           currentPath = [{ x: curX, y: curY }];
           break;
         case OPS.lineTo:
           var llp = tp(args[0], args[1]);
           currentPath.push({ x: llp.x, y: llp.y });
-          curX = llp.x; curY = llp.y;
+          curX = llp.x;
+          curY = llp.y;
           break;
         case OPS.rectangle:
-          var lr0 = tp(args[0], args[1]), lr1 = tp(args[0] + args[2], args[1]);
-          var lr2 = tp(args[0] + args[2], args[1] + args[3]), lr3 = tp(args[0], args[1] + args[3]);
+          var lr0 = tp(args[0], args[1]),
+            lr1 = tp(args[0] + args[2], args[1]);
+          var lr2 = tp(args[0] + args[2], args[1] + args[3]),
+            lr3 = tp(args[0], args[1] + args[3]);
           var rect2 = [lr0, lr1, lr2, lr3];
           closedPaths.push(rect2);
           _addPathSegments(rect2.concat([rect2[0]]), segments);
@@ -163,7 +191,11 @@ export function extractGeometry(pageNum) {
           }
           currentPath = [];
           break;
-        case OPS.stroke: case OPS.fill: case OPS.fillStroke: case OPS.eoFill: case OPS.eoFillStroke:
+        case OPS.stroke:
+        case OPS.fill:
+        case OPS.fillStroke:
+        case OPS.eoFill:
+        case OPS.eoFillStroke:
           if (currentPath.length >= 2) _addPathSegments(currentPath, segments);
           currentPath = [];
           break;
@@ -171,8 +203,8 @@ export function extractGeometry(pageNum) {
     }
 
     var epMap = {};
-    for (var s = 0; s < segments.length; s++) {
-      var seg = segments[s];
+    for (var si = 0; si < segments.length; si++) {
+      var seg = segments[si];
       var k1 = Math.round(seg.x1) + "," + Math.round(seg.y1);
       var k2 = Math.round(seg.x2) + "," + Math.round(seg.y2);
       if (!epMap[k1]) epMap[k1] = { x: seg.x1, y: seg.y1 };
@@ -200,11 +232,15 @@ function _addPathSegments(path, segments) {
 export function findNearestEndpoint(pageNum, pt, radiusPdf) {
   var geo = _geometry[pageNum];
   if (!geo) return null;
-  var best = null, bestDist = radiusPdf;
+  var best = null,
+    bestDist = radiusPdf;
   for (var i = 0; i < geo.endpoints.length; i++) {
     var ep = geo.endpoints[i];
     var d = Math.sqrt(Math.pow(ep.x - pt.x, 2) + Math.pow(ep.y - pt.y, 2));
-    if (d < bestDist) { bestDist = d; best = { x: ep.x, y: ep.y, distance: d, type: "endpoint" }; }
+    if (d < bestDist) {
+      bestDist = d;
+      best = { x: ep.x, y: ep.y, distance: d, type: "endpoint" };
+    }
   }
   return best;
 }
@@ -216,7 +252,8 @@ export function findNearestEndpoint(pageNum, pt, radiusPdf) {
 export function findNearestSegmentPoint(pageNum, pt, radiusPdf) {
   var geo = _geometry[pageNum];
   if (!geo) return null;
-  var best = null, bestDist = radiusPdf;
+  var best = null,
+    bestDist = radiusPdf;
   for (var i = 0; i < geo.segments.length; i++) {
     var seg = geo.segments[i];
     var proj = _projectOnSeg(pt, seg);
@@ -229,11 +266,14 @@ export function findNearestSegmentPoint(pageNum, pt, radiusPdf) {
 }
 
 function _projectOnSeg(pt, seg) {
-  var dx = seg.x2 - seg.x1, dy = seg.y2 - seg.y1;
+  var dx = seg.x2 - seg.x1,
+    dy = seg.y2 - seg.y1;
   var len2 = dx * dx + dy * dy;
-  if (len2 === 0) return { x: seg.x1, y: seg.y1, d: Math.sqrt(Math.pow(pt.x - seg.x1, 2) + Math.pow(pt.y - seg.y1, 2)) };
+  if (len2 === 0)
+    return { x: seg.x1, y: seg.y1, d: Math.sqrt(Math.pow(pt.x - seg.x1, 2) + Math.pow(pt.y - seg.y1, 2)) };
   var t = Math.max(0, Math.min(1, ((pt.x - seg.x1) * dx + (pt.y - seg.y1) * dy) / len2));
-  var px = seg.x1 + t * dx, py = seg.y1 + t * dy;
+  var px = seg.x1 + t * dx,
+    py = seg.y1 + t * dy;
   return { x: px, y: py, d: Math.sqrt(Math.pow(pt.x - px, 2) + Math.pow(pt.y - py, 2)) };
 }
 
@@ -258,49 +298,91 @@ export function getClosedPathsByArea(pageNum, pageWidth, pageHeight) {
   if (!geo) return [];
   var pageBorderArea = pageWidth * pageHeight;
   var results = [];
-  var tooSmall = 0, tooBig = 0, tooFew = 0;
+  var tooSmall = 0,
+    tooBig = 0,
+    tooFew = 0;
 
   for (var i = 0; i < geo.closedPaths.length; i++) {
     var path = geo.closedPaths[i];
-    if (path.length < 4) { tooFew++; continue; }
+    if (path.length < 4) {
+      tooFew++;
+      continue;
+    }
     var area = computeAreaPdf(path);
     // Skip page borders (>95% of page) and very tiny paths (<0.1% of page)
-    if (area > pageBorderArea * 0.95) { tooBig++; continue; }
-    if (area < pageBorderArea * 0.001) { tooSmall++; continue; }
+    if (area > pageBorderArea * 0.95) {
+      tooBig++;
+      continue;
+    }
+    if (area < pageBorderArea * 0.001) {
+      tooSmall++;
+      continue;
+    }
     results.push({ path: path, area: area });
   }
 
-  console.log("[VectorSnap] Closed path filter: " + geo.closedPaths.length + " total, " +
-    tooFew + " too few verts, " + tooSmall + " too small (<0.1%), " +
-    tooBig + " too big (>95%), " + results.length + " candidates passed." +
-    " Page area: " + pageBorderArea.toFixed(0) + " pts²");
+  console.log(
+    "[VectorSnap] Closed path filter: " +
+      geo.closedPaths.length +
+      " total, " +
+      tooFew +
+      " too few verts, " +
+      tooSmall +
+      " too small (<0.1%), " +
+      tooBig +
+      " too big (>95%), " +
+      results.length +
+      " candidates passed." +
+      " Page area: " +
+      pageBorderArea.toFixed(0) +
+      " pts²"
+  );
 
   // Log top 5 areas for debugging
-  results.sort(function(a, b) { return b.area - a.area; });
+  results.sort(function (a, b) {
+    return b.area - a.area;
+  });
   for (var j = 0; j < Math.min(5, results.length); j++) {
-    console.log("  Candidate " + (j+1) + ": " + results[j].path.length + " verts, area=" +
-      results[j].area.toFixed(1) + " pts² (" + (results[j].area / pageBorderArea * 100).toFixed(2) + "% of page)");
+    console.log(
+      "  Candidate " +
+        (j + 1) +
+        ": " +
+        results[j].path.length +
+        " verts, area=" +
+        results[j].area.toFixed(1) +
+        " pts² (" +
+        ((results[j].area / pageBorderArea) * 100).toFixed(2) +
+        "% of page)"
+    );
   }
 
   return results;
 }
 
 export function detectOutline(pageNum) {
-  return extractGeometry(pageNum).then(function(geo) {
-    return Loader.getPageSize(pageNum).then(function(size) {
+  return extractGeometry(pageNum).then(function (geo) {
+    return Loader.getPageSize(pageNum).then(function (size) {
       var pageBorderArea = size.width * size.height;
-      var best = null, bestArea = 0;
+      var best = null,
+        bestArea = 0;
       for (var i = 0; i < geo.closedPaths.length; i++) {
         var path = geo.closedPaths[i];
         if (path.length < 4) continue;
         var area = computeAreaPdf(path);
         if (area > pageBorderArea * 0.9 || area < pageBorderArea * 0.01) continue;
-        if (area > bestArea) { bestArea = area; best = path; }
+        if (area > bestArea) {
+          bestArea = area;
+          best = path;
+        }
       }
       return best;
     });
   });
 }
 
-export function reset() { _geometry = {}; }
-export function clearPage(pageNum) { delete _geometry[pageNum]; }
+export function reset() {
+  _geometry = {};
+}
+export function clearPage(pageNum) {
+  delete _geometry[pageNum];
+}
