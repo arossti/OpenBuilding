@@ -131,12 +131,21 @@
       user-select: none;
     }
 
-    #toolbar .app-title {
-      font-weight: 700;
-      font-size: 14px;
-      color: var(--accent-lit);
-      margin-right: 12px;
-      letter-spacing: -0.3px;
+    /* ── Logo styles ──────────────────────────────────── */
+    .header-logo {
+      height: 28px;
+      margin-right: 10px;
+      /* Shift dark navy → cyan: white then hue-rotate to cyan */
+      filter: brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(155deg) brightness(1.2);
+    }
+
+    .splash-logo {
+      width: 280px;
+      max-width: 60%;
+      margin-bottom: 20px;
+      /* Same cyan tint for dark background */
+      filter: brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(155deg) brightness(1.1);
+      opacity: 0.85;
     }
 
     .toolbar-spacer { flex: 1; }
@@ -551,7 +560,7 @@
 
     <!-- ── Toolbar ──────────────────────────────────── -->
     <div id="toolbar">
-      <span class="app-title">PDF-Parser</span>
+      <img src="graphics/BFCA-LOGO-sm.png" alt="BfCA" class="header-logo">
       <button class="tool-btn active" data-tool="navigate" title="Navigate / Pan (V)">Navigate <span class="key-hint">V</span></button>
       <button class="tool-btn" data-tool="measure" title="Measure Area (M)">Measure <span class="key-hint">M</span></button>
       <select id="measure-method" title="Measurement method" onchange="PP.setMeasureMethod(this.value)">
@@ -593,7 +602,7 @@
 
         <!-- Drop zone (shown before a PDF is loaded) -->
         <div id="drop-zone">
-          <div class="drop-icon">&#128196;</div>
+          <img src="graphics/BFCA-LOGO.png" alt="Builders for Climate Action" class="splash-logo">
           <div class="drop-text">Drop a construction PDF here</div>
           <div class="drop-hint">or</div>
           <button class="browse-btn" onclick="document.getElementById('file-input').click()">Browse Files</button>
