@@ -562,6 +562,18 @@ html, body {
 .scale-feedback-remember input {
   cursor: pointer;
 }
+#scale-feedback-ok {
+  background: var(--accent);
+  border: 1px solid var(--accent-lit);
+  color: #fff;
+  padding: 6px 24px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+#scale-feedback-ok:hover { background: var(--accent-lit); }
 
 /* ── Status bar variants ──────────────────────────────── */
 .status-ready { color: var(--text-dim); }
