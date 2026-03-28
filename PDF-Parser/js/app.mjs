@@ -36,9 +36,40 @@ var _snapTarget = null; // current snap indicator {x, y, type}
 var _rulerStart = null; // first point for ruler/calibrate rubber-band
 var _rulerCurrent = null; // live cursor position for ruler preview
 
-// Persistent ruler lines per page: _rulers[pageNum] = [{p1, p2, label, lengthM}, ...]
+// Persistent ruler lines per page: _rulers[pageNum] = [{p1, p2, pdfLength, lengthM}, ...]
 var _rulers = {};
 var _nextRulerId = 1;
+
+// Ruler undo/redo
+var _rulerUndoStack = [];
+var _rulerRedoStack = [];
+
+function _pushRulerUndo(pageNum) {
+  var rulers = _rulers[pageNum] || [];
+  _rulerUndoStack.push({ pageNum: pageNum, snapshot: JSON.parse(JSON.stringify(rulers)) });
+  _rulerRedoStack = [];
+  if (_rulerUndoStack.length > 50) _rulerUndoStack.shift();
+}
+
+function _undoRuler() {
+  if (_rulerUndoStack.length === 0) return false;
+  var entry = _rulerUndoStack.pop();
+  _rulerRedoStack.push({ pageNum: entry.pageNum, snapshot: JSON.parse(JSON.stringify(_rulers[entry.pageNum] || [])) });
+  _rulers[entry.pageNum] = entry.snapshot;
+  return entry.pageNum;
+}
+
+function _redoRuler() {
+  if (_rulerRedoStack.length === 0) return false;
+  var entry = _rulerRedoStack.pop();
+  _rulerUndoStack.push({ pageNum: entry.pageNum, snapshot: JSON.parse(JSON.stringify(_rulers[entry.pageNum] || [])) });
+  _rulers[entry.pageNum] = entry.snapshot;
+  return entry.pageNum;
+}
+
+// Unified undo history — tracks order of polygon vs ruler actions
+var _undoOrder = []; // "polygon" | "ruler"
+var _redoOrder = [];
 
 /* ── Boot ─────────────────────────────────────────────── */
 
@@ -68,7 +99,14 @@ function init() {
   Viewer.onOverlayClick(_handleOverlayClick);
   Viewer.onOverlayMouseMove(_handleOverlayMouseMove);
 
+  // Track polygon undo pushes in the unified undo order
+  PolygonTool.onUndoPush(function () {
+    _undoOrder.push("polygon");
+    _redoOrder = [];
+  });
+
   _bindFileInput();
+  _bindJsonImport();
   _bindToolbar();
   _bindKeyboard();
 
@@ -132,6 +170,12 @@ function loadPdf(buffer, fileName) {
   ScaleManager.reset();
   VectorSnap.reset();
   ProjectStore.reset();
+  _rulers = {};
+  _rulerUndoStack = [];
+  _rulerRedoStack = [];
+  _undoOrder = [];
+  _redoOrder = [];
+  _nextRulerId = 1;
 
   var loadingOverlay = document.getElementById("loading-overlay");
   var loadingBar = document.getElementById("loading-bar-fill");
@@ -708,6 +752,9 @@ function _handleRulerClick(pt) {
     var lengthM = ScaleManager.pdfToMetres(_currentPage, pdfLen);
 
     if (!_rulers[_currentPage]) _rulers[_currentPage] = [];
+    _pushRulerUndo(_currentPage);
+    _undoOrder.push("ruler");
+    _redoOrder = [];
     _rulers[_currentPage].push({
       id: "ruler_" + _nextRulerId++,
       p1: p1,
@@ -718,6 +765,8 @@ function _handleRulerClick(pt) {
 
     _rulerStart = null;
     _rulerCurrent = null;
+
+    ProjectStore.saveRulers(_currentPage, _rulers[_currentPage]);
 
     var lenStr =
       lengthM !== null
@@ -1076,25 +1125,43 @@ function setTool(tool) {
 function _bindKeyboard() {
   document.addEventListener("keydown", function (e) {
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-    // Undo: Cmd+Z / Ctrl+Z
+    // Undo: Cmd+Z / Ctrl+Z — unified polygon + ruler undo
     if ((e.metaKey || e.ctrlKey) && e.key === "z" && !e.shiftKey) {
       e.preventDefault();
-      var pg = PolygonTool.undo();
-      if (pg !== false) {
-        _refreshMeasurements();
-        Viewer.requestRedraw();
-        setStatus("Undo", "ready");
+      if (_undoOrder.length > 0) {
+        var lastType = _undoOrder.pop();
+        _redoOrder.push(lastType);
+        if (lastType === "ruler") {
+          var rulerPg = _undoRuler();
+          if (rulerPg !== false) ProjectStore.saveRulers(rulerPg, _rulers[rulerPg] || []);
+          Viewer.requestRedraw();
+          setStatus("Undo ruler", "ready");
+        } else {
+          PolygonTool.undo();
+          _refreshMeasurements();
+          Viewer.requestRedraw();
+          setStatus("Undo", "ready");
+        }
       }
       return;
     }
-    // Redo: Cmd+Shift+Z / Ctrl+Shift+Z
+    // Redo: Cmd+Shift+Z / Ctrl+Shift+Z — unified
     if ((e.metaKey || e.ctrlKey) && e.key === "z" && e.shiftKey) {
       e.preventDefault();
-      var pg2 = PolygonTool.redo();
-      if (pg2 !== false) {
-        _refreshMeasurements();
-        Viewer.requestRedraw();
-        setStatus("Redo", "ready");
+      if (_redoOrder.length > 0) {
+        var lastType2 = _redoOrder.pop();
+        _undoOrder.push(lastType2);
+        if (lastType2 === "ruler") {
+          var redoPg = _redoRuler();
+          if (redoPg !== false) ProjectStore.saveRulers(redoPg, _rulers[redoPg] || []);
+          Viewer.requestRedraw();
+          setStatus("Redo ruler", "ready");
+        } else {
+          PolygonTool.redo();
+          _refreshMeasurements();
+          Viewer.requestRedraw();
+          setStatus("Redo", "ready");
+        }
       }
       return;
     }
@@ -1158,9 +1225,25 @@ function _bindKeyboard() {
         break;
       case "Delete":
       case "Backspace":
+        // Shift+Delete: clear all rulers on current page
+        if (e.shiftKey && _rulers[_currentPage] && _rulers[_currentPage].length > 0) {
+          _pushRulerUndo(_currentPage);
+          _undoOrder.push("ruler");
+          _redoOrder = [];
+          var count = _rulers[_currentPage].length;
+          _rulers[_currentPage] = [];
+          ProjectStore.saveRulers(_currentPage, []);
+          Viewer.requestRedraw();
+          setStatus(count + " ruler" + (count > 1 ? "s" : "") + " cleared", "ready");
+          break;
+        }
         // Delete last ruler if in ruler mode, otherwise last polygon
         if (_currentTool === "ruler" && _rulers[_currentPage] && _rulers[_currentPage].length > 0) {
+          _pushRulerUndo(_currentPage);
+          _undoOrder.push("ruler");
+          _redoOrder = [];
           _rulers[_currentPage].pop();
+          ProjectStore.saveRulers(_currentPage, _rulers[_currentPage]);
           Viewer.requestRedraw();
           setStatus("Ruler deleted", "ready");
           break;
@@ -1997,6 +2080,112 @@ function exportCSV() {
 
 function exportJSON() {
   ProjectStore.download(ProjectStore.toJSON(), "pdf-parser-project.json", "application/json");
+}
+
+/* ── JSON Import ──────────────────────────────────────── */
+
+function _bindJsonImport() {
+  var jsonInput = document.getElementById("json-input");
+  if (jsonInput) {
+    jsonInput.addEventListener("change", function (e) {
+      if (e.target.files.length > 0) _importJsonFile(e.target.files[0]);
+      e.target.value = ""; // reset so same file can be re-imported
+    });
+  }
+}
+
+function _importJsonFile(file) {
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      var data = JSON.parse(e.target.result);
+    } catch (err) {
+      setStatus("Import failed: invalid JSON file", "error");
+      return;
+    }
+
+    if (!data.pages || !data.pageCount) {
+      setStatus("Import failed: not a PDF-Parser project file", "error");
+      return;
+    }
+
+    if (!Loader.isLoaded()) {
+      setStatus("Load the PDF first, then import measurements", "error");
+      return;
+    }
+
+    var pdfPageCount = Loader.getPageCount();
+    if (data.pageCount !== pdfPageCount) {
+      var proceed = confirm(
+        "Project has " +
+          data.pageCount +
+          " pages but the loaded PDF has " +
+          pdfPageCount +
+          " pages.\n\nImport anyway? (measurements will be applied to matching page numbers)"
+      );
+      if (!proceed) return;
+    }
+
+    // Restore project data into ProjectStore
+    ProjectStore.fromJSON(JSON.stringify(data));
+
+    // Restore per-page data into live modules
+    var areaCount = 0,
+      winCount = 0,
+      rulerCount = 0;
+    var maxPage = Math.min(data.pageCount, pdfPageCount);
+
+    for (var i = 0; i < maxPage; i++) {
+      var page = data.pages[i];
+      var pageNum = page.pageNum || i + 1;
+
+      // Restore polygons
+      if (page.polygons && page.polygons.length > 0) {
+        PolygonTool.loadPolygons(pageNum, page.polygons);
+        for (var pi = 0; pi < page.polygons.length; pi++) {
+          if (page.polygons[pi].type === "window") winCount++;
+          else areaCount++;
+        }
+      }
+
+      // Restore calibration
+      if (page.calibration) {
+        ScaleManager.restoreCalibration(pageNum, page.calibration);
+      }
+
+      // Restore rulers
+      if (page.rulers && page.rulers.length > 0) {
+        _rulers[pageNum] = page.rulers.slice();
+        rulerCount += page.rulers.length;
+      }
+    }
+
+    // Reset undo stacks (import is a fresh starting point)
+    _rulerUndoStack = [];
+    _rulerRedoStack = [];
+    _undoOrder = [];
+    _redoOrder = [];
+
+    // Refresh current page display
+    var pageData = ProjectStore.getPage(_currentPage);
+    _updateSheetInfo(pageData);
+    _updateScaleLabel();
+    _refreshMeasurements();
+    Viewer.requestRedraw();
+
+    setStatus(
+      "Imported: " +
+        areaCount +
+        " areas, " +
+        winCount +
+        " windows, " +
+        rulerCount +
+        " rulers from " +
+        (data.fileName || "project"),
+      "ready"
+    );
+  };
+  reader.readAsText(file);
 }
 
 /* ── Public API (exposed to HTML onclick handlers) ────── */

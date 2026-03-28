@@ -14,6 +14,12 @@ var _colorIdx = 0,
   _nextWinId = 1;
 var _undoStack = []; // snapshots for undo
 var _redoStack = [];
+var _onUndoPushCallback = null;
+
+/** Register a callback invoked whenever polygon undo state is pushed. */
+export function onUndoPush(fn) {
+  _onUndoPushCallback = fn;
+}
 
 function _pushUndo(pageNum) {
   var polys = _polygons[pageNum] || [];
@@ -23,6 +29,7 @@ function _pushUndo(pageNum) {
   });
   _redoStack = []; // clear redo on new action
   if (_undoStack.length > 50) _undoStack.shift();
+  if (_onUndoPushCallback) _onUndoPushCallback();
 }
 
 export function undo() {
@@ -576,6 +583,35 @@ export function reset() {
   _activePolyId = null;
   _colorIdx = 0;
   _nextId = 1;
+  _nextWinId = 1;
   _undoStack = [];
   _redoStack = [];
+}
+
+/**
+ * Load polygons from a saved project (import).
+ * Replaces current polygons for the given page and resets counters.
+ */
+export function loadPolygons(pageNum, polygons) {
+  _polygons[pageNum] = (polygons || []).map(function (p) {
+    return {
+      id: p.id || "poly_" + Date.now(),
+      label: p.label || "Area",
+      vertices: p.vertices || [],
+      closed: p.closed !== false,
+      type: p.type || "area",
+      mode: p.mode || "net",
+      color: POLY_COLORS[_colorIdx++ % POLY_COLORS.length],
+      _pageNum: pageNum
+    };
+  });
+  // Update counters to avoid ID collisions
+  var areaCount = 0,
+    winCount = 0;
+  for (var i = 0; i < _polygons[pageNum].length; i++) {
+    if (_polygons[pageNum][i].type === "window") winCount++;
+    else areaCount++;
+  }
+  if (areaCount >= _nextId) _nextId = areaCount + 1;
+  if (winCount >= _nextWinId) _nextWinId = winCount + 1;
 }

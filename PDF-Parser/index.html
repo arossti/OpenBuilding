@@ -55,6 +55,10 @@
         <button class="export-btn" onclick="PP.openSummaryTable()" title="View summary table">Summary</button>
         <button class="export-btn" onclick="PP.exportCSV()" title="Export measurements as CSV">CSV</button>
         <button class="export-btn" onclick="PP.exportJSON()" title="Save project as JSON">JSON</button>
+        <button class="export-btn" onclick="document.getElementById('json-input').click()" title="Import saved project">
+          Import
+        </button>
+        <input type="file" id="json-input" accept=".json" style="display: none" />
         <div class="toolbar-sep"></div>
         <a href="matrix.html" class="nav-btn" title="EC Compliance Matrix">Matrix</a>
       </div>
