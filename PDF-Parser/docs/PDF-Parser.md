@@ -755,6 +755,46 @@ Version tracking is via git commits, not step-numbered files.
 
 ---
 
+## Tablet / Mobile Compatibility
+
+The PDF-Parser is **desktop-first** — designed for mouse + keyboard workflows (scroll-wheel zoom, middle-click pan, keyboard shortcuts). However, many construction professionals review drawings on tablets (iPad, Android tablets) at job sites or in meetings.
+
+### Current State (Tablet)
+
+| Feature | iPad / Android Tablet | Notes |
+|---|---|---|
+| PDF loading | Works | File picker, drag-and-drop (iPad Files app) |
+| Page viewing | Works | Pinch-to-zoom via CSS transforms, touch scroll |
+| Page navigation | Works | Toolbar buttons, thumbnail sidebar |
+| Scale panel | Works | Touch-friendly dropdowns and buttons |
+| Summary table | Works | Scrollable modal, touch-friendly |
+| CSV / JSON export | Works | Downloads via browser share sheet |
+| JSON import | Works | File picker from Files app |
+| **Polygon drawing** | Partial | Single-tap works for vertices; no hover state for snap indicator |
+| **Rectangle drawing** | Partial | First tap sets corner, second tap completes; no drag preview |
+| **Vertex dragging** | Limited | Touch-drag works but lacks precision without mouse |
+| **Ruler tool** | Partial | Two-tap works; no rubber-band preview without hover |
+| **Keyboard shortcuts** | N/A | No physical keyboard — all tools must be accessible via toolbar buttons (currently true) |
+| **Middle-click pan** | N/A | Two-finger pan works as scroll fallback |
+| **Window measurement** | Partial | Same limitations as polygon drawing |
+
+### What Would Need to Change for Full Tablet Support
+
+1. **Touch event handlers** — currently uses `mousedown`/`mousemove`/`mouseup`. Would need parallel `touchstart`/`touchmove`/`touchend` handlers (or Pointer Events API for unified input).
+2. **Pinch-to-zoom on canvas** — currently only scroll-wheel zoom. Pinch gesture needs to be intercepted and mapped to zoom at midpoint.
+3. **Long-press for context actions** — vertex dragging, polygon close, right-click equivalents.
+4. **Snap indicator without hover** — snap preview currently relies on `mousemove`. On touch, could show snap after first tap with a "confirm" second tap.
+5. **Toolbar overflow** — toolbar is wide; would need responsive wrapping or a hamburger menu at narrow widths.
+6. **Larger touch targets** — vertex handles (currently 6px radius) would need to be larger for finger precision (minimum 22px for iOS HIG).
+
+### Recommendation
+
+**Phase 1: Desktop-only.** The measurement workflow requires precision that touch input cannot easily provide. Tablets can be used for **reviewing** measurements (summary table, CSV export, JSON import) but not for **creating** them.
+
+**Phase 2+: Tablet measurement support.** Add Pointer Events, pinch-to-zoom, larger touch targets, and long-press interactions. This is a meaningful UX project but not blocking for the BEAM integration path.
+
+---
+
 ## Open Questions
 
 1. **Scanned PDFs:** The reference set is vector (CAD-exported). Many CD sets from smaller firms or municipal archives are scanned raster images. Should Phase 1 support raster, or vector-only?
