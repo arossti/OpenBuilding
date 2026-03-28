@@ -334,6 +334,11 @@ function _handleOverlayClick(e) {
 function _handleDragMove(e) {
   if (!PolygonTool.isDragging()) return;
   var pt = Viewer.eventToPdfCoords(e);
+  // Snap during vertex drag
+  var snapRadius = 12 / (Viewer.getZoom() * (150 / 72));
+  var snap = VectorSnap.findSnap(_currentPage, pt, snapRadius);
+  _snapTarget = snap;
+  if (snap) pt = { x: snap.x, y: snap.y };
   PolygonTool.moveDrag(pt);
   Viewer.requestRedraw();
 }
@@ -342,10 +347,10 @@ function _bindDragEnd() {
   function onUp() {
     window.removeEventListener("mouseup", onUp);
     if (PolygonTool.isDragging()) {
-      var mergeRadius = 10 / (Viewer.getZoom() * (150 / 72));  // ~10 screen pixels
+      var mergeRadius = 10 / (Viewer.getZoom() * (150 / 72));
       var merged = PolygonTool.endDrag(mergeRadius);
       if (merged) setStatus("Vertices merged", "ready");
-      // Restore normal mousemove handler
+      _snapTarget = null;  // clear snap indicator
       Viewer.onOverlayMouseMove(_handleOverlayMouseMove);
       var wrap = document.getElementById("viewer-wrap");
       var cursorMap = { measure: "crosshair", calibrate: "crosshair", ruler: "crosshair", navigate: "default" };
@@ -1022,9 +1027,9 @@ function _updateMeasurements(measurements) {
   if (hasScale) {
     html += "<th>m\u00B2</th><th>ft\u00B2</th>";
   } else {
-    html += "<th colspan='2' style='color:var(--gold);font-size:10px;'>No scale — press C to calibrate</th>";
+    html += "<th colspan='2' style='color:var(--gold);font-size:10px;'>No scale — press S</th>";
   }
-  html += "</tr></thead><tbody>";
+  html += "<th></th></tr></thead><tbody>";
 
   var totalM2 = 0, totalFt2 = 0;
 
@@ -1039,6 +1044,7 @@ function _updateMeasurements(measurements) {
     } else {
       html += "<td class='num' colspan='2'>\u2014</td>";
     }
+    html += "<td class='del-cell' data-poly-idx='" + i + "' title='Delete this area'>\u00D7</td>";
     html += "</tr>";
   }
 
@@ -1065,6 +1071,19 @@ function _updateMeasurements(measurements) {
   for (var lc = 0; lc < labelCells.length; lc++) {
     labelCells[lc].addEventListener("click", function(e) {
       _startLabelEdit(this, parseInt(this.dataset.polyIdx, 10));
+    });
+  }
+
+  // Bind delete buttons
+  var delCells = els.measurePanel.querySelectorAll(".del-cell");
+  for (var dc = 0; dc < delCells.length; dc++) {
+    delCells[dc].addEventListener("click", function(e) {
+      var idx = parseInt(this.dataset.polyIdx, 10);
+      PolygonTool.deletePolygon(_currentPage, idx);
+      ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
+      _refreshMeasurements();
+      Viewer.requestRedraw();
+      setStatus("Area deleted", "ready");
     });
   }
 }
