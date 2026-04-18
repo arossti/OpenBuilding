@@ -1,0 +1,212 @@
+{
+  "$schema": "https://bfca.ca/schemas/material-v1.json",
+  "schema_version": 1,
+  "id": "clt_nordic_xlam_3_5in",
+
+  "external_refs": {
+    "beam_id": "LAM011",
+    "beam_csv_row_index": 545,
+    "mce2_id": null,
+    "ec3_id": null,
+    "ifc_material_guid": null
+  },
+
+  "naming": {
+    "display_name": "Cross Laminated Timber (CLT) / Nordic / X-Lam / 3-1/2\"",
+    "short_name": "CLT — Nordic X-Lam 3½\"",
+    "material_name": "Cross Laminated Timber",
+    "product_brand_name": "X-Lam"
+  },
+
+  "manufacturer": {
+    "name": "Nordic",
+    "country_code": "CAN",
+    "specifications": "3-1/2\"",
+    "website": null
+  },
+
+  "notes": null,
+  "source_notes": "BfCA BioC calc by mass",
+
+  "status": {
+    "listed": true,
+    "do_not_list": false,
+    "is_industry_average": false,
+    "is_beam_average": false,
+    "visibility": "public"
+  },
+
+  "classification": {
+    "division_prefix": "06",
+    "division_name": "Wood, Plastics, and Composites",
+    "category": "06_wood",
+    "csi_masterformat": null,
+    "uniformat_level2": null,
+    "material_type": "Wood",
+    "material_subtype": null,
+    "product_type": "Structure",
+    "product_subtype": "CLT",
+    "typical_elements": ["floor", "roof_deck", "wall_shear", "structural_frame"]
+  },
+
+  "rendering": {
+    "base_color": [0.82, 0.68, 0.44, 1.0],
+    "metallic": 0.0,
+    "roughness": 0.78,
+    "texture": "textures/Wood/06-CLT-XLam.jpg",
+    "has_grain": true
+  },
+
+  "physical": {
+    "density": {
+      "value_kg_m3": 456,
+      "value_lb_ft3": 28.47,
+      "source": "epd"
+    },
+    "thermal": {
+      "conductivity_w_mk": null,
+      "resistance_per_inch_rsi": null,
+      "r_value_per_inch_imperial": null,
+      "heat_capacity_j_kgk": null
+    },
+    "moisture_content_pct": null,
+    "mass_per_unit_kg": null,
+    "dimensions": {
+      "length_m": null,
+      "width_m": null,
+      "depth_m": 0.0889,
+      "unit_volume_m3": null,
+      "units_per_m2": 11.249
+    },
+    "additional_factor": {
+      "value": 0.09,
+      "units": "m thickness",
+      "description": "Nominal 3-1/2 inch thickness; used as divisor in m³→m² per-area conversion"
+    }
+  },
+
+  "carbon": {
+    "stated": {
+      "value_kgco2e": 69.96,
+      "per_unit": "m3",
+      "source": "epd",
+      "lifecycle_stages": ["A1", "A2", "A3"],
+      "_lifecycle_scope_reference": {
+        "_note": "Full EN 15804+A2 / ISO 21930 scope. LAM011 reports A1-A3 (cradle-to-gate). EU CPR/SPR-driven EPDs increasingly report A1-A5, C1-C4, and D. Schema supports all stages.",
+        "product_stage":           { "A1": "raw material supply", "A2": "transport to manufacturer", "A3": "manufacturing" },
+        "construction_stage":      { "A4": "transport to site",   "A5": "installation" },
+        "use_stage_in_service":    { "B1": "use",                 "B2": "maintenance", "B3": "repair", "B4": "replacement", "B5": "refurbishment" },
+        "use_stage_operational":   { "B6": "operational energy",  "B7": "operational water" },
+        "end_of_life":             { "C1": "deconstruction",      "C2": "transport to disposal", "C3": "waste processing", "C4": "disposal" },
+        "beyond_system_boundary":  { "D":  "reuse / recovery / recycling potential" }
+      }
+    },
+    "conversion": {
+      "to_common_unit": "m2 at 3.5\"",
+      "factor": 0.088897,
+      "factor_formula": "stated_per_m3 / units_per_m2",
+      "factor_source": "physical_dimensions",
+      "notes": "kgCO2e per m² at 3.5\" = kgCO2e per m³ ÷ 11.249 units/m² (1/0.0889)"
+    },
+    "common": {
+      "value_kgco2e": 6.22,
+      "per_functional_unit": "m2 at 3.5\"",
+      "metric_unit_label": "m²",
+      "imperial_unit_label": "ft²"
+    },
+    "biogenic": {
+      "gwp_bio_from_epd_kgco2e_per_common_unit": null,
+      "carbon_content_pct_kgc_kg": 0.5,
+      "biogenic_factor": 0.9897,
+      "storage_retention_pct": 0.9,
+      "wwf_storage_factor_kgco2e_per_kgc": 67.08,
+      "stored_kgco2e_per_common_unit": 67.08,
+      "full_carbon_kgco2e_per_common_unit": 74.53,
+      "carbon_content_kgc_per_unit": 20.31,
+      "co2_to_c_molar_ratio": 3.67,
+      "method": "wwf_storage_factor",
+      "notes": "full_C = density × thickness × biogenic_factor × carbon_content × 3.67; stored = full_C × storage_retention"
+    }
+  },
+
+  "impacts": {
+    "functional_unit": "m2 at 3.5\"",
+    "gwp_kgco2e": { "value": 6.22, "source": "beam_derived" },
+    "gwp_bio_kgco2e": { "value": null, "source": null },
+    "eutrophication_kgneq": { "value": null, "source": null },
+    "acidification_kgso2eq": { "value": null, "source": null },
+    "ozone_depletion_kgcfc11eq": { "value": null, "source": null },
+    "smog_kgo3eq": { "value": null, "source": null },
+    "abiotic_depletion_fossil_mj": { "value": null, "source": null },
+    "water_consumption_m3": { "value": null, "source": null },
+    "primary_energy_nonrenewable_mj": { "value": null, "source": null },
+    "primary_energy_renewable_mj": { "value": null, "source": null }
+  },
+
+  "cost": {
+    "unit": null,
+    "cad_per_unit": null,
+    "year": null,
+    "geography": null,
+    "source": null
+  },
+
+  "fire": {
+    "frr_hours": null,
+    "combustibility": "combustible",
+    "ulc_listing": null,
+    "flame_spread_rating": null,
+    "smoke_developed_rating": null
+  },
+
+  "code_compliance": {
+    "nbc_part_9_suitable": null,
+    "nbc_part_3_suitable": null,
+    "vbbl_s10_4_accepted": null,
+    "cov_appendix_ii_listed": null
+  },
+
+  "epd": {
+    "id": "5960-4998",
+    "type": "product_specific",
+    "owner": "Nordic Structures",
+    "prepared_by": "FPInnovations",
+    "program_operator": "CSA",
+    "validation": {
+      "type": "external",
+      "agent": "Jean-Francois Menard"
+    },
+    "publication_date": null,
+    "expiry_date": "2028-12-31",
+    "product_service_life_years": null,
+    "source_document_url": "https://drive.google.com/file/d/1rf6OkSsqOdlkwNesBZhYXLvuZWyXpoBk/view?usp=drive_link",
+    "footnote": "BfCA BioC calc by mass"
+  },
+
+  "methodology": {
+    "standards": ["ISO 21930"],
+    "pcr_guidelines": "Structural and architectural wood products, v1.1",
+    "lca_method": "TRACI 2.1",
+    "lca_software": "SimaPro 9.0003",
+    "lci_database": "US-EI 2.2",
+    "lifecycle_scope": {
+      "stages_included": ["A1", "A2", "A3"],
+      "cutoff_rule_pct": null,
+      "allocation_method": null
+    }
+  },
+
+  "provenance": {
+    "countries_of_manufacture": ["CAN"],
+    "markets_of_applicability": ["USA", "CAN"],
+    "data_added_or_modified": "2024-02-06",
+    "original_beam_added_or_modified_serial": 45328,
+    "source_notes": null,
+    "import_metadata": {
+      "imported_from": "BEAM Database-DUMP.csv",
+      "import_date": "2026-04-18",
+      "beam_csv_row_index": 545,
+      "beam_csv_sha256": null
+    }
+  }
+}

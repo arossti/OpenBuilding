@@ -1,0 +1,1008 @@
+{
+  "version": 1,
+  "materials": [
+    {
+      "id": "steel",
+      "name": "05 | Steel",
+      "category": "05_metals",
+      "base_color": [
+        0.78,
+        0.78,
+        0.8,
+        1.0
+      ],
+      "metallic": 1.0,
+      "roughness": 0.35,
+      "texture": null,
+      "has_grain": false,
+      "typical_use": [
+        "nodes",
+        "struts"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 50.0,
+        "density": 7800.0,
+        "heat_capacity": 450.0,
+        "embodied_energy": 20.1,
+        "embodied_carbon": 1.46,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — STEEL 1",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "steel_panel",
+      "name": "05 | Steel Panel",
+      "category": "05_metals",
+      "base_color": [
+        0.8,
+        0.8,
+        0.82,
+        1.0
+      ],
+      "metallic": 1.0,
+      "roughness": 0.3,
+      "texture": "textures/Metals/05-Steel-New.jpg",
+      "has_grain": false,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 50.0,
+        "density": 7800.0,
+        "heat_capacity": 450.0,
+        "embodied_energy": 20.1,
+        "embodied_carbon": 1.46,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — STEEL 1",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "steel_corrugated_seamed",
+      "name": "05 | Corrugated Steel (Seamed)",
+      "category": "05_metals",
+      "base_color": [
+        0.75,
+        0.75,
+        0.78,
+        1.0
+      ],
+      "metallic": 1.0,
+      "roughness": 0.4,
+      "texture": "textures/Metals/05-Corrugated-Seamed.jpg",
+      "has_grain": false,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 50.0,
+        "density": 7800.0,
+        "heat_capacity": 450.0,
+        "embodied_energy": 20.1,
+        "embodied_carbon": 1.46,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — STEEL 1",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "steel_corrugated_seamless",
+      "name": "05 | Corrugated Steel (Seamless)",
+      "category": "05_metals",
+      "base_color": [
+        0.75,
+        0.75,
+        0.78,
+        1.0
+      ],
+      "metallic": 1.0,
+      "roughness": 0.4,
+      "texture": "textures/Metals/05-Corrugated-Seamless.jpg",
+      "has_grain": false,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 50.0,
+        "density": 7800.0,
+        "heat_capacity": 450.0,
+        "embodied_energy": 20.1,
+        "embodied_carbon": 1.46,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — STEEL 1",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "aluminium",
+      "name": "05 | Aluminium",
+      "category": "05_metals",
+      "base_color": [
+        0.91,
+        0.91,
+        0.93,
+        1.0
+      ],
+      "metallic": 1.0,
+      "roughness": 0.45,
+      "texture": null,
+      "has_grain": false,
+      "typical_use": [
+        "struts",
+        "nodes"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 160.0,
+        "density": 2800.0,
+        "heat_capacity": 880.0,
+        "embodied_energy": 155.0,
+        "embodied_carbon": 9.16,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — ALUMINUM",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "copper",
+      "name": "05 | Copper",
+      "category": "05_metals",
+      "base_color": [
+        0.95,
+        0.64,
+        0.54,
+        1.0
+      ],
+      "metallic": 1.0,
+      "roughness": 0.4,
+      "texture": null,
+      "has_grain": false,
+      "typical_use": [
+        "nodes"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 380.0,
+        "density": 8900.0,
+        "heat_capacity": 380.0,
+        "embodied_energy": 42.0,
+        "embodied_carbon": 2.71,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — COPPER",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "galvanized",
+      "name": "05 | Galvanized Steel",
+      "category": "05_metals",
+      "base_color": [
+        0.82,
+        0.82,
+        0.8,
+        1.0
+      ],
+      "metallic": 1.0,
+      "roughness": 0.5,
+      "texture": "textures/Metals/05-Galvanized.jpg",
+      "has_grain": false,
+      "typical_use": [
+        "faces",
+        "struts"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 50.0,
+        "density": 7800.0,
+        "heat_capacity": 450.0,
+        "embodied_energy": 20.1,
+        "embodied_carbon": 1.46,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — STEEL 1 (galvanized)",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "corten_steel",
+      "name": "05 | Corten Steel",
+      "category": "05_metals",
+      "base_color": [
+        0.6,
+        0.35,
+        0.2,
+        1.0
+      ],
+      "metallic": 0.7,
+      "roughness": 0.85,
+      "texture": "textures/Metals/05-Corten-Steel.jpg",
+      "has_grain": false,
+      "typical_use": [
+        "faces",
+        "struts"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 50.0,
+        "density": 7800.0,
+        "heat_capacity": 450.0,
+        "embodied_energy": 20.1,
+        "embodied_carbon": 1.46,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — STEEL 1 (weathering)",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "douglas_fir",
+      "name": "06 | Douglas Fir (Veneer)",
+      "category": "06_wood",
+      "base_color": [
+        0.72,
+        0.53,
+        0.26,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.8,
+      "texture": "textures/Wood/06-Douglas-Fir-Grain.jpg",
+      "has_grain": true,
+      "typical_use": [
+        "struts",
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.18,
+        "density": 487.0,
+        "heat_capacity": 1600.0,
+        "embodied_energy": 12.1,
+        "embodied_carbon": 0.39,
+        "embodied_water": 0.0,
+        "data_source": "Coastland Wood EPD - Douglas Fir",
+        "data_year": 2015
+      }
+    },
+    {
+      "id": "fir_decking",
+      "name": "06 | Fir Decking",
+      "category": "06_wood",
+      "base_color": [
+        0.68,
+        0.5,
+        0.28,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.85,
+      "texture": "textures/Wood/06-Decking-DF.jpg",
+      "has_grain": true,
+      "typical_use": [
+        "struts",
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.18,
+        "density": 700.0,
+        "heat_capacity": 1600.0,
+        "embodied_energy": 12.1,
+        "embodied_carbon": 0.39,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — TIMBER 4",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "spf_decking",
+      "name": "06 | SPF Decking",
+      "category": "06_wood",
+      "base_color": [
+        0.75,
+        0.6,
+        0.4,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.8,
+      "texture": "textures/Wood/06-SPF-Decking.jpg",
+      "has_grain": true,
+      "typical_use": [
+        "struts",
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.13,
+        "density": 500.0,
+        "heat_capacity": 1600.0,
+        "embodied_energy": 6.95,
+        "embodied_carbon": 0.29,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — TIMBER 1",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "plywood_spf",
+      "name": "06 | Plywood (SPF)",
+      "category": "06_wood",
+      "base_color": [
+        0.85,
+        0.72,
+        0.48,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.65,
+      "texture": "textures/Wood/06-Plywood-SPF.jpg",
+      "has_grain": true,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.13,
+        "density": 500.0,
+        "heat_capacity": 1600.0,
+        "embodied_energy": 13.1,
+        "embodied_carbon": 0.64,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — PLYWOOD 2",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "plywood_tiling",
+      "name": "06 | Plywood (Tiling)",
+      "category": "06_wood",
+      "base_color": [
+        0.83,
+        0.7,
+        0.46,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.65,
+      "texture": "textures/Wood/06-Plywood-Tiling.jpg",
+      "has_grain": true,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.13,
+        "density": 500.0,
+        "heat_capacity": 1600.0,
+        "embodied_energy": 13.1,
+        "embodied_carbon": 0.64,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — PLYWOOD 2",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "plywood_edge_h",
+      "name": "06 | Plywood (Edge Horizontal)",
+      "category": "06_wood",
+      "base_color": [
+        0.82,
+        0.68,
+        0.44,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.65,
+      "texture": "textures/Wood/06-Plywood-Edge-H.jpg",
+      "has_grain": true,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.13,
+        "density": 500.0,
+        "heat_capacity": 1600.0,
+        "embodied_energy": 13.1,
+        "embodied_carbon": 0.64,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — PLYWOOD 2",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "plywood_edge_v",
+      "name": "06 | Plywood (Edge Vertical)",
+      "category": "06_wood",
+      "base_color": [
+        0.82,
+        0.68,
+        0.44,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.65,
+      "texture": "textures/Wood/06-Plywood-Edge-V.jpg",
+      "has_grain": true,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.13,
+        "density": 500.0,
+        "heat_capacity": 1600.0,
+        "embodied_energy": 13.1,
+        "embodied_carbon": 0.64,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — PLYWOOD 2",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "osb",
+      "name": "06 | OSB (Oriented Strand Board)",
+      "category": "06_wood",
+      "base_color": [
+        0.78,
+        0.65,
+        0.4,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.75,
+      "texture": "textures/Wood/06-OSB.png",
+      "has_grain": false,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.13,
+        "density": 650.0,
+        "heat_capacity": 1700.0,
+        "embodied_energy": 15.0,
+        "embodied_carbon": 0.9,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — OSB",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "bamboo",
+      "name": "06 | Bamboo Cladding",
+      "category": "06_wood",
+      "base_color": [
+        0.82,
+        0.74,
+        0.42,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "texture": "textures/Wood/06-Bamboo-Cladding.jpg",
+      "has_grain": true,
+      "typical_use": [
+        "struts",
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.14,
+        "density": 500.0,
+        "heat_capacity": 2300.0,
+        "embodied_energy": 10.0,
+        "embodied_carbon": 0.36,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — TIMBER 3 (bamboo proxy)",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "oak_1",
+      "name": "06 | Oak (Light 1)",
+      "category": "06_wood",
+      "base_color": [
+        0.8,
+        0.68,
+        0.45,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "texture": "textures/Wood/06-Oak-1.jpg",
+      "has_grain": true,
+      "typical_use": [
+        "struts",
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.18,
+        "density": 700.0,
+        "heat_capacity": 1600.0,
+        "embodied_energy": 12.1,
+        "embodied_carbon": 0.39,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — TIMBER 4 (hardwood)",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "oak_2",
+      "name": "06 | Oak (Light 2)",
+      "category": "06_wood",
+      "base_color": [
+        0.75,
+        0.65,
+        0.5,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "texture": "textures/Wood/06-Oak-2.jpg",
+      "has_grain": true,
+      "typical_use": [
+        "struts",
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.18,
+        "density": 700.0,
+        "heat_capacity": 1600.0,
+        "embodied_energy": 12.1,
+        "embodied_carbon": 0.39,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — TIMBER 4 (hardwood)",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "concrete",
+      "name": "03 | Concrete (Smooth)",
+      "category": "03_concrete",
+      "base_color": [
+        0.65,
+        0.65,
+        0.63,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.95,
+      "texture": null,
+      "has_grain": false,
+      "typical_use": [
+        "nodes",
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 1.7,
+        "density": 2300.0,
+        "heat_capacity": 800.0,
+        "embodied_energy": 0.88,
+        "embodied_carbon": 0.132,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — CONCRETE 4",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "concrete_01",
+      "name": "03 | Concrete 01",
+      "category": "03_concrete",
+      "base_color": [
+        0.65,
+        0.65,
+        0.63,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.92,
+      "texture": "textures/Concrete/03-Concrete-01.jpg",
+      "has_grain": false,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 1.15,
+        "density": 1800.0,
+        "heat_capacity": 1000.0,
+        "embodied_energy": 0.74,
+        "embodied_carbon": 0.107,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — CONCRETE 1",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "concrete_02",
+      "name": "03 | Concrete 02",
+      "category": "03_concrete",
+      "base_color": [
+        0.63,
+        0.63,
+        0.61,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.92,
+      "texture": "textures/Concrete/03-Concrete-02.png",
+      "has_grain": false,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 1.35,
+        "density": 2000.0,
+        "heat_capacity": 1000.0,
+        "embodied_energy": 0.78,
+        "embodied_carbon": 0.113,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — CONCRETE 2",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "concrete_03",
+      "name": "03 | Concrete 03",
+      "category": "03_concrete",
+      "base_color": [
+        0.6,
+        0.6,
+        0.58,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.93,
+      "texture": "textures/Concrete/03-Concrete-03.jpg",
+      "has_grain": false,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 1.65,
+        "density": 2200.0,
+        "heat_capacity": 1000.0,
+        "embodied_energy": 0.82,
+        "embodied_carbon": 0.12,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — CONCRETE 3",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "concrete_light",
+      "name": "03 | Concrete (Light)",
+      "category": "03_concrete",
+      "base_color": [
+        0.72,
+        0.72,
+        0.7,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.9,
+      "texture": "textures/Concrete/03-Concrete-04-Light.png",
+      "has_grain": false,
+      "typical_use": [
+        "faces",
+        "nodes"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.8,
+        "density": 2300.0,
+        "heat_capacity": 800.0,
+        "embodied_energy": 0.92,
+        "embodied_carbon": 0.15,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — CONCRETE LOW CONDUCTIVITY",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "concrete_board_formed",
+      "name": "03 | Concrete (Board-Formed)",
+      "category": "03_concrete",
+      "base_color": [
+        0.62,
+        0.6,
+        0.58,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.9,
+      "texture": "textures/Concrete/03-Concrete-Board-Formed.jpg",
+      "has_grain": false,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 1.7,
+        "density": 2300.0,
+        "heat_capacity": 800.0,
+        "embodied_energy": 0.88,
+        "embodied_carbon": 0.132,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — CONCRETE 4",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "cmr_stacked",
+      "name": "04 | CMR Block (Stacked)",
+      "category": "04_masonry",
+      "base_color": [
+        0.6,
+        0.6,
+        0.58,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.95,
+      "texture": "textures/Concrete/03-CMR-Stacked.jpg",
+      "has_grain": false,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.6,
+        "density": 1400.0,
+        "heat_capacity": 880.0,
+        "embodied_energy": 0.72,
+        "embodied_carbon": 0.088,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — CONCRETE BLOCK",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "limestone",
+      "name": "04 | Limestone Tile",
+      "category": "04_masonry",
+      "base_color": [
+        0.78,
+        0.75,
+        0.68,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.8,
+      "texture": "textures/Masonry/04-Limestone-Tile.png",
+      "has_grain": false,
+      "typical_use": [
+        "faces",
+        "nodes"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 1.7,
+        "density": 2200.0,
+        "heat_capacity": 1000.0,
+        "embodied_energy": 1.5,
+        "embodied_carbon": 0.09,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — LIMESTONE MEDIUM",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "granite",
+      "name": "04 | Stone (Granite)",
+      "category": "04_masonry",
+      "base_color": [
+        0.55,
+        0.55,
+        0.52,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.85,
+      "texture": null,
+      "has_grain": false,
+      "typical_use": [
+        "nodes"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 2.8,
+        "density": 2600.0,
+        "heat_capacity": 1000.0,
+        "embodied_energy": 10.2,
+        "embodied_carbon": 0.63,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — GRANITE 1",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "dimpleboard",
+      "name": "07 | Dimpleboard (Foundation)",
+      "category": "07_thermal",
+      "base_color": [
+        0.15,
+        0.15,
+        0.15,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.7,
+      "texture": "textures/Insulation/07-Dimpleboard.png",
+      "has_grain": false,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.5,
+        "density": 980.0,
+        "heat_capacity": 1800.0,
+        "embodied_energy": 76.7,
+        "embodied_carbon": 1.93,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — HIGH DENSITY POLYETHYLENE (HDPE membrane)",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "gps_neopor",
+      "name": "07 | GPS Neopor Insulation",
+      "category": "07_thermal",
+      "base_color": [
+        0.45,
+        0.45,
+        0.45,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.85,
+      "texture": "textures/Insulation/07-Insulation-GPS Neopor.jpeg",
+      "has_grain": false,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.032,
+        "density": 28.0,
+        "heat_capacity": 1450.0,
+        "embodied_energy": 87.4,
+        "embodied_carbon": 3.42,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — XPS (GPS Neopor proxy)",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "glass",
+      "name": "08 | Glass",
+      "category": "08_openings",
+      "base_color": [
+        0.92,
+        0.95,
+        1.0,
+        0.2
+      ],
+      "metallic": 0.0,
+      "roughness": 0.05,
+      "texture": null,
+      "has_grain": false,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 1.0,
+        "density": 2500.0,
+        "heat_capacity": 750.0,
+        "embodied_energy": 15.0,
+        "embodied_carbon": 0.91,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — SODA LIME",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "polycarbonate",
+      "name": "08 | Polycarbonate",
+      "category": "08_openings",
+      "base_color": [
+        0.95,
+        0.95,
+        0.95,
+        0.4
+      ],
+      "metallic": 0.0,
+      "roughness": 0.15,
+      "texture": null,
+      "has_grain": false,
+      "typical_use": [
+        "faces"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.2,
+        "density": 1200.0,
+        "heat_capacity": 1200.0,
+        "embodied_energy": 112.9,
+        "embodied_carbon": 7.62,
+        "embodied_water": 0.0,
+        "data_source": "MaterialCatalog.xml — POLYCARBONATE",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "painted_white",
+      "name": "09 | Painted (Matte White)",
+      "category": "09_finishes",
+      "base_color": [
+        0.95,
+        0.95,
+        0.95,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.9,
+      "texture": null,
+      "has_grain": false,
+      "typical_use": [
+        "faces",
+        "struts",
+        "nodes"
+      ],
+      "user_added": false,
+      "properties": {
+        "thermal_conductivity": 0.0,
+        "density": 0.0,
+        "heat_capacity": 0.0,
+        "embodied_energy": 0.0,
+        "embodied_carbon": 0.0,
+        "embodied_water": 0.0,
+        "data_source": "",
+        "data_year": 2025
+      }
+    },
+    {
+      "id": "painted_white_copy_33",
+      "name": "09 | Painted (Matte Red)",
+      "category": "09_finishes",
+      "base_color": [
+        1.0,
+        0.09019608,
+        0.09019608,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.9,
+      "texture": null,
+      "has_grain": false,
+      "typical_use": [
+        "faces",
+        "struts",
+        "nodes"
+      ],
+      "user_added": true,
+      "properties": {
+        "thermal_conductivity": 0.0,
+        "density": 0.0,
+        "heat_capacity": 0.0,
+        "embodied_energy": 0.0,
+        "embodied_carbon": 0.0,
+        "embodied_water": 0.0,
+        "data_source": "",
+        "data_year": 2025
+      }
+    }
+  ]
+}
