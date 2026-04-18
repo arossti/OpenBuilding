@@ -357,15 +357,15 @@ Everything here is **a strawman** — revise freely once section 4 is filled in.
 
 Small, independently-shippable slices:
 
-1. **Phase 0 — Design lock-in + shared dependency manifest + shell stub** (current). Document tabs and pattern (mostly done), build the dependency manifest page (see `PDF-Parser/dependencies.html`), scaffold `beamweb.html` with the 17 BEAM tabs in a sidebar + stubbed tab pages. No calc, no state — just navigation shell + nav-btn wired across existing apps.
-2. **Phase 1 — Shared infra**. `shared/filehandler.mjs` (JSON open/save/import, localStorage persistence) + `shared/statemanager.mjs` (project state + change events, dirty-flag propagation for the eventual calc graph). Both consumed by PDF-Parser (refactor) and BEAMweb (fresh).
-3. **Phase 2 — PROJECT tab**. Meta, energy fields, dimension fields, derived totals shell (no per-tab calcs yet — totals just sum whatever tabs produce). Unit conversion widget.
-4. **Phase 3 — First assembly tab end-to-end**. Candidate: `Footings & Slabs` (simplest geometry) or `Exterior Walls` (most representative — lots of shared infra). Pick after BEAM CSVs arrive. This phase establishes the per-row calc pattern, regression-tests against BEAM workbook output with a canonical project, and locks the per-tab module shape.
-5. **Phase 4 — Remaining assembly tabs in parallel**. Each follows the Phase 3 pattern. 15 tabs × ~1 day each → 3 weeks of focused work.
+1. **Phase 0 — Design lock-in + shared dependency manifest + shell stub** ✅. Document tabs and pattern, build the dependency manifest page ([`PDF-Parser/dependencies.html`](./PDF-Parser/dependencies.html)), scaffold [`beamweb.html`](./PDF-Parser/beamweb.html) with the 18 BEAM tabs in a sidebar + stubbed tab pages. Glossary + Energy GHG tabs ship with real content. No calc, no state — navigation shell + nav-btn wired across existing apps.
+2. **Phase 1 — Shared infra**. `PDF-Parser/js/shared/filehandler.mjs` (JSON open/save/import, localStorage persistence) + `PDF-Parser/js/shared/statemanager.mjs` (project state + change events, dirty-flag propagation for the eventual calc graph) + `PDF-Parser/js/shared/units.mjs` (§9 conversions; metric canonical, imperial display). All three consumed by PDF-Parser (refactor) and BEAMweb (fresh).
+3. **Phase 2 — PROJECT tab**. Meta, energy fields, dimension fields, derived totals shell (no per-tab calcs yet — totals just sum whatever tabs produce). Metric/imperial toggle in header wires into the units module.
+4. **Phase 3 — First assembly tab end-to-end**. Candidate: `Footings & Slabs` (simplest geometry) or `Exterior Walls` (most representative — lots of shared infra). Pick after BEAM CSVs arrive. Establishes the per-row calc pattern, regression-tests against BEAM workbook output with a canonical project, locks the per-tab module shape.
+5. **Phase 4 — Remaining assembly tabs in parallel**. Each follows the Phase 3 pattern. 13 assembly tabs × ~1 day each → ~3 weeks of focused work.
 6. **Phase 5 — REVIEW + RESULTS + reports**. Aggregation tabs, print view, CSV export of results (not export back to Excel — one-way only per §0).
 7. **Phase 6 — Excel import (reuse OBJECTIVE ExcelMapper)**. Read an MCE² or BEAM workbook into the project state. Round-trip test: import, export to JSON, re-open, numbers match within rounding tolerance.
-8. **Phase 7 — HOT2000 `.h2k` import**. Manual entry works from Phase 2; HOT2000 file import added here if feasible.
-9. **Phase 8 — PDF-Parser integration**. Polygon → assembly tab mapping UI. Shared project JSON. Live area totals.
+8. **Phase 7 — OBJECTIVE integration for operational energy** (see §10). Shared project file or cross-app nav pattern brings TEUI/TEDI + fuel consumption from OBJECTIVE into BEAMweb's PROJECT tab. HOT2000 direct-parse indefinitely deferred.
+9. **Phase 8 — PDF-Parser integration**. Polygons carry a `component` tag set at measurement time (see §7 Q11); BEAMweb reads them into assembly tabs. Shared project JSON. Live area totals.
 10. **Phase 9 — Calculation graph layer** (goal 5). Pure calc functions from Phases 3–5 wrapped in a dependency graph for topological replay on change. OBJECTIVE graph conventions consulted.
 
 ---
@@ -389,27 +389,79 @@ Small, independently-shippable slices:
 - Q3: Hidden/locked sheets in BEAM? (Andy has unlocked version — probably no issue.)
 - Q6: Waste factors — baked into material records, applied at component level, or both?
 - Q7: Garage-exclusion rule — separate tab (per BEAM tab list: `Garage` is its own tab), switch, or guidance?
-- Q7a **NEW** — Section-config unit normalisation: when a material's `functional_unit` is "m² at 3.5 inch" (CLT), does BEAM scale when the user enters a different thickness, or does it expect the functional unit to match the section config?
-- Q7b **NEW** — Multi-tab lookup chains (does `Exterior Walls` pull summary rows from `Cladding`?).
-
-**Input modalities:**
-- Q8: OBJECTIVE file-io modules to reuse — Andy will provide ExcelMapper when it is time (per §0 edit). Not needed until Phase 5.
-- Q10: HOT2000 `.h2k` parsing — is there a library, or a fixed subset to parse? How deep does the spreadsheet integrate today?
+- Q7a — Section-config unit normalisation: when a material's `functional_unit` is "m² at 3.5 inch" (CLT), does BEAM scale when the user enters a different thickness, or does it expect the functional unit to match the section config?
+- Q7b — Multi-tab lookup chains (does `Exterior Walls` pull summary rows from `Cladding`?).
 
 **Integration:**
-- Q11: Polygon → component mapping — assigned in PDF-Parser at measurement time (polygon carries `component: "wall_exterior"`), or inferred in BEAMweb from `typical_elements`?
 - Q12: Can two projects share polygons (cross-project material reuse), or is each project self-contained?
 - Q13: Does BEAMweb need read access to a completed BEAM workbook (full operational+material), or only MCE²-equivalent subset?
 
-**App location:**
-- ✅ **Q14 (on disk)** — resolved as `PDF-Parser/beamweb.html` + `js/beamweb.mjs` + `js/beam/reference-data.mjs`. Same Pages bundle, reuses shared `bfcastyles.css` (single consolidated file). Re-evaluate at Phase 5 if BEAMweb code grows large enough to warrant a dedicated `BEAMweb/` directory.
+### Answered
 
-**Units:**
-- Q16: Units — user-selectable metric/imperial toggle (MCE² has both widgets), or metric primary with on-row conversion?
+- ✅ **Q1, Q9, Q14, Q15, Q17, Q18** (tab list, Excel scope, app location, tab UX, Pages site, nav-btn) — resolved above / upthread.
+- ✅ **Q8 (OBJECTIVE file-io)** — Andy will provide ExcelMapper when Phase 6 starts.
+- ✅ **Q10 (HOT2000 `.h2k`)** — **parked indefinitely.** BEAMweb will integrate with OBJECTIVE for operational energy before it parses HOT2000 directly. See §10 below for the OBJECTIVE integration direction.
+- ✅ **Q11 (polygon → component mapping)** — tagged at measurement time in PDF-Parser. The user has the drawing open and the context is fresh when they place a polygon; PDF-Parser adds a `component` attribute to each polygon ("wall_exterior", "roof", "footing", etc.) which BEAMweb reads on import. This is a PDF-Parser Step 10 change; BEAMweb just consumes it.
+- ✅ **Q16 (units)** — metric foundation, display-time conversion, per-user toggle. See §9 below.
+- ✅ **Reference tabs shipped** — Glossary (48 terms, live search) + Energy GHG (13 provinces × 5 fuel factors) are Phase 0 deliverables in `PDF-Parser/js/beam/reference-data.mjs`.
 
-**Reference tabs (answered by shipping in Phase 0):**
-- ✅ Glossary tab shipped — 48 terms inline, searchable. Data lives at `PDF-Parser/js/beam/reference-data.mjs` (`GLOSSARY` export). Source CSV at `docs/csv files from BEAM/Glossary.csv` is redundant and can be deleted.
-- ✅ Energy GHG tab shipped — 13 provinces × 5 fuel factors, read-only. Data lives in the same module (`ENERGY_GHG` export). Source CSV at `docs/csv files from BEAM/Energy GHG.csv` is redundant and can be deleted. Project-level overrides land once the Phase 1 state manager is in.
+---
+
+## 9. Units — metric canonical, imperial display layer
+
+**Storage contract** — every numeric field in every project JSON is stored in metric (m, m², m³, kg, kgCO2e). There is no imperial mirror in the serialized file. Consumers that want imperial compute it at display time.
+
+**User preference** — a metric/imperial toggle lives in the header (like MCE²'s unit widget in the top-right of PROJECT), persisted in `localStorage` per-user (survives across projects). Default: metric.
+
+**Why**: Canadian practice splits along the Part 9 / Part 3 line. Part 3 AHJs, reviewers, commercial builders: overwhelmingly metric. Part 9 builders + Energy Advisors: often still imperial on paper. Both need to be first-class, but the model itself should never have two sources of truth for any quantity. Storage in metric keeps the calc engine simple and deterministic; display-only imperial keeps the UX familiar for Part 9 workflows.
+
+**Shared utility — planned as `PDF-Parser/js/shared/units.mjs`**
+
+One small ES module used by PDF-Parser, BEAMweb, and any future app:
+
+```js
+// Canonical conversions. Metric is the base; imperial is one-way display.
+export const UNITS = {
+  length: { m: 1, ft: 0.3048, in: 0.0254 },
+  area:   { m2: 1, ft2: 0.09290304 },
+  volume: { m3: 1, ft3: 0.028316846592 },
+  mass:   { kg: 1, lb: 0.45359237 },
+};
+
+export function fmt(metricValue, kind, displayUnit) {
+  // metricValue × conversion → display string with locale-aware rounding
+}
+
+export function parseUserInput(text, kind, userUnit) {
+  // "12 ft" → 3.6576 (metric). Rejects ambiguous input.
+}
+```
+
+- **Read-only from the calc engine**. Calc never sees imperial.
+- **PDF-Parser reconciliation**: PDF-Parser today auto-detects metric/imperial from the drawing for calibration. When the polygon is saved to JSON, convert-to-metric at write time. Reading a polygon from project JSON? Always metric. Displaying the polygon's label on the drawing? Convert to user's display preference.
+- **Lands in Phase 1** alongside `shared/filehandler.mjs` and `shared/statemanager.mjs` — state manager needs unit semantics when hydrating project state.
+
+**Edge case** — materials' `functional_unit` strings (e.g., `"m2 at 3.5\""`) are mixed-unit by design and stay as literal strings. `shared/units.mjs` does not try to parse them.
+
+---
+
+## 10. Operational energy — OBJECTIVE integration (not HOT2000)
+
+**Q10 replacement direction.** HOT2000 `.h2k` parsing parked indefinitely. Instead, BEAMweb's operational-emissions inputs come from OBJECTIVE (the team's existing energy-modelling app) either via:
+
+1. **Shared project JSON** — OBJECTIVE saves a project file that BEAMweb can open (or a subset of). Same `shared/filehandler.mjs` + `shared/statemanager.mjs` scaffold that BEAMweb uses.
+2. **Cross-app nav with state preservation** — adapt OBJECTIVE's `saveStateAndNavigate()` pattern so clicking from OBJECTIVE into BEAMweb (or reverse) carries the shared meta + energy consumption forward.
+3. **Manual entry fallback** — when no OBJECTIVE project is attached, the PROJECT tab energy fields accept manual kWh / m³ / L / kg inputs (parallels MCE² today).
+
+What BEAMweb needs from OBJECTIVE for operational energy (provisional):
+- Heated floor area, heating degree days, province (already part of both models)
+- Annual consumption: electricity (kWh), natural gas (m³), propane (L), oil (L), wood (kg)
+- On-site generation (kWh)
+- Optionally: TEUI / TEDI targets for side-by-side presentation on REVIEW
+
+BEAMweb applies the Energy GHG factors (tab 18) to produce operational emissions, not OBJECTIVE. OBJECTIVE owns *modelling*; BEAMweb owns *carbon accounting*.
+
+**Sequencing** — design the integration during Phase 7 (previously HOT2000 import); sooner if OBJECTIVE's file format is nailed down. Needs a deeper design conversation with Mark / OBJECTIVE team.
 
 ---
 
@@ -421,7 +473,7 @@ Small, independently-shippable slices:
 | **PDF-Parser** | Reads polygon → area / volume data from a shared project JSON. | Will need polygons to carry a material reference + component tag. That's shared work — land it in PDF-Parser's Step 10. |
 | **Database viewer** | Could become the picker UI inside BEAMweb (reused as a modal). | No change. |
 | **Matrix** | Independent. Linked from the shared nav only. | No change. |
-| **OBJECTIVE** | Lift file-handling patterns (xlsx read/write). | None — we only borrow conventions. |
+| **OBJECTIVE** | Lift file-handling patterns (xlsx read/write) in Phase 6. In Phase 7, **runtime integration**: OBJECTIVE supplies operational energy inputs (TEUI/TEDI, fuel consumption) via shared project JSON or `saveStateAndNavigate`-style cross-app nav. Replaces HOT2000 direct-parse (Q10 parked). See §10. | Shared project-file format converges with OBJECTIVE's. If OBJECTIVE bumps its schema, BEAMweb's file-handler has to track. Needs design conversation with Mark / OBJECTIVE team before Phase 7 code starts. |
 | **EPD PDF parser** (Phase 2 of schema) | When it lands, it fills `impacts.*.by_stage` on material records. BEAMweb will auto-get per-stage totals. | No direct coupling. |
 
 ---
@@ -436,6 +488,7 @@ Small, independently-shippable slices:
 
 ## Appendix — Changelog
 
+- **2026-04-18 (session 2, Q11/Q16/Q10 resolved)** — Polygon → component mapping locked in: tag at measurement time in PDF-Parser (user knows the context when placing the polygon). Units contract locked in: metric canonical in storage, imperial at display time only, per-user toggle persisted in localStorage; new §9 documents a planned `PDF-Parser/js/shared/units.mjs` for Phase 1. HOT2000 direct-parse parked indefinitely (may never happen); replaced by Phase 7 OBJECTIVE integration for operational energy — new §10 sketches the direction. Phase breakdown + relationships updated accordingly.
 - **2026-04-18 (session 2, ref tabs)** — Glossary + Energy GHG tabs ship as Phase 0 informational. 48 glossary terms (abbr / full / description, with live search) and 13-province × 5-fuel-factor Energy GHG table live at `PDF-Parser/js/beam/reference-data.mjs`. CSVs at `docs/csv files from BEAM/{Glossary,Energy GHG}.csv` now redundant and safe to delete. Q14 (app location) marked resolved: shipping at `PDF-Parser/beamweb.html` + `js/beamweb.mjs` + `js/beam/reference-data.mjs`.
 - **2026-04-18 (session 2)** — Doc revised after Andy's review. Tab list resolved (BEAM authoritative, 17 tabs + Energy GHG optional); nav-btn label set to `BEAM`. Section 2.3 added — assembly-tab pattern discovered from MCE² CSVs in `docs/csv files from BEAM/` (inline material toggle rows per tab, pre-curated subset of the 821-material DB, per-row SELECT+QUANTITY+%, section-level config like thickness/R-value). Section 4 populated with calc shape inferred from MCE² column labels; exact formulas await BEAM CSV exports from Andy's unlocked workbook. Section 7 open-questions re-triaged with answers/partials. Phase breakdown revised (10 phases). Goal 5 added — calculation graph consideration.
 - **2026-04-18 (session 1)** — BEAMweb workstream spun up. Document seeded with scaffold + open questions. Schema Phase 3 (standalone material picker) explicitly subsumed: the picker becomes inline toggles inside BEAMweb assembly tabs rather than a PDF-Parser feature.
