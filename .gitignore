@@ -4,6 +4,10 @@
 node_modules/
 PDF-Parser/logs/
 
+# Local staging of schema/ data into PDF-Parser/data/schema via `npm run stage:data`.
+# Not committed — the Pages workflow does the same copy at deploy time.
+PDF-Parser/data/schema/
+
 # Large binary files (will be managed with DVC)
 *.ifc
 *.ifc.zip

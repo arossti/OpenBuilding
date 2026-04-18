@@ -1,0 +1,1006 @@
+{
+  "division": "31",
+  "count": 5,
+  "records": [
+    {
+      "$schema": "https://bfca.ca/schemas/material-v1.json",
+      "schema_version": 1,
+      "id": "2c53be",
+      "external_refs": {
+        "beam_id": "2c53be",
+        "beam_csv_row_index": 2
+      },
+      "naming": {
+        "display_name": "Aggregate / NRMCA / US Average [Industry Avg]",
+        "material_name": "Aggregate"
+      },
+      "manufacturer": {
+        "name": "NRMCA",
+        "specifications": "Avg construction aggregate (gravel & sand)"
+      },
+      "source_notes": "Expired 2023",
+      "status": {
+        "listed": true,
+        "do_not_list": false,
+        "is_industry_average": true,
+        "is_beam_average": false,
+        "visibility": "public"
+      },
+      "classification": {
+        "division_prefix": "31",
+        "division_name": "Earthwork",
+        "category": "31_earthwork",
+        "material_type": "Aggregate",
+        "material_subtype": "Stone & Sand",
+        "product_type": "Construction aggregate",
+        "product_subtype": "Crushed Stone",
+        "typical_elements": [
+          "slab_on_grade",
+          "foundation"
+        ]
+      },
+      "rendering": {
+        "base_color": [
+          0.55,
+          0.5,
+          0.45,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "has_grain": false
+      },
+      "physical": {
+        "density": {
+          "value_kg_m3": 1682,
+          "value_lb_ft3": 105.01,
+          "source": "epd"
+        }
+      },
+      "carbon": {
+        "stated": {
+          "value_kgco2e": 9.52,
+          "per_unit": "MT",
+          "source": "industry_average",
+          "lifecycle_stages": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        },
+        "conversion": {
+          "to_common_unit": "m³"
+        },
+        "common": {
+          "value_kgco2e": 16.01,
+          "per_functional_unit": "m³",
+          "metric_unit_label": "m³",
+          "imperial_unit_label": "ft³"
+        },
+        "biogenic": {
+          "method": "none"
+        }
+      },
+      "impacts": {
+        "functional_unit": "m³",
+        "gwp_kgco2e": {
+          "total": {
+            "value": 16.01,
+            "source": "beam_derived"
+          },
+          "by_stage": {}
+        },
+        "gwp_bio_kgco2e": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "eutrophication_kgneq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "acidification_kgso2eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "ozone_depletion_kgcfc11eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "smog_kgo3eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "abiotic_depletion_fossil_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "water_consumption_m3": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_nonrenewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_renewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        }
+      },
+      "fire": {
+        "combustibility": "non_combustible"
+      },
+      "epd": {
+        "id": "NRMCAEPD: 10020",
+        "type": "industry_average",
+        "owner": "NRMCA",
+        "prepared_by": "Athena",
+        "expiry_date": "2023-12-31",
+        "footnote": "Expired 2023"
+      },
+      "methodology": {
+        "standards": [],
+        "lifecycle_scope": {
+          "stages_included": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        }
+      },
+      "provenance": {
+        "countries_of_manufacture": [],
+        "markets_of_applicability": [
+          "USA"
+        ],
+        "import_metadata": {
+          "imported_from": "BEAM Database-DUMP.csv",
+          "import_date": "2026-04-18",
+          "beam_csv_row_index": 2,
+          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+        }
+      },
+      "cost": {},
+      "code_compliance": {}
+    },
+    {
+      "$schema": "https://bfca.ca/schemas/material-v1.json",
+      "schema_version": 1,
+      "id": "s12345",
+      "external_refs": {
+        "beam_id": "S12345",
+        "beam_csv_row_index": 616
+      },
+      "naming": {
+        "display_name": "Ground screw / American Ground Screw / AGS IM3316 / 76 x 1600 mm",
+        "material_name": "Ground screw",
+        "product_brand_name": "AGS Ground Screws IM3316"
+      },
+      "manufacturer": {
+        "name": "American Ground Screw",
+        "country_code": "CHN",
+        "specifications": "76 x 1600 mm"
+      },
+      "status": {
+        "listed": true,
+        "do_not_list": false,
+        "is_industry_average": false,
+        "is_beam_average": false,
+        "visibility": "public"
+      },
+      "classification": {
+        "division_prefix": "31",
+        "division_name": "Earthwork",
+        "category": "31_earthwork",
+        "material_type": "Ground screw",
+        "product_type": "Foundation",
+        "product_subtype": "Pier",
+        "typical_elements": [
+          "foundation"
+        ]
+      },
+      "rendering": {
+        "base_color": [
+          0.55,
+          0.5,
+          0.45,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "has_grain": false
+      },
+      "physical": {
+        "density": {
+          "value_kg_m3": 11.93,
+          "value_lb_ft3": 0.74,
+          "source": "epd"
+        },
+        "dimensions": {
+          "units_per_m2": 1.6
+        }
+      },
+      "carbon": {
+        "stated": {
+          "value_kgco2e": 43.5,
+          "per_unit": "1600 mm",
+          "source": "epd",
+          "lifecycle_stages": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        },
+        "conversion": {
+          "to_common_unit": "m",
+          "factor": 0.625,
+          "factor_formula": "stated_per_1600_mm / units_per_m2",
+          "factor_source": "physical_dimensions",
+          "notes": "1600 mm → m via 1.6 units/m²"
+        },
+        "common": {
+          "value_kgco2e": 27.19,
+          "per_functional_unit": "m",
+          "metric_unit_label": "m",
+          "imperial_unit_label": "ft"
+        },
+        "biogenic": {
+          "method": "none"
+        }
+      },
+      "impacts": {
+        "functional_unit": "m",
+        "gwp_kgco2e": {
+          "total": {
+            "value": 27.19,
+            "source": "beam_derived"
+          },
+          "by_stage": {}
+        },
+        "gwp_bio_kgco2e": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "eutrophication_kgneq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "acidification_kgso2eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "ozone_depletion_kgcfc11eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "smog_kgo3eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "abiotic_depletion_fossil_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "water_consumption_m3": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_nonrenewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_renewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        }
+      },
+      "fire": {
+        "combustibility": "non_combustible"
+      },
+      "epd": {
+        "id": "EPD 456",
+        "type": "product_specific",
+        "owner": "American Ground Screw",
+        "prepared_by": "Athena Sustainable Materials Institute",
+        "program_operator": "ASTM",
+        "validation": {
+          "type": "external",
+          "agent": "Tom Gloria, Industrial Ecology Consultants"
+        },
+        "expiry_date": "2028-12-31"
+      },
+      "methodology": {
+        "standards": [
+          "ISO 21931"
+        ],
+        "pcr_guidelines": "ISO 21930:2017",
+        "lca_method": "TRACI 2.1",
+        "lca_software": "SimaPro 9.4",
+        "lifecycle_scope": {
+          "stages_included": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        }
+      },
+      "provenance": {
+        "countries_of_manufacture": [
+          "CHN"
+        ],
+        "markets_of_applicability": [
+          "USA",
+          "CAN"
+        ],
+        "data_added_or_modified": "2024-02-02",
+        "original_beam_added_or_modified_serial": 45324,
+        "import_metadata": {
+          "imported_from": "BEAM Database-DUMP.csv",
+          "import_date": "2026-04-18",
+          "beam_csv_row_index": 616,
+          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+        }
+      },
+      "cost": {},
+      "code_compliance": {}
+    },
+    {
+      "$schema": "https://bfca.ca/schemas/material-v1.json",
+      "schema_version": 1,
+      "id": "s12346",
+      "external_refs": {
+        "beam_id": "S12346",
+        "beam_csv_row_index": 617
+      },
+      "naming": {
+        "display_name": "Ground screw / American Ground Screw / AGS IM4516 / 114 x 1600 mm",
+        "material_name": "Ground screw",
+        "product_brand_name": "AGS Ground Screws IM4516"
+      },
+      "manufacturer": {
+        "name": "American Ground Screw",
+        "country_code": "CHN",
+        "specifications": "114 x 1600 mm"
+      },
+      "status": {
+        "listed": true,
+        "do_not_list": false,
+        "is_industry_average": false,
+        "is_beam_average": false,
+        "visibility": "public"
+      },
+      "classification": {
+        "division_prefix": "31",
+        "division_name": "Earthwork",
+        "category": "31_earthwork",
+        "material_type": "Ground screw",
+        "product_type": "Foundation",
+        "product_subtype": "Pier",
+        "typical_elements": [
+          "foundation"
+        ]
+      },
+      "rendering": {
+        "base_color": [
+          0.55,
+          0.5,
+          0.45,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "has_grain": false
+      },
+      "physical": {
+        "density": {
+          "value_kg_m3": 17.81,
+          "value_lb_ft3": 1.11,
+          "source": "epd"
+        },
+        "dimensions": {
+          "units_per_m2": 1.6
+        }
+      },
+      "carbon": {
+        "stated": {
+          "value_kgco2e": 65.9,
+          "per_unit": "1600 mm",
+          "source": "epd",
+          "lifecycle_stages": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        },
+        "conversion": {
+          "to_common_unit": "m",
+          "factor": 0.625,
+          "factor_formula": "stated_per_1600_mm / units_per_m2",
+          "factor_source": "physical_dimensions",
+          "notes": "1600 mm → m via 1.6 units/m²"
+        },
+        "common": {
+          "value_kgco2e": 41.19,
+          "per_functional_unit": "m",
+          "metric_unit_label": "m",
+          "imperial_unit_label": "ft"
+        },
+        "biogenic": {
+          "method": "none"
+        }
+      },
+      "impacts": {
+        "functional_unit": "m",
+        "gwp_kgco2e": {
+          "total": {
+            "value": 41.19,
+            "source": "beam_derived"
+          },
+          "by_stage": {}
+        },
+        "gwp_bio_kgco2e": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "eutrophication_kgneq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "acidification_kgso2eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "ozone_depletion_kgcfc11eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "smog_kgo3eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "abiotic_depletion_fossil_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "water_consumption_m3": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_nonrenewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_renewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        }
+      },
+      "fire": {
+        "combustibility": "non_combustible"
+      },
+      "epd": {
+        "id": "EPD 456",
+        "type": "product_specific",
+        "owner": "American Ground Screw",
+        "prepared_by": "Athena Sustainable Materials Institute",
+        "program_operator": "ASTM",
+        "validation": {
+          "type": "external",
+          "agent": "Tom Gloria, Industrial Ecology Consultants"
+        },
+        "expiry_date": "2028-12-31"
+      },
+      "methodology": {
+        "standards": [
+          "ISO 21931"
+        ],
+        "pcr_guidelines": "ISO 21930:2017",
+        "lca_method": "TRACI 2.1",
+        "lca_software": "SimaPro 9.4",
+        "lifecycle_scope": {
+          "stages_included": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        }
+      },
+      "provenance": {
+        "countries_of_manufacture": [
+          "CHN"
+        ],
+        "markets_of_applicability": [
+          "USA",
+          "CAN"
+        ],
+        "data_added_or_modified": "2024-02-02",
+        "original_beam_added_or_modified_serial": 45324,
+        "import_metadata": {
+          "imported_from": "BEAM Database-DUMP.csv",
+          "import_date": "2026-04-18",
+          "beam_csv_row_index": 617,
+          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+        }
+      },
+      "cost": {},
+      "code_compliance": {}
+    },
+    {
+      "$schema": "https://bfca.ca/schemas/material-v1.json",
+      "schema_version": 1,
+      "id": "s12347",
+      "external_refs": {
+        "beam_id": "S12347",
+        "beam_csv_row_index": 618
+      },
+      "naming": {
+        "display_name": "Ground screw / Krinner / E-Series E89x1000-E60 / 89 x 1000 mm [EU]",
+        "material_name": "Ground screw",
+        "product_brand_name": "E-Series E89x1000-E60"
+      },
+      "manufacturer": {
+        "name": "Krinner",
+        "country_code": "EU",
+        "specifications": "89 x 1000 mm"
+      },
+      "status": {
+        "listed": true,
+        "do_not_list": false,
+        "is_industry_average": false,
+        "is_beam_average": false,
+        "visibility": "public"
+      },
+      "classification": {
+        "division_prefix": "31",
+        "division_name": "Earthwork",
+        "category": "31_earthwork",
+        "material_type": "Ground screw",
+        "product_type": "Foundation",
+        "product_subtype": "Pier",
+        "typical_elements": [
+          "foundation"
+        ]
+      },
+      "rendering": {
+        "base_color": [
+          0.55,
+          0.5,
+          0.45,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "has_grain": false
+      },
+      "physical": {
+        "density": {
+          "value_kg_m3": 5.5,
+          "value_lb_ft3": 0.34,
+          "source": "epd"
+        }
+      },
+      "carbon": {
+        "stated": {
+          "value_kgco2e": 2.39,
+          "per_unit": "kg",
+          "source": "epd",
+          "lifecycle_stages": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        },
+        "conversion": {
+          "to_common_unit": "m"
+        },
+        "common": {
+          "value_kgco2e": 13.15,
+          "per_functional_unit": "m",
+          "metric_unit_label": "m",
+          "imperial_unit_label": "ft"
+        },
+        "biogenic": {
+          "method": "none"
+        }
+      },
+      "impacts": {
+        "functional_unit": "m",
+        "gwp_kgco2e": {
+          "total": {
+            "value": 13.15,
+            "source": "beam_derived"
+          },
+          "by_stage": {}
+        },
+        "gwp_bio_kgco2e": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "eutrophication_kgneq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "acidification_kgso2eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "ozone_depletion_kgcfc11eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "smog_kgo3eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "abiotic_depletion_fossil_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "water_consumption_m3": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_nonrenewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_renewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        }
+      },
+      "fire": {
+        "combustibility": "non_combustible"
+      },
+      "epd": {
+        "id": "EPD-KRI-20230308-IBC1-EN",
+        "type": "product_specific",
+        "owner": "Krinner Ground Screws",
+        "prepared_by": "IBU",
+        "program_operator": "IBU",
+        "validation": {
+          "type": "external",
+          "agent": "Matthias Klingler"
+        },
+        "expiry_date": "2028-12-31"
+      },
+      "methodology": {
+        "standards": [
+          "EN 15804+A2"
+        ],
+        "pcr_guidelines": "Structural steels 01.08.2021",
+        "lifecycle_scope": {
+          "stages_included": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        }
+      },
+      "provenance": {
+        "countries_of_manufacture": [
+          "EU"
+        ],
+        "markets_of_applicability": [
+          "EU"
+        ],
+        "data_added_or_modified": "2024-02-02",
+        "original_beam_added_or_modified_serial": 45324,
+        "import_metadata": {
+          "imported_from": "BEAM Database-DUMP.csv",
+          "import_date": "2026-04-18",
+          "beam_csv_row_index": 618,
+          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+        }
+      },
+      "cost": {},
+      "code_compliance": {}
+    },
+    {
+      "$schema": "https://bfca.ca/schemas/material-v1.json",
+      "schema_version": 1,
+      "id": "s12348",
+      "external_refs": {
+        "beam_id": "S12348",
+        "beam_csv_row_index": 619
+      },
+      "naming": {
+        "display_name": "Ground screw / Krinner / E-Series E140x1600-E76-100 / 140 x 1600 mm [EU]",
+        "material_name": "Ground screw",
+        "product_brand_name": "E-Series E140x1600-E76-100"
+      },
+      "manufacturer": {
+        "name": "Krinner",
+        "country_code": "EU",
+        "specifications": "140 x 1600 mm"
+      },
+      "status": {
+        "listed": true,
+        "do_not_list": false,
+        "is_industry_average": false,
+        "is_beam_average": false,
+        "visibility": "public"
+      },
+      "classification": {
+        "division_prefix": "31",
+        "division_name": "Earthwork",
+        "category": "31_earthwork",
+        "material_type": "Ground screw",
+        "product_type": "Foundation",
+        "product_subtype": "Pier",
+        "typical_elements": [
+          "foundation"
+        ]
+      },
+      "rendering": {
+        "base_color": [
+          0.55,
+          0.5,
+          0.45,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "has_grain": false
+      },
+      "physical": {
+        "density": {
+          "value_kg_m3": 5.5,
+          "value_lb_ft3": 0.34,
+          "source": "epd"
+        }
+      },
+      "carbon": {
+        "stated": {
+          "value_kgco2e": 2.39,
+          "per_unit": "kg",
+          "source": "epd",
+          "lifecycle_stages": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        },
+        "conversion": {
+          "to_common_unit": "m"
+        },
+        "common": {
+          "value_kgco2e": 44.22,
+          "per_functional_unit": "m",
+          "metric_unit_label": "m",
+          "imperial_unit_label": "ft"
+        },
+        "biogenic": {
+          "method": "none"
+        }
+      },
+      "impacts": {
+        "functional_unit": "m",
+        "gwp_kgco2e": {
+          "total": {
+            "value": 44.22,
+            "source": "beam_derived"
+          },
+          "by_stage": {}
+        },
+        "gwp_bio_kgco2e": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "eutrophication_kgneq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "acidification_kgso2eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "ozone_depletion_kgcfc11eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "smog_kgo3eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "abiotic_depletion_fossil_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "water_consumption_m3": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_nonrenewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_renewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        }
+      },
+      "fire": {
+        "combustibility": "non_combustible"
+      },
+      "epd": {
+        "id": "EPD-KRI-20230308-IBC1-EN",
+        "type": "product_specific",
+        "owner": "Krinner Ground Screws",
+        "prepared_by": "IBU",
+        "program_operator": "IBU",
+        "validation": {
+          "type": "external",
+          "agent": "Matthias Klingler"
+        },
+        "expiry_date": "2028-12-31"
+      },
+      "methodology": {
+        "standards": [
+          "EN 15804+A2"
+        ],
+        "pcr_guidelines": "Structural steels 01.08.2021",
+        "lifecycle_scope": {
+          "stages_included": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        }
+      },
+      "provenance": {
+        "countries_of_manufacture": [
+          "EU"
+        ],
+        "markets_of_applicability": [
+          "EU"
+        ],
+        "data_added_or_modified": "2024-02-02",
+        "original_beam_added_or_modified_serial": 45324,
+        "import_metadata": {
+          "imported_from": "BEAM Database-DUMP.csv",
+          "import_date": "2026-04-18",
+          "beam_csv_row_index": 619,
+          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+        }
+      },
+      "cost": {},
+      "code_compliance": {}
+    }
+  ]
+}

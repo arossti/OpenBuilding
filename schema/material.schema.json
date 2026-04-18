@@ -1,0 +1,393 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bfca.ca/schemas/material-v1.json",
+  "title": "BfCA Material Record (v1.1)",
+  "description": "Canonical JSON record for one material. Shared by BEAM.js, PDF-Parser material picker, ABCD.EARTH renderer, future cost/fire/code-compliance consumers. Every consumer reads only the fields it needs; producers emit the full schema-complete shape with nulls where unavailable. See schema.md for the design rationale.",
+  "type": "object",
+  "required": ["$schema", "schema_version", "id", "external_refs", "naming", "manufacturer", "status", "classification", "rendering", "physical", "carbon", "impacts", "cost", "fire", "code_compliance", "epd", "methodology", "provenance"],
+  "_note_validation": "Records are sparse-by-default: scalar null leaves are omitted from emitted JSON. This schema's `required` lists only include structurally-necessary keys (outer shape, impact blocks, arrays that must exist). Nullable scalars are optional but type-checked when present. sample.json remains schema-complete as a human-readable template; per-material records in materials/*.json are sparse.",
+  "additionalProperties": false,
+
+  "$defs": {
+    "iso3166_alpha3_or_scope": {
+      "description": "ISO 3166-1 alpha-3 country code, or BfCA scope marker (EU, GLB)",
+      "type": "string",
+      "pattern": "^[A-Z]{2,3}$"
+    },
+
+    "iso_date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+
+    "rgba": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "type": "number", "minimum": 0, "maximum": 1 }
+    },
+
+    "lifecycle_stage": {
+      "type": "string",
+      "enum": ["A1","A2","A3","A4","A5","B1","B2","B3","B4","B5","B6","B7","C1","C2","C3","C4","D"]
+    },
+
+    "impact_source": {
+      "type": ["string", "null"],
+      "enum": ["epd_direct","beam_derived","industry_average","estimated", null]
+    },
+
+    "impact_value": {
+      "type": "object",
+      "required": ["value", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "value":  { "type": ["number", "null"] },
+        "source": { "$ref": "#/$defs/impact_source" }
+      }
+    },
+
+    "impact_block": {
+      "description": "One impact category. total is aggregate over stages declared in carbon.stated.lifecycle_stages; by_stage carries per-stage values where the source EPD reports them.",
+      "type": "object",
+      "required": ["total", "by_stage"],
+      "additionalProperties": false,
+      "properties": {
+        "total": { "$ref": "#/$defs/impact_value" },
+        "by_stage": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "A1": { "$ref": "#/$defs/impact_value" },
+            "A2": { "$ref": "#/$defs/impact_value" },
+            "A3": { "$ref": "#/$defs/impact_value" },
+            "A4": { "$ref": "#/$defs/impact_value" },
+            "A5": { "$ref": "#/$defs/impact_value" },
+            "B1": { "$ref": "#/$defs/impact_value" },
+            "B2": { "$ref": "#/$defs/impact_value" },
+            "B3": { "$ref": "#/$defs/impact_value" },
+            "B4": { "$ref": "#/$defs/impact_value" },
+            "B5": { "$ref": "#/$defs/impact_value" },
+            "B6": { "$ref": "#/$defs/impact_value" },
+            "B7": { "$ref": "#/$defs/impact_value" },
+            "C1": { "$ref": "#/$defs/impact_value" },
+            "C2": { "$ref": "#/$defs/impact_value" },
+            "C3": { "$ref": "#/$defs/impact_value" },
+            "C4": { "$ref": "#/$defs/impact_value" },
+            "D":  { "$ref": "#/$defs/impact_value" }
+          }
+        }
+      }
+    }
+  },
+
+  "properties": {
+    "$schema":        { "type": "string" },
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "id":             { "type": "string", "minLength": 1 },
+    "notes":          { "type": ["string", "null"] },
+    "source_notes":   { "type": ["string", "null"] },
+
+    "external_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "beam_id":            { "type": ["string", "null"] },
+        "beam_csv_row_index": { "type": ["integer", "null"] },
+        "mce2_id":            { "type": ["string", "null"] },
+        "ec3_id":             { "type": ["string", "null"] },
+        "ifc_material_guid":  { "type": ["string", "null"] }
+      }
+    },
+
+    "naming": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "display_name":       { "type": ["string", "null"] },
+        "short_name":         { "type": ["string", "null"] },
+        "material_name":      { "type": ["string", "null"] },
+        "product_brand_name": { "type": ["string", "null"] }
+      }
+    },
+
+    "manufacturer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name":           { "type": ["string", "null"] },
+        "country_code":   { "type": ["string", "null"], "pattern": "^[A-Z]{2,3}$" },
+        "specifications": { "type": ["string", "null"] },
+        "website":        { "type": ["string", "null"] }
+      }
+    },
+
+    "status": {
+      "type": "object",
+      "required": ["listed", "do_not_list", "is_industry_average", "is_beam_average", "visibility"],
+      "additionalProperties": false,
+      "properties": {
+        "listed":              { "type": "boolean" },
+        "do_not_list":         { "type": "boolean" },
+        "is_industry_average": { "type": "boolean" },
+        "is_beam_average":     { "type": "boolean" },
+        "visibility":          { "type": "string", "enum": ["public", "hidden", "deprecated"] }
+      }
+    },
+
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "division_prefix":  { "type": ["string", "null"], "pattern": "^[0-9]{2}$" },
+        "division_name":    { "type": ["string", "null"] },
+        "category":         { "type": ["string", "null"] },
+        "csi_masterformat": { "type": ["string", "null"] },
+        "uniformat_level2": { "type": ["string", "null"] },
+        "material_type":    { "type": ["string", "null"] },
+        "material_subtype": { "type": ["string", "null"] },
+        "product_type":     { "type": ["string", "null"] },
+        "product_subtype":  { "type": ["string", "null"] },
+        "typical_elements": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "rendering": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "base_color": { "$ref": "#/$defs/rgba" },
+        "metallic":   { "type": "number", "minimum": 0, "maximum": 1 },
+        "roughness":  { "type": "number", "minimum": 0, "maximum": 1 },
+        "texture":    { "type": ["string", "null"] },
+        "has_grain":  { "type": "boolean" }
+      }
+    },
+
+    "physical": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "density": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value_kg_m3":  { "type": ["number", "null"] },
+            "value_lb_ft3": { "type": ["number", "null"] },
+            "source":       { "type": ["string", "null"], "enum": ["epd", "estimated", "materials_science", null] }
+          }
+        },
+        "thermal": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "conductivity_w_mk":          { "type": ["number", "null"] },
+            "resistance_per_inch_rsi":    { "type": ["number", "null"] },
+            "r_value_per_inch_imperial":  { "type": ["number", "null"] },
+            "heat_capacity_j_kgk":        { "type": ["number", "null"] }
+          }
+        },
+        "moisture_content_pct": { "type": ["number", "null"] },
+        "mass_per_unit_kg":     { "type": ["number", "null"] },
+        "dimensions": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "length_m":       { "type": ["number", "null"] },
+            "width_m":        { "type": ["number", "null"] },
+            "depth_m":        { "type": ["number", "null"] },
+            "unit_volume_m3": { "type": ["number", "null"] },
+            "units_per_m2":   { "type": ["number", "null"] }
+          }
+        },
+        "additional_factor": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value":       { "type": ["number", "null"] },
+            "units":       { "type": ["string", "null"] },
+            "description": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+
+    "carbon": {
+      "type": "object",
+      "required": ["stated", "conversion", "common", "biogenic"],
+      "additionalProperties": false,
+      "properties": {
+        "stated": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "value_kgco2e": { "type": ["number", "null"] },
+            "per_unit":     { "type": ["string", "null"] },
+            "source":       { "type": ["string", "null"], "enum": ["epd", "industry_average", "estimated", null] },
+            "lifecycle_stages": { "type": "array", "items": { "$ref": "#/$defs/lifecycle_stage" } }
+          }
+        },
+        "conversion": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "to_common_unit": { "type": ["string", "null"] },
+            "factor":         { "type": ["number", "null"] },
+            "factor_formula": { "type": ["string", "null"] },
+            "factor_source":  { "type": ["string", "null"], "enum": ["physical_dimensions", "mass_density", "explicit_epd", "manual", null] },
+            "notes":          { "type": ["string", "null"] }
+          }
+        },
+        "common": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value_kgco2e":         { "type": ["number", "null"] },
+            "per_functional_unit":  { "type": ["string", "null"] },
+            "metric_unit_label":    { "type": ["string", "null"] },
+            "imperial_unit_label":  { "type": ["string", "null"] }
+          }
+        },
+        "biogenic": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "gwp_bio_from_epd_kgco2e_per_common_unit": { "type": ["number", "null"] },
+            "carbon_content_pct_kgc_kg":               { "type": ["number", "null"] },
+            "biogenic_factor":                         { "type": ["number", "null"] },
+            "storage_retention_pct":                   { "type": ["number", "null"] },
+            "wwf_storage_factor_kgco2e_per_kgc":       { "type": ["number", "null"] },
+            "stored_kgco2e_per_common_unit":           { "type": ["number", "null"] },
+            "full_carbon_kgco2e_per_common_unit":      { "type": ["number", "null"] },
+            "carbon_content_kgc_per_unit":             { "type": ["number", "null"] },
+            "co2_to_c_molar_ratio":                    { "type": ["number", "null"] },
+            "method": { "type": "string", "enum": ["wwf_storage_factor", "en_15804_negative_a1", "none"] },
+            "notes":  { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+
+    "impacts": {
+      "type": "object",
+      "required": ["gwp_kgco2e", "gwp_bio_kgco2e", "eutrophication_kgneq", "acidification_kgso2eq", "ozone_depletion_kgcfc11eq", "smog_kgo3eq", "abiotic_depletion_fossil_mj", "water_consumption_m3", "primary_energy_nonrenewable_mj", "primary_energy_renewable_mj"],
+      "additionalProperties": true,
+      "properties": {
+        "functional_unit":               { "type": ["string", "null"] },
+        "gwp_kgco2e":                    { "$ref": "#/$defs/impact_block" },
+        "gwp_bio_kgco2e":                { "$ref": "#/$defs/impact_block" },
+        "eutrophication_kgneq":          { "$ref": "#/$defs/impact_block" },
+        "acidification_kgso2eq":         { "$ref": "#/$defs/impact_block" },
+        "ozone_depletion_kgcfc11eq":     { "$ref": "#/$defs/impact_block" },
+        "smog_kgo3eq":                   { "$ref": "#/$defs/impact_block" },
+        "abiotic_depletion_fossil_mj":   { "$ref": "#/$defs/impact_block" },
+        "water_consumption_m3":          { "$ref": "#/$defs/impact_block" },
+        "primary_energy_nonrenewable_mj":{ "$ref": "#/$defs/impact_block" },
+        "primary_energy_renewable_mj":   { "$ref": "#/$defs/impact_block" }
+      }
+    },
+
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "unit":         { "type": ["string", "null"] },
+        "cad_per_unit": { "type": ["number", "null"] },
+        "year":         { "type": ["integer", "null"] },
+        "geography":    { "type": ["string", "null"] },
+        "source":       { "type": ["string", "null"] }
+      }
+    },
+
+    "fire": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "frr_hours":              { "type": ["number", "null"] },
+        "combustibility":         { "type": ["string", "null"], "enum": ["non_combustible", "combustible", "fr_treated", null] },
+        "ulc_listing":            { "type": ["string", "null"] },
+        "flame_spread_rating":    { "type": ["integer", "null"] },
+        "smoke_developed_rating": { "type": ["integer", "null"] }
+      }
+    },
+
+    "code_compliance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nbc_part_9_suitable":    { "type": ["boolean", "null"] },
+        "nbc_part_3_suitable":    { "type": ["boolean", "null"] },
+        "vbbl_s10_4_accepted":    { "type": ["boolean", "null"] },
+        "cov_appendix_ii_listed": { "type": ["boolean", "null"] }
+      }
+    },
+
+    "epd": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id":                         { "type": ["string", "null"] },
+        "type":                       { "type": ["string", "null"], "enum": ["product_specific", "industry_average", "generic", "beam_average", null] },
+        "owner":                      { "type": ["string", "null"] },
+        "prepared_by":                { "type": ["string", "null"] },
+        "program_operator":           { "type": ["string", "null"] },
+        "validation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type":  { "type": ["string", "null"], "enum": ["internal", "external", null] },
+            "agent": { "type": ["string", "null"] }
+          }
+        },
+        "publication_date":           { "type": ["string", "null"] },
+        "expiry_date":                { "type": ["string", "null"] },
+        "product_service_life_years": { "type": ["number", "null"] },
+        "source_document_url":        { "type": ["string", "null"] },
+        "footnote":                   { "type": ["string", "null"] }
+      }
+    },
+
+    "methodology": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "standards":      { "type": "array", "items": { "type": "string" } },
+        "pcr_guidelines": { "type": ["string", "null"] },
+        "lca_method":     { "type": ["string", "null"] },
+        "lca_software":   { "type": ["string", "null"] },
+        "lci_database":   { "type": ["string", "null"] },
+        "lifecycle_scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "stages_included":   { "type": "array", "items": { "$ref": "#/$defs/lifecycle_stage" } },
+            "cutoff_rule_pct":   { "type": ["number", "null"] },
+            "allocation_method": { "type": ["string", "null"], "enum": ["mass", "economic", "system_expansion", null] }
+          }
+        }
+      }
+    },
+
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "countries_of_manufacture":             { "type": "array", "items": { "$ref": "#/$defs/iso3166_alpha3_or_scope" } },
+        "markets_of_applicability":             { "type": "array", "items": { "$ref": "#/$defs/iso3166_alpha3_or_scope" } },
+        "data_added_or_modified":               { "type": ["string", "null"] },
+        "original_beam_added_or_modified_serial": { "type": ["number", "null"] },
+        "source_notes":                         { "type": ["string", "null"] },
+        "import_metadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "imported_from":      { "type": ["string", "null"] },
+            "import_date":        { "type": ["string", "null"] },
+            "beam_csv_row_index": { "type": ["integer", "null"] },
+            "beam_csv_sha256":    { "type": ["string", "null"] }
+          }
+        }
+      }
+    }
+  }
+}

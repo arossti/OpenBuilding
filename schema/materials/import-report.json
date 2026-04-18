@@ -1,0 +1,24 @@
+{
+  "warnings": [
+    {
+      "kind": "blank_id",
+      "row": 424,
+      "beam_id": null
+    },
+    {
+      "kind": "blank_id",
+      "row": 425,
+      "beam_id": null
+    },
+    {
+      "kind": "blank_id",
+      "row": 427,
+      "beam_id": null
+    },
+    {
+      "kind": "blank_id",
+      "row": 428,
+      "beam_id": null
+    }
+  ]
+}

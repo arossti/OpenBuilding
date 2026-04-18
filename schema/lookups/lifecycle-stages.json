@@ -1,0 +1,31 @@
+{
+  "_note": "EN 15804+A2 / ISO 21930 lifecycle stages. Canonical order used as keys in impacts.<category>.by_stage and as allowed values in carbon.stated.lifecycle_stages[] and methodology.lifecycle_scope.stages_included[].",
+  "_schema_version": 1,
+  "stages_in_order": ["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "C1", "C2", "C3", "C4", "D"],
+  "stages": {
+    "A1": { "group": "product",                       "description": "Raw material supply" },
+    "A2": { "group": "product",                       "description": "Transport to manufacturer" },
+    "A3": { "group": "product",                       "description": "Manufacturing" },
+    "A4": { "group": "construction",                  "description": "Transport to site" },
+    "A5": { "group": "construction",                  "description": "Installation" },
+    "B1": { "group": "use_in_service",                "description": "Use" },
+    "B2": { "group": "use_in_service",                "description": "Maintenance" },
+    "B3": { "group": "use_in_service",                "description": "Repair" },
+    "B4": { "group": "use_in_service",                "description": "Replacement" },
+    "B5": { "group": "use_in_service",                "description": "Refurbishment" },
+    "B6": { "group": "use_operational",               "description": "Operational energy use" },
+    "B7": { "group": "use_operational",               "description": "Operational water use" },
+    "C1": { "group": "end_of_life",                   "description": "Deconstruction / demolition" },
+    "C2": { "group": "end_of_life",                   "description": "Transport to disposal" },
+    "C3": { "group": "end_of_life",                   "description": "Waste processing" },
+    "C4": { "group": "end_of_life",                   "description": "Disposal" },
+    "D":  { "group": "beyond_system_boundary",        "description": "Reuse / recovery / recycling potential" }
+  },
+  "common_scopes": {
+    "cradle_to_gate":        ["A1", "A2", "A3"],
+    "cradle_to_site":        ["A1", "A2", "A3", "A4"],
+    "cradle_to_practical_completion": ["A1", "A2", "A3", "A4", "A5"],
+    "cradle_to_grave":       ["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "C1", "C2", "C3", "C4"],
+    "cradle_to_cradle":      ["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "C1", "C2", "C3", "C4", "D"]
+  }
+}
