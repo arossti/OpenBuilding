@@ -73,12 +73,12 @@ No build tools, no framework. Opens directly via a local server (`npm run serve`
 | `docs/matrix/ec_matrix_v2.md` | Markdown documentation of the full data model |
 | `docs/matrix/TRIAGE.md` | Role/phase refinement Q&A notes |
 | `docs/matrix/ARCHITECTURE.md` | Matrix architecture notes (data model, conventions) |
-| `BfCA Resources/Building application flow chart.pdf` | Reference flowchart for building permit process (prescriptive / performance / EnerGuide paths) |
-| `BfCA Resources/Embodied Carbon Tool DB Comparison Report (Priopta).pdf` | 227-page NRC-funded tool comparison report |
-| `BfCA Resources/Navigating Part 9 Building Codes and Municipal Permitting Frameworks.docx` | Part 9 permitting guidance |
-| `BfCA Resources/canada_us_code` | Canadian building code governance structure (Canada section relevant; ignore US section) |
-| `BfCA Resources/Vancouver/city-of-vancouver-embodied-carbon-low-rise-residential-part-9-appendix-ii.pdf` | **COV Appendix II** — EC Assessment Guide for Low-Rise Residential (Part 9). Effective Jan 1, 2026. BEAM/MCE2 mandated as primary tools. ECI benchmarks. BfCA-developed methodology. |
-| `BfCA Resources/Vancouver/embodied-carbon-vancouver-addendum-national-wblca-practitioners-guide.pdf` | **COV Addendum v1.0** to NRC Practitioner's Guide. Part 3 EC compliance for VBBL s.10.4. ECI = 400 kgCO2e/m². Accepted tools list. ILCs. April 2025. |
+| `docs/PDF References/Building application flow chart Part 9.pdf` | Reference flowchart for building permit process (prescriptive / performance / EnerGuide paths) |
+| `docs/PDF References/Embodied Carbon Tool DB Comparison Report (Priopta).pdf` | 227-page NRC-funded tool comparison report |
+| `docs/PDF References/Navigating Part 9 Building Codes and Municipal Permitting Frameworks.docx` | Part 9 permitting guidance |
+| `docs/PDF References/canada_us_code` | Canadian building code governance structure (Canada section relevant; ignore US section) |
+| `docs/PDF References/Vancouver/city-of-vancouver-embodied-carbon-low-rise-residential-part-9-appendix-ii.pdf` | **COV Appendix II** — EC Assessment Guide for Low-Rise Residential (Part 9). Effective Jan 1, 2026. BEAM/MCE2 mandated as primary tools. ECI benchmarks. BfCA-developed methodology. |
+| `docs/PDF References/Vancouver/embodied-carbon-vancouver-addendum-national-wblca-practitioners-guide.pdf` | **COV Addendum v1.0** to NRC Practitioner's Guide. Part 3 EC compliance for VBBL s.10.4. ECI = 400 kgCO2e/m². Accepted tools list. ILCs. April 2025. |
 | `CCI-tables-20241121/` | CCI construction classification taxonomy (2 Excel files) |
 
 ## Conventions
@@ -128,7 +128,7 @@ Add a **"Flow Model"** button/toggle that presents the same underlying data as a
   4. **Actor/Role** — "I'm an Architect, what are my EC touchpoints?" (builds on the successful Actor Lens)
 
 ### Reference
-- `BfCA Resources/Building application flow chart.pdf` — existing flowchart showing prescriptive / performance / EnerGuide branching. Good structural model for the flow view, but our version needs to overlay EC requirements onto this process.
+- `docs/PDF References/Building application flow chart Part 9.pdf` — existing flowchart showing prescriptive / performance / EnerGuide branching. Good structural model for the flow view, but our version needs to overlay EC requirements onto this process.
 
 ### Implementation Notes
 - Keep it pure CSS/JS/SVG — no external libraries (consistent with current approach)

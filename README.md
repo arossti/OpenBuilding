@@ -43,10 +43,10 @@ at/
 │   ├── matrix.css       EC Matrix styles
 │   ├── js/              10 ESM modules (vanilla JS)
 │   └── lib/             PDF.js 4.9.155 (local ESM build)
-├── docs/                App documentation
+├── docs/                App documentation + reference materials
 │   ├── pdf-parser.md    PDF-Parser workplan + technical docs
-│   └── matrix/          EC Matrix docs (ARCHITECTURE, TRIAGE, data model)
-├── BfCA Resources/      Reference documents (Vancouver EC guides, NRC reports)
+│   ├── matrix/          EC Matrix docs (ARCHITECTURE, TRIAGE, data model)
+│   └── PDF References/  Vancouver EC guides, NRC reports, code references
 ├── regulatory/          Canadian Part 9 building code compliance research
 ├── ifc/                 IFC building model import exploration
 ├── cost/                Cost data integration research
