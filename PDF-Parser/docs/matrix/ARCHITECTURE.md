@@ -1,25 +1,26 @@
-# BfCA CAF — Embodied Carbon Assessment Framework
+# EC Matrix — Architecture Notes
 
 ## Project Purpose
 
-Interactive single-file HTML application mapping **roles, responsibilities, tools, standards, and compliance requirements** for embodied carbon (EC) assessments across Canadian building types, sizes, jurisdictions, and project phases. Aligned to **NBC/NECB 2025 Draft**.
+Interactive HTML application mapping **roles, responsibilities, tools, standards, and compliance requirements** for embodied carbon (EC) assessments across Canadian building types, sizes, jurisdictions, and project phases. Aligned to **NBC/NECB 2025 Draft**.
 
 **Scope: Canada only.** No US codes, ICC, or ASHRAE references unless they are explicitly referenced by a Canadian standard (e.g., TRACI v2.1, ASHRAE 140-2023 for NECB compliance).
 
 ## Architecture
 
-### Single-file HTML app (`Matrix App/ec_matrix_step13.html`)
+### Deployed as part of the PDF-Parser app
 
-Everything — CSS, HTML, JS, data — lives in one `~270 KB` HTML file (~4,854 lines). No build tools, no dependencies, no framework. Opens directly in a browser.
+The Matrix was consolidated into the PDF-Parser app on 2026-04-18. The canonical source is now `PDF-Parser/matrix.html` (with extracted `matrix.css`), deployed via GitHub Pages alongside the PDF-Parser tool. Users cross-navigate between the two apps using header buttons.
 
-**Structure (top to bottom):**
+**Files:**
 
-| Lines (approx.) | Section |
+| File | Purpose |
 |---|---|
-| 1–1159 | `<style>` — full CSS design system |
-| 1161–1619 | `<body>` — header, sidebar (filters + legends + reference panels), main content area, footer |
-| 1622–4724 | `<script>` — all JS: lookup tables, data model, rendering, event handling |
-| 4727–4855 | Trailing data rows (appended after closing `</html>` — **needs cleanup**) |
+| `PDF-Parser/matrix.html` | Body, data, and JS (~4,360 lines, ~278 KB) |
+| `PDF-Parser/matrix.css` | Light-theme styles (~1,900 lines) |
+| `PDF-Parser/bfcastyles.css` | Shared design tokens + dark header (used by both apps) |
+
+**Previous versions:** The history of the step-numbered single-file app (`ec_matrix_step12.html` through `ec_matrix_step15.html`) lives in git history. Prior to consolidation, the app was split inline-CSS per step-numbered file.
 
 ### Data Model (JS objects in `<script>`)
 
@@ -68,9 +69,10 @@ Everything — CSS, HTML, JS, data — lives in one `~270 KB` HTML file (~4,854 
 
 | File | Content |
 |---|---|
-| `Matrix App/ec_matrix_step13.html` | Current app (step 13) |
-| `Matrix App/ec_matrix_step12.html` | Previous version (step 12) — diff reference |
-| `Matrix App/ec_matrix_v2.md` | Markdown documentation of the full data model |
+| `PDF-Parser/matrix.html` | Current app (body + data + JS) |
+| `PDF-Parser/matrix.css` | Current app (light-theme styles) |
+| `PDF-Parser/docs/matrix/ec_matrix_v2.md` | Markdown documentation of the full data model |
+| `PDF-Parser/docs/matrix/TRIAGE.md` | Role/phase refinement Q&A notes |
 | `BfCA Resources/Building application flow chart.pdf` | Reference flowchart for building permit process (prescriptive / performance / EnerGuide paths) |
 | `BfCA Resources/Embodied Carbon Tool DB Comparison Report (Priopta).pdf` | 227-page NRC-funded tool comparison report |
 | `BfCA Resources/Navigating Part 9 Building Codes and Municipal Permitting Frameworks.docx` | Part 9 permitting guidance |
@@ -82,13 +84,13 @@ Everything — CSS, HTML, JS, data — lives in one `~270 KB` HTML file (~4,854 
 ## Conventions
 
 ### Versioning
-- Each major iteration is saved as `ec_matrix_stepNN.html` — always create the next step number, never overwrite the current file
-- The step number appears in the footer
+- Changes are tracked via git (feature branches, PRs). Step-numbered files are a legacy convention and no longer used post-consolidation.
+- The footer may still show a step number for user reference.
 
 ### Code Style
 - Vanilla JS (ES5-compatible `var`, `function`, `.forEach`, `.map` — no arrow functions, no `let`/`const`, no template literals)
-- All data is inline JS objects — no external JSON or fetch calls
-- CSS uses custom properties (`:root` vars) for the design system
+- Data lives in inline JS objects within `matrix.html` — no external JSON or fetch calls (for now)
+- CSS uses custom properties (`:root` vars) and the shared design system in `bfcastyles.css`
 - Inline styles used for sidebar reference panels (collapsible accordion pattern)
 
 ### Data Integrity

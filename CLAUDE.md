@@ -8,18 +8,18 @@ Interactive single-file HTML application mapping **roles, responsibilities, tool
 
 ## Architecture
 
-### Single-file HTML app (`Matrix App/ec_matrix_step13.html`)
+### HTML app deployed with PDF-Parser
 
-Everything — CSS, HTML, JS, data — lives in one `~270 KB` HTML file (~4,854 lines). No build tools, no dependencies, no framework. Opens directly in a browser.
+Consolidated on 2026-04-18. The Matrix and PDF-Parser ship together via GitHub Pages and share the `bfcastyles.css` design system.
 
-**Structure (top to bottom):**
-
-| Lines (approx.) | Section |
+| File | Role |
 |---|---|
-| 1–1159 | `<style>` — full CSS design system |
-| 1161–1619 | `<body>` — header, sidebar (filters + legends + reference panels), main content area, footer |
-| 1622–4724 | `<script>` — all JS: lookup tables, data model, rendering, event handling |
-| 4727–4855 | Trailing data rows (appended after closing `</html>` — **needs cleanup**) |
+| `PDF-Parser/matrix.html` | Body, data, and JS (~4,360 lines, ~278 KB) |
+| `PDF-Parser/matrix.css` | Light-theme styles (~1,900 lines) |
+| `PDF-Parser/bfcastyles.css` | Shared brand tokens and dark header (used by both apps) |
+| `PDF-Parser/docs/matrix/` | Matrix-specific docs (architecture, data model, TRIAGE) |
+
+No build tools, no framework. Opens directly via a local server (`npm run serve`) or the deployed GitHub Pages site.
 
 ### Data Model (JS objects in `<script>`)
 
@@ -68,11 +68,11 @@ Everything — CSS, HTML, JS, data — lives in one `~270 KB` HTML file (~4,854 
 
 | File | Content |
 |---|---|
-| `Matrix App/ec_matrix_step15.html` | **Current app (step 15)** — three-track flow view, Part 9/Part 3 splash, full actor/phase sync |
-| `Matrix App/ec_matrix_step14.html` | Previous version (step 14) — flow view prototype |
-| `Matrix App/ec_matrix_step13.html` | Earlier version (step 13) — Vancouver updates |
-| `Matrix App/ec_matrix_step12.html` | Earlier version (step 12) |
-| `Matrix App/ec_matrix_v2.md` | Markdown documentation of the full data model |
+| `PDF-Parser/matrix.html` | **Current Matrix app** — three-track flow view, Part 9/Part 3 splash, full actor/phase sync |
+| `PDF-Parser/matrix.css` | Matrix light-theme styles |
+| `PDF-Parser/docs/matrix/ec_matrix_v2.md` | Markdown documentation of the full data model |
+| `PDF-Parser/docs/matrix/TRIAGE.md` | Role/phase refinement Q&A notes |
+| `PDF-Parser/docs/matrix/ARCHITECTURE.md` | Matrix architecture notes (data model, conventions) |
 | `BfCA Resources/Building application flow chart.pdf` | Reference flowchart for building permit process (prescriptive / performance / EnerGuide paths) |
 | `BfCA Resources/Embodied Carbon Tool DB Comparison Report (Priopta).pdf` | 227-page NRC-funded tool comparison report |
 | `BfCA Resources/Navigating Part 9 Building Codes and Municipal Permitting Frameworks.docx` | Part 9 permitting guidance |
@@ -84,8 +84,8 @@ Everything — CSS, HTML, JS, data — lives in one `~270 KB` HTML file (~4,854 
 ## Conventions
 
 ### Versioning
-- Each major iteration is saved as `ec_matrix_stepNN.html` — always create the next step number, never overwrite the current file
-- The step number appears in the footer
+- Changes are tracked via git (feature branches, PRs). Step-numbered files are a legacy convention no longer used post-consolidation.
+- The footer may still show a step number for user reference.
 
 ### Code Style
 - Vanilla JS (ES5-compatible `var`, `function`, `.forEach`, `.map` — no arrow functions, no `let`/`const`, no template literals)

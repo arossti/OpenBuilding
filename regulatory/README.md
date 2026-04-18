@@ -4,20 +4,22 @@ Research and tooling for understanding Canadian Part 9 building code requirement
 
 ## Contents
 
-### `matrix/`
-
-Interactive tool mapping roles, responsibilities, tools, standards, and compliance requirements for embodied carbon assessments across Canadian building types, sizes, jurisdictions, and project phases.
-
-- **`ec_matrix_step15.html`** — Current version of the EC matrix app. A self-contained single-file HTML application (no dependencies, opens directly in a browser). Aligned to NBC/NECB 2025 Draft.
-- **`ec_matrix_v2.md`** — Comprehensive markdown documentation of the full data model powering the matrix app.
-- **`CLAUDE.md`** — Detailed project documentation including architecture notes, data model definitions, design system specifications, conventions, and next feature proposals. See this file for technical and development guidance.
-
 ### `background/`
 
 Reference documentation provided by BfCA to guide Andy's research into regulatory areas outside of energy modeling — specifically zoning, structural/safety codes, and municipal enforcement for Part 9 buildings.
 
 - **`Navigating Part 9 Building Codes and Municipal Permitting Frameworks.md`** — Research directives covering provincial/territorial enforcement variances, zoning and Green Development Standards, alternative material approval processes, and renovation triggers for existing buildings.
 - **`Building application flow chart.pdf`** — Visual flowchart of the building permit application process, showing prescriptive, performance, and EnerGuide compliance pathways.
+
+## EC Matrix tool
+
+The EC Matrix (interactive compliance tool) was consolidated into the PDF-Parser app on 2026-04-18. It now lives at:
+
+- **`PDF-Parser/matrix.html`** — current Matrix app
+- **`PDF-Parser/matrix.css`** — light-theme styles
+- **`PDF-Parser/docs/matrix/`** — data model, architecture, and triage docs
+
+Users navigate between the PDF-Parser and Matrix using header buttons in either app.
 
 ## Relationship to BEAM
 
