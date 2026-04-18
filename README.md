@@ -46,8 +46,8 @@ at/
 ├── docs/                App documentation + reference materials
 │   ├── pdf-parser.md    PDF-Parser workplan + technical docs
 │   ├── matrix/          EC Matrix docs (ARCHITECTURE, TRIAGE, data model)
-│   └── PDF References/  Vancouver EC guides, NRC reports, code references
-├── regulatory/          Canadian Part 9 building code compliance research
+│   ├── PDF References/  Vancouver EC guides, NRC reports, code references
+│   └── regulatory (Jacob)/  Legacy regulatory research (stale, kept for reference)
 ├── ifc/                 IFC building model import exploration
 ├── cost/                Cost data integration research
 ├── CCI-tables/          CCI construction classification taxonomy
