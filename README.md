@@ -35,16 +35,17 @@ Interactive reference mapping roles, responsibilities, tools, standards, and com
 
 ```
 at/
-├── PDF-Parser/          Construction document area extraction tool
+├── PDF-Parser/          Area extraction tool + EC Matrix app
 │   ├── index.html       PDF-Parser app (dark theme)
-│   ├── matrix.html      EC Matrix app (light theme)
+│   ├── matrix.html      EC Matrix app (light theme, with Part 9/Part 3 splash)
 │   ├── bfcastyles.css   Shared design system
 │   ├── pdfparser.css    PDF-Parser styles
 │   ├── matrix.css       EC Matrix styles
 │   ├── js/              10 ESM modules (vanilla JS)
-│   ├── lib/             PDF.js 4.9.155 (local ESM build)
-│   └── docs/            Workplan and technical documentation
-├── Matrix App/          EC Matrix standalone (step-numbered HTML files)
+│   └── lib/             PDF.js 4.9.155 (local ESM build)
+├── docs/                App documentation
+│   ├── pdf-parser.md    PDF-Parser workplan + technical docs
+│   └── matrix/          EC Matrix docs (ARCHITECTURE, TRIAGE, data model)
 ├── BfCA Resources/      Reference documents (Vancouver EC guides, NRC reports)
 ├── regulatory/          Canadian Part 9 building code compliance research
 ├── ifc/                 IFC building model import exploration

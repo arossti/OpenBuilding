@@ -17,7 +17,7 @@ The EC Matrix (interactive compliance tool) was consolidated into the PDF-Parser
 
 - **`PDF-Parser/matrix.html`** — current Matrix app
 - **`PDF-Parser/matrix.css`** — light-theme styles
-- **`PDF-Parser/docs/matrix/`** — data model, architecture, and triage docs
+- **`docs/matrix/`** — data model, architecture, and triage docs
 
 Users navigate between the PDF-Parser and Matrix using header buttons in either app.
 

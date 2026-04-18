@@ -71,8 +71,8 @@ The Matrix was consolidated into the PDF-Parser app on 2026-04-18. The canonical
 |---|---|
 | `PDF-Parser/matrix.html` | Current app (body + data + JS) |
 | `PDF-Parser/matrix.css` | Current app (light-theme styles) |
-| `PDF-Parser/docs/matrix/ec_matrix_v2.md` | Markdown documentation of the full data model |
-| `PDF-Parser/docs/matrix/TRIAGE.md` | Role/phase refinement Q&A notes |
+| `docs/matrix/ec_matrix_v2.md` | Markdown documentation of the full data model |
+| `docs/matrix/TRIAGE.md` | Role/phase refinement Q&A notes |
 | `BfCA Resources/Building application flow chart.pdf` | Reference flowchart for building permit process (prescriptive / performance / EnerGuide paths) |
 | `BfCA Resources/Embodied Carbon Tool DB Comparison Report (Priopta).pdf` | 227-page NRC-funded tool comparison report |
 | `BfCA Resources/Navigating Part 9 Building Codes and Municipal Permitting Frameworks.docx` | Part 9 permitting guidance |
