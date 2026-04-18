@@ -262,11 +262,14 @@ A thin graph layer on top later tracks `row → section → tab → project` dep
 
 ---
 
-## 5. Architecture sketch (draft)
+## 5. Architecture sketch (decisions locked in session 2)
 
-Mirroring PDF-Parser + Database viewer conventions:
+Mirroring PDF-Parser + Database viewer conventions for BEAMweb's own code, with OBJECTIVE-inspired shared infra:
 
-- **Tech stack**: vanilla JS ESM, no framework, no build step. Local dev via `npm run serve` (python3 http.server).
+- **Tech stack**: vanilla JS **ES modules** (matches PDF-Parser / Database). Bootstrap 5.1.3 CSS+JS loaded only by BEAMweb (for modals / dropdowns / tabs — matches OBJECTIVE's UX). SheetJS (`xlsx@0.18.5`) loaded as a classic `<script>` tag since it attaches to `window.XLSX`. No build step.
+- **Namespace**: `window.BEAM.*` (mirrors OBJECTIVE's `window.TEUI.*` so algorithms port directly).
+- **Dependency manifest**: [`PDF-Parser/dependencies.html`](./PDF-Parser/dependencies.html) — central registry of every CDN + version pin + per-app usage matrix. Live load probes. Not nav-linked (dev-only).
+- **OBJECTIVE reuse strategy**: Architecture patterns (3-tier reset, dual-state Target/Reference, section modules, `data-render-section`, `saveStateAndNavigate` cross-app nav) ported by reading OBJECTIVE's code. Files NOT copied verbatim — rewritten as ESM under `PDF-Parser/js/beam/` with matching API shape so convergence stays cheap.
 - **File layout** (proposed):
   ```
   BEAMweb/                          or PDF-Parser/beamweb.html + sibling assets

@@ -1,0 +1,458 @@
+{
+  "version": "0.1.0",
+  "fileName": "Calgary-DP-BP-new-home-sample-drawings.pdf",
+  "createdAt": "2026-04-02T20:16:55.646Z",
+  "updatedAt": "2026-04-02T20:20:56.284Z",
+  "pageCount": 26,
+  "pages": [
+    {
+      "pageNum": 1,
+      "sheetId": null,
+      "sheetTitle": null,
+      "classification": "other",
+      "scale": null,
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 2,
+      "sheetId": null,
+      "sheetTitle": null,
+      "classification": "other",
+      "scale": {
+        "ratio": 400,
+        "type": "metric",
+        "source": "auto",
+        "raw": "1:400"
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 3,
+      "sheetId": null,
+      "sheetTitle": null,
+      "classification": "other",
+      "scale": {
+        "ratio": 200,
+        "type": "metric",
+        "source": "auto",
+        "raw": "1:200"
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 4,
+      "sheetId": null,
+      "sheetTitle": null,
+      "classification": "other",
+      "scale": {
+        "ratio": 200,
+        "type": "metric",
+        "source": "auto",
+        "raw": "1:200"
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 5,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": 64,
+        "type": "imperial",
+        "source": "auto",
+        "raw": "3/16\"=1'-0\""
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 6,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": 64,
+        "type": "imperial",
+        "source": "auto",
+        "raw": "3/16\"=1'-0\""
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 7,
+      "sheetId": null,
+      "sheetTitle": "RIGHT SIDE",
+      "classification": "other",
+      "scale": {
+        "ratio": 64,
+        "type": "imperial",
+        "source": "auto",
+        "raw": "3/16\"=1'-0\""
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 8,
+      "sheetId": null,
+      "sheetTitle": "similarities with actual buildings and or",
+      "classification": "other",
+      "scale": {
+        "ratio": 64,
+        "type": "imperial",
+        "source": "auto",
+        "raw": "3/16\"=1'-0\""
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 9,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": 64,
+        "type": "imperial",
+        "source": "auto",
+        "raw": "3/16\"=1'-0\""
+      },
+      "polygons": [
+        {
+          "id": "poly_1775161193134",
+          "label": "Basement",
+          "vertices": [
+            {
+              "x": 518.6800000000001,
+              "y": 88.72000000000003
+            },
+            {
+              "x": 194.68000000000006,
+              "y": 88.72000000000003
+            },
+            {
+              "x": 194.68000000000006,
+              "y": 417.28
+            },
+            {
+              "x": 518.6800000000001,
+              "y": 417.28
+            }
+          ],
+          "closed": true,
+          "type": "area",
+          "mode": "net"
+        }
+      ],
+      "rulers": [],
+      "calibration": {
+        "pdfUnitsPerMetre": 44.29174238800939,
+        "source": "verified",
+        "ratio": 64,
+        "ratioLabel": "1:64",
+        "refPoints": [
+          {
+            "x": 194.68000000000006,
+            "y": 72.89633307113304
+          },
+          {
+            "x": 518.6800000000001,
+            "y": 74.27986000987377
+          }
+        ],
+        "refDistance": 24,
+        "refUnit": "ft"
+      }
+    },
+    {
+      "pageNum": 10,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": 64,
+        "type": "imperial",
+        "source": "auto",
+        "raw": "3/16\"=1'-0\""
+      },
+      "polygons": [
+        {
+          "id": "poly_1775161110862",
+          "label": "Main Level",
+          "vertices": [
+            {
+              "x": 187.48000000000002,
+              "y": 88.36000000000001
+            },
+            {
+              "x": 542.9200000000001,
+              "y": 88.36000000000001
+            },
+            {
+              "x": 542.9200000000001,
+              "y": 416.8
+            },
+            {
+              "x": 218.92000000000007,
+              "y": 416.8
+            },
+            {
+              "x": 218.92000000000007,
+              "y": 142.36
+            },
+            {
+              "x": 187.48000000000002,
+              "y": 142.36
+            }
+          ],
+          "closed": true,
+          "type": "area",
+          "mode": "net"
+        }
+      ],
+      "rulers": [],
+      "calibration": {
+        "pdfUnitsPerMetre": 44.286665425032176,
+        "source": "verified",
+        "ratio": 64,
+        "ratioLabel": "1:64",
+        "refPoints": [
+          {
+            "x": 179.50140327547595,
+            "y": 275.08
+          },
+          {
+            "x": 177.4409178617738,
+            "y": 142.36
+          }
+        ],
+        "refDistance": 9.833333333333334,
+        "refUnit": "ft"
+      }
+    },
+    {
+      "pageNum": 11,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": 64,
+        "type": "imperial",
+        "source": "auto",
+        "raw": "3/16\"=1'-0\""
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 12,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": 64,
+        "type": "imperial",
+        "source": "auto",
+        "raw": "3/16\"=1'-0\""
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 13,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": 64,
+        "type": "imperial",
+        "source": "auto",
+        "raw": "3/16\"=1'-0\""
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 14,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": 64,
+        "type": "imperial",
+        "source": "auto",
+        "raw": "3/16\"=1'-0\""
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 15,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": 64,
+        "type": "imperial",
+        "source": "auto",
+        "raw": "3/16\"=1'-0\""
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 16,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": 64,
+        "type": "imperial",
+        "source": "auto",
+        "raw": "3/16\"=1'-0\""
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 17,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": 64,
+        "type": "imperial",
+        "source": "auto",
+        "raw": "3/16\"=1'-0\""
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 18,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": null,
+        "type": "nts",
+        "source": "auto",
+        "raw": "NTS"
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 19,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": null,
+        "type": "nts",
+        "source": "auto",
+        "raw": "NTS"
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 20,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": null,
+        "type": "nts",
+        "source": "auto",
+        "raw": "NTS"
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 21,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": null,
+        "type": "nts",
+        "source": "auto",
+        "raw": "NTS"
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 22,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": null,
+        "type": "nts",
+        "source": "auto",
+        "raw": "NTS"
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 23,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": null,
+        "type": "nts",
+        "source": "auto",
+        "raw": "NTS"
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 24,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": {
+        "ratio": null,
+        "type": "nts",
+        "source": "auto",
+        "raw": "NTS"
+      },
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 25,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": null,
+      "polygons": [],
+      "rulers": []
+    },
+    {
+      "pageNum": 26,
+      "sheetId": null,
+      "sheetTitle": "This drawing set is intended to act as an",
+      "classification": "other",
+      "scale": null,
+      "polygons": [],
+      "rulers": []
+    }
+  ],
+  "scheduleData": {
+    "rooms": null
+  },
+  "volumes": []
+}
