@@ -374,8 +374,6 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: 620px;
-  overflow: auto;
 }
 
 .db-section {
