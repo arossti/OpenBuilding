@@ -168,14 +168,14 @@ const PANEL_SUBTITLES = {
   "party-walls": "Fire- + acoustic-separation walls between dwellings",
   cladding: "Exterior finishes — brick, fibre cement, siding, stucco",
   windows: "Double + triple pane glazing units",
-  "interior-walls": "Framing, drywall, interior finishes (cladding doubled per MCE²)",
+  "interior-walls": "Framing, drywall, interior finishes (cladding doubled for both faces)",
   floors: "Floor framing, subfloor, cavity insulation, flooring finishes",
   ceilings: "Ceiling framing + cladding",
   roof: "Roof framing, decking, roof insulation, roofing membrane",
-  garage: "Garage components — MCE² excludes these from whole-building totals",
+  garage: "Garage components — excluded from whole-building totals by default",
   review: "Inputs sanity-check · area/volume reconciliation · warnings",
   results: "Project EC total · per-component breakdown · operational + embodied summary",
-  glossary: `${GLOSSARY.length} terms and definitions from the BEAM / MCE² workbook`,
+  glossary: `${GLOSSARY.length} terms and definitions from the BEAM workbook`,
   "energy-ghg": `Province-by-province GHG intensities for operational energy (reference only)`,
 };
 
@@ -184,12 +184,12 @@ const PANEL_BODIES = {
     <div class="beam-tbd" style="text-align: left; padding: 28px 32px;">
       <h3 style="text-align:center">Welcome to BEAMweb</h3>
       <p style="text-align:center; font-size: 13px; margin: 8px 0 18px 0;">
-        A browser port of the BEAM / MCE² embodied carbon calculator, built for Canadian projects.
+        A browser port of the BEAM embodied carbon calculator, built for Canadian projects.
       </p>
 
       <h3 style="margin-top: 20px">How it works</h3>
       <ul>
-        <li>Enter your project meta and areas on the <strong>PROJECT</strong> tab — or import them from an MCE²/BEAM workbook or a PDF-Parser project.</li>
+        <li>Enter your project meta and areas on the <strong>PROJECT</strong> tab — or import them from a BEAM workbook or a PDF-Parser project.</li>
         <li>For each assembly tab (Footings &amp; Slabs through Garage), select the materials you used and the quantities.</li>
         <li>Material emissions come from the <a href="database.html" class="db-kv-link">BfCA material database</a> — 821 records, full EN 15804+A2 per-stage scope.</li>
         <li>Review the totals on <strong>REVIEW</strong> + <strong>RESULTS</strong>. Print to PDF for a project report.</li>
@@ -266,8 +266,7 @@ function renderEnergyGhgPanel() {
           your PROJECT-tab energy inputs to compute operational emissions; per-fuel values are shown here for transparency.
         </p>
         <p class="beam-ref-dim">
-          This tab is not in the BEAM workbook — it lives in MCE² and BEAMweb carries it forward as informational reference.
-          When the Phase 1 state manager lands, projects will be able to override any cell here to use a newer NIR / ECCC figure.
+          This tab is informational reference only. When the Phase 1 state manager lands, projects will be able to override any cell here to use a newer Canadian grid-intensity figure.
         </p>
       </div>
       <table class="beam-ref-table">

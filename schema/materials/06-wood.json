@@ -1,5 +1,5 @@
 {
-  "division": "06",
+  "group": "06",
   "count": 160,
   "records": [
     {
@@ -28,8 +28,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -225,8 +224,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -420,8 +418,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -616,8 +613,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "product_type": "Flooring",
@@ -818,8 +814,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "product_type": "Flooring",
@@ -1018,8 +1013,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "material_subtype": "Laminated",
@@ -1223,8 +1217,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "material_subtype": "Laminated",
@@ -1423,8 +1416,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -1621,8 +1613,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -1817,8 +1808,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -2013,8 +2003,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -2211,8 +2200,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -2409,8 +2397,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -2605,8 +2592,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -2801,8 +2787,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -2997,8 +2982,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Sheathing",
         "material_subtype": "Plywood",
@@ -3206,8 +3190,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Sheathing",
         "material_subtype": "Plywood",
@@ -3415,8 +3398,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Sheathing",
         "material_subtype": "Plywood",
@@ -3624,8 +3606,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Straw",
         "material_subtype": "Fiber bale",
@@ -3838,8 +3819,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Straw",
         "material_subtype": "Fiber bale",
@@ -4051,8 +4031,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fibre",
         "product_type": "Insulation",
@@ -4254,8 +4233,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fibre",
         "product_type": "Insulation",
@@ -4462,8 +4440,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -4660,8 +4637,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -4851,8 +4827,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -5042,8 +5017,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -5233,8 +5207,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -5424,8 +5397,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -5615,8 +5587,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Framing",
         "material_subtype": "Lumber",
@@ -5828,8 +5799,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Framing",
         "material_subtype": "Lumber",
@@ -6041,8 +6011,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Framing",
         "material_subtype": "Lumber",
@@ -6254,8 +6223,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -6450,8 +6418,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -6646,8 +6613,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -6842,8 +6808,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -7038,8 +7003,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -7234,8 +7198,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -7430,8 +7393,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -7626,8 +7588,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -7822,8 +7783,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -8018,8 +7978,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -8214,8 +8173,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -8410,8 +8368,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -8606,8 +8563,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -8801,8 +8757,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -8995,8 +8950,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -9189,8 +9143,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -9383,8 +9336,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -9577,8 +9529,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -9771,8 +9722,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -9966,8 +9916,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -10154,8 +10103,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -10346,8 +10294,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -10543,8 +10490,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -10735,8 +10681,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -10925,8 +10870,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Bamboo",
         "material_subtype": "Bamboo",
@@ -11094,8 +11038,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Bamboo",
         "material_subtype": "Bamboo",
@@ -11261,8 +11204,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Straw",
         "material_subtype": "Wall Board",
@@ -11429,8 +11371,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "typical_elements": [
@@ -11598,8 +11539,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "material_subtype": "Heat Treated Wood",
@@ -11764,8 +11704,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fibre",
         "product_type": "Insulation",
@@ -11932,8 +11871,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -12091,8 +12029,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -12252,8 +12189,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -12413,8 +12349,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -12574,8 +12509,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -12732,8 +12666,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -12890,8 +12823,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -13051,8 +12983,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -13214,8 +13145,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -13408,8 +13338,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "product_type": "Window",
         "product_subtype": "Double glaze",
@@ -13577,8 +13506,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "product_type": "Window",
         "product_subtype": "Triple glaze",
@@ -13741,8 +13669,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -13922,8 +13849,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Glulam",
         "material_subtype": "Wood",
@@ -14124,8 +14050,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Glulam",
         "material_subtype": "Wood",
@@ -14328,8 +14253,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Bamboo",
         "product_type": "Plywood",
@@ -14547,8 +14471,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Bamboo",
         "product_type": "Plywood",
@@ -14765,8 +14688,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Bamboo",
         "material_subtype": "Bamboo",
@@ -14980,8 +14902,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Bamboo",
         "material_subtype": "Bamboo",
@@ -15194,8 +15115,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Bamboo",
         "material_subtype": "Bamboo",
@@ -15417,8 +15337,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Bamboo",
         "material_subtype": "Bamboo",
@@ -15620,8 +15539,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Bamboo",
         "product_type": "Flooring",
@@ -15835,8 +15753,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Bamboo",
         "product_type": "Flooring",
@@ -16050,8 +15967,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Bamboo",
         "product_type": "Flooring",
@@ -16269,8 +16185,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Bamboo",
         "material_subtype": "Bamboo",
@@ -16485,8 +16400,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Bamboo",
         "product_type": "Structure",
@@ -16687,8 +16601,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Straw",
         "material_subtype": "Wall Board",
@@ -16898,8 +16811,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Straw",
         "material_subtype": "Wall Board",
@@ -17109,8 +17021,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Straw",
         "product_type": "Insulation",
@@ -17310,8 +17221,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Straw",
         "product_type": "Insulation",
@@ -17520,8 +17430,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "product_type": "Structure",
@@ -17750,8 +17659,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "product_type": "Structure",
@@ -17979,8 +17887,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "product_type": "Structure",
@@ -18185,8 +18092,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "product_type": "Structure",
@@ -18402,8 +18308,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "product_type": "Structure",
@@ -18615,8 +18520,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "product_type": "Structure",
@@ -18831,8 +18735,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "material_subtype": "MPP",
@@ -19047,8 +18950,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Structure",
         "material_subtype": "DLT",
@@ -19263,8 +19165,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -19457,8 +19358,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Structure",
         "product_type": "Glulam",
@@ -19666,8 +19566,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Glulam",
         "material_subtype": "Wood",
@@ -19876,8 +19775,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Structure",
         "product_type": "Glulam",
@@ -20086,8 +19984,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -20281,8 +20178,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Engineered wood",
         "product_type": "Flooring",
@@ -20491,8 +20387,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -20683,8 +20578,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Hardwood",
         "product_type": "Flooring",
@@ -20892,8 +20786,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "material_subtype": "Heat Treated Wood",
@@ -21111,8 +21004,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "material_subtype": "Heat Treated Wood",
@@ -21320,8 +21212,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "material_subtype": "Heat Treated Wood",
@@ -21529,8 +21420,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "material_subtype": "Heat Treated Wood",
@@ -21740,8 +21630,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "material_subtype": "Hempwood",
@@ -21954,8 +21843,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "LVL",
         "product_type": "Structure",
@@ -22163,8 +22051,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "material_subtype": "Laminated",
@@ -22379,8 +22266,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "material_subtype": "Laminated",
@@ -22583,8 +22469,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "product_type": "Sheathing",
         "product_subtype": "OSB",
@@ -22802,8 +22687,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "product_type": "Sheathing",
         "product_subtype": "OSB",
@@ -23010,8 +22894,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "product_type": "Sheathing",
         "product_subtype": "OSB",
@@ -23218,8 +23101,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "product_type": "Sheathing",
         "product_subtype": "OSB",
@@ -23426,8 +23308,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -23635,8 +23516,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -23850,8 +23730,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -24065,8 +23944,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -24280,8 +24158,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -24487,8 +24364,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -24694,8 +24570,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -24901,8 +24776,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -25107,8 +24981,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "product_type": "Sheathing",
         "product_subtype": "OSB",
@@ -25320,8 +25193,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "product_type": "Sheathing",
         "product_subtype": "OSB",
@@ -25528,8 +25400,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Plywood",
         "product_type": "Sheathing",
@@ -25739,8 +25610,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Plywood",
         "product_type": "Sheathing",
@@ -25950,8 +25820,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Plywood",
         "product_type": "Sheathing",
@@ -26162,8 +26031,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Straw",
         "material_subtype": "Infilled Panels",
@@ -26376,8 +26244,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Straw",
         "product_type": "cladding",
@@ -26588,8 +26455,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Straw",
         "material_subtype": "Wall Board",
@@ -26796,8 +26662,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Straw",
         "material_subtype": "Wall board",
@@ -26997,8 +26862,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fibre",
         "product_type": "Insulation",
@@ -27210,8 +27074,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fibre",
         "product_type": "Insulation",
@@ -27414,8 +27277,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fibre",
         "product_type": "Insulation",
@@ -27619,8 +27481,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fibre",
         "product_type": "Insulation",
@@ -27826,8 +27687,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fibre",
         "product_type": "Insulation",
@@ -28033,8 +27893,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fibre",
         "product_type": "Insulation",
@@ -28240,8 +28099,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fiberboard",
         "product_type": "Insulation",
@@ -28451,8 +28309,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fibre",
         "product_type": "Insulation",
@@ -28664,8 +28521,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fiberboard",
         "product_type": "Insulation",
@@ -28882,8 +28738,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fiberboard",
         "product_type": "Insulation",
@@ -29093,8 +28948,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood fiberboard",
         "product_type": "Insulation",
@@ -29304,8 +29158,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood/steel",
         "product_type": "Joist",
@@ -29516,8 +29369,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood/steel",
         "product_type": "Joist",
@@ -29728,8 +29580,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood/steel",
         "product_type": "Joist",
@@ -29938,8 +29789,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -30127,8 +29977,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "typical_elements": []
       },
@@ -30317,8 +30166,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood I-joist",
         "product_type": "Structure",
@@ -30531,8 +30379,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood I-joist",
         "product_type": "Structure",
@@ -30745,8 +30592,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood I-joist",
         "product_type": "Structure",
@@ -30959,8 +30805,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood I-joist",
         "product_type": "Structure",
@@ -31173,8 +31018,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood I-joist",
         "product_type": "Structure",
@@ -31387,8 +31231,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood I-joist",
         "product_type": "Structure",
@@ -31601,8 +31444,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood wool board",
         "product_type": "Wall & Ceiling panel",
@@ -31812,8 +31654,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "product_type": "Cladding",
@@ -32019,8 +31860,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "06",
-        "division_name": "Wood, Plastics, and Composites",
+        "group_prefix": "06",
         "category": "06_wood",
         "material_type": "Wood",
         "product_type": "Cladding",

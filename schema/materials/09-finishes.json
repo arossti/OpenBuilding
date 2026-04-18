@@ -1,5 +1,5 @@
 {
-  "division": "09",
+  "group": "09",
   "count": 83,
   "records": [
     {
@@ -30,8 +30,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Ceramic tile",
         "product_type": "Flooring",
@@ -234,8 +233,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "typical_elements": []
       },
@@ -422,8 +420,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "typical_elements": []
       },
@@ -603,8 +600,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "typical_elements": []
       },
@@ -784,8 +780,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "product_type": "Gypsum panel",
@@ -964,8 +959,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "product_type": "Gypsum panel",
@@ -1145,8 +1139,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "product_type": "Gypsum panel",
@@ -1328,8 +1321,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "product_type": "Gypsum panel",
@@ -1511,8 +1503,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Vinyl",
         "product_type": "Flooring",
@@ -1710,8 +1701,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Vinyl",
         "material_subtype": "LVT",
@@ -1911,8 +1901,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Vinyl",
         "material_subtype": "Heterogeneous",
@@ -2110,8 +2099,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "typical_elements": []
       },
@@ -2293,8 +2281,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "typical_elements": []
       },
@@ -2476,8 +2463,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Vinyl",
         "material_subtype": "EPS Foam",
@@ -2681,8 +2667,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Acrylic",
         "material_subtype": "Limestone & Silica",
@@ -2849,8 +2834,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "typical_elements": []
       },
@@ -3010,8 +2994,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Linoleum",
         "product_type": "Flooring",
@@ -3174,8 +3157,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Linoleum",
         "product_type": "Flooring",
@@ -3338,8 +3320,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Magnesium oxide",
         "material_subtype": "Wall Board",
@@ -3509,8 +3490,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Acrylic",
         "material_subtype": "Limestone & Silica",
@@ -3692,8 +3672,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Acrylic",
         "material_subtype": "Limestone & Silica",
@@ -3875,8 +3854,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Acrylic",
         "material_subtype": "Limestone & Silica",
@@ -4058,8 +4036,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Acrylic",
         "material_subtype": "Limestone & Silica",
@@ -4241,8 +4218,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Acrylic",
         "material_subtype": "Limestone & Silica",
@@ -4424,8 +4400,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Acrylic",
         "material_subtype": "Limestone & Silica",
@@ -4605,8 +4580,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "HDPE",
         "material_subtype": "Barrier",
@@ -4802,8 +4776,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "typical_elements": []
       },
@@ -4984,8 +4957,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Polyester",
         "product_type": "Flooring",
@@ -5186,8 +5158,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "product_type": "Flooring",
         "product_subtype": "Carpet",
@@ -5382,8 +5353,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "product_type": "Flooring",
         "product_subtype": "Carpet",
@@ -5579,8 +5549,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Nylon",
         "product_type": "Flooring",
@@ -5779,8 +5748,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Nylon-6",
         "product_type": "Flooring",
@@ -5978,8 +5946,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Nylon",
         "product_type": "Flooring",
@@ -6180,8 +6147,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Polyester",
         "product_type": "Flooring",
@@ -6383,8 +6349,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Recycled Nylon",
         "product_type": "Flooring",
@@ -6585,8 +6550,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "typical_elements": []
       },
@@ -6766,8 +6730,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Porcelain",
         "product_type": "Flooring",
@@ -6970,8 +6933,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Ceramic",
         "product_type": "Flooring",
@@ -7172,8 +7134,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "material_subtype": "Fiber board",
@@ -7377,8 +7338,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Recycled drinking boxes",
         "product_type": "Sheathing",
@@ -7585,8 +7545,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Recycled drinking boxes",
         "product_type": "Sheathing",
@@ -7792,8 +7751,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "typical_elements": []
       },
@@ -7981,8 +7939,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "VLT",
         "product_type": "Structure",
@@ -8186,8 +8143,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "typical_elements": []
       },
@@ -8367,8 +8323,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "typical_elements": []
       },
@@ -8547,8 +8502,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "product_type": "Cladding",
@@ -8764,8 +8718,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "product_type": "Gypsum panel",
@@ -8968,8 +8921,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "product_type": "Gypsum panel",
@@ -9173,8 +9125,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "product_type": "Cladding",
         "product_subtype": "Drywall",
@@ -9382,8 +9333,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "typical_elements": []
       },
@@ -9563,8 +9513,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "product_type": "Gypsum panel",
@@ -9761,8 +9710,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "product_type": "Cladding",
@@ -9978,8 +9926,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "product_type": "Gypsum panel",
@@ -10181,8 +10128,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "product_type": "Gypsum panel",
@@ -10360,8 +10306,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "product_type": "Gypsum panel",
@@ -10566,8 +10511,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "material_subtype": "Glass Mat",
@@ -10777,8 +10721,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Gypsum",
         "material_subtype": "Glass Mat",
@@ -10988,8 +10931,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Luxury vinyl tile",
         "product_type": "Flooring",
@@ -11178,8 +11120,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Vinyl",
         "material_subtype": "LVT",
@@ -11379,8 +11320,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Vinyl",
         "material_subtype": "LVT",
@@ -11584,8 +11524,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Luxury vinyl tile",
         "product_type": "Flooring",
@@ -11774,8 +11713,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Luxury vinyl tile",
         "product_type": "Flooring",
@@ -11965,8 +11903,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Vinyl",
         "material_subtype": "tile",
@@ -12168,8 +12105,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Vinyl",
         "material_subtype": "LVT",
@@ -12371,8 +12307,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Vinyl",
         "product_type": "Flooring",
@@ -12578,8 +12513,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Vinyl",
         "product_type": "Flooring",
@@ -12781,8 +12715,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Vinyl",
         "material_subtype": "LVT",
@@ -12984,8 +12917,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Vinyl",
         "material_subtype": "LVT",
@@ -13186,8 +13118,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Cement stucco",
         "product_type": "Cladding",
@@ -13386,8 +13317,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Linoleum",
         "product_type": "Flooring",
@@ -13583,8 +13513,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Linoleum",
         "product_type": "Flooring",
@@ -13790,8 +13719,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Linoleum",
         "product_type": "Flooring",
@@ -13996,8 +13924,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Linoleum",
         "product_type": "Flooring",
@@ -14195,8 +14122,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Linoleum",
         "product_type": "Flooring",
@@ -14402,8 +14328,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Linoleum",
         "product_type": "Flooring",
@@ -14609,8 +14534,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Linoleum",
         "product_type": "Flooring",
@@ -14815,8 +14739,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Linoleum",
         "material_subtype": "Liquid",
@@ -15027,8 +14950,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Magnesium oxide",
         "material_subtype": "Wall Board",
@@ -15213,8 +15135,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Magnesium oxide",
         "material_subtype": "Wall Board",
@@ -15413,8 +15334,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "typical_elements": []
       },
@@ -15595,8 +15515,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Nexite",
         "material_subtype": "EPS foam",
@@ -15796,8 +15715,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Nexite",
         "material_subtype": "EPS foam",
@@ -15997,8 +15915,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "09",
-        "division_name": "Finishes",
+        "group_prefix": "09",
         "category": "09_finishes",
         "material_type": "Nexite",
         "material_subtype": "EPS foam",

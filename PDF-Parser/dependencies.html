@@ -118,7 +118,7 @@
               </tr>
               <tr>
                 <td>SheetJS / xlsx</td>
-                <td>Matches OBJECTIVE's pinned version <code>0.18.5</code>. Attaches to <code>window.XLSX</code>. Used by BEAMweb for <em>read-only</em> MCE²/BEAM workbook import. No export planned (one-way convenience per BEAMweb.md §0).</td>
+                <td>Matches OBJECTIVE's pinned version <code>0.18.5</code>. Attaches to <code>window.XLSX</code>. Used by BEAMweb for <em>read-only</em> BEAM workbook import. No export planned (one-way convenience per BEAMweb.md §0).</td>
               </tr>
               <tr>
                 <td>PDF.js</td>
@@ -249,7 +249,7 @@
         },
         {
           path: "js/database.mjs",
-          purpose: "Database viewer logic — sortable table, lazy per-division fetch, expandable detail with per-stage impact matrix.",
+          purpose: "Database viewer logic — sortable table, lazy per-group fetch, expandable detail with per-stage impact matrix.",
           usedBy: ["Database"]
         },
         {
@@ -271,13 +271,13 @@
         },
         {
           path: "js/beam/excel-mapper.mjs",
-          purpose: "MCE²/BEAM workbook → project state, sheet+cell map driven (planned for Phase 6).",
+          purpose: "BEAM workbook → project state, sheet+cell map driven (planned for Phase 6).",
           usedBy: ["BEAM"],
           status: "planned"
         },
         {
           path: "data/schema/materials/",
-          purpose: "Sparse BEAM material catalogue (821 records, 8 CSI divisions, index.json). Staged by npm run stage:data and by the Pages deploy workflow.",
+          purpose: "Sparse BEAM material catalogue (821 records, 8 material groups, index.json). Staged by npm run stage:data and by the Pages deploy workflow.",
           usedBy: ["Database", "BEAM"]
         }
       ];

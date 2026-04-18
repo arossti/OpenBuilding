@@ -3,7 +3,7 @@
  *
  * Fetches the sparse catalogue at data/schema/materials/index.json (staged via
  * `npm run stage:data` locally or the Pages deploy workflow). Renders a sortable
- * filterable table; lazy-loads per-division full records when a row is expanded.
+ * filterable table; lazy-loads per-group full records when a row is expanded.
  *
  * Tone mirrors the rest of PDF-Parser: vanilla JS, no framework, no build step.
  */
@@ -12,20 +12,20 @@
 
 const DATA_BASE = "data/schema";
 const INDEX_URL = `${DATA_BASE}/materials/index.json`;
-const DIVISION_FILE = (prefix) => `${DATA_BASE}/materials/${divisionSlug(prefix)}`;
+const GROUP_FILE = (prefix) => `${DATA_BASE}/materials/${groupSlug(prefix)}`;
 
-const CSI_DIVISIONS = {
-  "03": { name: "Concrete", file: "03-concrete.json" },
-  "04": { name: "Masonry", file: "04-masonry.json" },
-  "05": { name: "Metals", file: "05-metals.json" },
-  "06": { name: "Wood, Plastics, and Composites", file: "06-wood.json" },
-  "07": { name: "Thermal & Moisture Protection", file: "07-thermal.json" },
-  "08": { name: "Openings", file: "08-openings.json" },
-  "09": { name: "Finishes", file: "09-finishes.json" },
-  "31": { name: "Earthwork", file: "31-earthwork.json" },
+const GROUPS = {
+  "03": { label: "Concrete",  file: "03-concrete.json"  },
+  "04": { label: "Masonry",   file: "04-masonry.json"   },
+  "05": { label: "Metals",    file: "05-metals.json"    },
+  "06": { label: "Wood",      file: "06-wood.json"      },
+  "07": { label: "Thermal",   file: "07-thermal.json"   },
+  "08": { label: "Openings",  file: "08-openings.json"  },
+  "09": { label: "Finishes",  file: "09-finishes.json"  },
+  "31": { label: "Earthwork", file: "31-earthwork.json" },
 };
-function divisionSlug(prefix) {
-  return (CSI_DIVISIONS[prefix] && CSI_DIVISIONS[prefix].file) || null;
+function groupSlug(prefix) {
+  return (GROUPS[prefix] && GROUPS[prefix].file) || null;
 }
 
 const ALL_STAGES = ["A1","A2","A3","A4","A5","B1","B2","B3","B4","B5","B6","B7","C1","C2","C3","C4","D"];
@@ -55,10 +55,10 @@ const IMPACT_CATEGORIES = [
 // ────────────────────────────────────────────────────────────
 const state = {
   indexEntries: [],         // all entries from index.json
-  divisionCache: new Map(), // division_prefix → records[] (lazy)
-  recordCache: new Map(),   // id → full record (from division file)
+  groupCache: new Map(),    // group_prefix → records[] (lazy)
+  recordCache: new Map(),   // id → full record (from per-group file)
   view: [],                 // filtered + sorted entries
-  activeDivisions: new Set(),
+  activeGroups: new Set(),
   search: "",
   epdOnly: false,
   sortKey: "display_name",
@@ -142,7 +142,7 @@ function wireControls() {
 function renderDivisionChips() {
   const counts = new Map();
   for (const e of state.indexEntries) {
-    const d = e.division_prefix || "??";
+    const d = e.group_prefix || "??";
     counts.set(d, (counts.get(d) || 0) + 1);
   }
   const container = document.getElementById("db-division-chips");
@@ -152,16 +152,16 @@ function renderDivisionChips() {
   for (const prefix of sorted) {
     const btn = document.createElement("button");
     btn.className = "db-chip";
-    btn.dataset.division = prefix;
-    const name = (CSI_DIVISIONS[prefix] && CSI_DIVISIONS[prefix].name) || "Unclassified";
+    btn.dataset.group = prefix;
+    const name = (GROUPS[prefix] && GROUPS[prefix].label) || "Unclassified";
     btn.innerHTML = `${prefix} ${escapeHtml(name.split(",")[0])}<span class="db-chip-count">${counts.get(prefix)}</span>`;
     btn.title = name;
     btn.addEventListener("click", () => {
-      if (state.activeDivisions.has(prefix)) {
-        state.activeDivisions.delete(prefix);
+      if (state.activeGroups.has(prefix)) {
+        state.activeGroups.delete(prefix);
         btn.classList.remove("active");
       } else {
-        state.activeDivisions.add(prefix);
+        state.activeGroups.add(prefix);
         btn.classList.add("active");
       }
       applyFilters();
@@ -176,7 +176,7 @@ function renderDivisionChips() {
 function applyFilters() {
   const q = state.search;
   state.view = state.indexEntries.filter((e) => {
-    if (state.activeDivisions.size > 0 && !state.activeDivisions.has(e.division_prefix)) return false;
+    if (state.activeGroups.size > 0 && !state.activeGroups.has(e.group_prefix)) return false;
     if (state.epdOnly) {
       // index doesn't carry epd.type — fall back to beam_id prefix heuristic.
       // beam_id starting with uppercase letters = product-specific BEAM codes;
@@ -222,7 +222,7 @@ function renderRows() {
   const tbody = document.getElementById("db-rows");
   if (state.view.length === 0) {
     tbody.innerHTML =
-      `<tr><td colspan="8" class="db-empty-state">No materials match the current filters.<br>Try clearing the search box or removing division chips.</td></tr>`;
+      `<tr><td colspan="8" class="db-empty-state">No materials match the current filters.<br>Try clearing the search box or removing group chips.</td></tr>`;
     return;
   }
   const frag = document.createDocumentFragment();
@@ -245,7 +245,7 @@ function renderMainRow(e) {
   tr.innerHTML = `
     <td title="${escapeAttr(e.beam_id || "")}"><code>${escapeHtml(e.beam_id || "—")}</code></td>
     <td title="${escapeAttr(e.display_name || "")}">${escapeHtml(e.display_name || "—")}</td>
-    <td><span class="db-div-tag">${escapeHtml(e.division_prefix || "—")}</span></td>
+    <td><span class="db-div-tag">${escapeHtml(e.group_prefix || "—")}</span></td>
     <td>${escapeHtml(prettyCategory(e.category))}</td>
     <td class="num">${formatGwp(e.gwp_kgco2e)}</td>
     <td>${escapeHtml(e.functional_unit || "—")}</td>
@@ -297,15 +297,15 @@ async function loadFullRecord(id) {
   if (state.recordCache.has(id)) return state.recordCache.get(id);
   const entry = state.indexEntries.find((e) => e.id === id);
   if (!entry) throw new Error(`unknown id ${id}`);
-  const prefix = entry.division_prefix;
-  if (!state.divisionCache.has(prefix)) {
-    const fileName = divisionSlug(prefix);
-    if (!fileName) throw new Error(`no file mapping for division ${prefix}`);
+  const prefix = entry.group_prefix;
+  if (!state.groupCache.has(prefix)) {
+    const fileName = groupSlug(prefix);
+    if (!fileName) throw new Error(`no file mapping for group ${prefix}`);
     setStatus(`Loading ${fileName}…`, "busy");
     const res = await fetch(`${DATA_BASE}/materials/${fileName}`, { cache: "force-cache" });
     if (!res.ok) throw new Error(`${fileName}: ${res.status}`);
     const doc = await res.json();
-    state.divisionCache.set(prefix, doc.records || []);
+    state.groupCache.set(prefix, doc.records || []);
     for (const r of (doc.records || [])) state.recordCache.set(r.id, r);
     setStatus("Ready.", "ready");
   }
@@ -405,7 +405,7 @@ function identityBlock(r) {
     ["display_name",       (r.naming || {}).display_name],
     ["material_name",      (r.naming || {}).material_name],
     ["product_brand_name", (r.naming || {}).product_brand_name],
-    ["division",           `${cls.division_prefix || ""} · ${cls.division_name || ""}`],
+    ["group",              cls.group_prefix || null],
     ["material_type",      cls.material_type],
     ["product_type",       cls.product_type],
     ["product_subtype",    cls.product_subtype],

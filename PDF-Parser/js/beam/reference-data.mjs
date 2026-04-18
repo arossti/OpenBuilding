@@ -3,10 +3,9 @@
  * so the app never has to fetch them at runtime and the CSV files can be deleted.
  *
  * Sources (now deleted from docs/csv files from BEAM/):
- *   ENERGY_GHG: MCE² "Energy GHG" sheet (Nov 2023). Province-by-province
- *     GHG intensity factors for the five MCE² energy sources. This tab is
- *     not in BEAM itself; BEAMweb re-adds it as an informational reference.
- *   GLOSSARY:  BEAM / MCE² "Glossary" sheet. 48 terms and definitions.
+ *   ENERGY_GHG: 2023 Canadian grid + fuel GHG-intensity factors (13 provinces
+ *     and territories, 5 energy sources). Informational reference only.
+ *   GLOSSARY:  Embodied carbon glossary. 48 terms and definitions.
  *
  * When we get a newer Canadian National Inventory Report update, bump the
  * numbers in place. Project-level overrides will land in Phase 1 once the
@@ -21,7 +20,7 @@ export const ENERGY_GHG = {
     propane:     "kgCO2e per L",
     wood:        "kgCO2e per kg",
   },
-  source: "MCE² Nov 2023 workbook · Canadian grid + fuel intensities",
+  source: "2023 Canadian grid and fuel GHG intensities (informational reference)",
   factors: [
       {
           "province": "Newfoundland and Labrador",
@@ -279,7 +278,7 @@ export const GLOSSARY = [
   {
     "abbr": "MCE",
     "full": "Material Carbon Emissions",
-    "desc": "MCE is sometimes referred to informally as embodied carbon.  MCEs differ from embodied carbon in that MCEs include the emissions only from the product manufacturing stages (A1 to A3) of the building lifecycle (with a few exceptions), while embodied carbon includes all phases of the lifecycle except B6 (operational emissions) and B7 (operational water use).  This Materials Carbon Emissions Estimator calculates estimated MCEs"
+    "desc": "MCE is sometimes referred to informally as embodied carbon. MCEs differ from full embodied carbon in that MCEs include only the product-manufacturing stages (A1-A3) of the building lifecycle (with a few exceptions), while embodied carbon includes all phases of the lifecycle except B6 (operational emissions) and B7 (operational water use)."
   },
   {
     "abbr": "MgO",

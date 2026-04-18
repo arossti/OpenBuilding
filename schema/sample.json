@@ -37,11 +37,8 @@
   },
 
   "classification": {
-    "division_prefix": "06",
-    "division_name": "Wood, Plastics, and Composites",
+    "group_prefix": "06",
     "category": "06_wood",
-    "csi_masterformat": null,
-    "uniformat_level2": null,
     "material_type": "Wood",
     "material_subtype": null,
     "product_type": "Structure",

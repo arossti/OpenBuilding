@@ -1,5 +1,5 @@
 {
-  "division": "31",
+  "group": "31",
   "count": 5,
   "records": [
     {
@@ -27,8 +27,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "31",
-        "division_name": "Earthwork",
+        "group_prefix": "31",
         "category": "31_earthwork",
         "material_type": "Aggregate",
         "material_subtype": "Stone & Sand",
@@ -216,8 +215,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "31",
-        "division_name": "Earthwork",
+        "group_prefix": "31",
         "category": "31_earthwork",
         "material_type": "Ground screw",
         "product_type": "Foundation",
@@ -424,8 +422,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "31",
-        "division_name": "Earthwork",
+        "group_prefix": "31",
         "category": "31_earthwork",
         "material_type": "Ground screw",
         "product_type": "Foundation",
@@ -632,8 +629,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "31",
-        "division_name": "Earthwork",
+        "group_prefix": "31",
         "category": "31_earthwork",
         "material_type": "Ground screw",
         "product_type": "Foundation",
@@ -830,8 +826,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "31",
-        "division_name": "Earthwork",
+        "group_prefix": "31",
         "category": "31_earthwork",
         "material_type": "Ground screw",
         "product_type": "Foundation",

@@ -1,5 +1,5 @@
 {
-  "division": "05",
+  "group": "05",
   "count": 93,
   "records": [
     {
@@ -27,8 +27,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "typical_elements": []
       },
@@ -209,8 +208,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "typical_elements": []
       },
@@ -391,8 +389,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "typical_elements": []
       },
@@ -577,8 +574,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Roofing/Wall cladding",
@@ -794,8 +790,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Metal",
         "product_type": "Roofing and wall cladding",
@@ -1009,8 +1004,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Rebar",
@@ -1223,8 +1217,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Rebar",
@@ -1437,8 +1430,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Rebar",
@@ -1651,8 +1643,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Rebar",
@@ -1865,8 +1856,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Rebar",
@@ -2079,8 +2069,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Rebar",
@@ -2293,8 +2282,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Rebar",
@@ -2507,8 +2495,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Rebar",
@@ -2721,8 +2708,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Rebar",
@@ -2934,8 +2920,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -3148,8 +3133,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -3362,8 +3346,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -3576,8 +3559,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -3790,8 +3772,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -4004,8 +3985,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -4218,8 +4198,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -4432,8 +4411,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -4646,8 +4624,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -4860,8 +4837,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -5074,8 +5050,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -5288,8 +5263,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -5502,8 +5476,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -5716,8 +5689,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -5930,8 +5902,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -6144,8 +6115,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -6358,8 +6328,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -6572,8 +6541,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -6786,8 +6754,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -7000,8 +6967,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -7214,8 +7180,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -7428,8 +7393,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -7642,8 +7606,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -7856,8 +7819,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -8070,8 +8032,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -8284,8 +8245,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -8498,8 +8458,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -8712,8 +8671,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -8926,8 +8884,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -9140,8 +9097,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -9354,8 +9310,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -9568,8 +9523,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -9782,8 +9736,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -9996,8 +9949,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -10210,8 +10162,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -10424,8 +10375,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -10638,8 +10588,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -10852,8 +10801,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -11066,8 +11014,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -11280,8 +11227,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -11494,8 +11440,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -11708,8 +11653,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -11922,8 +11866,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Structure",
@@ -12134,8 +12077,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "typical_elements": []
       },
@@ -12317,8 +12259,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Joist",
@@ -12532,8 +12473,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "16 gauge studs",
@@ -12748,8 +12688,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "20EQ gauge studs",
@@ -12956,8 +12895,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "product_type": "Panel",
         "product_subtype": "ICE",
@@ -13109,8 +13047,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "product_type": "Panel",
         "product_subtype": "ICE",
@@ -13268,8 +13205,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "product_type": "Window",
         "product_subtype": "Double glaze",
@@ -13435,8 +13371,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "product_type": "Window",
         "product_subtype": "Triple glaze",
@@ -13602,8 +13537,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "typical_elements": []
       },
@@ -13783,8 +13717,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Aluminum",
         "product_type": "Roofing",
@@ -14000,8 +13933,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Aluminum",
         "product_type": "Wall",
@@ -14211,8 +14143,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Aluminum",
         "product_type": "Wall",
@@ -14424,8 +14355,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "typical_elements": []
       },
@@ -14610,8 +14540,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Roofing",
@@ -14830,8 +14759,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Roofing",
@@ -15042,8 +14970,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Roofing/Wall cladding",
@@ -15259,8 +15186,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "Cold-formed steel",
@@ -15462,8 +15388,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "Cold-formed steel",
@@ -15665,8 +15590,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "Cold-formed steel",
@@ -15868,8 +15792,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "Cold-formed steel",
@@ -16071,8 +15994,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "Cold-formed steel",
@@ -16274,8 +16196,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "Cold-formed steel",
@@ -16477,8 +16398,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "Cold-formed steel",
@@ -16680,8 +16600,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "Cold-formed steel",
@@ -16883,8 +16802,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "Cold-formed steel",
@@ -17085,8 +17003,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "Cold-formed steel",
@@ -17287,8 +17204,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "16 gauge studs",
@@ -17482,8 +17398,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "16 gauge studs",
@@ -17687,8 +17602,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "16 gauge studs",
@@ -17893,8 +17807,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "16 gauge studs",
@@ -18087,8 +18000,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "20EQ gauge studs",
@@ -18292,8 +18204,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "20EQ gauge studs",
@@ -18498,8 +18409,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "material_subtype": "20EQ gauge studs",
@@ -18693,8 +18603,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Welded wire reinforcement",
@@ -18902,8 +18811,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Steel",
         "product_type": "Welded wire reinforcement",
@@ -19113,8 +19021,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "05",
-        "division_name": "Metals",
+        "group_prefix": "05",
         "category": "05_metals",
         "material_type": "Aluminum",
         "product_type": "Window",

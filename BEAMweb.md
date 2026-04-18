@@ -1,4 +1,4 @@
-# BEAMweb — JS port of BEAM / MCE² for the web
+# BEAMweb — JS port of BEAM for the web
 
 > **Workplan + design spec + cold-start handoff for the BEAMweb workstream.** Read section 0 first if you are joining fresh. Sections marked **TBD — user input** are intentionally empty and wait for Andy to describe the source of truth (MCE² workbook tabs and their calc formulas).
 
@@ -15,18 +15,18 @@
   - PDF-Parser exists for area extraction from construction drawings — Summary Table already shows all Key Areas per sheet (volumes coming in Step 10) (see `PDF-Parser/`)
   - Database viewer at [`PDF-Parser/database.html`](./PDF-Parser/database.html) proves the catalogue fetch/render pattern
   - Matrix app at [`PDF-Parser/matrix.html`](./PDF-Parser/matrix.html) proves the multi-app nav shell
-- **Reference CSVs in the repo** — [`docs/csv files from BEAM/`](./docs/csv%20files%20from%20BEAM/) contains 5 MCE² (Nov 2023) tab exports: User Input Sheet (269 rows), Footings and Slabs (1260 rows), Foundation Walls (1283 rows), Energy GHG (37 rows), Glossary (56 rows). These confirm the assembly-tab pattern (see §2.3). Full BEAM workbook CSV exports with formulas are pending from Andy (he has the unlocked original).
+- **Reference CSVs in the repo** — [`docs/csv files from BEAM/`](./docs/csv%20files%20from%20BEAM/) holds informal workbook-tab exports used during early design to validate the assembly-tab pattern (see §2.3). Full BEAM workbook CSV exports with formulas are pending from Andy (he has the unlocked original). A few reference CSVs were retired once the data was absorbed into `PDF-Parser/js/beam/reference-data.mjs` (Glossary, Energy GHG).
 - **Nav-btn label**: `BEAM` in the shared header (not `BEAMweb`). The `BEAMweb` name stays internal for code/docs to differentiate from the spreadsheet family.
 
 ### What BEAMweb is
 
-A browser app that replaces the **MCE² (Material Carbon Emissions Estimator)** and the BEAM (google sheets) spreadsheet applications. Same methodology, same outputs when driven by identical inputs, but:
+A browser app that replaces the BEAM (Google Sheets) embodied carbon spreadsheet. Same methodology, same outputs when driven by identical inputs, but:
 
 - Runs in the browser, no Excel required
 - Consumes the new BEAM materials JSON database (full ISO 21930 / EN 15804+A2 per-stage impact scope, not just GWP)
 - Accepts three input modalities for quantities:
   1. **Manual entry** — user types areas, thicknesses, etc. (mirrors MCE² workbook)
-  2. **Excel import** — read an existing MCE² file into state (reuse file-handling patterns from **OBJECTIVE**, ask Andy for that ExcelMapper file when it is time - this comes from Andy's team's energy model app)
+  2. **Excel import** — read an existing BEAM workbook file into state (reuse file-handling patterns from **OBJECTIVE**, ask Andy for that ExcelMapper file when it is time - this comes from Andy's team's energy model app)
   3. **PDF-Parser integration** — polygons measured on drawings flow directly as component areas (PDF Parser already fully functional, and creates summary table of all Key Areas if not yet volumes)
 - Persists projects as JSON (shared format with PDF-Parser so one project file covers both tools) - FileHandler needed for Import/Export and full StateManager.js for proper persistence and browser local storage use.
 - Deploys alongside PDF-Parser / Matrix / Database on GitHub Pages
@@ -34,14 +34,14 @@ A browser app that replaces the **MCE² (Material Carbon Emissions Estimator)** 
 
 ### What BEAMweb is NOT
 
-- Not a new calculation *methodology*. BEAM/MCE² is the source of truth; BEAMweb is a port, and is meant to be visually and functionally similar to the spreadsheet tools users know and love.
+- Not a new calculation *methodology*. BEAM is the source of truth; BEAMweb is a port, and is meant to be visually and functionally similar to the spreadsheet tools users know and love.
 - Not a material catalogue rewrite. Consumes `schema/materials/` as-is.
-- Not tied to Excel. Excel import is a *convenience*, not a dependency. Projects live as JSON. There is no planned excel *export* - this is intended as a one-way convenience only to assist users with transition from the legacy format
+- Not tied to Excel. Excel import is a *convenience*, not a dependency. Projects live as JSON. There is no planned excel *export* — this is intended as a one-way convenience only to assist users with transition from the legacy format
 - Not a replacement for OBJECTIVE. Operational energy (HOT2000) integration is scoped similarly to MCE² — import/accept, don't re-model.
 
 ### Name rationale
 
-**BEAMweb** differentiates this implementation from the BEAM/MCE² spreadsheet families. Used consistently as the product name in UI, docs, and cross-app navigation. Internal code modules can use `beamweb` as the prefix (e.g., `beamweb.html`, `js/beamweb.mjs`, `beamweb.css`).
+**BEAMweb** differentiates this implementation from the BEAM spreadsheet family. Used consistently as the product name in UI, docs, and cross-app navigation. Internal code modules can use `beamweb` as the prefix (e.g., `beamweb.html`, `js/beamweb.mjs`, `beamweb.css`).
 
 ### Git workflow (same as schema workstream)
 
@@ -62,9 +62,9 @@ A browser app that replaces the **MCE² (Material Carbon Emissions Estimator)** 
 
 ---
 
-## 2. Reference source — the BEAM and MCE² spreadsheets
+## 2. Reference source — the BEAM spreadsheet
 
-**Source of truth: BEAM** (Google Sheets, unlocked, full formulas). **Reference only: MCE²** (Excel, Nov 2023 NRCan release, locked). BEAM is newer and contains all the calc logic; MCE² is a derivative we already have CSVs for and use to sketch the general pattern. Once Andy exports BEAM tabs to CSV with formulas, those become the port's source of truth.
+**Source of truth: BEAM** (Google Sheets, unlocked, full formulas). BEAM contains all the calc logic; BEAMweb ports it tab-for-tab once Andy exports the tabs to CSV with formulas.
 
 ### 2.1 Tab list — authoritative (BEAM)
 
@@ -87,14 +87,14 @@ The following list is what BEAMweb emulates. Order and names follow the BEAM wor
 15. `REVIEW`
 16. `RESULTS`
 17. `Glossary`
-18. `Energy GHG` — not in BEAM; BEAMweb carries it forward from MCE² as informational reference. **Shipped in Phase 0** as a read-only table; live at [`beamweb.html#energy-ghg`](./PDF-Parser/beamweb.html#energy-ghg). 13 provinces × 5 fuel factors, sourced from `PDF-Parser/js/beam/reference-data.mjs`.
+18. `Energy GHG` — not in BEAM; BEAMweb adds it as informational reference. **Shipped in Phase 0** as a read-only table; live at [`beamweb.html#energy-ghg`](./PDF-Parser/beamweb.html#energy-ghg). 13 provinces × 5 fuel factors, sourced from `PDF-Parser/js/beam/reference-data.mjs`.
 
 Tab classification (first pass — confirm when BEAM CSVs arrive):
 - **User-intake tabs**: `Introduction`, `PROJECT`, all assembly tabs (`Footings & Slabs` → `Garage`)
 - **Derived / read-only**: `REVIEW`, `RESULTS`
 - **Reference / lookup**: `Glossary`, `Energy GHG`
 
-MCE² diverges with extra tabs not in BEAM: `Cover_Couverture`, `License`, `USER INPUT SHEET` (= BEAM's `PROJECT`), `Ext. Wall Systems`, `User Defined`, `SCENARIOS`. These are **not ports targets** unless BEAM adopts them later.
+Extra tabs from older BEAM-derivative spreadsheets (cover pages, licence, separate user-input sheets, scenario planners) are **not port targets** unless BEAM itself adopts them later.
 
 For each assembly tab, when populating §4, capture:
 - Purpose (what does this tab represent in the EC model?)
@@ -103,7 +103,7 @@ For each assembly tab, when populating §4, capture:
 - Output that feeds the project total
 - Andy: each tab generally follows a similar structure; samples on request.
 
-### 2.2 PROJECT tab — observed fields (from MCE² screenshot; BEAM equivalent expected similar)
+### 2.2 PROJECT tab — observed fields (BEAM layout, confirmed when CSVs arrive)
 
 Header:
 - Import project data from HOT2000 (operational energy source)
@@ -131,11 +131,11 @@ Unit conversion widget (top-right):
 - Area: m² ↔ ft²
 - Length: m ↔ ft
 
-### 2.3 Assembly-tab pattern (confirmed from MCE² CSVs — BEAM expected similar)
+### 2.3 Assembly-tab pattern (expected BEAM layout, verified against informal references)
 
 **This is the architectural cornerstone** — the picker isn't a modal; it's inline toggle rows in every tab.
 
-Observed shape from `docs/csv files from BEAM/Footings and Slabs.csv` (1260 rows) and `Foundation Walls.csv` (1283 rows):
+Observed shape from informal references (footings + foundation walls sheets, ~1200 rows each):
 
 ```
 SECTION N ➜ COMPONENT MATERIALS FOR <ASSEMBLY NAME>
@@ -164,7 +164,7 @@ One row per candidate material:   (many rows — MCE² Foundation Walls has ~100
 2. User enters QUANTITY in the assembly's unit (m², m³) and flips SELECT=1 on each material they want in the build.
 3. Shared section config (THICKNESS, R-value, framing spacing, etc.) sits at the top of each sub-category and feeds the per-row calc.
 4. `%` column lets user mix multiple materials within a category (e.g., 60% Cedar + 40% Pine in siding).
-5. Expired-EPD rows are flagged with the word "Expired YYYY" in a trailing column (visible in both MCE² CSVs). BEAMweb already has `epd.expiry_date` from the JSON DB — surface this as a visual warning on the row.
+5. Expired-EPD rows are flagged with the word "Expired YYYY" in a trailing column. BEAMweb already has `epd.expiry_date` from the JSON DB — surface this as a visual warning on the row.
 6. The tab subtotal at the top of the kgCO2e column rolls up into the project total shown on the PROJECT tab.
 
 **Implications for BEAMweb:**
@@ -185,7 +185,7 @@ One row per candidate material:   (many rows — MCE² Foundation Walls has ~100
 
 ### 3.2 Excel import — reuse OBJECTIVE patterns
 
-- Expected: `.xlsx` files matching the MCE² template.
+- Expected: `.xlsx` files matching the BEAM workbook template.
 - Reader walks a known sheet+cell map and populates project state.
 - Pattern borrowed from OBJECTIVE. **TBD — Andy to point at specific modules** (or lift them once BEAMweb has a home on disk).
 - Fallback behaviour for mismatched templates (different versions, user-edited sheet names) — **TBD** (warn and skip? reject? best-effort fill?).
@@ -194,7 +194,7 @@ One row per candidate material:   (many rows — MCE² Foundation Walls has ~100
 
 - PDF-Parser exports polygon measurements as JSON with area_m2 (already built) + depth_m (Step 10 volumetric takeoff, in progress).
 - Each polygon optionally carries a material reference by `id` (what Phase 3 of the schema plan was going to deliver — now lands inside BEAMweb).
-- BEAMweb maps polygons to MCE² components. E.g.:
+- BEAMweb maps polygons to BEAM components. E.g.:
   - All polygons tagged `wall_exterior` → sum into `Exterior wall area`
   - All polygons tagged `roof` → sum into `Roofing area`
   - Heavy timber volumes are added directly (polygon area × depth)
@@ -202,9 +202,9 @@ One row per candidate material:   (many rows — MCE² Foundation Walls has ~100
 
 ---
 
-## 4. Calculation approach — partial (confirmed from MCE² CSVs, pending BEAM formulas)
+## 4. Calculation approach — partial (inferred from reference sheets, pending BEAM formula export)
 
-### 4.1 What we know from MCE² CSVs
+### 4.1 What we know so far
 
 The per-row calc in each assembly tab follows this shape (inferred from column headers; exact formulas await BEAM export):
 
@@ -224,19 +224,19 @@ section subtotal           =  Σ displayed kgCO2e across all rows in the tab
 project material total     =  Σ subtotals across all assembly tabs
 ```
 
-The column labels in MCE² confirm this chain:
+The assembly-tab column labels confirm this chain:
 - `SELECTED MATERIAL kgCO2e CONTENT` — per-functional-unit intensity, after section-config multipliers
 - `NET kgCO2e EMISSIONS` — per-row result after QUANTITY and SELECT
 - `kgCO2e EMISSIONS` — final column, likely after any tab-level conditional rules
 
-### 4.2 Open items awaiting BEAM CSVs
+### 4.2 Open items awaiting BEAM CSV export
 
 - Exact formulas per column (we know the *shape*; we need the *multipliers*).
 - How section-config (thickness, R-value, framing spacing) composes with the material's native `functional_unit` (e.g. "m² at 3.5 inch" for CLT — does BEAM scale to user-entered thickness or expect the functional unit to match?).
-- The `kgCO2e EMISSIONS` → `NET kgCO2e EMISSIONS` transformation on a few tabs (interior wall cladding doubling is mentioned in MCE² hints).
+- The `kgCO2e EMISSIONS` → `NET kgCO2e EMISSIONS` transformation on a few tabs (interior wall cladding is doubled to account for both faces).
 - Any lookup-chain dependencies between tabs (e.g. does `Exterior Walls` pull summary rows from `Cladding`?).
 - The `REVIEW` / `RESULTS` tab formulas that aggregate everything.
-- Garage exclusion rule — MCE² says "Exclude any garage quantities" on the user input sheet; need to see if BEAM handles this via a switch, a separate tab, or guidance only.
+- Garage exclusion rule — reference guidance says to exclude garage quantities from whole-building totals; confirm BEAM handles this via a switch, a separate tab, or guidance only.
 
 ### 4.3 Port approach
 
@@ -363,7 +363,7 @@ Small, independently-shippable slices:
 4. **Phase 3 — First assembly tab end-to-end**. Candidate: `Footings & Slabs` (simplest geometry) or `Exterior Walls` (most representative — lots of shared infra). Pick after BEAM CSVs arrive. Establishes the per-row calc pattern, regression-tests against BEAM workbook output with a canonical project, locks the per-tab module shape.
 5. **Phase 4 — Remaining assembly tabs in parallel**. Each follows the Phase 3 pattern. 13 assembly tabs × ~1 day each → ~3 weeks of focused work.
 6. **Phase 5 — REVIEW + RESULTS + reports**. Aggregation tabs, print view, CSV export of results (not export back to Excel — one-way only per §0).
-7. **Phase 6 — Excel import (reuse OBJECTIVE ExcelMapper)**. Read an MCE² or BEAM workbook into the project state. Round-trip test: import, export to JSON, re-open, numbers match within rounding tolerance.
+7. **Phase 6 — Excel import (reuse OBJECTIVE ExcelMapper)**. Read a BEAM workbook into the project state. Round-trip test: import, export to JSON, re-open, numbers match within rounding tolerance.
 8. **Phase 7 — OBJECTIVE integration for operational energy** (see §10). Shared project file or cross-app nav pattern brings TEUI/TEDI + fuel consumption from OBJECTIVE into BEAMweb's PROJECT tab. HOT2000 direct-parse indefinitely deferred.
 9. **Phase 8 — PDF-Parser integration**. Polygons carry a `component` tag set at measurement time (see §7 Q11); BEAMweb reads them into assembly tabs. Shared project JSON. Live area totals.
 10. **Phase 9 — Calculation graph layer** (goal 5). Pure calc functions from Phases 3–5 wrapped in a dependency graph for topological replay on change. OBJECTIVE graph conventions consulted.
@@ -411,7 +411,7 @@ Small, independently-shippable slices:
 
 **Storage contract** — every numeric field in every project JSON is stored in metric (m, m², m³, kg, kgCO2e). There is no imperial mirror in the serialized file. Consumers that want imperial compute it at display time.
 
-**User preference** — a metric/imperial toggle lives in the header (like MCE²'s unit widget in the top-right of PROJECT), persisted in `localStorage` per-user (survives across projects). Default: metric.
+**User preference** — a metric/imperial toggle lives in the header (like the BEAM workbook's unit widget in the top-right of PROJECT), persisted in `localStorage` per-user (survives across projects). Default: metric.
 
 **Why**: Canadian practice splits along the Part 9 / Part 3 line. Part 3 AHJs, reviewers, commercial builders: overwhelmingly metric. Part 9 builders + Energy Advisors: often still imperial on paper. Both need to be first-class, but the model itself should never have two sources of truth for any quantity. Storage in metric keeps the calc engine simple and deterministic; display-only imperial keeps the UX familiar for Part 9 workflows.
 
