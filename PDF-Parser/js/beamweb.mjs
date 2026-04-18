@@ -200,7 +200,7 @@ const PANEL_BODIES = {
         This is the navigation shell. Tabs are stubbed. Calc engine, state management, and file I/O land in Phases 1–3.
       </p>
       <p style="margin:6px 0">
-        See <a href="https://github.com/arossti/OpenBuilding/blob/main/BEAMweb.md" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md</a> for the workplan and open questions.
+        See <a href="https://github.com/arossti/OpenBuilding/blob/beamweb/BEAMweb.md" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md</a> for the workplan and open questions.
       </p>
       <p style="margin:6px 0">
         Data source: <a href="database.html" class="db-kv-link">BfCA Material Database</a>.
@@ -319,7 +319,7 @@ function defaultStub(tab) {
       </ul>
       <p style="margin-top: 14px;">
         Awaiting BEAM CSV exports (with formulas) from the unlocked workbook.
-        See <a href="https://github.com/arossti/OpenBuilding/blob/main/BEAMweb.md#2-reference-source--the-beam-and-mce²-spreadsheets" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md §2</a>.
+        See <a href="https://github.com/arossti/OpenBuilding/blob/beamweb/BEAMweb.md#2-reference-source--the-beam-and-mce²-spreadsheets" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md §2</a>.
       </p>
     </div>
   `;
