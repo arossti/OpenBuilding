@@ -1,14 +1,15 @@
 # BEAMweb — JS port of BEAM for the web
 
-> **Workplan + design spec + cold-start handoff for the BEAMweb workstream.** Read section 0 first if you are joining fresh. Sections marked **TBD — user input** are intentionally empty and wait for Andy to describe the source of truth (MCE² workbook tabs and their calc formulas).
+> **Workplan + design spec + cold-start handoff for the BEAMweb workstream.** Read section 0 first if you are joining fresh. Sections marked **TBD — user input** are intentionally empty and wait for Andy to describe the source of truth (BEAM workbook tabs and their calc formulas).
 
 ---
 
 ## 0. Cold-start handoff (read this first)
 
-### Status as of 2026-04-18 (end of session 2)
+### Status as of 2026-04-18 (end of session 2 — Phase 0 merged to main)
 
-- **Phase 0 shipped.** Branch `beamweb` on both remotes, 10 commits ahead of `main`. App shell live at [`PDF-Parser/beamweb.html`](./PDF-Parser/beamweb.html) with 18 tabs, Glossary + Energy GHG populated with real data, reference-data module, action bar wired to stubs.
+- **Phase 0 shipped + merged** via PR #6 (`cd89b37`). App shell live at [`PDF-Parser/beamweb.html`](./PDF-Parser/beamweb.html) with 18 tabs, Glossary + Energy GHG populated with real data, reference-data module, action bar wired to stubs. Site is deployed on Pages.
+- **Active branch**: `beamweb-tabs` (for BEAM CSV → assembly-tab ports; Phase 3+). Work on a new branch per phase; never push to `main`.
 - **Ecosystem restructured** — landing page at `PDF-Parser/index.html`; PDF-Parser app renamed to `pdfparser.html`; single-file CSS (`bfcastyles.css`, ~4100 lines, section/app scoped); cyan accent; dependency manifest with drift detector at `dependencies.html`; BEAM nav-btn added across all apps.
 - **IP neutralisation applied** (session 2 commit `8d730ab`) — see the "IP rules" block below. Code and served data are CSI/MCE²-free; Matrix intentionally retains regulatory-program references (legitimate citations).
 - **Parent repo dependencies in place:**
@@ -33,7 +34,7 @@ A browser app that replaces the BEAM (Google Sheets) embodied carbon spreadsheet
 - Runs in the browser, no Excel required
 - Consumes the new BEAM materials JSON database (full ISO 21930 / EN 15804+A2 per-stage impact scope, not just GWP)
 - Accepts three input modalities for quantities:
-  1. **Manual entry** — user types areas, thicknesses, etc. (mirrors MCE² workbook)
+  1. **Manual entry** — user types areas, thicknesses, etc. (mirrors the BEAM workbook)
   2. **Excel import** — read an existing BEAM workbook file into state (reuse file-handling patterns from **OBJECTIVE**, ask Andy for that ExcelMapper file when it is time - this comes from Andy's team's energy model app)
   3. **PDF-Parser integration** — polygons measured on drawings flow directly as component areas (PDF Parser already fully functional, and creates summary table of all Key Areas if not yet volumes)
 - Persists projects as JSON (shared format with PDF-Parser so one project file covers both tools) - FileHandler needed for Import/Export and full StateManager.js for proper persistence and browser local storage use.
@@ -45,7 +46,7 @@ A browser app that replaces the BEAM (Google Sheets) embodied carbon spreadsheet
 - Not a new calculation *methodology*. BEAM is the source of truth; BEAMweb is a port, and is meant to be visually and functionally similar to the spreadsheet tools users know and love.
 - Not a material catalogue rewrite. Consumes `schema/materials/` as-is.
 - Not tied to Excel. Excel import is a *convenience*, not a dependency. Projects live as JSON. There is no planned excel *export* — this is intended as a one-way convenience only to assist users with transition from the legacy format
-- Not a replacement for OBJECTIVE. Operational energy (HOT2000) integration is scoped similarly to MCE² — import/accept, don't re-model.
+- Not a replacement for OBJECTIVE. Operational energy integration is scoped the same way: import/accept, don't re-model. See §10 — we hook into OBJECTIVE rather than parse HOT2000 directly.
 
 ### Name rationale
 
@@ -53,16 +54,17 @@ A browser app that replaces the BEAM (Google Sheets) embodied carbon spreadsheet
 
 ### Git workflow (same as schema workstream)
 
-1. Feature branch `beamweb` (current). Commit + push to **both** remotes after every meaningful change.
+1. Feature branch per phase (currently `beamweb-tabs`). Commit + push to **both** remotes after every meaningful change.
 2. When ready to deploy: PR on `arossti/OpenBuilding` → user merges → GitHub Pages auto-deploys from `main`.
-3. Never push to `main` directly. Never force-push. Never skip hooks.
-4. Commit messages via `git commit --file=- <<'MSG'` heredocs. Avoid apostrophes in messages.
+3. After merge: fast-forward local `main`, push `main` to the `origin` mirror (`git push origin main`), delete the feature branch on both remotes (`git push origin --delete <branch> && git push openbuilding --delete <branch>`), delete the local branch, create the next feature branch.
+4. Never push to `main` directly. Never force-push. Never skip hooks.
+5. Commit messages via `git commit --file=- <<'MSG'` heredocs. Avoid apostrophes in messages.
 
 ---
 
 ## 1. Goals
 
-1. Produce the same EC totals as MCE² for the same inputs (regression-test against a reference MCE² workbook).
+1. Produce the same EC totals as the BEAM workbook for the same inputs (regression-test against the unlocked BEAM Google Sheet that Andy maintains).
 2. Extend output with the full per-stage impact breakdown the new JSON database supports (once EPD parser fills `impacts.*.by_stage`).
 3. Let a practitioner get to a total without leaving the browser: drawings → areas → materials → EC.
 4. Keep the three input modalities as equal citizens so a practitioner can mix them on one project (some manual, some from PDF, some from imported Excel).
@@ -159,7 +161,7 @@ Section-level config row:         e.g. THICKNESS = ___ in = 0.00 m
 Sub-sub-category:                 e.g. "AGGREGATE"
 Descriptive note:                 e.g. "If you do not know ..."
 
-One row per candidate material:   (many rows — MCE² Foundation Walls has ~1000)
+One row per candidate material:   (many rows — Foundation Walls sheet has ~1000)
   Aggregate / Kangley Rock / … / Avg construction aggregate
     quantity=0.0 m²   %=100%   SELECT=☐   net=0   content=0   emissions=0
 
@@ -187,7 +189,7 @@ One row per candidate material:   (many rows — MCE² Foundation Walls has ~100
 
 ### 3.1 Manual entry
 
-- Mirror the MCE² form layout (tabs, input fields, formatting).
+- Mirror the BEAM workbook form layout (tabs, input fields, formatting).
 - Inputs validated on blur, totals recomputed live.
 - Blank / null fields are allowed; the model just doesn't count them toward the total.
 
@@ -226,7 +228,7 @@ per row (one candidate material):
                               × row.QUANTITY (m² or m³)
 
   displayed kgCO2e         =  NET × any component-specific multiplier
-                              (e.g. interior wall cladding ×2 per MCE² note)
+                              (e.g. interior wall cladding ×2 to account for both faces)
 
 section subtotal           =  Σ displayed kgCO2e across all rows in the tab
 project material total     =  Σ subtotals across all assembly tabs
@@ -264,7 +266,7 @@ The BEAM workbook uses cross-sheet custom functions to convert unit strings (e.g
 
 This pattern is common enough in the reference CSVs that the importer should treat `#NAME?` as a soft-null sentinel, not a hard parse error.
 
-### 4.4 Calculation graph consideration (goal 5)
+### 4.5 Calculation graph consideration (goal 5)
 
 Since the graph is goal 5, design the calc layer as pure functions with declared inputs so a future dependency-graph wrapper can replay them in topological order. Concretely:
 
@@ -302,7 +304,7 @@ Mirroring PDF-Parser + Database viewer conventions for BEAMweb's own code, with 
   │   │   ├── user-input.mjs
   │   │   ├── footings-slabs.mjs
   │   │   ├── foundation-walls.mjs
-  │   │   └── ...                   one per MCE² assembly tab
+  │   │   └── ...                   one per BEAM assembly tab
   │   └── material-picker.mjs       modal/panel, reuses schema/materials/
   └── data/ or fetch from ../schema/materials/
   ```
@@ -395,7 +397,7 @@ Small, independently-shippable slices:
 - ✅ **Q1 (tab inventory)** — use the BEAM list, 17 tabs + Energy GHG optional (see §2.1).
 - 🟡 **Q2 (user-facing vs derived vs lookup)** — first-pass classification in §2.1 (user intake = Introduction/PROJECT/assembly tabs; derived = REVIEW/RESULTS; lookup = Glossary/Energy GHG). Confirm when BEAM CSVs arrive.
 - 🟡 **Q4 (material reference encoding)** — assembly tabs pre-curate a subset of BEAM materials as inline rows (see §2.3). Likely resolved by `beam_id` once CSVs come with formulas; confirm.
-- 🟡 **Q5 (per-m² vs mass-based)** — MCE² column labels indicate per-functional-unit intensity × section-config × quantity (see §4.1). Confirm formulas from BEAM.
+- 🟡 **Q5 (per-m² vs mass-based)** — reference-CSV column labels indicate per-functional-unit intensity × section-config × quantity (see §4.1). Confirm formulas from BEAM CSV export.
 - ✅ **Q9 (Excel import scope)** — `.xlsx` only (Excel import is a one-way convenience for transition from legacy; no export planned — §0 NOT list).
 - ✅ **Q15 (tab UX)** — mirror the spreadsheet visually and functionally, "so users know and love it" (per §0 edit). Tab sidebar + per-tab pages.
 - ✅ **Q17 (Pages site)** — yes, same Pages site; `beamweb.html` deploys alongside existing apps.
@@ -412,7 +414,7 @@ Small, independently-shippable slices:
 
 **Integration:**
 - Q12: Can two projects share polygons (cross-project material reuse), or is each project self-contained?
-- Q13: Does BEAMweb need read access to a completed BEAM workbook (full operational+material), or only MCE²-equivalent subset?
+- Q13: Does BEAMweb need read access to a completed BEAM workbook (full operational + material scope), or only the material-emissions subset?
 
 ### Answered
 
@@ -469,7 +471,7 @@ export function parseUserInput(text, kind, userUnit) {
 
 1. **Shared project JSON** — OBJECTIVE saves a project file that BEAMweb can open (or a subset of). Same `shared/filehandler.mjs` + `shared/statemanager.mjs` scaffold that BEAMweb uses.
 2. **Cross-app nav with state preservation** — adapt OBJECTIVE's `saveStateAndNavigate()` pattern so clicking from OBJECTIVE into BEAMweb (or reverse) carries the shared meta + energy consumption forward.
-3. **Manual entry fallback** — when no OBJECTIVE project is attached, the PROJECT tab energy fields accept manual kWh / m³ / L / kg inputs (parallels MCE² today).
+3. **Manual entry fallback** — when no OBJECTIVE project is attached, the PROJECT tab energy fields accept manual kWh / m³ / L / kg inputs (parallels the BEAM workbook today).
 
 What BEAMweb needs from OBJECTIVE for operational energy (provisional):
 - Heated floor area, heating degree days, province (already part of both models)
@@ -483,7 +485,7 @@ BEAMweb applies the Energy GHG factors (tab 18) to produce operational emissions
 
 ---
 
-## 8. Relationship to sibling workstreams
+## 11. Relationship to sibling workstreams
 
 | Workstream | How BEAMweb uses it | How BEAMweb affects it |
 |---|---|---|
@@ -496,11 +498,11 @@ BEAMweb applies the Energy GHG factors (tab 18) to produce operational emissions
 
 ---
 
-## Appendix — Branch + repo state at spin-up
+## Appendix — Branch + repo state
 
-- Branch: `beamweb` on both remotes (commit `8321204`, same tip as `main`)
-- No code yet — this document only
-- Sibling apps all on `main`: PDF-Parser, Matrix, Database viewer; shipped and deployed
+- Phase 0 merged to `main` at commit `cd89b37` (PR #6, 2026-04-18)
+- Active feature branch: `beamweb-tabs` on both remotes, for Phase 3+ assembly-tab ports
+- Sibling apps all on `main`: PDF-Parser, Matrix, Database viewer, BEAMweb shell, Landing, Deps manifest — shipped and deployed at `arossti.github.io/OpenBuilding/`
 
 ---
 
