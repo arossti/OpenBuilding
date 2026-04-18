@@ -16,13 +16,16 @@
 - **Batch output**: [`schema/materials/`](./materials) — 821 records across 8 CSI divisions (03/04/05/06/07/08/09/31), `index.json` picker catalogue, `import-report.json` manual-review flags.
 - **Lookups**: [`schema/lookups/`](./lookups) — country-codes, csi-divisions, material-type-to-csi, display-name-keywords, typical-elements, lifecycle-stages.
 - **Branch**: `schema` on both remotes (`origin` = bfca-labs/at, `openbuilding` = arossti/OpenBuilding)
-- **Last commit at time of writing**: `6d5a999` — Phase 1 pipeline + first batch output shipped.
-- **Phase 1 status**: All acceptance criteria met except the final PR merge to `main`. Ready to open PR on `arossti/OpenBuilding`.
-- **Next phase**: Phase 2 (EPD PDF parser — fills `impacts.*.by_stage` from ISO 21930 / EN 15804 Type III EPD tables) or Phase 3 (PDF-Parser material picker — consumes `materials/index.json`). User call on sequencing.
+- **Last commit at time of writing**: `f82094c` — Phase 1.5 Database viewer + detail-pane clip fix.
+- **Phase 1 status**: All technical acceptance criteria met. PR ready to open on `arossti/OpenBuilding`.
+- **Phase 1.5 status**: Database viewer shipped — stakeholder-facing tabular browser at `PDF-Parser/database.html`, proves the catalogue consumption pattern and will become live on Pages once the PR merges.
+- **Next phase**: Phase 3 (PDF-Parser material picker) is unblocked and recommended next. Phase 2 (EPD PDF parser) waits on a sample EPD PDF from the user.
 
 ### Recommended next action
 
-**Phase 1, Task 1.6**: Write `scripts/beam-csv-to-json.mjs` and port the single LAM011 row as a regression target — the script's output must match `sample.json` byte-for-byte (or at least structurally, modulo insignificant whitespace). Once LAM011 round-trips, extend to all 825 rows.
+**Phase 1 + 1.5 shipped.** Open the Phase 1 PR on `arossti/OpenBuilding` and merge to `main`. After merge, choose the next phase:
+- **Phase 3 — PDF-Parser material picker** (recommended next, unblocked). Consumes `materials/index.json` which the Database viewer already proves loads cleanly at runtime. Integrates with the existing Volumetric Takeoff feature.
+- **Phase 2 — EPD PDF parser**. Blocked on user sharing a sample EPD PDF. When unblocked, this fills `impacts.*.by_stage` slots that are visibly empty in the Database viewer matrix today.
 
 ### Project context (required reading)
 
@@ -49,14 +52,19 @@ Memory files at `/Users/andrewthomson/.claude/projects/<path-hash>/memory/MEMORY
 | Path | Purpose |
 |---|---|
 | `schema/schema.md` | **This file.** Workplan + design spec + agent handoff |
-| `schema/sample.json` | Canonical reference record (LAM011 CLT, 143 fields, 88 populated) |
+| `schema/sample.json` | Canonical full-template reference record (LAM011 CLT, schema-complete) |
 | `schema/BEAM Database-DUMP.csv` | Cleaned BEAM source data — 826 lines, Excel row = CSV line |
 | `schema/materials.json` | Pre-existing ABCD.EARTH schema — donor of rendering hints only |
-| `schema/material.schema.json` | **To create (Phase 1.1).** JSON Schema Draft 2020-12 validator |
-| `schema/lookups/*.json` | **To create (Phase 1.2-1.4).** Enum lookups for country/CSI/elements |
-| `schema/scripts/beam-csv-to-json.mjs` | **To create (Phase 1.5).** Node ESM importer |
-| `schema/materials/index.json` | **To create (Phase 1.8).** Lightweight picker catalogue |
-| `schema/materials/NN-<slug>.json` | **To create (Phase 1.7).** Per-CSI-division record files |
+| `schema/material.schema.json` | ✅ JSON Schema Draft 2020-12 validator |
+| `schema/lookups/*.json` | ✅ 6 files — country-codes, csi-divisions, material-type-to-csi, display-name-keywords, typical-elements, lifecycle-stages |
+| `schema/scripts/beam-csv-to-json.mjs` | ✅ Node ESM importer (single-row + batch modes, formula evaluator, IFERROR extractor) |
+| `schema/scripts/validate.mjs` | ✅ Zero-dep Node walker for `material.schema.json` |
+| `schema/materials/index.json` | ✅ Lightweight picker catalogue (821 entries × 8 fields, ~290 KB pretty) |
+| `schema/materials/NN-<slug>.json` | ✅ Per-CSI-division sparse records (8 files: 03–09, 31) |
+| `schema/materials/import-report.json` | ✅ Manual-review flags (unresolved divisions, blank IDs) |
+| `PDF-Parser/database.html` | ✅ Phase 1.5 — stakeholder viewer for the full catalogue |
+| `PDF-Parser/database.css` | ✅ Database viewer styles (dark theme, extends bfcastyles + pdfparser) |
+| `PDF-Parser/js/database.mjs` | ✅ Database viewer logic (sortable table, lazy per-division fetch, expandable detail with full per-stage matrix) |
 
 ### Known gotchas / lossy-import hazards
 
@@ -127,29 +135,35 @@ Priority ordering. Each phase is independently valuable; later phases depend on 
 - [x] IFC alignment mapped (§5.4)
 - [x] `docs/`, `schema/`, workstream consolidation complete (see parent repo)
 
-### Phase 1 — JSON database port (NEXT)
+### Phase 1 — JSON database port — Complete ✅
 
 **Goal**: Emit the full catalogue as validated per-CSI-division JSON files + a lightweight index. This unblocks all downstream work.
 
-1. **`schema/material.schema.json`** — formal JSON Schema Draft 2020-12 validator with `$defs` + stable `$anchor` IDs for each block. Enforces enums for `status.visibility`, `carbon.biogenic.method`, `classification.typical_elements`, `impacts.*.source`, etc.
-2. **`schema/lookups/country-codes.json`** — `"US & CA"` → `["USA","CAN"]`, `"CAN"` → `["CAN"]`, etc. Populate from real BEAM values first; flag unmappable entries.
-3. **`schema/lookups/csi-divisions.json`** — 2-digit prefix → division_name (`"03"` → `"Concrete"`, `"06"` → `"Wood, Plastics, and Composites"`).
-4. **`schema/lookups/typical-elements.json`** — enum list (foundation, slab, wall_exterior, wall_interior, wall_shear, roof, roof_deck, floor, structural_frame, beam, column, joist, stud, sheathing, cladding, siding, trim, flooring, ceiling, window, door, insulation_cavity, insulation_continuous, vapour_barrier, air_barrier, membrane, finish, fastener). Also a small `material_type → default_typical_elements[]` lookup for auto-population.
-5. **`schema/lookups/lifecycle-stages.json`** — enum A1, A2, A3, A4, A5, B1, B2, B3, B4, B5, B6, B7, C1, C2, C3, C4, D with short descriptions (see `sample.json` `_lifecycle_scope_reference` for the structure).
-6. **`schema/scripts/beam-csv-to-json.mjs`** — Node ESM importer. Single-row mode first (LAM011 → must diff-match `sample.json`). Then batch. Handles:
-   - Excel date serial conversion (see §0 gotchas)
-   - Formula cell evaluation: in-row reference resolution (e.g., `=Q545/11.249` → lookup column Q in same row / 11.249); IFERROR fallback extraction
-   - Country code normalisation via lookup
-   - CSI division inference from Display Name prefix where `Material Type` is blank
-   - Biogenic method derivation (populated biogenic fields → `"wwf_storage_factor"`)
-   - Density dual-unit computation (kg_m3 × 0.06243 → lb_ft3)
-   - Slug generation for `id` from `display_name` (deterministic)
-7. **`schema/materials/NN-<slug>.json`** — emit one file per CSI division (`03-concrete.json`, `04-masonry.json`, `05-metals.json`, `06-wood.json`, `07-thermal.json`, `08-openings.json`, `09-finishes.json`, etc.).
-8. **`schema/materials/index.json`** — emit lightweight picker catalogue (see §6.1 for schema). One entry per full record with 8 fields for UI display + filtering.
-9. **Validation**: every emitted record must pass `material.schema.json`. Script exits non-zero if any record fails. Include a run report: rows skipped, rows with inferred division, rows needing manual review.
-10. **Commit milestone**: Phase 1 merge to `main` triggers the next branch (`material-picker` or similar).
+- [x] **`schema/material.schema.json`** — JSON Schema Draft 2020-12 validator with `impact_block` / `impact_value` `$defs`. Relaxed to sparse-aware (scalar leaves optional, structural blocks required, `additionalProperties:false` everywhere; enums/patterns/types enforced).
+- [x] **`schema/lookups/country-codes.json`** — 21 BEAM free-text values → ISO 3166-1 alpha-3 arrays (incl. `"US & CA"` → `["USA","CAN"]`, `"EU"`/`"GLB"` retained as scope markers).
+- [x] **`schema/lookups/csi-divisions.json`** — 15 MasterFormat 2020 divisions with category slugs.
+- [x] **`schema/lookups/material-type-to-csi.json`** — all 90 observed BEAM material types mapped.
+- [x] **`schema/lookups/display-name-keywords.json`** — 45 fallback keyword patterns for the 337 blank-material-type rows (no unresolved rows after full scan).
+- [x] **`schema/lookups/typical-elements.json`** — enum + `material_type_defaults` + `product_subtype_overrides` (CLT, Glulam, LVL, I-joist, OSB).
+- [x] **`schema/lookups/lifecycle-stages.json`** — 17 EN 15804+A2 stages with groups + common-scope shortcuts (cradle_to_gate, cradle_to_grave, cradle_to_cradle).
+- [x] **`schema/scripts/beam-csv-to-json.mjs`** — Node ESM importer with RFC-4180 parser, recursive arithmetic formula evaluator (handles the AB=AE*AF chain where AE is itself a formula), IFERROR fallback extraction, Excel-serial-vs-year date heuristic, CSI inference via material_type primary + keyword fallback, density dual-unit, biogenic-method derivation, sparse emission via `prune()` + `normalize()`.
+- [x] **`schema/materials/NN-<slug>.json`** — 8 files emitted: `03-concrete.json` (205), `04-masonry.json` (42), `05-metals.json` (93), `06-wood.json` (160), `07-thermal.json` (217), `08-openings.json` (16), `09-finishes.json` (83), `31-earthwork.json` (5). Total 821 records.
+- [x] **`schema/materials/index.json`** — 8 fields per entry (id, beam_id, display_name, category, division_prefix, typical_elements, gwp_kgco2e, functional_unit). ~290 KB pretty.
+- [x] **Validation**: 822/822 records pass (`node scripts/validate.mjs --all`).
+- [x] **Sparse-by-default**: per-record 13 KB → 4 KB (−68%), batch 18 MB → 4.3 MB (−76%), ~1.2 MB gzipped.
+- [x] **Deployment gate**: `.github/workflows/deploy-pages.yml` now skips on `bfca-labs/at` (no Pages site), runs only on `arossti/OpenBuilding`.
+- [x] **Commit milestone**: PR on `arossti/OpenBuilding` → `main` pending user merge.
 
-**Estimated effort**: 1-2 days of focused work. Task 1.6 (the script) is the long pole.
+### Phase 1.5 — Database viewer — Complete ✅
+
+**Goal**: Interim stakeholder-facing HTML viewer for the full 821-record catalogue so BfCA / NRCan / AIBC can review the schema choices in a real UI before committing further down the pipeline. Lets teams see the empty per-stage slots and understand what the EPD parser (Phase 2) will fill.
+
+- [x] **`PDF-Parser/database.html`** — standalone page, dark theme, reuses `bfcastyles.css` + `pdfparser.css` + new `database.css`. Shared header nav across PDF-Parser / Matrix / Database.
+- [x] **Main table**: sortable columns (BEAM ID, Display Name, Division, Material, GWP, functional unit, typical elements), sticky header, live search, division chips with per-division counts, EPD-only toggle.
+- [x] **Expanded row detail** (accordion, collapsed by default; Carbon Calc Graph opens by default): Identity & Classification, Manufacturer & Provenance, Physical Properties, Carbon Calc Graph (ASCII flow diagram of BEAM's audit trail), Impacts per-stage matrix, EPD/Methodology/Code Compliance, Raw JSON.
+- [x] **Per-stage matrix**: 10 categories × (Total + 17 stages), horizontal scroll, sticky first column + total column, per-cell source tag (beam_derived / epd_direct) for provenance at a glance.
+- [x] **Data staging**: `npm run stage:data` in `PDF-Parser/` copies `schema/` outputs into `PDF-Parser/data/schema/`. Pages workflow does the same copy before upload. Staged dir gitignored to avoid doubling ~4 MB of committed data.
+- [x] **Local test**: all resources 200 via `npm run serve`; Node syntax clean; 821 entries load.
 
 ### Phase 2 — EPD PDF parser
 
@@ -166,7 +180,8 @@ Priority ordering. Each phase is independently valuable; later phases depend on 
 
 **Goal**: Wire the materials database into the PDF-Parser so users can associate measured polygons with materials for volumetric takeoff.
 
-- Prerequisite: Phase 1 complete (need `materials/index.json`).
+- Prerequisite: Phase 1 complete ✅ (`materials/index.json` is shipped).
+- Prior art: Phase 1.5 Database viewer proves the fetch + lazy-load + filter pattern works in a dark-theme module within PDF-Parser.
 - Integrates with the existing PDF-Parser Volumetric Takeoff feature (Step 10 in `docs/pdf-parser.md`).
 - Tasks:
   - Fetch `materials/index.json` at PDF-Parser boot
@@ -640,27 +655,33 @@ Sample.json (the canonical full template) remains schema-complete at ~21 KB beca
 #### Recommended file layout
 
 ```
-schema/
-├── material.schema.json          JSON Schema validator (Phase 1.1)
-├── sample.json                   CLT LAM011 full-fields reference
-├── lookups/                      Phase 1.2-1.5 enums
-│   ├── country-codes.json
-│   ├── csi-divisions.json
-│   ├── typical-elements.json
-│   └── lifecycle-stages.json
+schema/                           As committed in PR
+├── material.schema.json          Draft 2020-12 validator (sparse-aware)
+├── sample.json                   LAM011 full-template reference (schema-complete)
+├── BEAM Database-DUMP.csv        Cleaned BEAM source (826 lines)
+├── materials.json                ABCD.EARTH donor schema (rendering hints only)
+├── schema.md                     This document
+├── lookups/                      Enum + inference lookups
+│   ├── country-codes.json        21 BEAM free-text → ISO 3166-1 alpha-3 arrays
+│   ├── csi-divisions.json        15 MasterFormat 2020 codes + category slugs
+│   ├── material-type-to-csi.json 90 BEAM material types → 2-digit CSI prefix
+│   ├── display-name-keywords.json 45 fallback patterns (ordered specific-first)
+│   ├── typical-elements.json     Enum + material_type defaults + product_subtype overrides
+│   └── lifecycle-stages.json     17 EN 15804+A2 stages + common-scope shortcuts
 ├── scripts/
-│   └── beam-csv-to-json.mjs      Phase 1.6 importer
-└── materials/                    Phase 1.7-1.8 output
-    ├── index.json                Lightweight picker catalogue
-    ├── 03-concrete.json
-    ├── 04-masonry.json
-    ├── 05-metals.json
-    ├── 06-wood.json              Wood + bamboo + wood fibre (~60 records)
-    ├── 07-thermal.json           Insulation family (~70 records)
-    ├── 08-openings.json          Windows, doors, glazing
-    ├── 09-finishes.json          Gypsum, vinyl, linoleum, paint
-    ├── 31-earthwork.json         (future / sparse)
-    └── 32-sitework.json          (future / sparse)
+│   ├── beam-csv-to-json.mjs      Node ESM importer (single-row + batch)
+│   └── validate.mjs              Zero-dep JSON Schema walker
+└── materials/                    Sparse emitted catalogue (821 records)
+    ├── index.json                Picker catalogue (8 fields per entry, ~290 KB)
+    ├── import-report.json        Manual-review flags
+    ├── 03-concrete.json          205 records (incl. rebar → 03)
+    ├── 04-masonry.json            42 records (brick, stone, earth-based)
+    ├── 05-metals.json             93 records (steel, aluminum, composite beams)
+    ├── 06-wood.json              160 records (CLT, glulam, sheathing, fibre, bamboo)
+    ├── 07-thermal.json           217 records (insulation, barriers, roofing, siding)
+    ├── 08-openings.json           16 records (double/triple pane, wood+alu frames)
+    ├── 09-finishes.json           83 records (gypsum, flooring, carpet, tiles)
+    └── 31-earthwork.json           5 records (aggregate, ground screw, ICF webbing)
 ```
 
 #### `materials/index.json` — what's in it
@@ -763,7 +784,7 @@ print(f'raw=logical={raw} ✓')
 - [x] Every emitted record passes JSON Schema validation — 822/822 pass via `node scripts/validate.mjs --all`
 - [x] `materials/index.json` has correct shape (8 fields per entry); size is ~290 KB pretty-printed (exceeds the original 150 KB target but acceptable — minify for production delivery if needed)
 - [x] Import report identifies all skipped/problem rows by CSV row number
-- [ ] Phase 1 PR merges cleanly to `main`; GitHub Pages deploy succeeds — pending
+- [ ] Phase 1 PR merges cleanly to `main`; GitHub Pages deploy succeeds — **PR open, user to merge**
 
 ### 7.4 Phase 1 verification commands (post-import)
 
@@ -851,9 +872,12 @@ Scoping: not a Phase 1 deliverable. Phase 1 ships the intensity-only material re
 
 ## Appendix B — Changelog
 
-- **2026-04-18 (session 2, sparse-by-default)** — Schema v1.1 serialization refinement. Per-material records become sparse: null scalar leaves dropped, empty sub-objects collapsed. The 15 top-level object blocks, `impacts.<category>.total` (as `{value, source}`), `impacts.<category>.by_stage`, and all arrays stay present for safe traversal. Full template structure remains documented in `sample.json` and `material.schema.json` for EPD parser reference. Size impact: per-record ~13 KB → ~4 KB, batch 18 MB → 4.3 MB (76% reduction). Validator relaxed (required arrays pruned to structural members only; additionalProperties:false and enums/patterns unchanged); 822/822 records still pass.
-- **2026-04-18 (session 2, validator)** — Added `material.schema.json` (JSON Schema Draft 2020-12) and `scripts/validate.mjs` (zero-dep walker).
-- **2026-04-18 (session 2, heavy impacts)** — `impacts.*` expanded to heavy per-stage structure: each category carries `total` + `by_stage` object over all 17 EN 15804+A2 stages (A1–A5, B1–B7, C1–C4, D). Top-level `id` changed from display-derived slug to lowercased BEAM ID (`clt_nordic_xlam_3_5in` → `lam011`); `external_refs.beam_id` preserves case-exact. Added Appendix A1 stub on future project-level calc graph (deferred to Phase 4 / BEAM.js app; defer to OBJECTIVE energy model's graph conventions). `sample.json` updated to match.
+- **2026-04-18 `f82094c`** — Database viewer fix: removed 620px max-height cap on detail pane that clipped the impact matrix at 7 of 10 categories.
+- **2026-04-18 `b40ac44`** — Phase 1.5 Database viewer shipped: `PDF-Parser/database.html` + `database.css` + `js/database.mjs`. Sortable + filterable table, expandable row detail with full 10×18 per-stage impact matrix (horizontal scroll), carbon calc graph as ASCII flow diagram, raw JSON inspector. Data staged into `PDF-Parser/data/schema/` via `npm run stage:data` (local) or workflow step (Pages). Nav cross-links added across PDF-Parser / Matrix / Database.
+- **2026-04-18 `e66e513`** — CI fix: gated the Pages deploy job to `arossti/OpenBuilding` only (bfca-labs/at is private, no Pages site → 404). Cosmetic failure noise on the private mirror now suppressed.
+- **2026-04-18 `009a9c5`** — Sparse-by-default serialization. Per-material records omit null scalar leaves and empty sub-objects. 15 top-level object blocks, `impacts.<category>.total` (as `{value, source}`), `impacts.<category>.by_stage`, and all arrays stay present for safe traversal. Full template structure remains documented in `sample.json` and `material.schema.json`. Size: per-record ~13 KB → ~4 KB, batch 18 MB → 4.3 MB (76% reduction). Validator relaxed (required arrays pruned to structural members only; additionalProperties:false and enums/patterns unchanged); 822/822 records still pass.
+- **2026-04-18 `c71ef7d`** — Added `material.schema.json` (JSON Schema Draft 2020-12) and `scripts/validate.mjs` (zero-dep walker).
+- **2026-04-18 `6d5a999`** — Phase 1 pipeline shipped: `scripts/beam-csv-to-json.mjs` importer (recursive formula evaluator, IFERROR extractor, CSI inference), 6 lookup files, 821-record batch across 8 CSI divisions, `materials/index.json`, `import-report.json`. `impacts.*` expanded to heavy per-stage structure: each category carries `total` + `by_stage` object over all 17 EN 15804+A2 stages. Top-level `id` changed from display-derived slug to lowercased BEAM ID (`clt_nordic_xlam_3_5in` → `lam011`); `external_refs.beam_id` preserves case-exact. Added Appendix A1 on future project-level calc graph (deferred to Phase 4 / BEAM.js app; defer to OBJECTIVE energy model's graph conventions).
 - **2026-04-18 `0489ed5`** — Full workplan + cold-start agent handoff committed.
 - **2026-04-18 `0714485`** — BEAM CSV cleaned (truncated trailing 753 garbage rows, flattened embedded newlines). Excel row ↔ CSV line alignment now guaranteed.
 - **2026-04-18 `228eafb`** — Initial schema design package committed: `BEAM Database-DUMP.csv`, `materials.json` (ABCD.EARTH donor), `sample.json`, `schema.md` v1.
