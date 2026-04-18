@@ -1,8 +1,91 @@
-# Materials Database Schema — Workplan
+# BfCA Materials Database — Workplan & Schema Specification
 
-Status: **Sample record ready for review** (`sample.json`). Full porting, validator, and conversion script are follow-up tasks.
+> **This document is the canonical plan AND the design spec AND a cold-start handoff for new agents picking up the work.** Read the Cold-Start section first if you're joining fresh.
 
-## Goal
+---
+
+## 0. Cold-start handoff (read this first)
+
+### Status as of 2026-04-18
+
+- **Design**: locked in — 20 top-level blocks, 143 leaf fields, snake_case, schema-complete/nullable
+- **Sample record**: complete at [`schema/sample.json`](./sample.json) — BEAM `LAM011` (Nordic X-Lam CLT 3½")
+- **Source data**: cleaned & committed at [`schema/BEAM Database-DUMP.csv`](./BEAM%20Database-DUMP.csv) — 826 lines (1 header + 825 data rows), Excel-row ↔ CSV-line alignment verified
+- **Branch**: `schema` on both remotes (`origin` = bfca-labs/at, `openbuilding` = arossti/OpenBuilding)
+- **Last commit at time of writing**: `0714485` — CSV cleanup
+- **Current phase**: About to enter **Phase 1** (BEAM CSV → JSON database port). See §3.
+
+### Recommended next action
+
+**Phase 1, Task 1.6**: Write `scripts/beam-csv-to-json.mjs` and port the single LAM011 row as a regression target — the script's output must match `sample.json` byte-for-byte (or at least structurally, modulo insignificant whitespace). Once LAM011 round-trips, extend to all 825 rows.
+
+### Project context (required reading)
+
+Memory files at `/Users/andrewthomson/.claude/projects/<path-hash>/memory/MEMORY.md` carry:
+- Scope: **Canada only.** No US codes/ICC/ASHRAE unless explicitly referenced by a Canadian standard (e.g., TRACI 2.1).
+- Always surface **BEAM** and **MCE²** as tools when discussing EC/wbLCA assessments.
+- User is a senior architect (Andy Thomson, Thomson Architecture Inc.) — be terse, opinionated, and correct.
+- Collaborator: Jacob Racusin (BfCA) — his initial-commit folders are at `docs/*(Jacob)/` and are stale reference material.
+
+### Git workflow (strict)
+
+1. Work on a feature branch (currently `schema`).
+2. Commit + push to **both** remotes every time:
+   ```bash
+   git push origin <branch> && git push openbuilding <branch>
+   ```
+3. When ready to deploy: PR on `arossti/OpenBuilding` → user merges → GitHub Pages auto-deploys from `main`.
+4. After merge: rebase local `main`, delete feature branch both sides (`git push <remote> --delete <branch>`), prune, create next feature branch.
+5. Commit messages via heredoc; avoid apostrophes in messages (break bash heredocs). Prefer `--file=-` with a `<<'MSG'` block when message contains special chars.
+6. **Never** push to `main` directly. **Never** force-push. **Never** skip hooks.
+
+### Critical file inventory
+
+| Path | Purpose |
+|---|---|
+| `schema/schema.md` | **This file.** Workplan + design spec + agent handoff |
+| `schema/sample.json` | Canonical reference record (LAM011 CLT, 143 fields, 88 populated) |
+| `schema/BEAM Database-DUMP.csv` | Cleaned BEAM source data — 826 lines, Excel row = CSV line |
+| `schema/materials.json` | Pre-existing ABCD.EARTH schema — donor of rendering hints only |
+| `schema/material.schema.json` | **To create (Phase 1.1).** JSON Schema Draft 2020-12 validator |
+| `schema/lookups/*.json` | **To create (Phase 1.2-1.4).** Enum lookups for country/CSI/elements |
+| `schema/scripts/beam-csv-to-json.mjs` | **To create (Phase 1.5).** Node ESM importer |
+| `schema/materials/index.json` | **To create (Phase 1.8).** Lightweight picker catalogue |
+| `schema/materials/NN-<slug>.json` | **To create (Phase 1.7).** Per-CSI-division record files |
+
+### Known gotchas / lossy-import hazards
+
+See §6.2 for full table. Headline items:
+- **Excel date serials** are mixed with year-integers in the same column. Rule: if `n < 3000` → year; else Excel serial (epoch 1899-12-30).
+- **Formula cells** survive in the CSV as literal formula strings (e.g., `=Q545/11.249`, `=IFERROR(DUMMYFUNCTION("..."), "fallback")`). The importer must either evaluate against the referenced columns in the same row or extract the IFERROR fallback string.
+- **Country codes** are free-text (`"US & CA"`, `"CAN"`) → must map to ISO 3166-1 alpha-3 arrays.
+- **Column AA and AC misplaced values** — BEAM's sheet has some column labels placed in data rows (e.g., LAM011 col AC = `"m2 at 3.5\""` instead of a number). Detect & null.
+- **337 rows have blank `Material Type`** — infer division from Display Name prefix (`"05 | ..."`) or leave for manual classification.
+- **LAM011 canonical test values**: Stated EPD = 69.96 kgCO2e/m³, density = 456 kg/m³, thickness = 0.09 m, units/m² = 11.249, biogenic factor = 0.9897, carbon content = 0.5, storage retention = 0.9. Common GWP = 6.22 kgCO2e per m² at 3.5".
+
+### Don'ts
+
+- Don't rename top-level schema blocks without updating `sample.json`, the Full Field Inventory (§5.1), and the IFC alignment table (§5.4) in the same commit.
+- Don't embed numeric field IDs in the JSON data (use path strings + short block codes from §5.2).
+- Don't add comments (`//`) to `sample.json` — strict JSON only. Use `_prefixed` sibling fields for annotations.
+- Don't commit large binaries — `*.pdf`, `*.docx`, `*.xlsx` are gitignored except `PDF-Parser/sample.pdf`.
+- Don't add `Co-Authored-By: Claude Sonnet` — use the model tag shown in the active environment (currently Opus 4.7).
+
+### Verification commands (quick sanity checks)
+
+```bash
+cd schema
+# sample.json structurally valid
+python3 -c "import json; d=json.load(open('sample.json')); assert len(d.keys())==20; print('OK')"
+# carbon math reconciles
+python3 -c "import json; d=json.load(open('sample.json')); assert d['carbon']['common']['value_kgco2e']==6.22; print('OK')"
+# CSV Excel-row correspondence
+python3 -c "import csv; r=list(csv.reader(open('BEAM Database-DUMP.csv'))); assert r[1][0]=='2c53be'; assert r[544][0]=='LAM011'; print('OK')"
+```
+
+---
+
+## 1. Goal
 
 Define a canonical JSON record for a single material that serves multiple consumers in one structure:
 
@@ -13,15 +96,123 @@ Define a canonical JSON record for a single material that serves multiple consum
 
 Each record carries everything needed to place it in a wbLCA calc, pick it in a UI, and render it in 3D. Consumers read only the fields they need.
 
-## Source inputs
+### 1.1 Source inputs
 
-| Source | Rows | Purpose |
+| Source | Rows / size | Purpose |
 |---|---|---|
-| `schema/BEAM Database-DUMP.csv` | ~820 unique (1,753 rows with gaps) | BEAM's legacy 65-column material data — the primary import |
-| `schema/materials.json` | 33 | ABCD.EARTH's existing schema — donor of rendering hints (base_color, metallic, roughness, texture, has_grain) |
-| Future EPD PDFs | — | ISO 21930 / EN 15804 Type III declarations to be parsed row-by-row into the same schema |
+| `schema/BEAM Database-DUMP.csv` | 826 lines / 825 data rows (cleaned) | BEAM's legacy 65-column materials data — primary import |
+| `schema/materials.json` | 33 records | ABCD.EARTH's existing schema — donor of rendering hints (base_color, metallic, roughness, texture, has_grain) |
+| Future EPD PDFs | — | ISO 21930 / EN 15804 Type III declarations — Phase 2 target |
 
-## Design decisions (locked in, 2026-04-18)
+---
+
+## 2. Phase plan
+
+Priority ordering. Each phase is independently valuable; later phases depend on earlier ones in the ways noted.
+
+### Phase 0 — Complete ✅
+
+- [x] Schema design locked in (20 blocks, 143 leaf fields)
+- [x] Design decisions documented with rationale (§4.1)
+- [x] Canonical sample record hand-authored (`sample.json` — LAM011)
+- [x] BEAM CSV cleaned (trailing garbage removed, embedded newlines flattened, Excel row alignment)
+- [x] Full field inventory documented (§5.1)
+- [x] Field reference codes adopted (§5.2)
+- [x] File size projected & module splitting strategy decided (§6.1)
+- [x] IFC alignment mapped (§5.4)
+- [x] `docs/`, `schema/`, workstream consolidation complete (see parent repo)
+
+### Phase 1 — JSON database port (NEXT)
+
+**Goal**: Emit the full catalogue as validated per-CSI-division JSON files + a lightweight index. This unblocks all downstream work.
+
+1. **`schema/material.schema.json`** — formal JSON Schema Draft 2020-12 validator with `$defs` + stable `$anchor` IDs for each block. Enforces enums for `status.visibility`, `carbon.biogenic.method`, `classification.typical_elements`, `impacts.*.source`, etc.
+2. **`schema/lookups/country-codes.json`** — `"US & CA"` → `["USA","CAN"]`, `"CAN"` → `["CAN"]`, etc. Populate from real BEAM values first; flag unmappable entries.
+3. **`schema/lookups/csi-divisions.json`** — 2-digit prefix → division_name (`"03"` → `"Concrete"`, `"06"` → `"Wood, Plastics, and Composites"`).
+4. **`schema/lookups/typical-elements.json`** — enum list (foundation, slab, wall_exterior, wall_interior, wall_shear, roof, roof_deck, floor, structural_frame, beam, column, joist, stud, sheathing, cladding, siding, trim, flooring, ceiling, window, door, insulation_cavity, insulation_continuous, vapour_barrier, air_barrier, membrane, finish, fastener). Also a small `material_type → default_typical_elements[]` lookup for auto-population.
+5. **`schema/lookups/lifecycle-stages.json`** — enum A1, A2, A3, A4, A5, B1, B2, B3, B4, B5, B6, B7, C1, C2, C3, C4, D with short descriptions (see `sample.json` `_lifecycle_scope_reference` for the structure).
+6. **`schema/scripts/beam-csv-to-json.mjs`** — Node ESM importer. Single-row mode first (LAM011 → must diff-match `sample.json`). Then batch. Handles:
+   - Excel date serial conversion (see §0 gotchas)
+   - Formula cell evaluation: in-row reference resolution (e.g., `=Q545/11.249` → lookup column Q in same row / 11.249); IFERROR fallback extraction
+   - Country code normalisation via lookup
+   - CSI division inference from Display Name prefix where `Material Type` is blank
+   - Biogenic method derivation (populated biogenic fields → `"wwf_storage_factor"`)
+   - Density dual-unit computation (kg_m3 × 0.06243 → lb_ft3)
+   - Slug generation for `id` from `display_name` (deterministic)
+7. **`schema/materials/NN-<slug>.json`** — emit one file per CSI division (`03-concrete.json`, `04-masonry.json`, `05-metals.json`, `06-wood.json`, `07-thermal.json`, `08-openings.json`, `09-finishes.json`, etc.).
+8. **`schema/materials/index.json`** — emit lightweight picker catalogue (see §6.1 for schema). One entry per full record with 8 fields for UI display + filtering.
+9. **Validation**: every emitted record must pass `material.schema.json`. Script exits non-zero if any record fails. Include a run report: rows skipped, rows with inferred division, rows needing manual review.
+10. **Commit milestone**: Phase 1 merge to `main` triggers the next branch (`material-picker` or similar).
+
+**Estimated effort**: 1-2 days of focused work. Task 1.6 (the script) is the long pole.
+
+### Phase 2 — EPD PDF parser
+
+**Goal**: Build a parser that ingests ISO 21930 / EN 15804 Type III EPD PDFs and emits schema-conformant records or patches to existing records.
+
+- Prerequisite: Phase 1 complete (need real records to diff new EPD data against).
+- Prerequisite: User shares a sample EPD PDF (pending as of 2026-04-18 afternoon).
+- Approach: reuse PDF.js from `PDF-Parser/lib/` for PDF rendering and text extraction.
+- Section mapping already documented in §5.5 — EPD "Declared unit" → `carbon.stated.{value_kgco2e, per_unit}`, etc.
+- Output: JSON patch (new record, or diff against existing) with `source: "epd_direct"` on every impact value.
+- Human-in-the-loop: low-confidence fields flagged for manual review before merge.
+
+### Phase 3 — PDF-Parser material picker
+
+**Goal**: Wire the materials database into the PDF-Parser so users can associate measured polygons with materials for volumetric takeoff.
+
+- Prerequisite: Phase 1 complete (need `materials/index.json`).
+- Integrates with the existing PDF-Parser Volumetric Takeoff feature (Step 10 in `docs/pdf-parser.md`).
+- Tasks:
+  - Fetch `materials/index.json` at PDF-Parser boot
+  - Material picker UI — CSI division filter + `typical_elements` filter + full-text search over `display_name`
+  - On selection: lazy-fetch the relevant `materials/NN-*.json` and store the full record in the project state
+  - Extend PDF-Parser project JSON export to include material references per polygon
+  - Compute EC: polygon area (m²) × depth (m) → volume (m³) × density (kg/m³) × GWP (kgCO2e/kg) = kgCO2e
+  - Display per-material subtotal and project total in the Summary Table modal
+
+### Phase 4 — BEAM app port
+
+**Goal**: Port BEAM's Excel-based calculation engine to a JS web app sharing infrastructure with PDF-Parser.
+
+- Prerequisite: Phase 1 complete. Phase 3 recommended (establishes integration pattern).
+- User flagged: "We will need to update/enhance or create a filehandler and statemanager files, which I do not think we have explicitly created yet."
+- Sub-phases:
+  - **4a. Shared infra**: Create `shared/filehandler.mjs` and `shared/statemanager.mjs` used by both PDF-Parser and BEAM app. Project files are JSON, same format both apps can read. PDF-Parser project JSON extends BEAM project JSON (materials map + polygon area/depth refs).
+  - **4b. Material picker UI**: reuse from Phase 3.
+  - **4c. BEAM calc engine**: port the operational + embodied carbon calculations from BEAM's Excel model. Requires domain study of BEAM v3.
+  - **4d. Integrated UI**: web app that can load a saved PDF-Parser project AND a saved BEAM project and run the calcs end-to-end.
+
+### Phase 5 — IFC interop
+
+**Goal**: Bidirectional IfcMaterial read/write. See §5.4 for full field mapping.
+
+- `schema/ifc/ifc-import.md` — rules for parsing `IfcMaterial` + standard Psets (`Pset_MaterialCommon`, `Pset_MaterialThermal`) into our schema.
+- `schema/ifc/ifc-export.md` — rules for emitting IFC-conformant materials + custom `Pset_BfCA_EPDProvenance` for fields IFC doesn't natively model.
+- `schema/ifc/pset_bfca_epd_provenance.json` — formal custom Pset definition.
+- Integrates with the `ifc/` workstream (currently archived as `docs/ifc (Jacob)/` pending work resumption).
+- Test fixture: round-trip a material through IFC (export → import → verify no data loss on overlapping fields).
+
+### Phase 6 — Canadian context extensions
+
+**Goal**: Populate the `cost`, `fire`, `code_compliance` blocks with Canadian data.
+
+- Cost per unit (CAD/m³, CAD/m², CAD/kg, CAD/unit) — requires external data source (RSMeans Canada, Altus Group, BCA indices).
+- Fire ratings: FRR hours, combustibility (NBC Part 3.1.5), ULC listings, flame/smoke per CAN/ULC-S102.
+- NBC Part 9 / Part 3 suitability: manual review per material type.
+- VBBL s.10.4 + COV Appendix II: cross-reference with BfCA/COV documentation.
+
+### Phase 7 — Team PDF deliverable
+
+**Goal**: Render `schema.md` as a stakeholder-shareable PDF with tree diagram and full field list.
+
+- Low effort, can run anytime: `pandoc schema.md -o schema.pdf --toc --pdf-engine=xelatex`
+- Consider adding a Mermaid tree diagram of the 20-block structure for visual impact.
+- Low priority relative to Phases 1-4; parallel track for team comms.
+
+---
+
+## 3. Design decisions (locked in 2026-04-18)
 
 | Decision | Choice | Rationale |
 |---|---|---|
@@ -36,7 +227,7 @@ Each record carries everything needed to place it in a wbLCA calc, pick it in a 
 | Country codes | ISO 3166-1 alpha-3 arrays (`"US & CA"` → `["USA","CAN"]`) | Unambiguous; tool-friendly |
 | Biogenic method | Explicit enum `method: "wwf_storage_factor" \| "en_15804_negative_a1" \| "none"` | Makes the calculation methodology auditable; EPD parser fills later |
 
-## Record structure (20 top-level keys)
+### 3.1 Record structure (20 top-level keys)
 
 ```
 $schema, schema_version, id,
@@ -47,9 +238,9 @@ cost, fire, code_compliance,
 epd, methodology, provenance
 ```
 
-See `sample.json` for the fully-populated example (BEAM LAM011 — Nordic X-Lam CLT 3½").
+See [`sample.json`](./sample.json) for the fully-populated example (BEAM LAM011 — Nordic X-Lam CLT 3½").
 
-## Sub-object purposes
+### 3.2 Sub-object purposes
 
 | Block | Purpose |
 |---|---|
@@ -69,11 +260,50 @@ See `sample.json` for the fully-populated example (BEAM LAM011 — Nordic X-Lam 
 | `methodology` | LCA method, standards, PCR, software, LCI database, lifecycle scope (A1–D stages) |
 | `provenance` | Geography, dates, import metadata with CSV row index for round-trip audit |
 
-## Full field inventory (shareable with team)
+---
+
+## 4. Calculation audit — how `carbon` captures BEAM's math
+
+BEAM encodes three calculation passes. The schema preserves each explicitly so a consumer can verify the arithmetic (or a future EPD parser can populate each step from an EPD PDF):
+
+```
+carbon.stated       →  raw EPD declaration: "69.96 kgCO2e per m³"
+carbon.conversion   →  functional unit conversion: "divide by 11.249 units/m² = 0.0889× multiplier"
+carbon.common       →  result: "6.22 kgCO2e per m² at 3.5″"
+carbon.biogenic     →  sequestration math: density × thickness × biogenic_factor × carbon_content × 3.67
+                       then × storage_retention (0.9) for long-term stored CO2e
+```
+
+The CO₂:C molar ratio (44/12 ≈ 3.67) is preserved as `carbon.biogenic.co2_to_c_molar_ratio` — constant but explicit.
+
+### 4.1 Worked example (LAM011 — use as Phase 1 importer test target)
+
+| Step | Value | Source |
+|---|---|---|
+| `carbon.stated.value_kgco2e` | `69.96` | BEAM col Q (Stated EPD kgCO2e / unit) |
+| `carbon.stated.per_unit` | `"m3"` | BEAM col R |
+| Units/m² (internal) | `11.249` | BEAM col S formula `=Q545/11.249` (derived from 3.5" thickness: 1/0.0889) |
+| `carbon.conversion.factor` | `0.088897` | = 1 / 11.249 |
+| `carbon.common.value_kgco2e` | `6.22` | = 69.96 / 11.249 |
+| `carbon.common.per_functional_unit` | `"m2 at 3.5\""` | BEAM col T |
+| Density | `456 kg/m³` | BEAM col AG |
+| Thickness | `0.09 m` | BEAM col AI (3.5" rounded) |
+| Biogenic factor | `0.9897` | BEAM col X |
+| Carbon content | `0.5` kgC/kg | BEAM col Y |
+| Storage retention | `0.9` | BEAM col AF |
+| `carbon.biogenic.full_carbon_kgco2e_per_common_unit` | `74.53` | = 456 × 0.09 × 0.9897 × 0.5 × 3.67 |
+| `carbon.biogenic.stored_kgco2e_per_common_unit` | `67.08` | = 74.53 × 0.9 |
+| `carbon.biogenic.carbon_content_kgc_per_unit` | `20.31` | = 456 × 0.09 × 0.9897 × 0.5 (without CO2/C ratio) |
+
+---
+
+## 5. Specification reference
+
+### 5.1 Full field inventory (shareable with team)
 
 Every leaf field the schema defines, grouped by top-level block. Type hints: `str`, `num`, `bool`, `str[]`, `num[4]`, `ISO-3166-1α3`, `enum(...)`. All fields are nullable unless marked required.
 
-### Top-level identity
+#### Top-level identity
 | Field | Type | Notes |
 |---|---|---|
 | `$schema` | str | URL to JSON Schema definition (aspirational) |
@@ -82,7 +312,7 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `notes` | str | Free-form user commentary |
 | `source_notes` | str | Import-time annotations (e.g., "BfCA BioC calc by mass") |
 
-### `external_refs` — cross-catalogue IDs
+#### `external_refs` — cross-catalogue IDs
 | Field | Type |
 |---|---|
 | `beam_id` | str — BEAM CSV column A |
@@ -91,7 +321,7 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `ec3_id` | str — future, EC3 database |
 | `ifc_material_guid` | str — future, IFC IfcMaterial GUID |
 
-### `naming`
+#### `naming`
 | Field | Type |
 |---|---|
 | `display_name` | str — long form with manufacturer/spec |
@@ -99,7 +329,7 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `material_name` | str — generic (e.g., "Cross Laminated Timber") |
 | `product_brand_name` | str — product line (e.g., "X-Lam") |
 
-### `manufacturer`
+#### `manufacturer`
 | Field | Type |
 |---|---|
 | `name` | str |
@@ -107,7 +337,7 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `specifications` | str — free-form |
 | `website` | str URL |
 
-### `status`
+#### `status`
 | Field | Type |
 |---|---|
 | `listed` | bool |
@@ -116,7 +346,7 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `is_beam_average` | bool |
 | `visibility` | enum(`public`, `hidden`, `deprecated`) |
 
-### `classification`
+#### `classification`
 | Field | Type |
 |---|---|
 | `division_prefix` | str — CSI 2-digit (e.g., `"06"`) |
@@ -130,7 +360,7 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `product_subtype` | str |
 | `typical_elements` | str[] — enum (foundation, slab, wall_exterior, …) |
 
-### `rendering` — shader hints
+#### `rendering` — shader hints
 | Field | Type |
 |---|---|
 | `base_color` | num[4] — RGBA floats 0-1 |
@@ -139,7 +369,7 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `texture` | str path |
 | `has_grain` | bool |
 
-### `physical`
+#### `physical`
 | Field | Type |
 |---|---|
 | `density.value_kg_m3` | num |
@@ -160,7 +390,7 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `additional_factor.units` | str |
 | `additional_factor.description` | str |
 
-### `carbon.stated` — raw EPD declaration
+#### `carbon.stated` — raw EPD declaration
 | Field | Type |
 |---|---|
 | `value_kgco2e` | num |
@@ -168,7 +398,7 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `source` | enum(`epd`, `industry_average`, `estimated`) |
 | `lifecycle_stages` | str[] — EN 15804 stages reported |
 
-### `carbon.conversion` — declared → functional unit
+#### `carbon.conversion` — declared → functional unit
 | Field | Type |
 |---|---|
 | `to_common_unit` | str |
@@ -177,7 +407,7 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `factor_source` | enum(`physical_dimensions`, `mass_density`, `explicit_epd`, `manual`) |
 | `notes` | str |
 
-### `carbon.common` — harmonised functional-unit result
+#### `carbon.common` — harmonised functional-unit result
 | Field | Type |
 |---|---|
 | `value_kgco2e` | num |
@@ -185,7 +415,7 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `metric_unit_label` | str |
 | `imperial_unit_label` | str |
 
-### `carbon.biogenic` — sequestration math
+#### `carbon.biogenic` — sequestration math
 | Field | Type |
 |---|---|
 | `gwp_bio_from_epd_kgco2e_per_common_unit` | num |
@@ -200,22 +430,22 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `method` | enum(`wwf_storage_factor`, `en_15804_negative_a1`, `none`) |
 | `notes` | str |
 
-### `impacts` — harmonised wbLCA view
+#### `impacts` — harmonised wbLCA view
 | Field | Type |
 |---|---|
 | `functional_unit` | str |
 | Each of `gwp_kgco2e`, `gwp_bio_kgco2e`, `eutrophication_kgneq`, `acidification_kgso2eq`, `ozone_depletion_kgcfc11eq`, `smog_kgo3eq`, `abiotic_depletion_fossil_mj`, `water_consumption_m3`, `primary_energy_nonrenewable_mj`, `primary_energy_renewable_mj` | `{ value: num, source: enum(epd_direct \| beam_derived \| industry_average \| estimated) }` |
 
-### `cost` (future)
+#### `cost` (future)
 `unit`, `cad_per_unit`, `year`, `geography`, `source`
 
-### `fire` (future)
+#### `fire` (future)
 `frr_hours`, `combustibility` (enum `non_combustible | combustible | fr_treated`), `ulc_listing`, `flame_spread_rating`, `smoke_developed_rating`
 
-### `code_compliance` (future, BfCA-specific)
+#### `code_compliance` (future, BfCA-specific)
 `nbc_part_9_suitable`, `nbc_part_3_suitable`, `vbbl_s10_4_accepted`, `cov_appendix_ii_listed`
 
-### `epd` — provenance
+#### `epd` — provenance
 | Field | Type |
 |---|---|
 | `id` | str |
@@ -231,7 +461,7 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `source_document_url` | str |
 | `footnote` | str |
 
-### `methodology`
+#### `methodology`
 | Field | Type |
 |---|---|
 | `standards` | str[] |
@@ -243,7 +473,7 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `lifecycle_scope.cutoff_rule_pct` | num |
 | `lifecycle_scope.allocation_method` | enum(`mass`, `economic`, `system_expansion`) |
 
-### `provenance`
+#### `provenance`
 | Field | Type |
 |---|---|
 | `countries_of_manufacture` | ISO-3166-1α3[] |
@@ -256,9 +486,9 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `import_metadata.beam_csv_row_index` | num |
 | `import_metadata.beam_csv_sha256` | str — hash of source CSV |
 
-## Field reference codes (for docs & conversation)
+### 5.2 Field reference codes (for docs & conversation)
 
-To talk about fields tersely in PRs, chat, and issues without embedding numeric IDs in the JSON data itself, use these short block prefixes. They're a documentation convention — the JSON on disk stays clean.
+To talk about fields tersely in PRs, chat, and issues without embedding numeric IDs in the JSON itself, use these short block prefixes. Documentation convention only — the JSON on disk stays clean.
 
 | Code | Block | Full path prefix |
 |---|---|---|
@@ -289,170 +519,7 @@ To talk about fields tersely in PRs, chat, and issues without embedding numeric 
 
 Example usage: "`CBG.storage_retention_pct` needs to be clamped to 0–1 in the importer" or "UI filter should check `CLS.typical_elements` for `wall_exterior`."
 
-**Why not numeric IDs in the JSON?** Paths are already unique and self-documenting. Numeric IDs add payload weight, invisible maintenance burden (deprecated IDs need to stay reserved), and buy nothing over path strings. When we need strict field identity for schema evolution, `material.schema.json` (deliverable #1) will use JSON Schema Draft 2020-12 `$id`/`$anchor` on `$defs` — that mechanism gives stable IDs without polluting record data.
-
----
-
-## File size & module splitting
-
-### Size projections
-
-Measured from `sample.json` (minus the `_lifecycle_scope_reference` documentation block):
-
-| Records | Pretty-printed | Minified | Gzipped (est.) |
-|---|---|---|---|
-| 1 | ~6.2 KB | ~4.7 KB | ~1.2 KB |
-| 820 (actual BEAM count) | ~4.8 MB | ~3.6 MB | **~0.9 MB** |
-| 1000 (rounded) | ~5.9 MB | ~4.5 MB | **~1.1 MB** |
-
-**Takeaway:** A monolithic `materials.json` is viable (~1 MB gzipped over the wire) but borderline for a browser-first tool. The PDF-Parser's material picker should not force a full load when the user is measuring, say, concrete foundation walls and only needs division 03 materials. **Recommend splitting.**
-
-### Recommended split: CSI MasterFormat for files, UNIFORMAT as in-record filter
-
-CSI and UNIFORMAT answer different questions and are **orthogonal** — they don't compete for the same role:
-
-| Question | Taxonomy | Role |
-|---|---|---|
-| *What material is this?* (steel, concrete, wood) | **CSI MasterFormat** — 50 divisions, of which ~15 have entries in BEAM | **File-level split** — one JSON per CSI division |
-| *Where does it go in the building?* (foundation, wall, roof, floor) | **UNIFORMAT II** — A/B/C/D/E/F/G elemental groupings | **In-record filter** via existing `classification.typical_elements[]` |
-
-**Why CSI wins for file organisation:**
-- BEAM's Display Names already prefix with CSI division (`"05 | Steel Panel"`, `"06 | Plywood"`) — the split is free.
-- Each material belongs to **exactly one** CSI division (concrete is always 03, never "also 06"). UNIFORMAT would force duplicating materials that serve multiple elements (concrete appears in both A Substructure and B Superstructure).
-- CSI aligns with how specs are written and how trades are organised on site — the users of these tools already think in CSI.
-
-**Why UNIFORMAT stays in `typical_elements[]`:**
-- Already in the schema; no new scheme needed.
-- Lets a record be searchable across multiple element types simultaneously (`["floor", "roof_deck", "wall_shear"]` for CLT).
-- PDF-Parser volumetric takeoff filters client-side: "show me division-06 materials where `typical_elements` includes `wall_exterior`."
-
-### Recommended file layout
-
-```
-schema/
-├── material.schema.json          JSON Schema validator (future)
-├── sample.json                   CLT LAM011 full-fields reference
-└── materials/
-    ├── index.json                Lightweight catalogue (see below)
-    ├── 03-concrete.json
-    ├── 04-masonry.json
-    ├── 05-metals.json
-    ├── 06-wood.json              Wood + bamboo + wood fibre (~60 records)
-    ├── 07-thermal.json           Insulation family: mineral wool + PIR + EPS + XPS + foam glass + cellulose (~70)
-    ├── 08-openings.json          Windows, doors, glazing
-    ├── 09-finishes.json          Gypsum, vinyl, linoleum, paint
-    ├── 31-earthwork.json         (future / sparse)
-    └── 32-sitework.json          (future / sparse)
-```
-
-### `materials/index.json` — what's in it
-
-A "directory" file the UI always loads first. Projected size: ~100 KB for 1000 records. Carries only the fields needed for picker display and filtering:
-
-| Field | Source full-record path | Purpose in index |
-|---|---|---|
-| `id` | `id` | Primary key; used to fetch full record |
-| `beam_id` | `external_refs.beam_id` | Cross-reference |
-| `display_name` | `naming.display_name` | UI list label |
-| `category` | `classification.category` | Group header (`06_wood`) |
-| `division_prefix` | `classification.division_prefix` | Which per-division file to fetch |
-| `typical_elements` | `classification.typical_elements` | UNIFORMAT filter axis |
-| `gwp_kgco2e` | `impacts.gwp_kgco2e.value` | Preview number in the picker |
-| `functional_unit` | `impacts.functional_unit` | Preview unit label |
-
-~8 short fields per record × 1000 records ≈ 100 KB pretty, ~30 KB gzipped. Acceptable startup cost.
-
-### Load pattern for the PDF-Parser material picker
-
-```
-1. App boot:      fetch materials/index.json         (~30 KB gz, once, cached)
-2. Picker open:   render list from index             (no network)
-3. User filters:  "division 06 + typical_element=wall_exterior"
-                  → fetch materials/06-wood.json     (~300 KB gz, once per division, cached)
-4. User picks X:  full record already in memory      (no extra fetch)
-```
-
-### Import script responsibilities (future `beam-csv-to-json.mjs`)
-
-1. Produce per-division files into `materials/NN-slug.json`.
-2. Produce `materials/index.json` from the aggregate.
-3. Emit a report of any BEAM rows whose division couldn't be inferred (expect ~few; 337 BEAM rows have blank `Material Type` but most have division-prefixed Display Names we can parse).
-4. Validate every emitted record against `material.schema.json` before writing.
-
----
-
-## IFC (Industry Foundation Classes) alignment
-
-IFC / ISO 16739 is the open BIM data exchange standard. Our schema is a **superset** of what typical IFC material data carries — we can absorb IFC material data on import and emit IFC-compatible material entities on export. Full bidirectional read/write is a future phase; this section documents the alignment so we build in the right direction.
-
-### Our schema → IFC 4.x mapping
-
-| Our field | IFC 4.x entity / property set |
-|---|---|
-| `id` | `IfcMaterial.Name` (or `.GlobalId` for `IfcMaterial` in IFC 4.3) |
-| `external_refs.ifc_material_guid` | `IfcMaterial.GlobalId` — the natural cross-reference |
-| `naming.material_name` | `IfcMaterial.Name` |
-| `naming.display_name` | `IfcMaterial.Description` |
-| `classification.category` | `IfcMaterial.Category` |
-| `classification.csi_masterformat` | `IfcClassificationReference` relationship (via `IfcRelAssociatesClassification`) |
-| `physical.density.value_kg_m3` | `Pset_MaterialCommon.MassDensity` |
-| `physical.thermal.conductivity_w_mk` | `Pset_MaterialThermal.ThermalConductivity` |
-| `physical.thermal.heat_capacity_j_kgk` | `Pset_MaterialThermal.SpecificHeatCapacity` |
-| `physical.moisture_content_pct` | `Pset_MaterialHygroscopic` (partial) |
-| `rendering.base_color` | `IfcSurfaceStyleRendering.DiffuseColour` (or PBR in IFC 4.3: `IfcSurfaceStyleRefraction`) |
-| `rendering.metallic`, `roughness` | IFC 4.3 PBR: `IfcSurfaceStyleRendering` extensions (MetalnessRoughness model) |
-| `rendering.texture` | `IfcSurfaceTexture` |
-| `fire.combustibility` | `Pset_MaterialCombustion` (partial) + building-element-level Psets |
-| `fire.frr_hours` | `Pset_BuildingElementProxyFireHazardProperties` (element-bound, not material-bound in IFC) |
-| `impacts.*` (GWP, EP, AP, ODP, POCP, ADP, etc.) | `IfcEnvironmentalImpactValue` (IFC 4.0+) with `ImpactCategoryEnum` + `IfcLifeCycleStage` — **direct structural match** |
-| `carbon.stated.lifecycle_stages[]` | `IfcLifeCycleStage` enum on `IfcEnvironmentalImpactValue` — same A1–D taxonomy |
-| `epd.*` (full EPD provenance) | No native IFC entity — would be emitted as custom `IfcPropertySet` (e.g., `Pset_BfCA_EPDProvenance`) |
-| `methodology.*` | No native IFC entity — custom Pset |
-| `code_compliance.*` | No native IFC entity — custom Pset or `IfcRelAssociatesApproval` |
-| `carbon.biogenic.*` | Partial alignment with `IfcEnvironmentalImpactValue.Category = BIOGENICCARBONEQUIVALENT` (IFC 4.3+); detailed math fields (factor, retention_pct, molar_ratio) are custom |
-
-### Observations
-
-1. **Strong alignment on physical properties**: our `physical` block maps cleanly onto IFC's standard material property sets (`Pset_MaterialCommon`, `Pset_MaterialThermal`). An IFC importer can populate these without custom schemas.
-
-2. **Strong alignment on impact categories**: IFC 4.0+ has `IfcEnvironmentalImpactValue` with `ImpactCategoryEnum` and `LifeCycleStage` — **our `impacts` block and `lifecycle_stages` enum use the same taxonomy (EN 15804)**. This is the key compatibility win: the industry is converging on these names.
-
-3. **Schema gaps vs. IFC**: IFC has richer mechanical and optical properties (`Pset_MaterialMechanical`, `Pset_MaterialOptical`) that we don't yet model. When imported from IFC, we'd stash these in a forward-compat `physical.mechanical.*` / `physical.optical.*` block (future addition).
-
-4. **IFC gaps vs. our schema**: IFC has no native representation for:
-   - EPD provenance chain (id, owner, verifier, PCR, etc.)
-   - BEAM's explicit conversion math (`carbon.conversion.factor`, etc.)
-   - BfCA-specific code compliance (NBC / VBBL / COV)
-   - Biogenic storage methodology (WWF factor, storage retention %)
-
-   On export to IFC, these fields become a **custom `IfcPropertySet`** (naming convention: `Pset_BfCA_*`) attached via `IfcRelDefinesByProperties`. IFC fully supports this pattern — custom Psets are first-class citizens.
-
-### Future work
-
-- `schema/ifc/` directory for IFC interop:
-  - `ifc-import.md` — rules for parsing `IfcMaterial` + standard Psets into our schema
-  - `ifc-export.md` — rules for emitting IFC-conformant materials with BfCA custom Psets
-  - `pset_bfca_epd_provenance.json` — formal custom Pset definition
-- Test fixture: round-trip a material through IFC (export → import → verify no data loss on overlapping fields)
-- Alignment audit when IFC 5 drops (expected to expand environmental property modelling)
-
----
-
-## Calculation audit — how `carbon` captures BEAM's math
-
-BEAM encodes three calculation passes. The schema preserves each explicitly so a consumer can verify the arithmetic (or a future EPD parser can populate each step from an EPD PDF):
-
-```
-carbon.stated       →  raw EPD declaration: "69.96 kgCO2e per m³"
-carbon.conversion   →  functional unit conversion: "divide by 11.249 units/m² = 0.0889× multiplier"
-carbon.common       →  result: "6.22 kgCO2e per m² at 3.5″"
-carbon.biogenic     →  sequestration math: density × thickness × biogenic_factor × carbon_content × 3.67
-                       then × storage_retention (0.9) for long-term stored CO2e
-```
-
-The CO₂:C molar ratio (44/12 ≈ 3.67) is preserved as `carbon.biogenic.co2_to_c_molar_ratio` — constant but explicit.
-
-## Field count by domain (for import script planning)
+### 5.3 Field count by domain
 
 | Domain | Fields | Populated in LAM011 sample |
 |---|---|---|
@@ -470,40 +537,46 @@ The CO₂:C molar ratio (44/12 ≈ 3.67) is preserved as `carbon.biogenic.co2_to
 | Structural sub-object keys | 9 | 9 |
 | **Total leaf fields** | **143** | **88 populated, 55 null** |
 
-Counts verified from `sample.json` with `jq`/Python traversal. Documentation annotations (`_lifecycle_scope_reference` and its 17 children) are additional and not part of the schema's data surface.
+### 5.4 IFC (Industry Foundation Classes) alignment
 
-## Fields that can't be directly mapped from BEAM
+IFC / ISO 16739 is the open BIM data exchange standard. Our schema is a **superset** of typical IFC material data — we can absorb IFC on import and emit IFC-compatible material entities on export. Phase 5 delivers this.
 
-Fields that need manual fill, computation, or stay null for the BEAM import:
+#### Our schema → IFC 4.x mapping
 
-- `external_refs.mce2_id`, `ec3_id`, `ifc_material_guid` → null
-- `naming.short_name` → derive from display_name manually
-- `classification.typical_elements` → small per-material-type lookup table
-- `rendering.*` → fuzzy-match ABCD.EARTH by material_type; default per category when missing
-- `physical.density.value_lb_ft3` → computed (kg_m3 × 0.06243)
-- `physical.thermal.heat_capacity_j_kgk` → null; future materials-science lookup
-- `carbon.biogenic.method` → derive: biogenic fields populated → `"wwf_storage_factor"`, else `"none"`
-- `impacts.*` (non-GWP) → null; EPD parser fills
-- `cost.*`, `fire.*` (except combustibility), `code_compliance.*` → null; out of BEAM scope
-- `methodology.lifecycle_scope.cutoff_rule_pct`, `allocation_method` → null; EPD parser fills
-
-## Fields that are lossy to port from BEAM
-
-| BEAM column | Handling |
+| Our field | IFC 4.x entity / property set |
 |---|---|
-| Excel date serials (mix of year integers and day-count serials) | If value < 3000 → treat as year; if > 30000 → Excel serial → ISO date; preserve raw in `provenance.original_beam_added_or_modified_serial` |
-| Formula cells (`=Q545/11.249`, `=IFERROR(DUMMYFUNCTION(...))`) | Evaluate or reconstruct from referenced columns; extract fallback strings from IFERROR arguments |
-| `Footnote` column (IFERROR with conditional expired-status prose) | Parse out the final quoted fallback; split on `;` → structured flags |
-| Sparse `CSI MasterFormat` (~0.4% populated) | Port as-is; no synthesis |
-| Free-text country strings (`"US & CA"`) | ISO 3166-1 alpha-3 arrays via lookup table; log misses |
-| Polymorphic `Addn'l factors` + units | Keep as `physical.additional_factor.{value, units, description}`; flag in schema |
-| Duplicate `Common Unit: kgCO2e / _` columns (T and AA) | Rename to distinct paths: `carbon.common.per_functional_unit` vs biogenic-local context |
-| Whitespace + non-breaking spaces in `EPD ID` values | `.trim()` on import |
-| ~933 blank rows in CSV | Skip rows with empty ID |
+| `id` | `IfcMaterial.Name` (or `.GlobalId` for `IfcMaterial` in IFC 4.3) |
+| `external_refs.ifc_material_guid` | `IfcMaterial.GlobalId` — the natural cross-reference |
+| `naming.material_name` | `IfcMaterial.Name` |
+| `naming.display_name` | `IfcMaterial.Description` |
+| `classification.category` | `IfcMaterial.Category` |
+| `classification.csi_masterformat` | `IfcClassificationReference` relationship (via `IfcRelAssociatesClassification`) |
+| `physical.density.value_kg_m3` | `Pset_MaterialCommon.MassDensity` |
+| `physical.thermal.conductivity_w_mk` | `Pset_MaterialThermal.ThermalConductivity` |
+| `physical.thermal.heat_capacity_j_kgk` | `Pset_MaterialThermal.SpecificHeatCapacity` |
+| `physical.moisture_content_pct` | `Pset_MaterialHygroscopic` (partial) |
+| `rendering.base_color` | `IfcSurfaceStyleRendering.DiffuseColour` (or PBR in IFC 4.3) |
+| `rendering.metallic`, `roughness` | IFC 4.3 PBR: `IfcSurfaceStyleRendering` extensions (MetalnessRoughness model) |
+| `rendering.texture` | `IfcSurfaceTexture` |
+| `fire.combustibility` | `Pset_MaterialCombustion` (partial) + building-element-level Psets |
+| `fire.frr_hours` | `Pset_BuildingElementProxyFireHazardProperties` (element-bound, not material-bound in IFC) |
+| `impacts.*` (GWP, EP, AP, ODP, POCP, ADP, etc.) | `IfcEnvironmentalImpactValue` (IFC 4.0+) with `ImpactCategoryEnum` + `IfcLifeCycleStage` — **direct structural match** |
+| `carbon.stated.lifecycle_stages[]` | `IfcLifeCycleStage` enum on `IfcEnvironmentalImpactValue` — same A1–D taxonomy |
+| `epd.*` (full EPD provenance) | No native IFC entity — emitted as custom `IfcPropertySet` (e.g., `Pset_BfCA_EPDProvenance`) |
+| `methodology.*` | No native IFC entity — custom Pset |
+| `code_compliance.*` | No native IFC entity — custom Pset or `IfcRelAssociatesApproval` |
+| `carbon.biogenic.*` | Partial alignment with `IfcEnvironmentalImpactValue.Category = BIOGENICCARBONEQUIVALENT` (IFC 4.3+); detailed math fields are custom |
 
-## EPD parser implications
+#### Observations
 
-The schema *structure* mirrors ISO 21930 / EN 15804 EPD document sections. A future parser can walk an EPD PDF and populate:
+1. **Strong alignment on physical properties**: `physical` block maps cleanly onto IFC's standard Psets. An IFC importer can populate these without custom schemas.
+2. **Strong alignment on impact categories**: IFC 4.0+ `IfcEnvironmentalImpactValue` with `ImpactCategoryEnum` and `LifeCycleStage` uses the same EN 15804 taxonomy as our `impacts` block and `lifecycle_stages` enum. The industry is converging on these names.
+3. **Schema gaps vs. IFC**: IFC has richer mechanical and optical properties (`Pset_MaterialMechanical`, `Pset_MaterialOptical`) that we don't yet model. When imported from IFC, stash in forward-compat `physical.mechanical.*` / `physical.optical.*` blocks.
+4. **IFC gaps vs. our schema**: IFC has no native representation for EPD provenance chain, BEAM's explicit conversion math, BfCA-specific code compliance, or detailed biogenic storage methodology. On export these become custom `Pset_BfCA_*` property sets attached via `IfcRelDefinesByProperties`.
+
+### 5.5 EPD parser implications
+
+The schema *structure* mirrors ISO 21930 / EN 15804 EPD document sections. Phase 2 parser walks an EPD PDF and populates:
 
 - EPD "Declared unit" → `carbon.stated.{value_kgco2e, per_unit}`
 - EPD "Functional unit" → `carbon.common.per_functional_unit` + `impacts.functional_unit`
@@ -516,28 +589,191 @@ The schema *structure* mirrors ISO 21930 / EN 15804 EPD document sections. A fut
 
 The `source` discriminator (`"epd_direct" | "beam_derived" | "industry_average" | "estimated" | null`) on impact values distinguishes parsed-from-EPD numbers from BEAM-derived ones — important for data quality audits.
 
-## Next deliverables (not in this commit)
+---
 
-1. `schema/material.schema.json` — formal JSON Schema Draft 2020-12 validator (with `$defs` + stable `$anchor` IDs for strict field identity)
-2. `schema/lookups/` — `country-codes.json`, `typical-elements.json`, `csi-divisions.json`, `lifecycle-stages.json`
-3. `schema/scripts/beam-csv-to-json.mjs` — BEAM CSV importer (Node ESM); emits per-division files + `materials/index.json`
-4. `schema/materials/` — split catalogue (see "File size & module splitting" section):
-   - `index.json` — lightweight picker catalogue (~30 KB gz) loaded at app boot
-   - `NN-<slug>.json` per CSI division (~0.3–0.7 MB gz each) — lazy-loaded on demand
-5. EPD parser spec + implementation (PDF → schema-conformant patches)
-6. Canadian context extensions (cost data, code_compliance research, VBBL/COV alignment)
-7. **IFC interop** — see IFC alignment section above. Bidirectional read/write with `IfcMaterial` + standard Psets (`Pset_MaterialCommon`, `Pset_MaterialThermal`) + custom `Pset_BfCA_EPDProvenance` for fields IFC doesn't natively model. Integrates with the `ifc/` workstream.
+## 6. Implementation guidance
 
-## Verification — sample.json
+### 6.1 File size & module splitting
 
-Run these to check the sample matches the locked-in design:
+#### Size projections
+
+Measured from `sample.json`:
+
+| Records | Pretty-printed | Minified | Gzipped (est.) |
+|---|---|---|---|
+| 1 | ~6.2 KB | ~4.7 KB | ~1.2 KB |
+| 820 (actual BEAM count) | ~4.8 MB | ~3.6 MB | **~0.9 MB** |
+| 1000 (rounded) | ~5.9 MB | ~4.5 MB | **~1.1 MB** |
+
+#### Split strategy: CSI MasterFormat for files, UNIFORMAT as in-record filter
+
+| Question | Taxonomy | Role |
+|---|---|---|
+| *What material is this?* (steel, concrete, wood) | **CSI MasterFormat** — 50 divisions, ~15 have entries in BEAM | **File-level split** — one JSON per CSI division |
+| *Where does it go in the building?* (foundation, wall, roof, floor) | **UNIFORMAT II** — A/B/C/D/E/F/G elemental groupings | **In-record filter** via existing `classification.typical_elements[]` |
+
+**Why CSI wins for file organisation:**
+- BEAM's Display Names already prefix with CSI division (`"05 | Steel Panel"`, `"06 | Plywood"`) — the split is free.
+- Each material belongs to **exactly one** CSI division (concrete is always 03, never "also 06"). UNIFORMAT would force duplicating materials.
+- CSI aligns with how specs are written and how trades are organised on site.
+
+**Why UNIFORMAT stays in `typical_elements[]`:**
+- Already in the schema; no new scheme needed.
+- A record can be searchable across multiple element types simultaneously (`["floor", "roof_deck", "wall_shear"]` for CLT).
+- Clients filter client-side: "show me division-06 materials where `typical_elements` includes `wall_exterior`."
+
+#### Recommended file layout
+
+```
+schema/
+├── material.schema.json          JSON Schema validator (Phase 1.1)
+├── sample.json                   CLT LAM011 full-fields reference
+├── lookups/                      Phase 1.2-1.5 enums
+│   ├── country-codes.json
+│   ├── csi-divisions.json
+│   ├── typical-elements.json
+│   └── lifecycle-stages.json
+├── scripts/
+│   └── beam-csv-to-json.mjs      Phase 1.6 importer
+└── materials/                    Phase 1.7-1.8 output
+    ├── index.json                Lightweight picker catalogue
+    ├── 03-concrete.json
+    ├── 04-masonry.json
+    ├── 05-metals.json
+    ├── 06-wood.json              Wood + bamboo + wood fibre (~60 records)
+    ├── 07-thermal.json           Insulation family (~70 records)
+    ├── 08-openings.json          Windows, doors, glazing
+    ├── 09-finishes.json          Gypsum, vinyl, linoleum, paint
+    ├── 31-earthwork.json         (future / sparse)
+    └── 32-sitework.json          (future / sparse)
+```
+
+#### `materials/index.json` — what's in it
+
+Projected size: ~100 KB for 1000 records. 8 fields per record for picker display and filtering:
+
+| Field | Source full-record path | Purpose in index |
+|---|---|---|
+| `id` | `id` | Primary key; used to fetch full record |
+| `beam_id` | `external_refs.beam_id` | Cross-reference |
+| `display_name` | `naming.display_name` | UI list label |
+| `category` | `classification.category` | Group header (`06_wood`) |
+| `division_prefix` | `classification.division_prefix` | Which per-division file to fetch |
+| `typical_elements` | `classification.typical_elements` | UNIFORMAT filter axis |
+| `gwp_kgco2e` | `impacts.gwp_kgco2e.value` | Preview number in the picker |
+| `functional_unit` | `impacts.functional_unit` | Preview unit label |
+
+#### Load pattern for the PDF-Parser material picker
+
+```
+1. App boot:      fetch materials/index.json         (~30 KB gz, once, cached)
+2. Picker open:   render list from index             (no network)
+3. User filters:  "division 06 + typical_element=wall_exterior"
+                  → fetch materials/06-wood.json     (~300 KB gz, once per division, cached)
+4. User picks X:  full record already in memory      (no extra fetch)
+```
+
+### 6.2 Fields that can't be mapped from BEAM
+
+Null at import time; fill manually or in later phases:
+
+- `external_refs.mce2_id`, `ec3_id`, `ifc_material_guid` → null
+- `naming.short_name` → derive from display_name manually
+- `classification.typical_elements` → small per-material-type lookup table (Phase 1.4)
+- `rendering.*` → fuzzy-match ABCD.EARTH by material_type; default per category when missing
+- `physical.density.value_lb_ft3` → computed (kg_m3 × 0.06243)
+- `physical.thermal.heat_capacity_j_kgk` → null; future materials-science lookup
+- `carbon.biogenic.method` → derive: biogenic fields populated → `"wwf_storage_factor"`, else `"none"`
+- `impacts.*` (non-GWP) → null; EPD parser (Phase 2) fills
+- `cost.*`, `fire.*` (except combustibility), `code_compliance.*` → null; Phase 6 fills
+- `methodology.lifecycle_scope.cutoff_rule_pct`, `allocation_method` → null; EPD parser (Phase 2) fills
+
+### 6.3 Fields that are lossy to port from BEAM
+
+| BEAM column | Handling |
+|---|---|
+| Excel date serials (mix of year integers and day-count serials) | If value < 3000 → treat as year; if > 30000 → Excel serial → ISO date; preserve raw in `provenance.original_beam_added_or_modified_serial` |
+| Formula cells (`=Q545/11.249`, `=IFERROR(DUMMYFUNCTION(...))`) | Evaluate or reconstruct from referenced columns; extract fallback strings from IFERROR arguments |
+| `Footnote` column (IFERROR with conditional expired-status prose) | Parse out the final quoted fallback; split on `;` → structured flags |
+| Sparse `CSI MasterFormat` (~0.4% populated) | Port as-is; no synthesis. Infer `division_prefix` from Display Name instead |
+| Free-text country strings (`"US & CA"`) | ISO 3166-1 alpha-3 arrays via lookup table (Phase 1.2); log misses |
+| Polymorphic `Addn'l factors` + units | Keep as `physical.additional_factor.{value, units, description}`; flag in schema |
+| Duplicate `Common Unit: kgCO2e / _` columns (T and AA) | Rename to distinct paths: `carbon.common.per_functional_unit` vs biogenic-local context |
+| Whitespace + non-breaking spaces in `EPD ID` values | `.trim()` on import |
+| Blank `Material Type` (337 rows) | Infer from Display Name prefix (`"05 | ..."`) or leave for manual review |
+
+---
+
+## 7. Verification
+
+### 7.1 sample.json regression checks
 
 ```bash
 cd schema
-python3 -c "import json; d=json.load(open('sample.json')); print('valid, 20 top-level keys:', len(d.keys())==20)"
-python3 -c "import json; d=json.load(open('sample.json')); print(d['carbon']['common']['value_kgco2e'])"   # → 6.22
-python3 -c "import json; d=json.load(open('sample.json')); print(d['external_refs']['beam_id'])"           # → LAM011
-python3 -c "import json; d=json.load(open('sample.json')); print(d['provenance']['countries_of_manufacture'])"  # → ['CAN']
+python3 -c "import json; d=json.load(open('sample.json')); assert len(d.keys())==20; print('20 top-level keys ✓')"
+python3 -c "import json; d=json.load(open('sample.json')); assert d['carbon']['common']['value_kgco2e']==6.22; print('carbon.common.value_kgco2e=6.22 ✓')"
+python3 -c "import json; d=json.load(open('sample.json')); assert d['external_refs']['beam_id']=='LAM011'; print('beam_id=LAM011 ✓')"
+python3 -c "import json; d=json.load(open('sample.json')); assert d['provenance']['countries_of_manufacture']==['CAN']; print('ISO alpha-3 ✓')"
 ```
 
-All pass as of this commit.
+### 7.2 CSV integrity checks
+
+```bash
+cd schema
+# Row 1 is header, row 2 is '2c53be', row 545 is LAM011, row 826 is XPS002
+python3 -c "
+import csv
+r = list(csv.reader(open('BEAM Database-DUMP.csv')))
+assert r[0][0] == 'ID'
+assert r[1][0] == '2c53be'
+assert r[544][0] == 'LAM011'
+assert r[825][0] == 'XPS002'
+print('CSV row alignment ✓')
+"
+# Raw lines == logical rows (no embedded newlines drift)
+python3 -c "
+import csv
+with open('BEAM Database-DUMP.csv') as f: raw = sum(1 for _ in f)
+with open('BEAM Database-DUMP.csv', newline='') as f: logical = sum(1 for _ in csv.reader(f))
+assert raw == logical == 826
+print(f'raw=logical={raw} ✓')
+"
+```
+
+### 7.3 Phase 1 acceptance criteria
+
+- [ ] `material.schema.json` validates `sample.json` with zero errors
+- [ ] `scripts/beam-csv-to-json.mjs` processes LAM011 and output diff-matches `sample.json` structurally
+- [ ] Full batch produces ~825 records across 10-15 per-division files
+- [ ] Every emitted record passes JSON Schema validation
+- [ ] `materials/index.json` has correct shape (8 fields per entry) and size (<150 KB)
+- [ ] Import report identifies all skipped/problem rows by CSV row number
+- [ ] Phase 1 PR merges cleanly to `main`; GitHub Pages deploy succeeds
+
+---
+
+## Appendix A — Key values to memorise
+
+| | |
+|---|---|
+| LAM011 CSV row | `545` |
+| LAM011 Stated EPD | `69.96 kgCO2e/m³` |
+| LAM011 density | `456 kg/m³` |
+| LAM011 thickness | `0.09 m` (3.5") |
+| LAM011 units/m² | `11.249` |
+| LAM011 conversion factor | `1/11.249 ≈ 0.0889` |
+| LAM011 biogenic factor | `0.9897` |
+| LAM011 carbon content | `0.5 kgC/kg` |
+| LAM011 storage retention | `0.9` |
+| LAM011 common GWP | `6.22 kgCO2e per m² at 3.5"` |
+| LAM011 full biogenic C | `74.53 kgCO2e` per common unit |
+| LAM011 stored biogenic C | `67.08 kgCO2e` per common unit |
+| CO2:C molar ratio | `3.67` (= 44/12) |
+| First data row | Excel row 2, `2c53be` (Aggregate / NRMCA) |
+| Last data row | Excel row 826, `XPS002` |
+| Internal blank rows | 424, 425, 427, 428 (preserved per BEAM source) |
+
+## Appendix B — Changelog
+
+- **2026-04-18 `0714485`** — BEAM CSV cleaned (truncated trailing 753 garbage rows, flattened embedded newlines). Excel row ↔ CSV line alignment now guaranteed.
+- **2026-04-18 `228eafb`** — Initial schema design package committed: `BEAM Database-DUMP.csv`, `materials.json` (ABCD.EARTH donor), `sample.json`, `schema.md` v1.
