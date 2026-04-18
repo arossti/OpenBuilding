@@ -10,7 +10,7 @@
 
 - **Design**: locked in — 20 top-level blocks, **`impacts` expanded to heavy per-stage structure (10 categories × 17 EN 15804+A2 stages, 340 impact slots/record)**, snake_case, schema-complete/nullable
 - **Sample record**: current at [`schema/sample.json`](./sample.json) — BEAM `LAM011` (Nordic X-Lam CLT 3½"), `id = "lam011"` (lowercased BEAM ID), `external_refs.beam_id = "LAM011"`
-- **Source data**: cleaned & committed at [`schema/BEAM Database-DUMP.csv`](./BEAM%20Database-DUMP.csv) — 826 lines (1 header + 825 data rows), Excel-row ↔ CSV-line alignment verified
+- **Source data**: cleaned & committed at [`docs/csv files from BEAM/BEAM Database-DUMP.csv`](../docs/csv%20files%20from%20BEAM/BEAM%20Database-DUMP.csv) — 826 lines (1 header + 825 data rows), Excel-row ↔ CSV-line alignment verified. (Lives under `docs/` with all other BEAM reference exports; the importer's `CSV_PATH` resolves there.)
 - **Formal validator**: [`schema/material.schema.json`](./material.schema.json) — JSON Schema Draft 2020-12, full 20-block coverage with enums and per-stage impact_block `$def`. Zero-dep Node walker at `scripts/validate.mjs`.
 - **Importer**: [`schema/scripts/beam-csv-to-json.mjs`](./scripts/beam-csv-to-json.mjs) — single-row + batch modes, RFC-4180 parser, recursive arithmetic formula evaluator, IFERROR fallback extraction, country/CSI/element inference via lookups.
 - **Batch output**: [`schema/materials/`](./materials) — 821 records across 8 CSI divisions (03/04/05/06/07/08/09/31), `index.json` picker catalogue, `import-report.json` manual-review flags.
@@ -53,7 +53,7 @@ Memory files at `/Users/andrewthomson/.claude/projects/<path-hash>/memory/MEMORY
 |---|---|
 | `schema/schema.md` | **This file.** Workplan + design spec + agent handoff |
 | `schema/sample.json` | Canonical full-template reference record (LAM011 CLT, schema-complete) |
-| `schema/BEAM Database-DUMP.csv` | Cleaned BEAM source data — 826 lines, Excel row = CSV line |
+| `docs/csv files from BEAM/BEAM Database-DUMP.csv` | Cleaned BEAM source data — 826 lines, Excel row = CSV line. Consumed by `schema/scripts/beam-csv-to-json.mjs` (hardcoded `CSV_PATH`). |
 | `schema/materials.json` | Pre-existing ABCD.EARTH schema — donor of rendering hints only |
 | `schema/material.schema.json` | ✅ JSON Schema Draft 2020-12 validator |
 | `schema/lookups/*.json` | ✅ 6 files — country-codes, csi-divisions, material-type-to-csi, display-name-keywords, typical-elements, lifecycle-stages |
@@ -92,8 +92,8 @@ cd schema
 python3 -c "import json; d=json.load(open('sample.json')); assert len(d.keys())==20; print('OK')"
 # carbon math reconciles
 python3 -c "import json; d=json.load(open('sample.json')); assert d['carbon']['common']['value_kgco2e']==6.22; print('OK')"
-# CSV Excel-row correspondence
-python3 -c "import csv; r=list(csv.reader(open('BEAM Database-DUMP.csv'))); assert r[1][0]=='2c53be'; assert r[544][0]=='LAM011'; print('OK')"
+# CSV Excel-row correspondence (source CSV now lives under docs/)
+python3 -c "import csv; r=list(csv.reader(open('../docs/csv files from BEAM/BEAM Database-DUMP.csv'))); assert r[1][0]=='2c53be'; assert r[544][0]=='LAM011'; print('OK')"
 ```
 
 ---
@@ -113,7 +113,7 @@ Each record carries everything needed to place it in a wbLCA calc, pick it in a 
 
 | Source | Rows / size | Purpose |
 |---|---|---|
-| `schema/BEAM Database-DUMP.csv` | 826 lines / 825 data rows (cleaned) | BEAM's legacy 65-column materials data — primary import |
+| `docs/csv files from BEAM/BEAM Database-DUMP.csv` | 826 lines / 825 data rows (cleaned) | BEAM's legacy 65-column materials data — primary import. Colocated with the other MCE²/BEAM workbook-tab exports. |
 | `schema/materials.json` | 33 records | ABCD.EARTH's existing schema — donor of rendering hints (base_color, metallic, roughness, texture, has_grain) |
 | Future EPD PDFs | — | ISO 21930 / EN 15804 Type III declarations — Phase 2 target |
 
@@ -658,7 +658,7 @@ Sample.json (the canonical full template) remains schema-complete at ~21 KB beca
 schema/                           As committed in PR
 ├── material.schema.json          Draft 2020-12 validator (sparse-aware)
 ├── sample.json                   LAM011 full-template reference (schema-complete)
-├── BEAM Database-DUMP.csv        Cleaned BEAM source (826 lines)
+│   (source CSV moved to docs/csv files from BEAM/BEAM Database-DUMP.csv — see that folder for all BEAM workbook-tab exports)
 ├── materials.json                ABCD.EARTH donor schema (rendering hints only)
 ├── schema.md                     This document
 ├── lookups/                      Enum + inference lookups
@@ -757,9 +757,10 @@ python3 -c "import json; d=json.load(open('sample.json')); assert d['provenance'
 ```bash
 cd schema
 # Row 1 is header, row 2 is '2c53be', row 545 is LAM011, row 826 is XPS002
+CSV="../docs/csv files from BEAM/BEAM Database-DUMP.csv"
 python3 -c "
 import csv
-r = list(csv.reader(open('BEAM Database-DUMP.csv')))
+r = list(csv.reader(open('$CSV')))
 assert r[0][0] == 'ID'
 assert r[1][0] == '2c53be'
 assert r[544][0] == 'LAM011'
@@ -769,8 +770,8 @@ print('CSV row alignment ✓')
 # Raw lines == logical rows (no embedded newlines drift)
 python3 -c "
 import csv
-with open('BEAM Database-DUMP.csv') as f: raw = sum(1 for _ in f)
-with open('BEAM Database-DUMP.csv', newline='') as f: logical = sum(1 for _ in csv.reader(f))
+with open('$CSV') as f: raw = sum(1 for _ in f)
+with open('$CSV', newline='') as f: logical = sum(1 for _ in csv.reader(f))
 assert raw == logical == 826
 print(f'raw=logical={raw} ✓')
 "

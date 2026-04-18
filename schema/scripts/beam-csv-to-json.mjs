@@ -26,7 +26,10 @@ import { createHash } from "node:crypto";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_DIR = resolve(__dirname, "..");
-const CSV_PATH = join(SCHEMA_DIR, "BEAM Database-DUMP.csv");
+const REPO_ROOT  = resolve(__dirname, "..", "..");
+// Source CSV lives under docs/ with the rest of the BEAM reference exports so
+// that docs/csv files from BEAM/ is the single spot for raw BEAM workbook dumps.
+const CSV_PATH = join(REPO_ROOT, "docs", "csv files from BEAM", "BEAM Database-DUMP.csv");
 
 // ---------------------------------------------------------------------------
 // CSV tokeniser (RFC 4180, minimal). Source CSV has no embedded newlines
