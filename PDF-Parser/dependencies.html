@@ -35,6 +35,21 @@
       <!-- ── Body ──────────────────────────────────── -->
       <main class="dep-body">
 
+        <!-- ── §0 Drift detector ─────────────────────── -->
+        <section class="dep-section">
+          <h2>0. Drift detector — manifest vs. what apps actually load</h2>
+          <p class="lede">
+            Fetches every app HTML, parses its <code>&lt;script src&gt;</code> and <code>&lt;link href&gt;</code> tags, compares against the manifest.
+            Catches three drift conditions:
+            <span class="dep-tag" style="border-color: var(--red); color: var(--red);">stale</span> manifest claims app uses a dep but the app does not load it ·
+            <span class="dep-tag" style="border-color: var(--gold); color: var(--gold);">miss</span> app loads a dep not in the manifest ·
+            <span class="dep-tag" style="border-color: var(--accent-lit); color: var(--accent-lit);">ok</span> everything lines up.
+          </p>
+          <div class="dep-drift" id="drift-report">
+            <p class="dep-subtitle">Scanning apps…</p>
+          </div>
+        </section>
+
         <!-- ── §1 External CDNs ──────────────────────── -->
         <section class="dep-section">
           <h2>1. External CDNs — version-pinned</h2>
@@ -152,7 +167,7 @@
        * below to add / remove / bump versions.
        */
 
-      const USED_BY_APPS = ["PDF-Parser", "Matrix", "Database", "BEAM", "Deps"];
+      const USED_BY_APPS = ["Landing", "PDF-Parser", "Matrix", "Database", "BEAM", "Deps"];
 
       const MANIFEST = [
         {
@@ -161,7 +176,7 @@
           url: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css",
           kind: "css",
           purpose: "Icon font — toolbar, nav, inline indicators.",
-          usedBy: ["PDF-Parser", "Matrix", "Database", "BEAM", "Deps"]
+          usedBy: ["PDF-Parser", "Database", "BEAM", "Deps", "Landing"]
         },
         {
           name: "Bootstrap",
@@ -220,7 +235,7 @@
         {
           path: "bfcastyles.css",
           purpose: "Single-file CSS source for every BfCA app. Sections: reset · shared tokens · shared header · dark theme · light theme · PDF-Parser · Matrix · Database · BEAMweb · Landing · Deps. Rules scoped by html class (theme-dark / theme-light / app-*). Roadmap: unify duplicated patterns into shared utilities; goal is a single ~1500-line file serving the whole ecosystem.",
-          usedBy: ["PDF-Parser", "Matrix", "Database", "BEAM", "Deps"]
+          usedBy: ["Landing", "PDF-Parser", "Matrix", "Database", "BEAM", "Deps"]
         },
         {
           path: "index.html",
@@ -428,6 +443,106 @@
       document.querySelector("#boilerplate-dark").textContent = darkHead;
       document.querySelector("#boilerplate-bootstrap").textContent = bootstrapHead;
       document.querySelector("#boilerplate-nav").textContent = navBlock;
+
+      // ── Drift detector ───────────────────────────────────────────
+      // Fetch each app's HTML, parse its <script src=> + <link href=> tags,
+      // compare against the manifest. Find:
+      //   stale — manifest says app uses dep but app doesn't load it
+      //   miss  — app loads dep not in manifest
+      //   ok    — everything lines up
+      const APP_FILES = {
+        "PDF-Parser":  "pdfparser.html",
+        "Matrix":      "matrix.html",
+        "Database":    "database.html",
+        "BEAM":        "beamweb.html",
+        "Deps":        "dependencies.html",
+        "Landing":     "index.html"
+      };
+
+      async function runDriftDetector() {
+        const report = document.getElementById("drift-report");
+
+        // Fetch each app's HTML in parallel; parse tags.
+        const apps = {};
+        const parser = new DOMParser();
+        await Promise.all(Object.entries(APP_FILES).map(async ([name, file]) => {
+          try {
+            const res = await fetch(file, { cache: "no-cache" });
+            if (!res.ok) { apps[name] = { error: `HTTP ${res.status}`, urls: [] }; return; }
+            const html = await res.text();
+            const doc = parser.parseFromString(html, "text/html");
+            const urls = [];
+            for (const s of doc.querySelectorAll("script[src]"))  urls.push(normalise(s.getAttribute("src")));
+            for (const l of doc.querySelectorAll("link[rel='stylesheet'][href]")) urls.push(normalise(l.getAttribute("href")));
+            apps[name] = { urls };
+          } catch (e) {
+            apps[name] = { error: e.message, urls: [] };
+          }
+        }));
+
+        // Flatten manifest URLs for lookup
+        const manifestUrls = new Map();  // url → MANIFEST entry
+        for (const dep of MANIFEST) manifestUrls.set(normalise(dep.url), dep);
+
+        // Compute drift
+        const findings = [];
+        // Stale: manifest says app X uses dep Y, but app X's HTML doesn't include Y
+        for (const dep of MANIFEST) {
+          // Planned deps are aspirational — don't treat them as drift
+          if (dep.status === "planned") continue;
+          for (const appName of (dep.usedBy || [])) {
+            const app = apps[appName];
+            if (!app || app.error) continue;
+            const depUrl = normalise(dep.url);
+            const loaded = app.urls.some(u => u === depUrl);
+            if (!loaded) {
+              findings.push({
+                kind: "stale",
+                text: `manifest says ${appName} uses ${dep.name} (${dep.version}) but ${APP_FILES[appName]} does not load it`
+              });
+            }
+          }
+        }
+        // Miss: app loads a URL we don't see in the manifest
+        for (const [appName, app] of Object.entries(apps)) {
+          if (!app || app.error) continue;
+          for (const u of app.urls) {
+            // Skip local files that aren't vendored CDNs (they're internal css/js — INTERNAL manifest covers those)
+            if (!u.startsWith("http") && !u.includes("/lib/")) continue;
+            if (!manifestUrls.has(u)) {
+              findings.push({
+                kind: "miss",
+                text: `${appName} (${APP_FILES[appName]}) loads a URL not in the manifest: ${u}`
+              });
+            }
+          }
+        }
+        // Fetch failures
+        for (const [appName, app] of Object.entries(apps)) {
+          if (app && app.error) {
+            findings.push({ kind: "stale", text: `could not fetch ${APP_FILES[appName]} for ${appName}: ${app.error}` });
+          }
+        }
+
+        // Render
+        if (findings.length === 0) {
+          const appCount = Object.keys(apps).length;
+          report.innerHTML = `<ul><li class="ok">ok — ${appCount} apps scanned, no drift against the manifest</li></ul>`;
+          return;
+        }
+        const byKind = { stale: [], miss: [] };
+        for (const f of findings) byKind[f.kind].push(f);
+        const pieces = [];
+        if (byKind.stale.length) pieces.push(`<h3>Stale manifest entries (${byKind.stale.length})</h3><ul>` + byKind.stale.map(f => `<li class="stale">${escapeHtml(f.text)}</li>`).join("") + `</ul>`);
+        if (byKind.miss.length)  pieces.push(`<h3>Manifest misses (${byKind.miss.length})</h3><ul>` + byKind.miss.map(f => `<li class="miss">${escapeHtml(f.text)}</li>`).join("") + `</ul>`);
+        report.innerHTML = pieces.join("");
+      }
+      function normalise(url) {
+        // Collapse relative paths; leave absolute URLs alone.
+        // "./foo" → "foo"; "../foo" left alone (no apps use it); trailing whitespace trimmed.
+        return url.trim().replace(/^\.\//, "");
+      }
+      runDriftDetector();
 
       function escapeHtml(s) {
         if (s == null) return "";
