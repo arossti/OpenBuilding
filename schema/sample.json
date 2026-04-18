@@ -1,7 +1,7 @@
 {
   "$schema": "https://bfca.ca/schemas/material-v1.json",
   "schema_version": 1,
-  "id": "clt_nordic_xlam_3_5in",
+  "id": "lam011",
 
   "external_refs": {
     "beam_id": "LAM011",
@@ -131,16 +131,227 @@
 
   "impacts": {
     "functional_unit": "m2 at 3.5\"",
-    "gwp_kgco2e": { "value": 6.22, "source": "beam_derived" },
-    "gwp_bio_kgco2e": { "value": null, "source": null },
-    "eutrophication_kgneq": { "value": null, "source": null },
-    "acidification_kgso2eq": { "value": null, "source": null },
-    "ozone_depletion_kgcfc11eq": { "value": null, "source": null },
-    "smog_kgo3eq": { "value": null, "source": null },
-    "abiotic_depletion_fossil_mj": { "value": null, "source": null },
-    "water_consumption_m3": { "value": null, "source": null },
-    "primary_energy_nonrenewable_mj": { "value": null, "source": null },
-    "primary_energy_renewable_mj": { "value": null, "source": null }
+    "_structure_note": "Each category carries `total` (aggregate over stages declared in carbon.stated.lifecycle_stages) and `by_stage` (per-stage values from EPD tables). BEAM imports populate total only; EPD parser (Phase 2) fills by_stage. Every stage slot is schema-complete with {value, source} for audit parity.",
+    "gwp_kgco2e": {
+      "total": { "value": 6.22, "source": "beam_derived" },
+      "by_stage": {
+        "A1": { "value": null, "source": null },
+        "A2": { "value": null, "source": null },
+        "A3": { "value": null, "source": null },
+        "A4": { "value": null, "source": null },
+        "A5": { "value": null, "source": null },
+        "B1": { "value": null, "source": null },
+        "B2": { "value": null, "source": null },
+        "B3": { "value": null, "source": null },
+        "B4": { "value": null, "source": null },
+        "B5": { "value": null, "source": null },
+        "B6": { "value": null, "source": null },
+        "B7": { "value": null, "source": null },
+        "C1": { "value": null, "source": null },
+        "C2": { "value": null, "source": null },
+        "C3": { "value": null, "source": null },
+        "C4": { "value": null, "source": null },
+        "D":  { "value": null, "source": null }
+      }
+    },
+    "gwp_bio_kgco2e": {
+      "total": { "value": null, "source": null },
+      "by_stage": {
+        "A1": { "value": null, "source": null },
+        "A2": { "value": null, "source": null },
+        "A3": { "value": null, "source": null },
+        "A4": { "value": null, "source": null },
+        "A5": { "value": null, "source": null },
+        "B1": { "value": null, "source": null },
+        "B2": { "value": null, "source": null },
+        "B3": { "value": null, "source": null },
+        "B4": { "value": null, "source": null },
+        "B5": { "value": null, "source": null },
+        "B6": { "value": null, "source": null },
+        "B7": { "value": null, "source": null },
+        "C1": { "value": null, "source": null },
+        "C2": { "value": null, "source": null },
+        "C3": { "value": null, "source": null },
+        "C4": { "value": null, "source": null },
+        "D":  { "value": null, "source": null }
+      }
+    },
+    "eutrophication_kgneq": {
+      "total": { "value": null, "source": null },
+      "by_stage": {
+        "A1": { "value": null, "source": null },
+        "A2": { "value": null, "source": null },
+        "A3": { "value": null, "source": null },
+        "A4": { "value": null, "source": null },
+        "A5": { "value": null, "source": null },
+        "B1": { "value": null, "source": null },
+        "B2": { "value": null, "source": null },
+        "B3": { "value": null, "source": null },
+        "B4": { "value": null, "source": null },
+        "B5": { "value": null, "source": null },
+        "B6": { "value": null, "source": null },
+        "B7": { "value": null, "source": null },
+        "C1": { "value": null, "source": null },
+        "C2": { "value": null, "source": null },
+        "C3": { "value": null, "source": null },
+        "C4": { "value": null, "source": null },
+        "D":  { "value": null, "source": null }
+      }
+    },
+    "acidification_kgso2eq": {
+      "total": { "value": null, "source": null },
+      "by_stage": {
+        "A1": { "value": null, "source": null },
+        "A2": { "value": null, "source": null },
+        "A3": { "value": null, "source": null },
+        "A4": { "value": null, "source": null },
+        "A5": { "value": null, "source": null },
+        "B1": { "value": null, "source": null },
+        "B2": { "value": null, "source": null },
+        "B3": { "value": null, "source": null },
+        "B4": { "value": null, "source": null },
+        "B5": { "value": null, "source": null },
+        "B6": { "value": null, "source": null },
+        "B7": { "value": null, "source": null },
+        "C1": { "value": null, "source": null },
+        "C2": { "value": null, "source": null },
+        "C3": { "value": null, "source": null },
+        "C4": { "value": null, "source": null },
+        "D":  { "value": null, "source": null }
+      }
+    },
+    "ozone_depletion_kgcfc11eq": {
+      "total": { "value": null, "source": null },
+      "by_stage": {
+        "A1": { "value": null, "source": null },
+        "A2": { "value": null, "source": null },
+        "A3": { "value": null, "source": null },
+        "A4": { "value": null, "source": null },
+        "A5": { "value": null, "source": null },
+        "B1": { "value": null, "source": null },
+        "B2": { "value": null, "source": null },
+        "B3": { "value": null, "source": null },
+        "B4": { "value": null, "source": null },
+        "B5": { "value": null, "source": null },
+        "B6": { "value": null, "source": null },
+        "B7": { "value": null, "source": null },
+        "C1": { "value": null, "source": null },
+        "C2": { "value": null, "source": null },
+        "C3": { "value": null, "source": null },
+        "C4": { "value": null, "source": null },
+        "D":  { "value": null, "source": null }
+      }
+    },
+    "smog_kgo3eq": {
+      "total": { "value": null, "source": null },
+      "by_stage": {
+        "A1": { "value": null, "source": null },
+        "A2": { "value": null, "source": null },
+        "A3": { "value": null, "source": null },
+        "A4": { "value": null, "source": null },
+        "A5": { "value": null, "source": null },
+        "B1": { "value": null, "source": null },
+        "B2": { "value": null, "source": null },
+        "B3": { "value": null, "source": null },
+        "B4": { "value": null, "source": null },
+        "B5": { "value": null, "source": null },
+        "B6": { "value": null, "source": null },
+        "B7": { "value": null, "source": null },
+        "C1": { "value": null, "source": null },
+        "C2": { "value": null, "source": null },
+        "C3": { "value": null, "source": null },
+        "C4": { "value": null, "source": null },
+        "D":  { "value": null, "source": null }
+      }
+    },
+    "abiotic_depletion_fossil_mj": {
+      "total": { "value": null, "source": null },
+      "by_stage": {
+        "A1": { "value": null, "source": null },
+        "A2": { "value": null, "source": null },
+        "A3": { "value": null, "source": null },
+        "A4": { "value": null, "source": null },
+        "A5": { "value": null, "source": null },
+        "B1": { "value": null, "source": null },
+        "B2": { "value": null, "source": null },
+        "B3": { "value": null, "source": null },
+        "B4": { "value": null, "source": null },
+        "B5": { "value": null, "source": null },
+        "B6": { "value": null, "source": null },
+        "B7": { "value": null, "source": null },
+        "C1": { "value": null, "source": null },
+        "C2": { "value": null, "source": null },
+        "C3": { "value": null, "source": null },
+        "C4": { "value": null, "source": null },
+        "D":  { "value": null, "source": null }
+      }
+    },
+    "water_consumption_m3": {
+      "total": { "value": null, "source": null },
+      "by_stage": {
+        "A1": { "value": null, "source": null },
+        "A2": { "value": null, "source": null },
+        "A3": { "value": null, "source": null },
+        "A4": { "value": null, "source": null },
+        "A5": { "value": null, "source": null },
+        "B1": { "value": null, "source": null },
+        "B2": { "value": null, "source": null },
+        "B3": { "value": null, "source": null },
+        "B4": { "value": null, "source": null },
+        "B5": { "value": null, "source": null },
+        "B6": { "value": null, "source": null },
+        "B7": { "value": null, "source": null },
+        "C1": { "value": null, "source": null },
+        "C2": { "value": null, "source": null },
+        "C3": { "value": null, "source": null },
+        "C4": { "value": null, "source": null },
+        "D":  { "value": null, "source": null }
+      }
+    },
+    "primary_energy_nonrenewable_mj": {
+      "total": { "value": null, "source": null },
+      "by_stage": {
+        "A1": { "value": null, "source": null },
+        "A2": { "value": null, "source": null },
+        "A3": { "value": null, "source": null },
+        "A4": { "value": null, "source": null },
+        "A5": { "value": null, "source": null },
+        "B1": { "value": null, "source": null },
+        "B2": { "value": null, "source": null },
+        "B3": { "value": null, "source": null },
+        "B4": { "value": null, "source": null },
+        "B5": { "value": null, "source": null },
+        "B6": { "value": null, "source": null },
+        "B7": { "value": null, "source": null },
+        "C1": { "value": null, "source": null },
+        "C2": { "value": null, "source": null },
+        "C3": { "value": null, "source": null },
+        "C4": { "value": null, "source": null },
+        "D":  { "value": null, "source": null }
+      }
+    },
+    "primary_energy_renewable_mj": {
+      "total": { "value": null, "source": null },
+      "by_stage": {
+        "A1": { "value": null, "source": null },
+        "A2": { "value": null, "source": null },
+        "A3": { "value": null, "source": null },
+        "A4": { "value": null, "source": null },
+        "A5": { "value": null, "source": null },
+        "B1": { "value": null, "source": null },
+        "B2": { "value": null, "source": null },
+        "B3": { "value": null, "source": null },
+        "B4": { "value": null, "source": null },
+        "B5": { "value": null, "source": null },
+        "B6": { "value": null, "source": null },
+        "B7": { "value": null, "source": null },
+        "C1": { "value": null, "source": null },
+        "C2": { "value": null, "source": null },
+        "C3": { "value": null, "source": null },
+        "C4": { "value": null, "source": null },
+        "D":  { "value": null, "source": null }
+      }
+    }
   },
 
   "cost": {

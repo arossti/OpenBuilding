@@ -6,14 +6,14 @@
 
 ## 0. Cold-start handoff (read this first)
 
-### Status as of 2026-04-18
+### Status as of 2026-04-18 (revised, session 2)
 
-- **Design**: locked in — 20 top-level blocks, 143 leaf fields, snake_case, schema-complete/nullable
-- **Sample record**: complete at [`schema/sample.json`](./sample.json) — BEAM `LAM011` (Nordic X-Lam CLT 3½")
+- **Design**: locked in — 20 top-level blocks, **`impacts` expanded to heavy per-stage structure (10 categories × 17 EN 15804+A2 stages, 340 impact slots/record)**, snake_case, schema-complete/nullable
+- **Sample record**: current at [`schema/sample.json`](./sample.json) — BEAM `LAM011` (Nordic X-Lam CLT 3½"), `id = "lam011"` (lowercased BEAM ID), `external_refs.beam_id = "LAM011"`
 - **Source data**: cleaned & committed at [`schema/BEAM Database-DUMP.csv`](./BEAM%20Database-DUMP.csv) — 826 lines (1 header + 825 data rows), Excel-row ↔ CSV-line alignment verified
 - **Branch**: `schema` on both remotes (`origin` = bfca-labs/at, `openbuilding` = arossti/OpenBuilding)
-- **Last commit at time of writing**: `0714485` — CSV cleanup
-- **Current phase**: About to enter **Phase 1** (BEAM CSV → JSON database port). See §3.
+- **Last commit at time of writing**: `0489ed5` — schema workplan committed; about to ship heavy-structure + importer
+- **Current phase**: In **Phase 1** (BEAM CSV → JSON database port). Task 1.6 importer actively being written. See §3.
 
 ### Recommended next action
 
@@ -60,7 +60,7 @@ See §6.2 for full table. Headline items:
 - **Formula cells** survive in the CSV as literal formula strings (e.g., `=Q545/11.249`, `=IFERROR(DUMMYFUNCTION("..."), "fallback")`). The importer must either evaluate against the referenced columns in the same row or extract the IFERROR fallback string.
 - **Country codes** are free-text (`"US & CA"`, `"CAN"`) → must map to ISO 3166-1 alpha-3 arrays.
 - **Column AA and AC misplaced values** — BEAM's sheet has some column labels placed in data rows (e.g., LAM011 col AC = `"m2 at 3.5\""` instead of a number). Detect & null.
-- **337 rows have blank `Material Type`** — infer division from Display Name prefix (`"05 | ..."`) or leave for manual classification.
+- **337 rows have blank `Material Type`** — display-name CSI prefixes (`"05 | ..."`) do **not** exist in the cleaned CSV (verified session 2, 0 of 825 rows). Derive division from keyword scan of `Display Name` (e.g., `"Cedar Siding"` → 06, `"Brick, Clay"` → 04, `"Concrete"` → 03). Fallback to `null` with a manual-review flag in the import report.
 - **LAM011 canonical test values**: Stated EPD = 69.96 kgCO2e/m³, density = 456 kg/m³, thickness = 0.09 m, units/m² = 11.249, biogenic factor = 0.9897, carbon content = 0.5, storage retention = 0.9. Common GWP = 6.22 kgCO2e per m² at 3.5".
 
 ### Don'ts
@@ -216,12 +216,13 @@ Priority ordering. Each phase is independently valuable; later phases depend on 
 
 | Decision | Choice | Rationale |
 |---|---|---|
-| Primary key | `id` (slug) top-level; `beam_id` preserved inside `external_refs` | Not every future material comes from BEAM; slugs are URL/diff-friendly; BEAM ID remains indexable |
+| Primary key | `id = lowercase(beam_id)` top-level; `beam_id` preserved case-exact inside `external_refs` | BEAM IDs are already stable, unique, collision-free. Lowercasing keeps URL/path/JSON-key form consistent; the case-exact BEAM ID stays for spreadsheet legacy lookup. JSON DB is not user-facing — display names are. |
 | Null vs missing | **Schema-complete, nullable** — every field present, `null` when unavailable | Readers can traverse without optional-chaining; diffs show where data got filled in |
 | Arrays | Always `[]` when empty, never `null` | `.forEach` safe |
 | Unit convention | **Unit in field name** (`density_kg_m3`, `gwp_kgco2e`) | Self-documenting; survives flattening to CSV/BigQuery |
 | Variable-unit fields | Paired `functional_unit` string (e.g., `carbon.common.per_functional_unit`) | BEAM's "common unit" is per-material (m², m³, kg, linear m) — can't bake into field name |
-| `carbon` vs `impacts` | **Separate blocks** | `carbon` preserves BEAM's audit trail (stated → conversion → common → biogenic); `impacts` is the harmonised wbLCA view with `source` discriminator |
+| `carbon` vs `impacts` | **Separate blocks** | `carbon` preserves BEAM's audit trail (stated → conversion → common → biogenic, flat); `impacts` is the harmonised wbLCA view with full ISO per-stage breakdown |
+| `impacts` lifecycle scope | **Heavy** — each category carries `total` + `by_stage` object covering all 17 EN 15804+A2 stages (A1–A5, B1–B7, C1–C4, D), every stage a `{value, source}` pair | BEAM.js is a richer app than the BEAM spreadsheet; future EPDs increasingly report A4–D. Schema-complete per-stage slots make EPD parsing a direct table-copy and keep the source discriminator at stage granularity for audit |
 | Case | snake_case everywhere | Normalised from BEAM's mixed casing |
 | Dates | ISO 8601 strings; raw Excel serials preserved in `provenance.original_beam_added_or_modified_serial` | Round-trip audit |
 | Country codes | ISO 3166-1 alpha-3 arrays (`"US & CA"` → `["USA","CAN"]`) | Unambiguous; tool-friendly |
@@ -430,11 +431,16 @@ Every leaf field the schema defines, grouped by top-level block. Type hints: `st
 | `method` | enum(`wwf_storage_factor`, `en_15804_negative_a1`, `none`) |
 | `notes` | str |
 
-#### `impacts` — harmonised wbLCA view
+#### `impacts` — harmonised wbLCA view (heavy, per-stage)
 | Field | Type |
 |---|---|
 | `functional_unit` | str |
-| Each of `gwp_kgco2e`, `gwp_bio_kgco2e`, `eutrophication_kgneq`, `acidification_kgso2eq`, `ozone_depletion_kgcfc11eq`, `smog_kgo3eq`, `abiotic_depletion_fossil_mj`, `water_consumption_m3`, `primary_energy_nonrenewable_mj`, `primary_energy_renewable_mj` | `{ value: num, source: enum(epd_direct \| beam_derived \| industry_average \| estimated) }` |
+| `<category>.total` | `{ value: num, source: enum(epd_direct \| beam_derived \| industry_average \| estimated) }` — aggregate over stages declared in `carbon.stated.lifecycle_stages` |
+| `<category>.by_stage.<stage>` | `{ value: num, source: enum(...) }` — one entry per stage in `["A1","A2","A3","A4","A5","B1","B2","B3","B4","B5","B6","B7","C1","C2","C3","C4","D"]` |
+
+Where `<category>` ∈ {`gwp_kgco2e`, `gwp_bio_kgco2e`, `eutrophication_kgneq`, `acidification_kgso2eq`, `ozone_depletion_kgcfc11eq`, `smog_kgo3eq`, `abiotic_depletion_fossil_mj`, `water_consumption_m3`, `primary_energy_nonrenewable_mj`, `primary_energy_renewable_mj`}.
+
+Shape: 10 categories × (1 total + 17 stages) × 2 fields = **340 impact slots** per material record. BEAM imports populate `<category>.total` only; `by_stage` slots stay null until EPD parser (Phase 2) walks the EPD table.
 
 #### `cost` (future)
 `unit`, `cad_per_unit`, `year`, `geography`, `source`
@@ -752,6 +758,49 @@ print(f'raw=logical={raw} ✓')
 
 ---
 
+## Appendix A1 — Future: project-level calculation graph
+
+**Stub — parked for Phase 4 (BEAM.js app port).**
+
+The per-material schema (this document) captures *intensity* values — kgCO2e per functional unit. A project file needs a *calculation graph* that composes those intensities with quantities to produce a total EC figure:
+
+```
+polygon (from PDF-Parser)
+   ├─ area_m2                            measured on the drawing
+   ├─ depth_m                            user-entered or derived
+   ├─ material_ref → materials/XX.json   picked from catalogue
+   └─ node type: {wall, floor, roof, opening, …}
+        │
+        ▼
+  volume_m3 = area × depth
+        │
+        ▼
+  mass_kg = volume × density_kg_m3       from material.physical.density
+        │
+        ▼
+  ec_kgco2e = <lookup via material.carbon.common or impacts.gwp_kgco2e.total>
+        │
+        ▼
+  project_total = Σ node.ec + operational + transport + etc.
+```
+
+Why a graph (not a flat list):
+- **Dependencies propagate** — edit a window polygon's area → net wall area of containing wall updates → wall EC recomputes → project total updates. Same for density, thickness, and material swaps.
+- **Provenance chain** — every final number has a traceable lineage back to a polygon, a material record, an EPD. Good for audits, BfCA peer review, and the forthcoming Vancouver QP attestation workflow.
+- **What-if analysis** — "swap all studs from #2 SPF to LSL" becomes a single-node substitution; the graph recomputes downstream in O(affected edges).
+- **Operational + embodied unification** — the same graph can absorb operational energy results from energy modelling tools and compose them with embodied totals into whole-building lifecycle carbon.
+
+**Prior art to consult** — the team's **OBJECTIVE energy model** app uses a robust dependency graph for operational energy calculations. Before designing the BEAM.js graph, review OBJECTIVE's node model, edge semantics, dirty-flag propagation, and UI conventions. Target: a consistent calc-graph mental model across both tools so a practitioner switching between them doesn't retrain.
+
+**Interop with the material schema** — material records must remain *pure intensity data* (no quantities, no project context). The graph references materials by `id` and multiplies through at evaluation time. Keeping the two concerns separate means:
+- Material DB can be versioned independently (new EPDs, corrections, additions)
+- A project file is a small JSON of graph nodes + edges + material-id references, not a snapshot of the catalogue
+- Two projects using the same material see the same numbers; updating the material cascades to both on next open
+
+Scoping: not a Phase 1 deliverable. Phase 1 ships the intensity-only material records. Phase 3 (PDF-Parser material picker) introduces the first use of material refs in project state. Phase 4 (BEAM.js port) is where the calc graph lands formally.
+
+---
+
 ## Appendix A — Key values to memorise
 
 | | |
@@ -775,5 +824,7 @@ print(f'raw=logical={raw} ✓')
 
 ## Appendix B — Changelog
 
+- **2026-04-18 (session 2)** — Schema v1.1 revision. `impacts.*` expanded to heavy per-stage structure: each category carries `total` + `by_stage` object over all 17 EN 15804+A2 stages (A1–A5, B1–B7, C1–C4, D). Top-level `id` changed from display-derived slug to lowercased BEAM ID (`clt_nordic_xlam_3_5in` → `lam011`); `external_refs.beam_id` preserves case-exact. Added Appendix A1 stub on future project-level calc graph (deferred to Phase 4 / BEAM.js app; defer to OBJECTIVE energy model's graph conventions). `sample.json` updated to match.
+- **2026-04-18 `0489ed5`** — Full workplan + cold-start agent handoff committed.
 - **2026-04-18 `0714485`** — BEAM CSV cleaned (truncated trailing 753 garbage rows, flattened embedded newlines). Excel row ↔ CSV line alignment now guaranteed.
 - **2026-04-18 `228eafb`** — Initial schema design package committed: `BEAM Database-DUMP.csv`, `materials.json` (ABCD.EARTH donor), `sample.json`, `schema.md` v1.
