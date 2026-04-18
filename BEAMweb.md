@@ -6,17 +6,25 @@
 
 ## 0. Cold-start handoff (read this first)
 
-### Status as of 2026-04-18 (revised, session 2)
+### Status as of 2026-04-18 (end of session 2)
 
-- **New workstream.** Branch `beamweb` on both remotes. Doc + CSV reference material seeded; no code yet.
-- **Pivot from Phase 3 (standalone material picker).** The picker would have been orphaned from the real consumer. Instead, we build the full app and the picker lands inside it (as inline toggle rows per assembly tab, not a free-text modal — see §2.3).
-- **Parent repo dependencies already in place:**
-  - BEAM materials catalogue shipped — `schema/materials/*.json`, `schema/materials/index.json` (see [`schema/schema.md`](./schema/schema.md))
-  - PDF-Parser exists for area extraction from construction drawings — Summary Table already shows all Key Areas per sheet (volumes coming in Step 10) (see `PDF-Parser/`)
-  - Database viewer at [`PDF-Parser/database.html`](./PDF-Parser/database.html) proves the catalogue fetch/render pattern
-  - Matrix app at [`PDF-Parser/matrix.html`](./PDF-Parser/matrix.html) proves the multi-app nav shell
-- **Reference CSVs in the repo** — [`docs/csv files from BEAM/`](./docs/csv%20files%20from%20BEAM/) holds informal workbook-tab exports used during early design to validate the assembly-tab pattern (see §2.3). Full BEAM workbook CSV exports with formulas are pending from Andy (he has the unlocked original). A few reference CSVs were retired once the data was absorbed into `PDF-Parser/js/beam/reference-data.mjs` (Glossary, Energy GHG).
-- **Nav-btn label**: `BEAM` in the shared header (not `BEAMweb`). The `BEAMweb` name stays internal for code/docs to differentiate from the spreadsheet family.
+- **Phase 0 shipped.** Branch `beamweb` on both remotes, 10 commits ahead of `main`. App shell live at [`PDF-Parser/beamweb.html`](./PDF-Parser/beamweb.html) with 18 tabs, Glossary + Energy GHG populated with real data, reference-data module, action bar wired to stubs.
+- **Ecosystem restructured** — landing page at `PDF-Parser/index.html`; PDF-Parser app renamed to `pdfparser.html`; single-file CSS (`bfcastyles.css`, ~4100 lines, section/app scoped); cyan accent; dependency manifest with drift detector at `dependencies.html`; BEAM nav-btn added across all apps.
+- **IP neutralisation applied** (session 2 commit `8d730ab`) — see the "IP rules" block below. Code and served data are CSI/MCE²-free; Matrix intentionally retains regulatory-program references (legitimate citations).
+- **Parent repo dependencies in place:**
+  - BEAM materials catalogue — 821 sparse records, 8 material groups, full EN 15804+A2 per-stage scope ([`schema/materials/`](./schema/materials))
+  - PDF-Parser — area takeoff, Summary Table with Key Areas per sheet, volumetric in Step 10
+  - Database viewer — proves the catalogue fetch/render + lazy-per-group pattern
+  - Matrix — proves multi-app nav shell
+- **Reference CSVs** — [`docs/csv files from BEAM/`](./docs/csv%20files%20from%20BEAM/) holds informal workbook-tab exports. Full BEAM workbook CSV exports with formulas pending from Andy. **Known hazard: `#NAME?` in unit cells** — see §4.4.
+- **Nav-btn label** — `BEAM` in the shared header (not `BEAMweb`). `BEAMweb` is internal only.
+
+### IP rules (enforced 2026-04-18)
+
+- **Do not** introduce `CSI`, `MasterFormat`, or "Division(s)" terminology in any code served by Pages or any data file fetched by an app. The numeric 2-digit prefix convention stays (`03`, `06`, etc.) under the field name `group_prefix`.
+- **Do not** position BEAMweb as a port of MCE² or any NRCan / Crown-copyright tool. BEAMweb ports BEAM (BfCA-owned). Historical MCE² references are allowed in this doc's changelog as factual record only.
+- **Matrix is the exception** — it's a regulatory-compliance tool that legitimately cites NRCan, EnerGuide, HOT2000, ENERGY STAR, etc. as the programs it documents.
+- See `CLAUDE.md` at repo root for the canonical IP rules a future agent should follow.
 
 ### What BEAMweb is
 
@@ -241,10 +249,20 @@ The assembly-tab column labels confirm this chain:
 ### 4.3 Port approach
 
 Once BEAM CSVs with formulas land:
-1. Extract the per-tab curated material list (rows with a `material` column populated) — emit as `PDF-Parser/js/beamweb/tabs/<tab>-materials.json` (cross-ref by `beam_id` to `schema/materials/index.json`).
+1. Extract the per-tab curated material list (rows with a `material` column populated) — emit as `PDF-Parser/js/beam/tabs/<tab>-materials.json` (cross-ref by `beam_id` to `schema/materials/index.json`).
 2. Extract the per-row formula for `SELECTED kgCO2e CONTENT`, `NET kgCO2e EMISSIONS`, etc. — port to a pure JS function per tab in `calc.mjs`.
 3. Extract section-config defaults from the workbook — wire as placeholders in the tab's form.
 4. Regression-test each tab with canonical input against the BEAM workbook output.
+
+### 4.4 Known CSV-import hazard: `#NAME?` in unit cells
+
+The BEAM workbook uses cross-sheet custom functions to convert unit strings (e.g. "sf" ↔ "sm", "ft" ↔ "m") between imperial/metric display states. When those functions are not resolved by the exporting environment, the CSV drops `#NAME?` into the cell instead of the proper unit token. The importer must:
+
+1. **Detect `#NAME?`** as a known-bad token; do not treat as a literal label.
+2. **Infer the unit from context**: the column itself declares the unit family (area ↔ sf/sm, volume ↔ cf/cm, length ↔ ft/m, mass ↔ lb/kg). When the cell content is `#NAME?`, fall back to the column's canonical metric form and log a warning in the import report rather than failing the row.
+3. **Do not propagate** `#NAME?` into any BEAMweb project JSON or DB record. Metric is canonical (see §9); if the import can't recover the unit, mark the field null and raise a row warning.
+
+This pattern is common enough in the reference CSVs that the importer should treat `#NAME?` as a soft-null sentinel, not a hard parse error.
 
 ### 4.4 Calculation graph consideration (goal 5)
 
@@ -488,6 +506,8 @@ BEAMweb applies the Energy GHG factors (tab 18) to produce operational emissions
 
 ## Appendix — Changelog
 
+- **2026-04-18 (session 2, wrap-up)** — Added §4.4 documenting the `#NAME?` CSV-import hazard: BEAM workbook uses cross-sheet functions for unit conversion (sf/sm, ft/m, cf/cm, lb/kg); when those don't resolve in the exporting environment the CSV drops `#NAME?` into the cell. Importer should treat as soft-null sentinel, infer unit from column context, log to import report, never propagate into project JSON. Updated §0 status to reflect Phase 0 shipped and added explicit IP rules block referencing `CLAUDE.md`.
+- **2026-04-18 (session 2, IP neutralisation)** — Precautionary scrub to defuse copyright-troll scraping of the Pages site. Removed `CSI`/`MasterFormat`/`Division` terminology from all code and served data; renamed `division_prefix` → `group_prefix`; dropped `division_name`, `csi_masterformat`, `uniformat_level2` fields. Removed MCE²/NRCan/Crown references from user-facing copy. Matrix left alone (regulatory-program citations are legitimate). Material DB regenerated (822/822 validates). See commit `8d730ab`.
 - **2026-04-18 (session 2, Q11/Q16/Q10 resolved)** — Polygon → component mapping locked in: tag at measurement time in PDF-Parser (user knows the context when placing the polygon). Units contract locked in: metric canonical in storage, imperial at display time only, per-user toggle persisted in localStorage; new §9 documents a planned `PDF-Parser/js/shared/units.mjs` for Phase 1. HOT2000 direct-parse parked indefinitely (may never happen); replaced by Phase 7 OBJECTIVE integration for operational energy — new §10 sketches the direction. Phase breakdown + relationships updated accordingly.
 - **2026-04-18 (session 2, ref tabs)** — Glossary + Energy GHG tabs ship as Phase 0 informational. 48 glossary terms (abbr / full / description, with live search) and 13-province × 5-fuel-factor Energy GHG table live at `PDF-Parser/js/beam/reference-data.mjs`. CSVs at `docs/csv files from BEAM/{Glossary,Energy GHG}.csv` now redundant and safe to delete. Q14 (app location) marked resolved: shipping at `PDF-Parser/beamweb.html` + `js/beamweb.mjs` + `js/beam/reference-data.mjs`.
 - **2026-04-18 (session 2)** — Doc revised after Andy's review. Tab list resolved (BEAM authoritative, 17 tabs + Energy GHG optional); nav-btn label set to `BEAM`. Section 2.3 added — assembly-tab pattern discovered from MCE² CSVs in `docs/csv files from BEAM/` (inline material toggle rows per tab, pre-curated subset of the 821-material DB, per-row SELECT+QUANTITY+%, section-level config like thickness/R-value). Section 4 populated with calc shape inferred from MCE² column labels; exact formulas await BEAM CSV exports from Andy's unlocked workbook. Section 7 open-questions re-triaged with answers/partials. Phase breakdown revised (10 phases). Goal 5 added — calculation graph consideration.

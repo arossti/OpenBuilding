@@ -1,23 +1,64 @@
-# BfCA CAF — Embodied Carbon Assessment Framework
+# BfCA OpenBuilding — Embodied Carbon Assessment Framework
 
 ## Project Purpose
 
-Interactive single-file HTML application mapping **roles, responsibilities, tools, standards, and compliance requirements** for embodied carbon (EC) assessments across Canadian building types, sizes, jurisdictions, and project phases. Aligned to **NBC/NECB 2025 Draft**.
+Open-source browser-native toolkit for embodied carbon (EC) assessments on Canadian construction projects. Four apps share one design system, one material database, and a single dependency manifest.
 
 **Scope: Canada only.** No US codes, ICC, or ASHRAE references unless they are explicitly referenced by a Canadian standard (e.g., TRACI v2.1, ASHRAE 140-2023 for NECB compliance).
 
+## IP rules (enforced 2026-04-18 — do not regress)
+
+Read this before writing any code or prose that will be served by Pages or included in a data file an app fetches.
+
+- **No `CSI`, `MasterFormat`, or "Division(s)" terminology** in public code, UI strings, fetched JSON, or served doc files. The numeric 2-digit prefix convention stays (`03`, `06`, ...) under the field name `group_prefix` and the lookup path `schema/lookups/material-groups.json`. Labels are single neutral words ("Wood", "Thermal", "Finishes") — not the verbose industry-standard titles.
+- **No positioning as a port of MCE² or any NRCan / Crown-copyright tool.** BEAMweb ports BEAM (BfCA-owned). Historical references in changelog-style docs are factual record and fine; current-state prose should say "BEAM" only.
+- **Matrix is the exception.** `PDF-Parser/matrix.html` is a regulatory-compliance tool and legitimately cites NRCan, EnerGuide, HOT2000, ENERGY STAR, CHBA, CMHC, VBBL, COV Appendix II, NBC/NECB, etc. — those are programs and codes the tool documents, not brand claims.
+- When in doubt: **the concern is spider-trolls scraping the deployed Pages site**. Anything that doesn't ship to Pages (dev docs, archived PDF references, schema planning docs) is lower priority but still worth neutralising eventually.
+
 ## Architecture
 
-### HTML app deployed with PDF-Parser
+### App ecosystem — one repo, five pages on Pages
 
-Consolidated on 2026-04-18. The Matrix and PDF-Parser ship together via GitHub Pages and share the `bfcastyles.css` design system.
+Deployed from `PDF-Parser/` via GitHub Actions (`.github/workflows/deploy-pages.yml`). GitHub Pages serves `PDF-Parser/` as the site root.
 
-| File | Role |
-|---|---|
-| `PDF-Parser/matrix.html` | Body, data, and JS (~4,360 lines, ~278 KB) |
-| `PDF-Parser/matrix.css` | Light-theme styles (~1,900 lines) |
-| `PDF-Parser/bfcastyles.css` | Shared brand tokens and dark header (used by both apps) |
-| `docs/matrix/` | Matrix-specific docs (architecture, data model, TRIAGE) |
+| URL | File | Role |
+|---|---|---|
+| `/` | `PDF-Parser/index.html` | Landing page / app directory (4 cards + deps link) |
+| `/pdfparser.html` | `PDF-Parser/pdfparser.html` | PDF-Parser — area + volume takeoff from drawings |
+| `/matrix.html` | `PDF-Parser/matrix.html` | EC Matrix — regulatory compliance grid |
+| `/database.html` | `PDF-Parser/database.html` | BfCA material database viewer (821 records) |
+| `/beamweb.html` | `PDF-Parser/beamweb.html` | BEAM — embodied carbon calculator (Phase 0 shell) |
+| `/dependencies.html` | `PDF-Parser/dependencies.html` | Dev dependency manifest (not nav-linked) |
+
+### Styling — single consolidated file
+
+`PDF-Parser/bfcastyles.css` (~4100 lines) is the single source of truth for every app's styles. Rules are section/app-scoped via html classes:
+
+- `<html class="theme-dark app-pdfparser">` — PDF-Parser
+- `<html class="theme-dark app-database">` — Database viewer
+- `<html class="theme-dark app-beamweb">` — BEAMweb
+- `<html class="theme-dark app-deps">` — Dependency manifest
+- `<html class="theme-dark app-landing">` — Landing
+- `<html class="app-matrix">` — Matrix (its own light palette)
+
+No per-app `.css` files — if you find yourself creating one, add rules to `bfcastyles.css` under the appropriate `§N  APP: name` section banner instead. Long-term goal is a single ~1500-line file with shared utilities (status bars, chips, tags, action buttons, data tables) that each app consumes.
+
+### JS — ES modules, no build
+
+- `PDF-Parser/js/*.mjs` — per-app entries (`database.mjs`, `beamweb.mjs`)
+- `PDF-Parser/js/beam/*.mjs` — BEAMweb-internal modules (`reference-data.mjs`, future `state-manager.mjs`, `file-handler.mjs`, `units.mjs`)
+- `PDF-Parser/js/shared/*.mjs` — cross-app utilities (Phase 1 of BEAMweb will land `filehandler.mjs`, `statemanager.mjs`, `units.mjs`)
+- Global namespace for BEAMweb: `window.BEAM.*` (mirrors OBJECTIVE's `window.TEUI.*` so algorithms port cheaply between repos)
+
+### Data — single sparse catalogue
+
+- **Source of truth**: `schema/materials/*.json` (8 files, 821 records, one file per 2-digit material group: 03-concrete, 04-masonry, 05-metals, 06-wood, 07-thermal, 08-openings, 09-finishes, 31-earthwork)
+- `schema/materials/index.json` — lightweight picker catalogue (8 fields per entry)
+- `schema/material.schema.json` — Draft 2020-12 validator, sparse-aware
+- `schema/scripts/beam-csv-to-json.mjs` — importer (reads `docs/csv files from BEAM/BEAM Database-DUMP.csv`)
+- `schema/scripts/validate.mjs` — zero-dep walker; run after any schema change
+- `schema/lookups/*.json` — enum + inference tables (`material-groups.json`, `country-codes.json`, `material-type-to-group.json`, `display-name-keywords.json`, `typical-elements.json`, `lifecycle-stages.json`)
+- **Runtime path**: Pages staging step copies `schema/materials/*` + `schema/material.schema.json` + `schema/sample.json` into `PDF-Parser/data/schema/` so apps can fetch them with relative paths. Local dev: `cd PDF-Parser && npm run stage:data`.
 
 No build tools, no framework. Opens directly via a local server (`npm run serve`) or the deployed GitHub Pages site.
 
