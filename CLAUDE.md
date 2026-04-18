@@ -8,18 +8,18 @@ Interactive single-file HTML application mapping **roles, responsibilities, tool
 
 ## Architecture
 
-### Single-file HTML app (`Matrix App/ec_matrix_step13.html`)
+### HTML app deployed with PDF-Parser
 
-Everything — CSS, HTML, JS, data — lives in one `~270 KB` HTML file (~4,854 lines). No build tools, no dependencies, no framework. Opens directly in a browser.
+Consolidated on 2026-04-18. The Matrix and PDF-Parser ship together via GitHub Pages and share the `bfcastyles.css` design system.
 
-**Structure (top to bottom):**
-
-| Lines (approx.) | Section |
+| File | Role |
 |---|---|
-| 1–1159 | `<style>` — full CSS design system |
-| 1161–1619 | `<body>` — header, sidebar (filters + legends + reference panels), main content area, footer |
-| 1622–4724 | `<script>` — all JS: lookup tables, data model, rendering, event handling |
-| 4727–4855 | Trailing data rows (appended after closing `</html>` — **needs cleanup**) |
+| `PDF-Parser/matrix.html` | Body, data, and JS (~4,360 lines, ~278 KB) |
+| `PDF-Parser/matrix.css` | Light-theme styles (~1,900 lines) |
+| `PDF-Parser/bfcastyles.css` | Shared brand tokens and dark header (used by both apps) |
+| `docs/matrix/` | Matrix-specific docs (architecture, data model, TRIAGE) |
+
+No build tools, no framework. Opens directly via a local server (`npm run serve`) or the deployed GitHub Pages site.
 
 ### Data Model (JS objects in `<script>`)
 
@@ -68,24 +68,24 @@ Everything — CSS, HTML, JS, data — lives in one `~270 KB` HTML file (~4,854 
 
 | File | Content |
 |---|---|
-| `Matrix App/ec_matrix_step15.html` | **Current app (step 15)** — three-track flow view, Part 9/Part 3 splash, full actor/phase sync |
-| `Matrix App/ec_matrix_step14.html` | Previous version (step 14) — flow view prototype |
-| `Matrix App/ec_matrix_step13.html` | Earlier version (step 13) — Vancouver updates |
-| `Matrix App/ec_matrix_step12.html` | Earlier version (step 12) |
-| `Matrix App/ec_matrix_v2.md` | Markdown documentation of the full data model |
-| `BfCA Resources/Building application flow chart.pdf` | Reference flowchart for building permit process (prescriptive / performance / EnerGuide paths) |
-| `BfCA Resources/Embodied Carbon Tool DB Comparison Report (Priopta).pdf` | 227-page NRC-funded tool comparison report |
-| `BfCA Resources/Navigating Part 9 Building Codes and Municipal Permitting Frameworks.docx` | Part 9 permitting guidance |
-| `BfCA Resources/canada_us_code` | Canadian building code governance structure (Canada section relevant; ignore US section) |
-| `BfCA Resources/Vancouver/city-of-vancouver-embodied-carbon-low-rise-residential-part-9-appendix-ii.pdf` | **COV Appendix II** — EC Assessment Guide for Low-Rise Residential (Part 9). Effective Jan 1, 2026. BEAM/MCE2 mandated as primary tools. ECI benchmarks. BfCA-developed methodology. |
-| `BfCA Resources/Vancouver/embodied-carbon-vancouver-addendum-national-wblca-practitioners-guide.pdf` | **COV Addendum v1.0** to NRC Practitioner's Guide. Part 3 EC compliance for VBBL s.10.4. ECI = 400 kgCO2e/m². Accepted tools list. ILCs. April 2025. |
+| `PDF-Parser/matrix.html` | **Current Matrix app** — three-track flow view, Part 9/Part 3 splash, full actor/phase sync |
+| `PDF-Parser/matrix.css` | Matrix light-theme styles |
+| `docs/matrix/ec_matrix_v2.md` | Markdown documentation of the full data model |
+| `docs/matrix/TRIAGE.md` | Role/phase refinement Q&A notes |
+| `docs/matrix/ARCHITECTURE.md` | Matrix architecture notes (data model, conventions) |
+| `docs/PDF References/Building application flow chart Part 9.pdf` | Reference flowchart for building permit process (prescriptive / performance / EnerGuide paths) |
+| `docs/PDF References/Embodied Carbon Tool DB Comparison Report (Priopta).pdf` | 227-page NRC-funded tool comparison report |
+| `docs/PDF References/Navigating Part 9 Building Codes and Municipal Permitting Frameworks.docx` | Part 9 permitting guidance |
+| `docs/PDF References/canada_us_code` | Canadian building code governance structure (Canada section relevant; ignore US section) |
+| `docs/PDF References/Vancouver/city-of-vancouver-embodied-carbon-low-rise-residential-part-9-appendix-ii.pdf` | **COV Appendix II** — EC Assessment Guide for Low-Rise Residential (Part 9). Effective Jan 1, 2026. BEAM/MCE2 mandated as primary tools. ECI benchmarks. BfCA-developed methodology. |
+| `docs/PDF References/Vancouver/embodied-carbon-vancouver-addendum-national-wblca-practitioners-guide.pdf` | **COV Addendum v1.0** to NRC Practitioner's Guide. Part 3 EC compliance for VBBL s.10.4. ECI = 400 kgCO2e/m². Accepted tools list. ILCs. April 2025. |
 | `CCI-tables-20241121/` | CCI construction classification taxonomy (2 Excel files) |
 
 ## Conventions
 
 ### Versioning
-- Each major iteration is saved as `ec_matrix_stepNN.html` — always create the next step number, never overwrite the current file
-- The step number appears in the footer
+- Changes are tracked via git (feature branches, PRs). Step-numbered files are a legacy convention no longer used post-consolidation.
+- The footer may still show a step number for user reference.
 
 ### Code Style
 - Vanilla JS (ES5-compatible `var`, `function`, `.forEach`, `.map` — no arrow functions, no `let`/`const`, no template literals)
@@ -128,7 +128,7 @@ Add a **"Flow Model"** button/toggle that presents the same underlying data as a
   4. **Actor/Role** — "I'm an Architect, what are my EC touchpoints?" (builds on the successful Actor Lens)
 
 ### Reference
-- `BfCA Resources/Building application flow chart.pdf` — existing flowchart showing prescriptive / performance / EnerGuide branching. Good structural model for the flow view, but our version needs to overlay EC requirements onto this process.
+- `docs/PDF References/Building application flow chart Part 9.pdf` — existing flowchart showing prescriptive / performance / EnerGuide branching. Good structural model for the flow view, but our version needs to overlay EC requirements onto this process.
 
 ### Implementation Notes
 - Keep it pure CSS/JS/SVG — no external libraries (consistent with current approach)

@@ -103,8 +103,17 @@ export var METRIC_SCALES = [
   { label: "1:150", ratio: 150 },
   { label: "1:200", ratio: 200 },
   { label: "1:250", ratio: 250 },
+  { label: "1:300", ratio: 300 },
+  { label: "1:400", ratio: 400 },
   { label: "1:500", ratio: 500 },
-  { label: "1:1000", ratio: 1000 }
+  { label: "1:600", ratio: 600 },
+  { label: "1:750", ratio: 750 },
+  { label: "1:1000", ratio: 1000 },
+  { label: "1:1250", ratio: 1250 },
+  { label: "1:1500", ratio: 1500 },
+  { label: "1:2000", ratio: 2000 },
+  { label: "1:2500", ratio: 2500 },
+  { label: "1:5000", ratio: 5000 }
 ];
 
 export var IMPERIAL_SCALES = [

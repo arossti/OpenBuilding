@@ -24,15 +24,39 @@
         Who models embodied carbon, under what authority, at each project phase — across project types, sizes, and jurisdictions.
       </div>
     </div>
-    <div class="view-toggle" id="view-toggle">
-      <button class="view-toggle-btn active" id="btn-view-cards">Cards</button>
-      <button class="view-toggle-btn" id="btn-view-flow">Flow Model</button>
-      <a href="index.html" class="view-toggle-btn" style="text-decoration:none;background:#2a5c3f;border-color:#3a7c5f;">PDF Parser</a>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem;flex-shrink:0;">
+      <div class="view-toggle" id="view-toggle">
+        <button class="view-toggle-btn active" id="btn-view-cards">Cards</button>
+        <button class="view-toggle-btn" id="btn-view-flow">Flow Model</button>
+        <a href="index.html" class="view-toggle-btn" style="text-decoration:none;background:#2a5c3f;border-color:#3a7c5f;">PDF Parser</a>
+      </div>
+      <button class="part-mode-indicator" id="part-mode-indicator" onclick="showPartSplash()" style="display:none;"></button>
     </div>
   </header>
 
+  <!-- ── Part Selector Splash ─────────────────────────── -->
+  <div class="part-splash" id="part-splash">
+    <img src="graphics/BFCA-LOGO.png" alt="Builders for Climate Action" class="part-splash-logo">
+    <div class="part-splash-header">
+      <h1>Embodied Carbon Modelling Matrix</h1>
+      <p>Select the building classification to explore EC modelling requirements, roles, and tools for Canadian construction.</p>
+    </div>
+    <div class="part-splash-buttons">
+      <button class="part-splash-btn" id="btn-part9" onclick="selectPart('part9')">
+        <span class="part-splash-btn-icon">🏠</span>
+        <span class="part-splash-btn-title">Part 9</span>
+        <span class="part-splash-btn-desc">Residential &amp; small buildings<br>≤ 3 storeys + ≤ 600 m²</span>
+      </button>
+      <button class="part-splash-btn" id="btn-part3" onclick="selectPart('part3')">
+        <span class="part-splash-btn-icon">🏢</span>
+        <span class="part-splash-btn-title">Part 3</span>
+        <span class="part-splash-btn-desc">Larger buildings<br>&gt; 3 storeys or &gt; 600 m²</span>
+      </button>
+    </div>
+  </div>
+
   <!-- ── Main layout ───────────────────────────────────── -->
-  <div class="layout">
+  <div class="layout" id="main-layout" style="display:none;">
 
     <!-- ── Sidebar ──────────────────────────────────────── -->
     <aside class="sidebar">
@@ -4209,6 +4233,128 @@ window.EC = EC;
 
   btnViewCards.addEventListener('click', function() { setView('cards'); });
   btnViewFlow.addEventListener('click', function() { setView('flow'); });
+
+  // =============================================================
+  // PART 9 / PART 3 SPLIT — Splash + Pre-filter
+  // =============================================================
+
+  var currentPart = null; // 'part9' or 'part3'
+
+  // Actors relevant per part (for filtering the Actor dropdown)
+  var PART9_ACTORS = ["OB","OW","DT","AR","PE","EA","SC","QP","BO","CT","CPHD","CPHC","DEV","FI","RS"];
+  var PART3_ACTORS = ["OW","AR","PE","SC","QP","BO","FM","CT","CxA","DEV","PM","FI","UD","RS"];
+
+  // Persona presets relevant per part
+  var PART9_PERSONAS = ["EA","DT","OB","AR","SC","BO"];
+  var PART3_PERSONAS = ["AR","PE","SC","BO","DEV","CxA","OW"];
+
+  function selectPart(part) {
+    currentPart = part;
+
+    // Hide splash, show layout
+    document.getElementById('part-splash').classList.add('hidden');
+    document.getElementById('main-layout').style.display = '';
+
+    // Show part indicator in header
+    var indicator = document.getElementById('part-mode-indicator');
+    if (indicator) {
+      indicator.style.display = '';
+      indicator.textContent = (part === 'part9' ? '\uD83C\uDFE0 Part 9 — Residential' : '\uD83C\uDFE2 Part 3 — Larger Buildings') + '  \u25BE Change';
+    }
+
+    // Hide/show Building Size dropdown
+    var fgSize = document.getElementById('fg-size');
+    if (fgSize) {
+      if (part === 'part9') {
+        fgSize.style.display = 'none';
+        selSize.value = 'part9';
+      } else {
+        fgSize.style.display = '';
+        selSize.value = '';
+        // Hide Part 9 option, show only Part 3 sizes
+        var sizeOpts = selSize.querySelectorAll('option');
+        for (var s = 0; s < sizeOpts.length; s++) {
+          var sv = sizeOpts[s].value;
+          if (!sv) { sizeOpts[s].style.display = ''; continue; } // "All sizes" always visible
+          sizeOpts[s].style.display = (sv === 'part9') ? 'none' : '';
+        }
+      }
+    }
+
+    // Filter actor dropdown options by part
+    var actorSelect = document.getElementById('sel-actor');
+    if (actorSelect) {
+      var validActors = part === 'part9' ? PART9_ACTORS : PART3_ACTORS;
+      var options = actorSelect.querySelectorAll('option');
+      for (var i = 0; i < options.length; i++) {
+        var opt = options[i];
+        if (!opt.value) { opt.style.display = ''; continue; } // "All roles" always visible
+        opt.style.display = validActors.indexOf(opt.value) !== -1 ? '' : 'none';
+      }
+    }
+
+    // Filter persona presets by part
+    var validPersonaActors = part === 'part9' ? PART9_PERSONAS : PART3_PERSONAS;
+    var personaChips = document.querySelectorAll('.persona-chip');
+    personaChips.forEach(function(chip, idx) {
+      var preset = PERSONA_PRESETS[idx];
+      if (!preset) return;
+      var actorOk = validPersonaActors.indexOf(preset.actor) !== -1;
+      var sizeOk = !preset.size || (part === 'part9' ? preset.size === 'part9' : preset.size !== 'part9');
+      chip.style.display = (actorOk && sizeOk) ? '' : 'none';
+    });
+
+    // Update size hint text per part
+    var sizeHint = document.querySelector('#fg-size .filter-hint');
+    if (sizeHint) {
+      sizeHint.innerHTML = part === 'part9'
+        ? 'Part 9: \u2264 3 storeys + \u2264 600 m\u00B2'
+        : 'Small: \u2264 2,000 m\u00B2 &middot; Medium: 2,001\u201310,000 m\u00B2 &middot; Large: &gt; 10,000 m\u00B2';
+    }
+
+    // Update jurisdiction hint text per part
+    var jurisHint = document.querySelector('#fg-juris .filter-hint');
+    if (jurisHint) {
+      if (part === 'part9') {
+        jurisHint.innerHTML = 'Vancouver has mandatory Part 9 EC requirements (ZEB Bulletin Appendix II, Jan 2026). Toronto TGS v4 has EC at Tier 3\u20134. Other municipalities have no numeric EC targets.';
+      } else {
+        jurisHint.innerHTML = 'Vancouver has mandatory Part 3 EC requirements (VBBL s.10.4 + COV Addendum v1.0, April 2025). Toronto TGS v4 has EC at Tier 3\u20134. Federal buildings have mandatory EC (Treasury Board Standard).';
+      }
+    }
+
+    // Reset all filters and trigger
+    selType.value = '';
+    selJuris.value = '';
+    selActor.value = '';
+    clearPersonaHighlight();
+    onFilterChange();
+  }
+
+  function showPartSplash() {
+    currentPart = null;
+    document.getElementById('part-splash').classList.remove('hidden');
+    document.getElementById('main-layout').style.display = 'none';
+    var indicator = document.getElementById('part-mode-indicator');
+    if (indicator) indicator.style.display = 'none';
+  }
+
+  // Override filterRows to respect currentPart
+  var _originalFilterRows = filterRows;
+  filterRows = function(typeVal, sizeVal, jurisVal, actorVal) {
+    var results = _originalFilterRows(typeVal, sizeVal, jurisVal, actorVal);
+    if (!currentPart) return results;
+    return results.filter(function(row) {
+      if (currentPart === 'part9') {
+        return row.sizeBand === 'part9' || row.sizeBand === 'any';
+      } else {
+        return row.sizeBand !== 'part9';
+      }
+    });
+  };
+
+  // Expose to global scope for onclick handlers
+  window.selectPart = selectPart;
+  window.showPartSplash = showPartSplash;
 
 })();
 </script>

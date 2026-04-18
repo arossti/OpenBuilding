@@ -35,20 +35,23 @@ Interactive reference mapping roles, responsibilities, tools, standards, and com
 
 ```
 at/
-├── PDF-Parser/          Construction document area extraction tool
+├── PDF-Parser/          Area extraction tool + EC Matrix app
 │   ├── index.html       PDF-Parser app (dark theme)
-│   ├── matrix.html      EC Matrix app (light theme)
+│   ├── matrix.html      EC Matrix app (light theme, with Part 9/Part 3 splash)
 │   ├── bfcastyles.css   Shared design system
 │   ├── pdfparser.css    PDF-Parser styles
 │   ├── matrix.css       EC Matrix styles
 │   ├── js/              10 ESM modules (vanilla JS)
-│   ├── lib/             PDF.js 4.9.155 (local ESM build)
-│   └── docs/            Workplan and technical documentation
-├── Matrix App/          EC Matrix standalone (step-numbered HTML files)
-├── BfCA Resources/      Reference documents (Vancouver EC guides, NRC reports)
-├── regulatory/          Canadian Part 9 building code compliance research
-├── ifc/                 IFC building model import exploration
-├── cost/                Cost data integration research
+│   └── lib/             PDF.js 4.9.155 (local ESM build)
+├── schema/              Materials database JSON schema (in progress)
+│   └── schema.md        Workplan for BEAM materials port + wbLCA extensibility
+├── docs/                App documentation + reference materials
+│   ├── pdf-parser.md    PDF-Parser workplan + technical docs
+│   ├── matrix/          EC Matrix docs (ARCHITECTURE, TRIAGE, data model)
+│   ├── PDF References/  Vancouver EC guides, NRC reports, code references
+│   ├── regulatory (Jacob)/  Legacy regulatory research (stale, kept for reference)
+│   ├── ifc (Jacob)/         Legacy IFC exploration + IFCLCA permission notes
+│   └── cost (Jacob)/        Legacy cost-data research
 ├── CCI-tables/          CCI construction classification taxonomy
 └── CLAUDE.md            Project instructions for AI-assisted development
 ```
