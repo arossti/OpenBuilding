@@ -208,9 +208,14 @@ function inferTypicalElements(materialType, productSubtype, elementsLookup) {
 // ---------------------------------------------------------------------------
 const ALL_STAGES = ["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "C1", "C2", "C3", "C4", "D"];
 function emptyImpactBlock() {
-  const by_stage = {};
-  for (const s of ALL_STAGES) by_stage[s] = { value: null, source: null };
-  return { total: { value: null, source: null }, by_stage };
+  // Sparse-by-default: by_stage starts empty; only populated stages appear.
+  // `total` keeps its {value, source} shape so consumers can find the aggregate
+  // slot by name whether or not it is populated.
+  return { total: { value: null, source: null }, by_stage: {} };
+}
+function addStageValue(block, stage, value, source) {
+  if (value === null || value === undefined) return;
+  block.by_stage[stage] = { value, source };
 }
 
 // ---------------------------------------------------------------------------
@@ -568,6 +573,65 @@ function buildRecord({ row, rowIndex, lookups, warnings, csvSha256 }) {
 }
 
 // ---------------------------------------------------------------------------
+// Sparse-by-default serialization. Full template structure lives in sample.json
+// (human reference) and material.schema.json (formal validator). Per-material
+// records only carry populated fields. Rules:
+//   - Null scalar leaves are dropped (readers use `?.` + nullish coalescing).
+//   - Arrays are kept as-is (including empty `[]` — preserves .forEach safety).
+//   - `impacts.<category>.total` keeps its {value, source} shape even when both
+//     are null — consumers find the aggregate slot by name. `by_stage` contains
+//     only populated stage slots.
+//   - Empty sub-objects elsewhere collapse away.
+//   - After prune, normalize() guarantees the 15 top-level object blocks exist
+//     and all 10 impact categories are present (as empty skeletons if needed).
+// ---------------------------------------------------------------------------
+const TOP_LEVEL_OBJECT_KEYS = [
+  "external_refs", "naming", "manufacturer", "status", "classification",
+  "rendering", "physical", "carbon", "impacts", "cost", "fire",
+  "code_compliance", "epd", "methodology", "provenance"
+];
+const IMPACT_CATEGORIES = [
+  "gwp_kgco2e", "gwp_bio_kgco2e", "eutrophication_kgneq", "acidification_kgso2eq",
+  "ozone_depletion_kgcfc11eq", "smog_kgo3eq", "abiotic_depletion_fossil_mj",
+  "water_consumption_m3", "primary_energy_nonrenewable_mj", "primary_energy_renewable_mj"
+];
+
+function prune(value, path = "$") {
+  // Fixed-shape preservation: impacts.<cat>.total stays {value, source}
+  if (/^\$\.impacts\.[^.]+\.total$/.test(path)) return value;
+
+  if (value === null || value === undefined) return undefined;
+  if (Array.isArray(value)) return value;
+  if (typeof value !== "object") return value;
+
+  const out = {};
+  for (const [k, v] of Object.entries(value)) {
+    const pruned = prune(v, `${path}.${k}`);
+    if (pruned === undefined) continue;
+    out[k] = pruned;
+  }
+
+  // Preserve empty `by_stage` objects (explicit "no per-stage data")
+  const isByStage = /^\$\.impacts\.[^.]+\.by_stage$/.test(path);
+  if (Object.keys(out).length === 0 && !isByStage) return undefined;
+  return out;
+}
+
+function normalize(record) {
+  // Guarantee outer shape so consumers can traverse without optional chaining
+  // on the first level. Missing object blocks become `{}` (2 chars vs ~50+ null
+  // fields). Impact categories get the minimum {total, by_stage} skeleton.
+  for (const k of TOP_LEVEL_OBJECT_KEYS) if (!(k in record)) record[k] = {};
+  if (!record.impacts || typeof record.impacts !== "object") record.impacts = {};
+  for (const cat of IMPACT_CATEGORIES) {
+    if (!(cat in record.impacts)) {
+      record.impacts[cat] = { total: { value: null, source: null }, by_stage: {} };
+    }
+  }
+  return record;
+}
+
+// ---------------------------------------------------------------------------
 // Lookup loader
 // ---------------------------------------------------------------------------
 function loadLookups() {
@@ -616,8 +680,9 @@ function main() {
     let idx = -1;
     for (let i = 1; i < rows.length; i++) if (rows[i][0] === args.row) { idx = i; break; }
     if (idx < 0) { console.error(`Row not found: ${args.row}`); process.exit(2); }
-    const rec = buildRecord({ row: rows[idx], rowIndex: idx + 1, lookups, warnings, csvSha256 });
-    if (!rec) { console.error("Record build failed"); process.exit(3); }
+    const full = buildRecord({ row: rows[idx], rowIndex: idx + 1, lookups, warnings, csvSha256 });
+    if (!full) { console.error("Record build failed"); process.exit(3); }
+    const rec = normalize(prune(full));
     const json = JSON.stringify(rec, null, 2);
     if (args.out) {
       writeFileSync(args.out, json + "\n");
@@ -647,8 +712,9 @@ function main() {
     let built = 0, skipped = 0;
     for (let i = 1; i < rows.length; i++) {
       if (rows[i].every(f => !f)) { skipped++; continue; } // blank row preserved
-      const rec = buildRecord({ row: rows[i], rowIndex: i + 1, lookups, warnings, csvSha256 });
-      if (!rec) { skipped++; continue; }
+      const full = buildRecord({ row: rows[i], rowIndex: i + 1, lookups, warnings, csvSha256 });
+      if (!full) { skipped++; continue; }
+      const rec = normalize(prune(full));
       built++;
       const div = rec.classification.division_prefix || "zz";
       const slug = lookups.csi.divisions[div]?.category_slug || `${div}_unclassified`;

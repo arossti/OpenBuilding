@@ -222,7 +222,8 @@ Priority ordering. Each phase is independently valuable; later phases depend on 
 | Decision | Choice | Rationale |
 |---|---|---|
 | Primary key | `id = lowercase(beam_id)` top-level; `beam_id` preserved case-exact inside `external_refs` | BEAM IDs are already stable, unique, collision-free. Lowercasing keeps URL/path/JSON-key form consistent; the case-exact BEAM ID stays for spreadsheet legacy lookup. JSON DB is not user-facing — display names are. |
-| Null vs missing | **Schema-complete, nullable** — every field present, `null` when unavailable | Readers can traverse without optional-chaining; diffs show where data got filled in |
+| Null vs missing | **Sparse-by-default for per-material records; schema-complete for the canonical template** — `materials/*.json` records emit only populated fields (null scalars and empty sub-objects dropped). `sample.json` and `material.schema.json` carry the full template structure as the human/machine reference. Consumers use `?.` + nullish coalescing. EPD parser (Phase 2) consults the template to know what fields to probe for, then emits only what it finds. | Per-record size drops ~70% (13 KB → 4 KB), batch 18 MB → 4.3 MB, files become readable. The old "schema-complete everywhere" principle made diffs verbose (`null → value`) and turned per-stage impact blocks into 170-null walls per record. Sparse makes presence semantic: a stage key appears when the EPD reports it. |
+| Structural preservation rules | **Arrays always present** (`[]` when empty — preserves `.forEach` safety). **15 top-level object blocks always present** (`{}` when empty — consumers can traverse the outer shape without existence checks). **`impacts.<category>.total` always present as `{value, source}`** (consumers find the aggregate slot by name). **`impacts.<category>.by_stage` always present** (may be empty `{}`). Everything else omittable. | Balances sparsity with safe traversal. Preserves the outer shape that loops expect, trims the inner noise. |
 | Arrays | Always `[]` when empty, never `null` | `.forEach` safe |
 | Unit convention | **Unit in field name** (`density_kg_m3`, `gwp_kgco2e`) | Self-documenting; survives flattening to CSV/BigQuery |
 | Variable-unit fields | Paired `functional_unit` string (e.g., `carbon.common.per_functional_unit`) | BEAM's "common unit" is per-material (m², m³, kg, linear m) — can't bake into field name |
@@ -606,15 +607,18 @@ The `source` discriminator (`"epd_direct" | "beam_derived" | "industry_average" 
 
 ### 6.1 File size & module splitting
 
-#### Size projections
+#### Size projections (sparse-by-default, schema v1.1)
 
-Measured from `sample.json`:
+Measured from committed `materials/*.json` (821 records):
 
-| Records | Pretty-printed | Minified | Gzipped (est.) |
+| Metric | Full schema-complete (old) | Sparse (current) | Reduction |
 |---|---|---|---|
-| 1 | ~6.2 KB | ~4.7 KB | ~1.2 KB |
-| 820 (actual BEAM count) | ~4.8 MB | ~3.6 MB | **~0.9 MB** |
-| 1000 (rounded) | ~5.9 MB | ~4.5 MB | **~1.1 MB** |
+| Per-record pretty-printed | ~13 KB | ~4 KB | ~68% |
+| 821-record batch pretty-printed | 18 MB | 4.3 MB | ~76% |
+| `materials/index.json` | 290 KB | 290 KB | 0% (index was always lean) |
+| Gzipped batch (estimated) | ~4 MB | ~1.2 MB | ~70% |
+
+Sample.json (the canonical full template) remains schema-complete at ~21 KB because it's documentation, not data.
 
 #### Split strategy: CSI MasterFormat for files, UNIFORMAT as in-record filter
 
@@ -847,7 +851,9 @@ Scoping: not a Phase 1 deliverable. Phase 1 ships the intensity-only material re
 
 ## Appendix B — Changelog
 
-- **2026-04-18 (session 2)** — Schema v1.1 revision. `impacts.*` expanded to heavy per-stage structure: each category carries `total` + `by_stage` object over all 17 EN 15804+A2 stages (A1–A5, B1–B7, C1–C4, D). Top-level `id` changed from display-derived slug to lowercased BEAM ID (`clt_nordic_xlam_3_5in` → `lam011`); `external_refs.beam_id` preserves case-exact. Added Appendix A1 stub on future project-level calc graph (deferred to Phase 4 / BEAM.js app; defer to OBJECTIVE energy model's graph conventions). `sample.json` updated to match.
+- **2026-04-18 (session 2, sparse-by-default)** — Schema v1.1 serialization refinement. Per-material records become sparse: null scalar leaves dropped, empty sub-objects collapsed. The 15 top-level object blocks, `impacts.<category>.total` (as `{value, source}`), `impacts.<category>.by_stage`, and all arrays stay present for safe traversal. Full template structure remains documented in `sample.json` and `material.schema.json` for EPD parser reference. Size impact: per-record ~13 KB → ~4 KB, batch 18 MB → 4.3 MB (76% reduction). Validator relaxed (required arrays pruned to structural members only; additionalProperties:false and enums/patterns unchanged); 822/822 records still pass.
+- **2026-04-18 (session 2, validator)** — Added `material.schema.json` (JSON Schema Draft 2020-12) and `scripts/validate.mjs` (zero-dep walker).
+- **2026-04-18 (session 2, heavy impacts)** — `impacts.*` expanded to heavy per-stage structure: each category carries `total` + `by_stage` object over all 17 EN 15804+A2 stages (A1–A5, B1–B7, C1–C4, D). Top-level `id` changed from display-derived slug to lowercased BEAM ID (`clt_nordic_xlam_3_5in` → `lam011`); `external_refs.beam_id` preserves case-exact. Added Appendix A1 stub on future project-level calc graph (deferred to Phase 4 / BEAM.js app; defer to OBJECTIVE energy model's graph conventions). `sample.json` updated to match.
 - **2026-04-18 `0489ed5`** — Full workplan + cold-start agent handoff committed.
 - **2026-04-18 `0714485`** — BEAM CSV cleaned (truncated trailing 753 garbage rows, flattened embedded newlines). Excel row ↔ CSV line alignment now guaranteed.
 - **2026-04-18 `228eafb`** — Initial schema design package committed: `BEAM Database-DUMP.csv`, `materials.json` (ABCD.EARTH donor), `sample.json`, `schema.md` v1.

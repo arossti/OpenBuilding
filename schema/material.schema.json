@@ -5,6 +5,7 @@
   "description": "Canonical JSON record for one material. Shared by BEAM.js, PDF-Parser material picker, ABCD.EARTH renderer, future cost/fire/code-compliance consumers. Every consumer reads only the fields it needs; producers emit the full schema-complete shape with nulls where unavailable. See schema.md for the design rationale.",
   "type": "object",
   "required": ["$schema", "schema_version", "id", "external_refs", "naming", "manufacturer", "status", "classification", "rendering", "physical", "carbon", "impacts", "cost", "fire", "code_compliance", "epd", "methodology", "provenance"],
+  "_note_validation": "Records are sparse-by-default: scalar null leaves are omitted from emitted JSON. This schema's `required` lists only include structurally-necessary keys (outer shape, impact blocks, arrays that must exist). Nullable scalars are optional but type-checked when present. sample.json remains schema-complete as a human-readable template; per-material records in materials/*.json are sparse.",
   "additionalProperties": false,
 
   "$defs": {
@@ -56,7 +57,6 @@
         "by_stage": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["A1","A2","A3","A4","A5","B1","B2","B3","B4","B5","B6","B7","C1","C2","C3","C4","D"],
           "properties": {
             "A1": { "$ref": "#/$defs/impact_value" },
             "A2": { "$ref": "#/$defs/impact_value" },
@@ -90,7 +90,6 @@
 
     "external_refs": {
       "type": "object",
-      "required": ["beam_id", "beam_csv_row_index", "mce2_id", "ec3_id", "ifc_material_guid"],
       "additionalProperties": false,
       "properties": {
         "beam_id":            { "type": ["string", "null"] },
@@ -103,7 +102,6 @@
 
     "naming": {
       "type": "object",
-      "required": ["display_name", "short_name", "material_name", "product_brand_name"],
       "additionalProperties": false,
       "properties": {
         "display_name":       { "type": ["string", "null"] },
@@ -115,7 +113,6 @@
 
     "manufacturer": {
       "type": "object",
-      "required": ["name", "country_code", "specifications", "website"],
       "additionalProperties": false,
       "properties": {
         "name":           { "type": ["string", "null"] },
@@ -140,7 +137,6 @@
 
     "classification": {
       "type": "object",
-      "required": ["division_prefix", "division_name", "category", "csi_masterformat", "uniformat_level2", "material_type", "material_subtype", "product_type", "product_subtype", "typical_elements"],
       "additionalProperties": false,
       "properties": {
         "division_prefix":  { "type": ["string", "null"], "pattern": "^[0-9]{2}$" },
@@ -158,7 +154,6 @@
 
     "rendering": {
       "type": "object",
-      "required": ["base_color", "metallic", "roughness", "texture", "has_grain"],
       "additionalProperties": false,
       "properties": {
         "base_color": { "$ref": "#/$defs/rgba" },
@@ -171,12 +166,10 @@
 
     "physical": {
       "type": "object",
-      "required": ["density", "thermal", "moisture_content_pct", "mass_per_unit_kg", "dimensions", "additional_factor"],
       "additionalProperties": false,
       "properties": {
         "density": {
           "type": "object",
-          "required": ["value_kg_m3", "value_lb_ft3", "source"],
           "additionalProperties": false,
           "properties": {
             "value_kg_m3":  { "type": ["number", "null"] },
@@ -186,7 +179,6 @@
         },
         "thermal": {
           "type": "object",
-          "required": ["conductivity_w_mk", "resistance_per_inch_rsi", "r_value_per_inch_imperial", "heat_capacity_j_kgk"],
           "additionalProperties": false,
           "properties": {
             "conductivity_w_mk":          { "type": ["number", "null"] },
@@ -199,7 +191,6 @@
         "mass_per_unit_kg":     { "type": ["number", "null"] },
         "dimensions": {
           "type": "object",
-          "required": ["length_m", "width_m", "depth_m", "unit_volume_m3", "units_per_m2"],
           "additionalProperties": false,
           "properties": {
             "length_m":       { "type": ["number", "null"] },
@@ -211,7 +202,6 @@
         },
         "additional_factor": {
           "type": "object",
-          "required": ["value", "units", "description"],
           "additionalProperties": false,
           "properties": {
             "value":       { "type": ["number", "null"] },
@@ -229,7 +219,6 @@
       "properties": {
         "stated": {
           "type": "object",
-          "required": ["value_kgco2e", "per_unit", "source", "lifecycle_stages"],
           "additionalProperties": true,
           "properties": {
             "value_kgco2e": { "type": ["number", "null"] },
@@ -240,7 +229,6 @@
         },
         "conversion": {
           "type": "object",
-          "required": ["to_common_unit", "factor", "factor_formula", "factor_source", "notes"],
           "additionalProperties": false,
           "properties": {
             "to_common_unit": { "type": ["string", "null"] },
@@ -252,7 +240,6 @@
         },
         "common": {
           "type": "object",
-          "required": ["value_kgco2e", "per_functional_unit", "metric_unit_label", "imperial_unit_label"],
           "additionalProperties": false,
           "properties": {
             "value_kgco2e":         { "type": ["number", "null"] },
@@ -263,7 +250,6 @@
         },
         "biogenic": {
           "type": "object",
-          "required": ["gwp_bio_from_epd_kgco2e_per_common_unit", "carbon_content_pct_kgc_kg", "biogenic_factor", "storage_retention_pct", "wwf_storage_factor_kgco2e_per_kgc", "stored_kgco2e_per_common_unit", "full_carbon_kgco2e_per_common_unit", "carbon_content_kgc_per_unit", "co2_to_c_molar_ratio", "method", "notes"],
           "additionalProperties": false,
           "properties": {
             "gwp_bio_from_epd_kgco2e_per_common_unit": { "type": ["number", "null"] },
@@ -284,7 +270,7 @@
 
     "impacts": {
       "type": "object",
-      "required": ["functional_unit", "gwp_kgco2e", "gwp_bio_kgco2e", "eutrophication_kgneq", "acidification_kgso2eq", "ozone_depletion_kgcfc11eq", "smog_kgo3eq", "abiotic_depletion_fossil_mj", "water_consumption_m3", "primary_energy_nonrenewable_mj", "primary_energy_renewable_mj"],
+      "required": ["gwp_kgco2e", "gwp_bio_kgco2e", "eutrophication_kgneq", "acidification_kgso2eq", "ozone_depletion_kgcfc11eq", "smog_kgo3eq", "abiotic_depletion_fossil_mj", "water_consumption_m3", "primary_energy_nonrenewable_mj", "primary_energy_renewable_mj"],
       "additionalProperties": true,
       "properties": {
         "functional_unit":               { "type": ["string", "null"] },
@@ -303,7 +289,6 @@
 
     "cost": {
       "type": "object",
-      "required": ["unit", "cad_per_unit", "year", "geography", "source"],
       "additionalProperties": false,
       "properties": {
         "unit":         { "type": ["string", "null"] },
@@ -316,7 +301,6 @@
 
     "fire": {
       "type": "object",
-      "required": ["frr_hours", "combustibility", "ulc_listing", "flame_spread_rating", "smoke_developed_rating"],
       "additionalProperties": false,
       "properties": {
         "frr_hours":              { "type": ["number", "null"] },
@@ -329,7 +313,6 @@
 
     "code_compliance": {
       "type": "object",
-      "required": ["nbc_part_9_suitable", "nbc_part_3_suitable", "vbbl_s10_4_accepted", "cov_appendix_ii_listed"],
       "additionalProperties": false,
       "properties": {
         "nbc_part_9_suitable":    { "type": ["boolean", "null"] },
@@ -341,7 +324,6 @@
 
     "epd": {
       "type": "object",
-      "required": ["id", "type", "owner", "prepared_by", "program_operator", "validation", "publication_date", "expiry_date", "product_service_life_years", "source_document_url", "footnote"],
       "additionalProperties": false,
       "properties": {
         "id":                         { "type": ["string", "null"] },
@@ -351,7 +333,6 @@
         "program_operator":           { "type": ["string", "null"] },
         "validation": {
           "type": "object",
-          "required": ["type", "agent"],
           "additionalProperties": false,
           "properties": {
             "type":  { "type": ["string", "null"], "enum": ["internal", "external", null] },
@@ -368,7 +349,6 @@
 
     "methodology": {
       "type": "object",
-      "required": ["standards", "pcr_guidelines", "lca_method", "lca_software", "lci_database", "lifecycle_scope"],
       "additionalProperties": false,
       "properties": {
         "standards":      { "type": "array", "items": { "type": "string" } },
@@ -378,7 +358,6 @@
         "lci_database":   { "type": ["string", "null"] },
         "lifecycle_scope": {
           "type": "object",
-          "required": ["stages_included", "cutoff_rule_pct", "allocation_method"],
           "additionalProperties": false,
           "properties": {
             "stages_included":   { "type": "array", "items": { "$ref": "#/$defs/lifecycle_stage" } },
@@ -391,7 +370,6 @@
 
     "provenance": {
       "type": "object",
-      "required": ["countries_of_manufacture", "markets_of_applicability", "data_added_or_modified", "original_beam_added_or_modified_serial", "source_notes", "import_metadata"],
       "additionalProperties": false,
       "properties": {
         "countries_of_manufacture":             { "type": "array", "items": { "$ref": "#/$defs/iso3166_alpha3_or_scope" } },
@@ -401,7 +379,6 @@
         "source_notes":                         { "type": ["string", "null"] },
         "import_metadata": {
           "type": "object",
-          "required": ["imported_from", "import_date", "beam_csv_row_index", "beam_csv_sha256"],
           "additionalProperties": false,
           "properties": {
             "imported_from":      { "type": ["string", "null"] },
