@@ -1,0 +1,8 @@
+Sheet,Label,Type,Mode,Gross (m²),Net (m²),Gross (ft²),Net (ft²),Perimeter (m)
+Page 6,"Area 1",area,,53.85,46.77,579.62,503.47,29.50
+Page 6,"  Window 1",window,net,1.49,,16.01,,4.88
+Page 6,"  Window 2",window,net,0.94,,10.06,,4.27
+Page 6,"  Window 3",window,net,3.17,,34.10,,7.21
+Page 6,"  Window 4",window,net,1.48,,15.98,,4.87
+Page 6,GROSS TOTAL,,,53.85,,579.62,,
+Page 6,NET TOTAL,,,,46.77,,503.47,

@@ -1,5 +1,5 @@
 {
-  "division": "04",
+  "group": "04",
   "count": 42,
   "records": [
     {
@@ -29,8 +29,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "product_type": "Cladding",
         "product_subtype": "Brick",
@@ -220,8 +219,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "product_type": "Cladding",
         "product_subtype": "Brick",
@@ -422,10 +420,8 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
-        "csi_masterformat": "04 41, 04 42, 04 43, 04 43 16, 09 75",
         "material_type": "Stone",
         "material_subtype": "Natural",
         "product_type": "Cladding",
@@ -635,8 +631,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Stone",
         "product_type": "Flooring",
@@ -839,8 +834,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Earth Block",
         "product_type": "Structure",
@@ -1048,8 +1042,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Earth Block",
         "product_type": "Structure",
@@ -1256,8 +1249,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "typical_elements": []
       },
@@ -1437,8 +1429,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Clay Brick",
         "product_type": "Cladding",
@@ -1612,8 +1603,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Portland-Masonry Cement",
         "material_subtype": "Site mix",
@@ -1797,8 +1787,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "typical_elements": []
       },
@@ -1990,8 +1979,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "typical_elements": []
       },
@@ -2185,8 +2173,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "typical_elements": []
       },
@@ -2372,8 +2359,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "typical_elements": []
       },
@@ -2557,8 +2543,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Clay",
         "material_subtype": "Site mix",
@@ -2740,8 +2725,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "typical_elements": []
       },
@@ -2923,8 +2907,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "typical_elements": []
       },
@@ -3105,8 +3088,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "typical_elements": []
       },
@@ -3288,8 +3270,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Clay Brick",
         "product_type": "Cladding",
@@ -3485,8 +3466,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Clay Brick",
         "product_type": "Cladding",
@@ -3682,8 +3662,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "typical_elements": []
       },
@@ -3867,8 +3846,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "product_type": "Cladding",
         "product_subtype": "Brick",
@@ -4059,8 +4037,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Clay Brick",
         "product_type": "Cladding",
@@ -4273,8 +4250,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Brick",
         "product_type": "Cladding",
@@ -4482,8 +4458,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Clay Brick",
         "product_type": "Cladding",
@@ -4679,8 +4654,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Clay Brick",
         "product_type": "Cladding",
@@ -4887,8 +4861,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Recycled clay",
         "material_subtype": "Brick",
@@ -5097,8 +5070,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "product_type": "Cladding",
         "typical_elements": []
@@ -5277,8 +5249,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Stone",
         "product_type": "Flooring",
@@ -5482,8 +5453,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Stone",
         "product_type": "Flooring",
@@ -5685,8 +5655,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Stone",
         "product_type": "Flooring",
@@ -5888,8 +5857,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "product_type": "Concrete",
         "product_subtype": "Block",
@@ -6093,8 +6061,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "product_type": "Concrete",
         "product_subtype": "Block",
@@ -6298,8 +6265,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Leca",
         "product_type": "Insulation",
@@ -6509,8 +6475,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Leca",
         "product_type": "Insulation",
@@ -6720,8 +6685,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Leca",
         "product_type": "Insulation",
@@ -6932,8 +6896,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Clay",
         "material_subtype": "Factory mix",
@@ -7130,8 +7093,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Clay",
         "material_subtype": "Factory mix",
@@ -7330,8 +7292,7 @@
         "visibility": "hidden"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Lime-Clay",
         "material_subtype": "Factory mix",
@@ -7534,8 +7495,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Lime cork",
         "product_type": "Cladding",
@@ -7749,8 +7709,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Lime cork",
         "product_type": "Cladding",
@@ -7964,8 +7923,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Lime cork",
         "product_type": "Cladding",
@@ -8180,8 +8138,7 @@
         "visibility": "public"
       },
       "classification": {
-        "division_prefix": "04",
-        "division_name": "Masonry",
+        "group_prefix": "04",
         "category": "04_masonry",
         "material_type": "Lime",
         "material_subtype": "Factory mix",

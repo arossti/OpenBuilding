@@ -1,6 +1,6 @@
-# BfCA CAF — Embodied Carbon Assessment Framework
+# BfCA OpenBuilding — Embodied Carbon Assessment Framework
 
-Research, prototyping, and tooling for embodied carbon (EC) assessment in Canadian construction, developed under the NRCan Codes Accelerator Fund (CAF) in collaboration with [Builders for Climate Action](https://www.buildersforclimateaction.org/) (BfCA).
+Research, prototyping, and tooling for embodied carbon (EC) assessment in Canadian construction, developed by [Builders for Climate Action](https://www.buildersforclimateaction.org/) (BfCA).
 
 ## Live Tools
 
@@ -8,7 +8,7 @@ Both tools are deployed via GitHub Pages and share a unified dark-chrome design 
 
 ### PDF-Parser — Construction Document Area Extraction
 
-Client-side tool for extracting area and volume data from construction document PDFs. Loads a PDF, identifies architectural plans, and lets users measure areas with polygon or rectangle tools — purpose-built for the area/volume inputs needed by BEAM, MCE2, and wbLCA tools.
+Client-side tool for extracting area and volume data from construction document PDFs. Loads a PDF, identifies architectural plans, and lets users measure areas with polygon or rectangle tools — purpose-built for the area/volume inputs needed by BEAM and wbLCA tools.
 
 **Key features:**
 - PDF.js 4.x viewer with CAD-style controls (scroll-zoom at cursor, middle-click pan)

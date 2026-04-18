@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="app-matrix">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EC Matrix — Canadian Embodied Carbon Modelling</title>
   <link rel="stylesheet" href="bfcastyles.css">
-  <link rel="stylesheet" href="matrix.css">
-  <style>
-    /* App-specific overrides (if any) can go here */
-  </style>
 </head>
 <body>
 
@@ -28,8 +24,10 @@
       <div class="view-toggle" id="view-toggle">
         <button class="view-toggle-btn active" id="btn-view-cards">Cards</button>
         <button class="view-toggle-btn" id="btn-view-flow">Flow Model</button>
-        <a href="index.html" class="view-toggle-btn" style="text-decoration:none;background:#2a5c3f;border-color:#3a7c5f;">PDF Parser</a>
-        <a href="database.html" class="view-toggle-btn" style="text-decoration:none;background:#2a5c3f;border-color:#3a7c5f;" title="BfCA Material Database">Database</a>
+        <a href="index.html" class="view-toggle-btn" style="text-decoration:none;background:#0891b2;border-color:#22d3ee;" title="App directory / home">Home</a>
+        <a href="pdfparser.html" class="view-toggle-btn" style="text-decoration:none;background:#0891b2;border-color:#22d3ee;">PDF Parser</a>
+        <a href="database.html" class="view-toggle-btn" style="text-decoration:none;background:#0891b2;border-color:#22d3ee;" title="BfCA Material Database">Database</a>
+        <a href="beamweb.html" class="view-toggle-btn" style="text-decoration:none;background:#0891b2;border-color:#22d3ee;" title="BEAM — Embodied Carbon Calculator">BEAM</a>
       </div>
       <button class="part-mode-indicator" id="part-mode-indicator" onclick="showPartSplash()" style="display:none;"></button>
     </div>

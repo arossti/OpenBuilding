@@ -1,60 +1,222 @@
 {
-  "_note": "Fallback CSI division inference for the 337 rows with blank Material Type. First keyword match wins; ordering matters — put more specific strings first (e.g., `Brick, Clay` before `Brick`). Case-insensitive substring match. Importer logs unresolved rows for manual review.",
+  "_note": "Fallback group inference for rows with blank Material Type. First keyword match wins; ordering matters — put more specific strings first (e.g., `Brick, Clay` before `Brick`). Case-insensitive substring match. Importer logs unresolved rows for manual review.",
   "_schema_version": 1,
   "patterns": [
-    { "pattern": "cedar shingle",           "division": "07" },
-    { "pattern": "cedar siding",            "division": "06" },
-    { "pattern": "vinyl siding",            "division": "07" },
-    { "pattern": "asphalt shingle",         "division": "07" },
-    { "pattern": "clay roof tile",          "division": "07" },
-    { "pattern": "brick, clay",             "division": "04" },
-    { "pattern": "concrete block",          "division": "04" },
-    { "pattern": "rammed earth",            "division": "04" },
-    { "pattern": "compressed earth",        "division": "04" },
-    { "pattern": "earthen floor",           "division": "04" },
-    { "pattern": "cob wall",                "division": "04" },
-    { "pattern": "icf webbing",             "division": "03" },
-    { "pattern": "rebar",                   "division": "03" },
-    { "pattern": "concrete",                "division": "03" },
-    { "pattern": "cement",                  "division": "03" },
-    { "pattern": "brick",                   "division": "04" },
-    { "pattern": "clay tile",               "division": "04" },
-    { "pattern": "stone",                   "division": "04" },
-    { "pattern": "masonry",                 "division": "04" },
-    { "pattern": "composite beam",          "division": "05" },
-    { "pattern": "steel",                   "division": "05" },
-    { "pattern": "aluminum",                "division": "05" },
-    { "pattern": "aluminium",               "division": "05" },
-    { "pattern": "metal deck",              "division": "05" },
-    { "pattern": "clt",                     "division": "06" },
-    { "pattern": "cross laminated",         "division": "06" },
-    { "pattern": "glulam",                  "division": "06" },
-    { "pattern": "plywood",                 "division": "06" },
-    { "pattern": "osb",                     "division": "06" },
-    { "pattern": "lumber",                  "division": "06" },
-    { "pattern": "timber",                  "division": "06" },
-    { "pattern": "wood",                    "division": "06" },
-    { "pattern": "insulation",              "division": "07" },
-    { "pattern": "membrane",                "division": "07" },
-    { "pattern": "vapour barrier",          "division": "07" },
-    { "pattern": "vapor barrier",           "division": "07" },
-    { "pattern": "air barrier",             "division": "07" },
-    { "pattern": "sheet barrier",           "division": "07" },
-    { "pattern": "liquid applied barrier",  "division": "07" },
-    { "pattern": "self-adhered barrier",    "division": "07" },
-    { "pattern": "wall barrier",            "division": "07" },
-    { "pattern": "ceiling sheet barrier",   "division": "07" },
-    { "pattern": "perm-a-barrier",          "division": "07" },
-    { "pattern": "barrier",                 "division": "07" },
-    { "pattern": "roof",                    "division": "07" },
-    { "pattern": "window",                  "division": "08" },
-    { "pattern": "door",                    "division": "08" },
-    { "pattern": "glazing",                 "division": "08" },
-    { "pattern": "gypsum",                  "division": "09" },
-    { "pattern": "drywall",                 "division": "09" },
-    { "pattern": "carpet",                  "division": "09" },
-    { "pattern": "flooring",                "division": "09" },
-    { "pattern": "tile",                    "division": "09" },
-    { "pattern": "paint",                   "division": "09" }
+    {
+      "pattern": "cedar shingle",
+      "group": "07"
+    },
+    {
+      "pattern": "cedar siding",
+      "group": "06"
+    },
+    {
+      "pattern": "vinyl siding",
+      "group": "07"
+    },
+    {
+      "pattern": "asphalt shingle",
+      "group": "07"
+    },
+    {
+      "pattern": "clay roof tile",
+      "group": "07"
+    },
+    {
+      "pattern": "brick, clay",
+      "group": "04"
+    },
+    {
+      "pattern": "concrete block",
+      "group": "04"
+    },
+    {
+      "pattern": "rammed earth",
+      "group": "04"
+    },
+    {
+      "pattern": "compressed earth",
+      "group": "04"
+    },
+    {
+      "pattern": "earthen floor",
+      "group": "04"
+    },
+    {
+      "pattern": "cob wall",
+      "group": "04"
+    },
+    {
+      "pattern": "icf webbing",
+      "group": "03"
+    },
+    {
+      "pattern": "rebar",
+      "group": "03"
+    },
+    {
+      "pattern": "concrete",
+      "group": "03"
+    },
+    {
+      "pattern": "cement",
+      "group": "03"
+    },
+    {
+      "pattern": "brick",
+      "group": "04"
+    },
+    {
+      "pattern": "clay tile",
+      "group": "04"
+    },
+    {
+      "pattern": "stone",
+      "group": "04"
+    },
+    {
+      "pattern": "masonry",
+      "group": "04"
+    },
+    {
+      "pattern": "composite beam",
+      "group": "05"
+    },
+    {
+      "pattern": "steel",
+      "group": "05"
+    },
+    {
+      "pattern": "aluminum",
+      "group": "05"
+    },
+    {
+      "pattern": "aluminium",
+      "group": "05"
+    },
+    {
+      "pattern": "metal deck",
+      "group": "05"
+    },
+    {
+      "pattern": "clt",
+      "group": "06"
+    },
+    {
+      "pattern": "cross laminated",
+      "group": "06"
+    },
+    {
+      "pattern": "glulam",
+      "group": "06"
+    },
+    {
+      "pattern": "plywood",
+      "group": "06"
+    },
+    {
+      "pattern": "osb",
+      "group": "06"
+    },
+    {
+      "pattern": "lumber",
+      "group": "06"
+    },
+    {
+      "pattern": "timber",
+      "group": "06"
+    },
+    {
+      "pattern": "wood",
+      "group": "06"
+    },
+    {
+      "pattern": "insulation",
+      "group": "07"
+    },
+    {
+      "pattern": "membrane",
+      "group": "07"
+    },
+    {
+      "pattern": "vapour barrier",
+      "group": "07"
+    },
+    {
+      "pattern": "vapor barrier",
+      "group": "07"
+    },
+    {
+      "pattern": "air barrier",
+      "group": "07"
+    },
+    {
+      "pattern": "sheet barrier",
+      "group": "07"
+    },
+    {
+      "pattern": "liquid applied barrier",
+      "group": "07"
+    },
+    {
+      "pattern": "self-adhered barrier",
+      "group": "07"
+    },
+    {
+      "pattern": "wall barrier",
+      "group": "07"
+    },
+    {
+      "pattern": "ceiling sheet barrier",
+      "group": "07"
+    },
+    {
+      "pattern": "perm-a-barrier",
+      "group": "07"
+    },
+    {
+      "pattern": "barrier",
+      "group": "07"
+    },
+    {
+      "pattern": "roof",
+      "group": "07"
+    },
+    {
+      "pattern": "window",
+      "group": "08"
+    },
+    {
+      "pattern": "door",
+      "group": "08"
+    },
+    {
+      "pattern": "glazing",
+      "group": "08"
+    },
+    {
+      "pattern": "gypsum",
+      "group": "09"
+    },
+    {
+      "pattern": "drywall",
+      "group": "09"
+    },
+    {
+      "pattern": "carpet",
+      "group": "09"
+    },
+    {
+      "pattern": "flooring",
+      "group": "09"
+    },
+    {
+      "pattern": "tile",
+      "group": "09"
+    },
+    {
+      "pattern": "paint",
+      "group": "09"
+    }
   ]
 }

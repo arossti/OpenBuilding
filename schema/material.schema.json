@@ -139,11 +139,8 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "division_prefix":  { "type": ["string", "null"], "pattern": "^[0-9]{2}$" },
-        "division_name":    { "type": ["string", "null"] },
+        "group_prefix":     { "type": ["string", "null"], "pattern": "^[0-9]{2}$" },
         "category":         { "type": ["string", "null"] },
-        "csi_masterformat": { "type": ["string", "null"] },
-        "uniformat_level2": { "type": ["string", "null"] },
         "material_type":    { "type": ["string", "null"] },
         "material_subtype": { "type": ["string", "null"] },
         "product_type":     { "type": ["string", "null"] },

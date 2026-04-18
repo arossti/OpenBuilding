@@ -5,12 +5,12 @@
 //   node beam-csv-to-json.mjs --row LAM011               stdout JSON for one row
 //   node beam-csv-to-json.mjs --row LAM011 --out FILE    write single record
 //   node beam-csv-to-json.mjs --diff                     compare --row LAM011 output to sample.json (structural)
-//   node beam-csv-to-json.mjs --all --out-dir materials  batch all 825 → per-CSI-division files + index.json
+//   node beam-csv-to-json.mjs --all --out-dir materials  batch all 825 → per-group files + index.json
 //
 // Pipeline per row:
 //   1. RFC-4180 CSV tokenise (quoted fields, escaped quotes, embedded newlines already flattened in source)
 //   2. Parse raw → evaluate formulas against the same row → canonicalise types → build record
-//   3. Fill derived fields (id slug, CSI division, lifecycle scope, biogenic method, rendering defaults)
+//   3. Fill derived fields (id slug, group prefix, lifecycle scope, biogenic method, rendering defaults)
 //   4. Always emit the full schema-complete shape (340 impact slots + every other null)
 //
 // Design intent:
@@ -26,7 +26,10 @@ import { createHash } from "node:crypto";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_DIR = resolve(__dirname, "..");
-const CSV_PATH = join(SCHEMA_DIR, "BEAM Database-DUMP.csv");
+const REPO_ROOT  = resolve(__dirname, "..", "..");
+// Source CSV lives under docs/ with the rest of the BEAM reference exports so
+// that docs/csv files from BEAM/ is the single spot for raw BEAM workbook dumps.
+const CSV_PATH = join(REPO_ROOT, "docs", "csv files from BEAM", "BEAM Database-DUMP.csv");
 
 // ---------------------------------------------------------------------------
 // CSV tokeniser (RFC 4180, minimal). Source CSV has no embedded newlines
@@ -178,15 +181,15 @@ function normaliseCountry(raw, lookup, warnings, context) {
 }
 
 // ---------------------------------------------------------------------------
-// CSI division inference: material_type → division, then display-name keyword fallback.
+// Group inference: material_type → group prefix, then display-name keyword fallback.
 // ---------------------------------------------------------------------------
-function inferDivisionPrefix(materialType, displayName, mtLookup, kwLookup, warnings, context) {
+function inferGroupPrefix(materialType, displayName, mtLookup, kwLookup, warnings, context) {
   if (materialType && mtLookup.map[materialType]) return mtLookup.map[materialType];
   if (displayName) {
     const lc = displayName.toLowerCase();
-    for (const p of kwLookup.patterns) if (lc.includes(p.pattern)) return p.division;
+    for (const p of kwLookup.patterns) if (lc.includes(p.pattern)) return p.group;
   }
-  warnings.push({ kind: "unresolved_division", context, material_type: materialType, display_name: displayName });
+  warnings.push({ kind: "unresolved_group", context, material_type: materialType, display_name: displayName });
   return null;
 }
 
@@ -219,7 +222,7 @@ function addStageValue(block, stage, value, source) {
 }
 
 // ---------------------------------------------------------------------------
-// Rendering defaults per CSI division. First-pass placeholders; will be refined
+// Rendering defaults per group. First-pass placeholders; will be refined
 // later by ABCD.EARTH fuzzy match (Phase 1.x polish) and per-material-type override.
 // ---------------------------------------------------------------------------
 const RENDERING_DEFAULTS = {
@@ -233,13 +236,13 @@ const RENDERING_DEFAULTS = {
   "31": { base_color: [0.55, 0.50, 0.45, 1.0], metallic: 0.0,  roughness: 0.95, texture: null, has_grain: false },
   "32": { base_color: [0.55, 0.55, 0.55, 1.0], metallic: 0.0,  roughness: 0.90, texture: null, has_grain: false }
 };
-function defaultRenderingForDivision(prefix) {
+function defaultRenderingForGroup(prefix) {
   const d = RENDERING_DEFAULTS[prefix] || RENDERING_DEFAULTS["09"];
   return { ...d, base_color: [...d.base_color] };
 }
 
 // ---------------------------------------------------------------------------
-// Fire combustibility default per CSI division (first-pass heuristic; Phase 6 refines)
+// Fire combustibility default per group (first-pass heuristic; Phase 6 refines)
 // ---------------------------------------------------------------------------
 function defaultCombustibility(prefix, materialType) {
   const nonComb = new Set(["03", "04", "31", "32"]);
@@ -269,10 +272,10 @@ function buildRecord({ row, rowIndex, lookups, warnings, csvSha256 }) {
   if (!beamId) { w("blank_id"); return null; }
   const displayName = readStr(row, "B");
 
-  // --- Classification (division first; drives defaults downstream) --------
+  // --- Classification (group prefix first; drives defaults downstream) --------
   const materialType = readStr(row, "AT");
-  const divisionPrefix = inferDivisionPrefix(materialType, displayName, lookups.mt, lookups.kw, warnings, { row: rowIndex, beamId });
-  const divisionMeta = divisionPrefix ? lookups.csi.divisions[divisionPrefix] : null;
+  const groupPrefix = inferGroupPrefix(materialType, displayName, lookups.mt, lookups.kw, warnings, { row: rowIndex, beamId });
+  const groupMeta = groupPrefix ? lookups.groups.groups[groupPrefix] : null;
 
   // --- carbon.stated ------------------------------------------------------
   const statedValue = readNum(row, "Q");
@@ -340,10 +343,9 @@ function buildRecord({ row, rowIndex, lookups, warnings, csvSha256 }) {
   const dataModIso = dataModSerial !== null ? excelSerialToIso(dataModSerial) : null;
   const epdExpiry = yearOrSerialToExpiryIso(readRaw(row, "G"));
 
-  // --- Classification continued (typical_elements, csi_masterformat) ------
+  // --- Classification continued (typical_elements) ------
   const productSubtype = readStr(row, "AW");
   const typicalElements = inferTypicalElements(materialType, productSubtype, lookups.el);
-  const csiMasterformat = readStr(row, "AX");
 
   // --- Status flags -------------------------------------------------------
   const listed = readBool(row, "C");
@@ -399,11 +401,8 @@ function buildRecord({ row, rowIndex, lookups, warnings, csvSha256 }) {
     },
 
     "classification": {
-      "division_prefix": divisionPrefix,
-      "division_name": divisionMeta ? divisionMeta.name : null,
-      "category": divisionMeta ? divisionMeta.category_slug : null,
-      "csi_masterformat": csiMasterformat,
-      "uniformat_level2": null,
+      "group_prefix": groupPrefix,
+      "category": groupMeta ? groupMeta.category_slug : null,
       "material_type": materialType,
       "material_subtype": readStr(row, "AU"),
       "product_type": readStr(row, "AV"),
@@ -411,7 +410,7 @@ function buildRecord({ row, rowIndex, lookups, warnings, csvSha256 }) {
       "typical_elements": typicalElements
     },
 
-    "rendering": divisionPrefix ? defaultRenderingForDivision(divisionPrefix) : { base_color: [0.5, 0.5, 0.5, 1.0], metallic: 0.0, roughness: 0.8, texture: null, has_grain: false },
+    "rendering": groupPrefix ? defaultRenderingForGroup(groupPrefix) : { base_color: [0.5, 0.5, 0.5, 1.0], metallic: 0.0, roughness: 0.8, texture: null, has_grain: false },
 
     "physical": {
       "density": {
@@ -506,7 +505,7 @@ function buildRecord({ row, rowIndex, lookups, warnings, csvSha256 }) {
 
     "fire": {
       "frr_hours": null,
-      "combustibility": defaultCombustibility(divisionPrefix, materialType),
+      "combustibility": defaultCombustibility(groupPrefix, materialType),
       "ulc_listing": null,
       "flame_spread_rating": null,
       "smoke_developed_rating": null
@@ -638,8 +637,8 @@ function loadLookups() {
   const read = p => JSON.parse(readFileSync(join(SCHEMA_DIR, "lookups", p), "utf8"));
   return {
     cc: read("country-codes.json"),
-    csi: read("csi-divisions.json"),
-    mt: read("material-type-to-csi.json"),
+    groups: read("material-groups.json"),
+    mt: read("material-type-to-group.json"),
     el: read("typical-elements.json"),
     kw: read("display-name-keywords.json"),
     ls: read("lifecycle-stages.json")
@@ -707,7 +706,7 @@ function main() {
   if (args.all) {
     const outDir = args.outDir || join(SCHEMA_DIR, "materials");
     if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
-    const byDivision = new Map();
+    const byGroup = new Map();
     const indexEntries = [];
     let built = 0, skipped = 0;
     for (let i = 1; i < rows.length; i++) {
@@ -716,27 +715,27 @@ function main() {
       if (!full) { skipped++; continue; }
       const rec = normalize(prune(full));
       built++;
-      const div = rec.classification.division_prefix || "zz";
-      const slug = lookups.csi.divisions[div]?.category_slug || `${div}_unclassified`;
-      if (!byDivision.has(div)) byDivision.set(div, { slug, records: [] });
-      byDivision.get(div).records.push(rec);
+      const grp = rec.classification.group_prefix || "zz";
+      const slug = lookups.groups.groups[grp]?.category_slug || `${grp}_unclassified`;
+      if (!byGroup.has(grp)) byGroup.set(grp, { slug, records: [] });
+      byGroup.get(grp).records.push(rec);
       indexEntries.push({
         id: rec.id,
         beam_id: rec.external_refs.beam_id,
         display_name: rec.naming.display_name,
         category: rec.classification.category,
-        division_prefix: rec.classification.division_prefix,
+        group_prefix: rec.classification.group_prefix,
         typical_elements: rec.classification.typical_elements,
         gwp_kgco2e: rec.impacts.gwp_kgco2e.total.value,
         functional_unit: rec.impacts.functional_unit
       });
     }
-    for (const [div, { slug, records }] of [...byDivision.entries()].sort()) {
-      const filename = `${div}-${slug.replace(/^\d\d_/, "")}.json`;
-      writeFileSync(join(outDir, filename), JSON.stringify({ division: div, count: records.length, records }, null, 2) + "\n");
+    for (const [grp, { slug, records }] of [...byGroup.entries()].sort()) {
+      const filename = `${grp}-${slug.replace(/^\d\d_/, "")}.json`;
+      writeFileSync(join(outDir, filename), JSON.stringify({ group: grp, count: records.length, records }, null, 2) + "\n");
     }
     writeFileSync(join(outDir, "index.json"), JSON.stringify({ count: indexEntries.length, generated_from_csv_sha256: csvSha256, entries: indexEntries }, null, 2) + "\n");
-    console.error(`built=${built} skipped=${skipped} divisions=${byDivision.size} warnings=${warnings.length}`);
+    console.error(`built=${built} skipped=${skipped} groups=${byGroup.size} warnings=${warnings.length}`);
     if (warnings.length) {
       const reportPath = join(outDir, "import-report.json");
       writeFileSync(reportPath, JSON.stringify({ warnings }, null, 2) + "\n");
