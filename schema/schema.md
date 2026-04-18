@@ -23,9 +23,9 @@
 
 ### Recommended next action
 
-**Phase 1 + 1.5 shipped.** Open the Phase 1 PR on `arossti/OpenBuilding` and merge to `main`. After merge, choose the next phase:
-- **Phase 3 — PDF-Parser material picker** (recommended next, unblocked). Consumes `materials/index.json` which the Database viewer already proves loads cleanly at runtime. Integrates with the existing Volumetric Takeoff feature.
-- **Phase 2 — EPD PDF parser**. Blocked on user sharing a sample EPD PDF. When unblocked, this fills `impacts.*.by_stage` slots that are visibly empty in the Database viewer matrix today.
+**Phase 1 + 1.5 shipped and merged to `main`.** Active workstream has pivoted away from schema for now — see [`BEAMweb.md`](../BEAMweb.md) at repo root. BEAMweb is a full JS port of the BEAM / MCE² Excel app that consumes this schema directly; the originally-planned Phase 3 standalone material picker has been folded into BEAMweb as one of its UI components. Schema work resumes when:
+- The EPD parser (Phase 2) is ready to populate `impacts.*.by_stage` slots — blocked on a sample EPD PDF from the user.
+- IFC interop (Phase 5), Canadian context extensions (Phase 6), or schema PDF deliverable (Phase 7) are prioritised.
 
 ### Project context (required reading)
 
