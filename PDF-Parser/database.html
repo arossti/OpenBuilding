@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BfCA Material Database — Embodied Carbon Catalogue</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="bfcastyles.css" />
+    <link rel="stylesheet" href="pdfparser.css" />
+    <link rel="stylesheet" href="database.css" />
+  </head>
+  <body>
+    <div id="db-app">
+      <!-- ── Header ───────────────────────────────────────── -->
+      <header class="site-header db-header">
+        <img src="graphics/BFCA-LOGO-sm.png" alt="BfCA" class="header-logo" />
+        <div class="db-title-block">
+          <h1 class="db-title">Material Database</h1>
+          <span class="db-subtitle">
+            <span id="db-count-label">Loading…</span>
+            <span class="db-sep">·</span>
+            BEAM catalogue, sparse JSON, full ISO 21930 / EN 15804+A2 per-stage scope
+          </span>
+        </div>
+
+        <div class="db-spacer"></div>
+
+        <nav class="db-nav">
+          <a href="index.html" class="nav-btn" title="Area + volume takeoff from PDFs">PDF-Parser</a>
+          <a href="matrix.html" class="nav-btn" title="EC compliance matrix across project types + jurisdictions">Matrix</a>
+          <a href="database.html" class="nav-btn active" title="Material catalogue" aria-current="page">Database</a>
+        </nav>
+      </header>
+
+      <!-- ── Controls ─────────────────────────────────────── -->
+      <div id="db-controls">
+        <div class="db-control-row">
+          <div class="db-search-wrap">
+            <i class="bi bi-search db-search-icon"></i>
+            <input
+              type="search"
+              id="db-search"
+              placeholder="Search display name, manufacturer, material type, EPD ID…"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button id="db-clear-search" class="db-clear-btn" title="Clear search" hidden>
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+
+          <div class="db-filter-group" id="db-division-chips">
+            <span class="db-filter-label">Division</span>
+            <!-- chips injected by JS -->
+          </div>
+
+          <div class="db-filter-group db-filter-right">
+            <label class="db-toggle" title="Hide industry averages and BEAM averages — show only product-specific EPDs">
+              <input type="checkbox" id="db-epd-only" />
+              <span>EPD-only</span>
+            </label>
+            <button id="db-collapse-all" class="db-util-btn" title="Collapse all expanded rows">
+              <i class="bi bi-chevron-bar-contract"></i> Collapse
+            </button>
+          </div>
+        </div>
+
+        <div class="db-result-bar">
+          <span id="db-result-count" class="db-result-count">—</span>
+          <span class="db-spacer"></span>
+          <span class="db-hint">
+            Click a row to expand full record · <span class="db-hint-kbd">scroll horizontally</span> within the per-stage matrix
+          </span>
+        </div>
+      </div>
+
+      <!-- ── Table ────────────────────────────────────────── -->
+      <div id="db-table-wrap">
+        <table id="db-table">
+          <thead>
+            <tr>
+              <th data-sort="beam_id" class="db-th-id">BEAM ID</th>
+              <th data-sort="display_name" class="db-th-name">Display Name</th>
+              <th data-sort="division_prefix" class="db-th-div">Div</th>
+              <th class="db-th-type">Material</th>
+              <th data-sort="gwp_kgco2e" class="db-th-num num">GWP</th>
+              <th class="db-th-unit">Func. unit</th>
+              <th class="db-th-elements">Typical elements</th>
+              <th class="db-th-caret"></th>
+            </tr>
+          </thead>
+          <tbody id="db-rows">
+            <tr class="db-loading-row">
+              <td colspan="8" class="db-loading-cell">
+                <i class="bi bi-hourglass-split"></i> Loading material catalogue…
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Status bar ───────────────────────────────────── -->
+      <div id="db-status-bar">
+        <span id="db-status-message" class="status-ready">Ready.</span>
+        <span class="db-spacer"></span>
+        <span id="db-source-note" class="db-source-note"></span>
+      </div>
+    </div>
+
+    <script type="module" src="js/database.mjs"></script>
+  </body>
+</html>
