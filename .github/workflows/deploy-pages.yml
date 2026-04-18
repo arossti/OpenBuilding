@@ -16,6 +16,9 @@ concurrency:
 
 jobs:
   deploy:
+    # Skip on bfca-labs/at (private mirror with no Pages site). Runs only on
+    # the public repo where Pages is configured.
+    if: github.repository == 'arossti/OpenBuilding'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
