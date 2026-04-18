@@ -1,218 +1,96 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="theme-dark app-landing">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PDF-Parser — Construction Document Area Extraction</title>
-
+    <title>BfCA OpenBuilding — App Directory</title>
+    <meta name="description" content="BfCA OpenBuilding — Canadian embodied carbon assessment tools. PDF area takeoff, EC compliance matrix, BEAM material database, and the BEAMweb calculator." />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="bfcastyles.css" />
-    <link rel="stylesheet" href="pdfparser.css" />
   </head>
-
   <body>
-    <div id="app">
-      <!-- ── Toolbar ──────────────────────────────────── -->
-      <div id="toolbar">
-        <img src="graphics/BFCA-LOGO-sm.png" alt="BfCA" class="header-logo" />
-
-        <!-- Tools -->
-        <button class="tool-btn active" data-tool="navigate" data-tip="Navigate / Pan [V]">
-          <i class="bi bi-hand-index"></i>
-        </button>
-        <button class="tool-btn" data-tool="measure" data-tip="Measure Area [M] — draw rectangle or polygon">
-          <i class="bi bi-building-add"></i>
-        </button>
-        <select id="measure-method" title="Measurement method" onchange="PP.setMeasureMethod(this.value)">
-          <option value="rectangle">Rectangle</option>
-          <option value="polygon">Polygon</option>
-        </select>
-        <button class="tool-btn" data-tool="window" data-tip="Measure Window [W] — subtract from wall area">
-          <i class="bi bi-border-all"></i>
-        </button>
-        <select id="window-mode" title="Window mode" onchange="PP.setWindowMode(this.value)">
-          <option value="net">Net (subtract)</option>
-          <option value="add">Add</option>
-        </select>
-        <button class="tool-btn" data-tool="ruler" data-tip="Ruler [L] — measure a linear distance">
-          <i class="bi bi-rulers"></i>
-        </button>
-        <button class="tool-btn" data-tool="checkscale" data-tip="Check Scale [S] — set or verify page scale">
-          <i class="bi bi-aspect-ratio"></i>
-        </button>
-        <button class="tool-btn" data-tool="calibrate" data-tip="Calibrate [C] — two-point scale verification">
-          <i class="bi bi-crosshair2"></i>
-        </button>
-        <button class="tool-btn" onclick="PP.autoDetect()" data-tip="Auto-Detect [D] — detect building outline">
-          <i class="bi bi-magic"></i>
-        </button>
-
-        <div class="toolbar-sep"></div>
-
-        <!-- Zoom -->
-        <button class="tool-btn" onclick="PP.zoomIn()" data-tip="Zoom In [+]"><i class="bi bi-zoom-in"></i></button>
-        <button class="tool-btn" onclick="PP.zoomOut()" data-tip="Zoom Out [-]"><i class="bi bi-zoom-out"></i></button>
-        <button class="tool-btn" onclick="PP.zoomFit()" data-tip="Fit to View [F]">
-          <i class="bi bi-fullscreen"></i>
-        </button>
-
-        <div class="toolbar-sep"></div>
-
-        <!-- Page nav -->
-        <button class="tool-btn" onclick="PP.prevPage()" data-tip="Previous Page [&larr;]">
-          <i class="bi bi-chevron-left"></i>
-        </button>
-        <button class="tool-btn" onclick="PP.nextPage()" data-tip="Next Page [&rarr;]">
-          <i class="bi bi-chevron-right"></i>
-        </button>
-        <span class="toolbar-label" id="page-label"></span>
-
-        <div class="toolbar-spacer"></div>
-
-        <!-- Export / Import -->
-        <button class="export-btn" onclick="PP.openSummaryTable()" data-tip="View measurement summary table">
-          <i class="bi bi-table"></i>
-        </button>
-        <button class="export-btn" onclick="PP.exportCSV()" data-tip="Export measurements as CSV">
-          <i class="bi bi-filetype-csv"></i>
-        </button>
-        <button class="export-btn" onclick="PP.exportJSON()" data-tip="Save project as JSON">
-          <i class="bi bi-filetype-json"></i>
-        </button>
-        <button
-          class="export-btn"
-          onclick="document.getElementById('json-input').click()"
-          data-tip="Import saved project JSON"
-        >
-          <i class="bi bi-upload"></i>
-        </button>
-        <input type="file" id="json-input" accept=".json" style="display: none" />
-        <div class="toolbar-sep"></div>
-        <a href="matrix.html" class="nav-btn" title="EC Compliance Matrix">Matrix</a>
-        <a href="database.html" class="nav-btn" title="BfCA Material Database — embodied carbon catalogue">Database</a>
-        <a href="beamweb.html" class="nav-btn" title="BEAM — Embodied Carbon Calculator (BfCA)">BEAM</a>
+    <header class="site-header landing-header">
+      <img src="graphics/BFCA-LOGO-sm.png" alt="BfCA" class="header-logo" />
+      <div class="landing-title-block">
+        <h1 class="landing-title">BfCA OpenBuilding</h1>
+        <span class="landing-subtitle">Canadian embodied carbon assessment toolkit · open-source, browser-native</span>
       </div>
+      <div class="landing-spacer"></div>
+      <a href="https://github.com/arossti/OpenBuilding" class="nav-btn" title="Project repository">
+        <i class="bi bi-github"></i> Repo
+      </a>
+    </header>
 
-      <!-- ── Main Area ────────────────────────────────── -->
-      <div id="main">
-        <!-- Sidebar -->
-        <div id="sidebar">
-          <div id="sidebar-header">Sheets</div>
-          <div id="sheet-info"></div>
-          <div id="thumb-strip"></div>
-          <div id="measure-panel"><p class="empty">No measurements yet.</p></div>
-        </div>
+    <main class="landing-main">
+      <section class="landing-intro">
+        <p>
+          Four browser apps sharing the same design system, the same material database,
+          and one <a href="dependencies.html" class="landing-link">dependency manifest</a>.
+          Pick your starting point:
+        </p>
+      </section>
 
-        <!-- Viewer -->
-        <div id="viewer-area">
-          <!-- Drop zone (shown before a PDF is loaded) -->
-          <div id="drop-zone">
-            <img src="graphics/BFCA-LOGO.png" alt="Builders for Climate Action" class="splash-logo" />
-            <div class="drop-text">Drop a construction PDF here</div>
-            <div class="drop-hint">or</div>
-            <button class="browse-btn" onclick="document.getElementById('file-input').click()">Browse Files</button>
-            <button
-              class="browse-btn"
-              style="background: var(--bg-panel); border: 1px solid var(--border); margin-top: 8px"
-              onclick="PP.loadSample()"
-            >
-              Load Sample PDF
-            </button>
-            <input type="file" id="file-input" accept="application/pdf" />
-            <div class="drop-hint" style="margin-top: 24px">
-              <span class="key-hint">S</span> Scale &nbsp; <span class="key-hint">M</span> Measure &nbsp;
-              <span class="key-hint">W</span> Window &nbsp; <span class="key-hint">C</span> Calibrate &nbsp;
-              <span class="key-hint">F</span> Fit &nbsp; <span class="key-hint">Scroll</span> Zoom at cursor &nbsp;
-              <span class="key-hint">Mid-click</span> Pan &nbsp; <span class="key-hint">&larr;&rarr;</span> Pages
-            </div>
-          </div>
+      <section class="landing-grid">
+        <a href="pdfparser.html" class="landing-card">
+          <div class="landing-card-icon"><i class="bi bi-file-earmark-ruled"></i></div>
+          <h2 class="landing-card-title">PDF-Parser</h2>
+          <p class="landing-card-desc">
+            Area and volume takeoff from construction drawings. Load a PDF, calibrate scale,
+            measure walls / windows / roofs. Exports to JSON + CSV.
+          </p>
+          <div class="landing-card-meta">shipping · 9 steps · volumetric in progress</div>
+        </a>
 
-          <!-- Loading overlay -->
-          <div id="loading-overlay" style="display: none">
-            <div class="loading-content">
-              <div class="loading-title">Reading PDF...</div>
-              <div class="loading-bar-track">
-                <div class="loading-bar-fill" id="loading-bar-fill"></div>
-              </div>
-              <div class="loading-label" id="loading-label">Preparing...</div>
-            </div>
-          </div>
+        <a href="matrix.html" class="landing-card">
+          <div class="landing-card-icon"><i class="bi bi-diagram-3"></i></div>
+          <h2 class="landing-card-title">EC Matrix</h2>
+          <p class="landing-card-desc">
+            Who models embodied carbon, under what authority, at each project phase —
+            across project types, sizes, and Canadian jurisdictions. Aligned to NBC/NECB 2025.
+          </p>
+          <div class="landing-card-meta">shipping · Part 9 + Part 3 · Vancouver special</div>
+        </a>
 
-          <!-- Canvas viewer (hidden until PDF loaded) -->
-          <div id="viewer-wrap" style="display: none">
-            <div id="viewer-container">
-              <canvas id="pdf-canvas"></canvas>
-              <canvas id="overlay-canvas"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
+        <a href="database.html" class="landing-card">
+          <div class="landing-card-icon"><i class="bi bi-database"></i></div>
+          <h2 class="landing-card-title">Material Database</h2>
+          <p class="landing-card-desc">
+            Browse the 821-record BfCA BEAM material catalogue. Sortable, filterable table
+            with expandable per-material detail and full ISO per-stage impact matrix.
+          </p>
+          <div class="landing-card-meta">shipping · 8 CSI divisions · full EN 15804+A2 scope</div>
+        </a>
 
-      <!-- ── Scale Confirmation Panel (modal) ───────── -->
-      <div id="scale-backdrop"></div>
-      <div id="scale-panel">
-        <div class="scale-panel-title" id="scale-panel-title">Check Scale</div>
-        <div id="scale-detected" class="scale-panel-detected"></div>
+        <a href="beamweb.html" class="landing-card landing-card-beam">
+          <div class="landing-card-icon"><i class="bi bi-calculator"></i></div>
+          <h2 class="landing-card-title">BEAM <span class="landing-card-badge">Alpha</span></h2>
+          <p class="landing-card-desc">
+            Browser port of the BEAM / MCE² embodied carbon calculator. Canadian methodology,
+            manual + Excel + PDF-Parser inputs, JSON project files.
+          </p>
+          <div class="landing-card-meta">phase 0 shell · calc engine lands Phase 3</div>
+        </a>
+      </section>
 
-        <div class="scale-toggle">
-          <button id="scale-toggle-metric" class="active" onclick="PP.setScaleSystem('metric')">Metric</button>
-          <button id="scale-toggle-imperial" onclick="PP.setScaleSystem('imperial')">Imperial</button>
-        </div>
+      <section class="landing-footnote">
+        <a href="dependencies.html" class="landing-link">
+          <i class="bi bi-diagram-2"></i> Dependencies manifest
+        </a>
+        <span class="landing-sep">·</span>
+        <a href="https://github.com/arossti/OpenBuilding/blob/main/BEAMweb.md" class="landing-link">
+          <i class="bi bi-journal-text"></i> BEAMweb workplan
+        </a>
+        <span class="landing-sep">·</span>
+        <a href="https://github.com/arossti/OpenBuilding/blob/main/schema/schema.md" class="landing-link">
+          <i class="bi bi-file-earmark-code"></i> Schema workplan
+        </a>
+      </section>
+    </main>
 
-        <select id="scale-select"></select>
-
-        <div class="scale-panel-actions">
-          <button class="btn-cancel" onclick="PP.closeScalePanel()">Cancel</button>
-          <button class="btn-accept" onclick="PP.acceptScale()">Accept</button>
-          <button class="btn-verify" onclick="PP.verifyScale()">Accept &amp; Verify</button>
-        </div>
-
-        <div class="scale-panel-hint">
-          <b>Accept</b> — start measuring with this scale (provisional).<br />
-          <b>Accept &amp; Verify</b> — also calibrate against a known dimension (most accurate).
-        </div>
-      </div>
-
-      <!-- ── Scale Feedback Dialogue (toast/instruction) ─── -->
-      <div id="scale-feedback-backdrop"></div>
-      <div id="scale-feedback-panel">
-        <div class="scale-feedback-icon" id="scale-feedback-icon"></div>
-        <div class="scale-feedback-title" id="scale-feedback-title"></div>
-        <div class="scale-feedback-body" id="scale-feedback-body"></div>
-        <div class="scale-feedback-actions">
-          <label class="scale-feedback-remember" id="scale-feedback-remember-wrap" style="display: none">
-            <input type="checkbox" id="scale-feedback-remember" /> Don't show this again
-          </label>
-          <button id="scale-feedback-ok" onclick="PP.closeScaleFeedback()">OK</button>
-        </div>
-      </div>
-
-      <!-- ── Summary Table Modal ──────────────────────── -->
-      <div id="summary-backdrop"></div>
-      <div id="summary-panel">
-        <div class="summary-header">
-          <span class="summary-title">Measurement Summary</span>
-          <button class="summary-close" onclick="PP.closeSummaryTable()">&times;</button>
-        </div>
-        <div id="summary-content"></div>
-        <div class="summary-footer">
-          <button class="export-btn" onclick="PP.exportCSV()">Download CSV</button>
-          <button class="export-btn" onclick="PP.closeSummaryTable()">Close</button>
-        </div>
-      </div>
-
-      <!-- ── Status Bar ───────────────────────────────── -->
-      <div id="status-bar">
-        <span id="zoom-label"></span>
-        <span id="scale-label"></span>
-        <span style="flex: 1"></span>
-        <span>PDF-Parser v0.1.0 — Step 1</span>
-      </div>
-    </div>
-
-    <!-- ── Application ───────────────────────────────── -->
-    <!-- Single ESM entry point — imports all modules, including PDF.js 4.x -->
-    <!-- Requires: python3 -m http.server 8000 (or ./serve.sh) -->
-    <script type="module" src="js/app.mjs"></script>
+    <footer class="landing-footer">
+      <span>BfCA · Builders for Climate Action · Canadian projects only</span>
+      <span class="landing-spacer"></span>
+      <span class="landing-build">arossti/OpenBuilding · MIT-ish (CC BY-NC-ND for content, code open-source)</span>
+    </footer>
   </body>
 </html>

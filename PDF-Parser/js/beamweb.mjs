@@ -176,9 +176,10 @@ const PANEL_BODIES = {
       </p>
       <p style="margin:6px 0">
         Data source: <a href="database.html" class="db-kv-link">BfCA Material Database</a>.
-        Companion apps: <a href="index.html" class="db-kv-link">PDF-Parser</a> (area takeoff),
+        Companion apps: <a href="pdfparser.html" class="db-kv-link">PDF-Parser</a> (area takeoff),
         <a href="matrix.html" class="db-kv-link">EC Matrix</a> (regulatory compliance),
-        <a href="dependencies.html" class="db-kv-link">Dependency manifest</a> (dev).
+        <a href="index.html" class="db-kv-link">app directory</a>,
+        <a href="dependencies.html" class="db-kv-link">dependency manifest</a> (dev).
       </p>
     </div>
   `,

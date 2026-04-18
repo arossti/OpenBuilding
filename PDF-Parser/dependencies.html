@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="theme-dark app-deps">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,147 +7,6 @@
     <meta name="robots" content="noindex,nofollow" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="bfcastyles.css" />
-    <link rel="stylesheet" href="pdfparser.css" />
-    <style>
-      /* ──────────────────────────────────────────────
-         Dev-facing manifest page; dark theme, compact.
-         Not linked from the public nav. Find via direct URL.
-         ────────────────────────────────────────────── */
-      body { overflow: auto; }
-      .dep-app {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-      }
-      .dep-header {
-        padding: 14px 20px;
-        flex-shrink: 0;
-      }
-      .dep-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; margin: 0; }
-      .dep-subtitle { font-size: 11px; color: var(--text-dim); }
-      .dep-probe-bar {
-        padding: 8px 20px;
-        background: var(--bg-surface);
-        border-bottom: 1px solid var(--border);
-        font-size: 12px;
-        font-family: var(--font-mono);
-        display: flex;
-        gap: 20px;
-        align-items: center;
-      }
-      .dep-probe-pill {
-        display: inline-block;
-        padding: 2px 10px;
-        border-radius: 10px;
-        font-size: 11px;
-      }
-      .dep-probe-pill.ok { background: var(--accent); color: #fff; }
-      .dep-probe-pill.fail { background: var(--red); color: #fff; }
-      .dep-probe-pill.pending { background: var(--border); color: var(--text-dim); }
-
-      .dep-body { padding: 20px; max-width: 1400px; }
-      .dep-section { margin-bottom: 32px; }
-      .dep-section h2 {
-        font-family: var(--font-head);
-        font-size: 15px;
-        color: var(--accent-lit);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin: 0 0 6px 0;
-        padding-bottom: 4px;
-        border-bottom: 1px solid var(--border);
-      }
-      .dep-section .lede {
-        font-size: 11px;
-        color: var(--text-dim);
-        margin: 0 0 10px 0;
-      }
-
-      table.dep-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 12px;
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: 4px;
-      }
-      table.dep-table th,
-      table.dep-table td {
-        padding: 7px 10px;
-        vertical-align: top;
-        text-align: left;
-        border-bottom: 1px solid var(--border);
-      }
-      table.dep-table th {
-        background: var(--bg-panel);
-        color: var(--text-dim);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 10px;
-        font-weight: 600;
-        border-bottom: 1px solid var(--border);
-      }
-      table.dep-table tr:last-child td { border-bottom: 0; }
-      table.dep-table code {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--text);
-      }
-      .dep-url {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        color: var(--text-dim);
-        word-break: break-all;
-      }
-      .dep-used-by { display: flex; gap: 4px; flex-wrap: wrap; }
-      .dep-tag {
-        display: inline-block;
-        background: var(--bg-panel);
-        border: 1px solid var(--border);
-        color: var(--text);
-        padding: 1px 6px;
-        border-radius: 3px;
-        font-size: 10px;
-        font-family: var(--font-mono);
-      }
-      .dep-tag.planned { border-color: var(--gold); color: var(--gold); }
-      .dep-tag.beam    { border-color: var(--accent-lit); color: var(--accent-lit); }
-      .dep-status-cell { width: 60px; text-align: center; }
-      .dep-status-cell i { font-size: 14px; }
-      .dep-status-ok   { color: #4ade80; }
-      .dep-status-fail { color: var(--red); }
-      .dep-status-pending { color: var(--text-dim); }
-
-      .dep-copy-btn {
-        background: var(--bg-panel);
-        border: 1px solid var(--border);
-        color: var(--text-dim);
-        padding: 1px 8px;
-        border-radius: 3px;
-        font-size: 10px;
-        font-family: var(--font-mono);
-        cursor: pointer;
-      }
-      .dep-copy-btn:hover { color: var(--text); border-color: var(--accent-lit); }
-      .dep-copy-btn.copied { color: var(--accent-lit); border-color: var(--accent-lit); }
-
-      details.dep-details { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 8px 12px; margin-bottom: 8px; }
-      details.dep-details > summary { cursor: pointer; color: var(--text-dim); font-size: 11px; }
-      details.dep-details > summary:hover { color: var(--text); }
-      details.dep-details pre {
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: 3px;
-        padding: 10px;
-        margin-top: 8px;
-        font-size: 10px;
-        font-family: var(--font-mono);
-        overflow-x: auto;
-        white-space: pre;
-        color: var(--text);
-      }
-      .dep-divider { margin: 32px 0 16px 0; border: 0; border-top: 1px solid var(--border); }
-    </style>
   </head>
   <body>
     <div class="dep-app">
@@ -159,7 +18,8 @@
           <span class="dep-subtitle">Central registry of every CDN, font, and internal module used across the OpenBuilding app ecosystem. Not linked from the public nav — find via direct URL.</span>
         </div>
         <div style="flex: 1"></div>
-        <a href="index.html" class="nav-btn">PDF-Parser</a>
+        <a href="index.html" class="nav-btn">Home</a>
+        <a href="pdfparser.html" class="nav-btn">PDF-Parser</a>
         <a href="matrix.html" class="nav-btn">Matrix</a>
         <a href="database.html" class="nav-btn">Database</a>
         <a href="beamweb.html" class="nav-btn">BEAM</a>
@@ -359,29 +219,18 @@
       const INTERNAL = [
         {
           path: "bfcastyles.css",
-          purpose: "Shared design tokens, fonts, site-header, .nav-btn, .key-hint.",
+          purpose: "Single-file CSS source for every BfCA app. Sections: reset · shared tokens · shared header · dark theme · light theme · PDF-Parser · Matrix · Database · BEAMweb · Landing · Deps. Rules scoped by html class (theme-dark / theme-light / app-*). Roadmap: unify duplicated patterns into shared utilities; goal is a single ~1500-line file serving the whole ecosystem.",
           usedBy: ["PDF-Parser", "Matrix", "Database", "BEAM", "Deps"]
         },
         {
-          path: "pdfparser.css",
-          purpose: "Dark-theme app styles. Loaded by PDF-Parser and extended by Database / BEAM / Deps.",
-          usedBy: ["PDF-Parser", "Database", "BEAM", "Deps"]
+          path: "index.html",
+          purpose: "Landing page / app directory. First thing a visitor sees on arossti.github.io/OpenBuilding/. Cards for each app + links to dev dependency manifest.",
+          usedBy: []
         },
         {
-          path: "matrix.css",
-          purpose: "Light-theme styles for the EC Matrix app.",
-          usedBy: ["Matrix"]
-        },
-        {
-          path: "database.css",
-          purpose: "Table + expandable-row layout for the Material Database viewer.",
-          usedBy: ["Database"]
-        },
-        {
-          path: "beamweb.css",
-          purpose: "Tab sidebar + section layout for BEAMweb (planned).",
-          usedBy: ["BEAM"],
-          status: "planned"
+          path: "pdfparser.html",
+          purpose: "PDF-Parser app — area + volume takeoff from construction PDFs. Formerly index.html before the landing page was added.",
+          usedBy: []
         },
         {
           path: "js/database.mjs",
@@ -390,25 +239,24 @@
         },
         {
           path: "js/beamweb.mjs",
-          purpose: "BEAMweb app entry + tab router (planned).",
-          usedBy: ["BEAM"],
-          status: "planned"
+          purpose: "BEAMweb app entry + tab router. Global namespace window.BEAM.*; Phase 0 shell is live.",
+          usedBy: ["BEAM"]
         },
         {
           path: "js/beam/state-manager.mjs",
-          purpose: "Project state + 3-tier reset + dual-state Target/Reference + localStorage persistence. API mirrors OBJECTIVE's TEUI.StateManager so convergence stays cheap (planned).",
+          purpose: "Project state + 3-tier reset + dual-state Target/Reference + localStorage persistence. API mirrors OBJECTIVE's TEUI.StateManager so convergence stays cheap (planned for Phase 1).",
           usedBy: ["BEAM"],
           status: "planned"
         },
         {
           path: "js/beam/file-handler.mjs",
-          purpose: "JSON open/save + xlsx import via SheetJS + dirty-flag tracking (planned).",
+          purpose: "JSON open/save + xlsx import via SheetJS + dirty-flag tracking (planned for Phase 1).",
           usedBy: ["BEAM"],
           status: "planned"
         },
         {
           path: "js/beam/excel-mapper.mjs",
-          purpose: "MCE²/BEAM workbook → project state, sheet+cell map driven (planned).",
+          purpose: "MCE²/BEAM workbook → project state, sheet+cell map driven (planned for Phase 6).",
           usedBy: ["BEAM"],
           status: "planned"
         },
@@ -534,26 +382,28 @@
       // ── Boilerplates ────────────────────────────────────────────────
       const darkHead =
 `<!doctype html>
-<html lang="en">
+<html lang="en" class="theme-dark app-myapp">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BfCA — My App</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="bfcastyles.css" />
-    <link rel="stylesheet" href="pdfparser.css" />
   </head>
   <body>
     <header class="site-header">
       <img src="graphics/BFCA-LOGO-sm.png" alt="BfCA" class="header-logo" />
       <h1>My App</h1>
       <div style="flex:1"></div>
-      <a href="index.html" class="nav-btn">PDF-Parser</a>
+      <a href="index.html" class="nav-btn">Home</a>
+      <a href="pdfparser.html" class="nav-btn">PDF-Parser</a>
       <a href="matrix.html" class="nav-btn">Matrix</a>
       <a href="database.html" class="nav-btn">Database</a>
       <a href="beamweb.html" class="nav-btn">BEAM</a>
     </header>
     <!-- app here -->
+    <!-- Then add your app-specific section to bfcastyles.css under §11+
+         scoped with html.app-myapp — the single-file CSS convention. -->
     <script type="module" src="js/my-app.mjs"></script>
   </body>
 </html>
@@ -568,7 +418,8 @@
 `;
 
       const navBlock =
-`<a href="index.html" class="nav-btn">PDF-Parser</a>
+`<a href="index.html" class="nav-btn">Home</a>
+<a href="pdfparser.html" class="nav-btn">PDF-Parser</a>
 <a href="matrix.html" class="nav-btn">Matrix</a>
 <a href="database.html" class="nav-btn">Database</a>
 <a href="beamweb.html" class="nav-btn">BEAM</a>
