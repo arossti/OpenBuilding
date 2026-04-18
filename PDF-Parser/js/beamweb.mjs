@@ -16,6 +16,8 @@
 
 /* eslint-disable no-undef */
 
+import { ENERGY_GHG, GLOSSARY } from "./beam/reference-data.mjs";
+
 // ──────────────────────────────────────────────────────────────────────
 // Tab definitions
 // Grouped for sidebar display; order is the BEAM workbook order.
@@ -47,6 +49,10 @@ const BEAM_TABS = [
     { id: "results",            num: 16, label: "RESULTS",             phase: 5 },
     { id: "glossary",           num: 17, label: "Glossary",            phase: 0 },
   ]},
+  { group: "Reference", tabs: [
+    // Not in BEAM; BEAMweb adds it as informational reference.
+    { id: "energy-ghg",         num: 18, label: "Energy GHG",          phase: 0 },
+  ]},
 ];
 
 const FLAT_TABS = BEAM_TABS.flatMap(g => g.tabs);
@@ -69,8 +75,29 @@ function boot() {
   renderContentShell();
   wireActionBar();
   wireKeyboard();
+  wireGlossarySearch();
   setActiveTab(readInitialTabFromHash() || DEFAULT_TAB);
   loadMaterialIndex();
+}
+
+function wireGlossarySearch() {
+  const input = document.getElementById("beam-glossary-search");
+  const body  = document.getElementById("beam-glossary-body");
+  const count = document.getElementById("beam-glossary-count");
+  if (!input || !body || !count) return;
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    let shown = 0;
+    for (const tr of body.children) {
+      const idx = Number(tr.dataset.glossaryIdx);
+      const t = GLOSSARY[idx];
+      const hay = [t.abbr, t.full, t.desc].filter(Boolean).join(" ").toLowerCase();
+      const match = !q || hay.includes(q);
+      tr.style.display = match ? "" : "none";
+      if (match) shown++;
+    }
+    count.textContent = q ? `${shown} of ${GLOSSARY.length} terms` : `${GLOSSARY.length} terms`;
+  });
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -148,7 +175,8 @@ const PANEL_SUBTITLES = {
   garage: "Garage components — MCE² excludes these from whole-building totals",
   review: "Inputs sanity-check · area/volume reconciliation · warnings",
   results: "Project EC total · per-component breakdown · operational + embodied summary",
-  glossary: "Terms, standards references, methodology notes",
+  glossary: `${GLOSSARY.length} terms and definitions from the BEAM / MCE² workbook`,
+  "energy-ghg": `Province-by-province GHG intensities for operational energy (reference only)`,
 };
 
 const PANEL_BODIES = {
@@ -183,18 +211,98 @@ const PANEL_BODIES = {
       </p>
     </div>
   `,
-  glossary: `
-    <div class="beam-tbd">
-      <div class="beam-tbd-icon"><i class="bi bi-book"></i></div>
-      <h3>Glossary — Phase 0 stub</h3>
-      <p>
-        BEAM workbook Glossary will be ported here once Andy exports the tab to CSV.
-        In the meantime, see <code>schema/lookups/lifecycle-stages.json</code> for EN 15804+A2 stage definitions
-        and <a href="database.html" class="db-kv-link">Database</a> viewer for per-material EPD provenance.
-      </p>
-    </div>
-  `,
+  glossary: renderGlossaryPanel(),
+  "energy-ghg": renderEnergyGhgPanel(),
 };
+
+function renderGlossaryPanel() {
+  // Full-term column only shown when distinct from the abbr. Inline search field
+  // filters rows on abbr / full / description.
+  const rows = GLOSSARY.map((t, i) => {
+    const showFull = t.full && t.full !== t.abbr ? `<span class="beam-ref-dim">${escapeHtml(t.full)}</span>` : "";
+    return `<tr data-glossary-idx="${i}">
+      <td class="beam-ref-term"><strong>${escapeHtml(t.abbr)}</strong>${showFull ? "<br>" + showFull : ""}</td>
+      <td class="beam-ref-desc">${escapeHtml(t.desc) || '<span class="beam-ref-dim">—</span>'}</td>
+    </tr>`;
+  }).join("");
+  return `
+    <div class="beam-ref-pane">
+      <div class="beam-ref-controls">
+        <div class="beam-ref-search-wrap">
+          <i class="bi bi-search beam-ref-search-icon"></i>
+          <input type="search" id="beam-glossary-search" placeholder="Search terms, abbreviations, descriptions…" autocomplete="off" spellcheck="false" />
+        </div>
+        <span id="beam-glossary-count" class="beam-ref-count">${GLOSSARY.length} terms</span>
+      </div>
+      <table class="beam-ref-table beam-glossary-table">
+        <thead>
+          <tr>
+            <th style="width: 240px">Term</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody id="beam-glossary-body">${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderEnergyGhgPanel() {
+  const rows = ENERGY_GHG.factors.map(f => `
+    <tr>
+      <td class="beam-ref-term">${escapeHtml(f.province)}</td>
+      <td class="num">${formatFactor(f.electricity_kgco2e_per_kwh)}</td>
+      <td class="num">${formatFactor(f.natural_gas_kgco2e_per_m3)}</td>
+      <td class="num">${formatFactor(f.oil_kgco2e_per_l)}</td>
+      <td class="num">${formatFactor(f.propane_kgco2e_per_l)}</td>
+      <td class="num">${formatFactor(f.wood_kgco2e_per_kg)}</td>
+    </tr>
+  `).join("");
+  return `
+    <div class="beam-ref-pane">
+      <div class="beam-ref-intro">
+        <p>
+          Province-by-province GHG intensity factors for operational energy sources. BEAMweb multiplies these against
+          your PROJECT-tab energy inputs to compute operational emissions; per-fuel values are shown here for transparency.
+        </p>
+        <p class="beam-ref-dim">
+          This tab is not in the BEAM workbook — it lives in MCE² and BEAMweb carries it forward as informational reference.
+          When the Phase 1 state manager lands, projects will be able to override any cell here to use a newer NIR / ECCC figure.
+        </p>
+      </div>
+      <table class="beam-ref-table">
+        <thead>
+          <tr>
+            <th style="width: 220px">Province / Territory</th>
+            <th class="num" title="Electricity · ${escapeHtml(ENERGY_GHG.units.electricity)}">Electricity</th>
+            <th class="num" title="Natural Gas · ${escapeHtml(ENERGY_GHG.units.natural_gas)}">Natural Gas</th>
+            <th class="num" title="Oil · ${escapeHtml(ENERGY_GHG.units.oil)}">Oil</th>
+            <th class="num" title="Propane · ${escapeHtml(ENERGY_GHG.units.propane)}">Propane</th>
+            <th class="num" title="Wood · ${escapeHtml(ENERGY_GHG.units.wood)}">Wood</th>
+          </tr>
+          <tr class="beam-ref-subhead">
+            <th></th>
+            <th class="num">${escapeHtml(ENERGY_GHG.units.electricity)}</th>
+            <th class="num">${escapeHtml(ENERGY_GHG.units.natural_gas)}</th>
+            <th class="num">${escapeHtml(ENERGY_GHG.units.oil)}</th>
+            <th class="num">${escapeHtml(ENERGY_GHG.units.propane)}</th>
+            <th class="num">${escapeHtml(ENERGY_GHG.units.wood)}</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p class="beam-ref-footer">Source: ${escapeHtml(ENERGY_GHG.source)}.</p>
+    </div>
+  `;
+}
+
+function formatFactor(v) {
+  if (v == null) return '<span class="beam-ref-dim">—</span>';
+  if (v === 0) return "0";
+  // Use exponential for very small, fixed for normal range
+  if (Math.abs(v) < 0.0001) return v.toExponential(2);
+  return v.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
+}
 
 function defaultStub(tab) {
   return `

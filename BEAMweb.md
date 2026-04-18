@@ -87,7 +87,7 @@ The following list is what BEAMweb emulates. Order and names follow the BEAM wor
 15. `REVIEW`
 16. `RESULTS`
 17. `Glossary`
-18. `Energy GHG` — not in BEAM today; optional add (province-by-province grid intensities). Decide during Phase 3.
+18. `Energy GHG` — not in BEAM; BEAMweb carries it forward from MCE² as informational reference. **Shipped in Phase 0** as a read-only table; live at [`beamweb.html#energy-ghg`](./PDF-Parser/beamweb.html#energy-ghg). 13 provinces × 5 fuel factors, sourced from `PDF-Parser/js/beam/reference-data.mjs`.
 
 Tab classification (first pass — confirm when BEAM CSVs arrive):
 - **User-intake tabs**: `Introduction`, `PROJECT`, all assembly tabs (`Footings & Slabs` → `Garage`)
@@ -402,10 +402,14 @@ Small, independently-shippable slices:
 - Q13: Does BEAMweb need read access to a completed BEAM workbook (full operational+material), or only MCE²-equivalent subset?
 
 **App location:**
-- Q14: On disk — sibling of PDF-Parser as `PDF-Parser/beamweb.html` (simplest, same Pages bundle, reuses bfcastyles + pdfparser CSS)? Or new top-level `BEAMweb/` directory? **Leaning toward co-locating in `PDF-Parser/`** unless you want a clean split. Answer before stub lands.
+- ✅ **Q14 (on disk)** — resolved as `PDF-Parser/beamweb.html` + `js/beamweb.mjs` + `js/beam/reference-data.mjs`. Same Pages bundle, reuses shared `bfcastyles.css` (single consolidated file). Re-evaluate at Phase 5 if BEAMweb code grows large enough to warrant a dedicated `BEAMweb/` directory.
 
 **Units:**
 - Q16: Units — user-selectable metric/imperial toggle (MCE² has both widgets), or metric primary with on-row conversion?
+
+**Reference tabs (answered by shipping in Phase 0):**
+- ✅ Glossary tab shipped — 48 terms inline, searchable. Data lives at `PDF-Parser/js/beam/reference-data.mjs` (`GLOSSARY` export). Source CSV at `docs/csv files from BEAM/Glossary.csv` is redundant and can be deleted.
+- ✅ Energy GHG tab shipped — 13 provinces × 5 fuel factors, read-only. Data lives in the same module (`ENERGY_GHG` export). Source CSV at `docs/csv files from BEAM/Energy GHG.csv` is redundant and can be deleted. Project-level overrides land once the Phase 1 state manager is in.
 
 ---
 
@@ -432,5 +436,6 @@ Small, independently-shippable slices:
 
 ## Appendix — Changelog
 
+- **2026-04-18 (session 2, ref tabs)** — Glossary + Energy GHG tabs ship as Phase 0 informational. 48 glossary terms (abbr / full / description, with live search) and 13-province × 5-fuel-factor Energy GHG table live at `PDF-Parser/js/beam/reference-data.mjs`. CSVs at `docs/csv files from BEAM/{Glossary,Energy GHG}.csv` now redundant and safe to delete. Q14 (app location) marked resolved: shipping at `PDF-Parser/beamweb.html` + `js/beamweb.mjs` + `js/beam/reference-data.mjs`.
 - **2026-04-18 (session 2)** — Doc revised after Andy's review. Tab list resolved (BEAM authoritative, 17 tabs + Energy GHG optional); nav-btn label set to `BEAM`. Section 2.3 added — assembly-tab pattern discovered from MCE² CSVs in `docs/csv files from BEAM/` (inline material toggle rows per tab, pre-curated subset of the 821-material DB, per-row SELECT+QUANTITY+%, section-level config like thickness/R-value). Section 4 populated with calc shape inferred from MCE² column labels; exact formulas await BEAM CSV exports from Andy's unlocked workbook. Section 7 open-questions re-triaged with answers/partials. Phase breakdown revised (10 phases). Goal 5 added — calculation graph consideration.
 - **2026-04-18 (session 1)** — BEAMweb workstream spun up. Document seeded with scaffold + open questions. Schema Phase 3 (standalone material picker) explicitly subsumed: the picker becomes inline toggles inside BEAMweb assembly tabs rather than a PDF-Parser feature.
