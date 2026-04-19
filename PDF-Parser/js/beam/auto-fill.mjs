@@ -3,10 +3,20 @@
 //
 // When a user types a dimension into PROJECT (e.g. dim_foundation_slab_floor_area
 // = 110.4 m²), every material row in the F&S "CONCRETE SLABS" group's qty input
-// fills with that value as VALUE_STATES.DERIVED. User-typed entries on the
-// assembly side stay USER_MODIFIED and win — the bridge skips writing over
-// them. Loaded sample data (IMPORTED) also wins. The result is a "PROJECT
-// drives, assembly tab can override per row" model.
+// fills with that value as VALUE_STATES.DERIVED.
+//
+// Precedence — only USER_MODIFIED on the F&S row is sticky. The bridge
+// overrides IMPORTED, DERIVED, CALCULATED, and null. This matches the
+// stated state model:
+//
+//   USER_MODIFIED  >  everything else
+//   (a fresh import / sample-load can still overwrite USER_MODIFIED via
+//    explicit setValue from the loader — IMPORTED's "win" comes from
+//    being chronologically latest, not from a precedence rule.)
+//
+// Practical effect after Load Sample: changing a PROJECT area pushes the
+// new value into every related F&S row, even those the sample had marked
+// IMPORTED. Only rows the user hand-edited stay put.
 //
 // Mapping table is keyed off the parsed group `name` (column A in the BEAM
 // CSV banner row), case-insensitive. Group names that don't appear here have
@@ -51,8 +61,9 @@ function applyOneSource(parsedFs, projectKey, value) {
         for (const m of sub.materials) {
           const fId = `fs_${m.hash}_qty`;
           const st = StateManager.getFieldState(fId);
-          // User wins; imported (sample-loaded) wins. DERIVED + null are fair game.
-          if (st === VS.USER_MODIFIED || st === VS.IMPORTED) continue;
+          // Only user-typed values are sticky. Bridge overrides IMPORTED
+          // (sample-loaded) + DERIVED + CALCULATED + null.
+          if (st === VS.USER_MODIFIED) continue;
           StateManager.setValue(fId, writeVal, VS.DERIVED);
           touched = true;
         }
