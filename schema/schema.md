@@ -23,8 +23,15 @@
 
 ### Recommended next action
 
-**Phase 1 + 1.5 shipped and merged to `main`.** Active workstream has pivoted away from schema for now — see [`BEAMweb.md`](../BEAMweb.md) at repo root. BEAMweb is a full JS port of the BEAM / MCE² Excel app that consumes this schema directly; the originally-planned Phase 3 standalone material picker has been folded into BEAMweb as one of its UI components. Schema work resumes when:
+**Phase 1 + 1.5 shipped and merged to `main`.** Active workstream has pivoted to [`BEAMweb.md`](../BEAMweb.md) at repo root — a full JS port of the BEAM (Google Sheets) embodied-carbon calculator that will eventually consume this schema directly. The originally-planned Phase 3 standalone material picker has been folded into BEAMweb as one of its UI components.
+
+**Parity-then-migrate plan (locked 2026-04-18 session 3).** BEAMweb first ships matching the BEAM workbook's per-row emissions values exactly — using the precomputed NET/GROSS columns baked into the Google Sheet, not the full materials JSON DB. This keeps the initial port low-risk: same inputs produce the same outputs, which is the bar the BfCA team needs to clear before endorsing a web replacement for a tool their users already trust.
+
+Once BfCA validates functional parity against the gSheet on a canonical project, BEAMweb switches over to consuming [`schema/materials/`](./materials) directly. That migration is the moment BEAMweb stops being a spreadsheet port and becomes a more capable tool: the 10 impact categories × 17 EN 15804+A2 stages this schema already carries become surfaceable in BEAMweb's REVIEW / RESULTS tabs, even though the BEAM workbook only reports GWP. EPDs authored by the Phase 2 parser flow in the same way. Until parity is validated, the schema stays stable and the DB sits ready but unconnected from the live app.
+
+Schema work resumes when:
 - The EPD parser (Phase 2) is ready to populate `impacts.*.by_stage` slots — blocked on a sample EPD PDF from the user.
+- BEAMweb clears the parity gate and we wire the DB into its calc engine (Phase 4 in BEAMweb's plan; promotes this schema from "reference" to "runtime consumer").
 - IFC interop (Phase 5), Canadian context extensions (Phase 6), or schema PDF deliverable (Phase 7) are prioritised.
 
 ### Project context (required reading)
