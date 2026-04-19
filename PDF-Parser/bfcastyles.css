@@ -156,6 +156,13 @@ html.theme-dark {
   --sidebar-w: 240px;
   --toolbar-h: 42px;
   --statusbar-h: 28px;
+
+  /* Tell the browser to render native controls (number spinners,
+     checkboxes, scrollbars) in dark mode so spinner arrows render
+     light instead of near-black on our dark input backgrounds.
+     accent-color tints checkboxes/radios/progress/range cyan. */
+  color-scheme: dark;
+  accent-color: var(--accent);
 }
 
 html.theme-dark,
