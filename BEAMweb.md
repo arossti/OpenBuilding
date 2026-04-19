@@ -6,14 +6,16 @@
 
 ## 0. Cold-start handoff (read this first)
 
-### Status as of 2026-04-19 (session 4 — Phase 3 Footings & Slabs live; 11 assembly tabs remaining)
+### Status as of 2026-04-19 (session 5 — Phases 1-3 merged to main; cold-start blanks + Load Sample + PROJECT→F&S auto-fill on `beamweb-tabs-2`)
 
+- **Session 5 (this session)** lives on `beamweb-tabs-2` (commits `0c10b78`, `0d93225`). Foundational fix to make cold-start state actually empty: dropped the BEAM CSV sample bleed-through, removed the obsolete Tilt button (OBJECTIVE-era force-recompute that BEAMweb does not need), wired per-tab Reset, and built the Load Sample mechanism from end to end. New modules: [`js/beam/auto-fill.mjs`](./PDF-Parser/js/beam/auto-fill.mjs) (PROJECT-tab → F&S group quantity bridge with provenance precedence: USER_MODIFIED > IMPORTED > DERIVED) and [`js/beam/sample-loader.mjs`](./PDF-Parser/js/beam/sample-loader.mjs) (fetch JSON → import via FileHandler quarantine → walk parsed assembly CSVs → refresh visible panels). First sample at [`docs/beam-samples/single-family-home.json`](./docs/beam-samples/single-family-home.json) — DOE Prototype values lifted from the BEAM gSheet PROJECT tab, in BEAMweb's flat-dict format. Project-file shape locked in §5.1 (flat `{ field_id: value }`, retiring the earlier nested strawman). State plumbing: `StateManager.clearByPrefix(prefix)` for per-tab Reset; `getFieldState(fieldId)` for the auto-fill provenance check.
 - **Phase 0 shipped + merged** via PR #6 (`cd89b37`, 2026-04-18 session 2). App shell live at [`PDF-Parser/beamweb.html`](./PDF-Parser/beamweb.html) with 18 tabs, Glossary + Energy GHG populated with real data, reference-data module, action bar wired to stubs.
+- **Phases 1-3 shipped + merged** via PR #7 (`c7a2dcc`, 2026-04-19). Phase 1 shared infra (state-manager / file-handler / workbook-mapper), Phase 2 PROJECT tab, Phase 3 Footings & Slabs assembly picker, Database viewer group-section view, BEAM xlsx fetch script + 22 CSV snapshots — all on `main`.
 - **Phase 1 stubs landed** (session 3, `26daac0`). Three ESM modules: [`js/shared/state-manager.mjs`](./PDF-Parser/js/shared/state-manager.mjs) (field map, dependencies, listeners, localStorage autosave), [`js/shared/file-handler.mjs`](./PDF-Parser/js/shared/file-handler.mjs) (.json / .csv / .xlsx import + .json export, quarantine pattern), [`js/beam/workbook-mapper.mjs`](./PDF-Parser/js/beam/workbook-mapper.mjs) (user-workbook → state mapper, per-tab dispatch). Stub-level — method signatures locked, per-tab mapping tables fill in as assembly tabs port. Exposes `window.BEAM.StateManager`, `.FileHandler`, `.WorkbookMapper`.
 - **Phase 2 PROJECT tab live** (session 3, `c98cc93`). [`js/beam/project-tab.mjs`](./PDF-Parser/js/beam/project-tab.mjs) renders the three-section form (Project Information + Building Dimension Inputs + Garage Dimension Inputs), ~40 fields, L×H×W → computed volume for continuous footings, StateManager-backed persistence. Dropdowns still render as free-text inputs (Categories.csv option-list parsing is next up).
 - **Phase 3 Footings & Slabs tab live** (session 4, `aa33913` + polish `0ffaedb`, `4e1614b`). First live assembly picker. Two new modules: [`js/beam/assembly-csv-parser.mjs`](./PDF-Parser/js/beam/assembly-csv-parser.mjs) (generic parser for any assembly-tab CSV — banner rows vs material rows via column A + group-code depth, inline group-header config extraction from columns C/D/E, per-material emission-factor derivation from the first non-zero sample row per hash) and [`js/beam/footings-slabs-tab.mjs`](./PDF-Parser/js/beam/footings-slabs-tab.mjs) (consumes parser; 16 groups × 658 materials, 276 with derived EPD factors). Group-header configs editable inline (THICKNESS, R-VALUE, TOTAL REBAR LENGTH); linear `configRatio = user / default` scaling applied to emissions. Per-row select/qty/pct editable, StateManager persistence + localStorage autosave, group subtotals + tab totals (NET / GROSS / STORAGE Short / STORAGE Long) live. Default view: all groups collapsed for overview; click anywhere on a group-header bar to toggle (inline config inputs pass through without triggering collapse). CSV staged into `PDF-Parser/data/beam/` via extended `npm run stage:data` + Pages workflow step.
 - **Database viewer: group-section view** (session 4, `4e1614b`). Mirrors F&S hierarchy — collapsible group banners when browsing (8 sections, all collapsed on first load = compact overview); automatically flattens to the old flat sorted list when the user searches or picks a group chip so results surface without section chrome in the way. Dedicated `Expand all / Collapse all` toggle button (re-purposed from the old Collapse button). `Division` → `Groups` UI rename applied to the filter label, element IDs, and function names (Matrix's legitimate "VBBL Division B" regulatory reference untouched per IP rules).
-- **Active branch**: `beamweb-tabs` on both remotes. Work on a new branch per phase; never push to `main`.
+- **Active branch**: `beamweb-tabs-2` on both remotes (`origin` = bfca-labs/at, `openbuilding` = arossti/OpenBuilding). Created off `main` after PR #7 merge. Work on a new branch per phase; never push to `main`.
 - **Ecosystem restructured** (session 2) — landing page at `PDF-Parser/index.html`; PDF-Parser app renamed to `pdfparser.html`; single-file CSS (`bfcastyles.css`, ~4100 lines, section/app scoped); cyan accent; dependency manifest with drift detector at `dependencies.html`; BEAM nav-btn added across all apps.
 - **IP neutralisation applied** (session 2 commit `8d730ab`) — see the "IP rules" block below. Code and served data are CSI/MCE²-free; Matrix intentionally retains regulatory-program references (legitimate citations).
 - **Parent repo dependencies in place:**
@@ -58,7 +60,7 @@ A browser app that replaces the BEAM (Google Sheets) embodied carbon spreadsheet
 
 ### Git workflow (same as schema workstream)
 
-1. Feature branch per phase (currently `beamweb-tabs`). Commit + push to **both** remotes after every meaningful change.
+1. Feature branch per phase (currently `beamweb-tabs-2`). Commit + push to **both** remotes after every meaningful change.
 2. When ready to deploy: PR on `arossti/OpenBuilding` → user merges → GitHub Pages auto-deploys from `main`.
 3. After merge: fast-forward local `main`, push `main` to the `origin` mirror (`git push origin main`), delete the feature branch on both remotes (`git push origin --delete <branch> && git push openbuilding --delete <branch>`), delete the local branch, create the next feature branch.
 4. Never push to `main` directly. Never force-push. Never skip hooks.
@@ -66,11 +68,13 @@ A browser app that replaces the BEAM (Google Sheets) embodied carbon spreadsheet
 
 ### Where to pick up next (cold-start one-liner)
 
-1. `cd PDF-Parser && npm run stage:data` — copies `schema/materials/` + `docs/csv files from BEAM/Footings & Slabs.csv` into `PDF-Parser/data/` (gitignored; regenerate each session).
-2. `npm run serve` from the same dir, open `http://localhost:8000/beamweb.html#footings-slabs` to eyeball the live F&S picker.
-3. Before porting more tabs: **run a parity test** — load the DOE Prototype sample project inputs in both BEAM (gSheet) and BEAMweb F&S, compare totals. Mismatches pinpoint which assumption in `computeRowEmissions` (linear configRatio scaling, sample-row factor derivation) needs refinement. Fix parity once, then the pattern is safe to replicate across Phase 4.
-4. Phase 4 queue: see §6 — 11 assembly tabs, smallest-first (Windows → Garage). Each follows the `assembly-csv-parser.mjs` + per-tab-module template already established for F&S.
-5. Cross-cut items parallel to Phase 4: PROJECT→F&S quantity auto-fill, `Categories.csv` dropdown option lists on PROJECT, `js/shared/units.mjs` for the metric/imperial toggle.
+1. `cd PDF-Parser && npm run stage:data` — copies `schema/materials/`, `docs/csv files from BEAM/Footings & Slabs.csv`, and `docs/beam-samples/*.json` into `PDF-Parser/data/` (gitignored; regenerate each session).
+2. `npm run serve` from the same dir, open `http://localhost:8000/beamweb.html` — F&S now cold-starts blank.
+3. Click **Load Sample** in the action bar to populate the Single-Family Home (DOE Prototype) project from `data/beam/samples/single-family-home.json`. PROJECT tab fills in; F&S group qtys derive from PROJECT via `auto-fill.mjs`; F&S SELECT/qty/pct on workbook-flagged rows gets imported from the parsed CSV. Compare NET / GROSS / STORAGE totals against the BEAM gSheet for parity testing.
+4. **Reset Tab** clears only the active tab. Other tabs and the PDF-Parser polygon cache are preserved. After F&S Reset, the PROJECT auto-fill bridge re-syncs so DERIVED qtys re-flow without the user having to retype.
+5. Mismatches against the BEAM gSheet pinpoint where `computeRowEmissions` (linear configRatio scaling, sample-row factor derivation) needs refinement. Fix parity once, then the pattern is safe to replicate across Phase 4.
+6. Phase 4 queue: see §6 — 11 assembly tabs, smallest-first (Windows → Garage). Each follows the `assembly-csv-parser.mjs` + per-tab-module template established for F&S, and (when porting) gets added to `PROJECT_TO_FS_GROUPS` in `auto-fill.mjs` (rename to `PROJECT_TO_ASM_GROUPS` once it covers more than just F&S).
+7. Remaining cross-cut items: `Categories.csv` dropdown option lists on PROJECT, `js/shared/units.mjs` for the metric/imperial toggle.
 
 ---
 
@@ -343,64 +347,45 @@ Mirroring PDF-Parser + Database viewer conventions for BEAMweb's own code, with 
   - `shared/filehandler.mjs` — open/save/import JSON + xlsx; used by both PDF-Parser and BEAMweb
   - `shared/statemanager.mjs` — project state, change events, undo (?). Both apps can read each other's project JSON.
 
-### 5.1 Project file shape (draft)
+### 5.1 Project file shape (locked, session 5)
 
-A single JSON project file carries everything. Cross-app shape so PDF-Parser and BEAMweb edit the same file.
+Flat dict of `field_id → value` keyed exactly by the same StateManager field IDs the UI binds to. Mirrors the OBJECTIVE convention (DOM-id-as-row-header, value-as-row-body) so the same shape works as JSON, CSV, or a flat key/value store. The earlier nested strawman (`meta.address`, `components.foundation_wall.area_m2`, `pdf_parser.polygons`, `results.by_component`) is retired — too many mapping layers between the UI and the file, and field-id collisions across tabs become invisible. The flat shape eliminates both problems.
 
 ```json
 {
-  "$schema": "https://bfca.ca/schemas/project-v1.json",
-  "schema_version": 1,
-  "id": "project-slug-or-uuid",
-  "created_at": "ISO date",
-  "modified_at": "ISO date",
-  "meta": {
-    "address": "...", "province": "...", "building_type": "...",
-    "heated_floor_area_m2_above_grade": 120,
-    "heated_floor_area_m2_below_grade": 80,
-    "heating_degree_days": 4500,
-    "year_built": 2026
-  },
-  "energy": {
-    "source": "hot2000 | manual",
-    "electricity_kwh_yr": 0,
-    "nat_gas_m3_yr": 0,
-    "propane_l_yr": 0,
-    "oil_l_yr": 0,
-    "wood_kg_yr": 0,
-    "elec_generation_kwh_yr": 0
-  },
-  "components": {
-    "footings_pads_piers": { "volume_m3": 0, "material_ref": "lam011", ... },
-    "foundation_wall":     { "area_m2": 0, ... },
-    "exterior_wall":       { "area_m2": 0, "assembly_ref": "...", ... },
-    "windows":             { "area_m2": 0 },
-    "interior_wall":       { "area_m2": 0 },
-    "framed_floor":        { "area_m2": 0 },
-    "ceiling":             { "area_m2": 0 },
-    "roofing":             { "area_m2": 0 },
-    "roof_insulation":     { "area_m2": 0 },
-    "heavy_timber":        { "volume_m3": 0 },
-    "party_wall":          { "area_m2": 0 }
-  },
-  "assemblies": {
-    "ext_wall_systems": [ /* array of assembly templates the user defined */ ]
-  },
-  "pdf_parser": {
-    "polygons": [ /* direct import from PDF-Parser; used to populate components.*.area_m2 */ ],
-    "linked_file": "path/to/original.pdf"
-  },
-  "results": {
-    "material_emissions_kgco2e": 0,
-    "operational_emissions_kgco2e_yr": 0,
-    "operational_emissions_kgco2e_30yr": 0,
-    "material_emissions_kgco2e_per_m2_hfa": 0,
-    "by_component": { /* component → kgCO2e breakdown */ }
+  "format": "beamweb-project",
+  "version": 1,
+  "label": "Optional human label — sample projects use this; user saves omit it",
+  "fields": {
+    "project_name": "Sample Project DOE Prototype",
+    "project_country": "United States",
+    "project_total_floor_area": 221.0,
+
+    "dim_continuous_footings_length": 42.37,
+    "dim_continuous_footings_height": 0.46,
+    "dim_continuous_footings_width": 0.46,
+    "dim_foundation_slab_floor_area": 110.4,
+    "dim_exterior_wall_area": 187.8,
+    "dim_window_area": 33.1,
+
+    "fs_T01_C06_cfg": 6.0,
+    "fs_a3b91f_sel": true,
+    "fs_a3b91f_qty": 110.4,
+    "fs_a3b91f_pct": 1.0
   }
 }
 ```
 
-Everything here is **a strawman** — revise freely once section 4 is filled in.
+**Properties:**
+- `format` + `version` are header sentinels for the loader.
+- `fields` is the only data block. Keys are the exact StateManager field IDs (`project_*`, `dim_*`, `garage_*`, `fs_*`, future `fw_*` for foundation walls, `ext_*` for exterior walls, etc.).
+- `FileHandler.exportJson` emits this shape verbatim from `StateManager.exportState()`.
+- `FileHandler.importJson` accepts either a `{ fields: {...} }` envelope or a bare `{ field_id: value }` dict.
+- Symmetry between user-saved projects and curated samples — both go through the same parser. No special casing.
+
+**Sample projects** live at `docs/beam-samples/<slug>.json` (committed) and stage to `PDF-Parser/data/beam/samples/` for runtime fetch. First sample: `single-family-home.json` (DOE Prototype) — used as the parity-test fixture against the BEAM gSheet. Architected for many: when OBJECTIVE-style 12 case-study buildings land, each is one JSON in this directory plus one entry in `SAMPLES` in `js/beam/sample-loader.mjs`.
+
+**Cross-app convergence (PDF-Parser polygon → BEAMweb)** is now expressed via the same flat-dict format. PDF-Parser's polygon export → flat keys like `polygon_<id>_area_m2`, `polygon_<id>_component`. BEAMweb's PDF-Parser import handler reads those keys and maps them to `dim_*` keys via the same auto-fill mechanism that bridges PROJECT → assembly tabs. Wires up in Phase 8.
 
 ---
 
@@ -543,14 +528,18 @@ BEAMweb applies the Energy GHG factors (tab 18) to produce operational emissions
 
 ## Appendix — Branch + repo state
 
-- `main` sits at `cd89b37` (PR #6, Phase 0 shell, 2026-04-18). All Phase 1+ work lives on the feature branch until next merge.
-- Active feature branch: `beamweb-tabs` on both remotes. Tip as of 2026-04-19 end of session 4: `4e1614b`. Branch contains Phase 1 stubs, Phase 2 PROJECT tab, Phase 3 Footings & Slabs + assembly-csv-parser, Database viewer group-section restructure, and all session 3–4 tooling (xlsx fetch script, staging pipeline, `color-scheme: dark`, etc.).
-- Sibling apps all on `main`: PDF-Parser, Matrix, Database viewer, BEAMweb Phase 0 shell, Landing, Deps manifest — shipped and deployed at `arossti.github.io/OpenBuilding/`. `beamweb-tabs` ready to PR whenever we have a batch big enough to deploy (probably after 3–4 more assembly tabs port, or earlier if stakeholders want to review F&S live).
+- `main` sits at `c7a2dcc` (PR #7, "BEAMweb: Phase 1 shared infra + Phase 2 PROJECT + Phase 3 Footings & Slabs", merged 2026-04-19). All Phase 4+ work lives on the feature branch until next merge.
+- Active feature branch: `beamweb-tabs-2` on both remotes. Tip as of 2026-04-19 end of session 5: `0d93225`. Branch contains the cold-start blanks foundational fix, Tilt removal, per-tab Reset, PROJECT→F&S auto-fill bridge, and the sample-loader + first DOE Prototype sample JSON.
+- Sibling apps all on `main`: PDF-Parser, Matrix, Database viewer, BEAMweb Phase 3 (F&S), Landing, Deps manifest — shipped and deployed at `arossti.github.io/OpenBuilding/`. `beamweb-tabs-2` ready to PR whenever we have a batch big enough to deploy (after F&S parity is validated and the first 3-4 Phase 4 tabs port, probably).
 
 ---
 
 ## Appendix — Changelog
 
+- **2026-04-19 (session 5)** — Cold-start blank state + Load Sample + PROJECT→F&S auto-fill. Two commits on `beamweb-tabs-2`:
+  - `0c10b78` — Foundational fix. F&S `currentValues()` no longer falls back to `material.sample_*` so cold start is unchecked / blank qty / 100% mix-ratio across the board. `groupConfigRatio` returns 0 for blank/zero configs (was: silently used BEAM default), with the default surfaced as input placeholder + tooltip ("BEAM default: 6 in"). Tilt button removed from the action bar — OBJECTIVE-era force-recompute that BEAMweb's simpler calc graph does not need. `Reset` button enabled and renamed `Reset Tab`; per-tab dispatch via `TAB_RESETTERS` map; confirm modal names the active tab and reassures user about preserved PDF-Parser polygon data + other tabs. `New` wired to full `StateManager.clear()` + reload. `StateManager.clearByPrefix(prefix)` helper notifies listeners with state="cleared" and triggers debounced save.
+  - `0d93225` — Auto-fill + sample loader. `js/beam/auto-fill.mjs` registers listeners on PROJECT source keys (`dim_continuous_footings_volume`, `dim_columns_piers_pads_volume`, `dim_foundation_slab_floor_area`) and pushes their values to every material row in the mapped F&S groups as `VS.DERIVED`. Provenance precedence in `applyOneSource`: `USER_MODIFIED` > `IMPORTED` > `DERIVED`/null — user-typed entries on the assembly side stand. `js/beam/sample-loader.mjs` fetches `data/beam/samples/<slug>.json`, applies via `FileHandler.importJson` quarantine, manually re-syncs the auto-fill bridge after listener mute, then walks parsed F&S CSV and writes IMPORTED on workbook-flagged SELECT'd rows + group-config defaults. First sample at `docs/beam-samples/single-family-home.json` — DOE Prototype values lifted from `PROJECT.csv` rows 29-99, 43 fields total. `StateManager.getFieldState()` exposed so auto-fill can implement provenance precedence without touching the private fields map. After F&S Reset, `syncProjectToFsBridge()` re-runs so DERIVED qtys re-flow from PROJECT (Reset doesn't strand the auto-filled state). Also: §5.1 retired the nested project-file strawman in favor of the flat `{ field_id: value }` shape that mirrors `StateManager.exportState()` directly — same shape works for user saves, samples, and (future) PDF-Parser polygon imports. `package.json` `stage:data` and `.github/workflows/deploy-pages.yml` extended to copy `docs/beam-samples/*.json` into `PDF-Parser/data/beam/samples/`.
+  Cold-start contract documented: cold load = blank UI = zero emissions. Defaults only via Load Sample. Parity testing against the BEAM gSheet now possible from one button press.
 - **2026-04-19 (session 4)** — Phase 3 shipped + Database viewer restructured. Three commits on `beamweb-tabs`:
   - `aa33913` — First live assembly picker. New `js/beam/assembly-csv-parser.mjs` (generic, covers all 12 assembly tabs) + `js/beam/footings-slabs-tab.mjs` (consumes parser, renders 16 groups × 658 materials, 276 with derived EPD factors). Group-header configs editable inline with linear `configRatio` scaling; per-row select/qty/pct wired to StateManager with localStorage autosave; group + tab subtotals compute live. CSV staged into `PDF-Parser/data/beam/` via extended `stage:data` npm script and Pages workflow step; staged copy gitignored.
   - `0ffaedb` — F&S polish: groups collapsed by default on first load (overview view first), sticky-header gap fix so scrolled picker rows don't peek through above the totals strip (bleed sticky header into `#beam-content` padding via negative margins + `top: -20px`). Database viewer `Division` → `Groups` rename (filter label, element IDs, function names; Matrix's legitimate "VBBL Division B" regulatory citation untouched).
