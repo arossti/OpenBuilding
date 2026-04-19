@@ -17,6 +17,9 @@
 /* eslint-disable no-undef */
 
 import { ENERGY_GHG, GLOSSARY } from "./beam/reference-data.mjs";
+import { StateManager } from "./shared/state-manager.mjs";
+import { renderProjectPanel, wireProjectForm } from "./beam/project-tab.mjs";
+import { renderFootingsSlabsPanel, wireFootingsSlabsTab } from "./beam/footings-slabs-tab.mjs";
 
 // ──────────────────────────────────────────────────────────────────────
 // Tab definitions
@@ -26,10 +29,10 @@ import { ENERGY_GHG, GLOSSARY } from "./beam/reference-data.mjs";
 const BEAM_TABS = [
   { group: "Project",       tabs: [
     { id: "introduction",       num: 1,  label: "Introduction",        phase: 0 },
-    { id: "project",            num: 2,  label: "PROJECT",             phase: 2 },
+    { id: "project",            num: 2,  label: "PROJECT",             phase: 0 },
   ]},
   { group: "Below-grade",   tabs: [
-    { id: "footings-slabs",     num: 3,  label: "Footings & Slabs",    phase: 3 },
+    { id: "footings-slabs",     num: 3,  label: "Footings & Slabs",    phase: 0 },
     { id: "foundation-walls",   num: 4,  label: "Foundation Walls",    phase: 4 },
   ]},
   { group: "Structure",     tabs: [
@@ -71,11 +74,14 @@ const state = {
 // Boot
 // ──────────────────────────────────────────────────────────────────────
 function boot() {
+  StateManager.loadState();
   renderSidebar();
   renderContentShell();
   wireActionBar();
   wireKeyboard();
   wireGlossarySearch();
+  wireProjectForm();
+  wireFootingsSlabsTab();  // fires async fetch for data/beam/footings-slabs.csv
   setActiveTab(readInitialTabFromHash() || DEFAULT_TAB);
   loadMaterialIndex();
 }
@@ -160,8 +166,8 @@ function renderPanelBody(tab) {
 // real content replaces these per phase.
 const PANEL_SUBTITLES = {
   introduction: "How BEAMweb works · methodology reference · disclaimer",
-  project: "Project meta, HOT2000 energy import, total-area inputs, derived summary",
-  "footings-slabs": "Foundation concrete, aggregate, sub-slab insulation, vapour barriers",
+  project: "Project metadata · main-building and garage dimensions · feeds every assembly tab",
+  "footings-slabs": "Concrete footings · pads & piers · slabs · rebar · sub-slab insulation · basement flooring",
   "foundation-walls": "Concrete / ICF / earth-based foundation walls + insulation",
   "structural-elements": "Steel, heavy timber, framing lumber — posts, beams, joists",
   "exterior-walls": "Framing, sheathing, cavity + continuous insulation, WRB",
@@ -180,8 +186,11 @@ const PANEL_SUBTITLES = {
 };
 
 const PANEL_BODIES = {
+  project: renderProjectPanel(),
+  "footings-slabs": renderFootingsSlabsPanel(),
   introduction: `
     <div class="beam-tbd" style="text-align: left; padding: 28px 32px;">
+      <img src="graphics/beam-logo.png" alt="BEAM" class="bw-intro-logo" />
       <h3 style="text-align:center">Welcome to BEAMweb</h3>
       <p style="text-align:center; font-size: 13px; margin: 8px 0 18px 0;">
         A browser port of the BEAM embodied carbon calculator, built for Canadian projects.
@@ -200,7 +209,7 @@ const PANEL_BODIES = {
         This is the navigation shell. Tabs are stubbed. Calc engine, state management, and file I/O land in Phases 1–3.
       </p>
       <p style="margin:6px 0">
-        See <a href="https://github.com/arossti/OpenBuilding/blob/beamweb/BEAMweb.md" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md</a> for the workplan and open questions.
+        See <a href="https://github.com/arossti/OpenBuilding/blob/main/BEAMweb.md" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md</a> for the workplan and open questions.
       </p>
       <p style="margin:6px 0">
         Data source: <a href="database.html" class="db-kv-link">BfCA Material Database</a>.
@@ -318,7 +327,7 @@ function defaultStub(tab) {
       </ul>
       <p style="margin-top: 14px;">
         Awaiting BEAM CSV exports (with formulas) from the unlocked workbook.
-        See <a href="https://github.com/arossti/OpenBuilding/blob/beamweb/BEAMweb.md#2-reference-source--the-beam-and-mce²-spreadsheets" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md §2</a>.
+        See <a href="https://github.com/arossti/OpenBuilding/blob/main/BEAMweb.md#2-reference-source--the-beam-spreadsheet" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md §2</a>.
       </p>
     </div>
   `;

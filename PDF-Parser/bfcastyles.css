@@ -156,6 +156,13 @@ html.theme-dark {
   --sidebar-w: 240px;
   --toolbar-h: 42px;
   --statusbar-h: 28px;
+
+  /* Tell the browser to render native controls (number spinners,
+     checkboxes, scrollbars) in dark mode so spinner arrows render
+     light instead of near-black on our dark input backgrounds.
+     accent-color tints checkboxes/radios/progress/range cyan. */
+  color-scheme: dark;
+  accent-color: var(--accent);
 }
 
 html.theme-dark,
@@ -3211,6 +3218,77 @@ html.app-matrix body {
   border-bottom-color: var(--accent);
 }
 
+/* Group-header rows in the database viewer. Styled to echo the BEAMweb
+   assembly-tab group headers: rounded container, padded away from the
+   page edge, hover affordance, expanded-state contrast. The banner lives
+   inside an inner div so it can take margin + border-radius independently
+   of the table layout. */
+#db-table tbody tr.db-group-header {
+  border-bottom: none;
+}
+#db-table tbody tr.db-group-header td.db-group-header-cell {
+  padding: 8px 0;
+  background: transparent;
+  border-bottom: none;
+}
+.db-group-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 16px;
+  padding: 10px 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.1s, border-color 0.1s;
+}
+.db-group-bar:hover {
+  background: rgba(8, 145, 178, 0.12);
+  border-color: var(--accent);
+}
+#db-table tbody tr.db-group-header.expanded .db-group-bar {
+  background: rgba(8, 145, 178, 0.16);
+  border-color: var(--accent);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.db-group-caret {
+  display: inline-block;
+  width: 14px;
+  color: var(--accent-lit);
+  font-size: 10px;
+}
+.db-group-code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  background: rgba(0, 0, 0, 0.25);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+.db-group-name {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.03em;
+}
+.db-group-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-lit);
+  font-weight: 600;
+}
+/* Child rows under an expanded group header — slight indent so the
+   hierarchy reads at a glance. */
+#db-table tbody tr.db-row-main[data-group] td:first-child,
+#db-table tbody tr.db-detail-row[data-group] td:first-child {
+  padding-left: 32px;
+}
+
 #db-table td {
   padding: 6px 10px;
   color: var(--text);
@@ -3541,6 +3619,13 @@ html.app-matrix body {
 .beam-header {
   padding: 10px 16px;
   flex-shrink: 0;
+}
+.beam-header .header-logo {
+  height: 36px;
+  width: auto;
+  filter: none;
+  opacity: 1;
+  margin-right: 12px;
 }
 .beam-title-block {
   display: flex;
@@ -3933,6 +4018,408 @@ table.beam-glossary-table tbody tr {
   display: table;
   width: 100%;
   table-layout: fixed;
+}
+
+/* ── PROJECT tab ───────────────────────────────────────── */
+.bw-project-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.bw-project-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 18px;
+}
+.bw-section-title {
+  font-family: var(--font-head);
+  font-size: 15px;
+  margin: 0 0 12px 0;
+  color: var(--accent-lit);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.bw-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 24px;
+}
+.bw-field {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+}
+.bw-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+.bw-req {
+  color: var(--accent-lit);
+  font-weight: 600;
+}
+.bw-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bw-input {
+  flex: 1;
+  background: var(--bg-sunken, rgba(0,0,0,0.2));
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  min-width: 0;
+}
+.bw-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-lt);
+}
+.bw-input[readonly] {
+  background: transparent;
+  color: var(--text-dim);
+  border-color: transparent;
+}
+.bw-unit {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  min-width: 22px;
+}
+.bw-legend {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin: 12px 0 0 0;
+  line-height: 1.5;
+}
+
+.bw-dims-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.bw-dims-table thead th {
+  background: rgba(255,255,255,0.03);
+  color: var(--text-dim);
+  text-align: left;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.bw-dim-name-col { width: 280px; }
+.bw-dim-qty-col  { width: 220px; }
+.bw-dim-row td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.bw-dim-row:hover {
+  background: rgba(255,255,255,0.02);
+}
+.bw-dim-name {
+  font-weight: 600;
+  color: var(--text);
+  font-family: var(--font-head);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+.bw-dim-qty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.bw-dim-input {
+  width: 100px;
+}
+.bw-dim-volume {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent-lit);
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+}
+.bw-lhw-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.bw-lhw-group label {
+  font-size: 10px;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bw-lhw-input {
+  width: 70px;
+}
+.bw-lhw-x {
+  color: var(--text-dim);
+  font-weight: 600;
+  margin: 0 2px;
+  align-self: flex-end;
+  padding-bottom: 4px;
+}
+.bw-dim-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+.bw-dim-takeoff {
+  font-size: 10px;
+  color: var(--text-faint, #666);
+  font-style: italic;
+  margin-top: 3px;
+}
+
+/* ── Assembly picker (Footings & Slabs, future: all 12 assembly tabs) ── */
+.bw-asm-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.bw-asm-header {
+  position: sticky;
+  /* #beam-content has padding: 20px 28px. Bleed the sticky header out to
+     the scroll-container edges so picker rows can't show through the gap
+     above the totals when scrolling. top: -20px aligns the sticky anchor
+     with the scroll container's top edge (not its padding-inset content
+     area); the negative margins extend the header's background into that
+     padding; the matching padding keeps the interior layout unchanged. */
+  top: -20px;
+  margin: -20px -28px 0 -28px;
+  padding: 28px 28px 10px 28px;
+  z-index: 2;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.bw-asm-totals {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.bw-asm-total-cell {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bw-asm-total-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.bw-asm-total-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent-lit);
+}
+.bw-asm-total-unit {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.bw-asm-note {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 8px;
+}
+.bw-asm-note.bw-asm-error {
+  color: #ef4444;
+}
+
+.bw-asm-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.bw-asm-group {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.bw-asm-group-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(8, 145, 178, 0.08);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+.bw-asm-group-header:hover {
+  background: rgba(8, 145, 178, 0.14);
+}
+/* The inline config (thickness / R-value / rebar length) and its input
+   keep the default cursor so it reads as editable, not clickable. */
+.bw-asm-cfg,
+.bw-asm-cfg-input {
+  cursor: text;
+}
+.bw-asm-toggle {
+  background: transparent;
+  border: none;
+  color: var(--accent-lit);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 0 4px;
+  min-width: 18px;
+}
+.bw-asm-group-name {
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  flex: 0 0 auto;
+  letter-spacing: 0.03em;
+}
+.bw-asm-cfg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-left: 12px;
+}
+.bw-asm-cfg-label {
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+.bw-asm-cfg-input {
+  width: 70px;
+}
+.bw-asm-cfg-unit {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.bw-asm-group-subtotal {
+  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.bw-asm-group-subtotal-val {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-lit);
+}
+.bw-asm-group-subtotal-unit {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.bw-asm-group-body {
+  padding: 8px 14px 12px 14px;
+}
+.bw-asm-group-body[hidden] { display: none; }
+.bw-asm-empty {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin: 6px 0;
+  font-style: italic;
+}
+.bw-asm-sub {
+  margin-top: 8px;
+}
+.bw-asm-sub-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 0;
+  border-bottom: 1px dashed var(--border);
+  margin-bottom: 4px;
+}
+.bw-asm-rows {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.bw-asm-rows thead th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-dim);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border);
+}
+.bw-asm-rows tbody td {
+  padding: 3px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  vertical-align: middle;
+}
+.bw-asm-col-sel { width: 28px; }
+.bw-asm-col-name {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bw-asm-col-qty { width: 90px; }
+.bw-asm-col-unit { width: 36px; color: var(--text-dim); font-family: var(--font-mono); }
+.bw-asm-col-pct { width: 80px; white-space: nowrap; }
+.bw-asm-col-net { width: 100px; text-align: right; font-family: var(--font-mono); font-weight: 600; }
+.bw-asm-col-foot { width: 120px; font-size: 10px; color: var(--text-dim); }
+.bw-asm-col-foot.expired {
+  color: #c084fc;
+}
+.bw-asm-qty, .bw-asm-pct {
+  width: 72px;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+.bw-asm-pct-sign {
+  color: var(--text-dim);
+  font-size: 10px;
+  margin-left: 2px;
+}
+.bw-asm-row-selected {
+  background: rgba(234, 88, 12, 0.08);  /* warm orange wash matching BEAM */
+}
+.bw-asm-row-selected .bw-asm-col-net {
+  color: #fb923c;
+}
+.bw-asm-nofactor {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: help;
+}
+
+/* Hero logo on the Introduction tab — centered above the welcome copy
+   so it's instantly clear which app you're in. */
+.bw-intro-logo {
+  display: block;
+  margin: 0 auto 20px auto;
+  width: 180px;
+  height: auto;
 }
 
 /* ═════════════════════════════════════════════════════════════

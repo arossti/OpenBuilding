@@ -30,15 +30,18 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Stage schema data into PDF-Parser/data/schema
+      - name: Stage schema + BEAM CSV data into PDF-Parser/data
         # database.html reads the committed BEAM material catalogue from
-        # schema/materials/ and friends. Local dev runs `npm run stage:data`
-        # (see PDF-Parser/package.json) to produce the same layout.
+        # schema/materials/ and friends. BEAMweb assembly tabs fetch picker
+        # CSVs from docs/csv files from BEAM/. Local dev runs
+        # `npm run stage:data` (see PDF-Parser/package.json) to produce the
+        # same layout.
         run: |
-          mkdir -p PDF-Parser/data/schema
+          mkdir -p PDF-Parser/data/schema PDF-Parser/data/beam
           cp -r schema/materials PDF-Parser/data/schema/
           cp schema/material.schema.json PDF-Parser/data/schema/
           cp schema/sample.json PDF-Parser/data/schema/
+          cp "docs/csv files from BEAM/Footings & Slabs.csv" PDF-Parser/data/beam/footings-slabs.csv
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

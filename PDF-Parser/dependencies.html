@@ -462,21 +462,76 @@
       async function runDriftDetector() {
         const report = document.getElementById("drift-report");
 
-        // Fetch each app's HTML in parallel; parse tags.
+        // Module graph walker — transitively fetches ESM imports starting
+        // from a seed list, returns the concatenated text of every module
+        // visited. Lets us detect deps loaded via `import` from a .mjs
+        // entry point, not only deps loaded by a literal <script src>.
+        const moduleCache = new Map();  // path -> text (shared across apps)
+        function resolveRel(fromPath, importPath) {
+          if (/^https?:/.test(importPath)) return importPath;
+          const dir = fromPath.includes("/") ? fromPath.slice(0, fromPath.lastIndexOf("/") + 1) : "";
+          const segs = (dir + importPath).split("/");
+          const out = [];
+          for (const s of segs) {
+            if (s === "" || s === ".") continue;
+            if (s === "..") out.pop();
+            else out.push(s);
+          }
+          return out.join("/");
+        }
+        async function walkModules(seeds) {
+          const visited = new Set();
+          const queue = seeds.filter(p => /\.m?js$/i.test(p) && !/^https?:/.test(p));
+          const blobs = [];
+          const MAX = 80;  // hard cap so we don't runaway
+          while (queue.length && visited.size < MAX) {
+            const path = normalise(queue.shift());
+            if (visited.has(path)) continue;
+            visited.add(path);
+            let text = moduleCache.get(path);
+            if (text === undefined) {
+              try {
+                const res = await fetch(path, { cache: "no-cache" });
+                text = res.ok ? await res.text() : "";
+              } catch { text = ""; }
+              moduleCache.set(path, text);
+            }
+            if (!text) continue;
+            blobs.push(text);
+            // Collect both static imports (`from "..."`) and dynamic (`import("...")`)
+            const re = /(?:\bfrom\s+|\bimport\s*\(\s*)["']([^"']+)["']/g;
+            let m;
+            while ((m = re.exec(text)) !== null) {
+              const imp = m[1];
+              // Skip bare specifiers (e.g., node builtins); only relative / absolute
+              if (!imp.startsWith(".") && !imp.startsWith("/") && !imp.startsWith("http")) continue;
+              queue.push(resolveRel(path, imp));
+            }
+          }
+          return blobs.join("\n");
+        }
+
+        // Fetch each app's HTML in parallel; parse tags; walk the ESM graph.
         const apps = {};
         const parser = new DOMParser();
         await Promise.all(Object.entries(APP_FILES).map(async ([name, file]) => {
           try {
             const res = await fetch(file, { cache: "no-cache" });
-            if (!res.ok) { apps[name] = { error: `HTTP ${res.status}`, urls: [] }; return; }
+            if (!res.ok) { apps[name] = { error: `HTTP ${res.status}`, urls: [], moduleText: "" }; return; }
             const html = await res.text();
             const doc = parser.parseFromString(html, "text/html");
             const urls = [];
-            for (const s of doc.querySelectorAll("script[src]"))  urls.push(normalise(s.getAttribute("src")));
+            const moduleSeeds = [];
+            for (const s of doc.querySelectorAll("script[src]")) {
+              const src = s.getAttribute("src");
+              urls.push(normalise(src));
+              if (s.getAttribute("type") === "module") moduleSeeds.push(normalise(src));
+            }
             for (const l of doc.querySelectorAll("link[rel='stylesheet'][href]")) urls.push(normalise(l.getAttribute("href")));
-            apps[name] = { urls };
+            const moduleText = await walkModules(moduleSeeds);
+            apps[name] = { urls, moduleText };
           } catch (e) {
-            apps[name] = { error: e.message, urls: [] };
+            apps[name] = { error: e.message, urls: [], moduleText: "" };
           }
         }));
 
@@ -484,9 +539,19 @@
         const manifestUrls = new Map();  // url → MANIFEST entry
         for (const dep of MANIFEST) manifestUrls.set(normalise(dep.url), dep);
 
+        // A dep is "loaded" by an app if its URL appears as a <script>/<link>
+        // tag OR as a substring in any module fetched via the ESM graph walk.
+        // The substring check catches both `import "lib/pdf.min.mjs"` and
+        // string-literal worker paths like `GlobalWorkerOptions.workerSrc = "lib/..."`.
+        function isLoaded(app, depUrl) {
+          if (app.urls.some(u => u === depUrl)) return true;
+          if (app.moduleText && app.moduleText.includes(depUrl)) return true;
+          return false;
+        }
+
         // Compute drift
         const findings = [];
-        // Stale: manifest says app X uses dep Y, but app X's HTML doesn't include Y
+        // Stale: manifest says app X uses dep Y, but X's HTML + module graph doesn't include Y
         for (const dep of MANIFEST) {
           // Planned deps are aspirational — don't treat them as drift
           if (dep.status === "planned") continue;
@@ -494,8 +559,7 @@
             const app = apps[appName];
             if (!app || app.error) continue;
             const depUrl = normalise(dep.url);
-            const loaded = app.urls.some(u => u === depUrl);
-            if (!loaded) {
+            if (!isLoaded(app, depUrl)) {
               findings.push({
                 kind: "stale",
                 text: `manifest says ${appName} uses ${dep.name} (${dep.version}) but ${APP_FILES[appName]} does not load it`

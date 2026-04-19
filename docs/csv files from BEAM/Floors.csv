@@ -1,0 +1,320 @@
+,FLOORS,,,,,,,,,,,,
+,"PROJECT NAME:    Sample Project DOE Prototype
+SCENARIO:              Baseline
+BEAM VERSION:     V1.1",SECTION COMPLETE?,False,,,,"2,269   ","2,269   ",0   ,0   ,,,T09
+"
+Select materials in your project using the checkboxes (col. G). Once selected, the emissions of these materials will be added to the section SUBTOTAL (G2) and to the project total. 
+
+The NET CARBON column (col. H) presents the net material carbon emissions (EMISSIONS minus STORAGE) of each material based on the QUANTITY and PERCENTAGE entered. 
+
+Where applicable, the R-VALUE, THICKNESS, FRAMING SPACING, etc. must be entered in the AVACADO GREEN cells.
+
+Update the PERCENTAGE value (col. E) as appropriate. Understand that the carbon values will only update for that row, after which comparison with other rows may no longer be valid.
+",,,,,,,,,,,,,
+CATEGORY,MATERIAL,QUANTITY,UNITS,%,,SELECT,"NET
+EMISSIONS
+kg CO₂e","GROSS
+EMISSIONS
+kg CO₂e","STORAGE
+Short Cycle
+kg CO₂🤚","STORAGE
+Long Cycle
+kg CO₂ 🤚","SELECT
+Long Cycle",FOOTNOTE,ID
+OPEN WEB STEEL JOIST FLOOR FRAMING,,FRAMING SPACING,,in,,,,,,,,,T09|C01
+OPEN WEB STEEL FLOOR JOIST SYSTEM,,,,,,,,,,,,,T09|C01|S01
+,"Steel joists / Open web / Steel Joist Institute / 12"" 12K3 joist [Industry Avg | US & CA]",104.4,m²,1.0,,False,0,0,0,0,,,T09|C01|S01|sss004
+COLD-FORMED STEEL JOIST FLOOR FRAMING,,,,,,,,,,,,,T09|C06
+"12"" LIGHT STEEL FLOOR ASSEMBLY",,,,,,,,,,,,,T09|C06|S01
+,"Cold-formed steel floor joist assembly / ClarkDietrich / 12"" o.c. spacing, 12"" height, 14g (Joist: 1200S162-68, Rim: 1200S125-68)",104.4,m²,1.0,,False,5140.88568,5140.88568,0,0,,Expired 2026-01-01,T09|C06|S01|bv0gw2
+,"Cold-formed steel floor joist assembly / ClarkDietrich / 16"" o.c. spacing, 12"" height, 14g (Joist: 1200S162-68, Rim: 1200S125-68)",104.4,m²,1.0,,False,3985.49088,3985.49088,0,0,,Expired 2026-01-01,T09|C06|S01|9wmfex
+,"Cold-formed steel floor joist assembly / ClarkDietrich / 24"" o.c. spacing, 12"" height, 14g (Joist: 1200S162-68, Rim: 1200S125-68)",104.4,m²,1.0,,False,2829.847608,2829.847608,0,0,,Expired 2026-01-01,T09|C06|S01|gsl3dd
+"10"" LIGHT STEEL FLOOR ASSEMBLY",,,,,,,,,,,,,T09|C06|S02
+,"Cold-formed steel floor joist assembly / ClarkDietrich / 12"" o.c. spacing, 10"" height, 16g (Joist: 1000S162-54, Rim: 1000S125-54)",104.4,m²,1.0,,False,3584.954016,3584.954016,0,0,,Expired 2026-01-01,T09|C06|S02|xv9sm2
+,"Cold-formed steel floor joist assembly / ClarkDietrich / 16"" o.c. spacing, 10"" height, 16g (Joist: 1000S162-54, Rim: 1000S125-54)",104.4,m²,1.0,,False,2777.91696,2777.91696,0,0,,Expired 2026-01-01,T09|C06|S02|cx93wm
+,"Cold-formed steel floor joist assembly / ClarkDietrich / 24"" o.c. spacing, 10"" height, 16g (Joist: 1000S162-54, Rim: 1000S125-54)",104.4,m²,1.0,,False,1970.879904,1970.879904,0,0,,Expired 2026-01-01,T09|C06|S02|20fslq
+"8"" LIGHT STEEL FLOOR ASSEMBLY",,,,,,,,,,,,,T09|C06|S03
+,"Cold-formed steel floor joist assembly / ClarkDietrich / 12"" o.c. spacing, 8"" height, 18g (Joist: 800S162-43, Rim: 800S125-43)",104.4,m²,1.0,,False,2455.897248,2455.897248,0,0,,Expired 2026-01-01,T09|C06|S03|e923k2
+,"Cold-formed steel floor joist assembly / ClarkDietrich / 16"" o.c. spacing, 8"" height, 18g (Joist: 800S162-43, Rim: 800S125-43)",104.4,m²,1.0,,False,1901.556216,1901.556216,0,0,,Expired 2026-01-01,T09|C06|S03|3kg0d7
+,"Cold-formed steel floor joist assembly / ClarkDietrich / 24"" o.c. spacing, 8"" height, 18g (Joist: 800S162-43, Rim: 800S125-43)",104.4,m²,1.0,,False,1347.215184,1347.215184,0,0,,Expired 2026-01-01,T09|C06|S03|v2r3a4
+LAMINATED TIMBER FLOOR PANELS,,,,,,,,,,,,,T09|C02
+GLUED LAMINATED TIMBER (GLT) FLOOR SYSTEM,,,,,,,,,,,,,T09|C02|S01
+,"Glued Laminated Timber (Glulam) / AWC & CWC / 3-1/2"" Panel [Industry Avg | US & CA]",104.4,m²,1.0,,False,1276.146868,1276.146868,0,8325.946786,False,Expired 2025; BfCA BioC calc by mass,T09|C02|S01|vd92kd
+,"Glued Laminated Timber (Glulam) / Structurlam / Glulam Plus  3-1/2"" Panel / BC",104.4,m²,1.0,,False,1072.711253,1072.711253,0,8332.030264,False,Expired 2025; BfCA BioC calc by mass,T09|C02|S01|da1134
+CROSS-LAMINATED TIMBER (CLT) FLOOR PANELS,,,,,,,,,,,,,T09|C02|S02
+,Cross Laminated Timber (CLT) [BEAM Avg | US & CA],104.4,m²,1.0,,False,1105.149152,1105.149152,0,7465.237509,False,,T09|C02|S02|LAm00x
+,"Cross Laminated Timber (CLT) / Nordic  / Nordic Lam / 3-1/2""",104.4,m²,1.0,,False,1265.347675,1265.347675,0,7292.632515,False,BfCA BioC calc by mass,T09|C02|S02|LAm010
+,"Cross Laminated Timber (CLT) / Vaagen / Crosslam CLT / 3-1/2""",104.4,m²,1.0,,False,1263.1008,1263.1008,0,7102.0086,False,,T09|C02|S02|LAm009
+,"Cross Laminated Timber (CLT) / Structurlam / CrossLam / 3-1/2""",104.4,m²,1.0,,False,1165.29192,1165.29192,0,7426.595041,False,Expired 2025; BfCA BioC calc by mass,T09|C02|S02|134c8d
+,"Cross Laminated Timber (CLT) / Kalesnikoff / 3-1/2""",104.4,m²,1.0,,False,1155.708,1155.708,0,8734.193398,False,,T09|C02|S02|LAm008
+,"Cross Laminated Timber (CLT) / Element5 / Crosslam CLT / 3-1/2""",104.4,m²,1.0,,False,1132.16,1132.16,0,7232.9008,False,,T09|C02|S02|LAm007
+,"Cross Laminated Timber (CLT) / Nordic  / X-Lam / 3-1/2""",104.4,m²,1.0,,False,649.2865144,649.2865144,0,7003.094698,False,BfCA BioC calc by mass,T09|C02|S02|LAm011
+DOWEL-LAMINATED TIMBER (DLT) FLOOR SYSTEM,,,,,,,,,,,,,T09|C02|S03
+,"Dowel Laminated Timber / StructureCraft / DowelLam / 3-1/2""",104.4,m²,1.0,,False,1126.732824,1126.732824,0,7718.296186,False,Expired 2025,T09|C02|S03|c930d2
+LIGHT WOOD FLOOR FRAMING,,FRAMING SPACING,16.0,in,,,,,,,,,T09|C03
+WOOD I-JOIST FRAMING,,,,,,,,,,,,,T09|C03|S01
+,"Wood I joist / TJI 230/360 / 16"" Depth / AWC & CWC [Industry Avg | US & CA]",104.4,m²,1.0,,False,648.4210016,648.4210016,0,2562.414973,False,Expired 2025,T09|C03|S01|f53d9a
+,"Wood I joist / TJI 230/360 / 14"" Depth / AWC & CWC [Industry Avg | US & CA]",104.4,m²,1.0,,False,611.6771448,611.6771448,0,2417.211458,False,Expired 2025,T09|C03|S01|a6h0p2
+,"Wood I joist / TJI 230/360 / 11-7/8"" Depth / AWC & CWC [Industry Avg | US & CA]",104.4,m²,1.0,,True,556.0210089,556.0210089,0,2197.27084,False,Expired 2025,T09|C03|S01|cec541
+,"Wood I joist / TJI 230/360 / 9-1/2"" Depth / AWC & CWC [Industry Avg | US & CA]",104.4,m²,1.0,,False,500.3648729,500.3648729,0,1977.330221,False,Expired 2025,T09|C03|S01|d92kl5
+,"Wood I joist / RedBuilt / Red-I Joists / Red I-65 / 16"" depth, 2.5 x 1.5"" LVL flanges",104.4,m²,1.0,,False,1338.563541,1338.563541,0,2580.500241,False,BfCA BioC calc by mass,T09|C03|S01|WIJ005
+,"Wood I joist / RedBuilt / Red-I Joists / Red I-65 / 14"" depth, 2.5 x 1.5"" LVL flanges",104.4,m²,1.0,,False,1242.340922,1242.340922,0,2395.001023,False,BfCA BioC calc by mass,T09|C03|S01|WIJ004
+,"Wood I joist / RedBuilt / Red-I Joists / Red I-65 / 11.875"" depth, 2.5 x 1.5"" LVL flanges",104.4,m²,1.0,,False,1143.980023,1143.980023,0,2205.379599,False,BfCA BioC calc by mass,T09|C03|S01|WIJ003
+,"Wood I joist / RedBuilt / Red-I Joists / Red I-45 / 16"" depth, 1.75 x 1.5"" LVL flanges",104.4,m²,1.0,,False,953.6730658,953.6730658,0,1838.503367,False,BfCA BioC calc by mass,T09|C03|S01|WIJ002
+,"Wood I joist / RedBuilt / Red-I Joists / Red I-45 / 14"" depth, 1.75 x 1.5"" LVL flanges",104.4,m²,1.0,,False,795.440315,795.440315,0,1533.460207,False,BfCA BioC calc by mass,T09|C03|S01|WIJ001
+,"Wood I joist / RedBuilt / Red-I Joists / Red I-45 / 11.875"" depth, 1.75 x 1.5"" LVL flanges",104.4,m²,1.0,,False,43.38331695,43.38331695,0,1352.083194,False,BfCA BioC calc by mass,T09|C03|S01|WIJ000
+WOOD FLOOR TRUSSES,,,,,,,,,,,,,T09|C03|S02
+,"Wood floor truss / Common (Warren, 45 deg) web pattern / Top chord bearing, variable depth / QWEB [Industry Avg | CA]",104.4,m²,1.0,,False,529.4909055,529.4909055,0,2036.778023,False,Expired 2022; BfCA BioC calc by mass,T09|C03|S02|2480d6
+FRAMING LUMBER – SPRUCE-PINE-FIR,,,,,,,,,,,,,T09|C03|S03
+,Wood / SPF / 2x12 Lumber / AWC & CWC [Industry Avg | US & CA],104.4,m²,1.0,,False,236.3183544,236.3183544,0,59543.21073,False,Expired 2025; BfCA BioC calc by mass,T09|C03|S03|o3kwx9
+,Wood / SPF / 2x10 Lumber / AWC & CWC [Industry Avg | US & CA],104.4,m²,1.0,,False,194.3062025,194.3062025,0,48957.75104,False,Expired 2025; BfCA BioC calc by mass,T09|C03|S03|8vkef3
+,Wood / SPF / 2x8 Lumber / AWC & CWC [Industry Avg | US & CA],104.4,m²,1.0,,False,152.2940506,152.2940506,0,38372.29136,False,Expired 2025; BfCA BioC calc by mass,T09|C03|S03|4lv9wd
+,Wood / SPF / 2x8 Lumber / Surfaced Dry Softwood Lumber Produced in British Columbia,104.4,m²,1.0,,False,110.6496382,110.6496382,0,35717.46158,False,,T09|C03|S03|SPF002
+,Wood / SPF / 2x6 Lumber / AWC & CWC [Industry Avg | US & CA],104.4,m²,1.0,,False,115.5334177,115.5334177,0,29110.01413,False,Expired 2025; BfCA BioC calc by mass,T09|C03|S03|c309dk
+,Wood / SPF / 2x6 Lumber / Surfaced Dry Softwood Lumber Produced in British Columbia,104.4,m²,1.0,,False,83.94110481,83.94110481,0,27096.00534,False,,T09|C03|S03|SPF001
+WOOD/STEEL HYBRID FLOOR TRUSSES,,,,,,,,,,,,,T09|C03|S04
+,"Wood/steel hybrid floor truss / RedBuilt / Red-S Open-Web / 16"" deep, double 1.5 x 2.3"" LVL chords",104.4,m²,1.0,,False,184.478976,184.478976,0,2203.567641,False,BfCA BioC calc by mass,T09|C03|S04|TRU001
+,"Wood/steel hybrid floor truss / RedBuilt / Red-W Open-Web / 14"" deep, 1.5 x 4.25"" chords",104.4,m²,1.0,,False,176.8797,176.8797,0,1942.419168,False,BfCA BioC calc by mass,T09|C03|S04|TRU002
+,"Wood/steel hybrid floor truss / RedBuilt / Red-L Open-Web / 14"" deep, 1.5 x 3.5"" chords",104.4,m²,1.0,,False,145.43442,145.43442,0,1623.514529,False,BfCA BioC calc by mass,T09|C03|S04|TRU000
+SUB FLOORING,,,,,,,,,,,,,T09|C04
+ORIENTED STRAND BOARD (OSB),,,,,,,,,,,,,T09|C04|S01
+,"OSB sheathing / 3/4"" / AWC & CWC [Industry Avg | US & CA]",104.4,m²,1.0,,False,482.4479556,482.4479556,0,1950.883139,False,Expired 2025; BfCA BioC calc by mass,T09|C04|S01|69ac20
+,"OSB sheathing / 5/8"" / AWC & CWC [Industry Avg | US & CA]",104.4,m²,1.0,,True,402.1665898,402.1665898,0,1626.247992,False,Expired 2025; BfCA BioC calc by mass,T09|C04|S01|68328c
+,"OSB sheathing / 1/2"" / AWC & CWC [Industry Avg | US & CA]",104.4,m²,1.0,,False,321.6319704,321.6319704,0,1300.588759,False,Expired 2025; BfCA BioC calc by mass,T09|C04|S01|edcc0d
+,"OSB subflooring / Huber  / AdvanTech / 19/32"" Subflooring",104.4,m²,1.0,,False,739.978887,739.978887,0,1613.991793,False,Expired 2025-07-01; BfCA BioC calc by mass,T09|C04|S01|OSB006
+,"OSB subflooring / LP / LP Legacy® Premium / 5/8""",104.4,m²,1.0,,False,469.527255,469.527255,0,1942.291556,False,,T09|C04|S01|OSB007
+PLYWOOD,,,,,,,,,,,,,T09|C04|S02
+,"Plywood / 3/4"" / AWC & CWC [Industry Avg | US & CA]",104.4,m²,1.0,,False,436.1880024,436.1880024,0,1543.613785,False,Expired 2025; BfCA BioC calc by mass,T09|C04|S02|61a79e
+,"Plywood / 3/4"" / British Columbia Average",104.4,m²,1.0,,False,262.044,262.044,0,1279.716408,False,,T09|C04|S02|PLy001
+,"Plywood / 3/4"" / Roseburg softwood plywood",104.4,m²,1.0,,False,313.2,313.2,0,1427.299098,False,Expired 2024; BfCA BioC calc by mass,T09|C04|S02|PLy005
+,"Plywood / 5/8"" / AWC & CWC [Industry Avg | US & CA]",104.4,m²,1.0,,False,364.0624272,364.0624272,0,1288.370561,False,Expired 2025; BfCA BioC calc by mass,T09|C04|S02|d88aad
+,"Plywood / 5/8"" / British Columbia Average",104.4,m²,1.0,,False,218.196,218.196,0,1015.774899,False,,T09|C04|S02|PLy002
+,"Plywood / 1/2"" / AWC & CWC [Industry Avg | US & CA]",104.4,m²,1.0,,False,290.7920016,290.7920016,0,1029.075857,False,Expired 2025; BfCA BioC calc by mass,T09|C04|S02|c41283
+,"Plywood / 1/2"" / British Columbia Average",104.4,m²,1.0,,False,174.348,174.348,0,812.6199191,False,,T09|C04|S02|PLy000
+,"Plywood / 1/2"" / Roseburg softwood plywood / ",104.4,m²,1.0,,False,208.7478,208.7478,0,951.2948489,False,Expired 2024; BfCA BioC calc by mass,T09|C04|S02|PLy004
+WOOD BOARDS,,,,,,,,,,,,,T09|C04|S03
+,"Wood / SPF / 3/4"" boards / AWC & CWC [Industry Avg | US & CA]",104.4,m²,1.0,,False,125.5343184,125.5343184,0,1510.886666,False,Expired 2025; BfCA BioC calc by mass,T09|C04|S03|4scwf3
+FLOOR UNDERLAYMENT,,,,,,,,,,,,,T09|C05
+CEMENT BOARD,,,,,,,,,,,,,T09|C05|S01
+,"Cement board / 5/8"" (16 mm) / Durock with EdgeGuard / USG (Baltimore, MD plant)",104.4,m²,1.0,,False,1249.990527,1249.990527,0,0,,Expired 2025,T09|C05|S01|m210vf
+,"Cement board / 1/2"" (13 mm) / Durock with EdgeGuard / USG (Baltimore, MD plant)",104.4,m²,1.0,,False,1025.109107,1025.109107,0,0,,Expired 2025,T09|C05|S01|cfd454
+,"Cement board / 1/4"" (6 mm) / Durock with EdgeGuard / USG (Baltimore, MD plant)",104.4,m²,1.0,,False,715.2804736,715.2804736,0,0,,Expired 2025,T09|C05|S01|f034jf
+GYPSUM CONCRETE UNDERLAYMENT,,,,,,,,,,,,,T09|C05|S02
+,Gypsum concrete floor underlayment / USG / Levelrock 2500 Green / 30 mm,104.4,m²,1.0,,False,984.98268,984.98268,0,0,,Expired 2025-04-17,T09|C05|S02|d00294
+FLOORING,,,,,,,,,,,,,T09|C07
+LAMINATE FLOORING,,,,,,,,,,,,,T09|C07|S01
+,Rigid core vinyl flooring  / Resilient Floor Covering Institute [Industry Avg | US & CA],104.4,m²,1.0,,False,2140.2,2140.2,0,0,,Expired 2024,T09|C07|S01|LVT000
+,Luxury Vinyl Tile / Resilient Floor Covering Institute / LVT and SVT [Industry Avg | US & CA],73.08,m²,0.7,,True,869.652,869.652,0,0,,Expired 2024,T09|C07|S01|LVT001
+,Luxury vinyl tile (LVT) / Mohawk / Hot & Heavy Floating Tiles / 5.0 mm,104.4,m²,1.0,,False,1209.996,1209.996,0,0,,,T09|C07|S01|LVT002
+,Luxury vinyl tile (LVT) / Congoleum / CLEO / 4.1mm,104.4,m²,1.0,,False,1148.4,1148.4,0,0,,,T09|C07|S01|LVT003
+,Luxury vinyl tile (LVT) / Altro / Altro Lavencia / 3.0 mm,104.4,m²,1.0,,False,1141.9272,1141.9272,0,0,,,T09|C07|S01|LVT013
+,Luxury vinyl tile (LVT)  / Parterre Flooring / Dryback LVT / Tile or plank - 5 mm,104.4,m²,1.0,,False,1137.96,1137.96,0,0,,,T09|C07|S01|LVT004
+,Luxury vinyl tile (LVT) / Interface / All tile & plank models / 3.0 mm,104.4,m²,1.0,,False,1085.76,1085.76,0,0,,,T09|C07|S01|LVT005
+,Luxury vinyl tile (LVT) / Mannington / All tile & plank models / 4.0 mm,104.4,m²,1.0,,False,1054.44,1054.44,0,0,,,T09|C07|S01|LVT006
+,Luxury vinyl tile (LVT)  / Shaw - Patcraft / Luxury Vinyl Tile / 2 - 5 mm,104.4,m²,1.0,,False,1001.196,1001.196,0,0,,Expired 2026,T09|C07|S01|LVT007
+,"Luxury vinyl tile (LVT) / Armstrong / Biome, Coalesce, Duo, Exchange, Parallel USA, Terra & Theorem / 2.5 mm",104.4,m²,1.0,,False,718.272,718.272,0,0,,,T09|C07|S01|LVT008
+,Rigid core vinyl flooring / Parterre Flooring / Rigid Core Click / Tile or plank - 5 mm,104.4,m²,1.0,,False,680.688,680.688,0,0,,,T09|C07|S01|LVT009
+,Luxury vinyl tile (LVT) / Mannington / Luxury Vinyl Tile / 2.5 mm Tile and Plank,104.4,m²,1.0,,False,679.644,679.644,0,0,,,T09|C07|S01|LVT011
+,Luxury Vinyl Tile (LVT) / Fuhua / FloraFloor / Click & Loose lay / 4.0 mm,104.4,m²,1.0,,False,587.772,587.772,0,0,,,T09|C07|S01|LVT012
+RUBBER FLOORING,,,,,,,,,,,,,T09|C07|S02
+,Rubber flooring / Resilient Floor Covering Institute / Includes tiles and rolls / 2mm [Industry Avg | US & CA],104.4,m²,1.0,,False,1628.64,1628.64,0,0,,Expired 2024,T09|C07|S02|891444
+,Rubber flooring / ECOsurfaces / 6mm,104.4,m²,1.0,,False,615.96,615.96,0,0,,Expired 2020,T09|C07|S02|e06534
+HARDWOOD FLOORING,,,,,,,,,,,,,T09|C07|S03
+,"Hardwood flooring / NWFA and Decorative Hardwoods Association / Solid Wood Flooring /  3/4""  [Industry Avg | US & CA]",104.4,m²,1.0,,False,1022.3892,1022.3892,0,2077.4556,False,,T09|C07|S03|wwf000
+,"Hardwood flooring / mafi / Natural Hardwood Planks / 3/4"", 3 ply laminated solid, oil pre-finished [EU]",104.4,m²,1.0,,False,1460.101164,1460.101164,0,1951.546322,False,Expired 2025; BfCA BioC calc by mass,T09|C07|S03|ac0e7f
+,"Hardwood flooring / Wickham / Solid Hardwood / 3/4""",104.4,m²,1.0,,False,334.08,334.08,0,1968.462,False,,T09|C07|S03|wwf001
+ENGINEERED WOOD FLOORING,,,,,,,,,,,,,T09|C07|S15
+,"Engineered Wood Flooring / NWFA and Decorative Hardwoods Association / 3/8"" to 3/4""  [Industry Avg | US & CA]",104.4,m²,1.0,,False,715.0356,715.0356,0,1101.2112,False,,T09|C07|S15|EWF000
+,"Engineered Wood Flooring / CRAFT Artisan Wood Floors / Engineered / 5/8""",104.4,m²,1.0,,False,1607.76,1607.76,0,1340.526651,False,BfCA BioC calc by mass,T09|C07|S15|EWF003
+,Engineered Wood flooring / Wickham / Engineered Hardwood / 16 mm,104.4,m²,1.0,,False,1096.2,1096.2,0,1267.5204,False,,T09|C07|S15|EWF001
+CERAMIC TILE FLOORING,,,,,,,,,,,,,T09|C07|S04
+,Ceramic tile / Tile Council of North America/ 18.8 kg/m2 / [Industry Avg | US & CA] ,31.32,m²,0.3,,True,441.612,441.612,0,0,,"Expired 2025, Mortar EPD added",T09|C07|S04|CER000
+,Ceramic tile / Fireclay Tile / Ceramic / Standard and Second grade /,104.4,m²,1.0,,False,5019.552,5019.552,0,0,,"Expired 2025-05-22, Mortar EPD added",T09|C07|S04|CER002
+,Ceramic tile / Crossville / Porcelain / Standard grade (mortar included),104.4,m²,1.0,,False,2722.752,2722.752,0,0,,"Expired 2024, Mortar EPD added",T09|C07|S04|4dadb7
+,Ceramic tile / American Wonder Porcelain / Porcelain - recycled content / Standard and Second grade /,104.4,m²,1.0,,False,1428.192,1428.192,0,0,,"Expired 2024-12-06, Mortar EPD added",T09|C07|S04|CER001
+CARPET,,,,,,,,,,,,,T09|C07|S05
+,Carpet / [BEAM Avg],104.4,m²,1.0,,False,1256.80896,1256.80896,0,0,,,T09|C07|S05|CAR00x
+,Carpet / Shaw / Residential Broadloom,104.4,m²,1.0,,False,3184.2,3184.2,0,0,,,T09|C07|S05|CAR001
+,Carpet / Shaw / Strataworx / Carpet tile,104.4,m²,1.0,,False,1889.64,1889.64,0,0,,,T09|C07|S05|CAR003
+,Carpet / Shaw / StrataWorx Carpet tile witn Nylon-6 Face Fiber / 5.7 mm,104.4,m²,1.0,,False,1889.64,1889.64,0,0,,,T09|C07|S05|CAR004
+,Carpet / Venture Carpet / Average Product - Nylon 2520 Yarn System / 3.5 mm Modular Carpet,104.4,m²,1.0,,False,1396.872,1396.872,0,0,,,T09|C07|S05|CAR005
+,Carpet / Venture Carpet / Polyester Yarn System / 10.0 mm Modular Carpet,104.4,m²,1.0,,False,1031.472,1031.472,0,0,,,T09|C07|S05|CAR007
+,Carpet / Venture Carpet / Recycled nylon 6 yarn system / 3.5 mm Modular Carpet,104.4,m²,1.0,,False,814.32,814.32,0,0,,,T09|C07|S05|CAR008
+,Carpet / Shaw / Residential Broadloom with ClearTouch Platinum,104.4,m²,1.0,,False,749.592,749.592,0,0,,,T09|C07|S05|CAR002
+,Carpet / Venture Carpet / Average Product - Polypropylene Yarn System / 3.5 mm Modular Carpet,104.4,m²,1.0,,False,713.052,713.052,0,0,,,T09|C07|S05|CAR006
+,Carpet / Patcraft / Ecoworx carpet tiles with Needlebond polyester Face fiber / 3.71 mm,104.4,m²,1.0,,False,421.776,421.776,0,0,,,T09|C07|S05|CAR000
+,Carpet / Interface / CQUEST BioX / 1.5 mm Modular tile carpet,104.4,m²,1.0,,False,-10.0224,477.5256,487.548,0,,Expired 2025,T09|C07|S05|5a9ecd
+VINYL FLOORING,,,,,,,,,,,,,T09|C07|S06
+,Vinyl flooring / Resilient Floor Covering Institute / Heterogeneous [Industry Avg | US & CA],104.4,m²,1.0,,False,734.976,734.976,0,0,,Expired 2024,T09|C07|S06|LVT014
+,Vinyl flooring / Resilient Floor Covering Institute / Vinyl Composition Tile [Industry Avg | US & CA],104.4,m²,1.0,,False,517.824,517.824,0,0,,Expired 2024,T09|C07|S06|f2932d
+STONE PLASTIC COMPOSITE FLOORING,,,,,,,,,,,,,T09|C07|S07
+,Polyester-limestone composite tile / Armstrong / BioBased Tile (BBT™) / 2.0 mm,104.4,m²,1.0,,False,475.02,475.02,0,0,,Expired 2024,T09|C07|S07|2014f0
+NATURAL STONE FLOORING,,,,,,,,,,,,,T09|C07|S17
+,"Natural stone flooring / Natural Stone Institute / Includes limestone, granite, marble & quartzite / 1/2"" thickness / Mortar included / [Industry Avg, US]",104.4,m²,1.0,,False,2296.8,2296.8,0,0,,,T09|C07|S17|NSF000
+,"Marble flooring / Polycor Natural Stone / All marble products / 1/2"" thickness",104.4,m²,1.0,,False,3413.88,3413.88,0,0,,,T09|C07|S17|NSF003
+,"Granite flooring / Polycor Natural Stone / All granite products / 1/2"" thickness",104.4,m²,1.0,,False,2505.6,2505.6,0,0,,,T09|C07|S17|NSF001
+,"Limestone flooring / Polycor Natural Stone / All limestone products / 1/2"" thickness",104.4,m²,1.0,,False,958.392,958.392,0,0,,,T09|C07|S17|NSF002
+LINOLEUM FLOORING – LIQUID APPLIED,,,,,,,,,,,,,T09|C07|S08
+,Linoleum flooring / Mannington / Legato Flooring / 2.2 liquid applied,104.4,m²,1.0,,False,-132.62976,276.66,409.28976,0,,Expired 2025-11-05; BfCA BioC calc by mass,T09|C07|S08|lin006
+LINOLEUM FLOORING – 2.5 MM SHEET,,,,,,,,,,,,,T09|C07|S09
+,Linoleum flooring / 2.5 mm [BEAM Avg],104.4,m²,1.0,,False,18.2439,437.2834194,419.0395194,0,,,T09|C07|S09|p8c2la
+,Linoleum flooring / Gerflor  / DLW Linoleum Compact / 2.5 mm sheet style linoleum,104.4,m²,1.0,,False,120.9996,720.4644,599.4648,0,,,T09|C07|S09|lin003
+,Linoleum flooring / Forbo / Marmoleum / 2.0 mm sheet style linoleum,104.4,m²,1.0,,False,17.0172,273.528,256.5108,0,,,T09|C07|S09|lin005
+,Linoleum flooring / Forbo / Marmoleum / 2.5 mm sheet style linoleum,104.4,m²,1.0,,False,-2.4012,389.412,391.8132,0,,,T09|C07|S09|e075b4
+,"Linoleum flooring / Tarkett  / Lino Veneto xf2, Etrusco, Style Elle|Emme, Veneto, Originale, LinoRail, Linosport / 2.5 mm sheet style linoleum",104.4,m²,1.0,,False,-62.64,365.7292776,428.3692776,0,,Expired 2025-10-01; BfCA BioC calc by mass,T09|C07|S09|lin004
+LINOLEUM FLOORING – 4.0 MM SHEET,,,,,,,,,,,,,T09|C07|S10
+,Linoleum flooring / 4.0 mm [BEAM Avg],104.4,m²,1.0,,False,117.49176,671.6094282,554.1176682,0,,,T09|C07|S10|lin00X
+,Linoleum flooring / Gerflor  / DLW Linoleum Acousticplus / 4.0 mm sheet style linoleum with Neocare backing,104.4,m²,1.0,,False,399.33,1056.1104,656.7804,0,,,T09|C07|S10|lin000
+,Linoleum flooring / Tarkett  / Lino Acoustic / 3.8 mm sheet style linoleum with polyurethane foam backing,104.4,m²,1.0,,False,246.384,739.4127912,493.0287912,0,,Expired 2025-10-01; BfCA BioC calc by mass,T09|C07|S10|lin001
+,Linoleum flooring / Tarkett  / Veneto Acoustic Cork / 4.4 mm sheet style linoleum with cork backing,104.4,m²,1.0,,False,-43.1172,614.2545216,657.3717216,0,,Expired 2025-10-01; BfCA BioC calc by mass,T09|C07|S10|lin002
+EARTHEN FLOORS,,,,,,,,,,,,,T09|C07|S13
+,"Earthen Floor / Cast-in-place / Clay, sand, and straw / 4"" (100 mm) [US]",104.4,m²,1.0,,False,68.904,360.18,291.276,0,,,T09|C07|S13|95a692
+CORK FLOORING,,,,,,,,,,,,,T09|C07|S11
+,Cork flooring / Amorim /  Revestimentos S.A. / Cork floating floor planks [EU],104.4,m²,1.0,,False,481.674456,975.096,493.421544,0,,Expired 2021; BfCA BioC calc by mass,T09|C07|S11|a13a3e
+,Cork flooring / European Resilient Flooring Manufacturers' Institute [Industry Avg | EU],104.4,m²,1.0,,False,-286.056,80.2836,366.3396,0,,Expired 2024; BfCA BioC calc by mass,T09|C07|S11|ae7e1c
+HEMPWOOD FLOORING,,,,,,,,,,,,,T09|C07|S18
+,HempWood / Fibonacci / Natural Laminate Flooring / 16 mm,104.4,m²,1.0,,False,608.2993157,1169.28,560.9806843,1014.895833,False,BfCA BioC calc by mass,T09|C07|S18|HWF000
+BAMBOO FLOORING,,,,,,,,,,,,,T09|C07|S12
+,Bamboo Flooring [BEAM Avg],104.4,m²,1.0,,False,-1899.932487,861.53316,2761.465647,0,,,T09|C07|S12|BAM01X
+,"Laminated Bamboo flooring / MOSO / Bamboo Elite & Elite Premium, Industriale /  9/16"" (15mm)",104.4,m²,1.0,,False,-1129.77504,478.06848,1607.84352,0,,,T09|C07|S12|BAM008
+,"Hard Bamboo flooring / MOSO / Purebamboo, Topbamboo, Bamboo Supreme, UltraDensity / 9/16"" (15mm), High Density",104.4,m²,1.0,,False,-1280.78442,902.799,2183.58342,0,,,T09|C07|S12|BAM004
+,"Hard Bamboo flooring / MOSO / Solid & Supra Collection / 20mm, High Density",104.4,m²,1.0,,False,-3289.238,1203.732,4492.97,0,,,T09|C07|S12|BAM005
+FLOOR CAVITY INSULATION,,R-VALUE:,,,,,,,,,,,T09|C08
+HIGH R-VALUE CAVITY INSULATION,,,,,,,,,,,,,T09|C08|S01
+,Aerogel blanket / Aspen Aerogels / R9.6-inch,104.4,m²,1.0,,False,0,0,0,0,,Expired 2020,T09|C08|S01|199253
+SPRAY POLYURETHANE FOAM – HIGH DENSITY,,,,,,,,,,,,,T09|C08|S02
+,Spray polyurethane foam - High Density (HFC gas) / R 6.3-inch / SPFA [Industry Avg | US & CA],104.4,m²,1.0,,False,0,0,0,0,,A1-B1,T09|C08|S02|dc197c
+,Spray polyurethane foam - High Density (HFO gas) / R 6.5-inch / SPFA [Industry Avg | US & CA],104.4,m²,1.0,,False,0,0,0,0,,A1-A3 + B1,T09|C08|S02|ins045
+,Spray polyurethane foam - High Density  (HFC gas) / Carlisle CSFI / PremiSEAL / R 6.5-inch,104.4,m²,1.0,,False,0,0,0,0,,A1-A3 + B1,T09|C08|S02|ins046
+,Spray polyurethane foam - High Density  (HFO gas) / Carlisle CSFI / PremiR + EVO / R 6.5-inch,104.4,m²,1.0,,False,0,0,0,0,,A1-A3 + B1,T09|C08|S02|ins047
+SPRAY POLYURETHANE FOAM – CLOSED CELL,,,,,,,,,,,,,T09|C08|S03
+,Spray polyurethane foam - Closed Cell (HFC gas) / R 6.6-inch / SPFA [Industry Avg | US & CA],104.4,m²,1.0,,False,0,0,0,0,,A1-B1,T09|C08|S03|8ded24
+,Spray polyurethane foam - Closed Cell (HFO gas) / R 6.6-inch / SPFA [Industry Avg | US & CA],104.4,m²,1.0,,False,0,0,0,0,,A1-A3 + B1,T09|C08|S03|ins040
+,Spray polyurethane foam - Closed Cell (HFC gas) / Carlisle CSFI / SealTite PRO Closed Cell (HFC) / R 7.0-inch,104.4,m²,1.0,,False,0,0,0,0,,A1-A3 + B1,T09|C08|S03|ins041
+,"Spray polyurethane foam - Closed Cell (HFO gas) / Carlisle CSFI / SealTite PRO HFO, SealTite One / R 7.0-inch",104.4,m²,1.0,,False,0,0,0,0,,A1-A3 + B1,T09|C08|S03|ins042
+,Spray polyurethane foam - Closed Cell (HFO gas) / Huntsman / Heatlok Soya HFO & Heatlok HFO / R 6.5-inch,104.4,m²,1.0,,False,0,0,0,0,,A1-B1,T09|C08|S03|rnd601
+SPRAY POLYURETHANE FOAM – OPEN CELL,,,,,,,,,,,,,T09|C08|S04
+,Spray polyurethane foam - Open Cell / R 4.1-inch / SPFA [Industry Avg | US & CA],104.4,m²,1.0,,False,0,0,0,0,,A1-A3 + B1,T09|C08|S04|ins043
+,"Spray polyurethane foam - Open Cell / Carlisle CSFI / SealTite PRO Open Cell, SealTite PRO High Yield, SealTite PRO No Mix, SealTite PRO OCX / R 3.7-inch",104.4,m²,1.0,,False,0,0,0,0,,A1-A3 + B1,T09|C08|S04|ins044
+CEMENTITOUS FOAM INSULATION,,,,,,,,,,,,,T09|C08|S15
+,Cementitious Foam / R 3.5-inch [BEAM Avg] ,104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S15|CCF00x
+,Cementitious Foam / Holcim / Airium Spray / R3.35/inch / 100 kg/m3 [EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S15|CCF000
+,Cementitious Foam /Master Builders Solutions / MasterProtect NFF / R3.8/inch / 70 kg/m3 [EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S15|CCF002
+,Cementitious Foam / Perlmooser / Airium Spray / R3.43/inch / 70 kg/m3 [EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S15|CCF001
+MINERAL WOOL BATT INSULATION 🤚,,,,,,,,,,,,,T09|C08|S06
+,Mineral wool batt / [BEAM Avg] ,104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S06|mwb0ew
+,"Mineral wool batt / Owens Corning / UltraBatt - Fire & Sound Guard Plus R-15, R-30 (plant Avg) / R 4.2-inch",104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S06|mwb012
+,Mineral wool batt / Owens Corning / UltraBatt - Fire & Sound Guard Plus R-23 (plant Avg) / R 4.2-inch,104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S06|mwb013
+,Mineral wool batt / Rockwool / ComfortBatt R-24 (Wood Studs) / R 4.4-inch,104.4,m²,1.0,,False,0,0,0,0,,Expired 2024,T09|C08|S06|mwb014
+,Mineral wool batt / Owens Corning / UltraBatt - Fire & Sound Guard Plus R-10 (plant Avg) / R 4.0-inch,104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S06|mwb015
+,Mineral wool batt / Owens Corning / UltraBatt - Fire & Sound Guard Plus R-24 (plant Avg) / R 4.0-inch,104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S06|mwb016
+,Mineral wool batt / Rockwool / ComfortBatt R-23 / R 4.2-inch,104.4,m²,1.0,,False,0,0,0,0,,Expired 2024,T09|C08|S06|mwb017
+,Mineral wool batt / Rockwool / ComfortBatt R-15 / R 4.3-inch,104.4,m²,1.0,,False,0,0,0,0,,Expired 2024,T09|C08|S06|mwb018
+,"Mineral wool batt / Rockwool / ComfortBatt R-10, R-14, R-22, R-28, R-30, R-32 / R 4.0-inch",104.4,m²,1.0,,False,0,0,0,0,,Expired 2024,T09|C08|S06|mwb019
+,Mineral wool batt / Rockwool / ComfortBatt R-24 (Steel Studs) / R 4.0-inch,104.4,m²,1.0,,False,0,0,0,0,,Expired 2024,T09|C08|S06|mwb020
+MINERAL WOOL LOOSE FILL INSULATION,,,,,,,,,,,,,T09|C08|S07
+,Mineral wool loose fill / NAIMA / R 3-inch [Industry Avg | N.America],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S07|INS020
+FIBERGLASS LOOSE FILL INSULATION,,,,,,,,,,,,,T09|C08|S08
+,Fiberglass loose fill / NAIMA /  R 2.2-inch [Industry Avg | N.America],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S08|INS008
+,"Fiberglass loose fill / CertainTeed / InsulSafe, Optima, TruComfort / R 2.6-inch",104.4,m²,1.0,,False,0,0,0,0,,Expired 2024,T09|C08|S08|f33e5e
+,"Fiberglass loose fill / Owens Corning / AttiCat, ProCat, ProPink / R 3.28-inch",104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S08|INS049
+,"Fiberglass loose fill / Johns Manville / Climate Pro, Attic Protector, JM Spider PLUS (Canada) / R 2.8-inch",104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S08|INS009
+FIBERGLASS BATT INSULATION,,,,,,,,,,,,,T09|C08|S09
+,Fiberglass batt / NAIMA /  R 4.4-inch [Industry Avg | N.America],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S09|INS005
+,"Fiberglass batt / Johns Manville / Unfaced, ComfortTherm, Cavity-SHIELD, FSK-25 / R 3.4-inch",104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S09|INS006
+,Fiberglass batt / CertainTeed / Sustainable Insulation / R 3.6-inch,104.4,m²,1.0,,False,0,0,0,0,,Expired 2024,T09|C08|S09|1f3cc3
+,"Fiberglass batt & roll / Owens Corning / Unfaced, PINK Next Gen Fiberglas / R 3.6-inch avg.",104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S09|ins048
+SHEEP WOOL INSULATION,,,,,,,,,,,,,T09|C08|S05
+,Wool batt / R 3.8 /inch [BEAM Avg ],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S05|WB000x
+,Wool batt / Havelock Wool / Batts / R 3.6-inch,104.4,m²,1.0,,False,0,0,0,0,,Expired 2025-06-05; BfCA BioC calc by mass,T09|C08|S05|be49e2
+,Wool Loose-fill / Havelock Wool / Loose-fill / R 4.4-inch,104.4,m²,1.0,,False,0,0,0,0,,Expired 2025-06-05; BfCA BioC calc by mass,T09|C08|S05|840925
+,Wool batt / Thermafleece / Cosywool Slab / R3.8-inch [EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S05|INS022
+,Wool batt / Thermafleece / Cosywool Roll / R3.7-inch [EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S05|INS023
+,Wool batt / Thermafleece / UltraWool Slab / R4.1-inch [EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S05|INS024
+,Wool batt / ISOLENA / Optimal batt / 5.5 inch / R 3.8-inch [EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S05|INS025
+HEMP FIBER WOOL INSULATION,,,,,,,,,,,,,T09|C08|S10
+,Hemp Fiber Batt / R 3.6-inch [BEAM Avg] ,104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S10|HEMP0X
+,Hemp fiber batt / NaturFibre / Hemp Wool / R 3.7-inch,104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S10|2fe063
+,Hemp fiber batt / Ekolution / Hemp fiber insulation / R 3.6-inch [EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S10|INS011
+,Hemp fiber batt / KOBE-cz / ECO HempFlex insulation / R 3.6-inch [EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S10|INS012
+CELLULOSE INSULATION,,,,,,,,,,,,,T09|C08|S11
+,Cellulose / dense pack / CIMA / R 3.7-inch / [Industry Avg | US & CA],104.4,m²,1.0,,False,0,0,0,0,,Expired 2024-12-23; BfCA BioC calc by mass,T09|C08|S11|fc7d3a
+,Cellulose / dense pack / Advanced Fiber Technology / AFT Carbon Smart / 56 kg/m3 / R3.8-inch ,104.4,m²,1.0,,False,0,0,0,0,,Expired 2025; BfCA BioC calc by mass,T09|C08|S11|Cel001
+,Cellulose / dense pack / Greenfiber / Sanctuary / Avg of all facilties / 56.1 kg/m3 / R3.8-inch ,104.4,m²,1.0,,False,0,0,0,0,,BfCA BioC calc by mass,T09|C08|S11|Cel002
+,Cellulose / batt / CMS / EcoCell / R 3.6-inch,104.4,m²,1.0,,False,0,0,0,0,,Expired 2024; BfCA BioC calc by mass,T09|C08|S11|967ad6
+,Cellulose / batt / Ekovilla / Ekovilla Slab / R3.7-inch [EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S11|Cel000
+,Cellulose / loose fill / CIMA / R 3.7-inch / [Industry Avg | US & CA] ,104.4,m²,1.0,,False,0,0,0,0,,Expired 2024-12-23; BfCA BioC calc by mass,T09|C08|S11|1ca576
+,Cellulose / loose fill / Advanced Fiber Technology / AFT Carbon Smart / 25.2 kg/m3 / R3.8-inch,104.4,m²,1.0,,False,0,0,0,0,,Expired 2025; BfCA BioC calc by mass,T09|C08|S11|Cel003
+,Cellulose / loose fill / Greenfiber / Sanctuary / Avg of all facilties / 17.1 kg/m3 / R3.8-inch ,104.4,m²,1.0,,False,0,0,0,0,,BfCA BioC calc by mass,T09|C08|S11|Cel004
+,"Cellulose / spray applied / International Cellulose Corp. / K-13, ThermoCon / R 3.75-inch",104.4,m²,1.0,,False,0,0,0,0,,Expired 2025; BfCA BioC calc by mass,T09|C08|S11|5231c8
+WOOD FIBER INSULATION,,,,,,,,,,,,,T09|C08|S12
+,Wood fiber batt / [BEAM Avg | EU],104.4,m²,1.0,,False,0,0,0,0,,BfCA BioC calc by mass,T09|C08|S12|g692me
+,Wood fiber loose fill / GUTEX / ThermoFiber / R 3.8-inch [EU],104.4,m²,1.0,,False,0,0,0,0,,Expired 2024; BfCA BioC calc by mass,T09|C08|S12|ins035
+,Wood fiber batt / GUTEX / ThermoFlex / R 4-inch [EU],104.4,m²,1.0,,False,0,0,0,0,,Expired 2023; BfCA BioC calc by mass,T09|C08|S12|be052f
+,Wood fiber batt / Steico / SteicoFlex / R 3.8-inch [EU],104.4,m²,1.0,,False,0,0,0,0,,Expired 2025; BfCA BioC calc by mass,T09|C08|S12|ins034
+GRASS INSULATION,,,,,,,,,,,,,T09|C08|S16
+,Grass Insulation / Gramitherm 100 batt / R3.5-inch [EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S16|ins010
+HEMPCRETE INSULATION,,,,,,,,,,,,,T09|C08|S13
+,Hempcrete / R 2.4-inch [BEAM Avg] ,104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S13|HEMPCX
+,Hempcrete cast in place / Senini / Bio Beton Jet / R2.7-inch / 230 kg/m3 [EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S13|ins013
+,Hempcrete dry fill / Senini / Bio Beton Pronto / R2.7-inch / 190 kg/m3 [EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S13|ins014
+,Hempcrete / Cast in-situ / Avg. mix using NHL & PHL / R 2.2-inch / USA,104.4,m²,1.0,,False,0,0,0,0,,"LCA, 2020; BfCA BioC calc by mass",T09|C08|S13|5731ae
+,Hempcrete / Cast in-situ / IsoHemp / R 2.2-inch / [EU],104.4,m²,1.0,,False,0,0,0,0,,Expired 2023; BfCA BioC calc by mass,T09|C08|S13|7d79df
+STRAW BALE INSULATION,,,,,,,,,,,,,T09|C08|S14
+,Straw Bale / Wheat & barley straw / SNaB (UK) / R 2.8/inch [Industry Avg | EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S14|b4T02m
+,Straw Bale / Wheat & rye straw / FASBA (Germany) / R 2.8-inch [Industry Avg | EU],104.4,m²,1.0,,False,0,0,0,0,,,T09|C08|S14|INS021
+STRUCTURAL INSULATED PANEL (SIP),,,,,,,,,,,,,T09|C12
+EPS FOAM INSULATED PANELS,,,,,,,,,,,,,T09|C12|S01
+,"SIP panels - EPS foam & OSB / SIPA / R-45 12.25"" panel [Industry Avg | N America] ",104.4,m²,1.0,,False,9197.71308,9197.71308,0,2263.4964,False,"Pre-publication EPD, BfCA BioC calc by mass",T09|C12|S01|SIP004
+,"SIP panels - EPS foam & OSB / SIPA / R-38 10.25"" panel [Industry Avg | N America] ",104.4,m²,1.0,,False,7764.228,7764.228,0,2263.4964,False,"Pre-publication EPD, BfCA BioC calc by mass",T09|C12|S01|SIP003
+,"SIP panels - EPS foam & OSB / SIPA / R-30 8.25"" panel [Industry Avg | N America]",104.4,m²,1.0,,False,6130.2636,6130.2636,0,2263.4964,False,"Pre-publication EPD, BfCA BioC calc by mass",T09|C12|S01|SIP002
+,"SIP panels - EPS foam & OSB / SIPA / R-23 6.5"" panel [Industry Avg | N America]",104.4,m²,1.0,,False,4704.8904,4704.8904,0,2263.4964,False,"Pre-publication EPD, BfCA BioC calc by mass",T09|C12|S01|SIP001
+,"SIP panels - EPS foam & OSB / SIPA / R-15 4.5"" panel [Industry Avg | N America]",104.4,m²,1.0,,False,3066.29064,3066.29064,0,2263.4964,False,"Pre-publication EPD, BfCA BioC calc by mass",T09|C12|S01|SIP000
+COMPOSITE SIP PANELS,,,,,,,,,,,,,T09|C12|S02
+,"Straw Insulated Panels with wood framing (SIP) / EcoCocon / Prefabricated panel, 40 cm / R35 [EU]",104.4,m²,1.0,,False,-7378.47,1492.92,8871.39,0,,,T09|C12|S02|g93fwm
+ADDITIONAL MATERIALS 🤚,,,,,,,,,,,,,T09|CAM
+MATERIALS BY LENGTH,,,,,,,,,,,,,T09|CAM|SLE
+,,,m,1.0,,False,0,,,,False,,T09|CAM|SLE|000001
+,,,m,1.0,,False,0,,,,False,,T09|CAM|SLE|000002
+,,,m,1.0,,False,0,,,,False,,T09|CAM|SLE|000003
+,,,m,1.0,,False,0,,,,False,,T09|CAM|SLE|000004
+,,,m,1.0,,False,0,,,,False,,T09|CAM|SLE|000005
+MATERIALS BY AREA,,,,,,,,,,,,,T09|CAM|SAR
+,,,m²,1.0,,False,0,,,,False,,T09|CAM|SAR|000001
+,,,m²,1.0,,False,0,,,,False,,T09|CAM|SAR|000002
+,,,m²,1.0,,False,0,,,,False,,T09|CAM|SAR|000003
+,,,m²,1.0,,False,0,,,,False,,T09|CAM|SAR|000004
+,,,m²,1.0,,False,0,,,,False,,T09|CAM|SAR|000005
+MATERIALS BY R-VALUE & AREA,,,,R-VALUE,➜,,,,,,,,T09|CAM|SRV
+,,,m²,1.0,,False,0,,,,False,,T09|CAM|SRV|000001
+,,,m²,1.0,,False,0,,,,False,,T09|CAM|SRV|000002
+,,,m²,1.0,,False,0,,,,False,,T09|CAM|SRV|000003
+,,,m²,1.0,,False,0,,,,False,,T09|CAM|SRV|000004
+,,,m²,1.0,,False,0,,,,False,,T09|CAM|SRV|000005
+MATERIALS BY VOLUME,,,,,,,,,,,,,T09|CAM|SVO
+,,,m³,1.0,,False,0,,,,False,,T09|CAM|SVO|000001
+,,,m³,1.0,,False,0,,,,False,,T09|CAM|SVO|000002
+,,,m³,1.0,,False,0,,,,False,,T09|CAM|SVO|000003
+,,,m³,1.0,,False,0,,,,False,,T09|CAM|SVO|000004
+,,,m³,1.0,,False,0,,,,False,,T09|CAM|SVO|000005
+ADD CUSTOM EPD VALUE 🤚,,,,,,,,,,,,,T09|CEP
+,Material Description / EPD Owner / EPD ID number / EPD Program Operator / EPD Expired date,  QUANTITY        ,UNITS,%,, SELECT,"User defined
+NET
+EMISSIONS
+kg CO₂e","User defined
+ GROSS
+EMISSIONS
+kg CO₂e","User defined
+STORAGE
+Short Cycle
+kg CO₂   ","User defined
+STORAGE
+Long Cycle
+kg CO₂   ","SELECT
+Long Cycle",,T09|CEP|SMO
+,,,,1.0,,False,0,,,,False,,T09|CEP|SMO|000001
+,,,,1.0,,False,0,,,,False,,T09|CEP|SMO|000002
+,,,,1.0,,False,0,,,,False,,T09|CEP|SMO|000003
+,,,,1.0,,False,0,,,,False,,T09|CEP|SMO|000004
+,,,,1.0,,False,0,,,,False,,T09|CEP|SMO|000005
+,,,,1.0,,False,0,,,,False,,T09|CEP|SMO|000006

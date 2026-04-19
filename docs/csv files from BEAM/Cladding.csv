@@ -1,0 +1,193 @@
+,EXTERIOR WALL CLADDING,,,,,,,,,,,,
+,"PROJECT NAME:    Sample Project DOE Prototype
+SCENARIO:              Baseline
+BEAM VERSION:     V1.1",SECTION COMPLETE?,False,,,,"9,453   ","9,453   ",0   ,0   ,,,T06
+"
+Select materials in your project using the checkboxes (col. G). Once selected, the emissions of these materials will be added to the section SUBTOTAL (G2) and to the project total. 
+
+The NET CARBON column (col. H) presents the net material carbon emissions (EMISSIONS minus STORAGE) of each material based on the QUANTITY and PERCENTAGE entered. 
+
+Where applicable, the R-VALUE, THICKNESS, FRAMING SPACING, etc. must be entered in the AVACADO GREEN cells.
+
+Update the PERCENTAGE value (col. E) as appropriate. Understand that the carbon values will only update for that row, after which comparison with other rows may no longer be valid.
+",,,,,,,,,,,,,
+CATEGORY,MATERIAL,QUANTITY,UNITS,%,,SELECT,"NET
+EMISSIONS
+kg CO₂e","GROSS
+EMISSIONS
+kg CO₂e","STORAGE
+Short Cycle
+kg CO₂🤚","STORAGE
+Long Cycle
+kg CO₂ 🤚","SELECT
+Long Cycle",FOOTNOTE,ID
+EXTERIOR WALL CLADDING,,,,,,,,,,,,,T06|C01
+ACRYLIC STUCCO,,,,,,,,,,,,,T06|C01|S04
+,Synthetic Stucco (Acrylic) [BEAM Avg | US & CA],187.8,m²,1.0,,False,7042.5,7042.5,0,0,,,T06|C01|S04|STU00X
+,Synthetic Stucco (Acrylic) / Sto / Stolit Freeform & Freeform Dark Colors (avg),187.8,m²,1.0,,False,9559.02,9559.02,0,0,,Expired 2024-12-18,T06|C01|S04|21dw0f
+,Synthetic Stucco (Acrylic) / Sto / Stolit 1.5 & 1.5 Dark Colors (avg),187.8,m²,1.0,,False,6159.84,6159.84,0,0,,Expired 2024-12-18,T06|C01|S04|f93xa0
+,Synthetic Stucco (Acrylic) / Sto / Stolit 1.0 & 1.0 Dark Colors (avg),187.8,m²,1.0,,False,5408.64,5408.64,0,0,,Expired 2024-12-18,T06|C01|S04|5caf85
+COMMON BRICK,,,,,,,,,,,,,T06|C01|S01
+,"Brick, Clay, Generic Modular / 3-5/8"" x 2-3/4"" x 7-5/8"" incl. 3/8"" mortar / Brick Industry Association / [Industry Avg | US-Canada]",187.8,m²,1.0,,True,8873.257032,8873.257032,0,0,,Expired 2025-10-06,T06|C01|S01|e73378
+,"Brick, Clay / SHAW / Avg Face Brick / 3-5/8"" x 2-3/4"" x 7-5/8"" (92 x 70 x 194 mm) incl. 3/8"" mortar",187.8,m²,1.0,,False,11129.53882,11129.53882,0,0,,,T06|C01|S01|BRI005
+,"Brick, Clay / Mutual Materials / Avg Face Brick (plant Avg) /  3-5/8"" x 2-3/4"" x 7-5/8"" (92 x 70 x 194 mm) incl. 3/8"" mortar",187.8,m²,1.0,,False,10692.15637,10692.15637,0,0,,,T06|C01|S01|BRI001
+,"Brick, Clay / Interstate / Avg Face Brick / 3-5/8"" x 2-3/4"" x 7-5/8"" (92 x 70 x 194 mm) incl. 3/8"" mortar",187.8,m²,1.0,,False,8918.964923,8918.964923,0,0,,Expired 2025,T06|C01|S01|2d7548
+,"Brick, Waste-based / StoneCycling / Caramel / 215x102x65 mm, incl. 3/8"" mortar / EU",187.8,m²,1.0,,False,5912.835674,5912.835674,0,0,,,T06|C01|S01|BRI007
+,"Brick, Clay / Matzen Tegl / Avg Face Brick, produce with Biogas  / 2-1/2"" x 5/8"" x 7-1/2"" (64 x 16 x 190 mm) incl. 3/8"" mortar [EU]",187.8,m²,1.0,,False,2880.936134,2880.936134,0,0,,,T06|C01|S01|BRI000
+NATURAL STONE MASONRY,,,,,,,,,,,,,T06|C01|S02
+,"Stone Cladding, incl. mortar & ties / Natural Stone Institute / Includes limestone, granite, marble, quartzite, sandstone  [Industry Avg | US & CA] ",187.8,m²,1.0,,False,4018.92,4018.92,0,0,,,T06|C01|S02|n93fd1
+,"Stone Cladding, incl. mortar & ties / Arriscraft / Natural Limestone Masonry / Weighted average product profile",187.8,m²,1.0,,False,8914.649079,8914.649079,0,0,,Expired 2021,T06|C01|S02|21a5bb
+COMPOSITE CLADDING,,,,,,,,,,,,,T06|C01|S14
+,"Composite cladding / Modern Mill / ACRE Cladding / 3/4""",187.8,m²,1.0,,False,5806.776,5806.776,0,0,,,T06|C01|S14|ccc001
+,"Composite cladding / Fiberon / Wildwood Cladding / 3/4""",187.8,m²,1.0,,False,2758.782,2758.782,0,0,,,T06|C01|S14|ccc000
+ALUMINUM PANELS,,,,,,,,,,,,,T06|C01|S05
+,Metal Panels - Aluminum / 22 gauge / Metal Construction Assn. [Industry Avg | US],187.8,m²,1.0,,False,3493.08,3493.08,0,0,,,T06|C01|S05|34db3d
+,"Metal Wall Panels - Aluminum / CENTRIA / LVLZ / 0.060""",187.8,m²,1.0,,False,14460.6,14460.6,0,0,,,T06|C01|S05|MPA002
+,"Metal Wall Panels - Aluminum / CENTRIA / RZR / 0.060""",187.8,m²,1.0,,False,11305.56,11305.56,0,0,,,T06|C01|S05|MPA001
+,"Metal Panels - Aluminum / Petersen Aluminum Corp / Pac-Clad, all profiles / 20 gauge",187.8,m²,1.0,,False,7211.52,7211.52,0,0,,,T06|C01|S05|MPA000
+FIBER CEMENT SIDING,,,,,,,,,,,,,T06|C01|S07
+,Fiber Cement siding [BEAM Avg],187.8,m²,1.0,,False,1247.981471,1554.5145,306.5330288,0,,,T06|C01|S07|FIB00X
+,"Fiber Cement siding / Equitone / Pictura, Natura Pro, sheets / 8 mm [EU]",187.8,m²,1.0,,False,2626.40178,3062.079,435.67722,0,,Expired 2025-02-05; BfCA BioC calc by mass,T06|C01|S07|FIB001
+,Fiber Cement siding / Equitone / Linea|Lunara sheets / 10 mm [EU],187.8,m²,1.0,,False,1208.964848,1464.84,255.8751525,0,,Expired 2025; BfCA BioC calc by mass,T06|C01|S07|FIB000
+,"Fiber Cement siding / JamesHardie / Hardie Plank HZ5, Hardie Panel HZ5, Hardie Architectural Panel HZ5 / 8 mm",187.8,m²,1.0,,False,1106.7054,1432.914,326.2086,0,,,T06|C01|S07|FIB003
+,"Fiber Cement siding / JamesHardie / Hardie Plank HZ10, Hardie Panel HZ10, Hardie Architectural Panel HZ10 / 8 mm",187.8,m²,1.0,,False,956.6532,1284.552,327.8988,0,,,T06|C01|S07|FIB002
+,Fiber Cement siding / JamesHardie / Hardie Shingle HZ5 / 6.3 mm,187.8,m²,1.0,,False,859.3728,1123.044,263.6712,0,,,T06|C01|S07|FIB005
+,Fiber Cement siding / JamesHardie / Hardie Shingle HZ10 /  6.3 mm,187.8,m²,1.0,,False,729.7908,959.658,229.8672,0,,,T06|C01|S07|FIB004
+STEEL PANELS,,,,,,,,,,,,,T06|C01|S06
+,Metal Panels - Steel / Metal Construction Assn.  / 24 gauge [Industry Avg | US],187.8,m²,1.0,,False,2873.34,2873.34,0,0,,Expired 2025,T06|C01|S06|98a9cd
+,Metal Panels - Steel / Metal Building Manufacturers Assn / 24 gauge [Industry Avg | US],187.8,m²,1.0,,False,2315.574,2315.574,0,0,,,T06|C01|S06|MPS001
+,Metal Panels - Steel / Canadian Sheet Steel Building Institute / 24 gauge [Industry Avg | CA],187.8,m²,1.0,,False,2230.673376,2230.673376,0,0,,,T06|C01|S06|MPS002
+,Metal Panels - Steel / AEP Span / All roofing & wall products / 24 gauge,187.8,m²,1.0,,False,4056.48,4056.48,0,0,,,T06|C01|S06|MPS004
+,"Metal Panels - Steel / Petersen Aluminum Corp / Pac-Clad, all profiles / 24 gauge",187.8,m²,1.0,,False,2967.24,2967.24,0,0,,,T06|C01|S06|MPS000
+,Metal panels - steel / ArcelorMittal / XCarb RRP / 24 gauge,187.8,m²,1.0,,False,1246.39104,1246.39104,0,0,,,T06|C01|S06|MPS003
+THIN VENEER BRICK,,,,,,,,,,,,,T06|C01|S03
+,Thin Veneer Brick [BEAM Avg | US & CA],187.8,m²,1.0,,False,1960.388987,1960.388987,0,0,,,T06|C01|S03|BRI00X
+,"Brick, Clay / Interstate / Avg Thin Face Brick / 3-9/16"" x 5/8"" x 11-5/8"" (90 x 16 mm x 295) incl. 3/8"" mortar and ties",187.8,m²,1.0,,False,2586.184786,2586.184786,0,0,,Expired 2025,T06|C01|S03|c9a7f3
+,"Brick, Clay / Mutual Materials / Avg Thin Face Brick (plant Avg) / 2-1/2"" x 5/8"" x 7-1/2"" (64 x 16 x 190 mm) incl. 3/8"" mortar",187.8,m²,1.0,,False,1859.505456,1859.505456,0,0,,,T06|C01|S03|BRI003
+,"Brick, Clay / SHAW / Slender - Thin Face Brick / 2 1/4"" x 1/2"" x 7-1/2"" (57 x 12.7 mm x 190) incl. 3/8"" mortar",187.8,m²,1.0,,False,1536.36025,1536.36025,0,0,,,T06|C01|S03|BRI006
+POLYPROPYLENE SIDING,,,,,,,,,,,,,T06|C01|S08
+,"Polypropylene siding / Vinyl Siding Institute  / 0.085"" Single 7"" wood shake appearance [Industry Avg | US & CA]",187.8,m²,1.0,,False,1842.318,1842.318,0,0,,,T06|C01|S08|VIN000
+VINYL SIDING,,,,,,,,,,,,,T06|C01|S09
+,"Insulated Vinyl Siding / Vinyl Siding Institute / 0.040"" Double 4.5"" [Industry Avg | US & CA] / R-0.5",187.8,m²,1.0,,False,1136.19,1136.19,0,0,,,T06|C01|S09|VIN002
+,"Vinyl Siding / Vinyl Siding Institute / 0.040"" Double 4.5"" [Industry Avg | US & CA]",187.8,m²,1.0,,False,884.538,884.538,0,0,,,T06|C01|S09|VIN001
+ENGINEERED WOOD SIDING,,,,,,,,,,,,,T06|C01|S10
+,Engineered Wood Siding [BEAM Avg | US & CA],187.8,m²,1.0,,False,606.9848869,606.9848869,0,2927.730298,False,,T06|C01|S10|lp000X
+,"Engineered Wood Siding & Trim / LP / SmartSide ExpertFinish/ 3/8"" (9.5 mm)",187.8,m²,1.0,,False,868.910223,868.910223,0,1759.226078,False,,T06|C01|S10|lp0001
+,"Engineered Wood Siding & Trim / LP / SmartSide / 0.578"" (14.7mm)",187.8,m²,1.0,,False,771.4112238,771.4112238,0,4686.09336,False,,T06|C01|S10|lp0003
+,"Engineered Wood Siding & Trim / LP / SmartSide / 0.418"" (10.6 mm)",187.8,m²,1.0,,False,556.2557124,556.2557124,0,3379.087729,False,,T06|C01|S10|lp0002
+,"Engineered Wood Siding & Trim / LP / SmartSide / 0.354"" (9 mm)",187.8,m²,1.0,,False,472.292586,472.292586,0,2869.036751,False,,T06|C01|S10|lp0004
+,"Engineered Wood Siding & Trim / LP / BuilderSeries® Lap Siding / 9/32"" (7.3 mm)",187.8,m²,1.0,,False,366.0546894,366.0546894,0,1945.207573,False,,T06|C01|S10|lp0000
+HEAT TREATED WOOD SIDING,,,,,,,,,,,,,T06|C01|S15
+,Heat Treated Wood Cladding [BEAM Avg],187.8,m²,1.0,,False,1452.7269,1452.7269,0,2593.823175,False,,T06|C01|S15|HTW00X
+,Heat Treated Wood Cladding / Russwood / Accoya profiled cladding / 20 mm [EU],187.8,m²,1.0,,False,4056.48,4056.48,0,2616.4296,False,,T06|C01|S15|HTW003
+,"Heat Treated Wood Cladding / Abodo / Vulcan - Thermally Modified Timber, Surfaced / 20 mm [NZ]",187.8,m²,1.0,,False,912.708,912.708,0,3411.6687,False,Expired 2025-08-12; BfCA BioC calc by mass,T06|C01|S15|HTW000
+,Heat Treated Wood Cladding / Lunawood / Planed Thermowood D / 20 mm [EU],187.8,m²,1.0,,False,480.768,480.768,0,2204.0208,False,,T06|C01|S15|HTW001
+,Heat Treated Wood Cladding / Lunawood / Planed Thermowood S / 20 mm [EU],187.8,m²,1.0,,False,360.9516,360.9516,0,2143.1736,False,,T06|C01|S15|HTW002
+NATURAL WOOD SIDING,,,,,,,,,,,,,T06|C01|S11
+,Cedar Siding / Western Red Cedar Lumber Assn / 1x6 Boards [Industry Avg | CA],187.8,m²,1.0,,False,323.6809393,323.6809393,0,1234.853486,False,Expired 2021,T06|C01|S11|1110de
+,"Wood / SPF / 3/4"" boards / AWC & CWC [Industry Avg | US & CA]",187.8,m²,1.0,,False,225.8174808,225.8174808,0,2717.859347,False,Expired 2025; BfCA BioC calc by mass,T06|C01|S11|4scwf3
+,Wood cladding / BurntWood / ReUse with linseed oil treatment / 18 mm [EU],187.8,m²,1.0,,False,634.764,1094.874,460.11,5628.366,False,,T06|C01|S11|WWC000
+,Wood cladding / BurntWood / ReUse without surface treatment / 18 mm [EU],187.8,m²,1.0,,False,448.842,448.842,0,5628.366,False,,T06|C01|S11|WWC001
+EXTERIOR PLASTER,,,,,,,,,,,,,T06|C01|S12
+,"Cement ""Stucco"" Plaster / 1:1:4 mix of Portland, masonry cement, sand @ 1/2"" [Industry Avg | US & CA]",187.8,m²,1.0,,False,1878.837375,1878.837375,0,0,,Custom BEAM assembly,T06|C01|S12|d201fq
+,"Lime Plaster, NHL 3.5 / Kerakoll / Biocalce Intonaco line @ 2 cm [EU]",187.8,m²,1.0,,False,1923.8232,1923.8232,0,0,,Expired 2024-07-26,T06|C01|S12|g1g2cs
+,"Cement ""Stucco"" Plaster / Sto SE / Pre-mixed rendering & plastering mortar with reinforcing fiber / 1/2"" [EU]",187.8,m²,1.0,,False,1652.369568,1652.369568,0,0,,,T06|C01|S12|STU000
+,"Lime/Cork Plaster (Int.) / Diasen / Diathonite Acoustix, 3/4"" [EU]",187.8,m²,1.0,,False,1323.751947,1442.698943,118.9469968,0,,,T06|C01|S12|LCP003
+,"Cement ""Stucco"" Plaster / Beissier / Premixed Mortar @ 1/2"" [EU]",187.8,m²,1.0,,False,995.285538,995.285538,0,0,,Expired 2026-03-15,T06|C01|S12|p3m1f1
+,"Lime/Cork Plaster (Ext. & Int.) / Diasen / Diathonite Evolution, R3.2-inch / 3/4"" [EU]",187.8,m²,1.0,,False,964.2508556,1021.628244,57.37738842,0,,,T06|C01|S12|LCP001
+,"Lime/Cork Plaster (Ext. & Int.) / Diasen / Diathonite Thermactive.037, R3.9-inch / 3/4"" [EU]",187.8,m²,1.0,,False,707.4699719,780.399144,72.92917215,0,,,T06|C01|S12|LCP002
+,"Clay Plaster, site mixed / 15 mm (9/16"") [EU]",187.8,m²,1.0,,False,165.264,165.264,0,0,,"LCA, 2014",T06|C01|S12|2ecd60
+BAMBOO CLADDING,,,,,,,,,,,,,T06|C01|S13
+,Bamboo Cladding [BEAM Avg],187.8,m²,1.0,,False,943.7977313,6015.719933,5071.922201,0,,,T06|C01|S13|BAM00X
+,"Bamboo Cladding / Lamboo / Rainscreen™ Facing System / 11/16"" (17 mm) ",187.8,m²,1.0,,False,7239.737945,10708.76916,3469.031215,0,,,T06|C01|S13|BAM000
+,"Bamboo Cladding / MOSO / X-treme, all profiles / Heat treated / 5/8"" (18 mm)",187.8,m²,1.0,,False,-788.1966,4743.828,5532.0246,0,,,T06|C01|S13|BAM007
+,"Bamboo Cladding / Dasso / dassoXTR Bamboo RainClad® Siding / Shiplap, 3/4'' (19 mm) ",187.8,m²,1.0,,False,-1256.109164,4304.49807,5560.607234,0,,Expired 2025-01-04; BfCA BioC calc by mass,T06|C01|S13|d0rk2l
+,"Bamboo Cladding / Dasso / dassoCTECH outdoor oiled Cladding / Shiplap, 5/8"" (18 mm) ",187.8,m²,1.0,,False,-1420.241256,4305.7845,5726.025756,0,,Expired 2025-01-04; BfCA BioC calc by mass,T06|C01|S13|s0glec
+STRAPPING / FURRING 🤚,,STRAPPING SPACING:,,in,,,,,,,,,T06|C02
+WOOD STRAPPING,,,,,,,,,,,,,T06|C02|S01
+,Wood / SPF / 1x4 Lumber / AWC & CWC [Industry Avg | US & CA],187.8,m²,1.0,,False,0,0,0,0,False,Expired 2025; BfCA BioC calc by mass,T06|C02|S01|s029f2
+,Wood / SPF / 1x3 Lumber / AWC & CWC [Industry Avg | US & CA],187.8,m²,1.0,,False,0,0,0,0,False,Expired 2025; BfCA BioC calc by mass,T06|C02|S01|w93kcl
+,Wood / SPF / 1x2 Lumber / AWC & CWC [Industry Avg | US & CA],187.8,m²,1.0,,False,0,0,0,0,False,Expired 2025; BfCA BioC calc by mass,T06|C02|S01|k2f2dm
+INTERIOR CLADDING FOR EXTERIOR WALLS,,,,,,,,,,,,,T06|C03
+"DRYWALL – 1/2""",,,,,,,,,,,,,T06|C03|S01
+,"Drywall 1/2"" [BEAM Avg | US & CA]",187.8,m²,1.0,,True,579.771244,579.771244,0,0,,,T06|C03|S01|d7w02l
+,"Drywall 1/2"" / Pabco / QuietRock / QuietRock 1/2""",187.8,m²,1.0,,False,911.7093649,911.7093649,0,0,,Expired 2025,T06|C03|S01|bc703d
+,"Drywall 1/2"" / National Gypsum / Gold Bond XP Gypsum Board / 1/2""",187.8,m²,1.0,,False,772.4222288,865.2142088,92.79198,0,,,T06|C03|S01|INT000
+,"Drywall 1/2""/ Georgia-Pacific / ToughRock Mold-Guard / ",187.8,m²,1.0,,False,479.1022605,479.1022605,0,0,,Expired 2025,T06|C03|S01|INT003
+,"Drywall 1/2"" / USG / Sheetrock Ultralight Panels ",187.8,m²,1.0,,False,325.4581512,325.4581512,0,0,,,T06|C03|S01|INT002
+,"Drywall 1/2"" / USG / Sheetrock Brand UltraLight Sag-Resistant Ceilling Board ",187.8,m²,1.0,,False,317.3722344,317.3722344,0,0,,,T06|C03|S01|INT001
+"DRYWALL – 1/2"" TYPE C",,,,,,,,,,,,,T06|C03|S02
+,"Drywall 1/2"" Type C / Georgia-Pacific / ToughRock Fireguard C / ",187.8,m²,1.0,,False,576.1356297,576.1356297,0,0,,Expired 2024,T06|C03|S02|1742d8
+"DRYWALL – 5/8"" TYPE X",,,,,,,,,,,,,T06|C03|S03
+,"Drywall 5/8"" / National Gypsum / Gold Bond XP Fire-Shield Gypsum Board / 5/8"" type X",187.8,m²,1.0,,False,883.2816807,972.3552207,89.07354,0,,,T06|C03|S03|INT005
+,"Drywall 5/8"" Type X / Gypsum Association [Industry Avg | US & CA]",187.8,m²,1.0,,False,559.9634015,559.9634015,0,0,,Expired 2025-04-27,T06|C03|S03|ba3064
+,"Drywall 5/8"" / USG / Sheetrock Brand EcoSmart Firecode X / 5/8""",187.8,m²,1.0,,False,442.7039448,442.7039448,0,0,,,T06|C03|S03|INT006
+"DRYWALL – 5/8"" TYPE C",,,,,,,,,,,,,T06|C03|S08
+,"Drywall 5/8"" / Georgia-Pacific / ToughRock Fireguard C/ ",187.8,m²,1.0,,False,599.082,599.082,0,0,,,T06|C03|S08|INT004
+MAGNESIUM OXIDE BOARD,,,,,,,,,,,,,T06|C03|S04
+,"MgO board  1/2"" [BEAM Avg]",187.8,m²,1.0,,False,1323.99,1323.99,0,0,,,T06|C03|S04|MgoB0X
+,"MgO board 1/2"" / North American MgO / MagTech Ultra / 1/2""",187.8,m²,1.0,,False,1389.72,1389.72,0,0,,Expired 2023,T06|C03|S04|63d778
+,"MgO board 1/2"" / Sinh Build / MAGOXX boards / 1/2"" [EU]",187.8,m²,1.0,,False,1178.127618,1258.26,80.132382,0,,,T06|C03|S04|int007
+BIO-BASED CLADDING,,,,,,,,,,,,,T06|C03|S05
+,"Plywood / 3/4"" / AWC & CWC [Industry Avg | US & CA]",187.8,m²,1.0,,False,784.6370388,784.6370388,0,2776.730544,False,Expired 2025; BfCA BioC calc by mass,T06|C03|S05|61a79e
+,"Plywood / 1/2"" / AWC & CWC [Industry Avg | US & CA]",187.8,m²,1.0,,False,523.0913592,523.0913592,0,1851.153696,False,Expired 2025; BfCA BioC calc by mass,T06|C03|S05|c41283
+,Cedar Siding / Western Red Cedar Lumber Assn / 1x6 Boards [Industry Avg | CA],187.8,m²,1.0,,False,323.6809393,323.6809393,0,1234.853486,False,Expired 2021,T06|C03|S05|1110de
+,"Wood / SPF / 3/4"" boards / AWC & CWC [Industry Avg | US & CA]",187.8,m²,1.0,,False,225.8174808,225.8174808,0,2717.859347,False,Expired 2025; BfCA BioC calc by mass,T06|C03|S05|4scwf3
+,"Wood / Redwood / 3/4"" boards / AWC & CWC [Industry Avg | US & CA]",187.8,m²,1.0,,False,135.8410923,135.8410923,0,2694.225788,False,Expired 2025; BfCA BioC calc by mass,T06|C03|S05|pd92mn
+,"Wood wool boards / Armstrong / Tectum ceiling & wall boards / 2"" ",187.8,m²,1.0,,False,144.3309106,2688.567336,2544.236425,0,,BfCA BioC calc by mass,T06|C03|S05|int008
+,"Eelgrass accoustic board / Søuld ApS / Søuld Acoustic Mats / Flame retardant, NRC 0.90 [EU]",187.8,m²,1.0,,False,-255.648384,510.21504,765.863424,0,,Expired 2026-02-08; BfCA BioC calc by mass,T06|C03|S05|sl3g0r
+,Straw board sheathing / VestaEco Straw Boards 280 / 30 mm [EU],187.8,m²,1.0,,False,-532.1281728,1481.10135,2013.229523,0,,,T06|C03|S05|int009
+,"Bamboo plywood / Smith & Fong / Plyboo / 1/2"" (uncarved) ",187.8,m²,1.0,,False,-1840.27683,596.265,2436.54183,0,,BfCA BioC calc by mass,T06|C03|S05|BAM002
+,"Bamboo plywood / Smith & Fong / Plyboo / 3/4"" (uncarved) ",187.8,m²,1.0,,False,-2754.418424,892.05,3646.468424,0,,BfCA BioC calc by mass,T06|C03|S05|BAM003
+INTERIOR FINISH PLASTER,,,,,,,,,,,,,T06|C03|S06
+,"Cement ""Stucco"" Plaster / 1:1:4 mix of Portland, masonry cement, sand @ 1/2"" [Industry Avg | US & CA]",187.8,m²,1.0,,False,1878.837375,1878.837375,0,0,,Custom BEAM assembly,T06|C03|S06|d201fq
+,"Lime Plaster, NHL 3.5 / Kerakoll / Biocalce Intonaco line @ 2 cm [EU]",187.8,m²,1.0,,False,1923.8232,1923.8232,0,0,,Expired 2024-07-26,T06|C03|S06|g1g2cs
+,"Cement ""Stucco"" Plaster / Sto SE / Pre-mixed rendering & plastering mortar with reinforcing fiber / 1/2"" [EU]",187.8,m²,1.0,,False,1652.369568,1652.369568,0,0,,,T06|C03|S06|STU000
+,"Cement ""Stucco"" Plaster / Beissier / Premixed Mortar @ 1/2"" [EU]",187.8,m²,1.0,,False,995.285538,995.285538,0,0,,Expired 2026-03-15,T06|C03|S06|p3m1f1
+,"Clay Plaster, site mixed / 15 mm (9/16"") [EU]",187.8,m²,1.0,,False,165.264,165.264,0,0,,"LCA, 2014",T06|C03|S06|2ecd60
+ADDITIONAL MATERIALS 🤚,,,,,,,,,,,,,T06|CAM
+MATERIALS BY LENGTH,,,,,,,,,,,,,T06|CAM|SLE
+,,,m,1.0,,False,0,,,,False,,T06|CAM|SLE|000001
+,,,m,1.0,,False,0,,,,False,,T06|CAM|SLE|000002
+,,,m,1.0,,False,0,,,,False,,T06|CAM|SLE|000003
+,,,m,1.0,,False,0,,,,False,,T06|CAM|SLE|000004
+,,,m,1.0,,False,0,,,,False,,T06|CAM|SLE|000005
+MATERIALS BY AREA,,,,,,,,,,,,,T06|CAM|SAR
+,,,m²,1.0,,False,0,,,,False,,T06|CAM|SAR|000001
+,,,m²,1.0,,False,0,,,,False,,T06|CAM|SAR|000002
+,,,m²,1.0,,False,0,,,,False,,T06|CAM|SAR|000003
+,,,m²,1.0,,False,0,,,,False,,T06|CAM|SAR|000004
+,,,m²,1.0,,False,0,,,,False,,T06|CAM|SAR|000005
+MATERIALS BY R-VALUE & AREA,,,,R-VALUE,➜,,,,,,,,T06|CAM|SRV
+,,,m²,1.0,,False,0,,,,False,,T06|CAM|SRV|000001
+,,,m²,1.0,,False,0,,,,False,,T06|CAM|SRV|000002
+,,,m²,1.0,,False,0,,,,False,,T06|CAM|SRV|000003
+,,,m²,1.0,,False,0,,,,False,,T06|CAM|SRV|000004
+,,,m²,1.0,,False,0,,,,False,,T06|CAM|SRV|000005
+MATERIALS BY VOLUME,,,,,,,,,,,,,T06|CAM|SVO
+,,,m³,1.0,,False,0,,,,False,,T06|CAM|SVO|000001
+,,,m³,1.0,,False,0,,,,False,,T06|CAM|SVO|000002
+,,,m³,1.0,,False,0,,,,False,,T06|CAM|SVO|000003
+,,,m³,1.0,,False,0,,,,False,,T06|CAM|SVO|000004
+,,,m³,1.0,,False,0,,,,False,,T06|CAM|SVO|000005
+ADD CUSTOM EPD VALUE 🤚,,,,,,,,,,,,,T06|CEP
+,Material Description / EPD Owner / EPD ID number / EPD Program Operator / EPD Expired date,  QUANTITY        ,UNITS,%,, SELECT,"User defined
+NET
+EMISSIONS
+kg CO₂e","User defined
+ GROSS
+EMISSIONS
+kg CO₂e","User defined
+STORAGE
+Short Cycle
+kg CO₂   ","User defined
+STORAGE
+Long Cycle
+kg CO₂   ","SELECT
+Long Cycle",,T06|CEP|SMO
+,,,,1.0,,False,0,,,,False,,T06|CEP|SMO|000001
+,,,,1.0,,False,0,,,,False,,T06|CEP|SMO|000002
+,,,,1.0,,False,0,,,,False,,T06|CEP|SMO|000003
+,,,,1.0,,False,0,,,,False,,T06|CEP|SMO|000004
+,,,,1.0,,False,0,,,,False,,T06|CEP|SMO|000005
+,,,,1.0,,False,0,,,,False,,T06|CEP|SMO|000006

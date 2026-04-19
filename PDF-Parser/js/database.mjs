@@ -64,6 +64,7 @@ const state = {
   sortKey: "display_name",
   sortDir: "asc",
   expanded: new Set(),      // ids of rows expanded
+  expandedGroups: new Set(),// group_prefix values expanded in grouped (no-filter) view
 };
 
 // ────────────────────────────────────────────────────────────
@@ -77,7 +78,7 @@ async function boot() {
     const idx = await res.json();
     state.indexEntries = idx.entries || [];
     document.getElementById("db-source-note").textContent = `source: ${idx.count} records · sha ${short(idx.generated_from_csv_sha256)}`;
-    renderDivisionChips();
+    renderGroupChips();
     wireControls();
     applyFilters();
     setStatus("Ready.", "ready");
@@ -113,8 +114,20 @@ function wireControls() {
     applyFilters();
   });
 
-  document.getElementById("db-collapse-all").addEventListener("click", () => {
-    state.expanded.clear();
+  document.getElementById("db-expand-toggle").addEventListener("click", () => {
+    // Toggle between overview (all groups collapsed, all row details closed)
+    // and fully-expanded (all group sections open, row details left as-is).
+    const anyExpanded = state.expandedGroups.size > 0 || state.expanded.size > 0;
+    if (anyExpanded) {
+      state.expanded.clear();
+      state.expandedGroups.clear();
+    } else {
+      // Expand every group that has rows in the current view
+      const prefixes = new Set();
+      for (const e of state.view) prefixes.add(e.group_prefix || "??");
+      state.expandedGroups = prefixes;
+    }
+    updateExpandToggleLabel();
     renderRows();
   });
 
@@ -133,20 +146,41 @@ function wireControls() {
   });
 
   document.getElementById("db-rows").addEventListener("click", (e) => {
+    const groupHeader = e.target.closest(".db-group-header");
+    if (groupHeader) {
+      toggleGroup(groupHeader.dataset.group);
+      return;
+    }
     const row = e.target.closest(".db-row-main");
     if (!row) return;
     toggleExpand(row.dataset.id);
   });
 }
 
-function renderDivisionChips() {
+function toggleGroup(prefix) {
+  if (state.expandedGroups.has(prefix)) state.expandedGroups.delete(prefix);
+  else state.expandedGroups.add(prefix);
+  updateExpandToggleLabel();
+  renderRows();
+}
+
+function updateExpandToggleLabel() {
+  const label = document.getElementById("db-expand-toggle-label");
+  const icon = document.getElementById("db-expand-toggle-icon");
+  if (!label || !icon) return;
+  const anyExpanded = state.expandedGroups.size > 0 || state.expanded.size > 0;
+  label.textContent = anyExpanded ? "Collapse all" : "Expand all";
+  icon.className = anyExpanded ? "bi bi-chevron-bar-contract" : "bi bi-chevron-bar-expand";
+}
+
+function renderGroupChips() {
   const counts = new Map();
   for (const e of state.indexEntries) {
     const d = e.group_prefix || "??";
     counts.set(d, (counts.get(d) || 0) + 1);
   }
-  const container = document.getElementById("db-division-chips");
-  // Preserve the "Division" label; remove anything else
+  const container = document.getElementById("db-groups-chips");
+  // Preserve the "Groups" label; remove anything else
   [...container.querySelectorAll(".db-chip")].forEach(n => n.remove());
   const sorted = [...counts.keys()].sort();
   for (const prefix of sorted) {
@@ -220,20 +254,71 @@ function applyFilters() {
 // ────────────────────────────────────────────────────────────
 function renderRows() {
   const tbody = document.getElementById("db-rows");
+  updateExpandToggleLabel();
   if (state.view.length === 0) {
     tbody.innerHTML =
       `<tr><td colspan="8" class="db-empty-state">No materials match the current filters.<br>Try clearing the search box or removing group chips.</td></tr>`;
     return;
   }
+  // When the user is searching or has chip filters active, flatten the list
+  // — matching results surface immediately instead of hiding behind section
+  // chrome. When just browsing, render as collapsible group sections so the
+  // initial view is an 8-group overview.
+  const filterActive = state.search.length > 0 || state.activeGroups.size > 0;
   const frag = document.createDocumentFragment();
-  for (const e of state.view) {
-    const tr = renderMainRow(e);
-    frag.appendChild(tr);
-    if (state.expanded.has(e.id)) {
-      frag.appendChild(renderDetailRow(e));
+  if (filterActive) {
+    for (const e of state.view) {
+      frag.appendChild(renderMainRow(e));
+      if (state.expanded.has(e.id)) frag.appendChild(renderDetailRow(e));
+    }
+  } else {
+    // Group-by-prefix, render each as a collapsible section
+    const byGroup = new Map();
+    for (const e of state.view) {
+      const prefix = e.group_prefix || "??";
+      if (!byGroup.has(prefix)) byGroup.set(prefix, []);
+      byGroup.get(prefix).push(e);
+    }
+    const sortedPrefixes = [...byGroup.keys()].sort();
+    for (const prefix of sortedPrefixes) {
+      const materials = byGroup.get(prefix);
+      const expanded = state.expandedGroups.has(prefix);
+      frag.appendChild(renderGroupHeaderRow(prefix, materials.length, expanded));
+      if (expanded) {
+        for (const e of materials) {
+          const tr = renderMainRow(e);
+          tr.dataset.group = prefix;
+          frag.appendChild(tr);
+          if (state.expanded.has(e.id)) {
+            const det = renderDetailRow(e);
+            det.dataset.group = prefix;
+            frag.appendChild(det);
+          }
+        }
+      }
     }
   }
   tbody.replaceChildren(frag);
+}
+
+function renderGroupHeaderRow(prefix, count, expanded) {
+  const tr = document.createElement("tr");
+  tr.className = "db-group-header" + (expanded ? " expanded" : "");
+  tr.dataset.group = prefix;
+  const name = (GROUPS[prefix] && GROUPS[prefix].label) || "Unclassified";
+  // Banner is an inner div so it can take margin + border-radius independently
+  // of the enclosing td (which can't easily escape the table layout box).
+  tr.innerHTML = `
+    <td colspan="8" class="db-group-header-cell">
+      <div class="db-group-bar">
+        <span class="db-group-caret">${expanded ? "▼" : "▶"}</span>
+        <span class="db-group-code">${escapeHtml(prefix)}</span>
+        <span class="db-group-name">${escapeHtml(name)}</span>
+        <span class="db-group-count">${count.toLocaleString()}</span>
+      </div>
+    </td>
+  `;
+  return tr;
 }
 
 function renderMainRow(e) {

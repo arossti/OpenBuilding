@@ -1,0 +1,186 @@
+,INTERIOR WALLS,,,,,,,,,,,,
+,"PROJECT NAME:    Sample Project DOE Prototype
+SCENARIO:              Baseline
+BEAM VERSION:     V1.1",SECTION COMPLETE?,False,,,,"1,536   ","1,536   ",0   ,0   ,,,T08
+"
+Select materials in your project using the checkboxes (col. G). Once selected, the emissions of these materials will be added to the section SUBTOTAL (G2) and to the project total. 
+
+The NET CARBON column (col. H) presents the net material carbon emissions (EMISSIONS minus STORAGE) of each material based on the QUANTITY and PERCENTAGE entered. 
+
+Where applicable, the R-VALUE, THICKNESS, FRAMING SPACING, etc. must be entered in the AVACADO GREEN cells.
+
+Update the PERCENTAGE value (col. E) as appropriate. Understand that the carbon values will only update for that row, after which comparison with other rows may no longer be valid.
+",,,,,,,,,,,,,
+CATEGORY,MATERIAL,QUANTITY,UNITS,%,,SELECT,"NET
+EMISSIONS
+kg CO₂e","GROSS
+EMISSIONS
+kg CO₂e","STORAGE
+Short Cycle
+kg CO₂🤚","STORAGE
+Long Cycle
+kg CO₂ 🤚","SELECT
+Long Cycle",FOOTNOTE,ID
+LIGHT STEEL FRAME INTERIOR WALLS,,FRAMING SPACING,,in,,,,,,,,,T08|C01
+LIGHT STEEL FRAMING – 16 GAUGE (2X6),,,,,,,,,,,,,T08|C01|S01
+,"Steel studs - Load bearing / Steel Framing Industry Assn / 600-S-137-54, 16 gauge [Industry Avg, US & CA]",200.6,m²,1.0,,False,0,0,0,0,,,T08|C01|S01|sss005
+,"Steel studs - Load bearing / Scafco / 600-S-137-54, 16 gauge",200.6,m²,1.0,,False,0,0,0,0,,Expired 2024,T08|C01|S01|3a1205
+,"Steel studs - Load bearing / MarinoWARE / Structural stud and track / 600-S-137-54, 16 gauge",200.6,m²,1.0,,False,0,0,0,0,,,T08|C01|S01|sss001
+,"Steel studs - Load bearing / ClarkDietrich / 600-S-137-54, 16 gauge",200.6,m²,1.0,,False,0,0,0,0,,,T08|C01|S01|sss000
+LIGHT STEEL FRAMING – 20 GAUGE (2X4),,,,,,,,,,,,,T08|C01|S02
+,"Steel studs - Non-loadbearing / Steel Framing Industry Assn / 362-S-137-54 20EQ gauge [Industry Avg, US+Can]",200.6,m²,1.0,,False,0,0,0,0,,,T08|C01|S02|sss006
+,"Steel studs - Non-loadbearing / Scafco / 362VS125-18, 20EQ gauge",200.6,m²,1.0,,False,0,0,0,0,,Expired 2024,T08|C01|S02|58154c
+,Steel studs - Non-loadbearing / MarinoWARE / Viper Stud Viper 20 / 20EQ gauge,200.6,m²,1.0,,False,0,0,0,0,,,T08|C01|S02|sss003
+,"Steel studs - Non-loadbearing / ClarkDietrich / 362-S-125-18, 20EQ gauge",200.6,m²,1.0,,False,0,0,0,0,,,T08|C01|S02|sss002
+LIGHT WOOD FRAME INTERIOR WALLS,,FRAMING SPACING,16.0,in,,,,,,,,,T08|C02
+FRAMING LUMBER – SPRUCE-PINE-FIR,,,,,,,,,,,,,T08|C02|S01
+,Wood / SPF / 2x8 Lumber / AWC & CWC [Industry Avg | US & CA],200.6,m²,1.0,,False,582.9209322,582.9209322,0,7015.830212,False,Expired 2025; BfCA BioC calc by mass,T08|C02|S01|4lv9wd
+,Wood / SPF / 2x8 Lumber / Surfaced Dry Softwood Lumber Produced in British Columbia,200.6,m²,1.0,,False,423.5227179,423.5227179,0,6530.432173,False,,T08|C02|S01|SPF002
+,Wood / SPF / 2x6 Lumber / AWC & CWC [Industry Avg | US & CA],20.06,m²,0.1,,True,44.22158796,44.22158796,0,532.2353954,False,Expired 2025; BfCA BioC calc by mass,T08|C02|S01|c309dk
+,Wood / SPF / 2x6 Lumber / Surfaced Dry Softwood Lumber Produced in British Columbia,200.6,m²,1.0,,False,321.2930963,321.2930963,0,4954.120959,False,,T08|C02|S01|SPF001
+,Wood / SPF / 2x4 Lumber / AWC & CWC [Industry Avg | US & CA],180.54,m²,0.9,,True,253.2690947,253.2690947,0,3048.257265,False,Expired 2025; BfCA BioC calc by mass,T08|C02|S01|2m3nf4
+,Wood / SPF / 2x4 Lumber / Surfaced Dry Softwood Lumber Produced in British Columbia,200.6,m²,1.0,,False,204.4592431,204.4592431,0,3152.622429,False,,T08|C02|S01|SPF000
+,Wood / SPF / 2x3 Lumber / AWC & CWC [Industry Avg | US & CA],200.6,m²,1.0,,False,201.007218,201.007218,0,2419.251797,False,Expired 2025; BfCA BioC calc by mass,T08|C02|S01|12dc8t
+RECYCLED PAPER STUDS,,,,,,,,,,,,,T08|C02|S02
+,"Wood tube studs / Wood Tube // 1.5 x 2.5"" / Recycled paper, stud only [EU]",200.6,m²,1.0,,False,-1792.76378,221.1338583,2013.897638,0,,,T08|C02|S02|WRT000
+INTERIOR WALL SYSTEMS,,,,,,,,,,,,,T08|C04
+EARTH MASONRY UNIT WALLS,,,,,,,,,,,,,T08|C04|S02
+,"Compressed earth block wall / Briques Technic Concept - Cycle terre / Stabilized with 0.2% NHL - 2.2% CEM III / 100mm (4"") width, incl. mortar [EU]",200.6,m²,1.0,,False,1789.352,1789.352,0,0,,,T08|C04|S02|CMU007
+COMPRESSED WALL BOARD STRAW PANELS,,,,,,,,,,,,,T08|C04|S01
+,Straw board partition wall / Durra Panel / Durra Wall Panels / 50 mm [AUS],200.6,m²,1.0,,False,-6728.124,2298.876,9027,0,,,T08|C04|S01|wal001
+,Straw board partition wall / Ekopanely / Ekopanel E60-1200 / 60 mm  [EU],200.6,m²,1.0,,False,-16288.72,3209.6,19498.32,0,,,T08|C04|S01|wal000
+CLADDING FOR INTERIOR WALLS 🤚,,,,,,,,,,,,,T08|C03
+"DRYWALL – 1/2""",,,,,,,,,,,,,T08|C03|S01
+,"Drywall 1/2"" [BEAM Avg | US & CA]",200.6,m²,1.0,,True,1238.574138,1238.574138,0,0,,,T08|C03|S01|d7w02l
+,"Drywall 1/2"" / Pabco / QuietRock / QuietRock 1/2""",200.6,m²,1.0,,False,1947.698601,1947.698601,0,0,,Expired 2025,T08|C03|S01|bc703d
+,"Drywall 1/2"" / National Gypsum / Gold Bond XP Gypsum Board / 1/2""",200.6,m²,1.0,,False,1650.137371,1848.370291,198.23292,0,,,T08|C03|S01|INT000
+,"Drywall 1/2""/ Georgia-Pacific / ToughRock Mold-Guard / ",200.6,m²,1.0,,False,1023.513455,1023.513455,0,0,,Expired 2025,T08|C03|S01|INT003
+,"Drywall 1/2"" / USG / Sheetrock Ultralight Panels ",200.6,m²,1.0,,False,695.2812048,695.2812048,0,0,,,T08|C03|S01|INT002
+,"Drywall 1/2"" / USG / Sheetrock Brand UltraLight Sag-Resistant Ceilling Board ",200.6,m²,1.0,,False,678.0071376,678.0071376,0,0,,,T08|C03|S01|INT001
+"DRYWALL – 1/2"" TYPE C",,,,,,,,,,,,,T08|C03|S02
+,"Drywall 1/2"" Type C / Georgia-Pacific / ToughRock Fireguard C / ",200.6,m²,1.0,,False,1230.80732,1230.80732,0,0,,Expired 2024,T08|C03|S02|1742d8
+"DRYWALL – 5/8"" TYPE X",,,,,,,,,,,,,T08|C03|S03
+,"Drywall 5/8"" / National Gypsum / Gold Bond XP Fire-Shield Gypsum Board / 5/8"" type X",200.6,m²,1.0,,False,1886.968106,2077.257266,190.28916,0,,,T08|C03|S03|INT005
+,"Drywall 5/8"" Type X / Gypsum Association [Industry Avg | US & CA]",200.6,m²,1.0,,False,1196.258342,1196.258342,0,0,,Expired 2025-04-27,T08|C03|S03|ba3064
+,"Drywall 5/8"" / USG / Sheetrock Brand EcoSmart Firecode X / 5/8""",200.6,m²,1.0,,False,945.7551792,945.7551792,0,0,,,T08|C03|S03|INT006
+"DRYWALL – 5/8"" TYPE C",,,,,,,,,,,,,T08|C03|S08
+,"Drywall 5/8"" / Georgia-Pacific / ToughRock Fireguard C/ ",200.6,m²,1.0,,False,1279.828,1279.828,0,0,,,T08|C03|S08|INT004
+MAGNESIUM OXIDE BOARD,,,,,,,,,,,,,T08|C03|S04
+,"MgO board  1/2"" [BEAM Avg]",200.6,m²,1.0,,False,2828.46,2828.46,0,0,,,T08|C03|S04|MGoB0X
+,"MgO board 1/2"" / North American MgO / MagTech Ultra / 1/2""",200.6,m²,1.0,,False,2968.88,2968.88,0,0,,Expired 2023,T08|C03|S04|63d778
+,"MgO board 1/2"" / Sinh Build / MAGOXX boards / 1/2"" [EU]",200.6,m²,1.0,,False,2516.851972,2688.04,171.188028,0,,,T08|C03|S04|int007
+BIO-BASED CLADDING,,,,,,,,,,,,,T08|C03|S05
+,"Plywood / 3/4"" / AWC & CWC [Industry Avg | US & CA]",200.6,m²,1.0,,False,1676.232055,1676.232055,0,2965.985874,False,Expired 2025; BfCA BioC calc by mass,T08|C03|S05|61a79e
+,"Plywood / 1/2"" / AWC & CWC [Industry Avg | US & CA]",200.6,m²,1.0,,False,1117.488037,1117.488037,0,1977.323916,False,Expired 2025; BfCA BioC calc by mass,T08|C03|S05|c41283
+,Cedar Siding / Western Red Cedar Lumber Assn / 1x6 Boards [Industry Avg | CA],200.6,m²,1.0,,False,691.48452,691.48452,0,1319.018154,False,Expired 2021,T08|C03|S05|1110de
+,"Wood / SPF / 3/4"" boards / AWC & CWC [Industry Avg | US & CA]",200.6,m²,1.0,,False,482.4173232,482.4173232,0,2903.102157,False,Expired 2025; BfCA BioC calc by mass,T08|C03|S05|4scwf3
+,"Wood / Redwood / 3/4"" boards / AWC & CWC [Industry Avg | US & CA]",200.6,m²,1.0,,False,290.1993942,290.1993942,0,2877.85779,False,Expired 2025; BfCA BioC calc by mass,T08|C03|S05|pd92mn
+,"Wood wool boards / Armstrong / Tectum ceiling & wall boards / 2"" ",200.6,m²,1.0,,False,308.3363222,5743.627344,5435.291022,0,,BfCA BioC calc by mass,T08|C03|S05|int008
+,"Eelgrass accoustic board / Søuld ApS / Søuld Acoustic Mats / Flame retardant, NRC 0.90 [EU]",200.6,m²,1.0,,False,-546.145536,1089.98016,1636.125696,0,,Expired 2026-02-08; BfCA BioC calc by mass,T08|C03|S05|sl3g0r
+,Straw board sheathing / VestaEco Straw Boards 280 / 30 mm [EU],200.6,m²,1.0,,False,-1136.793519,3164.09937,4300.892889,0,,,T08|C03|S05|int009
+,"Bamboo plywood / Smith & Fong / Plyboo / 1/2"" (uncarved) ",200.6,m²,1.0,,False,-3931.411418,1273.81,5205.221418,0,,BfCA BioC calc by mass,T08|C03|S05|BAM002
+,"Bamboo plywood / Smith & Fong / Plyboo / 3/4"" (uncarved) ",200.6,m²,1.0,,False,-5884.306027,1905.7,7790.006027,0,,BfCA BioC calc by mass,T08|C03|S05|BAM003
+INTERIOR FINISH PLASTER,,,,,,,,,,,,,T08|C03|S06
+,"Cement ""Stucco"" Plaster / 1:1:4 mix of Portland, masonry cement, sand @ 1/2"" [Industry Avg | US & CA]",200.6,m²,1.0,,False,4013.788897,4013.788897,0,0,,Custom BEAM assembly,T08|C03|S06|d201fq
+,"Lime Plaster, NHL 3.5 / Kerakoll / Biocalce Intonaco line @ 2 cm [EU]",200.6,m²,1.0,,False,4109.8928,4109.8928,0,0,,Expired 2024-07-26,T08|C03|S06|g1g2cs
+,"Cement ""Stucco"" Plaster / Sto SE / Pre-mixed rendering & plastering mortar with reinforcing fiber / 1/2"" [EU]",200.6,m²,1.0,,False,3529.982272,3529.982272,0,0,,,T08|C03|S06|STU000
+,"Cement ""Stucco"" Plaster / Beissier / Premixed Mortar @ 1/2"" [EU]",200.6,m²,1.0,,False,2126.243652,2126.243652,0,0,,Expired 2026-03-15,T08|C03|S06|p3m1f1
+,"Clay Plaster, site mixed / 15 mm (9/16"") [EU]",200.6,m²,1.0,,False,353.056,353.056,0,0,,"LCA, 2014",T08|C03|S06|2ecd60
+CAVITY INSULATION,,R-VALUE,,,,,,,,,,,T08|C05
+MINERAL WOOL BATT INSULATION ,,,,,,,,,,,,,T08|C05|S06
+,Mineral wool batt (Sound and Fire application)  / [BEAM Avg] ,200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S06|mwb0iw
+,Mineral wool batt / Rockwool / Safe'n'Sound / R 4.0-inch,200.6,m²,1.0,,False,0,0,0,0,,Expired 2024,T08|C05|S06|mwb006
+,Mineral wool batt / Owens Corning / Thermafiber SAFB (4 pcf) (Plant Avg) / R3.7/inch,200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S06|mwb001
+MINERAL WOOL LOOSE FILL INSULATION,,,,,,,,,,,,,T08|C05|S07
+,Mineral wool loose fill / NAIMA / R 3-inch [Industry Avg | N.America],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S07|INS020
+FIBERGLASS LOOSE FILL INSULATION,,,,,,,,,,,,,T08|C05|S08
+,Fiberglass loose fill / NAIMA /  R 2.2-inch [Industry Avg | N.America],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S08|INS008
+,"Fiberglass loose fill / CertainTeed / InsulSafe, Optima, TruComfort / R 2.6-inch",200.6,m²,1.0,,False,0,0,0,0,,Expired 2024,T08|C05|S08|f33e5e
+,"Fiberglass loose fill / Johns Manville / Climate Pro, Attic Protector, JM Spider PLUS (Canada) / R 2.8-inch",200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S08|INS009
+FIBERGLASS BATT INSULATION,,,,,,,,,,,,,T08|C05|S09
+,Fiberglass batt / NAIMA /  R 4.4-inch [Industry Avg | N.America],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S09|INS005
+,"Fiberglass batt / Johns Manville / Unfaced, ComfortTherm, Cavity-SHIELD, FSK-25 / R 3.4-inch",200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S09|INS006
+,Fiberglass batt / CertainTeed / Sustainable Insulation / R 3.6-inch,200.6,m²,1.0,,False,0,0,0,0,,Expired 2024,T08|C05|S09|1f3cc3
+,"Fiberglass batt & roll / Owens Corning / Unfaced, PINK Next Gen Fiberglas / R 3.6-inch avg.",200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S09|ins048
+SHEEP WOOL INSULATION,,,,,,,,,,,,,T08|C05|S05
+,Wool batt / R 3.8 /inch [BEAM Avg ],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S05|WB000X
+,Wool batt / Havelock Wool / Batts / R 3.6-inch,200.6,m²,1.0,,False,0,0,0,0,,Expired 2025-06-05; BfCA BioC calc by mass,T08|C05|S05|be49e2
+,Wool Loose-fill / Havelock Wool / Loose-fill / R 4.4-inch,200.6,m²,1.0,,False,0,0,0,0,,Expired 2025-06-05; BfCA BioC calc by mass,T08|C05|S05|840925
+,Wool batt / Thermafleece / Cosywool Slab / R3.8-inch [EU],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S05|INS022
+,Wool batt / Thermafleece / Cosywool Roll / R3.7-inch [EU],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S05|INS023
+,Wool batt / Thermafleece / UltraWool Slab / R4.1-inch [EU],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S05|INS024
+,Wool batt / ISOLENA / Optimal batt / 5.5 inch / R 3.8-inch [EU],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S05|INS025
+HEMP FIBER WOOL INSULATION,,,,,,,,,,,,,T08|C05|S10
+,Hemp Fiber Batt / R 3.6-inch [BEAM Avg] ,200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S10|HEMP0X
+,Hemp fiber batt / NaturFibre / Hemp Wool / R 3.7-inch,200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S10|2fe063
+,Hemp fiber batt / Ekolution / Hemp fiber insulation / R 3.6-inch [EU],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S10|INS011
+,Hemp fiber batt / KOBE-cz / ECO HempFlex insulation / R 3.6-inch [EU],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S10|INS012
+CELLULOSE INSULATION,,,,,,,,,,,,,T08|C05|S11
+,Cellulose / dense pack / CIMA / R 3.7-inch / [Industry Avg | US & CA],200.6,m²,1.0,,False,0,0,0,0,,Expired 2024-12-23; BfCA BioC calc by mass,T08|C05|S11|fc7d3a
+,Cellulose / dense pack / Advanced Fiber Technology / AFT Carbon Smart / 56 kg/m3 / R3.8-inch ,200.6,m²,1.0,,False,0,0,0,0,,Expired 2025; BfCA BioC calc by mass,T08|C05|S11|Cel001
+,Cellulose / dense pack / Greenfiber / Sanctuary / Avg of all facilties / 56.1 kg/m3 / R3.8-inch ,200.6,m²,1.0,,False,0,0,0,0,,BfCA BioC calc by mass,T08|C05|S11|Cel002
+,Cellulose / batt / CMS / EcoCell / R 3.6-inch,200.6,m²,1.0,,False,0,0,0,0,,Expired 2024; BfCA BioC calc by mass,T08|C05|S11|967ad6
+,Cellulose / batt / Ekovilla / Ekovilla Slab / R3.7-inch [EU],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S11|Cel000
+,Cellulose / loose fill / CIMA / R 3.7-inch / [Industry Avg | US & CA] ,200.6,m²,1.0,,False,0,0,0,0,,Expired 2024-12-23; BfCA BioC calc by mass,T08|C05|S11|1ca576
+,Cellulose / loose fill / Advanced Fiber Technology / AFT Carbon Smart / 25.2 kg/m3 / R3.8-inch,200.6,m²,1.0,,False,0,0,0,0,,Expired 2025; BfCA BioC calc by mass,T08|C05|S11|Cel003
+,Cellulose / loose fill / Greenfiber / Sanctuary / Avg of all facilties / 17.1 kg/m3 / R3.8-inch ,200.6,m²,1.0,,False,0,0,0,0,,BfCA BioC calc by mass,T08|C05|S11|Cel004
+,"Cellulose / spray applied / International Cellulose Corp. / K-13, ThermoCon / R 3.75-inch",200.6,m²,1.0,,False,0,0,0,0,,Expired 2025; BfCA BioC calc by mass,T08|C05|S11|5231c8
+WOOD FIBER INSULATION,,,,,,,,,,,,,T08|C05|S12
+,Wood fiber batt / [BEAM Avg | EU],200.6,m²,1.0,,False,0,0,0,0,,BfCA BioC calc by mass,T08|C05|S12|g692me
+,Wood fiber loose fill / GUTEX / ThermoFiber / R 3.8-inch [EU],200.6,m²,1.0,,False,0,0,0,0,,Expired 2024; BfCA BioC calc by mass,T08|C05|S12|ins035
+,Wood fiber batt / Steico / SteicoFlex / R 3.8-inch [EU],200.6,m²,1.0,,False,0,0,0,0,,Expired 2025; BfCA BioC calc by mass,T08|C05|S12|ins034
+,Wood fiber batt / GUTEX / ThermoFlex / R 4-inch [EU],200.6,m²,1.0,,False,0,0,0,0,,Expired 2023; BfCA BioC calc by mass,T08|C05|S12|be052f
+GRASS INSULATION,,,,,,,,,,,,,T08|C05|S16
+,Grass Insulation / Gramitherm 100 batt / R3.5-inch [EU],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S16|INS010
+HEMPCRETE INSULATION,,,,,,,,,,,,,T08|C05|S13
+,Hempcrete / R 2.4-inch [BEAM Avg] ,200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S13|HEMPCX
+,Hempcrete cast in place / Senini / Bio Beton Jet / R2.7-inch / 230 kg/m3 [EU],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S13|INS013
+,Hempcrete dry fill / Senini / Bio Beton Pronto / R2.7-inch / 190 kg/m3 [EU],200.6,m²,1.0,,False,0,0,0,0,,,T08|C05|S13|INS014
+,Hempcrete / Cast in-situ / Avg. mix using NHL & PHL / R 2.2-inch / USA,200.6,m²,1.0,,False,0,0,0,0,,"LCA, 2020; BfCA BioC calc by mass",T08|C05|S13|5731ae
+,Hempcrete / Cast in-situ / IsoHemp / R 2.2-inch / [EU],200.6,m²,1.0,,False,0,0,0,0,,Expired 2023; BfCA BioC calc by mass,T08|C05|S13|7d79df
+ADDITIONAL MATERIALS 🤚,,,,,,,,,,,,,T08|CAM
+MATERIALS BY LENGTH,,,,,,,,,,,,,T08|CAM|SLE
+,,,m,1.0,,False,0,,,,False,,T08|CAM|SLE|000001
+,,,m,1.0,,False,0,,,,False,,T08|CAM|SLE|000002
+,,,m,1.0,,False,0,,,,False,,T08|CAM|SLE|000003
+,,,m,1.0,,False,0,,,,False,,T08|CAM|SLE|000004
+,,,m,1.0,,False,0,,,,False,,T08|CAM|SLE|000005
+MATERIALS BY AREA,,,,,,,,,,,,,T08|CAM|SAR
+,,,m²,1.0,,False,0,,,,False,,T08|CAM|SAR|000001
+,,,m²,1.0,,False,0,,,,False,,T08|CAM|SAR|000002
+,,,m²,1.0,,False,0,,,,False,,T08|CAM|SAR|000003
+,,,m²,1.0,,False,0,,,,False,,T08|CAM|SAR|000004
+,,,m²,1.0,,False,0,,,,False,,T08|CAM|SAR|000005
+MATERIALS BY R-VALUE & AREA,,,,R-VALUE,➜,,,,,,,,T08|CAM|SRV
+,,,m²,1.0,,False,0,,,,False,,T08|CAM|SRV|000001
+,,,m²,1.0,,False,0,,,,False,,T08|CAM|SRV|000002
+,,,m²,1.0,,False,0,,,,False,,T08|CAM|SRV|000003
+,,,m²,1.0,,False,0,,,,False,,T08|CAM|SRV|000004
+,,,m²,1.0,,False,0,,,,False,,T08|CAM|SRV|000005
+MATERIALS BY VOLUME,,,,,,,,,,,,,T08|CAM|SVO
+,,,m³,1.0,,False,0,,,,False,,T08|CAM|SVO|000001
+,,,m³,1.0,,False,0,,,,False,,T08|CAM|SVO|000002
+,,,m³,1.0,,False,0,,,,False,,T08|CAM|SVO|000003
+,,,m³,1.0,,False,0,,,,False,,T08|CAM|SVO|000004
+,,,m³,1.0,,False,0,,,,False,,T08|CAM|SVO|000005
+ADD CUSTOM EPD VALUE 🤚,,,,,,,,,,,,,T08|CEP
+,Material Description / EPD Owner / EPD ID number / EPD Program Operator / EPD Expired date,  QUANTITY        ,UNITS,%,, SELECT,"User defined
+NET
+EMISSIONS
+kg CO₂e","User defined
+ GROSS
+EMISSIONS
+kg CO₂e","User defined
+STORAGE
+Short Cycle
+kg CO₂   ","User defined
+STORAGE
+Long Cycle
+kg CO₂   ","SELECT
+Long Cycle",,T08|CEP|SMO
+,,,,1.0,,False,0,,,,False,,T08|CEP|SMO|000001
+,,,,1.0,,False,0,,,,False,,T08|CEP|SMO|000002
+,,,,1.0,,False,0,,,,False,,T08|CEP|SMO|000003
+,,,,1.0,,False,0,,,,False,,T08|CEP|SMO|000004
+,,,,1.0,,False,0,,,,False,,T08|CEP|SMO|000005
+,,,,1.0,,False,0,,,,False,,T08|CEP|SMO|000006

@@ -1,0 +1,101 @@
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,Input Legend 🤚,,,Basic Instructions - Start Here! 🤚,,,
+,,,,,,,,,Required for saving projects,,,1. Explore our pre-populated sample project 🤚,,,
+,,,,,,,,,Required for project calculations,,,,,,
+,,,,,,,Input Units 🤚,,Non-essential,,,"3. Save the sample project for future reference using the BEAM Menu
+
+4. Use the BEAM Menu to Create new Project
+
+5. Fill in the Required for Saving Projects cells then use the BEAM menu to Save current project 
+
+6. Click Filter Concrete button. This is only required if you are located in Canada and need province-specific concrete EPDs. If you are working in the USA you can skip this step. 
+
+7. Enter your Building and/or Garage Dimension Inputs in the green cells below
+
+8. Select a building section from the tabs along the bottom of the window. Each building assembly has its own tab, from Footings & Slabs to Garage. The sequence is not important     
+
+9. To select materials, scroll options and click the check box in column G. Each time you select a material its emissions will be added to your project total
+
+*Note: If you see zeros in Column H, please ensure you have filled in all the user inputs required for material calculations, e.g. building dimensions, framing spacing, R-value, thickness, etc.
+
+10. Go to the REVIEW tab to see a detailed material summary 
+
+11. Go to the RESULTS tab for an overview and to gain insights on your project
+
+12. Create & save alternative scenarios and compare results in the GENERATE COMPARISON  tab ",,,
+,,,,,,,Metric,,"Read-only, do not edit",,,,,,
+,Project Information 🤚,,,,,,,,,,,,,,
+,Project Name,Sample Project DOE Prototype,,,,,Construction Year,,,2024.0,,,,,
+,Scenario,Baseline,,,,,Number of Bedrooms,,,3.0,,,,,
+,Beam Version,V1.1,,,,,Stories Above Grade,,,2.0,,,,,
+,Designer,US Department of Energy                       ,,,,,Total Floor Area,,,221.0,m²,,,,
+,Engineer,,,,,,Above Grade Conditioned Area,,,221.0,m²,,,,
+,Builder / Developer,,,,,,Below Grade Conditioned Area,,,0.0,m²,,,,
+,Development Project,,,,,,,,,,,,,,
+,Address,,,,,,,,,,,,,,
+,City,,,,,,,,,,,,,,
+,Country,United States,,,,,,,🤚,,,,,,
+,Province / State (Can./US only),Vermont,,,,,,,,,,,,,
+,Building Type,Single Detached House,,,,,,,,,,,,,
+,Construction Type,New Construction,,,,,,,,,,,,,
+,Project Development Stage,Permits & Contracts,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,More Resources,,,
+,,,,,,,,,,,,"Visit our Quick Start Guide & FAQ
+See our Instructions pop-up located in the BEAM Menu 
+Visit our BEAM User's Guide.",,,
+,Building Dimension Inputs (Excluding Garage)   🤚 ,,,,,,,,,,,,,,YOUR DATA
+,DIMENSION NAME,QTY,,UNIT,DESCRIPTION,,,,,,,USED TO CALCULATE TAKE-OFFS FOR,,,
+,,,,,,,,,,,,,,,
+,CONTINUOUS FOOTINGS VOLUME,8.965492,,m³,Length (m),,Height (m),,Width (m),Exclude: garage,,"Continuous (aka ""strip"") foundation wall footings (exterior and interior)",,,
+,,,,,42.37,X,0.46,X,0.46,,,,,,
+,COLUMNS/PIERS & PADS VOLUME,0.0,,m³,"Total volume of discontinuous foundation elements 
+Includes: pads/footings, columns/piers/piles  Excludes: garage",,,,,,,Concrete volume for all discontinuous pads/footings and columns/piers (ext. and int.),,,
+,FOUNDATION WALL AREA,0.0,,m²,"Total foundation wall surface area (centerline length x height) 
+Includes: basement, party walls. Excludes: openings, garage foundation",,,,,,,"Foundation & basement wall insulation (ext. and int.), interior framing, wall cladding and barriers",,,
+,FOUNDATION SLAB/FLOOR AREA,110.4,,m²,"Total foundation slab surface area
+Excludes: garage slab",,,,,,,"Aggregate base, sub-slab insulation, slab, barriers and basement flooring",,,
+,EXTERIOR WALL AREA,187.8,,m²,"Surface area of exterior walls.
+Includes: gable ends. Excludes: window & door openings, party walls, garage walls",,,,,,,"Framing, insulation, sheathing, barriers, exterior cladding, and interior cladding of exterior walls",,,
+,WINDOW AREA,33.1,,m²,"Area of window frames (preferrable) or rough openings 
+Includes: full glazing area, skylights.   Excludes:  garage windows",,,,,,,Windows of main building,,,
+,PARTY WALL AREA,0.0,,m²,"Wall area that partitions this unit from others 
+Typical for townhouses & apartment units",,,,,,,"Party wall framing, insulation, sheathing, barriers and interior cladding",,,
+,INTERIOR WALL AREA,200.6,,m²,"One side only (i.e. centerline) of all interior walls. 
+Includes: interior door area.   Excludes: exterior, garage partition and party walls",,,,,,,Interior wall framing and cladding (assumes both sides of walls are finished by default),,,
+,FRAMED FLOOR AREA ,104.4,,m²,"Above grade flooring area 
+Excludes: basement floor slab, and floor openings",,,,,,,"Floor framing, subfloor, floor insulation, finish flooring",,,
+,FINISHED CEILING AREA,110.4,,m²,"Total finished ceiling area
+Includes: basement ceilings.   Excludes: garage ceilings",,,,,,,Ceiling cladding,,,
+,ROOF CAVITY INSULATION AREA,110.4,,m²,Total area of roof insulation,,,,,,,"Flat or sloped roof cavity insulation, ceiling barriers and membranes",,,
+,ROOF SURFACE AREA,116.3,,m²,"Total roof surface area.
+Includes: overhangs",,,,,,,"Roof framing,  decking, barriers & membranes, roofing, and insulation parallel to roof surface",,,
+,TIMBER FRAMING VOLUME,0.0,,m³,"Total volume of wood in heavy timber posts & beams
+Separate inputs for steel found in Structural Elements section",,,,,,,Mass timber framing elements,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,Garage Dimension Inputs  🤚 ,,,,,,,,,,,,,,
+,DIMENSION NAME,QTY,,UNIT,DESCRIPTION,,,,,,,USED TO CALCULATE TAKE-OFFS FOR,,,
+,,,,,,,,,,,,,,,
+,GARAGE PARTITION WALL AREA,0.0,,m²,"Wall area that partitions the main building from the garage. 
+Excludes: openings and exterior garage walls",,,,,,,Partition insulation and interior cladding on garage side of partition wall,,,
+,GARAGE CONTINUOUS FOOTINGS VOLUME,0,,m³,Length (m),,Height (m),,Width (m),,,Continuous garage foundation wall footings,,,
+,,,,,0.0,X,0.0,X,0.0,,,,,,
+,GARAGE COLUMNS/PIERS & PADS VOLUME,0.0,,m³,"Total volume of discontinuous foundation elements 
+Includes: pads/footings, columns/piers/piles",,,,,,,Garage Concrete volume for all discontinuous pads/footings and columns/piers (ext. and int.),,,
+,GARAGE FOUNDATION WALL AREA,0.0,,m²,Foundation wall surface area,,,,,,,Garage foundation walls,,,
+,GARAGE SLAB AREA,0.0,,m²,Slab surface area,,,,,,,"Garage slab, aggregate base",,,
+,FLOOR AREA ABOVE GARAGE,0.0,,m²,Floor area of interior space directly above the garage.,,,,,,,Garage foundation attribution percentage for garage footings & foundation walls,,,
+,GARAGE FOUNDATION ATTRIBUTION % 🤚,,,=,0,,Portion of garage foundation attributed to the garage. The rest is attributed to the main building.,,,,,Garage footings and foundation walls,,,
+,,,,,,,,,,,,,,,
+,GARAGE EXTERIOR WALL AREA,0.0,,m²,"Surface area of exterior garage walls
+Includes: gable ends. Excludes: window & door openings, partition walls",,,,,,,"Garage exterior wall framing, sheathing, exterior cladding, interior cladding of exterior walls",,,
+,GARAGE WINDOW AREA,0.0,,m²,"Area of window frames (preferrable) or rough openings 
+Includes: full glazing area, skylights.",,,,,,,Garage windows,,,
+,GARAGE FINISHED CEILING AREA,0.0,,m²,Garage ceiling area covered by materials,,,,,,,"Garage ceiling cladding, insulation parallel to ceiling",,,
+,GARAGE ROOF SURFACE AREA,0.0,,m²,"Garage roof surface area. Calculated with roof pitch
+Includes: overhangs",,,,,,,"Garage roof framing, decking, roofing, insulation parallel to roof surface",,,
+,GARAGE TIMBER FRAMING VOLUME,0.0,,m³,Volume of wood for heavy timber structures in garage,,,,,,,Garage mass timber framing elements,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,

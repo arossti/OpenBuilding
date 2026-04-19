@@ -1,0 +1,111 @@
+,CEILINGS,,,,,,,,,,,,
+,"PROJECT NAME:    Sample Project DOE Prototype
+SCENARIO:              Baseline
+BEAM VERSION:     V1.1",SECTION COMPLETE?,False,,,,341   ,341   ,0   ,0   ,,,T10
+"
+Select materials in your project using the checkboxes (col. G). Once selected, the emissions of these materials will be added to the section SUBTOTAL (G2) and to the project total. 
+
+The NET CARBON column (col. H) presents the net material carbon emissions (EMISSIONS minus STORAGE) of each material based on the QUANTITY and PERCENTAGE entered. 
+
+Where applicable, the R-VALUE, THICKNESS, FRAMING SPACING, etc. must be entered in the AVACADO GREEN cells.
+
+Update the PERCENTAGE value (col. E) as appropriate. Understand that the carbon values will only update for that row, after which comparison with other rows may no longer be valid.
+",,,,,,,,,,,,,
+CATEGORY,MATERIAL,QUANTITY,UNITS,%,,SELECT,"NET
+EMISSIONS
+kg CO₂e","GROSS
+EMISSIONS
+kg CO₂e","STORAGE
+Short Cycle
+kg CO₂🤚","STORAGE
+Long Cycle
+kg CO₂ 🤚","SELECT
+Long Cycle",FOOTNOTE,ID
+CEILING FINISHES,,,,,,,,,,,,,T10|C01
+"DRYWALL – 1/2""",,,,,,,,,,,,,T10|C01|S01
+,"Drywall 1/2"" [BEAM Avg | US & CA]",110.4,m²,1.0,,True,340.8239901,340.8239901,0,0,,,T10|C01|S01|d7w02l
+,"Drywall 1/2"" / Pabco / QuietRock / QuietRock 1/2""",110.4,m²,1.0,,False,535.9569429,535.9569429,0,0,,Expired 2025,T10|C01|S01|bc703d
+,"Drywall 1/2"" / National Gypsum / Gold Bond XP Gypsum Board / 1/2""",110.4,m²,1.0,,False,454.0756872,508.6243272,54.54864,0,,,T10|C01|S01|INT000
+,"Drywall 1/2""/ Georgia-Pacific / ToughRock Mold-Guard / ",110.4,m²,1.0,,False,281.6447793,281.6447793,0,0,,Expired 2025,T10|C01|S01|INT003
+,"Drywall 1/2"" / USG / Sheetrock Ultralight Panels ",110.4,m²,1.0,,False,191.3236416,191.3236416,0,0,,,T10|C01|S01|INT002
+,"Drywall 1/2"" / USG / Sheetrock Brand UltraLight Sag-Resistant Ceilling Board ",110.4,m²,1.0,,False,186.5702592,186.5702592,0,0,,,T10|C01|S01|INT001
+"DRYWALL – 1/2"" TYPE C",,,,,,,,,,,,,T10|C01|S02
+,"Drywall 1/2"" Type C / Georgia-Pacific / ToughRock Fireguard C / ",110.4,m²,1.0,,False,338.68676,338.68676,0,0,,Expired 2024,T10|C01|S02|1742d8
+"DRYWALL – 5/8"" TYPE X",,,,,,,,,,,,,T10|C01|S03
+,"Drywall 5/8"" / National Gypsum / Gold Bond XP Fire-Shield Gypsum Board / 5/8"" type X",110.4,m²,1.0,,False,519.2454608,571.6081808,52.36272,0,,,T10|C01|S03|INT005
+,"Drywall 5/8"" Type X / Gypsum Association [Industry Avg | US & CA]",110.4,m²,1.0,,False,329.1797632,329.1797632,0,0,,Expired 2025-04-27,T10|C01|S03|ba3064
+,"Drywall 5/8"" / USG / Sheetrock Brand EcoSmart Firecode X / 5/8""",110.4,m²,1.0,,False,260.2476864,260.2476864,0,0,,,T10|C01|S03|INT006
+"DRYWALL – 5/8"" TYPE C",,,,,,,,,,,,,T10|C01|S08
+,"Drywall 5/8"" / Georgia-Pacific / ToughRock Fireguard C/ ",110.4,m²,1.0,,False,352.176,352.176,0,0,,,T10|C01|S08|INT004
+MAGNESIUM OXIDE BOARD,,,,,,,,,,,,,T10|C01|S04
+,"MgO board  1/2"" [BEAM Avg]",110.4,m²,1.0,,False,778.32,778.32,0,0,,,T10|C01|S04|MGoB0X
+,"MgO board 1/2"" / North American MgO / MagTech Ultra / 1/2""",110.4,m²,1.0,,False,816.96,816.96,0,0,,Expired 2023,T10|C01|S04|63d778
+,"MgO board 1/2"" / Sinh Build / MAGOXX boards / 1/2"" [EU]",110.4,m²,1.0,,False,692.573424,739.68,47.106576,0,,,T10|C01|S04|int007
+BIO-BASED CLADDING,,,,,,,,,,,,,T10|C01|S05
+,"Plywood / 3/4"" / AWC & CWC [Industry Avg | US & CA]",110.4,m²,1.0,,False,461.2562784,461.2562784,0,1632.327221,False,Expired 2025; BfCA BioC calc by mass,T10|C01|S05|61a79e
+,"Plywood / 1/2"" / AWC & CWC [Industry Avg | US & CA]",110.4,m²,1.0,,False,307.5041856,307.5041856,0,1088.218147,False,Expired 2025; BfCA BioC calc by mass,T10|C01|S05|c41283
+,Cedar Siding / Western Red Cedar Lumber Assn / 1x6 Boards [Industry Avg | CA],110.4,m²,1.0,,False,190.2788908,190.2788908,0,725.9202601,False,Expired 2021,T10|C01|S05|1110de
+,"Wood / SPF / 3/4"" boards / AWC & CWC [Industry Avg | US & CA]",110.4,m²,1.0,,False,132.7489344,132.7489344,0,1597.719233,False,Expired 2025; BfCA BioC calc by mass,T10|C01|S05|4scwf3
+,"Wood / Redwood / 3/4"" boards / AWC & CWC [Industry Avg | US & CA]",110.4,m²,1.0,,False,79.8554664,79.8554664,0,1583.826022,False,Expired 2025; BfCA BioC calc by mass,T10|C01|S05|pd92mn
+,"Wood wool boards / Armstrong / Tectum ceiling & wall boards / 2"" ",110.4,m²,1.0,,False,84.84628608,1580.499648,1495.653362,0,,BfCA BioC calc by mass,T10|C01|S05|int008
+,"Eelgrass accoustic board / Søuld ApS / Søuld Acoustic Mats / Flame retardant, NRC 0.90 [EU]",110.4,m²,1.0,,False,-150.285312,299.93472,450.220032,0,,Expired 2026-02-08; BfCA BioC calc by mass,T10|C01|S05|sl3g0r
+,Straw board sheathing / VestaEco Straw Boards 280 / 30 mm [EU],110.4,m²,1.0,,False,-312.8165617,870.6793879,1183.49595,0,,,T10|C01|S05|int009
+,"Bamboo plywood / Smith & Fong / Plyboo / 1/2"" (uncarved) ",110.4,m²,1.0,,False,-1081.824079,350.52,1432.344079,0,,BfCA BioC calc by mass,T10|C01|S05|BAM002
+,"Bamboo plywood / Smith & Fong / Plyboo / 3/4"" (uncarved) ",110.4,m²,1.0,,False,-1619.210831,524.4,2143.610831,0,,BfCA BioC calc by mass,T10|C01|S05|BAM003
+INTERIOR FINISH PLASTER,,,,,,,,,,,,,T10|C01|S06
+,"Cement ""Stucco"" Plaster / 1:1:4 mix of Portland, masonry cement, sand @ 1/2"" [Industry Avg | US & CA]",110.4,m²,1.0,,False,1104.492259,1104.492259,0,0,,Custom BEAM assembly,T10|C01|S06|d201fq
+,"Lime Plaster, NHL 3.5 / Kerakoll / Biocalce Intonaco line @ 2 cm [EU]",110.4,m²,1.0,,False,1130.9376,1130.9376,0,0,,Expired 2024-07-26,T10|C01|S06|g1g2cs
+,"Cement ""Stucco"" Plaster / Sto SE / Pre-mixed rendering & plastering mortar with reinforcing fiber / 1/2"" [EU]",110.4,m²,1.0,,False,971.361024,971.361024,0,0,,,T10|C01|S06|STU000
+,"Cement ""Stucco"" Plaster / Beissier / Premixed Mortar @ 1/2"" [EU]",110.4,m²,1.0,,False,585.087984,585.087984,0,0,,Expired 2026-03-15,T10|C01|S06|p3m1f1
+,"Clay Plaster, site mixed / 15 mm (9/16"") [EU]",110.4,m²,1.0,,False,97.152,97.152,0,0,,"LCA, 2014",T10|C01|S06|2ecd60
+CEILINGS STRAPPING,,STRAPPING SPACING:,,in,,,,,,,,,T10|C04
+WOOD STRAPPING,,,,,,,,,,,,,T10|C04|S01
+,Wood / SPF / 1x4 Lumber / AWC & CWC [Industry Avg | US & CA],110.4,m²,1.0,,False,0,0,0,0,False,Expired 2025; BfCA BioC calc by mass,T10|C04|S01|s029f2
+,Wood / SPF / 1x3 Lumber / AWC & CWC [Industry Avg | US & CA],110.4,m²,1.0,,False,0,0,0,0,False,Expired 2025; BfCA BioC calc by mass,T10|C04|S01|w93kcl
+,Wood / SPF / 1x2 Lumber / AWC & CWC [Industry Avg | US & CA],110.4,m²,1.0,,False,0,0,0,0,False,Expired 2025; BfCA BioC calc by mass,T10|C04|S01|k2f2dm
+ADDITIONAL MATERIALS 🤚,,,,,,,,,,,,,T10|CAM
+MATERIALS BY LENGTH,,,,,,,,,,,,,T10|CAM|SLE
+,,,m,1.0,,False,0,,,,False,,T10|CAM|SLE|000001
+,,,m,1.0,,False,0,,,,False,,T10|CAM|SLE|000002
+,,,m,1.0,,False,0,,,,False,,T10|CAM|SLE|000003
+,,,m,1.0,,False,0,,,,False,,T10|CAM|SLE|000004
+,,,m,1.0,,False,0,,,,False,,T10|CAM|SLE|000005
+MATERIALS BY AREA,,,,,,,,,,,,,T10|CAM|SAR
+,,,m²,1.0,,False,0,,,,False,,T10|CAM|SAR|000001
+,,,m²,1.0,,False,0,,,,False,,T10|CAM|SAR|000002
+,,,m²,1.0,,False,0,,,,False,,T10|CAM|SAR|000003
+,,,m²,1.0,,False,0,,,,False,,T10|CAM|SAR|000004
+,,,m²,1.0,,False,0,,,,False,,T10|CAM|SAR|000005
+MATERIALS BY R-VALUE & AREA,,,,R-VALUE,➜,,,,,,,,T10|CAM|SRV
+,,,m²,1.0,,False,0,,,,False,,T10|CAM|SRV|000001
+,,,m²,1.0,,False,0,,,,False,,T10|CAM|SRV|000002
+,,,m²,1.0,,False,0,,,,False,,T10|CAM|SRV|000003
+,,,m²,1.0,,False,0,,,,False,,T10|CAM|SRV|000004
+,,,m²,1.0,,False,0,,,,False,,T10|CAM|SRV|000005
+MATERIALS BY VOLUME,,,,,,,,,,,,,T10|CAM|SVO
+,,,m³,1.0,,False,0,,,,False,,T10|CAM|SVO|000001
+,,,m³,1.0,,False,0,,,,False,,T10|CAM|SVO|000002
+,,,m³,1.0,,False,0,,,,False,,T10|CAM|SVO|000003
+,,,m³,1.0,,False,0,,,,False,,T10|CAM|SVO|000004
+,,,m³,1.0,,False,0,,,,False,,T10|CAM|SVO|000005
+ADD CUSTOM EPD VALUE 🤚,,,,,,,,,,,,,T10|CEP
+,Material Description / EPD Owner / EPD ID number / EPD Program Operator / EPD Expired date,  QUANTITY        ,UNITS,%,, SELECT,"User defined
+NET
+EMISSIONS
+kg CO₂e","User defined
+ GROSS
+EMISSIONS
+kg CO₂e","User defined
+STORAGE
+Short Cycle
+kg CO₂   ","User defined
+STORAGE
+Long Cycle
+kg CO₂   ","SELECT
+Long Cycle",,T10|CEP|SMO
+,,,,1.0,,False,0,,,,False,,T10|CEP|SMO|000001
+,,,,1.0,,False,0,,,,False,,T10|CEP|SMO|000002
+,,,,1.0,,False,0,,,,False,,T10|CEP|SMO|000003
+,,,,1.0,,False,0,,,,False,,T10|CEP|SMO|000004
+,,,,1.0,,False,0,,,,False,,T10|CEP|SMO|000005
+,,,,1.0,,False,0,,,,False,,T10|CEP|SMO|000006

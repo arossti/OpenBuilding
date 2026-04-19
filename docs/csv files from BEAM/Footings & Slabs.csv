@@ -1,0 +1,781 @@
+, FOOTINGS & SLABS,,,,,,,,,,,,
+,"PROJECT NAME:    Sample Project DOE Prototype
+SCENARIO:              Baseline
+BEAM VERSION:     V1.1",SECTION COMPLETE?,False,,,,"11,229   ","11,229   ",0   ,0   ,,,T01
+"
+Select materials in your project using the checkboxes (col. G). Once selected, the emissions of these materials will be added to the section SUBTOTAL (G2) and to the project total. 
+
+The NET CARBON column (col. H) presents the net material carbon emissions (EMISSIONS minus STORAGE) of each material based on the QUANTITY and PERCENTAGE entered. 
+
+Where applicable, the R-VALUE, THICKNESS, FRAMING SPACING, etc. must be entered in the AVACADO GREEN cells.
+
+Update the PERCENTAGE value (col. E) as appropriate. Understand that the carbon values will only update for that row, after which comparison with other rows may no longer be valid.
+",,,,,,,,,,,,,
+CATEGORY,MATERIAL,QUANTITY,UNITS,%,,SELECT,"NET
+EMISSIONS
+kg CO₂e","GROSS
+EMISSIONS
+kg CO₂e","STORAGE
+Short Cycle
+kg CO₂🤚","STORAGE
+Long Cycle
+kg CO₂ 🤚","SELECT
+Long Cycle",FOOTNOTE,ID
+CONTINUOUS CONCRETE FOOTINGS,,,,,,,,,,,,,T01|C01
+CONCRETE – <=25 MPa – CANADA,,,,,,,,,,,,,T01|C01|S01
+,"Concrete – 0-25 MPa, 0-14% FA/SL, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,2872.453982,2872.453982,0,0,,Expired 01-2022,T01|C01|S01|4e0f8a
+,"Concrete – 0-25 MPa, Canadian Benchmark Average / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,2730.171624,2730.171624,0,0,,Expired 01-2022,T01|C01|S01|7de1da
+,"Concrete – 0-25 MPa, 15-29% Fly Ash, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,2592.05822,2592.05822,0,0,,Expired 01-2022,T01|C01|S01|e72bcd
+,"Concrete – 0-25 MPa, 25-34% Slag, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,2351.110622,2351.110622,0,0,,Expired 01-2022,T01|C01|S01|6ed061
+,"Concrete – 0-25 MPa, 30-40% Fly Ash, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,2288.934935,2288.934935,0,0,,Expired 01-2022,T01|C01|S01|d873ca
+,"Concrete – 0-25 MPa, 35-50% Slag, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,2142.618106,2142.618106,0,0,,Expired 01-2022,T01|C01|S01|b069b6
+,"Concrete – 25 MPa, Quebec Baseline Average / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2628.23398,2628.23398,0,0,,,T01|C01|S01|fdsj68
+,"Concrete – 25 MPa, 10% SL, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2515.44809,2515.44809,0,0,,,T01|C01|S01|aaacc1
+,"Concrete – 25 MPa, 10% FA, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2476.4482,2476.4482,0,0,,,T01|C01|S01|aaacc2
+,"Concrete – 25 MPa, 20% SL, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2320.26933,2320.26933,0,0,,,T01|C01|S01|aaacc3
+,"Concrete – 25 MPa, 20% FA, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2242.448859,2242.448859,0,0,,,T01|C01|S01|aaacc4
+,"Concrete – 25 MPa, 30% SL, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2129.30435,2129.30435,0,0,,,T01|C01|S01|aaacc5
+,"Concrete – 25 MPa, 30% FA, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2012.573644,2012.573644,0,0,,,T01|C01|S01|aaacc6
+,"Concrete – 25 MPa, 30% FA, GUL / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,1877.64299,1877.64299,0,0,,,T01|C01|S01|A12345
+,"Concrete – 25 MPa, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,2453.586196,2453.586196,0,0,,,T01|C01|S01|aaacc21
+,"Concrete – 25 MPa, 15% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,2189.731766,2189.731766,0,0,,,T01|C01|S01|aaacc22
+,"Concrete – 25 MPa, 25% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,2013.828813,2013.828813,0,0,,,T01|C01|S01|aaacc23
+,"Concrete – 25 MPa, 35% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,1838.015515,1838.015515,0,0,,,T01|C01|S01|aaacc24
+,"Concrete – 25 MPa, 50% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,1574.161085,1574.161085,0,0,,,T01|C01|S01|aaacc25
+,"Concrete – 25 MPa, 50% SL, GUL / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,1511.357814,1511.357814,0,0,,,T01|C01|S01|A12349
+,"Concrete – 25 MPa, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,3095.605078,3095.605078,0,0,,,T01|C01|S01|aaacc36
+,"Concrete – 25 MPa, 10% FA, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,2851.474731,2851.474731,0,0,,,T01|C01|S01|aaacc37
+,"Concrete – 25 MPa, 20% FA, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,2607.434038,2607.434038,0,0,,,T01|C01|S01|aaacc38
+,"Concrete – 25 MPa, 30% FA, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,2363.393346,2363.393346,0,0,,,T01|C01|S01|aaacc39
+,"Concrete – 25 MPa, 40% FA, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,2119.352654,2119.352654,0,0,,,T01|C01|S01|aaacc40
+,"Concrete – 25 MPa, 40% FA, GUL / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,1957.570351,1957.570351,0,0,,,T01|C01|S01|A12352
+,"Concrete – 25 MPa, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,2427.227649,2427.227649,0,0,,,T01|C01|S01|aaacc51
+,"Concrete – 25 MPa, 10% FA, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,2233.931642,2233.931642,0,0,,,T01|C01|S01|aaacc52
+,"Concrete – 25 MPa, 20% FA, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,2031.939107,2031.939107,0,0,,,T01|C01|S01|aaacc53
+,"Concrete – 25 MPa, 30% FA, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,1838.553444,1838.553444,0,0,,,T01|C01|S01|aaacc54
+,"Concrete – 25 MPa, 40% FA, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,1636.56091,1636.56091,0,0,,,T01|C01|S01|aaacc55
+,"Concrete – 25 MPa, 40% FA, GUL / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,1448.823507,1448.823507,0,0,,,T01|C01|S01|A12355
+,"Concrete – 25 MPa, GU / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,2366.351958,2366.351958,0,0,,,T01|C01|S01|aaacc66
+,"Concrete – 25 MPa, 15% SCM, GU / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,2103.752698,2103.752698,0,0,,,T01|C01|S01|aaacc67
+,"Concrete – 25 MPa, 25% SCM, GU / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,1933.498005,1933.498005,0,0,,,T01|C01|S01|aaacc68
+,"Concrete – 25 MPa, 40% SCM, GU / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,1670.181505,1670.181505,0,0,,,T01|C01|S01|aaacc69
+,"Concrete – 25 MPa, 40% SCM, GUL / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,1567.571449,1567.571449,0,0,,,T01|C01|S01|A12359
+,"Concrete – 25 MPa, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,3471.438502,3471.438502,0,0,,,T01|C01|S01|aaacc78
+,"Concrete – 25 MPa, 10% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,3205.253045,3205.253045,0,0,,,T01|C01|S01|aaacc79
+,"Concrete – 25 MPa, 20% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,2939.067587,2939.067587,0,0,,,T01|C01|S01|aaacc80
+,"Concrete – 25 MPa, 30% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,2672.792475,2672.792475,0,0,,,T01|C01|S01|aaacc81
+,"Concrete – 25 MPa, 40% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,2406.607018,2406.607018,0,0,,,T01|C01|S01|aaacc82
+,"Concrete – 25 MPa, 40% FA, GUL / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,2260.917773,2260.917773,0,0,,,T01|C01|S01|A12361
+,"Concrete – 25 MPa, GU / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,3064.405166,3064.405166,0,0,,,T01|C01|S01|aaacc93
+,"Concrete – 25 MPa, 10% FA, GU / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,2800.550736,2800.550736,0,0,,,T01|C01|S01|aaacc94
+,"Concrete – 25 MPa, 20% FA, GU / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,2532.75149,2532.75149,0,0,,,T01|C01|S01|aaacc95
+,"Concrete – 25 MPa, 20% FA, GUL / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,2293.372854,2293.372854,0,0,,,T01|C01|S01|A12363
+CONCRETE – 26-30 MPa – CANADA,,,,,,,,,,,,,T01|C01|S02
+,"Concrete – 26-30 MPa, 0-14% FA/SL, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,3230.266768,3230.266768,0,0,,Expired 01-2022,T01|C01|S02|be7b88
+,"Concrete – 26-30 MPa, Canadian Benchmark Average / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,3135.053243,3135.053243,0,0,,Expired 01-2022,T01|C01|S02|897eab
+,"Concrete – 26-30 MPa, 15-29% Fly Ash, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,2909.167672,2909.167672,0,0,,Expired 01-2022,T01|C01|S02|38d491
+,"Concrete – 26-30 MPa, 25-34% Slag, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,2633.254655,2633.254655,0,0,,Expired 01-2022,T01|C01|S02|a6839d
+,"Concrete – 26-30 MPa, 30-40% Fly Ash, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,2562.023821,2562.023821,0,0,,Expired 01-2022,T01|C01|S02|814de3
+,"Concrete – 26-30 MPa, 35-50% Slag, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,2394.503603,2394.503603,0,0,,Expired 01-2022,T01|C01|S02|b1d6d5
+,"Concrete – 30 MPa, Quebec Baseline Average / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2931.446919,2931.446919,0,0,,,T01|C01|S02|aaacc7
+,"Concrete – 30 MPa, 10% SL, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2804.226588,2804.226588,0,0,,,T01|C01|S02|aaacc8
+,"Concrete – 30 MPa, 10% FA, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2760.833606,2760.833606,0,0,,,T01|C01|S02|aaacc9
+,"Concrete – 30 MPa, 20% SL, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2591.475463,2591.475463,0,0,,,T01|C01|S02|aaacc10
+,"Concrete – 30 MPa, 20% FA, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2503.882606,2503.882606,0,0,,,T01|C01|S02|aaacc11
+,"Concrete – 30 MPa, 30% SL, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2374.600211,2374.600211,0,0,,,T01|C01|S02|aaacc12
+,"Concrete – 30 MPa, 30% FA, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2242.807479,2242.807479,0,0,,,T01|C01|S02|aaacc13
+,"Concrete – 30 MPa, 30% FA, GUL / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2089.856185,2089.856185,0,0,,,T01|C01|S02|A12346
+,"Concrete – 30 MPa, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,2659.344237,2659.344237,0,0,,,T01|C01|S02|aaacc26
+,"Concrete – 30 MPa, 15% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,2370.296775,2370.296775,0,0,,,T01|C01|S02|aaacc27
+,"Concrete – 30 MPa, 25% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,2177.538697,2177.538697,0,0,,,T01|C01|S02|aaacc28
+,"Concrete – 30 MPa, 35% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,1984.870274,1984.870274,0,0,,,T01|C01|S02|aaacc29
+,"Concrete – 30 MPa, 50% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,1695.733157,1695.733157,0,0,,,T01|C01|S02|aaacc30
+,"Concrete – 30 MPa, 50% SL, GUL / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,1687.529732,1687.529732,0,0,,,T01|C01|S02|A12350
+,"Concrete – 30 MPa, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,3379.273245,3379.273245,0,0,,,T01|C01|S02|aaacc41
+,"Concrete – 30 MPa, 10% FA, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,3110.936069,3110.936069,0,0,,,T01|C01|S02|aaacc42
+,"Concrete – 30 MPa, 20% FA, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,2838.295457,2838.295457,0,0,,,T01|C01|S02|aaacc43
+,"Concrete – 30 MPa, 30% FA, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,2569.958282,2569.958282,0,0,,,T01|C01|S02|aaacc44
+,"Concrete – 30 MPa, 40% FA, GUL / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,2117.963003,2117.963003,0,0,,,T01|C01|S02|A12353
+,"Concrete – 30 MPa, 40% FA, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,2297.31767,2297.31767,0,0,,,T01|C01|S02|aaacc45
+,"Concrete – 30 MPa, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,2673.778679,2673.778679,0,0,,,T01|C01|S02|aaacc56
+,"Concrete – 30 MPa, 10% FA, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,2454.482745,2454.482745,0,0,,,T01|C01|S02|aaacc57
+,"Concrete – 30 MPa, 20% FA, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,2234.469571,2234.469571,0,0,,,T01|C01|S02|aaacc58
+,"Concrete – 30 MPa, 30% FA, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,2015.173637,2015.173637,0,0,,,T01|C01|S02|aaacc59
+,"Concrete – 30 MPa, 40% FA, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,1795.250118,1795.250118,0,0,,,T01|C01|S02|aaacc60
+,"Concrete – 30 MPa, 40% FA, GUL / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,1586.130017,1586.130017,0,0,,,T01|C01|S02|A12356
+,"Concrete – 30 MPa, GU / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,2785.488709,2785.488709,0,0,,,T01|C01|S02|aaacc70
+,"Concrete – 30 MPa, 15% SCM, GU / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,2474.117172,2474.117172,0,0,,,T01|C01|S02|aaacc71
+,"Concrete – 30 MPa, 25% SCM, GU / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,2266.476378,2266.476378,0,0,,,T01|C01|S02|aaacc72
+,"Concrete – 30 MPa, 40% SCM, GU / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,1955.015186,1955.015186,0,0,,,T01|C01|S02|aaacc73
+,"Concrete – 30 MPa, 40% SCM, GUL / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,1832.591392,1832.591392,0,0,,,T01|C01|S02|A12360
+,"Concrete – 30 MPa, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,3762.279063,3762.279063,0,0,,,T01|C01|S02|aaacc83
+,"Concrete – 30 MPa, 10% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,3467.404031,3467.404031,0,0,,,T01|C01|S02|aaacc84
+,"Concrete – 30 MPa, 20% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,3172.528999,3172.528999,0,0,,,T01|C01|S02|aaacc85
+,"Concrete – 30 MPa, 30% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,2877.653967,2877.653967,0,0,,,T01|C01|S02|aaacc86
+,"Concrete – 30 MPa, 40% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,2582.778935,2582.778935,0,0,,,T01|C01|S02|aaacc87
+,"Concrete – 30 MPa, 40% FA, GUL / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,2421.400079,2421.400079,0,0,,,T01|C01|S02|A12362
+,"Concrete – 30 MPa, GU / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,3451.53511,3451.53511,0,0,,,T01|C01|S02|aaacc96
+,"Concrete – 30 MPa, 10% FA, GU / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,3152.894572,3152.894572,0,0,,,T01|C01|S02|aaacc97
+,"Concrete – 30 MPa, 20% FA, GU / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,2850.129907,2850.129907,0,0,,,T01|C01|S02|aaacc98
+,"Concrete – 30 MPa, 20% FA, GUL / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,2617.609872,2617.609872,0,0,,,T01|C01|S02|A12364
+CONCRETE – 31-35 MPa – CANADA,,,,,,,,,,,,,T01|C01|S03
+,"Concrete – 31-35 MPa, 0-14% FA/SL, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,3749.368754,3749.368754,0,0,,Expired 01-2022,T01|C01|S03|ad41fc
+,"Concrete – 31-35 MPa, Canadian Benchmark Average / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,3739.058439,3739.058439,0,0,,Expired 01-2022,T01|C01|S03|dad6dc
+,"Concrete – 31-35 MPa, 15-29% Fly Ash, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,3369.007756,3369.007756,0,0,,Expired 01-2022,T01|C01|S03|cfa664
+,"Concrete – 31-35 MPa, 25-34% Slag, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,3042.215573,3042.215573,0,0,,Expired 01-2022,T01|C01|S03|43fc51
+,"Concrete – 31-35 MPa, 30-40% Fly Ash, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,2957.850293,2957.850293,0,0,,Expired 01-2022,T01|C01|S03|dac0ae
+,"Concrete – 31-35 MPa, 35-50% Slag, GU / CRMCA [Industry Avg | CA]",8.965492,m³,1.0,,False,2759.3543,2759.3543,0,0,,Expired 01-2022,T01|C01|S03|1ea5e4
+,"Concrete – 35 MPa, Quebec Baseline Average / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,3311.135505,3311.135505,0,0,,,T01|C01|S03|aaacc14
+,"Concrete – 35 MPa, 10% SL, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,3171.542795,3171.542795,0,0,,,T01|C01|S03|aaacc15
+,"Concrete – 35 MPa, 10% FA, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,3121.425695,3121.425695,0,0,,,T01|C01|S03|aaacc16
+,"Concrete – 35 MPa, 20% SL, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2926.336589,2926.336589,0,0,,,T01|C01|S03|aaacc17
+,"Concrete – 35 MPa, 20% FA, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2825.474804,2825.474804,0,0,,,T01|C01|S03|aaacc18
+,"Concrete – 35 MPa, 30% SL, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2676.109707,2676.109707,0,0,,,T01|C01|S03|aaacc19
+,"Concrete – 35 MPa, 30% FA, GU / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2525.220477,2525.220477,0,0,,,T01|C01|S03|aaacc20
+,"Concrete – 35 MPa, 30% FA, GUL / ABQ [Industry Avg | CA]",8.965492,m³,1.0,,False,2350.348555,2350.348555,0,0,,,T01|C01|S03|A12348
+,"Concrete – 35 MPa, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,3176.473816,3176.473816,0,0,,,T01|C01|S03|aaacc31
+,"Concrete – 35 MPa, 15% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,2823.95067,2823.95067,0,0,,,T01|C01|S03|aaacc32
+,"Concrete – 35 MPa, 25% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,2588.87547,2588.87547,0,0,,,T01|C01|S03|aaacc33
+,"Concrete – 35 MPa, 35% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,2353.80027,2353.80027,0,0,,,T01|C01|S03|aaacc34
+,"Concrete – 35 MPa, 50% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,2001.277124,2001.277124,0,0,,,T01|C01|S03|aaacc35
+,"Concrete – 35 MPa, 50% SL, GUL / Ontario Concrete RMCAO [Industry Avg | CA]",8.965492,m³,1.0,,False,1894.722252,1894.722252,0,0,,,T01|C01|S03|A12351
+,"Concrete – 35 MPa, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,3963.016429,3963.016429,0,0,,,T01|C01|S03|aaacc46
+,"Concrete – 35 MPa, 10% FA, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,3641.96216,3641.96216,0,0,,,T01|C01|S03|aaacc47
+,"Concrete – 35 MPa, 20% FA, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,3312.211364,3312.211364,0,0,,,T01|C01|S03|aaacc48
+,"Concrete – 35 MPa, 30% FA, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,2991.157096,2991.157096,0,0,,,T01|C01|S03|aaacc49
+,"Concrete – 35 MPa, 40% FA, GU / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,2661.316645,2661.316645,0,0,,,T01|C01|S03|aaacc50
+,"Concrete – 35 MPa, 40% FA, GUL / Concrete Sask [Industry Avg | CA]",8.965492,m³,1.0,,False,2577.713432,2577.713432,0,0,,,T01|C01|S03|A12354
+,"Concrete – 35 MPa, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,3042.43971,3042.43971,0,0,,,T01|C01|S03|aaacc61
+,"Concrete – 35 MPa, 10% FA, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,2794.185237,2794.185237,0,0,,,T01|C01|S03|aaacc62
+,"Concrete – 35 MPa, 20% FA, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,2537.234236,2537.234236,0,0,,,T01|C01|S03|aaacc63
+,"Concrete – 35 MPa, 30% FA, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,2288.979763,2288.979763,0,0,,,T01|C01|S03|aaacc64
+,"Concrete – 35 MPa, 40% FA, GU / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,2032.118417,2032.118417,0,0,,,T01|C01|S03|aaacc65
+,"Concrete – 35 MPa, 40% FA, GUL / Concrete Manitoba [Industry Avg | CA]",8.965492,m³,1.0,,False,1792.246678,1792.246678,0,0,,,T01|C01|S03|A12358
+,"Concrete – 35 MPa, GU / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,3185.080688,3185.080688,0,0,,,T01|C01|S03|aaacc74
+,"Concrete – 35 MPa, 15% SCM, GU / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,2827.805832,2827.805832,0,0,,,T01|C01|S03|aaacc75
+,"Concrete – 35 MPa, 25% SCM, GU / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,2590.489258,2590.489258,0,0,,,T01|C01|S03|aaacc76
+,"Concrete – 35 MPa, 40% SCM, GU / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,2229.448896,2229.448896,0,0,,,T01|C01|S03|aaacc77
+,"Concrete – 35 MPa, 40% SCM, GUL / Concrete BC [Industry Avg | CA]",8.965492,m³,1.0,,False,2088.376879,2088.376879,0,0,,,T01|C01|S03|A12366
+,"Concrete – 35 MPa, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,4370.946315,4370.946315,0,0,,,T01|C01|S03|aaacc88
+,"Concrete – 35 MPa, 10% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,4018.781789,4018.781789,0,0,,,T01|C01|S03|aaacc89
+,"Concrete – 35 MPa, 20% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,3666.527608,3666.527608,0,0,,,T01|C01|S03|aaacc90
+,"Concrete – 35 MPa, 30% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,3314.273428,3314.273428,0,0,,,T01|C01|S03|aaacc91
+,"Concrete – 35 MPa, 40% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,2962.108902,2962.108902,0,0,,,T01|C01|S03|aaacc92
+,"Concrete – 35 MPa, 40% FA, GUL / Atlantic Concrete Association [Industry Avg | CA]",8.965492,m³,1.0,,False,2691.9338,2691.9338,0,0,,,T01|C01|S03|A12368
+,"Concrete – 35 MPa, GU / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,3901.154534,3901.154534,0,0,,,T01|C01|S03|aaacc99
+,"Concrete – 35 MPa, 10% FA, GU / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,3559.838254,3559.838254,0,0,,,T01|C01|S03|aaacc100
+,"Concrete – 35 MPa, 20% FA, GU / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,3214.487502,3214.487502,0,0,,,T01|C01|S03|aaacc101
+,"Concrete – 35 MPa, 20% FA, GUL / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,2902.30907,2902.30907,0,0,,,T01|C01|S03|A12365
+CONCRETE – <= 2500 psi – N.AMERICA,,,,,,,,,,,,,T01|C01|S05
+,"Concrete - 0-2500 psi, Standard mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2506.392944,2506.392944,0,0,,Expired 2024,T01|C01|S05|949348
+,"Concrete - 0-2500 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2166.331832,2166.331832,0,0,,Expired 2024,T01|C01|S05|b7e1fe
+,"Concrete - 0-2500 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,1976.173747,1976.173747,0,0,,Expired 2024,T01|C01|S05|d6132a
+,"Concrete - 0-2500 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,1790.63289,1790.63289,0,0,,Expired 2024,T01|C01|S05|921b8b
+,"Concrete - 0-2500 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,1602.31273,1602.31273,0,0,,Expired 2024,T01|C01|S05|1a5a48
+CONCRETE – 2501-3000 psi – N.AMERICA,,,,,,,,,,,,,T01|C01|S04
+,"Concrete - 2501-3000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,True,2791.764554,2791.764554,0,0,,Expired 2024,T01|C01|S04|43fe24
+,"Concrete - 2501-3000 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2406.427708,2406.427708,0,0,,Expired 2024,T01|C01|S04|a7c43b
+,"Concrete - 2501-3000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2190.269696,2190.269696,0,0,,Expired 2024,T01|C01|S04|809f93
+,"Concrete - 2501-3000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,1979.759943,1979.759943,0,0,,Expired 2024,T01|C01|S04|c50635
+,"Concrete - 2501-3000 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,1767.008818,1767.008818,0,0,,Expired 2024,T01|C01|S04|900b85
+CONCRETE – 3001-4000 psi – N.AMERICA,,,,,,,,,,,,,T01|C01|S06
+,"Concrete - 3001-4000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,3439.162731,3439.162731,0,0,,Expired 2024,T01|C01|S06|s33333
+,"Concrete - 3001-4000 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2951.081347,2951.081347,0,0,,Expired 2024,T01|C01|S06|s33334
+,"Concrete - 3001-4000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2677.320049,2677.320049,0,0,,Expired 2024,T01|C01|S06|s33335
+,"Concrete - 3001-4000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2410.462179,2410.462179,0,0,,Expired 2024,T01|C01|S06|s33336
+,"Concrete - 3001-4000 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2140.152595,2140.152595,0,0,,Expired 2024,T01|C01|S06|s33337
+CONCRETE – 4001-5000 psi – N.AMERICA,,,,,,,,,,,,,T01|C01|S07
+,"Concrete - 4001-5000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,4203.829544,4203.829544,0,0,,Expired 2024,T01|C01|S07|s33338
+,"Concrete - 4001-5000 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,3595.520912,3595.520912,0,0,,Expired 2024,T01|C01|S07|s33339
+,"Concrete - 4001-5000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,3254.652906,3254.652906,0,0,,Expired 2024,T01|C01|S07|s33340
+,"Concrete - 4001-5000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2920.867639,2920.867639,0,0,,Expired 2024,T01|C01|S07|s33341
+,"Concrete - 4001-5000 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2582.958245,2582.958245,0,0,,Expired 2024,T01|C01|S07|s33342
+CONCRETE COLUMN PADS & PIERS,,,,,,,,,,,,,T01|C11
+CONCRETE – <=25 MPa – CANADA,,,,,,,,,,,,,T01|C11|S01
+,"Concrete – 0-25 MPa, 0-14% FA/SL, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S01|4e0f8a
+,"Concrete – 0-25 MPa, Canadian Benchmark Average / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S01|7de1da
+,"Concrete – 0-25 MPa, 15-29% Fly Ash, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S01|e72bcd
+,"Concrete – 0-25 MPa, 25-34% Slag, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S01|6ed061
+,"Concrete – 0-25 MPa, 30-40% Fly Ash, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S01|d873ca
+,"Concrete – 0-25 MPa, 35-50% Slag, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S01|b069b6
+,"Concrete – 25 MPa, Quebec Baseline Average / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|fdsj68
+,"Concrete – 25 MPa, 10% SL, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc1
+,"Concrete – 25 MPa, 10% FA, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc2
+,"Concrete – 25 MPa, 20% SL, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc3
+,"Concrete – 25 MPa, 20% FA, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc4
+,"Concrete – 25 MPa, 30% SL, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc5
+,"Concrete – 25 MPa, 30% FA, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc6
+,"Concrete – 25 MPa, 30% FA, GUL / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|A12345
+,"Concrete – 25 MPa, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc21
+,"Concrete – 25 MPa, 15% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc22
+,"Concrete – 25 MPa, 25% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc23
+,"Concrete – 25 MPa, 35% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc24
+,"Concrete – 25 MPa, 50% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc25
+,"Concrete – 25 MPa, 50% SL, GUL / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|A12349
+,"Concrete – 25 MPa, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc36
+,"Concrete – 25 MPa, 10% FA, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc37
+,"Concrete – 25 MPa, 20% FA, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc38
+,"Concrete – 25 MPa, 30% FA, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc39
+,"Concrete – 25 MPa, 40% FA, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc40
+,"Concrete – 25 MPa, 40% FA, GUL / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|A12352
+,"Concrete – 25 MPa, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc51
+,"Concrete – 25 MPa, 10% FA, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc52
+,"Concrete – 25 MPa, 20% FA, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc53
+,"Concrete – 25 MPa, 30% FA, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc54
+,"Concrete – 25 MPa, 40% FA, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc55
+,"Concrete – 25 MPa, 40% FA, GUL / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|A12355
+,"Concrete – 25 MPa, GU / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc66
+,"Concrete – 25 MPa, 15% SCM, GU / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc67
+,"Concrete – 25 MPa, 25% SCM, GU / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc68
+,"Concrete – 25 MPa, 40% SCM, GU / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc69
+,"Concrete – 25 MPa, 40% SCM, GUL / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|A12359
+,"Concrete – 25 MPa, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc78
+,"Concrete – 25 MPa, 10% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc79
+,"Concrete – 25 MPa, 20% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc80
+,"Concrete – 25 MPa, 30% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc81
+,"Concrete – 25 MPa, 40% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc82
+,"Concrete – 25 MPa, 40% FA, GUL / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|A12361
+,"Concrete – 25 MPa, GU / Concrete Alberta [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc93
+,"Concrete – 25 MPa, 10% FA, GU / Concrete Alberta [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc94
+,"Concrete – 25 MPa, 20% FA, GU / Concrete Alberta [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|aaacc95
+,"Concrete – 25 MPa, 20% FA, GUL / Concrete Alberta [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S01|A12363
+CONCRETE – 26-30 MPa – CANADA,,,,,,,,,,,,,T01|C11|S02
+,"Concrete – 26-30 MPa, 0-14% FA/SL, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S02|be7b88
+,"Concrete – 26-30 MPa, Canadian Benchmark Average / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S02|897eab
+,"Concrete – 26-30 MPa, 15-29% Fly Ash, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S02|38d491
+,"Concrete – 26-30 MPa, 25-34% Slag, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S02|a6839d
+,"Concrete – 26-30 MPa, 30-40% Fly Ash, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S02|814de3
+,"Concrete – 26-30 MPa, 35-50% Slag, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S02|b1d6d5
+,"Concrete – 30 MPa, Quebec Baseline Average / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc7
+,"Concrete – 30 MPa, 10% SL, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc8
+,"Concrete – 30 MPa, 10% FA, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc9
+,"Concrete – 30 MPa, 20% SL, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc10
+,"Concrete – 30 MPa, 20% FA, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc11
+,"Concrete – 30 MPa, 30% SL, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc12
+,"Concrete – 30 MPa, 30% FA, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc13
+,"Concrete – 30 MPa, 30% FA, GUL / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|A12346
+,"Concrete – 30 MPa, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc26
+,"Concrete – 30 MPa, 15% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc27
+,"Concrete – 30 MPa, 25% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc28
+,"Concrete – 30 MPa, 35% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc29
+,"Concrete – 30 MPa, 50% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc30
+,"Concrete – 30 MPa, 50% SL, GUL / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|A12350
+,"Concrete – 30 MPa, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc41
+,"Concrete – 30 MPa, 10% FA, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc42
+,"Concrete – 30 MPa, 20% FA, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc43
+,"Concrete – 30 MPa, 30% FA, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc44
+,"Concrete – 30 MPa, 40% FA, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc45
+,"Concrete – 30 MPa, 40% FA, GUL / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|A12353
+,"Concrete – 30 MPa, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc56
+,"Concrete – 30 MPa, 10% FA, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc57
+,"Concrete – 30 MPa, 20% FA, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc58
+,"Concrete – 30 MPa, 30% FA, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc59
+,"Concrete – 30 MPa, 40% FA, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc60
+,"Concrete – 30 MPa, 40% FA, GUL / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|A12356
+,"Concrete – 30 MPa, GU / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc70
+,"Concrete – 30 MPa, 15% SCM, GU / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc71
+,"Concrete – 30 MPa, 25% SCM, GU / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc72
+,"Concrete – 30 MPa, 40% SCM, GU / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc73
+,"Concrete – 30 MPa, 40% SCM, GUL / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|A12360
+,"Concrete – 30 MPa, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc83
+,"Concrete – 30 MPa, 10% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc84
+,"Concrete – 30 MPa, 20% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc85
+,"Concrete – 30 MPa, 30% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc86
+,"Concrete – 30 MPa, 40% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc87
+,"Concrete – 30 MPa, 40% FA, GUL / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|A12362
+,"Concrete – 30 MPa, GU / Concrete Alberta [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc96
+,"Concrete – 30 MPa, 10% FA, GU / Concrete Alberta [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc97
+,"Concrete – 30 MPa, 20% FA, GU / Concrete Alberta [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|aaacc98
+,"Concrete – 30 MPa, 20% FA, GUL / Concrete Alberta [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S02|A12364
+CONCRETE – 31-35 MPa – CANADA,,,,,,,,,,,,,T01|C11|S03
+,"Concrete – 31-35 MPa, 0-14% FA/SL, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S03|ad41fc
+,"Concrete – 31-35 MPa, Canadian Benchmark Average / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S03|dad6dc
+,"Concrete – 31-35 MPa, 15-29% Fly Ash, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S03|cfa664
+,"Concrete – 31-35 MPa, 25-34% Slag, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S03|43fc51
+,"Concrete – 31-35 MPa, 30-40% Fly Ash, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S03|dac0ae
+,"Concrete – 31-35 MPa, 35-50% Slag, GU / CRMCA [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,Expired 01-2022,T01|C11|S03|1ea5e4
+,"Concrete – 35 MPa, Quebec Baseline Average / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc14
+,"Concrete – 35 MPa, 10% SL, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc15
+,"Concrete – 35 MPa, 10% FA, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc16
+,"Concrete – 35 MPa, 20% SL, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc17
+,"Concrete – 35 MPa, 20% FA, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc18
+,"Concrete – 35 MPa, 30% SL, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc19
+,"Concrete – 35 MPa, 30% FA, GU / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc20
+,"Concrete – 35 MPa, 30% FA, GUL / ABQ [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|A12348
+,"Concrete – 35 MPa, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc31
+,"Concrete – 35 MPa, 15% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc32
+,"Concrete – 35 MPa, 25% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc33
+,"Concrete – 35 MPa, 35% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc34
+,"Concrete – 35 MPa, 50% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc35
+,"Concrete – 35 MPa, 50% SL, GUL / Ontario Concrete RMCAO [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|A12351
+,"Concrete – 35 MPa, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc46
+,"Concrete – 35 MPa, 10% FA, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc47
+,"Concrete – 35 MPa, 20% FA, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc48
+,"Concrete – 35 MPa, 30% FA, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc49
+,"Concrete – 35 MPa, 40% FA, GU / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc50
+,"Concrete – 35 MPa, 40% FA, GUL / Concrete Sask [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|A12354
+,"Concrete – 35 MPa, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc61
+,"Concrete – 35 MPa, 10% FA, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc62
+,"Concrete – 35 MPa, 20% FA, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc63
+,"Concrete – 35 MPa, 30% FA, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc64
+,"Concrete – 35 MPa, 40% FA, GU / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc65
+,"Concrete – 35 MPa, 40% FA, GUL / Concrete Manitoba [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|A12358
+,"Concrete – 35 MPa, GU / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc74
+,"Concrete – 35 MPa, 15% SCM, GU / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc75
+,"Concrete – 35 MPa, 25% SCM, GU / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc76
+,"Concrete – 35 MPa, 40% SCM, GU / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc77
+,"Concrete – 35 MPa, 40% SCM, GUL / Concrete BC [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|A12366
+,"Concrete – 35 MPa, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc88
+,"Concrete – 35 MPa, 10% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc89
+,"Concrete – 35 MPa, 20% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc90
+,"Concrete – 35 MPa, 30% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc91
+,"Concrete – 35 MPa, 40% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc92
+,"Concrete – 35 MPa, 40% FA, GUL / Atlantic Concrete Association [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|A12368
+,"Concrete – 35 MPa, GU / Concrete Alberta [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc99
+,"Concrete – 35 MPa, 10% FA, GU / Concrete Alberta [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc100
+,"Concrete – 35 MPa, 20% FA, GU / Concrete Alberta [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|aaacc101
+,"Concrete – 35 MPa, 20% FA, GUL / Concrete Alberta [Industry Avg | CA]",0,m³,1.0,,False,0,0,0,0,,,T01|C11|S03|A12365
+CONCRETE – <= 2500 psi – N.AMERICA,,,,,,,,,,,,,T01|C11|S05
+,"Concrete - 0-2500 psi, Standard mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S05|949348
+,"Concrete - 0-2500 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S05|b7e1fe
+,"Concrete - 0-2500 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S05|d6132a
+,"Concrete - 0-2500 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S05|921b8b
+,"Concrete - 0-2500 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S05|1a5a48
+CONCRETE – 2501-3000 psi – N.AMERICA,,,,,,,,,,,,,T01|C11|S04
+,"Concrete - 2501-3000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S04|43fe24
+,"Concrete - 2501-3000 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S04|a7c43b
+,"Concrete - 2501-3000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S04|809f93
+,"Concrete - 2501-3000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S04|c50635
+,"Concrete - 2501-3000 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S04|900b85
+CONCRETE – 3001-4000 psi – N.AMERICA,,,,,,,,,,,,,T01|C11|S06
+,"Concrete - 3001-4000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S06|s33333
+,"Concrete - 3001-4000 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S06|s33334
+,"Concrete - 3001-4000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S06|s33335
+,"Concrete - 3001-4000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S06|s33336
+,"Concrete - 3001-4000 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S06|s33337
+CONCRETE – 4001-5000 psi – N.AMERICA,,,,,,,,,,,,,T01|C11|S07
+,"Concrete - 4001-5000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S07|s33338
+,"Concrete - 4001-5000 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S07|s33339
+,"Concrete - 4001-5000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S07|s33340
+,"Concrete - 4001-5000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S07|s33341
+,"Concrete - 4001-5000 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S07|s33342
+METAL PILE FOUNDATIONS,,TOTAL LENGTH,,m,,,,,,,,,T01|C03
+STEEL HELICAL PILES 🤚,,,,,,,,,,,,,T01|C03|S01
+,"Helical pier / Generic / 3"" Nominal Pipe, 3.5 x 3/16"" (89 x 5.5 mm), 10"" Helix, Sched 40 Galvanized steel [Industry Avg]",0,m,1.0,,False,0,0,0,0,,Expired 2021,T01|C03|S01|541b20
+STEEL SCREW PILES 🤚,,,,,,,,,,,,,T01|C03|S02
+,Ground screw / Krinner / E-Series E140x1600-E76-100 / 140 x 1600 mm [EU],0,m,1.0,,False,0,0,0,0,,,T01|C03|S02|S12348
+,Ground screw / American Ground Screw / AGS IM4516 / 114 x 1600 mm,0,m,1.0,,False,0,0,0,0,,,T01|C03|S02|S12346
+,Ground screw / American Ground Screw / AGS IM3316 / 76 x 1600 mm,0,m,1.0,,False,0,0,0,0,,,T01|C03|S02|S12345
+,Ground screw / Krinner / E-Series E89x1000-E60 / 89 x 1000 mm [EU],0,m,1.0,,False,0,0,0,0,,,T01|C03|S02|S12347
+TIMBER PILE FOUNDATION,,TOTAL VOLUME,,m³,,,,,,,,,T01|C14
+TIMBER PILES,,,,,,,,,,,,,T01|C14|S01
+,Wood / SPF / Lumber by volume / AWC & CWC [Industry Avg | US & CA] ,0,m³,1.0,,False,0,0,0,0,False,Expired 2025; BfCA BioC calc by mass,T01|C14|S01|9219e5
+CONCRETE SLABS,,THICKNESS,6.0,in,,,,,,,,,T01|C06
+CONCRETE – <=25 MPa – CANADA,,,,,,,,,,,,,T01|C06|S01
+,"Concrete – 0-25 MPa, 0-14% FA/SL, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,5390.548934,5390.548934,0,0,,Expired 01-2022,T01|C06|S01|4e0f8a
+,"Concrete – 0-25 MPa, Canadian Benchmark Average / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,5123.536819,5123.536819,0,0,,Expired 01-2022,T01|C06|S01|7de1da
+,"Concrete – 0-25 MPa, 15-29% Fly Ash, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,4864.34831,4864.34831,0,0,,Expired 01-2022,T01|C06|S01|e72bcd
+,"Concrete – 0-25 MPa, 25-34% Slag, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,4412.17751,4412.17751,0,0,,Expired 01-2022,T01|C06|S01|6ed061
+,"Concrete – 0-25 MPa, 30-40% Fly Ash, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,4295.496413,4295.496413,0,0,,Expired 01-2022,T01|C06|S01|d873ca
+,"Concrete – 0-25 MPa, 35-50% Slag, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,4020.913066,4020.913066,0,0,,Expired 01-2022,T01|C06|S01|b069b6
+,"Concrete – 25 MPa, Quebec Baseline Average / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,4932.237024,4932.237024,0,0,,,T01|C06|S01|fdsj68
+,"Concrete – 25 MPa, 10% SL, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,4720.579027,4720.579027,0,0,,,T01|C06|S01|aaacc1
+,"Concrete – 25 MPa, 10% FA, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,4647.390451,4647.390451,0,0,,,T01|C06|S01|aaacc2
+,"Concrete – 25 MPa, 20% SL, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,4354.299648,4354.299648,0,0,,,T01|C06|S01|aaacc3
+,"Concrete – 25 MPa, 20% FA, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,4208.258995,4208.258995,0,0,,,T01|C06|S01|aaacc4
+,"Concrete – 25 MPa, 30% SL, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,3995.928,3995.928,0,0,,,T01|C06|S01|aaacc5
+,"Concrete – 25 MPa, 30% FA, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,3776.867021,3776.867021,0,0,,,T01|C06|S01|aaacc6
+,"Concrete – 25 MPa, 30% FA, GUL / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,3523.651373,3523.651373,0,0,,,T01|C06|S01|A12345
+,"Concrete – 25 MPa, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,4604.486803,4604.486803,0,0,,,T01|C06|S01|aaacc21
+,"Concrete – 25 MPa, 15% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,4109.32823,4109.32823,0,0,,,T01|C06|S01|aaacc22
+,"Concrete – 25 MPa, 25% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,3779.222515,3779.222515,0,0,,,T01|C06|S01|aaacc23
+,"Concrete – 25 MPa, 35% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,3449.28505,3449.28505,0,0,,,T01|C06|S01|aaacc24
+,"Concrete – 25 MPa, 50% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,2954.126477,2954.126477,0,0,,,T01|C06|S01|aaacc25
+,"Concrete – 25 MPa, 50% SL, GUL / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,2836.267632,2836.267632,0,0,,,T01|C06|S01|A12349
+,"Concrete – 25 MPa, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,5809.322189,5809.322189,0,0,,,T01|C06|S01|aaacc36
+,"Concrete – 25 MPa, 10% FA, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,5351.178528,5351.178528,0,0,,,T01|C06|S01|aaacc37
+,"Concrete – 25 MPa, 20% FA, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,4893.203117,4893.203117,0,0,,,T01|C06|S01|aaacc38
+,"Concrete – 25 MPa, 30% FA, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,4435.227706,4435.227706,0,0,,,T01|C06|S01|aaacc39
+,"Concrete – 25 MPa, 40% FA, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,3977.252294,3977.252294,0,0,,,T01|C06|S01|aaacc40
+,"Concrete – 25 MPa, 40% FA, GUL / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,3673.645891,3673.645891,0,0,,,T01|C06|S01|A12352
+,"Concrete – 25 MPa, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,4555.021421,4555.021421,0,0,,,T01|C06|S01|aaacc51
+,"Concrete – 25 MPa, 10% FA, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,4192.275283,4192.275283,0,0,,,T01|C06|S01|aaacc52
+,"Concrete – 25 MPa, 20% FA, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,3813.208934,3813.208934,0,0,,,T01|C06|S01|aaacc53
+,"Concrete – 25 MPa, 30% FA, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,3450.294547,3450.294547,0,0,,,T01|C06|S01|aaacc54
+,"Concrete – 25 MPa, 40% FA, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,3071.228198,3071.228198,0,0,,,T01|C06|S01|aaacc55
+,"Concrete – 25 MPa, 40% FA, GUL / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,2718.913536,2718.913536,0,0,,,T01|C06|S01|A12355
+,"Concrete – 25 MPa, GU / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,4440.779942,4440.779942,0,0,,,T01|C06|S01|aaacc66
+,"Concrete – 25 MPa, 15% SCM, GU / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,3947.976864,3947.976864,0,0,,,T01|C06|S01|aaacc67
+,"Concrete – 25 MPa, 25% SCM, GU / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,3628.470874,3628.470874,0,0,,,T01|C06|S01|aaacc68
+,"Concrete – 25 MPa, 40% SCM, GU / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,3134.321798,3134.321798,0,0,,,T01|C06|S01|aaacc69
+,"Concrete – 25 MPa, 40% SCM, GUL / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,2941.760131,2941.760131,0,0,,,T01|C06|S01|A12359
+,"Concrete – 25 MPa, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,6514.624512,6514.624512,0,0,,,T01|C06|S01|aaacc78
+,"Concrete – 25 MPa, 10% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,6015.09145,6015.09145,0,0,,,T01|C06|S01|aaacc79
+,"Concrete – 25 MPa, 20% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,5515.558387,5515.558387,0,0,,,T01|C06|S01|aaacc80
+,"Concrete – 25 MPa, 30% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,5015.857075,5015.857075,0,0,,,T01|C06|S01|aaacc81
+,"Concrete – 25 MPa, 40% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,4516.324013,4516.324013,0,0,,,T01|C06|S01|aaacc82
+,"Concrete – 25 MPa, 40% FA, GUL / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,4242.918413,4242.918413,0,0,,,T01|C06|S01|A12361
+,"Concrete – 25 MPa, GU / Concrete Alberta [Industry Avg | CA]",110.4,m²,1.0,,False,5750.771328,5750.771328,0,0,,,T01|C06|S01|aaacc93
+,"Concrete – 25 MPa, 10% FA, GU / Concrete Alberta [Industry Avg | CA]",110.4,m²,1.0,,False,5255.612755,5255.612755,0,0,,,T01|C06|S01|aaacc94
+,"Concrete – 25 MPa, 20% FA, GU / Concrete Alberta [Industry Avg | CA]",110.4,m²,1.0,,False,4753.0512,4753.0512,0,0,,,T01|C06|S01|aaacc95
+,"Concrete – 25 MPa, 20% FA, GUL / Concrete Alberta [Industry Avg | CA]",110.4,m²,1.0,,False,4303.824768,4303.824768,0,0,,,T01|C06|S01|A12363
+CONCRETE – 26-30 MPa – CANADA,,,,,,,,,,,,,T01|C06|S02
+,"Concrete – 26-30 MPa, 0-14% FA/SL, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,6062.033088,6062.033088,0,0,,Expired 01-2022,T01|C06|S02|be7b88
+,"Concrete – 26-30 MPa, Canadian Benchmark Average / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,5883.352013,5883.352013,0,0,,Expired 01-2022,T01|C06|S02|897eab
+,"Concrete – 26-30 MPa, 15-29% Fly Ash, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,5459.447146,5459.447146,0,0,,Expired 01-2022,T01|C06|S02|38d491
+,"Concrete – 26-30 MPa, 25-34% Slag, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,4941.659002,4941.659002,0,0,,Expired 01-2022,T01|C06|S02|a6839d
+,"Concrete – 26-30 MPa, 30-40% Fly Ash, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,4807.984694,4807.984694,0,0,,Expired 01-2022,T01|C06|S02|814de3
+,"Concrete – 26-30 MPa, 35-50% Slag, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,4493.610317,4493.610317,0,0,,Expired 01-2022,T01|C06|S02|b1d6d5
+,"Concrete – 30 MPa, Quebec Baseline Average / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,5501.257171,5501.257171,0,0,,,T01|C06|S02|aaacc7
+,"Concrete – 30 MPa, 10% SL, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,5262.510989,5262.510989,0,0,,,T01|C06|S02|aaacc8
+,"Concrete – 30 MPa, 10% FA, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,5181.078182,5181.078182,0,0,,,T01|C06|S02|aaacc9
+,"Concrete – 30 MPa, 20% SL, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,4863.254688,4863.254688,0,0,,,T01|C06|S02|aaacc10
+,"Concrete – 30 MPa, 20% FA, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,4698.874829,4698.874829,0,0,,,T01|C06|S02|aaacc11
+,"Concrete – 30 MPa, 30% SL, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,4456.258906,4456.258906,0,0,,,T01|C06|S02|aaacc12
+,"Concrete – 30 MPa, 30% FA, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,4208.931994,4208.931994,0,0,,,T01|C06|S02|aaacc13
+,"Concrete – 30 MPa, 30% FA, GUL / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,3921.898176,3921.898176,0,0,,,T01|C06|S02|A12346
+,"Concrete – 30 MPa, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,4990.619635,4990.619635,0,0,,,T01|C06|S02|aaacc26
+,"Concrete – 30 MPa, 15% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,4448.182925,4448.182925,0,0,,,T01|C06|S02|aaacc27
+,"Concrete – 30 MPa, 25% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,4086.446285,4086.446285,0,0,,,T01|C06|S02|aaacc28
+,"Concrete – 30 MPa, 35% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,3724.877894,3724.877894,0,0,,,T01|C06|S02|aaacc29
+,"Concrete – 30 MPa, 50% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,3182.272934,3182.272934,0,0,,,T01|C06|S02|aaacc30
+,"Concrete – 35 MPa, 50% SL, GUL / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,3555.702922,3555.702922,0,0,,,T01|C06|S02|A12351
+,"Concrete – 30 MPa, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,6341.663923,6341.663923,0,0,,,T01|C06|S02|aaacc41
+,"Concrete – 30 MPa, 10% FA, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,5838.09287,5838.09287,0,0,,,T01|C06|S02|aaacc42
+,"Concrete – 30 MPa, 20% FA, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,5326.445837,5326.445837,0,0,,,T01|C06|S02|aaacc43
+,"Concrete – 30 MPa, 30% FA, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,4822.874784,4822.874784,0,0,,,T01|C06|S02|aaacc44
+,"Concrete – 30 MPa, 40% FA, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,4311.22775,4311.22775,0,0,,,T01|C06|S02|aaacc45
+,"Concrete – 30 MPa, 40% FA, GUL / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,3974.644426,3974.644426,0,0,,,T01|C06|S02|A12353
+,"Concrete – 30 MPa, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,5017.707821,5017.707821,0,0,,,T01|C06|S02|aaacc56
+,"Concrete – 30 MPa, 10% FA, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,4606.169299,4606.169299,0,0,,,T01|C06|S02|aaacc57
+,"Concrete – 30 MPa, 20% FA, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,4193.284781,4193.284781,0,0,,,T01|C06|S02|aaacc58
+,"Concrete – 30 MPa, 30% FA, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,3781.746259,3781.746259,0,0,,,T01|C06|S02|aaacc59
+,"Concrete – 30 MPa, 40% FA, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,3369.02999,3369.02999,0,0,,,T01|C06|S02|aaacc60
+,"Concrete – 30 MPa, 40% FA, GUL / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,2976.587798,2976.587798,0,0,,,T01|C06|S02|A12356
+,"Concrete – 30 MPa, GU / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,5227.346822,5227.346822,0,0,,,T01|C06|S02|aaacc70
+,"Concrete – 30 MPa, 15% SCM, GU / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,4643.015962,4643.015962,0,0,,,T01|C06|S02|aaacc71
+,"Concrete – 30 MPa, 25% SCM, GU / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,4253.349888,4253.349888,0,0,,,T01|C06|S02|aaacc72
+,"Concrete – 30 MPa, 40% SCM, GU / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,3668.850778,3668.850778,0,0,,,T01|C06|S02|aaacc73
+,"Concrete – 30 MPa, 40% SCM, GUL / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,3439.105949,3439.105949,0,0,,,T01|C06|S02|A12360
+,"Concrete – 30 MPa, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,7060.426214,7060.426214,0,0,,,T01|C06|S02|aaacc83
+,"Concrete – 30 MPa, 10% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,6507.05328,6507.05328,0,0,,,T01|C06|S02|aaacc84
+,"Concrete – 30 MPa, 20% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,5953.680346,5953.680346,0,0,,,T01|C06|S02|aaacc85
+,"Concrete – 30 MPa, 30% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,5400.307411,5400.307411,0,0,,,T01|C06|S02|aaacc86
+,"Concrete – 30 MPa, 40% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,4846.934477,4846.934477,0,0,,,T01|C06|S02|aaacc87
+,"Concrete – 30 MPa, 40% FA, GUL / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,4544.085197,4544.085197,0,0,,,T01|C06|S02|A12362
+,"Concrete – 30 MPa, GU / Concrete Alberta [Industry Avg | CA]",110.4,m²,1.0,,False,6477.273101,6477.273101,0,0,,,T01|C06|S02|aaacc96
+,"Concrete – 30 MPa, 10% FA, GU / Concrete Alberta [Industry Avg | CA]",110.4,m²,1.0,,False,5916.833683,5916.833683,0,0,,,T01|C06|S02|aaacc97
+,"Concrete – 30 MPa, 20% FA, GU / Concrete Alberta [Industry Avg | CA]",110.4,m²,1.0,,False,5348.654784,5348.654784,0,0,,,T01|C06|S02|aaacc98
+,"Concrete – 30 MPa, 20% FA, GUL / Concrete Alberta [Industry Avg | CA]",110.4,m²,1.0,,False,4912.299446,4912.299446,0,0,,,T01|C06|S02|A12364
+CONCRETE – 31-35 MPa – CANADA,,,,,,,,,,,,,T01|C06|S03
+,"Concrete – 31-35 MPa, 0-14% FA/SL, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,7036.198272,7036.198272,0,0,,Expired 01-2022,T01|C06|S03|ad41fc
+,"Concrete – 31-35 MPa, Canadian Benchmark Average / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,7016.849568,7016.849568,0,0,,Expired 01-2022,T01|C06|S03|dad6dc
+,"Concrete – 31-35 MPa, 15-29% Fly Ash, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,6322.399344,6322.399344,0,0,,Expired 01-2022,T01|C06|S03|cfa664
+,"Concrete – 31-35 MPa, 25-34% Slag, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,5709.129552,5709.129552,0,0,,Expired 01-2022,T01|C06|S03|43fc51
+,"Concrete – 31-35 MPa, 30-40% Fly Ash, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,5550.806678,5550.806678,0,0,,Expired 01-2022,T01|C06|S03|dac0ae
+,"Concrete – 31-35 MPa, 35-50% Slag, GU / CRMCA [Industry Avg | CA]",110.4,m²,1.0,,False,5178.302064,5178.302064,0,0,,Expired 01-2022,T01|C06|S03|1ea5e4
+,"Concrete – 35 MPa, Quebec Baseline Average / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,6213.794227,6213.794227,0,0,,,T01|C06|S03|aaacc14
+,"Concrete – 35 MPa, 10% SL, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,5951.8296,5951.8296,0,0,,,T01|C06|S03|aaacc15
+,"Concrete – 35 MPa, 10% FA, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,5857.778074,5857.778074,0,0,,,T01|C06|S03|aaacc16
+,"Concrete – 35 MPa, 20% SL, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,5491.666944,5491.666944,0,0,,,T01|C06|S03|aaacc17
+,"Concrete – 35 MPa, 20% FA, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,5302.386144,5302.386144,0,0,,,T01|C06|S03|aaacc18
+,"Concrete – 35 MPa, 30% SL, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,5022.08231,5022.08231,0,0,,,T01|C06|S03|aaacc19
+,"Concrete – 35 MPa, 30% FA, GU / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,4738.918234,4738.918234,0,0,,,T01|C06|S03|aaacc20
+,"Concrete – 35 MPa, 30% FA, GUL / ABQ [Industry Avg | CA]",110.4,m²,1.0,,False,4410.747389,4410.747389,0,0,,,T01|C06|S03|A12348
+,"Concrete – 35 MPa, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,5961.083328,5961.083328,0,0,,,T01|C06|S03|aaacc31
+,"Concrete – 35 MPa, 15% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,5299.525901,5299.525901,0,0,,,T01|C06|S03|aaacc32
+,"Concrete – 35 MPa, 25% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,4858.37545,4858.37545,0,0,,,T01|C06|S03|aaacc33
+,"Concrete – 35 MPa, 35% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,4417.224998,4417.224998,0,0,,,T01|C06|S03|aaacc34
+,"Concrete – 35 MPa, 50% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,3755.667571,3755.667571,0,0,,,T01|C06|S03|aaacc35
+,"Concrete – 35 MPa, 50% SL, GUL / Ontario Concrete RMCAO [Industry Avg | CA]",110.4,m²,1.0,,False,3555.702922,3555.702922,0,0,,,T01|C06|S03|A12351
+,"Concrete – 35 MPa, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,7437.137069,7437.137069,0,0,,,T01|C06|S03|aaacc46
+,"Concrete – 35 MPa, 10% FA, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,6834.635251,6834.635251,0,0,,,T01|C06|S03|aaacc47
+,"Concrete – 35 MPa, 20% FA, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,6215.813222,6215.813222,0,0,,,T01|C06|S03|aaacc48
+,"Concrete – 35 MPa, 30% FA, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,5613.311405,5613.311405,0,0,,,T01|C06|S03|aaacc49
+,"Concrete – 35 MPa, 40% FA, GU / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,4994.321126,4994.321126,0,0,,,T01|C06|S03|aaacc50
+,"Concrete – 35 MPa, 40% FA, GUL / Concrete Sask [Industry Avg | CA]",110.4,m²,1.0,,False,4837.428374,4837.428374,0,0,,,T01|C06|S03|A12354
+,"Concrete – 35 MPa, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,5709.550176,5709.550176,0,0,,,T01|C06|S03|aaacc61
+,"Concrete – 35 MPa, 10% FA, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,5243.667034,5243.667034,0,0,,,T01|C06|S03|aaacc62
+,"Concrete – 35 MPa, 20% FA, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,4761.46368,4761.46368,0,0,,,T01|C06|S03|aaacc63
+,"Concrete – 35 MPa, 30% FA, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,4295.580538,4295.580538,0,0,,,T01|C06|S03|aaacc64
+,"Concrete – 35 MPa, 40% FA, GU / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,3813.545434,3813.545434,0,0,,,T01|C06|S03|aaacc65
+,"Concrete – 35 MPa, 40% FA, GUL / Concrete Manitoba [Industry Avg | CA]",110.4,m²,1.0,,False,3363.393629,3363.393629,0,0,,,T01|C06|S03|A12358
+,"Concrete – 35 MPa, GU / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,5977.23529,5977.23529,0,0,,,T01|C06|S03|aaacc74
+,"Concrete – 35 MPa, 15% SCM, GU / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,5306.760634,5306.760634,0,0,,,T01|C06|S03|aaacc75
+,"Concrete – 35 MPa, 25% SCM, GU / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,4861.403942,4861.403942,0,0,,,T01|C06|S03|aaacc76
+,"Concrete – 35 MPa, 40% SCM, GU / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,4183.862803,4183.862803,0,0,,,T01|C06|S03|aaacc77
+,"Concrete – 35 MPa, 40% SCM, GUL / Concrete BC [Industry Avg | CA]",110.4,m²,1.0,,False,3919.122058,3919.122058,0,0,,,T01|C06|S03|A12366
+,"Concrete – 35 MPa, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,8202.672749,8202.672749,0,0,,,T01|C06|S03|aaacc88
+,"Concrete – 35 MPa, 10% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,7541.78832,7541.78832,0,0,,,T01|C06|S03|aaacc89
+,"Concrete – 35 MPa, 20% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,6880.735642,6880.735642,0,0,,,T01|C06|S03|aaacc90
+,"Concrete – 35 MPa, 30% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,6219.682963,6219.682963,0,0,,,T01|C06|S03|aaacc91
+,"Concrete – 35 MPa, 40% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,5558.798534,5558.798534,0,0,,,T01|C06|S03|aaacc92
+,"Concrete – 35 MPa, 40% FA, GUL / Atlantic Concrete Association [Industry Avg | CA]",110.4,m²,1.0,,False,5051.778365,5051.778365,0,0,,,T01|C06|S03|A12368
+,"Concrete – 35 MPa, GU / Concrete Alberta [Industry Avg | CA]",110.4,m²,1.0,,False,7321.044845,7321.044845,0,0,,,T01|C06|S03|aaacc99
+,"Concrete – 35 MPa, 10% FA, GU / Concrete Alberta [Industry Avg | CA]",110.4,m²,1.0,,False,6680.518618,6680.518618,0,0,,,T01|C06|S03|aaacc100
+,"Concrete – 35 MPa, 20% FA, GU / Concrete Alberta [Industry Avg | CA]",110.4,m²,1.0,,False,6032.421158,6032.421158,0,0,,,T01|C06|S03|aaacc101
+,"Concrete – 35 MPa, 20% FA, GUL / Concrete Alberta [Industry Avg | CA]",110.4,m²,1.0,,False,5446.576051,5446.576051,0,0,,,T01|C06|S03|A12365
+CONCRETE – <= 2500 psi – N.AMERICA,,,,,,,,,,,,,T01|C06|S05
+,"Concrete - 0-2500 psi, Standard mix / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,True,4703.585818,4703.585818,0,0,,Expired 2024,T01|C06|S05|949348
+,"Concrete - 0-2500 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,4065.415085,4065.415085,0,0,,Expired 2024,T01|C06|S05|b7e1fe
+,"Concrete - 0-2500 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,3708.557683,3708.557683,0,0,,Expired 2024,T01|C06|S05|d6132a
+,"Concrete - 0-2500 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,3360.365136,3360.365136,0,0,,Expired 2024,T01|C06|S05|921b8b
+,"Concrete - 0-2500 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,3006.956851,3006.956851,0,0,,Expired 2024,T01|C06|S05|1a5a48
+CONCRETE – 2501-3000 psi – N.AMERICA,,,,,,,,,,,,,T01|C06|S04
+,"Concrete - 2501-3000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,5239.124294,5239.124294,0,0,,Expired 2024,T01|C06|S04|43fe24
+,"Concrete - 2501-3000 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,4515.987514,4515.987514,0,0,,Expired 2024,T01|C06|S04|a7c43b
+,"Concrete - 2501-3000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,4110.337728,4110.337728,0,0,,Expired 2024,T01|C06|S04|809f93
+,"Concrete - 2501-3000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,3715.287667,3715.287667,0,0,,Expired 2024,T01|C06|S04|c50635
+,"Concrete - 2501-3000 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,3316.031366,3316.031366,0,0,,Expired 2024,T01|C06|S04|900b85
+CONCRETE – 3001-4000 psi – N.AMERICA,,,,,,,,,,,,,T01|C06|S06
+,"Concrete - 3001-4000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,6454.054656,6454.054656,0,0,,Expired 2024,T01|C06|S06|s33333
+,"Concrete - 3001-4000 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,5538.103834,5538.103834,0,0,,Expired 2024,T01|C06|S06|s33334
+,"Concrete - 3001-4000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,5024.35368,5024.35368,0,0,,Expired 2024,T01|C06|S06|s33335
+,"Concrete - 3001-4000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,4523.558746,4523.558746,0,0,,Expired 2024,T01|C06|S06|s33336
+,"Concrete - 3001-4000 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,4016.286202,4016.286202,0,0,,Expired 2024,T01|C06|S06|s33337
+CONCRETE – 4001-5000 psi – N.AMERICA,,,,,,,,,,,,,T01|C06|S07
+,"Concrete - 4001-5000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,7889.055494,7889.055494,0,0,,Expired 2024,T01|C06|S07|s33338
+,"Concrete - 4001-5000 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,6747.481958,6747.481958,0,0,,Expired 2024,T01|C06|S07|s33339
+,"Concrete - 4001-5000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,6107.796979,6107.796979,0,0,,Expired 2024,T01|C06|S07|s33340
+,"Concrete - 4001-5000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,5481.403718,5481.403718,0,0,,Expired 2024,T01|C06|S07|s33341
+,"Concrete - 4001-5000 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",110.4,m²,1.0,,False,4847.270976,4847.270976,0,0,,Expired 2024,T01|C06|S07|s33342
+EARTHEN FLOOR SYSTEMS  ,,,,,,,,,,,,,T01|C07
+EARTHEN FLOOR SYSTEMS – CLAY BINDER,,,,,,,,,,,,,T01|C07|S01
+,"Earthen Floor / Cast-in-place / Clay, sand, and straw / 4"" (100 mm) [US]",110.4,m²,1.0,,False,72.864,380.88,308.016,0,,,T01|C07|S01|95a692
+EARTHEN FLOOR SYSTEMS – CLAY-LIME BINDER,,,,,,,,,,,,,T01|C07|S02
+,"Compressed earth block floor / Factory made / Stabilized with 6.5% NHL / 2-3/4"" (70 mm) [EU]",110.4,m²,1.0,,False,951.8933333,951.8933333,0,0,,LCA 2019,T01|C07|S02|f62c9s
+REBAR FOR CONTINUOUS FOOTINGS,,TOTAL REBAR LENGTH,84.7,m,,,,,,,,,T01|C02
+STEEL REINFORCING BARS - CANADIAN BAR SIZES,,,,,,,,,,,,,T01|C02|S01
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / 20M",84.7,m,1.0,,False,170.346099,170.346099,0,0,,,T01|C02|S01|REB002
+,Rebar / ArcelorMittal Long Products Canada / 20M,84.7,m,1.0,,False,256.4167568,256.4167568,0,0,,Expired 2024-03-25,T01|C02|S01|l29vks
+,Rebar / Nucor Corporation / 20M,84.7,m,1.0,,False,172.1413155,172.1413155,0,0,,Expired 2026-01-01,T01|C02|S01|sdf38s
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / 15M",84.7,m,1.0,,False,113.564066,113.564066,0,0,,,T01|C02|S01|REB001
+,Rebar / ArcelorMittal Long Products Canada / 15M,84.7,m,1.0,,False,170.9445045,170.9445045,0,0,,Expired 2024-03-25,T01|C02|S01|kb2gox
+,Rebar / Nucor Corporation / 15M,84.7,m,1.0,,False,114.760877,114.760877,0,0,,Expired 2026-01-01,T01|C02|S01|a03cls
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / 10M",84.7,m,1.0,,False,56.782033,56.782033,0,0,,,T01|C02|S01|REB000
+,Rebar / ArcelorMittal Long Products Canada / 10M,84.7,m,1.0,,False,85.47225225,85.47225225,0,0,,Expired 2024-03-25,T01|C02|S01|b8ldec
+,Rebar / Nucor Corporation / 10M,84.7,m,1.0,,False,57.3804385,57.3804385,0,0,,Expired 2026-01-01,T01|C02|S01|l2jfis
+STEEL REINFORCING BARS - US BAR SIZES,,,,,,,,,,,,,T01|C02|S02
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #6",84.7,m,1.0,,False,162.027712,162.027712,0,0,,,T01|C02|S02|REB006
+,Rebar / Nucor Corporation / #6,84.7,m,1.0,,False,163.735264,163.735264,0,0,,Expired 2026-01-01,T01|C02|S02|3vwqxf
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #5",84.7,m,1.0,,True,112.5513928,112.5513928,0,0,,,T01|C02|S02|REB005
+,Rebar / Nucor Corporation / #5,84.7,m,1.0,,False,113.7375316,113.7375316,0,0,,Expired 2026-01-01,T01|C02|S02|1cgews
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #4",84.7,m,1.0,,False,72.0444648,72.0444648,0,0,,,T01|C02|S02|REB004
+,Rebar / Nucor Corporation / #4,84.7,m,1.0,,False,72.8037156,72.8037156,0,0,,Expired 2026-01-01,T01|C02|S02|bomxc2
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #3",84.7,m,1.0,,False,40.5792618,40.5792618,0,0,,,T01|C02|S02|REB003
+,Rebar / Nucor Corporation / #3,84.7,m,1.0,,False,41.0069121,41.0069121,0,0,,Expired 2026-01-01,T01|C02|S02|fdk49v
+"REBAR FOR COLUMN FOOTINGS, PADS & PIERS",,TOTAL REBAR LENGTH,,m,,,,,,,,,T01|C12
+STEEL REINFORCING BARS - CANADIAN BAR SIZES,,,,,,,,,,,,,T01|C12|S01
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / 20M",0,m,1.0,,False,0,0,0,0,,,T01|C12|S01|REB002
+,Rebar / ArcelorMittal Long Products Canada / 20M,0,m,1.0,,False,0,0,0,0,,Expired 2024-03-25,T01|C12|S01|l29vks
+,Rebar / Nucor Corporation / 20M,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C12|S01|sdf38s
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / 15M",0,m,1.0,,False,0,0,0,0,,,T01|C12|S01|REB001
+,Rebar / ArcelorMittal Long Products Canada / 15M,0,m,1.0,,False,0,0,0,0,,Expired 2024-03-25,T01|C12|S01|kb2gox
+,Rebar / Nucor Corporation / 15M,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C12|S01|a03cls
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / 10M",0,m,1.0,,False,0,0,0,0,,,T01|C12|S01|REB000
+,Rebar / ArcelorMittal Long Products Canada / 10M,0,m,1.0,,False,0,0,0,0,,Expired 2024-03-25,T01|C12|S01|b8ldec
+,Rebar / Nucor Corporation / 10M,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C12|S01|l2jfis
+STEEL REINFORCING BARS - US BAR SIZES,,,,,,,,,,,,,T01|C12|S02
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #6",0,m,1.0,,False,0,0,0,0,,,T01|C12|S02|REB006
+,Rebar / Nucor Corporation / #6,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C12|S02|3vwqxf
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #5",0,m,1.0,,False,0,0,0,0,,,T01|C12|S02|REB005
+,Rebar / Nucor Corporation / #5,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C12|S02|1cgews
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #4",0,m,1.0,,False,0,0,0,0,,,T01|C12|S02|REB004
+,Rebar / Nucor Corporation / #4,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C12|S02|bomxc2
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #3",0,m,1.0,,False,0,0,0,0,,,T01|C12|S02|REB003
+,Rebar / Nucor Corporation / #3,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C12|S02|fdk49v
+REBAR FOR SLABS,,TOTAL REBAR LENGTH,,m,,,,,,,,,T01|C04
+STEEL REINFORCING BARS - CANADIAN BAR SIZES,,,,,,,,,,,,,T01|C04|S01
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / 20M",0,m,1.0,,False,0,0,0,0,,,T01|C04|S01|REB002
+,Rebar / ArcelorMittal Long Products Canada / 20M,0,m,1.0,,False,0,0,0,0,,Expired 2024-03-25,T01|C04|S01|l29vks
+,Rebar / Nucor Corporation / 20M,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C04|S01|sdf38s
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / 15M",0,m,1.0,,False,0,0,0,0,,,T01|C04|S01|REB001
+,Rebar / ArcelorMittal Long Products Canada / 15M,0,m,1.0,,False,0,0,0,0,,Expired 2024-03-25,T01|C04|S01|kb2gox
+,Rebar / Nucor Corporation / 15M,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C04|S01|a03cls
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / 10M",0,m,1.0,,False,0,0,0,0,,,T01|C04|S01|REB000
+,Rebar / ArcelorMittal Long Products Canada / 10M,0,m,1.0,,False,0,0,0,0,,Expired 2024-03-25,T01|C04|S01|b8ldec
+,Rebar / Nucor Corporation / 10M,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C04|S01|l2jfis
+STEEL REINFORCING BARS - US BAR SIZES,,,,,,,,,,,,,T01|C04|S02
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #6",0,m,1.0,,False,0,0,0,0,,,T01|C04|S02|REB006
+,Rebar / Nucor Corporation / #6,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C04|S02|3vwqxf
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #5",0,m,1.0,,False,0,0,0,0,,,T01|C04|S02|REB005
+,Rebar / Nucor Corporation / #5,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C04|S02|1cgews
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #4",0,m,1.0,,False,0,0,0,0,,,T01|C04|S02|REB004
+,Rebar / Nucor Corporation / #4,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C04|S02|bomxc2
+,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #3",0,m,1.0,,False,0,0,0,0,,,T01|C04|S02|REB003
+,Rebar / Nucor Corporation / #3,0,m,1.0,,False,0,0,0,0,,Expired 2026-01-01,T01|C04|S02|fdk49v
+REINFORCING MESH FOR SLAB,,,,,,,,,,,,,T01|C05
+WELDED/WOVEN WIRE MESH 🤚,,,,,,,,,,,,,T01|C05|S01
+,"Welded wire reinforcement / Insteel Industries / 4"" x 4"" x 6/6g [US & CA]",110.4,m²,1.0,,False,578.70576,578.70576,0,0,,,T01|C05|S01|WIR000
+,"Welded wire reinforcement / Insteel Industries / 6"" x 6"" x 6/6g [US & CA]",110.4,m²,1.0,,True,391.5336,391.5336,0,0,,,T01|C05|S01|WIR001
+SUB-SLAB INSULATION,,R-VALUE,10.0,,,,,,,,,,T01|C08
+XPS FOAM BOARD (LEGACY FORMULAS),,,,,,,,,,,,,T01|C08|S02
+,"XPS foam board / DuPont / Styrofoam / HFC-filled / R 5.6-inch, 25 psi",110.4,m²,1.0,,False,11821.62733,11821.62733,0,0,,"A1-A3, B1",T01|C08|S02|19e71c
+,"XPS foam board / Owens Corning / Foamular 250 / HFC-filled / R 5.0-inch, 25 psi [MEXICO]",110.4,m²,1.0,,False,9818.950335,9818.950335,0,0,,"A1-A3, B1",T01|C08|S02|9cd566
+XPS FOAM BOARD (REDUCED GWP),,,,,,,,,,,,,T01|C08|S09
+,"XPS foam board / DuPont / Styrofoam / Reduced GWP / R 5.6-inch, 25 psi",110.4,m²,1.0,,False,7096.865093,7096.865093,0,0,,"A1-A3, B1",T01|C08|S09|175f1a
+XPS FOAM BOARD,,,,,,,,,,,,,T01|C08|S08
+,XPS foam board / R 5.0/inch [BEAM Avg | US & CA],110.4,m²,1.0,,False,1061.841899,1061.841899,0,0,,"A1-A3, B1",T01|C08|S08|a94mfe
+,"XPS foam board / Owens Corning / Foamular NGX CodeBord/C200 / R 5/inch, 20 psi",110.4,m²,1.0,,False,1654.638957,1654.638957,0,0,,"A1-A3, B1",T01|C08|S08|XPS002
+,"XPS foam board / Owens Corning / Foamular NGX 250 / R 5.0/inch, 25 psi",110.4,m²,1.0,,False,1644.917224,1644.917224,0,0,,"A1-A3, B1",T01|C08|S08|95e2e7
+,"XPS foam board / DuPont / Styrofoam ST-100 / R 5.0-inch, 25 psi",110.4,m²,1.0,,False,908.0098626,908.0098626,0,0,,"A1-A3, B1",T01|C08|S08|1a16ad
+,"XPS foam board / Kingspan / GreenGuard Type IV, Low GWP / R 5.0-inch, 25 psi",110.4,m²,1.0,,False,727.1856287,727.1856287,0,0,,Module B1 not declared,T01|C08|S08|XPS001
+,XPS foam board / SOPREMA / SOPRA-XPS (entire product line) / R 5.0-inch,110.4,m²,1.0,,False,374.4578232,374.4578232,0,0,,"A1-A3, B1",T01|C08|S08|3kglse
+EPS FOAM BOARD,,,,,,,,,,,,,T01|C08|S01
+,"EPS foam board / Type XV / R 4.3-inch, 60 psi / EPS Industry Alliance [Industry Avg | US & CA]",110.4,m²,1.0,,False,1368.143239,1368.143239,0,0,,,T01|C08|S01|EPS000
+,"EPS foam board / Type IX / R 4.2-inch, 25 psi / EPS Industry Alliance [Industry Avg | US & CA]",110.4,m²,1.0,,True,841.3193015,841.3193015,0,0,,,T01|C08|S01|EPS001
+,"EPS foam board / Type II / R 4.0-inch, 15 psi / EPS Industry Alliance [Industry Avg | US & CA]",110.4,m²,1.0,,False,667.0460176,667.0460176,0,0,,,T01|C08|S01|EPS002
+,"EPS foam board / Type I / R 3.6-inch, 10 psi / EPS Industry Alliance [Industry Avg | US & CA]",110.4,m²,1.0,,False,491.91969,491.91969,0,0,,,T01|C08|S01|EPS003
+EPS FOAM BOARD WITH GRAPHITE,,,,,,,,,,,,,T01|C08|S07
+,"EPS foam board with graphite / BASF / Neopor F 5200 & F 5300 Plus BMB / R 4.7-inch, Type IX, 25 psi (Type 9, 175 kPa)",110.4,m²,1.0,,False,599.6364917,599.6364917,0,0,,,T01|C08|S07|EPS006
+,"EPS foam board with graphite / BASF  / Neopor F 5200 Plus / R 4.7-inch, Type IX, 25 psi",110.4,m²,1.0,,False,572.4156393,572.4156393,0,0,,,T01|C08|S07|EPS004
+,"EPS foam board with graphite / BASF / Neopor F 5200 & F 5300 Plus BMB  / R 4.7-inch, Type II, 15 psi (Type 2, 110 kPa)",110.4,m²,1.0,,False,449.7273688,449.7273688,0,0,,,T01|C08|S07|EPS007
+,"EPS foam board with graphite / BASF / Neopor F 5200 Plus / R 4.7-inch, Type II, 15 psi (Type 2, 110 kPa)",110.4,m²,1.0,,False,442.3388517,442.3388517,0,0,,,T01|C08|S07|EPS005
+MINERAL WOOL BOARD,,,,,,,,,,,,,T01|C08|S03
+,Mineral wool board - heavy density / NAIMA / R 4.4-inch [Industry Avg | N.America],110.4,m²,1.0,,False,1326.044382,1326.044382,0,0,,,T01|C08|S03|INS018
+,Mineral wool board  / Rockwool / Comfortboard 80 / R 4.2-inch,110.4,m²,1.0,,False,789.5991546,789.5991546,0,0,,Expired 2024,T01|C08|S03|MWB009
+LIGHT WEIGHT AGGREGATE,,,,,,,,,,,,,T01|C08|S04
+,"Light expanded clay aggregate (LECA) / Leca Int'l / Leca-sora 4-32 / R 1.2-inch, 4-32 mm [EU]",110.4,m²,1.0,,False,2168.09818,2168.09818,0,0,,,T01|C08|S04|LEC002
+,"Light expanded clay aggregate (LECA) / Leca Int'l / Leca Arlita 10-20 / R 1.3-inch, 10-20 mm [EU]",110.4,m²,1.0,,False,1410.399277,1410.399277,0,0,,,T01|C08|S04|LEC000
+,"Light expanded clay aggregate (LECA) / Leca Int'l / Leca ISO 10-20 / R 1.35-inch, 10-20 mm [EU]",110.4,m²,1.0,,False,1275.899658,1275.899658,0,0,,,T01|C08|S04|LEC001
+,"Foam glass aggregate / Hasopor / R 1.7-inch, 10-60 mm [EU]",110.4,m²,1.0,,False,120.8605847,120.8605847,0,0,,Expired 2022,T01|C08|S04|21cbc7
+,"Foam glass aggregate / Glasopor AS / R 1.7-inch, 10-60 mm [EU]",110.4,m²,1.0,,False,120.4406058,120.4406058,0,0,,Expired 2022,T01|C08|S04|103ade
+FOAM GLASS BOARD,,,,,,,,,,,,,T01|C08|S05
+,Foam glass board / R 3.4-inch [BEAM Avg] ,110.4,m²,1.0,,False,1591.301867,1591.301867,0,0,,,T01|C08|S05|a94jf2
+,Foam glass board / Pittsburgh Corning Europe / FOAMGLAS F / R 2.9-inch / [EU],110.4,m²,1.0,,False,2390.088059,2390.088059,0,0,,,T01|C08|S05|40c2ea
+,Foam glass board / Pittsburgh Corning Europe / FOAMGLAS S3 / R 3.2-inch / [EU],110.4,m²,1.0,,False,1706.164142,1706.164142,0,0,,,T01|C08|S05|8f8df3
+,Foam glass board / Pittsburgh Corning Europe / FOAMGLAS T4+ / R 3.5-inch / [EU],110.4,m²,1.0,,False,1271.50546,1271.50546,0,0,,,T01|C08|S05|bb05fc
+,Foam glass board / Pittsburgh Corning Europe / FOAMGLAS T3+ / R 4.0-inch / [EU],110.4,m²,1.0,,False,997.4498063,997.4498063,0,0,,,T01|C08|S05|ebf499
+CORK BOARD,,,,,,,,,,,,,T01|C08|S06
+,"Cork board insulation / Amorim  / Expanded Insulation Corkboard (ICB) / R3.6-inch, 115 kg/m3 [EU]",110.4,m²,1.0,,False,-839.9577316,643.9675942,1483.925326,0,,,T01|C08|S06|CBI000
+BARRIERS AND MEMBRANES,,,,,,,,,,,,,T01|C15
+SHEET BARRIER,,,,,,,,,,,,,T01|C15|S01
+,"Barrier, sheet / Polyethylene sheet / 10 mil",110.4,m²,1.0,,True,67.344,67.344,0,0,,From ICE Database V3,T01|C15|S01|bbb033
+,"Barrier, sheet / Polyethylene sheet / 6 mil",110.4,m²,1.0,,False,41.952,41.952,0,0,,From ICE Database V3,T01|C15|S01|bbb034
+LIQUID APPLIED BARRIER,,,,,,,,,,,,,T01|C15|S02
+,"Ext. Waterproofing Barrier, liquid applied / Carlisle / MiraSEAL & MiraTITE  ",110.4,m²,1.0,,False,924.048,924.048,0,0,,,T01|C15|S02|bbb024
+BASEMENT FLOORING,,,,,,,,,,,,,T01|C09
+LAMINATE FLOORING,,,,,,,,,,,,,T01|C09|S05
+,Rigid core vinyl flooring  / Resilient Floor Covering Institute [Industry Avg | US & CA],77.28,m²,0.7,,True,1584.24,1584.24,0,0,,Expired 2024,T01|C09|S05|lvt000
+,Luxury Vinyl Tile / Resilient Floor Covering Institute / LVT and SVT [Industry Avg | US & CA],110.4,m²,1.0,,False,1313.76,1313.76,0,0,,Expired 2024,T01|C09|S05|lvt001
+,Luxury vinyl tile (LVT) / Mohawk / Hot & Heavy Floating Tiles / 5.0 mm,110.4,m²,1.0,,False,1279.536,1279.536,0,0,,,T01|C09|S05|lvt002
+,Luxury vinyl tile (LVT) / Congoleum / CLEO / 4.1mm,110.4,m²,1.0,,False,1214.4,1214.4,0,0,,,T01|C09|S05|lvt003
+,Luxury vinyl tile (LVT) / Altro / Altro Lavencia / 3.0 mm,110.4,m²,1.0,,False,1207.5552,1207.5552,0,0,,,T01|C09|S05|LVT013
+,Luxury vinyl tile (LVT)  / Parterre Flooring / Dryback LVT / Tile or plank - 5 mm,110.4,m²,1.0,,False,1203.36,1203.36,0,0,,,T01|C09|S05|lvt004
+,Luxury vinyl tile (LVT) / Interface / All tile & plank models / 3.0 mm,110.4,m²,1.0,,False,1148.16,1148.16,0,0,,,T01|C09|S05|lvt005
+,Luxury vinyl tile (LVT) / Mannington / All tile & plank models / 4.0 mm,110.4,m²,1.0,,False,1115.04,1115.04,0,0,,,T01|C09|S05|lvt006
+,Luxury vinyl tile (LVT)  / Shaw - Patcraft / Luxury Vinyl Tile / 2 - 5 mm,110.4,m²,1.0,,False,1058.736,1058.736,0,0,,Expired 2026,T01|C09|S05|lvt007
+,"Luxury vinyl tile (LVT) / Armstrong / Biome, Coalesce, Duo, Exchange, Parallel USA, Terra & Theorem / 2.5 mm",110.4,m²,1.0,,False,759.552,759.552,0,0,,,T01|C09|S05|lvt008
+,Rigid core vinyl flooring / Parterre Flooring / Rigid Core Click / Tile or plank - 5 mm,110.4,m²,1.0,,False,719.808,719.808,0,0,,,T01|C09|S05|lvt009
+,Luxury vinyl tile (LVT) / Mannington / Luxury Vinyl Tile / 2.5 mm Tile and Plank,110.4,m²,1.0,,False,718.704,718.704,0,0,,,T01|C09|S05|lvt011
+,Luxury Vinyl Tile (LVT) / Fuhua / FloraFloor / Click & Loose lay / 4.0 mm,110.4,m²,1.0,,False,621.552,621.552,0,0,,,T01|C09|S05|lvt012
+CARPET,,,,,,,,,,,,,T01|C09|S07
+,Carpet / [BEAM Avg],110.4,m²,1.0,,False,1329.03936,1329.03936,0,0,,,T01|C09|S07|CAR00x
+,Carpet / Shaw / Residential Broadloom,110.4,m²,1.0,,False,3367.2,3367.2,0,0,,,T01|C09|S07|CAR001
+,Carpet / Shaw / Strataworx / Carpet tile,110.4,m²,1.0,,False,1998.24,1998.24,0,0,,,T01|C09|S07|CAR003
+,Carpet / Shaw / StrataWorx Carpet tile witn Nylon-6 Face Fiber / 5.7 mm,110.4,m²,1.0,,False,1998.24,1998.24,0,0,,,T01|C09|S07|CAR004
+,Carpet / Venture Carpet / Average Product - Nylon 2520 Yarn System / 3.5 mm Modular Carpet,110.4,m²,1.0,,False,1477.152,1477.152,0,0,,,T01|C09|S07|CAR005
+,Carpet / Venture Carpet / Polyester Yarn System / 10.0 mm Modular Carpet,110.4,m²,1.0,,False,1090.752,1090.752,0,0,,,T01|C09|S07|CAR007
+,Carpet / Venture Carpet / Recycled nylon 6 yarn system / 3.5 mm Modular Carpet,110.4,m²,1.0,,False,861.12,861.12,0,0,,,T01|C09|S07|CAR008
+,Carpet / Shaw / Residential Broadloom with ClearTouch Platinum,110.4,m²,1.0,,False,792.672,792.672,0,0,,,T01|C09|S07|CAR002
+,Carpet / Venture Carpet / Average Product - Polypropylene Yarn System / 3.5 mm Modular Carpet,110.4,m²,1.0,,False,754.032,754.032,0,0,,,T01|C09|S07|CAR006
+,Carpet / Patcraft / Ecoworx carpet tiles with Needlebond polyester Face fiber / 3.71 mm,110.4,m²,1.0,,False,446.016,446.016,0,0,,,T01|C09|S07|CAR000
+,Carpet / Interface / CQUEST BioX / 1.5 mm Modular tile carpet,110.4,m²,1.0,,False,-10.5984,504.9696,515.568,0,,Expired 2025,T01|C09|S07|5a9ecd
+RUBBER FLOORING,,,,,,,,,,,,,T01|C09|S12
+,Rubber flooring / Resilient Floor Covering Institute / Includes tiles and rolls / 2mm [Industry Avg | US & CA],110.4,m²,1.0,,False,1722.24,1722.24,0,0,,Expired 2024,T01|C09|S12|891444
+,Rubber flooring / ECOsurfaces / 6mm,110.4,m²,1.0,,False,651.36,651.36,0,0,,Expired 2020,T01|C09|S12|e06534
+HARDWOOD FLOORING,,,,,,,,,,,,,T01|C09|S01
+,"Hardwood flooring / NWFA and Decorative Hardwoods Association / Solid Wood Flooring /  3/4""  [Industry Avg | US & CA]",110.4,m²,1.0,,False,1081.1472,1081.1472,0,2196.8496,False,,T01|C09|S01|wwf000
+,"Hardwood flooring / mafi / Natural Hardwood Planks / 3/4"", 3 ply laminated solid, oil pre-finished [EU]",110.4,m²,1.0,,False,1544.015024,1544.015024,0,2063.704157,False,Expired 2025; BfCA BioC calc by mass,T01|C09|S01|ac0e7f
+,"Hardwood flooring / Wickham / Solid Hardwood / 3/4""",110.4,m²,1.0,,False,353.28,353.28,0,2081.592,False,,T01|C09|S01|wwf001
+ENGINEERED WOOD FLOORING,,,,,,,,,,,,,T01|C09|S15
+,"Engineered Wood Flooring / NWFA and Decorative Hardwoods Association / 3/8"" to 3/4""  [Industry Avg | US & CA]",110.4,m²,1.0,,False,756.1296,756.1296,0,1164.4992,False,,T01|C09|S15|EWF000
+,Engineered Wood flooring / Wickham / Engineered Hardwood / 16 mm,110.4,m²,1.0,,False,1159.2,1159.2,0,1340.3664,False,,T01|C09|S15|EWF001
+,"Engineered Wood Flooring / CRAFT Artisan Wood Floors / Engineered / 5/8""",110.4,m²,1.0,,False,1700.16,1700.16,0,1417.568413,False,BfCA BioC calc by mass,T01|C09|S15|EWF003
+CERAMIC TILE FLOORING,,,,,,,,,,,,,T01|C09|S03
+,Ceramic tile / Tile Council of North America/ 18.8 kg/m2 / [Industry Avg | US & CA] ,33.12,m²,0.3,,True,466.992,466.992,0,0,,"Expired 2025, Mortar EPD added",T01|C09|S03|CER000
+,Ceramic tile / Fireclay Tile / Ceramic / Standard and Second grade /,110.4,m²,1.0,,False,5308.032,5308.032,0,0,,"Expired 2025-05-22, Mortar EPD added",T01|C09|S03|CER002
+,Ceramic tile / Crossville / Porcelain / Standard grade (mortar included),110.4,m²,1.0,,False,2879.232,2879.232,0,0,,"Expired 2024, Mortar EPD added",T01|C09|S03|4dadb7
+,Ceramic tile / American Wonder Porcelain / Porcelain - recycled content / Standard and Second grade /,110.4,m²,1.0,,False,1510.272,1510.272,0,0,,"Expired 2024-12-06, Mortar EPD added",T01|C09|S03|CER001
+NATURAL STONE FLOORING,,,,,,,,,,,,,T01|C09|S17
+,"Natural stone flooring / Natural Stone Institute / Includes limestone, granite, marble & quartzite / 1/2"" thickness / Mortar included / [Industry Avg, US]",110.4,m²,1.0,,False,2428.8,2428.8,0,0,,,T01|C09|S17|NSF000
+,"Marble flooring / Polycor Natural Stone / All marble products / 1/2"" thickness",110.4,m²,1.0,,False,3610.08,3610.08,0,0,,,T01|C09|S17|NSF003
+,"Granite flooring / Polycor Natural Stone / All granite products / 1/2"" thickness",110.4,m²,1.0,,False,2649.6,2649.6,0,0,,,T01|C09|S17|NSF001
+,"Limestone flooring / Polycor Natural Stone / All limestone products / 1/2"" thickness",110.4,m²,1.0,,False,1013.472,1013.472,0,0,,,T01|C09|S17|NSF002
+VINYL FLOORING,,,,,,,,,,,,,T01|C09|S04
+,Vinyl flooring / Resilient Floor Covering Institute / Heterogeneous [Industry Avg | US & CA],110.4,m²,1.0,,False,777.216,777.216,0,0,,Expired 2024,T01|C09|S04|LVT014
+,Vinyl flooring / Resilient Floor Covering Institute / Vinyl Composition Tile [Industry Avg | US & CA],110.4,m²,1.0,,False,547.584,547.584,0,0,,Expired 2024,T01|C09|S04|f2932d
+STONE PLASTIC COMPOSITE FLOORING,,,,,,,,,,,,,T01|C09|S08
+,Polyester-limestone composite tile / Armstrong / BioBased Tile (BBT™) / 2.0 mm,110.4,m²,1.0,,False,502.32,502.32,0,0,,Expired 2024,T01|C09|S08|2014f0
+LINOLEUM FLOORING – LIQUID APPLIED,,,,,,,,,,,,,T01|C09|S10
+,Linoleum flooring / Mannington / Legato Flooring / 2.2 liquid applied,110.4,m²,1.0,,False,-140.25216,292.56,432.81216,0,,Expired 2025-11-05; BfCA BioC calc by mass,T01|C09|S10|Lin006
+LINOLEUM FLOORING – 2.5 mm SHEET,,,,,,,,,,,,,T01|C09|S02
+,Linoleum flooring / 2.5 mm [BEAM Avg],110.4,m²,1.0,,False,19.2924,462.4146504,443.1222504,0,,,T01|C09|S02|p8c2la
+,Linoleum flooring / Gerflor  / DLW Linoleum Compact / 2.5 mm sheet style linoleum,110.4,m²,1.0,,False,127.9536,761.8704,633.9168,0,,,T01|C09|S02|lin003
+,Linoleum flooring / Forbo / Marmoleum / 2.0 mm sheet style linoleum,110.4,m²,1.0,,False,17.9952,289.248,271.2528,0,,,T01|C09|S02|lin005
+,Linoleum flooring / Forbo / Marmoleum / 2.5 mm sheet style linoleum,110.4,m²,1.0,,False,-2.5392,411.792,414.3312,0,,,T01|C09|S02|e075b4
+,"Linoleum flooring / Tarkett  / Lino Veneto xf2, Etrusco, Style Elle|Emme, Veneto, Originale, LinoRail, Linosport / 2.5 mm sheet style linoleum",110.4,m²,1.0,,False,-66.24,386.7482016,452.9882016,0,,Expired 2025-10-01; BfCA BioC calc by mass,T01|C09|S02|lin004
+LINOLEUM FLOORING – 4.0 mm SHEET,,,,,,,,,,,,,T01|C09|S09
+,Linoleum flooring / 4.0 mm [BEAM Avg],110.4,m²,1.0,,False,124.24416,710.2076712,585.9635112,0,,,T01|C09|S09|lin00X
+,Linoleum flooring / Gerflor  / DLW Linoleum Acousticplus / 4.0 mm sheet style linoleum with Neocare backing,110.4,m²,1.0,,False,422.28,1116.8064,694.5264,0,,,T01|C09|S09|lin000
+,Linoleum flooring / Tarkett  / Lino Acoustic / 3.8 mm sheet style linoleum with polyurethane foam backing,110.4,m²,1.0,,False,260.544,781.9077792,521.3637792,0,,Expired 2025-10-01; BfCA BioC calc by mass,T01|C09|S09|lin001
+,Linoleum flooring / Tarkett  / Veneto Acoustic Cork / 4.4 mm sheet style linoleum with cork backing,110.4,m²,1.0,,False,-45.5952,649.5565056,695.1517056,0,,Expired 2025-10-01; BfCA BioC calc by mass,T01|C09|S09|lin002
+CORK FLOORING,,,,,,,,,,,,,T01|C09|S06
+,Cork flooring / European Resilient Flooring Manufacturers' Institute [Industry Avg | EU],110.4,m²,1.0,,False,-302.496,84.8976,387.3936,0,,Expired 2024; BfCA BioC calc by mass,T01|C09|S06|ae7e1c
+,Cork flooring / Amorim /  Revestimentos S.A. / Cork floating floor planks [EU],110.4,m²,1.0,,False,509.356896,1031.136,521.779104,0,,Expired 2021; BfCA BioC calc by mass,T01|C09|S06|a13a3e
+HEMPWOOD FLOORING,,,,,,,,,,,,,T01|C09|S18
+,HempWood / Fibonacci / Natural Laminate Flooring / 16 mm,110.4,m²,1.0,,False,643.2590464,1236.48,593.2209536,1073.223179,False,BfCA BioC calc by mass,T01|C09|S18|HWF000
+BAMBOO FLOORING,,,,,,,,,,,,,T01|C09|S11
+,Bamboo Flooring [BEAM Avg],110.4,m²,1.0,,False,-2009.124009,911.04656,2920.170569,0,,,T01|C09|S11|BAM01X
+,"Laminated Bamboo flooring / MOSO / Bamboo Elite & Elite Premium, Industriale /  9/16"" (15mm)",110.4,m²,1.0,,False,-1194.70464,505.54368,1700.24832,0,,,T01|C09|S11|BAM008
+,"Hard Bamboo flooring / MOSO / Purebamboo, Topbamboo, Bamboo Supreme, UltraDensity / 9/16"" (15mm), High Density",110.4,m²,1.0,,False,-1354.39272,954.684,2309.07672,0,,,T01|C09|S11|BAM004
+,"Hard Bamboo flooring / MOSO / Solid & Supra Collection / 20mm, High Density",110.4,m²,1.0,,False,-3478.274667,1272.912,4751.186667,0,,,T01|C09|S11|BAM005
+AGGREGATE BASE,,THICKNESS,6.0,in,,,,,,,,,T01|C10
+CRUSHED STONE,,,,,,,,,,,,,T01|C10|S01
+,Aggregate / NRMCA / US Average [Industry Avg],110.4,m²,1.0,,True,269.4120275,269.4120275,0,0,,Expired 2023,T01|C10|S01|2c53be
+ADDITIONAL MATERIALS 🤚,,,,,,,,,,,,,T01|CAM
+MATERIALS BY LENGTH,,,,%,,,,,,,,,T01|CAM|SLE
+,,,m,1.0,,False,0,,,,False,,T01|CAM|SLE|000001
+,,,m,1.0,,False,0,,,,False,,T01|CAM|SLE|000002
+,,,m,1.0,,False,0,,,,False,,T01|CAM|SLE|000003
+,,,m,1.0,,False,0,,,,False,,T01|CAM|SLE|000004
+,,,m,1.0,,False,0,,,,False,,T01|CAM|SLE|000005
+MATERIALS BY AREA,,,,%,,,,,,,,,T01|CAM|SAR
+,,,m²,1.0,,False,0,,,,False,,T01|CAM|SAR|000001
+,,,m²,1.0,,False,0,,,,False,,T01|CAM|SAR|000002
+,,,m²,1.0,,False,0,,,,False,,T01|CAM|SAR|000003
+,,,m²,1.0,,False,0,,,,False,,T01|CAM|SAR|000004
+,,,m²,1.0,,False,0,,,,False,,T01|CAM|SAR|000005
+MATERIALS BY R-VALUE & AREA,,,,R-VALUE,➜,,,,,,,,T01|CAM|SRV
+,,,m²,1.0,,False,0,,,,False,,T01|CAM|SRV|000001
+,,,m²,1.0,,False,0,,,,False,,T01|CAM|SRV|000002
+,,,m²,1.0,,False,0,,,,False,,T01|CAM|SRV|000003
+,,,m²,1.0,,False,0,,,,False,,T01|CAM|SRV|000004
+,,,m²,1.0,,False,0,,,,False,,T01|CAM|SRV|000005
+MATERIALS BY VOLUME,,,,%,,,,,,,,,T01|CAM|SVO
+,,,m³,1.0,,False,0,,,,False,,T01|CAM|SVO|000001
+,,,m³,1.0,,False,0,,,,False,,T01|CAM|SVO|000002
+,,,m³,1.0,,False,0,,,,False,,T01|CAM|SVO|000003
+,,,m³,1.0,,False,0,,,,False,,T01|CAM|SVO|000004
+,,,m³,1.0,,False,0,,,,False,,T01|CAM|SVO|000005
+ADD CUSTOM EPD VALUE 🤚,,,,,,,,,,,,,T01|CEP
+,Material Description / EPD Owner / EPD ID number / EPD Program Operator / EPD Expired date,  QUANTITY        ,UNITS,%,, SELECT,"User defined
+NET
+EMISSIONS
+kg CO₂e","User defined
+ GROSS
+EMISSIONS
+kg CO₂e","User defined
+STORAGE
+Short Cycle
+kg CO₂   ","User defined
+STORAGE
+Long Cycle
+kg CO₂   ","SELECT
+Long Cycle",,T01|CEP|SMO
+,,,,1.0,,False,0,,,,False,,T01|CEP|SMO|1203
+,,,,1.0,,False,0,,,,False,,T01|CEP|SMO|1204
+,,,,1.0,,False,0,,,,False,,T01|CEP|SMO|1205
+,,,,1.0,,False,0,,,,False,,T01|CEP|SMO|1206
+,,,,1.0,,False,0,,,,False,,T01|CEP|SMO|1207
+,,,,1.0,,False,0,,,,False,,T01|CEP|SMO|1208
