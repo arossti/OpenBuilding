@@ -30,10 +30,30 @@ import { refreshFootingsSlabsTab } from "./footings-slabs-tab.mjs";
 const VS = StateManager.VALUE_STATES;
 
 // PROJECT field id → array of F&S group names whose per-row qty should mirror it.
+//
+// Group names match the F&S CSV column-A banners (case- and whitespace-
+// insensitive — see findGroup). When porting Phase 4 tabs, add new entries
+// keyed by the same PROJECT field id (or new dim_* fields) and the relevant
+// per-tab group names.
+//
+// Excluded by design (groups have their own group-config quantity field
+// instead of a PROJECT auto-fill source):
+//   - METAL PILE FOUNDATIONS / TIMBER PILE FOUNDATION (own TOTAL LENGTH /
+//     TOTAL VOLUME at group banner)
+//   - REBAR FOR CONTINUOUS FOOTINGS / COLUMN FOOTINGS / SLABS
+//     (own TOTAL REBAR LENGTH at group banner)
 const PROJECT_TO_FS_GROUPS = {
   dim_continuous_footings_volume: ["CONTINUOUS CONCRETE FOOTINGS"],
-  dim_columns_piers_pads_volume:  ["CONCRETE COLUMN PADS & PIERS", "TIMBER PILE FOUNDATION"],
-  dim_foundation_slab_floor_area: ["CONCRETE SLABS", "AGGREGATE BASE", "SUB-SLAB INSULATION"],
+  dim_columns_piers_pads_volume:  ["CONCRETE COLUMN PADS & PIERS"],
+  dim_foundation_slab_floor_area: [
+    "CONCRETE SLABS",
+    "EARTHEN FLOOR SYSTEMS",
+    "REINFORCING MESH FOR SLAB",
+    "SUB-SLAB INSULATION",
+    "BARRIERS AND MEMBRANES",
+    "BASEMENT FLOORING",
+    "AGGREGATE BASE",
+  ],
 };
 
 let registered = false;
@@ -41,8 +61,11 @@ let cachedParsedFs = null;
 
 function findGroup(parsedFs, groupName) {
   if (!parsedFs) return null;
-  const target = groupName.toUpperCase();
-  return parsedFs.groups.find((g) => g.name && g.name.toUpperCase() === target) || null;
+  // CSV banner names sometimes carry trailing whitespace ("EARTHEN FLOOR
+  // SYSTEMS  "). Trim both sides before comparing so the mapping table can
+  // use clean labels.
+  const target = groupName.trim().toUpperCase();
+  return parsedFs.groups.find((g) => g.name && g.name.trim().toUpperCase() === target) || null;
 }
 
 function applyOneSource(parsedFs, projectKey, value) {

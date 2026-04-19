@@ -31,11 +31,22 @@ function fmtKg(v) {
   return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
+// Convert a row's code path (T01|C01|S04|43fe24) to a CSS-safe identifier
+// (T01_C01_S04_43fe24). Used as the suffix of every per-row state key,
+// DOM id, and data attribute. Hash alone is not unique - the same material
+// EPD appears in several F&S groups (e.g. a concrete mix shows under
+// CONTINUOUS FOOTINGS, COLUMN PADS, and SLABS) - so we must qualify by the
+// full path or row state cross-talks across groups.
+function rowKey(material) {
+  return material.code.replace(/\|/g, "_");
+}
+
 function fieldIds(material) {
+  const k = rowKey(material);
   return {
-    sel: `fs_${material.hash}_sel`,
-    qty: `fs_${material.hash}_qty`,
-    pct: `fs_${material.hash}_pct`,
+    sel: `fs_${k}_sel`,
+    qty: `fs_${k}_qty`,
+    pct: `fs_${k}_pct`,
   };
 }
 
@@ -198,7 +209,8 @@ function renderSubgroup(group, sub) {
 function renderMaterialRow(group, sub, m) {
   const ids = fieldIds(m);
   const vals = currentValues(m, group);
-  const netId = `bw-fs-net-${m.hash}`;
+  const k = rowKey(m);
+  const netId = `bw-fs-net-${k}`;
   const rowCls = vals.select ? "bw-asm-row bw-asm-row-selected" : "bw-asm-row";
   const footCls = m.footnote.toLowerCase().includes("expired") ? "bw-asm-foot expired" : "bw-asm-foot";
   // Row jurisdiction inherits subgroup signal + adds material-name [bracket]
@@ -210,17 +222,17 @@ function renderMaterialRow(group, sub, m) {
   const pctDisplay = (vals.pct * 100).toFixed(0);
   const noFactor = !m.factors;
   return `
-    <tr class="${rowCls}" data-row-hash="${m.hash}" data-group-code="${esc(group.code)}" ${jurAttrs(rowJur)}>
+    <tr class="${rowCls}" data-row-key="${k}" data-group-code="${esc(group.code)}" ${jurAttrs(rowJur)}>
       <td class="bw-asm-col-sel">
-        <input type="checkbox" class="bw-asm-sel" data-field-id="${ids.sel}" data-row-hash="${m.hash}" ${vals.select ? "checked" : ""} />
+        <input type="checkbox" class="bw-asm-sel" data-field-id="${ids.sel}" data-row-key="${k}" ${vals.select ? "checked" : ""} />
       </td>
       <td class="bw-asm-col-name" title="${esc(m.name)}">${esc(m.name)}</td>
       <td class="bw-asm-col-qty">
-        <input type="number" step="0.1" class="bw-input bw-asm-qty bw-asm-qty-readonly" data-field-id="${ids.qty}" data-row-hash="${m.hash}" value="${qtyDisplay}" placeholder="0" readonly title="Set this quantity on the PROJECT tab — assembly-tab quantities are display-only, matching BEAM workbook behavior." />
+        <input type="number" step="0.1" class="bw-input bw-asm-qty bw-asm-qty-readonly" data-field-id="${ids.qty}" data-row-key="${k}" value="${qtyDisplay}" placeholder="0" readonly title="Set this quantity on the PROJECT tab — assembly-tab quantities are display-only, matching BEAM workbook behavior." />
       </td>
       <td class="bw-asm-col-unit">${esc(m.unit)}</td>
       <td class="bw-asm-col-pct">
-        <input type="number" min="0" max="100" step="1" class="bw-input bw-asm-pct" data-field-id="${ids.pct}" data-row-hash="${m.hash}" value="${pctDisplay}" />
+        <input type="number" min="0" max="100" step="1" class="bw-input bw-asm-pct" data-field-id="${ids.pct}" data-row-key="${k}" value="${pctDisplay}" />
         <span class="bw-asm-pct-sign">%</span>
       </td>
       <td class="bw-asm-col-net">
@@ -262,7 +274,7 @@ function recomputeAll() {
           factors: m.factors,
           configRatio: vals.configRatio,
         });
-        const netEl = document.getElementById(`bw-fs-net-${m.hash}`);
+        const netEl = document.getElementById(`bw-fs-net-${rowKey(m)}`);
         if (netEl) netEl.textContent = fmtKg(emissions.net);
         groupNet += emissions.net;
         tabNet += emissions.net;
@@ -287,8 +299,8 @@ function recomputeAll() {
   if (totalEls.stlong) totalEls.stlong.textContent = fmtKg(tabStLong);
 }
 
-function updateRowSelectedClass(hash, selected) {
-  const row = document.querySelector(`tr[data-row-hash="${hash}"]`);
+function updateRowSelectedClass(rowKeyVal, selected) {
+  const row = document.querySelector(`tr[data-row-key="${rowKeyVal}"]`);
   if (row) row.classList.toggle("bw-asm-row-selected", selected);
 }
 
@@ -305,7 +317,7 @@ function wireInputs(panel) {
 
     if (t.type === "checkbox") {
       StateManager.setValue(fieldId, t.checked, VS.USER_MODIFIED);
-      updateRowSelectedClass(t.dataset.rowHash, t.checked);
+      updateRowSelectedClass(t.dataset.rowKey, t.checked);
     } else if (t.classList.contains("bw-asm-pct")) {
       // UI shows 0-100; store as decimal 0-1 to match BEAM
       const n = parseFloat(t.value);
@@ -361,7 +373,7 @@ function refreshInputsFromState() {
         if (sel) sel.checked = rawSel === true || rawSel === "true";
         if (qty) qty.value = (rawQty === null || rawQty === "" || Number(rawQty) === 0) ? "" : rawQty;
         if (pct) pct.value = rawPct === null ? "100" : String(Math.round(StateManager.parseNumeric(rawPct, 1) * 100));
-        updateRowSelectedClass(m.hash, sel ? sel.checked : false);
+        updateRowSelectedClass(rowKey(m), sel ? sel.checked : false);
       }
     }
   }
