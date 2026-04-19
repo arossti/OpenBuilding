@@ -41,23 +41,32 @@ function groupCfgId(group) {
   return `fs_${group.code.replace(/\|/g, "_")}_cfg`;
 }
 
+// Cold-start contract: no BEAM CSV sample values bleed in as defaults.
+// Empty state means empty UI (unchecked, blank qty, blank group config) and
+// zero emissions. Use the action-bar Load Sample button to populate the
+// DOE Prototype values on demand.
 function currentValues(material, group) {
   const f = fieldIds(material);
   const rawSel = StateManager.getValue(f.sel);
   const rawQty = StateManager.getValue(f.qty);
   const rawPct = StateManager.getValue(f.pct);
-  const select = rawSel === null ? material.sample_select : rawSel === "true" || rawSel === true;
-  const qty = StateManager.parseNumeric(rawQty, material.sample_qty);
-  const pct = StateManager.parseNumeric(rawPct, material.sample_pct);
+  const select = rawSel === null ? false : (rawSel === "true" || rawSel === true);
+  const qty = StateManager.parseNumeric(rawQty, 0);
+  const pct = rawPct === null ? 1 : StateManager.parseNumeric(rawPct, 1);
   const configRatio = groupConfigRatio(group);
   return { select, qty, pct, configRatio };
 }
 
+// configRatio = user / BEAM-default. Blank/zero user input means the group
+// has no effective contribution → returns 0 so emissions roll up to 0 until
+// the user enters a value (or loads the sample). The BEAM default is only
+// surfaced as a placeholder + tooltip on the input.
 function groupConfigRatio(group) {
-  if (!group.config || group.config.default === null || group.config.default === 0) return 1;
-  const current = StateManager.getValue(groupCfgId(group));
-  const user = StateManager.parseNumeric(current, group.config.default);
-  if (!user || !group.config.default) return 1;
+  if (!group.config || !group.config.default) return 1;
+  const raw = StateManager.getValue(groupCfgId(group));
+  if (raw === null || raw === "") return 0;
+  const user = StateManager.parseNumeric(raw, 0);
+  if (!user) return 0;
   return user / group.config.default;
 }
 
@@ -132,12 +141,17 @@ function renderGroup(group) {
 function renderGroupConfig(group) {
   const id = groupCfgId(group);
   const current = StateManager.getValue(id);
-  const val = current !== null ? current : (group.config.default !== null ? group.config.default : "");
-  const unit = group.config.unit ? `<span class="bw-asm-cfg-unit">${esc(group.config.unit)}</span>` : "";
+  const val = current !== null && current !== "" ? esc(current) : "";
+  const placeholder = group.config.default !== null ? esc(group.config.default) : "";
+  const unitTxt = group.config.unit || "";
+  const tip = group.config.default !== null
+    ? `BEAM default: ${group.config.default}${unitTxt ? " " + unitTxt : ""}`
+    : "";
+  const unit = unitTxt ? `<span class="bw-asm-cfg-unit">${esc(unitTxt)}</span>` : "";
   return `
-    <label class="bw-asm-cfg">
+    <label class="bw-asm-cfg" title="${esc(tip)}">
       <span class="bw-asm-cfg-label">${esc(group.config.label)}</span>
-      <input type="number" step="0.01" class="bw-input bw-asm-cfg-input" data-field-id="${id}" data-group-code="${esc(group.code)}" value="${esc(val)}" />
+      <input type="number" step="0.01" class="bw-input bw-asm-cfg-input" data-field-id="${id}" data-group-code="${esc(group.code)}" value="${val}" placeholder="${placeholder}" />
       ${unit}
     </label>
   `;
@@ -175,6 +189,8 @@ function renderMaterialRow(group, m) {
   const netId = `bw-fs-net-${m.hash}`;
   const rowCls = vals.select ? "bw-asm-row bw-asm-row-selected" : "bw-asm-row";
   const footCls = m.footnote.toLowerCase().includes("expired") ? "bw-asm-foot expired" : "bw-asm-foot";
+  // Render qty blank when 0 so cold-start rows don't visually broadcast "0".
+  const qtyDisplay = vals.qty ? esc(vals.qty) : "";
   const pctDisplay = (vals.pct * 100).toFixed(0);
   const noFactor = !m.factors;
   return `
@@ -184,7 +200,7 @@ function renderMaterialRow(group, m) {
       </td>
       <td class="bw-asm-col-name" title="${esc(m.name)}">${esc(m.name)}</td>
       <td class="bw-asm-col-qty">
-        <input type="number" step="0.1" class="bw-input bw-asm-qty" data-field-id="${ids.qty}" data-row-hash="${m.hash}" value="${esc(vals.qty)}" />
+        <input type="number" step="0.1" class="bw-input bw-asm-qty" data-field-id="${ids.qty}" data-row-hash="${m.hash}" value="${qtyDisplay}" placeholder="0" />
       </td>
       <td class="bw-asm-col-unit">${esc(m.unit)}</td>
       <td class="bw-asm-col-pct">
@@ -297,6 +313,48 @@ function wireInputs(panel) {
     btn.textContent = open ? "▼" : "▶";
     btn.setAttribute("aria-expanded", String(open));
   });
+}
+
+// Refresh DOM inputs to match current StateManager values. Cheaper than
+// re-rendering the whole panel — useful after reset/sample-load.
+function refreshInputsFromState() {
+  if (!parsed) return;
+  const panel = document.getElementById("bw-fs-panel");
+  if (!panel) return;
+  for (const group of parsed.groups) {
+    if (group.config) {
+      const cfgEl = panel.querySelector(`input[data-field-id="${groupCfgId(group)}"]`);
+      if (cfgEl) {
+        const v = StateManager.getValue(groupCfgId(group));
+        cfgEl.value = (v === null || v === "") ? "" : v;
+      }
+    }
+    for (const sub of group.subgroups) {
+      for (const m of sub.materials) {
+        const f = fieldIds(m);
+        const sel = panel.querySelector(`input[data-field-id="${f.sel}"]`);
+        const qty = panel.querySelector(`input[data-field-id="${f.qty}"]`);
+        const pct = panel.querySelector(`input[data-field-id="${f.pct}"]`);
+        const rawSel = StateManager.getValue(f.sel);
+        const rawQty = StateManager.getValue(f.qty);
+        const rawPct = StateManager.getValue(f.pct);
+        if (sel) sel.checked = rawSel === true || rawSel === "true";
+        if (qty) qty.value = (rawQty === null || rawQty === "" || Number(rawQty) === 0) ? "" : rawQty;
+        if (pct) pct.value = rawPct === null ? "100" : String(Math.round(StateManager.parseNumeric(rawPct, 1) * 100));
+        updateRowSelectedClass(m.hash, sel ? sel.checked : false);
+      }
+    }
+  }
+  recomputeAll();
+}
+
+export function resetFootingsSlabsTab() {
+  StateManager.clearByPrefix("fs_");
+  refreshInputsFromState();
+}
+
+export function refreshFootingsSlabsTab() {
+  refreshInputsFromState();
 }
 
 export async function wireFootingsSlabsTab() {

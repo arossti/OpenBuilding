@@ -18,7 +18,7 @@ const VS = StateManager.VALUE_STATES;
 const INFO_LEFT = [
   { id: "project_name",             label: "Project Name",                   type: "text", required: true },
   { id: "project_scenario",         label: "Scenario",                       type: "text" },
-  { id: "project_beam_version",     label: "BEAM Version",                   type: "text", readonly: true, default: "V1.1" },
+  { id: "project_beam_version",     label: "BEAM Version",                   type: "text", readonly: true },
   { id: "project_designer",         label: "Designer",                       type: "text" },
   { id: "project_engineer",         label: "Engineer",                       type: "text" },
   { id: "project_builder",          label: "Builder / Developer",            type: "text" },
@@ -266,23 +266,42 @@ function populateInputFromState(fieldId) {
   }
 }
 
-export function wireProjectForm() {
-  const lhwParents = [...DIMS_BUILDING, ...DIMS_GARAGE].filter((f) => f.lhw).map((f) => f.id);
+function lhwParentIds() {
+  return [...DIMS_BUILDING, ...DIMS_GARAGE].filter((f) => f.lhw).map((f) => f.id);
+}
 
-  // Seed defaults (read-only fields etc.)
-  for (const f of allFields()) {
-    if (f.default !== undefined && StateManager.getValue(f.id) === null) {
-      StateManager.setValue(f.id, f.default, VS.DEFAULT);
-    }
-  }
-
-  // Populate simple inputs from state
+function refreshProjectInputsFromState() {
   for (const f of allFields()) populateInputFromState(f.id);
-  // Populate L/H/W children + computed volumes
-  for (const parent of lhwParents) {
+  for (const parent of lhwParentIds()) {
     for (const child of lhwChildIds(parent)) populateInputFromState(child);
     recomputeVolume(parent);
   }
+}
+
+export function refreshProjectForm() {
+  refreshProjectInputsFromState();
+}
+
+export function resetProjectTab() {
+  StateManager.clearByPrefix("project_");
+  StateManager.clearByPrefix("dim_");
+  StateManager.clearByPrefix("garage_");
+  // Blank every input in the PROJECT panel, then recompute LHW volumes (all 0).
+  const panel = document.getElementById("beam-panel-project");
+  if (panel) {
+    for (const input of panel.querySelectorAll("input.bw-input")) {
+      input.value = "";
+    }
+    for (const out of panel.querySelectorAll("output.bw-dim-volume")) {
+      out.textContent = "0.0";
+    }
+  }
+}
+
+export function wireProjectForm() {
+  // Cold-start contract: no defaults seeded into state. The form renders blank
+  // until the user types or presses Load Sample.
+  refreshProjectInputsFromState();
 
   // Wire inputs — all `.bw-input` inside the PROJECT panel
   const panel = document.getElementById("beam-panel-project");

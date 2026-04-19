@@ -18,8 +18,8 @@
 
 import { ENERGY_GHG, GLOSSARY } from "./beam/reference-data.mjs";
 import { StateManager } from "./shared/state-manager.mjs";
-import { renderProjectPanel, wireProjectForm } from "./beam/project-tab.mjs";
-import { renderFootingsSlabsPanel, wireFootingsSlabsTab } from "./beam/footings-slabs-tab.mjs";
+import { renderProjectPanel, wireProjectForm, resetProjectTab } from "./beam/project-tab.mjs";
+import { renderFootingsSlabsPanel, wireFootingsSlabsTab, resetFootingsSlabsTab } from "./beam/footings-slabs-tab.mjs";
 
 // ──────────────────────────────────────────────────────────────────────
 // Tab definitions
@@ -359,24 +359,67 @@ function wireKeyboard() {
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Action bar — New / Open / Save / Import — all stubbed until Phase 1
+// Action bar — New / Open / Save / Import / Load Sample / Reset Tab.
 // ──────────────────────────────────────────────────────────────────────
+const TAB_RESETTERS = {
+  "project":        { label: "PROJECT",            fn: resetProjectTab },
+  "footings-slabs": { label: "Footings & Slabs",   fn: resetFootingsSlabsTab },
+};
+
+function handleResetActiveTab() {
+  const tab = state.activeTab;
+  const entry = TAB_RESETTERS[tab];
+  if (!entry) {
+    setStatus(`Reset not yet wired for "${tab}" tab — coming with Phase 4.`, "busy");
+    setTimeout(() => setStatus("Shell ready · cold-start blank state · Phase 3", "ready"), 3000);
+    return;
+  }
+  const ok = window.confirm(
+    `Reset "${entry.label}" to a blank state?\n\n` +
+    `This clears only the inputs on this tab. Other tabs, PDF-Parser polygon data, and any saved project file are preserved.`
+  );
+  if (!ok) return;
+  entry.fn();
+  setStatus(`"${entry.label}" reset to blank state.`, "ready");
+  setTimeout(() => setStatus(READY_MSG, "ready"), 3000);
+}
+
+function handleNewProject() {
+  const ok = window.confirm(
+    "Start a fresh project?\n\n" +
+    "This clears all inputs across every tab. Use Save first if you want to keep the current project."
+  );
+  if (!ok) return;
+  StateManager.clear();
+  // Reload to re-render every tab from blank state without further wiring.
+  location.reload();
+}
+
+function handleLoadSample() {
+  // Real wiring lands in slice 2 (sample-loader.mjs).
+  setStatus("Load Sample — sample-loader lands in the next commit.", "busy");
+  setTimeout(() => setStatus("Shell ready · cold-start blank state · Phase 3", "ready"), 3000);
+}
+
 function wireActionBar() {
   const handlers = {
-    "beam-new-project":     () => notImplemented("New project — needs state-manager (Phase 1)."),
-    "beam-open-project":    () => notImplemented("Open project JSON — needs file-handler (Phase 1)."),
-    "beam-save-project":    () => notImplemented("Save project JSON — needs file-handler (Phase 1)."),
-    "beam-import-xlsx":     () => notImplemented("Import xlsx — needs excel-mapper (Phase 6; SheetJS already loaded)."),
+    "beam-new-project":      handleNewProject,
+    "beam-open-project":     () => notImplemented("Open project JSON — file-handler import wiring lands next."),
+    "beam-save-project":     () => notImplemented("Save project JSON — file-handler export wiring lands next."),
+    "beam-import-xlsx":      () => notImplemented("Import xlsx — needs excel-mapper (Phase 6; SheetJS already loaded)."),
     "beam-import-pdf-parser":() => notImplemented("Import PDF-Parser project — needs polygon→assembly mapping (Phase 8)."),
+    "beam-load-sample":      handleLoadSample,
+    "beam-reset":            handleResetActiveTab,
   };
   for (const [id, fn] of Object.entries(handlers)) {
     const el = document.getElementById(id);
     if (el) el.addEventListener("click", fn);
   }
 }
+const READY_MSG = "Ready · cold-start blank state · Phase 3 (Footings & Slabs live)";
 function notImplemented(msg) {
   setStatus(`not yet implemented · ${msg}`, "busy");
-  setTimeout(() => setStatus("Shell ready · no calc engine yet · phase 0", "ready"), 3500);
+  setTimeout(() => setStatus(READY_MSG, "ready"), 3500);
 }
 
 // ──────────────────────────────────────────────────────────────────────

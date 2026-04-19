@@ -200,6 +200,25 @@ function clear() {
   }
 }
 
+function clearByPrefix(prefix) {
+  if (!prefix) return 0;
+  let removed = 0;
+  for (const id of [...fields.keys()]) {
+    if (id.startsWith(prefix)) {
+      const old = fields.get(id);
+      fields.delete(id);
+      delete lastImportedState[id];
+      notifyListeners(id, null, old?.value, "cleared");
+      removed++;
+    }
+  }
+  if (removed) {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(saveState, 1000);
+  }
+  return removed;
+}
+
 function exportState() {
   const out = {};
   for (const [id, field] of fields) out[id] = field.value;
@@ -231,6 +250,7 @@ export const StateManager = {
   saveState,
   loadState,
   clear,
+  clearByPrefix,
   exportState,
   importState,
   getLastImportedState,
