@@ -1,116 +1,147 @@
-"","STRUCTURAL ELEMENTS","","","","","","","","","","","",""
-"","PROJECT NAME:    Sample Project DOE Prototype
+,STRUCTURAL ELEMENTS,,,,,,,,,,,,
+,"PROJECT NAME:    Sample Project DOE Prototype
 SCENARIO:              Baseline
-BEAM VERSION:     V1.1","","FALSE","","","","","","","","","","T03"
-"CATEGORY","MATERIAL","","UNITS","","","","","","","","","FOOTNOTE","ID"
-"STRUCTURAL TIMBER","","","","","","","","","","","","","T03|C01"
-"STRUCTURAL COMPOSITE LUMBER","","","","","","","","","","","","","T03|C01|S01"
-"","Laminated strand lumber (LSL) / AWC & CWC [Industry Avg | US & CA]","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","Expired 2026-01-04; BfCA BioC calc by mass","T03|C01|S01|4k2v0s"
-"","Laminated veneer lumber (LVL) / AWC & CWC [Industry Avg | US & CA]","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","Expired 2025; BfCA BioC calc by mass","T03|C01|S01|ebd574"
-"","Laminated Veneer Lumber (LVL) / Boise Cascade / Versa-Lam","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","","T03|C01|S01|LAM000"
-"","Laminated veneer lumber (LVL) / RedBuilt / RedLam LVL ","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","BfCA BioC calc by mass","T03|C01|S01|LAM001"
-"","Veneer Laminated Timber (VLT) / Boise Cascade /  VersaWorks","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","","T03|C01|S01|lam013"
-"","Glued Laminated Timber (Glulam) / AWC & CWC [Industry Avg | US & CA] ","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","Expired 2025; BfCA BioC calc by mass","T03|C01|S01|f92a05"
-"","Glued Laminated Timber (Glulam) / Western Archrib / Edmonton, Alberta","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","","T03|C01|S01|lam005"
-"","Glued Laminated Timber (Glulam) / Western Archrib / Boissevain, Manitoba ","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","","T03|C01|S01|lam004"
-"","Glued Laminated Timber (Glulam) / Vaagen / Colville, WA","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","","T03|C01|S01|lam002"
-"","Glued Laminated Timber (Glulam) / Kalesnikoff Lumber Co. / BC","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","","T03|C01|S01|lam003"
-"","Glued Laminated Timber (Glulam) / Element5  / Ontario","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","","T03|C01|S01|lam006"
-"","Mass ply panels (MPP) / Freres Lumber","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","","T03|C01|S01|lam012"
-"STRUCTURAL COMPOSITE BAMBOO","","","","","","","","","","","","","T03|C01|S03"
-"","Bamboo Glulam / Lamboo / Structural Grade Product Systems","0.0","m³","100%","","FALSE","0","0","0","0","","","T03|C01|S03|BAM001"
-"","Bamboo beams / MOSO / Bamboo Solid Beams / High Density","0.0","m³","100%","","FALSE","0","0","0","0","","","T03|C01|S03|BAM006"
-"TIMBER FRAMING LUMBER","","","","","","","","","","","","","T03|C01|S02"
-"","Wood / SPF / Lumber by volume / AWC & CWC [Industry Avg | US & CA] ","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","Expired 2025; BfCA BioC calc by mass","T03|C01|S02|9219e5"
-"","Wood / Redwood / Lumber by volume / AWC & CWC [Industry Avg | US & CA]","0.0","m³","100%","","FALSE","0","0","0","0","FALSE","Expired 2025; BfCA BioC calc by mass","T03|C01|S02|10d47f"
-"STRUCTURAL STEEL – WIDE FLANGE BEAMS","","","","","","","","","","","","","T03|C02"
-"WIDE FLANGE – W150 (US W6)","","","","","","","","","","","","","T03|C02|S01"
-"","Structural Steel / Wide Flange / W150x22 (US W6x15) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S01|STR007"
-"","Structural Steel / Wide Flange / W150x30 (US W6x20) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S01|STR008"
-"WIDE FLANGE – W200 (US W8)","","","","","","","","","","","","","T03|C02|S02"
-"","Structural Steel / Wide Flange / W200x22 (US W8x15) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S02|STR009"
-"","Structural Steel / Wide Flange / W200x27 (US W8x18) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S02|STR010"
-"","Structural Steel / Wide Flange / W200x31 (US W8x21) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S02|STR011"
-"","Structural Steel / Wide Flange / W200x36 (US W8x24) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S02|STR012"
-"","Structural Steel / Wide Flange / W200x42 (US W8x28) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S02|STR013"
-"","Structural Steel / Wide Flange / W200x59 (US W8x40) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S02|STR014"
-"","Structural Steel / Wide Flange / W200x71 (US W8x48) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S02|STR015"
-"WIDE FLANGE – W250 (US W10)","","","","","","","","","","","","","T03|C02|S03"
-"","Structural Steel / Wide Flange / W250x18 (US W10x12) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S03|STR016"
-"","Structural Steel / Wide Flange / W250x22 (US W10x15) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S03|STR017"
-"","Structural Steel / Wide Flange / W250x25 (US W10x17) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S03|STR018"
-"","Structural Steel / Wide Flange / W250x28 (US W10x19) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S03|STR019"
-"","Structural Steel / Wide Flange / W250x33 (US W10x22) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S03|STR020"
-"","Structural Steel / Wide Flange / W250x39 (US W10x26) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S03|STR021"
-"","Structural Steel / Wide Flange / W250x45 (US W10x30) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S03|STR022"
-"","Structural Steel / Wide Flange / W250x50 (US W10x33) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S03|STR023"
-"","Structural Steel / Wide Flange / W250x58 (US W10x38) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S03|STR024"
-"","Structural Steel / Wide Flange / W250x67 (US W10x45) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S03|STR025"
-"","Structural Steel / Wide Flange / W250x73 (US W10x49) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S03|STR026"
-"","Structural Steel / Wide Flange / W250x80 (US W10x54) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S03|STR027"
-"","Structural Steel / Wide Flange / W250x131 (US W10x88) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S03|STR028"
-"WIDE FLANGE – W310 (US W12)","","","","","","","","","","","","","T03|C02|S04"
-"","Structural Steel / Wide Flange / W310x129 (US W12x87) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S04|STR029"
-"","Structural Steel / Wide Flange / W310x21 (US W12x14) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S04|STR030"
-"","Structural Steel / Wide Flange / W310x33 (US W12x22) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S04|STR031"
-"","Structural Steel / Wide Flange / W310x39 (US W12x26) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S04|STR032"
-"","Structural Steel / Wide Flange / W310x45 (US W12x30) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S04|STR033"
-"","Structural Steel / Wide Flange / W310x52 (US W12x35) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S04|STR034"
-"","Structural Steel / Wide Flange / W310x79 (US W12x53) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S04|STR035"
-"WIDE FLANGE – W360 (US W14)","","","","","","","","","","","","","T03|C02|S05"
-"","Structural Steel / Wide Flange / W360x33 (US W14x22) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S05|STR036"
-"","Structural Steel / Wide Flange / W360x45 (US W14x30) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S05|STR037"
-"","Structural Steel / Wide Flange / W360x51 (US W14x34) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S05|STR038"
-"","Structural Steel / Wide Flange / W360x57 (US W14x38) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S05|STR039"
-"WIDE FLANGE – W410 (US W16)","","","","","","","","","","","","","T03|C02|S06"
-"","Structural Steel / Wide Flange / W410x74 (US W16x50) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S06|STR040"
-"WIDE FLANGE – W530 (US W21)","","","","","","","","","","","","","T03|C02|S07"
-"","Structural Steel / Wide Flange / W530x72 (US W21x48) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S07|STR041"
-"","Structural Steel / Wide Flange / W530x85 (US W21x55) / AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C02|S07|STR042"
-"STRUCTURAL STEEL – OTHER SECTION SHAPES","","","","","","","","","","","","","T03|C03"
-"STEEL – SQUARE HSS","","","","","","","","","","","","","T03|C03|S01"
-"","Structural Steel / Square HSS / 3 x 3 x 3/16""/ AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C03|S01|STR002"
-"","Structural Steel / Square HSS / 4 x 4 x 1/4""/ AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C03|S01|STR003"
-"","Structural Steel / Square HSS / 5 x 5 x 1/4""/ AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C03|S01|STR004"
-"","Structural Steel / Square HSS / 5 x 5 x 1/2""/ AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C03|S01|STR005"
-"","Structural Steel / Square HSS / 8 x 8 x 1/4""/ AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C03|S01|STR006"
-"STEEL – RECTANGULAR","","","","","","","","","","","","","T03|C03|S02"
-"","Structural Steel / Rectangular HSS / 8 x 6 x 5/16""/ AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C03|S02|STR001"
-"STEEL – ANGLE","","","","","","","","","","","","","T03|C03|S03"
-"","Structural Steel / L-Angle / L 3.5 x 3.5 x 1/4""/ AISC [Industry Avg | US]","","m","100%","","FALSE","0","0","0","0","","","T03|C03|S03|STR000"
-"STRUCTURAL STEEL POSTS","","","","","","","","","","","","","T03|C04"
-"STEEL POST","","","","","","","","","","","","","T03|C04|S01"
-"","Steel post / Generic / 3.5 x 0.216"" (89 x 5.5 mm), Sched 40 STD","","m","100%","","FALSE","0","0","0","0","","Expired 2021","T03|C04|S01|12a279"
-"ADDITIONAL MATERIALS 🤚","","","","","","","","","","","","","T03|CAM"
-"MATERIALS BY LENGTH","","","","","","","","","","","","","T03|CAM|SLE"
-"","","","m","100%","","FALSE","0","","","","FALSE","","T03|CAM|SLE|000001"
-"","","","m","100%","","FALSE","0","","","","FALSE","","T03|CAM|SLE|000002"
-"","","","m","100%","","FALSE","0","","","","FALSE","","T03|CAM|SLE|000003"
-"","","","m","100%","","FALSE","0","","","","FALSE","","T03|CAM|SLE|000004"
-"","","","m","100%","","FALSE","0","","","","FALSE","","T03|CAM|SLE|000005"
-"MATERIALS BY AREA","","","","","","","","","","","","","T03|CAM|SAR"
-"","","","m²","100%","","FALSE","0","","","","FALSE","","T03|CAM|SAR|000001"
-"","","","m²","100%","","FALSE","0","","","","FALSE","","T03|CAM|SAR|000002"
-"","","","m²","100%","","FALSE","0","","","","FALSE","","T03|CAM|SAR|000003"
-"","","","m²","100%","","FALSE","0","","","","FALSE","","T03|CAM|SAR|000004"
-"","","","m²","100%","","FALSE","0","","","","FALSE","","T03|CAM|SAR|000005"
-"MATERIALS BY R-VALUE & AREA","","","","","➜","","","","","","","","T03|CAM|SRV"
-"","","","m²","1.0","","FALSE","0","","","","FALSE","","T03|CAM|SRV|000001"
-"","","","m²","1.0","","FALSE","0","","","","FALSE","","T03|CAM|SRV|000002"
-"","","","m²","1.0","","FALSE","0","","","","FALSE","","T03|CAM|SRV|000003"
-"","","","m²","1.0","","FALSE","0","","","","FALSE","","T03|CAM|SRV|000004"
-"","","","m²","1.0","","FALSE","0","","","","FALSE","","T03|CAM|SRV|000005"
-"MATERIALS BY VOLUME","","","","","","","","","","","","","T03|CAM|SVO"
-"","","","m³","100%","","FALSE","0","","","","FALSE","","T03|CAM|SVO|000001"
-"","","","m³","100%","","FALSE","0","","","","FALSE","","T03|CAM|SVO|000002"
-"","","","m³","100%","","FALSE","0","","","","FALSE","","T03|CAM|SVO|000003"
-"","","","m³","100%","","FALSE","0","","","","FALSE","","T03|CAM|SVO|000004"
-"","","","m³","100%","","FALSE","0","","","","FALSE","","T03|CAM|SVO|000005"
-"ADD CUSTOM EPD VALUE 🤚","","","","","","","","","","","","","T03|CEP"
-"","Material Description / EPD Owner / EPD ID number / EPD Program Operator / EPD Expired date","","UNITS","","","","","","","","","","T03|CEP|SMO"
-"","","","","100%","","FALSE","0","","","","FALSE","","T03|CEP|SMO|000001"
-"","","","","100%","","FALSE","0","","","","FALSE","","T03|CEP|SMO|000002"
-"","","","","100%","","FALSE","0","","","","FALSE","","T03|CEP|SMO|000003"
-"","","","","100%","","FALSE","0","","","","FALSE","","T03|CEP|SMO|000004"
-"","","","","100%","","FALSE","0","","","","FALSE","","T03|CEP|SMO|000005"
-"","","","","100%","","FALSE","0","","","","FALSE","","T03|CEP|SMO|000006"
+BEAM VERSION:     V1.1",SECTION COMPLETE?,False,,,,0   ,0   ,0   ,0   ,,,T03
+"
+Select materials in your project using the checkboxes (col. G). Once selected, the emissions of these materials will be added to the section SUBTOTAL (G2) and to the project total. 
+
+The NET CARBON column (col. H) presents the net material carbon emissions (EMISSIONS minus STORAGE) of each material based on the QUANTITY and PERCENTAGE entered. 
+
+Where applicable, the R-VALUE, THICKNESS, FRAMING SPACING, etc. must be entered in the AVACADO GREEN cells.
+
+Update the PERCENTAGE value (col. E) as appropriate. Understand that the carbon values will only update for that row, after which comparison with other rows may no longer be valid.
+",,,,,,,,,,,,,
+CATEGORY,MATERIAL,QUANTITY,UNITS,%,,SELECT,"NET
+EMISSIONS
+kg CO₂e","GROSS
+EMISSIONS
+kg CO₂e","STORAGE
+Short Cycle
+kg CO₂🤚","STORAGE
+Long Cycle
+kg CO₂ 🤚","SELECT
+Long Cycle",FOOTNOTE,ID
+STRUCTURAL TIMBER,,,,,,,,,,,,,T03|C01
+STRUCTURAL COMPOSITE LUMBER,,,,,,,,,,,,,T03|C01|S01
+,Laminated strand lumber (LSL) / AWC & CWC [Industry Avg | US & CA],0,m³,1.0,,False,0,0,0,0,False,Expired 2026-01-04; BfCA BioC calc by mass,T03|C01|S01|4k2v0s
+,Laminated veneer lumber (LVL) / AWC & CWC [Industry Avg | US & CA],0,m³,1.0,,False,0,0,0,0,False,Expired 2025; BfCA BioC calc by mass,T03|C01|S01|ebd574
+,Laminated Veneer Lumber (LVL) / Boise Cascade / Versa-Lam,0,m³,1.0,,False,0,0,0,0,False,,T03|C01|S01|LAM000
+,Laminated veneer lumber (LVL) / RedBuilt / RedLam LVL ,0,m³,1.0,,False,0,0,0,0,False,BfCA BioC calc by mass,T03|C01|S01|LAM001
+,Veneer Laminated Timber (VLT) / Boise Cascade /  VersaWorks,0,m³,1.0,,False,0,0,0,0,False,,T03|C01|S01|lam013
+,Glued Laminated Timber (Glulam) / AWC & CWC [Industry Avg | US & CA] ,0,m³,1.0,,False,0,0,0,0,False,Expired 2025; BfCA BioC calc by mass,T03|C01|S01|f92a05
+,"Glued Laminated Timber (Glulam) / Western Archrib / Edmonton, Alberta",0,m³,1.0,,False,0,0,0,0,False,,T03|C01|S01|lam005
+,"Glued Laminated Timber (Glulam) / Western Archrib / Boissevain, Manitoba ",0,m³,1.0,,False,0,0,0,0,False,,T03|C01|S01|lam004
+,"Glued Laminated Timber (Glulam) / Vaagen / Colville, WA",0,m³,1.0,,False,0,0,0,0,False,,T03|C01|S01|lam002
+,Glued Laminated Timber (Glulam) / Kalesnikoff Lumber Co. / BC,0,m³,1.0,,False,0,0,0,0,False,,T03|C01|S01|lam003
+,Glued Laminated Timber (Glulam) / Element5  / Ontario,0,m³,1.0,,False,0,0,0,0,False,,T03|C01|S01|lam006
+,Mass ply panels (MPP) / Freres Lumber,0,m³,1.0,,False,0,0,0,0,False,,T03|C01|S01|lam012
+STRUCTURAL COMPOSITE BAMBOO,,,,,,,,,,,,,T03|C01|S03
+,Bamboo Glulam / Lamboo / Structural Grade Product Systems,0,m³,1.0,,False,0,0,0,0,,,T03|C01|S03|BAM001
+,Bamboo beams / MOSO / Bamboo Solid Beams / High Density,0,m³,1.0,,False,0,0,0,0,,,T03|C01|S03|BAM006
+TIMBER FRAMING LUMBER,,,,,,,,,,,,,T03|C01|S02
+,Wood / SPF / Lumber by volume / AWC & CWC [Industry Avg | US & CA] ,0,m³,1.0,,False,0,0,0,0,False,Expired 2025; BfCA BioC calc by mass,T03|C01|S02|9219e5
+,Wood / Redwood / Lumber by volume / AWC & CWC [Industry Avg | US & CA],0,m³,1.0,,False,0,0,0,0,False,Expired 2025; BfCA BioC calc by mass,T03|C01|S02|10d47f
+STRUCTURAL STEEL – WIDE FLANGE BEAMS,,,,,,,,,,,,,T03|C02
+WIDE FLANGE – W150 (US W6),,,,,,,,,,,,,T03|C02|S01
+,Structural Steel / Wide Flange / W150x22 (US W6x15) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S01|STR007
+,Structural Steel / Wide Flange / W150x30 (US W6x20) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S01|STR008
+WIDE FLANGE – W200 (US W8),,,,,,,,,,,,,T03|C02|S02
+,Structural Steel / Wide Flange / W200x22 (US W8x15) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S02|STR009
+,Structural Steel / Wide Flange / W200x27 (US W8x18) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S02|STR010
+,Structural Steel / Wide Flange / W200x31 (US W8x21) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S02|STR011
+,Structural Steel / Wide Flange / W200x36 (US W8x24) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S02|STR012
+,Structural Steel / Wide Flange / W200x42 (US W8x28) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S02|STR013
+,Structural Steel / Wide Flange / W200x59 (US W8x40) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S02|STR014
+,Structural Steel / Wide Flange / W200x71 (US W8x48) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S02|STR015
+WIDE FLANGE – W250 (US W10),,,,,,,,,,,,,T03|C02|S03
+,Structural Steel / Wide Flange / W250x18 (US W10x12) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S03|STR016
+,Structural Steel / Wide Flange / W250x22 (US W10x15) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S03|STR017
+,Structural Steel / Wide Flange / W250x25 (US W10x17) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S03|STR018
+,Structural Steel / Wide Flange / W250x28 (US W10x19) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S03|STR019
+,Structural Steel / Wide Flange / W250x33 (US W10x22) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S03|STR020
+,Structural Steel / Wide Flange / W250x39 (US W10x26) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S03|STR021
+,Structural Steel / Wide Flange / W250x45 (US W10x30) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S03|STR022
+,Structural Steel / Wide Flange / W250x50 (US W10x33) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S03|STR023
+,Structural Steel / Wide Flange / W250x58 (US W10x38) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S03|STR024
+,Structural Steel / Wide Flange / W250x67 (US W10x45) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S03|STR025
+,Structural Steel / Wide Flange / W250x73 (US W10x49) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S03|STR026
+,Structural Steel / Wide Flange / W250x80 (US W10x54) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S03|STR027
+,Structural Steel / Wide Flange / W250x131 (US W10x88) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S03|STR028
+WIDE FLANGE – W310 (US W12),,,,,,,,,,,,,T03|C02|S04
+,Structural Steel / Wide Flange / W310x129 (US W12x87) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S04|STR029
+,Structural Steel / Wide Flange / W310x21 (US W12x14) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S04|STR030
+,Structural Steel / Wide Flange / W310x33 (US W12x22) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S04|STR031
+,Structural Steel / Wide Flange / W310x39 (US W12x26) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S04|STR032
+,Structural Steel / Wide Flange / W310x45 (US W12x30) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S04|STR033
+,Structural Steel / Wide Flange / W310x52 (US W12x35) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S04|STR034
+,Structural Steel / Wide Flange / W310x79 (US W12x53) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S04|STR035
+WIDE FLANGE – W360 (US W14),,,,,,,,,,,,,T03|C02|S05
+,Structural Steel / Wide Flange / W360x33 (US W14x22) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S05|STR036
+,Structural Steel / Wide Flange / W360x45 (US W14x30) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S05|STR037
+,Structural Steel / Wide Flange / W360x51 (US W14x34) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S05|STR038
+,Structural Steel / Wide Flange / W360x57 (US W14x38) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S05|STR039
+WIDE FLANGE – W410 (US W16),,,,,,,,,,,,,T03|C02|S06
+,Structural Steel / Wide Flange / W410x74 (US W16x50) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S06|STR040
+WIDE FLANGE – W530 (US W21),,,,,,,,,,,,,T03|C02|S07
+,Structural Steel / Wide Flange / W530x72 (US W21x48) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S07|STR041
+,Structural Steel / Wide Flange / W530x85 (US W21x55) / AISC [Industry Avg | US],,m,1.0,,False,0,0,0,0,,,T03|C02|S07|STR042
+STRUCTURAL STEEL – OTHER SECTION SHAPES,,,,,,,,,,,,,T03|C03
+STEEL – SQUARE HSS,,,,,,,,,,,,,T03|C03|S01
+,"Structural Steel / Square HSS / 3 x 3 x 3/16""/ AISC [Industry Avg | US]",,m,1.0,,False,0,0,0,0,,,T03|C03|S01|STR002
+,"Structural Steel / Square HSS / 4 x 4 x 1/4""/ AISC [Industry Avg | US]",,m,1.0,,False,0,0,0,0,,,T03|C03|S01|STR003
+,"Structural Steel / Square HSS / 5 x 5 x 1/4""/ AISC [Industry Avg | US]",,m,1.0,,False,0,0,0,0,,,T03|C03|S01|STR004
+,"Structural Steel / Square HSS / 5 x 5 x 1/2""/ AISC [Industry Avg | US]",,m,1.0,,False,0,0,0,0,,,T03|C03|S01|STR005
+,"Structural Steel / Square HSS / 8 x 8 x 1/4""/ AISC [Industry Avg | US]",,m,1.0,,False,0,0,0,0,,,T03|C03|S01|STR006
+STEEL – RECTANGULAR,,,,,,,,,,,,,T03|C03|S02
+,"Structural Steel / Rectangular HSS / 8 x 6 x 5/16""/ AISC [Industry Avg | US]",,m,1.0,,False,0,0,0,0,,,T03|C03|S02|STR001
+STEEL – ANGLE,,,,,,,,,,,,,T03|C03|S03
+,"Structural Steel / L-Angle / L 3.5 x 3.5 x 1/4""/ AISC [Industry Avg | US]",,m,1.0,,False,0,0,0,0,,,T03|C03|S03|STR000
+STRUCTURAL STEEL POSTS,,,,,,,,,,,,,T03|C04
+STEEL POST,,,,,,,,,,,,,T03|C04|S01
+,"Steel post / Generic / 3.5 x 0.216"" (89 x 5.5 mm), Sched 40 STD",,m,1.0,,False,0,0,0,0,,Expired 2021,T03|C04|S01|12a279
+ADDITIONAL MATERIALS 🤚,,,,,,,,,,,,,T03|CAM
+MATERIALS BY LENGTH,,,,,,,,,,,,,T03|CAM|SLE
+,,,m,1.0,,False,0,,,,False,,T03|CAM|SLE|000001
+,,,m,1.0,,False,0,,,,False,,T03|CAM|SLE|000002
+,,,m,1.0,,False,0,,,,False,,T03|CAM|SLE|000003
+,,,m,1.0,,False,0,,,,False,,T03|CAM|SLE|000004
+,,,m,1.0,,False,0,,,,False,,T03|CAM|SLE|000005
+MATERIALS BY AREA,,,,,,,,,,,,,T03|CAM|SAR
+,,,m²,1.0,,False,0,,,,False,,T03|CAM|SAR|000001
+,,,m²,1.0,,False,0,,,,False,,T03|CAM|SAR|000002
+,,,m²,1.0,,False,0,,,,False,,T03|CAM|SAR|000003
+,,,m²,1.0,,False,0,,,,False,,T03|CAM|SAR|000004
+,,,m²,1.0,,False,0,,,,False,,T03|CAM|SAR|000005
+MATERIALS BY R-VALUE & AREA,,,,R-VALUE,➜,,,,,,,,T03|CAM|SRV
+,,,m²,1.0,,False,0,,,,False,,T03|CAM|SRV|000001
+,,,m²,1.0,,False,0,,,,False,,T03|CAM|SRV|000002
+,,,m²,1.0,,False,0,,,,False,,T03|CAM|SRV|000003
+,,,m²,1.0,,False,0,,,,False,,T03|CAM|SRV|000004
+,,,m²,1.0,,False,0,,,,False,,T03|CAM|SRV|000005
+MATERIALS BY VOLUME,,,,,,,,,,,,,T03|CAM|SVO
+,,,m³,1.0,,False,0,,,,False,,T03|CAM|SVO|000001
+,,,m³,1.0,,False,0,,,,False,,T03|CAM|SVO|000002
+,,,m³,1.0,,False,0,,,,False,,T03|CAM|SVO|000003
+,,,m³,1.0,,False,0,,,,False,,T03|CAM|SVO|000004
+,,,m³,1.0,,False,0,,,,False,,T03|CAM|SVO|000005
+ADD CUSTOM EPD VALUE 🤚,,,,,,,,,,,,,T03|CEP
+,Material Description / EPD Owner / EPD ID number / EPD Program Operator / EPD Expired date,  QUANTITY        ,UNITS,%,, SELECT,"User defined
+NET
+EMISSIONS
+kg CO₂e","User defined
+ GROSS
+EMISSIONS
+kg CO₂e","User defined
+STORAGE
+Short Cycle
+kg CO₂   ","User defined
+STORAGE
+Long Cycle
+kg CO₂   ","SELECT
+Long Cycle",,T03|CEP|SMO
+,,,,1.0,,False,0,,,,False,,T03|CEP|SMO|000001
+,,,,1.0,,False,0,,,,False,,T03|CEP|SMO|000002
+,,,,1.0,,False,0,,,,False,,T03|CEP|SMO|000003
+,,,,1.0,,False,0,,,,False,,T03|CEP|SMO|000004
+,,,,1.0,,False,0,,,,False,,T03|CEP|SMO|000005
+,,,,1.0,,False,0,,,,False,,T03|CEP|SMO|000006

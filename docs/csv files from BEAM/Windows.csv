@@ -1,63 +1,94 @@
-"","WINDOWS","","","","","","","","","","","",""
-"","PROJECT NAME:    Sample Project DOE Prototype
+,WINDOWS,,,,,,,,,,,,
+,"PROJECT NAME:    Sample Project DOE Prototype
 SCENARIO:              Baseline
-BEAM VERSION:     V1.1","","FALSE","","","","","","","","","","T07"
-"CATEGORY","MATERIAL","","UNITS","","","","","","","","","FOOTNOTE","ID"
-"WINDOWS – DOUBLE-GLAZED","","","","","","","","","","","","","T07|C01"
-"DOUBLE-GLAZED WINDOWS – AVERAGE","","","","","","","","","","","","","T07|C01|S01"
-"","Window - double-glazed / Fiberglass frame / BfCA Study [US & CA]","33.1","m²","100%","","FALSE","3,773","3,773","0","0","","","T07|C01|S01|a4f3bf"
-"","Window - double-glazed / Wood frame, aluminum cladding / BfCA Study [US & CA]","33.1","m²","100%","","FALSE","3,277","3,277","0","269","FALSE","BfCA BioC calc by mass","T07|C01|S01|6f579d"
-"","Window - double-glazed / Vinyl frame / BfCA Study [US & CA]","33.1","m²","100%","","TRUE","2,847","2,847","0","0","","","T07|C01|S01|1c4002"
-"","Window, double-glazed, PVC-U frame, tilt & turn / [Industry Avg | EU]","33.1","m²","100%","","FALSE","2,622","2,622","0","0","","","T07|C01|S01|www114"
-"","Window - double-glazed / Wood frame / BfCA Study [US & CA]","33.1","m²","100%","","FALSE","2,383","2,383","0","544","FALSE","BfCA BioC calc by mass","T07|C01|S01|5644c4"
-"DOUBLE-GLAZED WINDOWS – PRODUCT-SPECIFIC","","","","","","","","","","","","","T07|C01|S02"
-"","Window, double-glazed, aluminum frame / Kawneer / Optiq AA4325, 8225TL|TLF, 526, AA 6400|6500, NX-300|3000 / Projected & casement","33.1","m²","100%","","FALSE","7,348","7,348","0","0","","","T07|C01|S02|WWW116"
-"","Window, double-glazed, aluminum frame / Kawneer / OptiQ AA5450, TR-9100, 8400TL, AA6400|6500|6600 / Hung & sliding","33.1","m²","100%","","FALSE","6,223","6,223","0","0","","","T07|C01|S02|WWW115"
-"","Window, double-glazed, aluminum frame / EFCO / Xtherm, 875V, 2700, 2701, 450G, 590X, 6725, PG32, PX32, WV410, WV430 / Projected & casement","33.1","m²","100%","","FALSE","4,842","4,842","0","0","","","T07|C01|S02|WWW120"
-"","Window, double-glazed, aluminum frame / AluQuebec / Avg of fixed, casement, slider, hung, tilt & turn, awning","33.1","m²","100%","","FALSE","4,502","4,502","0","0","","","T07|C01|S02|WWW117"
-"","Window, double-glazed, aluminum frame / Arcadia / CV200, T200 / Projected & casement","33.1","m²","100%","","FALSE","4,138","4,138","0","0","","","T07|C01|S02|WWW118"
-"","Window, double-glazed, aluminum frame / Wausau / INvent casement windows / US","33.1","m²","100%","","FALSE","3,658","3,658","0","0","","","T07|C01|S02|WWW113"
-"","Window, double-glazed, aluminum frame / EFCO / Xtherm, 5FXT, FX45, 6615, 6621, 6715, FX32, OG32, OG45 / Fixed","33.1","m²","100%","","FALSE","3,124","3,124","0","0","","","T07|C01|S02|WWW119"
-"","Window, double-glazed, aluminum frame / Wausau / INvent fixed windows / US","33.1","m²","100%","","FALSE","2,587","2,587","0","0","","","T07|C01|S02|WWW112"
-"","Window - double-glazed / Inline Fiberglass / Series 300, 325, 325, 400 / Fiberglass frame / CAN","33.1","m²","100%","","FALSE","2,506","2,506","0","0","","","T07|C01|S02|s76tf2"
-"","Window - double-glazed / Andersen / E-Series / Wood frame, aluminum cladding / USA","33.1","m²","100%","","FALSE","2,443","2,443","0","0","","","T07|C01|S02|WWW111"
-"WINDOWS – TRIPLE-GLAZED","","","","","","","","","","","","","T07|C02"
-"TRIPLE-GLAZED WINDOWS – AVERAGE","","","","","","","","","","","","","T07|C02|S01"
-"","Window - triple pane / Fiberglass frame / BfCA Study [US & CA]","33.1","m²","100%","","FALSE","4,204","4,204","0","0","","","T07|C02|S01|bc7038"
-"","Window - triple pane / Wood frame, aluminum cladding / BfCA Study [US & CA]","33.1","m²","100%","","FALSE","3,707","3,707","0","269","FALSE","BfCA BioC calc by mass","T07|C02|S01|952dee"
-"","Window - triple pane / Vinyl frame / BfCA Study [US & CA]","33.1","m²","100%","","FALSE","3,277","3,277","0","0","","","T07|C02|S01|595ddd"
-"","Window, triple-glazed, PVC-U frame, tilt & turn / [Industry Avg | EU]","33.1","m²","100%","","FALSE","3,151","3,151","0","0","","","T07|C02|S01|www121"
-"","Window - triple pane / Wood frame / BfCA Study [US & CA]","33.1","m²","100%","","FALSE","2,814","2,814","0","544","FALSE","BfCA BioC calc by mass","T07|C02|S01|32a4e7"
-"ADDITIONAL MATERIALS 🤚","","","","","","","","","","","","","T07|CAM"
-"MATERIALS BY LENGTH","","","","","","","","","","","","","T07|CAM|SLE"
-"","","","m","100%","","FALSE","0","","","","FALSE","","T07|CAM|SLE|000001"
-"","","","m","100%","","FALSE","0","","","","FALSE","","T07|CAM|SLE|000002"
-"","","","m","100%","","FALSE","0","","","","FALSE","","T07|CAM|SLE|000003"
-"","","","m","100%","","FALSE","0","","","","FALSE","","T07|CAM|SLE|000004"
-"","","","m","100%","","FALSE","0","","","","FALSE","","T07|CAM|SLE|000005"
-"MATERIALS BY AREA","","","","","","","","","","","","","T07|CAM|SAR"
-"","","","m²","100%","","FALSE","0","","","","FALSE","","T07|CAM|SAR|000001"
-"","","","m²","100%","","FALSE","0","","","","FALSE","","T07|CAM|SAR|000002"
-"","","","m²","100%","","FALSE","0","","","","FALSE","","T07|CAM|SAR|000003"
-"","","","m²","100%","","FALSE","0","","","","FALSE","","T07|CAM|SAR|000004"
-"","","","m²","100%","","FALSE","0","","","","FALSE","","T07|CAM|SAR|000005"
-"MATERIALS BY R-VALUE & AREA","","","","","➜","","","","","","","","T07|CAM|SRV"
-"","","","m²","1.0","","FALSE","0","","","","FALSE","","T07|CAM|SRV|000001"
-"","","","m²","1.0","","FALSE","0","","","","FALSE","","T07|CAM|SRV|000002"
-"","","","m²","1.0","","FALSE","0","","","","FALSE","","T07|CAM|SRV|000003"
-"","","","m²","1.0","","FALSE","0","","","","FALSE","","T07|CAM|SRV|000004"
-"","","","m²","1.0","","FALSE","0","","","","FALSE","","T07|CAM|SRV|000005"
-"MATERIALS BY VOLUME","","","","","","","","","","","","","T07|CAM|SVO"
-"","","","m³","100%","","FALSE","0","","","","FALSE","","T07|CAM|SVO|000001"
-"","","","m³","100%","","FALSE","0","","","","FALSE","","T07|CAM|SVO|000002"
-"","","","m³","100%","","FALSE","0","","","","FALSE","","T07|CAM|SVO|000003"
-"","","","m³","100%","","FALSE","0","","","","FALSE","","T07|CAM|SVO|000004"
-"","","","m³","100%","","FALSE","0","","","","FALSE","","T07|CAM|SVO|000005"
-"ADD CUSTOM EPD VALUE 🤚","","","","","","","","","","","","","T07|CEP"
-"","Material Description / EPD Owner / EPD ID number / EPD Program Operator / EPD Expired date","","UNITS","","","","","","","","","","T07|CEP|SMO"
-"","","","","100%","","FALSE","0","","","","FALSE","","T07|CEP|SMO|000001"
-"","","","","100%","","FALSE","0","","","","FALSE","","T07|CEP|SMO|000002"
-"","","","","100%","","FALSE","0","","","","FALSE","","T07|CEP|SMO|000003"
-"","","","","100%","","FALSE","0","","","","FALSE","","T07|CEP|SMO|000004"
-"","","","","100%","","FALSE","0","","","","FALSE","","T07|CEP|SMO|000005"
-"","","","","100%","","FALSE","0","","","","FALSE","","T07|CEP|SMO|000006"
+BEAM VERSION:     V1.1",SECTION COMPLETE?,False,,,,"2,847   ","2,847   ",0   ,0   ,,,T07
+"
+Select materials in your project using the checkboxes (col. G). Once selected, the emissions of these materials will be added to the section SUBTOTAL (G2) and to the project total. 
+
+The NET CARBON column (col. H) presents the net material carbon emissions (EMISSIONS minus STORAGE) of each material based on the QUANTITY and PERCENTAGE entered. 
+
+Where applicable, the R-VALUE, THICKNESS, FRAMING SPACING, etc. must be entered in the AVACADO GREEN cells.
+
+Update the PERCENTAGE value (col. E) as appropriate. Understand that the carbon values will only update for that row, after which comparison with other rows may no longer be valid.
+",,,,,,,,,,,,,
+CATEGORY,MATERIAL,QUANTITY,UNITS,%,,SELECT,"NET
+EMISSIONS
+kg CO₂e","GROSS
+EMISSIONS
+kg CO₂e","STORAGE
+Short Cycle
+kg CO₂🤚","STORAGE
+Long Cycle
+kg CO₂ 🤚","SELECT
+Long Cycle",FOOTNOTE,ID
+WINDOWS – DOUBLE-GLAZED,,,,,,,,,,,,,T07|C01
+DOUBLE-GLAZED WINDOWS – AVERAGE,,,,,,,,,,,,,T07|C01|S01
+,Window - double-glazed / Fiberglass frame / BfCA Study [US & CA],33.1,m²,1.0,,False,3773.4,3773.4,0,0,,,T07|C01|S01|a4f3bf
+,"Window - double-glazed / Wood frame, aluminum cladding / BfCA Study [US & CA]",33.1,m²,1.0,,False,3276.9,3276.9,0,269.45055,False,BfCA BioC calc by mass,T07|C01|S01|6f579d
+,Window - double-glazed / Vinyl frame / BfCA Study [US & CA],33.1,m²,1.0,,True,2846.6,2846.6,0,0,,,T07|C01|S01|1c4002
+,"Window, double-glazed, PVC-U frame, tilt & turn / [Industry Avg | EU]",33.1,m²,1.0,,False,2621.52,2621.52,0,0,,,T07|C01|S01|www114
+,Window - double-glazed / Wood frame / BfCA Study [US & CA],33.1,m²,1.0,,False,2383.2,2383.2,0,543.78666,False,BfCA BioC calc by mass,T07|C01|S01|5644c4
+DOUBLE-GLAZED WINDOWS – PRODUCT-SPECIFIC,,,,,,,,,,,,,T07|C01|S02
+,"Window, double-glazed, aluminum frame / Kawneer / Optiq AA4325, 8225TL|TLF, 526, AA 6400|6500, NX-300|3000 / Projected & casement",33.1,m²,1.0,,False,7348.2,7348.2,0,0,,,T07|C01|S02|WWW116
+,"Window, double-glazed, aluminum frame / Kawneer / OptiQ AA5450, TR-9100, 8400TL, AA6400|6500|6600 / Hung & sliding",33.1,m²,1.0,,False,6222.8,6222.8,0,0,,,T07|C01|S02|WWW115
+,"Window, double-glazed, aluminum frame / EFCO / Xtherm, 875V, 2700, 2701, 450G, 590X, 6725, PG32, PX32, WV410, WV430 / Projected & casement",33.1,m²,1.0,,False,4841.868,4841.868,0,0,,,T07|C01|S02|WWW120
+,"Window, double-glazed, aluminum frame / AluQuebec / Avg of fixed, casement, slider, hung, tilt & turn, awning",33.1,m²,1.0,,False,4501.6,4501.6,0,0,,,T07|C01|S02|WWW117
+,"Window, double-glazed, aluminum frame / Arcadia / CV200, T200 / Projected & casement",33.1,m²,1.0,,False,4137.5,4137.5,0,0,,,T07|C01|S02|WWW118
+,"Window, double-glazed, aluminum frame / Wausau / INvent casement windows / US",33.1,m²,1.0,,False,3657.881,3657.881,0,0,,,T07|C01|S02|WWW113
+,"Window, double-glazed, aluminum frame / EFCO / Xtherm, 5FXT, FX45, 6615, 6621, 6715, FX32, OG32, OG45 / Fixed",33.1,m²,1.0,,False,3123.978,3123.978,0,0,,,T07|C01|S02|WWW119
+,"Window, double-glazed, aluminum frame / Wausau / INvent fixed windows / US",33.1,m²,1.0,,False,2587.096,2587.096,0,0,,,T07|C01|S02|WWW112
+,"Window - double-glazed / Inline Fiberglass / Series 300, 325, 325, 400 / Fiberglass frame / CAN",33.1,m²,1.0,,False,2505.67,2505.67,0,0,,,T07|C01|S02|s76tf2
+,"Window - double-glazed / Andersen / E-Series / Wood frame, aluminum cladding / USA",33.1,m²,1.0,,False,2442.78,2442.78,0,0,,,T07|C01|S02|WWW111
+WINDOWS – TRIPLE-GLAZED,,,,,,,,,,,,,T07|C02
+TRIPLE-GLAZED WINDOWS – AVERAGE,,,,,,,,,,,,,T07|C02|S01
+,Window - triple pane / Fiberglass frame / BfCA Study [US & CA],33.1,m²,1.0,,False,4203.7,4203.7,0,0,,,T07|C02|S01|bc7038
+,"Window - triple pane / Wood frame, aluminum cladding / BfCA Study [US & CA]",33.1,m²,1.0,,False,3707.2,3707.2,0,269.45055,False,BfCA BioC calc by mass,T07|C02|S01|952dee
+,Window - triple pane / Vinyl frame / BfCA Study [US & CA],33.1,m²,1.0,,False,3276.9,3276.9,0,0,,,T07|C02|S01|595ddd
+,"Window, triple-glazed, PVC-U frame, tilt & turn / [Industry Avg | EU]",33.1,m²,1.0,,False,3151.12,3151.12,0,0,,,T07|C02|S01|www121
+,Window - triple pane / Wood frame / BfCA Study [US & CA],33.1,m²,1.0,,False,2813.5,2813.5,0,543.78666,False,BfCA BioC calc by mass,T07|C02|S01|32a4e7
+ADDITIONAL MATERIALS 🤚,,,,,,,,,,,,,T07|CAM
+MATERIALS BY LENGTH,,,,,,,,,,,,,T07|CAM|SLE
+,,,m,1.0,,False,0,,,,False,,T07|CAM|SLE|000001
+,,,m,1.0,,False,0,,,,False,,T07|CAM|SLE|000002
+,,,m,1.0,,False,0,,,,False,,T07|CAM|SLE|000003
+,,,m,1.0,,False,0,,,,False,,T07|CAM|SLE|000004
+,,,m,1.0,,False,0,,,,False,,T07|CAM|SLE|000005
+MATERIALS BY AREA,,,,,,,,,,,,,T07|CAM|SAR
+,,,m²,1.0,,False,0,,,,False,,T07|CAM|SAR|000001
+,,,m²,1.0,,False,0,,,,False,,T07|CAM|SAR|000002
+,,,m²,1.0,,False,0,,,,False,,T07|CAM|SAR|000003
+,,,m²,1.0,,False,0,,,,False,,T07|CAM|SAR|000004
+,,,m²,1.0,,False,0,,,,False,,T07|CAM|SAR|000005
+MATERIALS BY R-VALUE & AREA,,,,R-VALUE,➜,,,,,,,,T07|CAM|SRV
+,,,m²,1.0,,False,0,,,,False,,T07|CAM|SRV|000001
+,,,m²,1.0,,False,0,,,,False,,T07|CAM|SRV|000002
+,,,m²,1.0,,False,0,,,,False,,T07|CAM|SRV|000003
+,,,m²,1.0,,False,0,,,,False,,T07|CAM|SRV|000004
+,,,m²,1.0,,False,0,,,,False,,T07|CAM|SRV|000005
+MATERIALS BY VOLUME,,,,,,,,,,,,,T07|CAM|SVO
+,,,m³,1.0,,False,0,,,,False,,T07|CAM|SVO|000001
+,,,m³,1.0,,False,0,,,,False,,T07|CAM|SVO|000002
+,,,m³,1.0,,False,0,,,,False,,T07|CAM|SVO|000003
+,,,m³,1.0,,False,0,,,,False,,T07|CAM|SVO|000004
+,,,m³,1.0,,False,0,,,,False,,T07|CAM|SVO|000005
+ADD CUSTOM EPD VALUE 🤚,,,,,,,,,,,,,T07|CEP
+,Material Description / EPD Owner / EPD ID number / EPD Program Operator / EPD Expired date,  QUANTITY        ,UNITS,%,, SELECT,"User defined
+NET
+EMISSIONS
+kg CO₂e","User defined
+ GROSS
+EMISSIONS
+kg CO₂e","User defined
+STORAGE
+Short Cycle
+kg CO₂   ","User defined
+STORAGE
+Long Cycle
+kg CO₂   ","SELECT
+Long Cycle",,T07|CEP|SMO
+,,,,1.0,,False,0,,,,False,,T07|CEP|SMO|000001
+,,,,1.0,,False,0,,,,False,,T07|CEP|SMO|000002
+,,,,1.0,,False,0,,,,False,,T07|CEP|SMO|000003
+,,,,1.0,,False,0,,,,False,,T07|CEP|SMO|000004
+,,,,1.0,,False,0,,,,False,,T07|CEP|SMO|000005
+,,,,1.0,,False,0,,,,False,,T07|CEP|SMO|000006
