@@ -12,6 +12,7 @@
 // in a follow-up.
 
 import { StateManager } from "../shared/state-manager.mjs";
+import { COUNTRIES, provinceOptions } from "./jurisdictions.mjs";
 
 const VS = StateManager.VALUE_STATES;
 
@@ -25,8 +26,8 @@ const INFO_LEFT = [
   { id: "project_development",      label: "Development Project",            type: "text" },
   { id: "project_address",          label: "Address",                        type: "text" },
   { id: "project_city",             label: "City",                           type: "text" },
-  { id: "project_country",          label: "Country",                        type: "text" },
-  { id: "project_province_state",   label: "Province / State (Can./US only)", type: "text" },
+  { id: "project_country",          label: "Country",                        type: "select", options: COUNTRIES, blank: "(select country)" },
+  { id: "project_province_state",   label: "Province / State",               type: "select", optionsFor: "project_country", blank: "(select country first)" },
   { id: "project_building_type",    label: "Building Type",                  type: "text" },
   { id: "project_construction_type",label: "Construction Type",              type: "text" },
   { id: "project_dev_stage",        label: "Project Development Stage",      type: "text" },
@@ -131,6 +132,7 @@ function esc(s) {
 }
 
 function renderInput(f) {
+  if (f.type === "select") return renderSelect(f);
   const attrs = [
     `type="${f.type || "text"}"`,
     `id="bw-${f.id}"`,
@@ -142,6 +144,58 @@ function renderInput(f) {
   ].filter(Boolean).join(" ");
   const unit = f.unit ? `<span class="bw-unit">${esc(f.unit)}</span>` : "";
   return `<div class="bw-input-wrap"><input class="bw-input" ${attrs} />${unit}</div>`;
+}
+
+function selectOptionsFor(f) {
+  if (f.options) return f.options;
+  if (f.optionsFor) {
+    const upstream = StateManager.getValue(f.optionsFor);
+    return provinceOptions(upstream);
+  }
+  return [];
+}
+
+function renderSelect(f) {
+  const opts = selectOptionsFor(f);
+  const blank = f.blank || "(select)";
+  const attrs = [
+    `id="bw-${f.id}"`,
+    `data-field-id="${f.id}"`,
+    f.required ? "required" : "",
+    f.optionsFor ? `data-options-for="${f.optionsFor}"` : "",
+  ].filter(Boolean).join(" ");
+  const optsHtml = opts.map((o) => {
+    const v = typeof o === "string" ? o : o.value;
+    const label = typeof o === "string" ? o : (o.label || o.value);
+    return `<option value="${esc(v)}">${esc(label)}</option>`;
+  }).join("");
+  return `<div class="bw-input-wrap"><select class="bw-input bw-select" ${attrs}><option value="">${esc(blank)}</option>${optsHtml}</select></div>`;
+}
+
+function refreshDependentSelects(changedFieldId) {
+  // Re-render any select whose options depend on `changedFieldId`.
+  // Preserves the existing stored value if it's still in the new option list.
+  for (const f of allFields()) {
+    if (f.type !== "select" || f.optionsFor !== changedFieldId) continue;
+    const sel = document.getElementById(`bw-${f.id}`);
+    if (!sel) continue;
+    const stored = StateManager.getValue(f.id);
+    const opts = selectOptionsFor(f);
+    const blank = f.blank || "(select)";
+    sel.innerHTML = `<option value="">${esc(blank)}</option>` + opts.map((o) => {
+      const v = typeof o === "string" ? o : o.value;
+      const label = typeof o === "string" ? o : (o.label || o.value);
+      return `<option value="${esc(v)}">${esc(label)}</option>`;
+    }).join("");
+    if (stored && opts.some((o) => (typeof o === "string" ? o : o.value) === stored)) {
+      sel.value = stored;
+    } else {
+      sel.value = "";
+      // Stored value no longer valid (e.g., country flipped CA→US and the
+      // saved province isn't in US states list). Clear it from state too.
+      if (stored) StateManager.setValue(f.id, "", VS.CALCULATED);
+    }
+  }
 }
 
 function renderInfoRow(f) {
@@ -260,9 +314,18 @@ function populateInputFromState(fieldId) {
   const el = document.getElementById(`bw-${fieldId}`);
   if (!el) return;
   const v = StateManager.getValue(fieldId);
-  if (v !== null && v !== undefined) {
-    if (el.tagName === "OUTPUT") el.textContent = String(v);
-    else el.value = String(v);
+  if (v === null || v === undefined) return;
+  if (el.tagName === "OUTPUT") {
+    el.textContent = String(v);
+  } else if (el.tagName === "SELECT") {
+    // For dependent selects, refresh options first so the stored value
+    // (e.g. a province) finds its <option> after a country is restored.
+    if (el.dataset.optionsFor) {
+      refreshDependentSelects(el.dataset.optionsFor);
+    }
+    el.value = String(v);
+  } else {
+    el.value = String(v);
   }
 }
 
@@ -286,16 +349,33 @@ export function resetProjectTab() {
   StateManager.clearByPrefix("project_");
   StateManager.clearByPrefix("dim_");
   StateManager.clearByPrefix("garage_");
-  // Blank every input in the PROJECT panel, then recompute LHW volumes (all 0).
+  // Blank every input + select in the PROJECT panel, then recompute LHW volumes (all 0).
   const panel = document.getElementById("beam-panel-project");
   if (panel) {
     for (const input of panel.querySelectorAll("input.bw-input")) {
       input.value = "";
     }
+    for (const sel of panel.querySelectorAll("select.bw-input")) {
+      sel.value = "";
+    }
     for (const out of panel.querySelectorAll("output.bw-dim-volume")) {
       out.textContent = "0.0";
     }
+    // Province options depend on country — refresh now that country is blank.
+    refreshDependentSelects("project_country");
   }
+}
+
+function handleFieldInput(target) {
+  if (!(target instanceof HTMLInputElement) && !(target instanceof HTMLSelectElement)) return;
+  const fieldId = target.dataset.fieldId;
+  if (!fieldId) return;
+  StateManager.setValue(fieldId, target.value, VS.USER_MODIFIED);
+  const parent = target.dataset.volumeParent;
+  if (parent) recomputeVolume(parent);
+  // If this field feeds another select's options (e.g. country -> province),
+  // re-render the dependent select(s).
+  refreshDependentSelects(fieldId);
 }
 
 export function wireProjectForm() {
@@ -303,16 +383,10 @@ export function wireProjectForm() {
   // until the user types or presses Load Sample.
   refreshProjectInputsFromState();
 
-  // Wire inputs — all `.bw-input` inside the PROJECT panel
+  // Wire inputs — all `.bw-input` inside the PROJECT panel.
+  // `input` covers text/number; `change` covers select.
   const panel = document.getElementById("beam-panel-project");
   if (!panel) return;
-  panel.addEventListener("input", (e) => {
-    const target = e.target;
-    if (!(target instanceof HTMLInputElement)) return;
-    const fieldId = target.dataset.fieldId;
-    if (!fieldId) return;
-    StateManager.setValue(fieldId, target.value, VS.USER_MODIFIED);
-    const parent = target.dataset.volumeParent;
-    if (parent) recomputeVolume(parent);
-  });
+  panel.addEventListener("input", (e) => handleFieldInput(e.target));
+  panel.addEventListener("change", (e) => handleFieldInput(e.target));
 }

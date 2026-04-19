@@ -12,6 +12,7 @@
 import { StateManager } from "../shared/state-manager.mjs";
 import { parseAssemblyCsv, computeRowEmissions } from "./assembly-csv-parser.mjs";
 import { registerProjectToFsBridge, syncProjectToFsBridge } from "./auto-fill.mjs";
+import { inferJurisdiction, matchesFilter } from "./jurisdictions.mjs";
 
 const VS = StateManager.VALUE_STATES;
 const CSV_PATH = "data/beam/footings-slabs.csv";
@@ -100,6 +101,7 @@ export function renderFootingsSlabsPanel() {
         <div class="bw-asm-note" id="bw-fs-load-note">
           Loading Footings &amp; Slabs picker from BEAM snapshot…
         </div>
+        <div class="bw-asm-filter-note" id="bw-fs-filter-note" hidden></div>
       </div>
       <div class="bw-asm-body" id="bw-fs-body"></div>
     </div>
@@ -158,11 +160,20 @@ function renderGroupConfig(group) {
   `;
 }
 
+function jurAttrs(jur) {
+  const c = (jur.countries || []).join(",");
+  const p = jur.provinces === "CA-wide"
+    ? "ca-wide"
+    : (Array.isArray(jur.provinces) ? jur.provinces.join(",") : "");
+  return `data-jur-countries="${esc(c)}" data-jur-provinces="${esc(p)}"`;
+}
+
 function renderSubgroup(group, sub) {
   if (sub.materials.length === 0) return "";
-  const rows = sub.materials.map((m) => renderMaterialRow(group, m)).join("");
+  const subJur = inferJurisdiction(sub.name, "");
+  const rows = sub.materials.map((m) => renderMaterialRow(group, sub, m)).join("");
   return `
-    <div class="bw-asm-sub" data-sub-code="${esc(sub.code)}">
+    <div class="bw-asm-sub" data-sub-code="${esc(sub.code)}" ${jurAttrs(subJur)}>
       <div class="bw-asm-sub-name">${esc(sub.name)}</div>
       <table class="bw-asm-rows">
         <thead>
@@ -184,18 +195,22 @@ function renderSubgroup(group, sub) {
   `;
 }
 
-function renderMaterialRow(group, m) {
+function renderMaterialRow(group, sub, m) {
   const ids = fieldIds(m);
   const vals = currentValues(m, group);
   const netId = `bw-fs-net-${m.hash}`;
   const rowCls = vals.select ? "bw-asm-row bw-asm-row-selected" : "bw-asm-row";
   const footCls = m.footnote.toLowerCase().includes("expired") ? "bw-asm-foot expired" : "bw-asm-foot";
+  // Row jurisdiction inherits subgroup signal + adds material-name [bracket]
+  // tag if present. Subgroup banner is the primary; material-level overrides
+  // refine (e.g. NRMCA rows in a CANADA subgroup get [US & CA] from bracket).
+  const rowJur = inferJurisdiction(sub.name, m.name);
   // Render qty blank when 0 so cold-start rows don't visually broadcast "0".
   const qtyDisplay = vals.qty ? esc(vals.qty) : "";
   const pctDisplay = (vals.pct * 100).toFixed(0);
   const noFactor = !m.factors;
   return `
-    <tr class="${rowCls}" data-row-hash="${m.hash}" data-group-code="${esc(group.code)}">
+    <tr class="${rowCls}" data-row-hash="${m.hash}" data-group-code="${esc(group.code)}" ${jurAttrs(rowJur)}>
       <td class="bw-asm-col-sel">
         <input type="checkbox" class="bw-asm-sel" data-field-id="${ids.sel}" data-row-hash="${m.hash}" ${vals.select ? "checked" : ""} />
       </td>
@@ -362,6 +377,59 @@ export function resetFootingsSlabsTab() {
 
 export function refreshFootingsSlabsTab() {
   refreshInputsFromState();
+  applyJurisdictionFilter();
+}
+
+// Read jurisdiction data attributes off a DOM element back into the shape
+// `matchesFilter` expects.
+function readJurAttrs(el) {
+  const c = (el.dataset.jurCountries || "").split(",").filter(Boolean);
+  const p = el.dataset.jurProvinces || "";
+  let provinces = null;
+  if (p === "ca-wide") provinces = "CA-wide";
+  else if (p) provinces = p.split(",").filter(Boolean);
+  return { countries: c.length ? c : null, provinces };
+}
+
+// Apply the project_country / project_province_state filter to F&S rows.
+// Hidden rows still contribute to subtotals when SELECT'd — filter is purely
+// a visibility aid. Subgroups are auto-hidden when every material row in
+// them is filtered out, so empty banners don't dangle.
+function applyJurisdictionFilter() {
+  const panel = document.getElementById("bw-fs-panel");
+  if (!panel) return;
+  const country = StateManager.getValue("project_country") || "";
+  const province = StateManager.getValue("project_province_state") || "";
+  let totalRows = 0, hiddenRows = 0;
+
+  for (const row of panel.querySelectorAll("tr.bw-asm-row")) {
+    totalRows++;
+    const jur = readJurAttrs(row);
+    const visible = matchesFilter(jur, country, province);
+    row.toggleAttribute("hidden", !visible);
+    if (!visible) hiddenRows++;
+  }
+  // Hide subgroup wrappers when no row inside them is visible.
+  for (const sub of panel.querySelectorAll(".bw-asm-sub")) {
+    const anyVisible = sub.querySelectorAll("tr.bw-asm-row:not([hidden])").length > 0;
+    sub.toggleAttribute("hidden", !anyVisible);
+  }
+
+  const note = document.getElementById("bw-fs-filter-note");
+  if (note) {
+    if (hiddenRows === 0 || !country) {
+      note.hidden = true;
+      note.textContent = "";
+    } else {
+      const where = province ? `${country} · ${province}` : country;
+      note.hidden = false;
+      note.textContent = `${hiddenRows} of ${totalRows} rows hidden by jurisdiction filter (${where}). Change Country/Province on PROJECT to adjust.`;
+    }
+  }
+}
+
+export function refreshFootingsSlabsFilter() {
+  applyJurisdictionFilter();
 }
 
 // Sample-loader hook. Walks the parsed CSV, writes sample SELECT/qty/pct
@@ -429,5 +497,10 @@ export async function wireFootingsSlabsTab() {
   // PROJECT source key (dim_continuous_footings_volume, etc.) and pushes
   // their current values down as DERIVED qty on every matching F&S row.
   registerProjectToFsBridge(parsed);
+  // Wire jurisdiction filter — listen to the two PROJECT keys that drive
+  // F&S row visibility and re-apply on every change.
+  StateManager.addListener("project_country", applyJurisdictionFilter);
+  StateManager.addListener("project_province_state", applyJurisdictionFilter);
+  applyJurisdictionFilter();
   recomputeAll();
 }

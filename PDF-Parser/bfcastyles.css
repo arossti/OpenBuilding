@@ -4087,6 +4087,21 @@ table.beam-glossary-table tbody tr {
   color: var(--text-dim);
   border-color: transparent;
 }
+.bw-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M0 0l5 6 5-6z' fill='%2394a3b8'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+.bw-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-lt);
+}
 .bw-unit {
   font-size: 11px;
   color: var(--text-dim);
@@ -4244,6 +4259,25 @@ table.beam-glossary-table tbody tr {
 }
 .bw-asm-note.bw-asm-error {
   color: #ef4444;
+}
+/* Jurisdiction filter banner — visible only when rows are hidden by the
+   PROJECT-tab Country/Province selection. */
+.bw-asm-filter-note {
+  margin-top: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--text);
+  background: rgba(34, 211, 238, 0.08);   /* cyan accent wash */
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+}
+.bw-asm-filter-note[hidden] {
+  display: none;
+}
+/* Hide rows + subgroups whose jurisdiction does not match the filter. */
+tr.bw-asm-row[hidden],
+.bw-asm-sub[hidden] {
+  display: none;
 }
 
 .bw-asm-body {
