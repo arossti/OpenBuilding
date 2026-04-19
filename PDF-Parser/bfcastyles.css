@@ -3542,6 +3542,13 @@ html.app-matrix body {
   padding: 10px 16px;
   flex-shrink: 0;
 }
+.beam-header .header-logo {
+  height: 36px;
+  width: auto;
+  filter: none;
+  opacity: 1;
+  margin-right: 12px;
+}
 .beam-title-block {
   display: flex;
   flex-direction: column;
