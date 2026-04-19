@@ -17,6 +17,8 @@
 /* eslint-disable no-undef */
 
 import { ENERGY_GHG, GLOSSARY } from "./beam/reference-data.mjs";
+import { StateManager } from "./shared/state-manager.mjs";
+import { renderProjectPanel, wireProjectForm } from "./beam/project-tab.mjs";
 
 // ──────────────────────────────────────────────────────────────────────
 // Tab definitions
@@ -26,7 +28,7 @@ import { ENERGY_GHG, GLOSSARY } from "./beam/reference-data.mjs";
 const BEAM_TABS = [
   { group: "Project",       tabs: [
     { id: "introduction",       num: 1,  label: "Introduction",        phase: 0 },
-    { id: "project",            num: 2,  label: "PROJECT",             phase: 2 },
+    { id: "project",            num: 2,  label: "PROJECT",             phase: 0 },
   ]},
   { group: "Below-grade",   tabs: [
     { id: "footings-slabs",     num: 3,  label: "Footings & Slabs",    phase: 3 },
@@ -71,11 +73,13 @@ const state = {
 // Boot
 // ──────────────────────────────────────────────────────────────────────
 function boot() {
+  StateManager.loadState();
   renderSidebar();
   renderContentShell();
   wireActionBar();
   wireKeyboard();
   wireGlossarySearch();
+  wireProjectForm();
   setActiveTab(readInitialTabFromHash() || DEFAULT_TAB);
   loadMaterialIndex();
 }
@@ -160,7 +164,7 @@ function renderPanelBody(tab) {
 // real content replaces these per phase.
 const PANEL_SUBTITLES = {
   introduction: "How BEAMweb works · methodology reference · disclaimer",
-  project: "Project meta, HOT2000 energy import, total-area inputs, derived summary",
+  project: "Project metadata · main-building and garage dimensions · feeds every assembly tab",
   "footings-slabs": "Foundation concrete, aggregate, sub-slab insulation, vapour barriers",
   "foundation-walls": "Concrete / ICF / earth-based foundation walls + insulation",
   "structural-elements": "Steel, heavy timber, framing lumber — posts, beams, joists",
@@ -180,6 +184,7 @@ const PANEL_SUBTITLES = {
 };
 
 const PANEL_BODIES = {
+  project: renderProjectPanel(),
   introduction: `
     <div class="beam-tbd" style="text-align: left; padding: 28px 32px;">
       <h3 style="text-align:center">Welcome to BEAMweb</h3>
