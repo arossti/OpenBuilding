@@ -19,6 +19,7 @@
 import { ENERGY_GHG, GLOSSARY } from "./beam/reference-data.mjs";
 import { StateManager } from "./shared/state-manager.mjs";
 import { renderProjectPanel, wireProjectForm } from "./beam/project-tab.mjs";
+import { renderFootingsSlabsPanel, wireFootingsSlabsTab } from "./beam/footings-slabs-tab.mjs";
 
 // ──────────────────────────────────────────────────────────────────────
 // Tab definitions
@@ -31,7 +32,7 @@ const BEAM_TABS = [
     { id: "project",            num: 2,  label: "PROJECT",             phase: 0 },
   ]},
   { group: "Below-grade",   tabs: [
-    { id: "footings-slabs",     num: 3,  label: "Footings & Slabs",    phase: 3 },
+    { id: "footings-slabs",     num: 3,  label: "Footings & Slabs",    phase: 0 },
     { id: "foundation-walls",   num: 4,  label: "Foundation Walls",    phase: 4 },
   ]},
   { group: "Structure",     tabs: [
@@ -80,6 +81,7 @@ function boot() {
   wireKeyboard();
   wireGlossarySearch();
   wireProjectForm();
+  wireFootingsSlabsTab();  // fires async fetch for data/beam/footings-slabs.csv
   setActiveTab(readInitialTabFromHash() || DEFAULT_TAB);
   loadMaterialIndex();
 }
@@ -165,7 +167,7 @@ function renderPanelBody(tab) {
 const PANEL_SUBTITLES = {
   introduction: "How BEAMweb works · methodology reference · disclaimer",
   project: "Project metadata · main-building and garage dimensions · feeds every assembly tab",
-  "footings-slabs": "Foundation concrete, aggregate, sub-slab insulation, vapour barriers",
+  "footings-slabs": "Concrete footings · pads & piers · slabs · rebar · sub-slab insulation · basement flooring",
   "foundation-walls": "Concrete / ICF / earth-based foundation walls + insulation",
   "structural-elements": "Steel, heavy timber, framing lumber — posts, beams, joists",
   "exterior-walls": "Framing, sheathing, cavity + continuous insulation, WRB",
@@ -185,6 +187,7 @@ const PANEL_SUBTITLES = {
 
 const PANEL_BODIES = {
   project: renderProjectPanel(),
+  "footings-slabs": renderFootingsSlabsPanel(),
   introduction: `
     <div class="beam-tbd" style="text-align: left; padding: 28px 32px;">
       <h3 style="text-align:center">Welcome to BEAMweb</h3>

@@ -4115,6 +4115,215 @@ table.beam-glossary-table tbody tr {
   margin-top: 3px;
 }
 
+/* ── Assembly picker (Footings & Slabs, future: all 12 assembly tabs) ── */
+.bw-asm-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.bw-asm-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg);
+  padding: 8px 0 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.bw-asm-totals {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.bw-asm-total-cell {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bw-asm-total-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.bw-asm-total-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent-lit);
+}
+.bw-asm-total-unit {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.bw-asm-note {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 8px;
+}
+.bw-asm-note.bw-asm-error {
+  color: #ef4444;
+}
+
+.bw-asm-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.bw-asm-group {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.bw-asm-group-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(8, 145, 178, 0.08);
+  border-bottom: 1px solid var(--border);
+}
+.bw-asm-toggle {
+  background: transparent;
+  border: none;
+  color: var(--accent-lit);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 0 4px;
+  min-width: 18px;
+}
+.bw-asm-group-name {
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  flex: 0 0 auto;
+  letter-spacing: 0.03em;
+}
+.bw-asm-cfg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-left: 12px;
+}
+.bw-asm-cfg-label {
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+.bw-asm-cfg-input {
+  width: 70px;
+}
+.bw-asm-cfg-unit {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.bw-asm-group-subtotal {
+  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.bw-asm-group-subtotal-val {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-lit);
+}
+.bw-asm-group-subtotal-unit {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.bw-asm-group-body {
+  padding: 8px 14px 12px 14px;
+}
+.bw-asm-group-body[hidden] { display: none; }
+.bw-asm-empty {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin: 6px 0;
+  font-style: italic;
+}
+.bw-asm-sub {
+  margin-top: 8px;
+}
+.bw-asm-sub-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 0;
+  border-bottom: 1px dashed var(--border);
+  margin-bottom: 4px;
+}
+.bw-asm-rows {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.bw-asm-rows thead th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-dim);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border);
+}
+.bw-asm-rows tbody td {
+  padding: 3px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  vertical-align: middle;
+}
+.bw-asm-col-sel { width: 28px; }
+.bw-asm-col-name {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bw-asm-col-qty { width: 90px; }
+.bw-asm-col-unit { width: 36px; color: var(--text-dim); font-family: var(--font-mono); }
+.bw-asm-col-pct { width: 80px; white-space: nowrap; }
+.bw-asm-col-net { width: 100px; text-align: right; font-family: var(--font-mono); font-weight: 600; }
+.bw-asm-col-foot { width: 120px; font-size: 10px; color: var(--text-dim); }
+.bw-asm-col-foot.expired {
+  color: #c084fc;
+}
+.bw-asm-qty, .bw-asm-pct {
+  width: 72px;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+.bw-asm-pct-sign {
+  color: var(--text-dim);
+  font-size: 10px;
+  margin-left: 2px;
+}
+.bw-asm-row-selected {
+  background: rgba(234, 88, 12, 0.08);  /* warm orange wash matching BEAM */
+}
+.bw-asm-row-selected .bw-asm-col-net {
+  color: #fb923c;
+}
+.bw-asm-nofactor {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: help;
+}
+
 /* ═════════════════════════════════════════════════════════════
    §9  APP: Landing — entry page (populated in same commit)
    ═════════════════════════════════════════════════════════════ */
