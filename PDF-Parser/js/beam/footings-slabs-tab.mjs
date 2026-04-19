@@ -201,7 +201,7 @@ function renderMaterialRow(group, m) {
       </td>
       <td class="bw-asm-col-name" title="${esc(m.name)}">${esc(m.name)}</td>
       <td class="bw-asm-col-qty">
-        <input type="number" step="0.1" class="bw-input bw-asm-qty" data-field-id="${ids.qty}" data-row-hash="${m.hash}" value="${qtyDisplay}" placeholder="0" />
+        <input type="number" step="0.1" class="bw-input bw-asm-qty bw-asm-qty-readonly" data-field-id="${ids.qty}" data-row-hash="${m.hash}" value="${qtyDisplay}" placeholder="0" readonly title="Set this quantity on the PROJECT tab — assembly-tab quantities are display-only, matching BEAM workbook behavior." />
       </td>
       <td class="bw-asm-col-unit">${esc(m.unit)}</td>
       <td class="bw-asm-col-pct">
@@ -283,6 +283,10 @@ function wireInputs(panel) {
     if (!(t instanceof HTMLInputElement)) return;
     const fieldId = t.dataset.fieldId;
     if (!fieldId) return;
+    // Defensive: qty cells are readonly (matches BEAM gSheet — quantities
+    // flow from PROJECT, not from user edits on the assembly tab). Ignore
+    // any stray input event on them.
+    if (t.classList.contains("bw-asm-qty")) return;
 
     if (t.type === "checkbox") {
       StateManager.setValue(fieldId, t.checked, VS.USER_MODIFIED);

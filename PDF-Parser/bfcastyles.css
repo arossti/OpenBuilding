@@ -4395,6 +4395,26 @@ table.beam-glossary-table tbody tr {
   padding: 2px 6px;
   font-size: 11px;
 }
+/* qty cells are display-only (matches BEAM gSheet — quantities flow from PROJECT). */
+.bw-asm-qty-readonly {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-bright, #f1f5f9);
+  cursor: default;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.bw-asm-qty-readonly::-webkit-outer-spin-button,
+.bw-asm-qty-readonly::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.bw-asm-qty-readonly:hover {
+  background: rgba(148, 163, 184, 0.06);
+}
 .bw-asm-pct-sign {
   color: var(--text-dim);
   font-size: 10px;
