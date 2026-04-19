@@ -1,84 +1,86 @@
-﻿,,,,,,,,,,,,,,,
-,"=@image(""https://endeavourcentre.org/wp-content/uploads/2022/04/BEAM_Logo_horiz_long_299x60.png"",3)",,,,,,,,,,,,"=@image(""https://endeavourcentre.org/wp-content/uploads/2022/04/BFCA-logo-140x70-1.jpg"",3)",,
-,,,,,,,Input Units:,,Input Legend:,,,,,,
-,,,,,,,Metric,,Required for saving projects,,,,,,
-,,,,,,,,,Used for materials calculations,,,,,,
-,,,,,,,,,Non-essential,,,,,,
-,,,,,,,,,Read-only,,,,,,
-,Project Information,,,,,,,,,,,Basic Instructions,,,
-,Project Name,,,,,,Construction Year,,,2024,,"1. Fill in this sheet according to the Input Legend above.
+"","Project Information 🤚","","","","","","Input Units 🤚 Metric ","","Input Legend 🤚 Required for saving projects Required for project calculations Non-essential Read-only, do not edit ","","","Basic Instructions - Start Here! 🤚 1. Explore our pre-populated sample project 🤚 3. Save the sample project for future reference using the BEAM Menu
 
-Tip: If your plans are PDFs, you might like to use this free tool to help take measurements from them:",,,
-,Designer,,,,,,Number of Bedrooms,,,4,,,,,
-,Engineer,,,,,,Stories Above Grade,,,2,,,,,
-,Builder / Developer,,,,,,Total Floor Area,,,500,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")",,PDFTron,,
-,Development Project,,,,,,Above Grade Conditioned Area,,,350,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","2. Specify materials in the section sheets listed along the bottom of the window, from ""Footings & Slabs"" to ""Garage."" The sequence is not important.",,,
-,Address,,,,,,Below Grade Conditioned Area,,,150,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")",,,,
-,City,,,,,,,,,,,,,,
-,Province / State (Can./US only),,,,,,,,,,,3. Review material selections in the REVIEW sheet.,,,
-,Country,Canada,,,,,,,,,,4. View material carbon results in the RESULTS sheet.,,,
-,Building Type,Single Detached House,,,,,,,,,,,,,
-,Construction Type,New Construction,,,,,,,,,,"For full instructions and more, see the",,,
-,Project Development Stage,Schematic Design,,,,,,,,,,BEAM User's Guide,,,
-,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,
-,Building Dimension Inputs (Excluding Garage),,,,,,,,,,,,,,YOUR DATA
-,DIMENSION NAME,QTY,,UNIT,DESCRIPTION,,,,,,,USED TO CALCULATE TAKE-OFFS FOR,,,
-,,,,,,,,,,,,,,,
-,CONTINUOUS FOOTINGS VOLUME,"=@SWITCH($H$4,""Metric"",(F30*H30*J30),""Imperial"",(CONVERT(F30,""ft"",""yd"")*CONVERT(H30,""in"",""yd"")*CONVERT(J30,""in"",""yd"")),"""")",,"=@SWITCH($H$4,""Metric"",""m³"",""Imperial"",""yd³"","""")","=@SWITCH($H$4,""Metric"",""Length (m)"",""Imperial"",""Length (ft)"","""")",,"=@SWITCH($H$4,""Metric"",""Height (m)"",""Imperial"",""Height (in.)"","""")",,"=@SWITCH($H$4,""Metric"",""Width (m)"",""Imperial"",""Width (in.)"","""")",Exclude: garage,,"Continuous (aka ""strip"") foundation wall footings (exterior and interior)",,,
-,,,,,300,X,0.5,X,0.8,,,,,,
-,COLUMN PADS & PIERS VOLUME,,,"=@SWITCH($H$4,""Metric"",""m³"",""Imperial"",""yd³"","""")","Total volume of discontinuous column footings, pad, piers, etc.
-Excludes: garage",,,,,,,Discontinuous footing elements aside from continuous footings (ext. and int.),,,
-,FOUNDATION WALL AREA,30,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Total foundation wall surface area (centerline length x height) 
-Includes: basement, party walls. Excludes: openings, garage foundation",,,,,,,"Foundation & basement wall insulation (ext. and int.), interior framing, and wall cladding",,,
-,FOUNDATION SLAB AREA,50,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Total foundation slab surface area
-Excludes: garage slab",,,,,,,"Aggregate base, sub-slab insulation, slab, and basement flooring",,,
-,EXTERIOR WALL AREA,300,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Surface area of exterior walls.
-Includes: gable ends. Excludes: window & door openings, party walls, garage walls",,,,,,,"Framing, insulation, sheathing, exterior cladding, and interior cladding of exterior walls",,,
-,WINDOW AREA,50,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Area of window frames (preferrable) or rough openings 
-Includes: full glazing area, skylights.   Excludes:  garage windows",,,,,,,Windows of main building,,,
-,PARTY WALL AREA,100,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Wall area that partitions this unit from others 
-Typical for townhouses & apartment units",,,,,,,"Party wall framing, insulation, sheathing, and interior cladding",,,
-,INTERIOR WALL AREA,100,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","One side only (i.e. centerline) of all interior walls. 
-Includes: interior door area.   Excludes: exterior, garage partition and party walls",,,,,,,Interior wall framing and cladding (assumes both sides of walls are finished by default),,,
-,FRAMED FLOOR AREA ,300,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Above grade flooring area 
-Excludes: basement floor slab, and floor openings",,,,,,,"Floor framing, subfloor, floor insulation, finish flooring",,,
-,FINISHED CEILING AREA,300,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Total finished ceiling area
-Includes: basement ceilings.   Excludes: garage ceilings",,,,,,,Ceiling cladding,,,
-,ROOF INSULATION AREA,100,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Area associated with roof insulation
-Typically equal to the ceiling area directly below the roof",,,,,,,Flat or sloped roof insulation,,,
-,ROOF SURFACE AREA,100,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Roofing surface area. Calculated with roof pitch
-Excludes: overhangs",,,,,,,"Roof framing,  decking, roofing, and insulation parallel to roof surface",,,
-,TIMBER FRAMING VOLUME,500,,"=@SWITCH($H$4,""Metric"",""m³"",""Imperial"",""yd³"","""")","Total volume of wood in heavy timber posts & beams
-Separate inputs for steel found in Structural Elements section",,,,,,,Mass timber framing elements,,,
-,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,
-,Garage Dimension Inputs,,,,,,,,,,,,,,
-,DIMENSION NAME,QTY,,UNIT,DESCRIPTION,,,,,,,USED TO CALCULATE TAKE-OFFS FOR,,,
-,,,,,,,,,,,,,,,
-,GARAGE PARTITION WALL AREA,,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Wall area that partitions the main building from the garage. 
-Excludes: openings and exterior garage walls",,,,,,,Partition insulation and interior cladding on garage side of partition wall,,,
-,GARAGE CONTINUOUS FOOTINGS VOLUME,"=@SWITCH($H$4,""Metric"",(F50*H50*J50),""Imperial"",(CONVERT(F50,""ft"",""yd"")*CONVERT(H50,""in"",""yd"")*CONVERT(J50,""in"",""yd"")),"""")",,"=@SWITCH($H$4,""Metric"",""m³"",""Imperial"",""yd³"","""")","=@SWITCH($H$4,""Metric"",""Length (m)"",""Imperial"",""Length (ft)"","""")",,"=@SWITCH($H$4,""Metric"",""Height (m)"",""Imperial"",""Height (in.)"","""")",,"=@SWITCH($H$4,""Metric"",""Width (m)"",""Imperial"",""Width (in.)"","""")",,,Continuous garage foundation wall footings,,,
-,,,,,,X,,X,,,,,,,
-,GARAGE COLUMN PADS & PIERS VOLUME,,,"=@SWITCH($H$4,""Metric"",""m³"",""Imperial"",""yd³"","""")","Volume of discontinuous footing elements
-Includes: sum of all volumes not included in continuous footing",,,,,,,Garage footings in addition to continuous footings,,,
-,GARAGE FOUNDATION WALL AREA,,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Foundation wall surface area
-Includes: basement.   Excludes: openings such as basement windows & doors",,,,,,,Garage foundation walls,,,
-,GARAGE SLAB AREA,,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")",Slab surface area,,,,,,,"Garage slab, aggregate base",,,
-,FLOOR AREA ABOVE GARAGE,,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")",Floor area of interior space directly above the garage.,,,,,,,Garage foundation attribution percentage for garage footings & foundation walls,,,
-,GARAGE FOUNDATION ATTRIBUTION %,"=IF(C53>0,1-C54/C53,)",,"=IF(C54*C53>0,""= 1 –"",""="")","=IF(C53*C54>0,C54,C53)",,Portion of garage foundation attributed to the garage. The rest is attributed to the main building.,,,,,Garage footings and foundation walls,,,
-,,,,,"=IF(C53>0,C53,)",,,,,,,,,,
-,GARAGE EXTERIOR WALL AREA,,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Surface area of exterior garage walls
-Includes: gable ends. Excludes: window & door openings, partition walls",,,,,,,"Garage exterior wall framing, sheathing, exterior cladding, interior cladding of exterior walls",,,
-,GARAGE WINDOW AREA,,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Area of window frames (preferrable) or rough openings 
-Includes: full glazing area, skylights.   Excludes:  garage windows",,,,,,,Garage windows,,,
-,GARAGE FINISHED CEILING AREA,,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")",Ceiling area with materials applied,,,,,,,"Garage ceiling cladding, insulation parallel to ceiling",,,
-,GARAGE ROOF SURFACE AREA,,,"=@SWITCH($H$4,""Metric"",""m²"",""Imperial"",""ft²"","""")","Garage roof surface area. Calculated with roof pitch
-Excludes: overhangs",,,,,,,"Garage roof framing, decking, roofing, insulation parallel to roof surface",,,
-,GARAGE TIMBER FRAMING VOLUME,,,"=@SWITCH($H$4,""Metric"",""m³"",""Imperial"",""yd³"","""")","Total volume of wood in heavy timber posts & beams
-Separate inputs for steel found in Structural Elements section",,,,,,,Garage mass timber framing elements,,,
-,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,
+4. Use the BEAM Menu to Create new Project
+
+5. Fill in the Required for Saving Projects cells then use the BEAM menu to Save current project 
+
+6. Click Filter Concrete button. This is only required if you are located in Canada and need province-specific concrete EPDs. If you are working in the USA you can skip this step. 
+
+7. Enter your Building and/or Garage Dimension Inputs in the green cells below
+
+8. Select a building section from the tabs along the bottom of the window. Each building assembly has its own tab, from Footings & Slabs to Garage. The sequence is not important     
+
+9. To select materials, scroll options and click the check box in column G. Each time you select a material its emissions will be added to your project total
+
+*Note: If you see zeros in Column H, please ensure you have filled in all the user inputs required for material calculations, e.g. building dimensions, framing spacing, R-value, thickness, etc.
+
+10. Go to the REVIEW tab to see a detailed material summary 
+
+11. Go to the RESULTS tab for an overview and to gain insights on your project
+
+12. Create & save alternative scenarios and compare results in the GENERATE COMPARISON  tab  ","","",""
+"","Project Name","","","","","","Construction Year","","","2024","","","","",""
+"","Scenario","","","","","","Number of Bedrooms","","","3","","","","",""
+"","Beam Version","","","","","","Stories Above Grade","","","2","","","","",""
+"","Designer","","","","","","Total Floor Area","","","221","m²","","","",""
+"","Engineer","","","","","","Above Grade Conditioned Area","","","221","m²","","","",""
+"","Builder / Developer","","","","","","Below Grade Conditioned Area","","","0","m²","","","",""
+"","Development Project","","","","","","","","","","","","","",""
+"","Address","","","","","","","","","","","","","",""
+"","City","","","","","","","","","","","","","",""
+"","Country","","","","","","","","🤚","","","","","",""
+"","Province / State (Can./US only)","","","","","","","","","","","","","",""
+"","Building Type","","","","","","","","","","","","","",""
+"","Construction Type","","","","","","","","","","","","","",""
+"","Project Development Stage","","","","","","","","","","","","","",""
+"","","","","","","","","","","","","More Resources","","",""
+"","","","","","","","","","","","","Visit our Quick Start Guide & FAQ
+See our Instructions pop-up located in the BEAM Menu 
+Visit our BEAM User's Guide.","","",""
+"","Building Dimension Inputs (Excluding Garage)   🤚 ","","","","","","","","","","","","","","YOUR DATA"
+"","DIMENSION NAME","","","UNIT","DESCRIPTION","","","","","","","USED TO CALCULATE TAKE-OFFS FOR","","",""
+"","CONTINUOUS FOOTINGS VOLUME","9.0","","m³","Length (m)","","Height (m)","","Width (m)","","","Continuous (aka ""strip"") foundation wall footings (exterior and interior)","","",""
+"","","","","","42.37","X","0.46","X","0.46","","","","","",""
+"","COLUMNS/PIERS & PADS VOLUME","0.0","","m³","Total volume of discontinuous foundation elements 
+Includes: pads/footings, columns/piers/piles  Excludes: garage","","","","","","","Concrete volume for all discontinuous pads/footings and columns/piers (ext. and int.)","","",""
+"","FOUNDATION WALL AREA","0.0","","m²","Total foundation wall surface area (centerline length x height) 
+Includes: basement, party walls. Excludes: openings, garage foundation","","","","","","","Foundation & basement wall insulation (ext. and int.), interior framing, wall cladding and barriers","","",""
+"","FOUNDATION SLAB/FLOOR AREA","110.4","","m²","Total foundation slab surface area
+Excludes: garage slab","","","","","","","Aggregate base, sub-slab insulation, slab, barriers and basement flooring","","",""
+"","EXTERIOR WALL AREA","187.8","","m²","Surface area of exterior walls.
+Includes: gable ends. Excludes: window & door openings, party walls, garage walls","","","","","","","Framing, insulation, sheathing, barriers, exterior cladding, and interior cladding of exterior walls","","",""
+"","WINDOW AREA","33.1","","m²","Area of window frames (preferrable) or rough openings 
+Includes: full glazing area, skylights.   Excludes:  garage windows","","","","","","","Windows of main building","","",""
+"","PARTY WALL AREA","0.0","","m²","Wall area that partitions this unit from others 
+Typical for townhouses & apartment units","","","","","","","Party wall framing, insulation, sheathing, barriers and interior cladding","","",""
+"","INTERIOR WALL AREA","200.6","","m²","One side only (i.e. centerline) of all interior walls. 
+Includes: interior door area.   Excludes: exterior, garage partition and party walls","","","","","","","Interior wall framing and cladding (assumes both sides of walls are finished by default)","","",""
+"","FRAMED FLOOR AREA ","104.4","","m²","Above grade flooring area 
+Excludes: basement floor slab, and floor openings","","","","","","","Floor framing, subfloor, floor insulation, finish flooring","","",""
+"","FINISHED CEILING AREA","110.4","","m²","Total finished ceiling area
+Includes: basement ceilings.   Excludes: garage ceilings","","","","","","","Ceiling cladding","","",""
+"","ROOF CAVITY INSULATION AREA","110.4","","m²","Total area of roof insulation","","","","","","","Flat or sloped roof cavity insulation, ceiling barriers and membranes","","",""
+"","ROOF SURFACE AREA","116.3","","m²","Total roof surface area.
+Includes: overhangs","","","","","","","Roof framing,  decking, barriers & membranes, roofing, and insulation parallel to roof surface","","",""
+"","TIMBER FRAMING VOLUME","0.0","","m³","Total volume of wood in heavy timber posts & beams
+Separate inputs for steel found in Structural Elements section","","","","","","","Mass timber framing elements","","",""
+"","Garage Dimension Inputs  🤚 ","","","","","","","","","","","","","",""
+"","DIMENSION NAME","","","UNIT","DESCRIPTION","","","","","","","USED TO CALCULATE TAKE-OFFS FOR","","",""
+"","GARAGE PARTITION WALL AREA","0.0","","m²","Wall area that partitions the main building from the garage. 
+Excludes: openings and exterior garage walls","","","","","","","Partition insulation and interior cladding on garage side of partition wall","","",""
+"","GARAGE CONTINUOUS FOOTINGS VOLUME","0.0","","m³","Length (m)","","Height (m)","","Width (m)","","","Continuous garage foundation wall footings","","",""
+"","","","","","0.00","X","0.00","X","0.0","","","","","",""
+"","GARAGE COLUMNS/PIERS & PADS VOLUME","0.0","","m³","Total volume of discontinuous foundation elements 
+Includes: pads/footings, columns/piers/piles","","","","","","","Garage Concrete volume for all discontinuous pads/footings and columns/piers (ext. and int.)","","",""
+"","GARAGE FOUNDATION WALL AREA","0.0","","m²","Foundation wall surface area","","","","","","","Garage foundation walls","","",""
+"","GARAGE SLAB AREA","0.0","","m²","Slab surface area","","","","","","","Garage slab, aggregate base","","",""
+"","FLOOR AREA ABOVE GARAGE","0.0","","m²","Floor area of interior space directly above the garage.","","","","","","","Garage foundation attribution percentage for garage footings & foundation walls","","",""
+"","GARAGE FOUNDATION ATTRIBUTION % 🤚","","","=","0.0","","Portion of garage foundation attributed to the garage. The rest is attributed to the main building.","","","","","Garage footings and foundation walls","","",""
+"","GARAGE EXTERIOR WALL AREA","0.0","","m²","Surface area of exterior garage walls
+Includes: gable ends. Excludes: window & door openings, partition walls","","","","","","","Garage exterior wall framing, sheathing, exterior cladding, interior cladding of exterior walls","","",""
+"","GARAGE WINDOW AREA","0.0","","m²","Area of window frames (preferrable) or rough openings 
+Includes: full glazing area, skylights.","","","","","","","Garage windows","","",""
+"","GARAGE FINISHED CEILING AREA","0.0","","m²","Garage ceiling area covered by materials","","","","","","","Garage ceiling cladding, insulation parallel to ceiling","","",""
+"","GARAGE ROOF SURFACE AREA","0.0","","m²","Garage roof surface area. Calculated with roof pitch
+Includes: overhangs","","","","","","","Garage roof framing, decking, roofing, insulation parallel to roof surface","","",""
+"","GARAGE TIMBER FRAMING VOLUME","0.0","","m³","Volume of wood for heavy timber structures in garage","","","","","","","Garage mass timber framing elements","","",""
