@@ -108,10 +108,13 @@ function renderGroup(group) {
   const cfgHtml = group.config ? renderGroupConfig(group) : "";
   const subs = group.subgroups.map((s) => renderSubgroup(group, s)).join("");
   const hasMats = group.subgroups.some((s) => s.materials.length > 0);
+  // Groups start collapsed so the initial view is an overview of the 16
+  // group categories. Clicking the chevron expands a group to show its
+  // subgroups and picker rows.
   return `
     <section class="bw-asm-group" data-group-code="${esc(group.code)}">
       <header class="bw-asm-group-header">
-        <button class="bw-asm-toggle" type="button" aria-expanded="true" data-toggle-group="${esc(group.code)}">▼</button>
+        <button class="bw-asm-toggle" type="button" aria-expanded="false" data-toggle-group="${esc(group.code)}">▶</button>
         <h3 class="bw-asm-group-name">${esc(group.name)}</h3>
         ${cfgHtml}
         <span class="bw-asm-group-subtotal">
@@ -119,7 +122,7 @@ function renderGroup(group) {
           <span class="bw-asm-group-subtotal-unit">kgCO2e net</span>
         </span>
       </header>
-      <div class="bw-asm-group-body">
+      <div class="bw-asm-group-body" hidden>
         ${hasMats ? subs : `<p class="bw-asm-empty">No picker rows — Phase 3b will wire custom entries.</p>`}
       </div>
     </section>

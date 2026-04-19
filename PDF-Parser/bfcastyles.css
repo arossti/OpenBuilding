@@ -4123,10 +4123,17 @@ table.beam-glossary-table tbody tr {
 }
 .bw-asm-header {
   position: sticky;
-  top: 0;
+  /* #beam-content has padding: 20px 28px. Bleed the sticky header out to
+     the scroll-container edges so picker rows can't show through the gap
+     above the totals when scrolling. top: -20px aligns the sticky anchor
+     with the scroll container's top edge (not its padding-inset content
+     area); the negative margins extend the header's background into that
+     padding; the matching padding keeps the interior layout unchanged. */
+  top: -20px;
+  margin: -20px -28px 0 -28px;
+  padding: 28px 28px 10px 28px;
   z-index: 2;
   background: var(--bg);
-  padding: 8px 0 10px 0;
   border-bottom: 1px solid var(--border);
 }
 .bw-asm-totals {

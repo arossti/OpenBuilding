@@ -77,7 +77,7 @@ async function boot() {
     const idx = await res.json();
     state.indexEntries = idx.entries || [];
     document.getElementById("db-source-note").textContent = `source: ${idx.count} records · sha ${short(idx.generated_from_csv_sha256)}`;
-    renderDivisionChips();
+    renderGroupChips();
     wireControls();
     applyFilters();
     setStatus("Ready.", "ready");
@@ -139,14 +139,14 @@ function wireControls() {
   });
 }
 
-function renderDivisionChips() {
+function renderGroupChips() {
   const counts = new Map();
   for (const e of state.indexEntries) {
     const d = e.group_prefix || "??";
     counts.set(d, (counts.get(d) || 0) + 1);
   }
-  const container = document.getElementById("db-division-chips");
-  // Preserve the "Division" label; remove anything else
+  const container = document.getElementById("db-groups-chips");
+  // Preserve the "Groups" label; remove anything else
   [...container.querySelectorAll(".db-chip")].forEach(n => n.remove());
   const sorted = [...counts.keys()].sort();
   for (const prefix of sorted) {
