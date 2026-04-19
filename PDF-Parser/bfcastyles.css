@@ -3218,6 +3218,77 @@ html.app-matrix body {
   border-bottom-color: var(--accent);
 }
 
+/* Group-header rows in the database viewer. Styled to echo the BEAMweb
+   assembly-tab group headers: rounded container, padded away from the
+   page edge, hover affordance, expanded-state contrast. The banner lives
+   inside an inner div so it can take margin + border-radius independently
+   of the table layout. */
+#db-table tbody tr.db-group-header {
+  border-bottom: none;
+}
+#db-table tbody tr.db-group-header td.db-group-header-cell {
+  padding: 8px 0;
+  background: transparent;
+  border-bottom: none;
+}
+.db-group-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 16px;
+  padding: 10px 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.1s, border-color 0.1s;
+}
+.db-group-bar:hover {
+  background: rgba(8, 145, 178, 0.12);
+  border-color: var(--accent);
+}
+#db-table tbody tr.db-group-header.expanded .db-group-bar {
+  background: rgba(8, 145, 178, 0.16);
+  border-color: var(--accent);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.db-group-caret {
+  display: inline-block;
+  width: 14px;
+  color: var(--accent-lit);
+  font-size: 10px;
+}
+.db-group-code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  background: rgba(0, 0, 0, 0.25);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+.db-group-name {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.03em;
+}
+.db-group-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-lit);
+  font-weight: 600;
+}
+/* Child rows under an expanded group header — slight indent so the
+   hierarchy reads at a glance. */
+#db-table tbody tr.db-row-main[data-group] td:first-child,
+#db-table tbody tr.db-detail-row[data-group] td:first-child {
+  padding-left: 32px;
+}
+
 #db-table td {
   padding: 6px 10px;
   color: var(--text);
@@ -4193,6 +4264,17 @@ table.beam-glossary-table tbody tr {
   padding: 10px 14px;
   background: rgba(8, 145, 178, 0.08);
   border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+.bw-asm-group-header:hover {
+  background: rgba(8, 145, 178, 0.14);
+}
+/* The inline config (thickness / R-value / rebar length) and its input
+   keep the default cursor so it reads as editable, not clickable. */
+.bw-asm-cfg,
+.bw-asm-cfg-input {
+  cursor: text;
 }
 .bw-asm-toggle {
   background: transparent;
@@ -4329,6 +4411,15 @@ table.beam-glossary-table tbody tr {
   font-family: var(--font-mono);
   font-size: 10px;
   cursor: help;
+}
+
+/* Hero logo on the Introduction tab — centered above the welcome copy
+   so it's instantly clear which app you're in. */
+.bw-intro-logo {
+  display: block;
+  margin: 0 auto 20px auto;
+  width: 180px;
+  height: auto;
 }
 
 /* ═════════════════════════════════════════════════════════════

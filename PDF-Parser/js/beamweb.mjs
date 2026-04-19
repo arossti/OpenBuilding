@@ -190,6 +190,7 @@ const PANEL_BODIES = {
   "footings-slabs": renderFootingsSlabsPanel(),
   introduction: `
     <div class="beam-tbd" style="text-align: left; padding: 28px 32px;">
+      <img src="graphics/beam-logo.png" alt="BEAM" class="bw-intro-logo" />
       <h3 style="text-align:center">Welcome to BEAMweb</h3>
       <p style="text-align:center; font-size: 13px; margin: 8px 0 18px 0;">
         A browser port of the BEAM embodied carbon calculator, built for Canadian projects.

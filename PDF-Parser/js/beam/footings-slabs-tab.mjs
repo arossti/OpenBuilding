@@ -282,12 +282,17 @@ function wireInputs(panel) {
   });
 
   panel.addEventListener("click", (e) => {
-    const btn = e.target.closest(".bw-asm-toggle");
-    if (!btn) return;
-    const groupCode = btn.dataset.toggleGroup;
-    const body = btn.closest(".bw-asm-group")?.querySelector(".bw-asm-group-body");
-    if (!body) return;
-    const open = body.hasAttribute("hidden") ? true : false;
+    // Any click anywhere on the group-header bar toggles expand/collapse —
+    // except clicks on the inline config (thickness / R-value / rebar length
+    // inputs) which must pass through so the user can type in them.
+    const header = e.target.closest(".bw-asm-group-header");
+    if (!header) return;
+    if (e.target.closest(".bw-asm-cfg")) return;
+    const group = header.closest(".bw-asm-group");
+    const body = group?.querySelector(".bw-asm-group-body");
+    const btn = header.querySelector(".bw-asm-toggle");
+    if (!body || !btn) return;
+    const open = body.hasAttribute("hidden");
     if (open) body.removeAttribute("hidden"); else body.setAttribute("hidden", "");
     btn.textContent = open ? "▼" : "▶";
     btn.setAttribute("aria-expanded", String(open));
