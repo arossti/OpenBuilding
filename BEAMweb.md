@@ -39,7 +39,7 @@ A browser app that replaces the BEAM (Google Sheets) embodied carbon spreadsheet
 - Consumes the new BEAM materials JSON database (full ISO 21930 / EN 15804+A2 per-stage impact scope, not just GWP)
 - Accepts three input modalities for quantities:
   1. **Manual entry** — user types areas, thicknesses, etc. (mirrors the BEAM workbook)
-  2. **Excel import** — read an existing BEAM workbook file into state (reuse file-handling patterns from **OBJECTIVE**, ask Andy for that ExcelMapper file when it is time - this comes from Andy's team's energy model app)
+  2. **Excel import** — read an existing BEAM workbook file into state (file-handling patterns shared from OBJECTIVE in session 3; workbook-mapper stub landed, per-tab mapping tables fill in as each assembly tab ports)
   3. **PDF-Parser integration** — polygons measured on drawings flow directly as component areas (PDF Parser already fully functional, and creates summary table of all Key Areas if not yet volumes)
 - Persists projects as JSON (shared format with PDF-Parser so one project file covers both tools) - FileHandler needed for Import/Export and full StateManager.js for proper persistence and browser local storage use.
 - Deploys alongside PDF-Parser / Matrix / Database on GitHub Pages
@@ -63,6 +63,14 @@ A browser app that replaces the BEAM (Google Sheets) embodied carbon spreadsheet
 3. After merge: fast-forward local `main`, push `main` to the `origin` mirror (`git push origin main`), delete the feature branch on both remotes (`git push origin --delete <branch> && git push openbuilding --delete <branch>`), delete the local branch, create the next feature branch.
 4. Never push to `main` directly. Never force-push. Never skip hooks.
 5. Commit messages via `git commit --file=- <<'MSG'` heredocs. Avoid apostrophes in messages.
+
+### Where to pick up next (cold-start one-liner)
+
+1. `cd PDF-Parser && npm run stage:data` — copies `schema/materials/` + `docs/csv files from BEAM/Footings & Slabs.csv` into `PDF-Parser/data/` (gitignored; regenerate each session).
+2. `npm run serve` from the same dir, open `http://localhost:8000/beamweb.html#footings-slabs` to eyeball the live F&S picker.
+3. Before porting more tabs: **run a parity test** — load the DOE Prototype sample project inputs in both BEAM (gSheet) and BEAMweb F&S, compare totals. Mismatches pinpoint which assumption in `computeRowEmissions` (linear configRatio scaling, sample-row factor derivation) needs refinement. Fix parity once, then the pattern is safe to replicate across Phase 4.
+4. Phase 4 queue: see §6 — 11 assembly tabs, smallest-first (Windows → Garage). Each follows the `assembly-csv-parser.mjs` + per-tab-module template already established for F&S.
+5. Cross-cut items parallel to Phase 4: PROJECT→F&S quantity auto-fill, `Categories.csv` dropdown option lists on PROJECT, `js/shared/units.mjs` for the metric/imperial toggle.
 
 ---
 
@@ -218,7 +226,7 @@ The assembly-csv-parser (Phase 3) should recognize this shape and expose each ba
 
 - Expected: `.xlsx` files matching the BEAM workbook template.
 - Reader walks a known sheet+cell map and populates project state.
-- Pattern borrowed from OBJECTIVE. **TBD — Andy to point at specific modules** (or lift them once BEAMweb has a home on disk).
+- Pattern borrowed from OBJECTIVE (ExcelMapper + FileHandler + StateManager patterns shared by Andy in session 3). Ported by API shape, not copied verbatim — see `js/shared/state-manager.mjs`, `js/shared/file-handler.mjs`, `js/beam/workbook-mapper.mjs` (Phase 1 stubs; per-tab mapping tables fill in as each assembly tab ports).
 - Fallback behaviour for mismatched templates (different versions, user-edited sheet names) — **TBD** (warn and skip? reject? best-effort fill?).
 
 ### 3.3 PDF-Parser polygon integration
