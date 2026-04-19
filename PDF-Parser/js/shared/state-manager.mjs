@@ -78,6 +78,10 @@ function getValue(fieldId) {
   return fields.has(fieldId) ? fields.get(fieldId).value : null;
 }
 
+function getFieldState(fieldId) {
+  return fields.has(fieldId) ? fields.get(fieldId).state : null;
+}
+
 function setValue(fieldId, value, state = VALUE_STATES.USER_MODIFIED) {
   const existing = fields.get(fieldId);
 
@@ -238,6 +242,7 @@ function getLastImportedState() {
 export const StateManager = {
   VALUE_STATES,
   getValue,
+  getFieldState,
   setValue,
   registerDependency,
   markDependentsDirty,

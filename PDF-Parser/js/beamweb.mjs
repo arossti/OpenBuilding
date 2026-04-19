@@ -20,6 +20,7 @@ import { ENERGY_GHG, GLOSSARY } from "./beam/reference-data.mjs";
 import { StateManager } from "./shared/state-manager.mjs";
 import { renderProjectPanel, wireProjectForm, resetProjectTab } from "./beam/project-tab.mjs";
 import { renderFootingsSlabsPanel, wireFootingsSlabsTab, resetFootingsSlabsTab } from "./beam/footings-slabs-tab.mjs";
+import { loadSample, SAMPLES } from "./beam/sample-loader.mjs";
 
 // ──────────────────────────────────────────────────────────────────────
 // Tab definitions
@@ -395,10 +396,30 @@ function handleNewProject() {
   location.reload();
 }
 
-function handleLoadSample() {
-  // Real wiring lands in slice 2 (sample-loader.mjs).
-  setStatus("Load Sample — sample-loader lands in the next commit.", "busy");
-  setTimeout(() => setStatus("Shell ready · cold-start blank state · Phase 3", "ready"), 3000);
+async function handleLoadSample() {
+  // Single sample today; widen to a dropdown when more case-study buildings land.
+  const sampleId = "single-family-home";
+  const entry = SAMPLES[sampleId];
+  const ok = window.confirm(
+    `Load "${entry.label}"?\n\n` +
+    `This populates PROJECT and assembly tabs with the BEAM workbook reference values. ` +
+    `Existing inputs in those fields will be overwritten — Save first if you want to keep your work.`
+  );
+  if (!ok) return;
+  setStatus(`Loading sample: ${entry.label}…`, "busy");
+  try {
+    const result = await loadSample(sampleId);
+    setStatus(
+      `Loaded "${result.label}" · ${result.projectFieldCount} PROJECT fields · ${result.fsFieldCount} F&S sample writes.`,
+      "ready"
+    );
+  } catch (err) {
+    console.error("[load-sample]", err);
+    setStatus(
+      `Load Sample failed: ${err.message}. Run \`npm run stage:data\` to copy sample JSON into PDF-Parser/data/.`,
+      "error"
+    );
+  }
 }
 
 function wireActionBar() {

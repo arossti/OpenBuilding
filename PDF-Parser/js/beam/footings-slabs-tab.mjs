@@ -11,6 +11,7 @@
 
 import { StateManager } from "../shared/state-manager.mjs";
 import { parseAssemblyCsv, computeRowEmissions } from "./assembly-csv-parser.mjs";
+import { registerProjectToFsBridge, syncProjectToFsBridge } from "./auto-fill.mjs";
 
 const VS = StateManager.VALUE_STATES;
 const CSV_PATH = "data/beam/footings-slabs.csv";
@@ -350,11 +351,44 @@ function refreshInputsFromState() {
 
 export function resetFootingsSlabsTab() {
   StateManager.clearByPrefix("fs_");
+  // Re-flow PROJECT auto-fill so DERIVED qtys come back after the wipe.
+  syncProjectToFsBridge();
   refreshInputsFromState();
 }
 
 export function refreshFootingsSlabsTab() {
   refreshInputsFromState();
+}
+
+// Sample-loader hook. Walks the parsed CSV, writes sample SELECT/qty/pct
+// to StateManager as IMPORTED for materials the BEAM workbook flagged as
+// selected, and writes inline group-config defaults (THICKNESS, R-VALUE,
+// TOTAL REBAR LENGTH). Returns the count of fields written.
+export function loadSampleIntoFootingsSlabs() {
+  if (!parsed) return 0;
+  let n = 0;
+  StateManager.muteListeners();
+  try {
+    for (const group of parsed.groups) {
+      if (group.config && group.config.default !== null) {
+        StateManager.setValue(groupCfgId(group), group.config.default, VS.IMPORTED);
+        n++;
+      }
+      for (const sub of group.subgroups) {
+        for (const m of sub.materials) {
+          if (!m.sample_select) continue;
+          const f = fieldIds(m);
+          StateManager.setValue(f.sel, true, VS.IMPORTED);
+          StateManager.setValue(f.qty, m.sample_qty, VS.IMPORTED);
+          StateManager.setValue(f.pct, m.sample_pct, VS.IMPORTED);
+          n += 3;
+        }
+      }
+    }
+  } finally {
+    StateManager.unmuteListeners();
+  }
+  return n;
 }
 
 export async function wireFootingsSlabsTab() {
@@ -387,5 +421,9 @@ export async function wireFootingsSlabsTab() {
   }
 
   wireInputs(panel);
+  // Wire PROJECT-tab → F&S quantity bridge. Registers listeners on every
+  // PROJECT source key (dim_continuous_footings_volume, etc.) and pushes
+  // their current values down as DERIVED qty on every matching F&S row.
+  registerProjectToFsBridge(parsed);
   recomputeAll();
 }

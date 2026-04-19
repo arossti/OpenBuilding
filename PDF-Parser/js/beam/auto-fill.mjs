@@ -1,0 +1,98 @@
+// auto-fill.mjs
+// PROJECT-tab → assembly-tab quantity bridge.
+//
+// When a user types a dimension into PROJECT (e.g. dim_foundation_slab_floor_area
+// = 110.4 m²), every material row in the F&S "CONCRETE SLABS" group's qty input
+// fills with that value as VALUE_STATES.DERIVED. User-typed entries on the
+// assembly side stay USER_MODIFIED and win — the bridge skips writing over
+// them. Loaded sample data (IMPORTED) also wins. The result is a "PROJECT
+// drives, assembly tab can override per row" model.
+//
+// Mapping table is keyed off the parsed group `name` (column A in the BEAM
+// CSV banner row), case-insensitive. Group names that don't appear here have
+// no PROJECT auto-fill — qty stays at user input or 0.
+//
+// Add new mappings here as Phase 4 tabs land.
+
+import { StateManager } from "../shared/state-manager.mjs";
+import { refreshFootingsSlabsTab } from "./footings-slabs-tab.mjs";
+
+const VS = StateManager.VALUE_STATES;
+
+// PROJECT field id → array of F&S group names whose per-row qty should mirror it.
+const PROJECT_TO_FS_GROUPS = {
+  dim_continuous_footings_volume: ["CONTINUOUS CONCRETE FOOTINGS"],
+  dim_columns_piers_pads_volume:  ["CONCRETE COLUMN PADS & PIERS", "TIMBER PILE FOUNDATION"],
+  dim_foundation_slab_floor_area: ["CONCRETE SLABS", "AGGREGATE BASE", "SUB-SLAB INSULATION"],
+};
+
+let registered = false;
+let cachedParsedFs = null;
+
+function findGroup(parsedFs, groupName) {
+  if (!parsedFs) return null;
+  const target = groupName.toUpperCase();
+  return parsedFs.groups.find((g) => g.name && g.name.toUpperCase() === target) || null;
+}
+
+function applyOneSource(parsedFs, projectKey, value) {
+  const targets = PROJECT_TO_FS_GROUPS[projectKey];
+  if (!targets) return false;
+  const num = StateManager.parseNumeric(value, 0);
+  const writeVal = num > 0 ? String(num) : "";
+  let touched = false;
+
+  StateManager.muteListeners();
+  try {
+    for (const groupName of targets) {
+      const group = findGroup(parsedFs, groupName);
+      if (!group) continue;
+      for (const sub of group.subgroups) {
+        for (const m of sub.materials) {
+          const fId = `fs_${m.hash}_qty`;
+          const st = StateManager.getFieldState(fId);
+          // User wins; imported (sample-loaded) wins. DERIVED + null are fair game.
+          if (st === VS.USER_MODIFIED || st === VS.IMPORTED) continue;
+          StateManager.setValue(fId, writeVal, VS.DERIVED);
+          touched = true;
+        }
+      }
+    }
+  } finally {
+    StateManager.unmuteListeners();
+  }
+  return touched;
+}
+
+// Register once. Subsequent calls (from re-wiring after a CSV reparse) replace
+// the cached parsedFs — listeners stay attached and use the new reference.
+export function registerProjectToFsBridge(parsedFs) {
+  cachedParsedFs = parsedFs;
+  if (registered) {
+    // Re-sync against new parsedFs without re-registering listeners.
+    syncProjectToFsBridge();
+    return;
+  }
+  registered = true;
+
+  for (const projectKey of Object.keys(PROJECT_TO_FS_GROUPS)) {
+    StateManager.addListener(projectKey, (newValue) => {
+      const touched = applyOneSource(cachedParsedFs, projectKey, newValue);
+      if (touched) refreshFootingsSlabsTab();
+    });
+  }
+  syncProjectToFsBridge();
+}
+
+// Walk every PROJECT source key and push current values to F&S targets.
+// Used on init, after sample-load, and after F&S Reset.
+export function syncProjectToFsBridge() {
+  if (!cachedParsedFs) return;
+  let touched = false;
+  for (const projectKey of Object.keys(PROJECT_TO_FS_GROUPS)) {
+    const v = StateManager.getValue(projectKey);
+    if (v === null || v === "") continue;
+    if (applyOneSource(cachedParsedFs, projectKey, v)) touched = true;
+  }
+  if (touched) refreshFootingsSlabsTab();
+}
