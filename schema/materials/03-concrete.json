@@ -32089,6 +32089,7 @@
           "carbon_content_pct_kgc_kg": 0.5,
           "biogenic_factor": 0.04,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 0.68,
           "full_carbon_kgco2e_per_common_unit": 0.76,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -32275,6 +32276,7 @@
           "carbon_content_pct_kgc_kg": 0.5,
           "biogenic_factor": 0.035,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 0.43,
           "full_carbon_kgco2e_per_common_unit": 0.47,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -37428,6 +37430,7 @@
         "biogenic": {
           "carbon_content_pct_kgc_kg": 0.524,
           "biogenic_factor": 0.7,
+          "stored_kgco2e_per_common_unit": 58.86,
           "carbon_content_kgc_per_unit": 37.46,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -37626,6 +37629,7 @@
         "biogenic": {
           "carbon_content_pct_kgc_kg": 0.524,
           "biogenic_factor": 0.7,
+          "stored_kgco2e_per_common_unit": 65.06,
           "carbon_content_kgc_per_unit": 41.4,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -37791,6 +37795,7 @@
           "imperial_unit_label": "ft²"
         },
         "biogenic": {
+          "stored_kgco2e_per_common_unit": 81.89,
           "method": "none"
         }
       },
@@ -37945,6 +37950,7 @@
           "imperial_unit_label": "ft²"
         },
         "biogenic": {
+          "stored_kgco2e_per_common_unit": 58.86,
           "method": "none"
         }
       },
@@ -38099,6 +38105,7 @@
           "imperial_unit_label": "ft²"
         },
         "biogenic": {
+          "stored_kgco2e_per_common_unit": 103.44,
           "method": "none"
         }
       },
@@ -38253,6 +38260,7 @@
           "imperial_unit_label": "ft²"
         },
         "biogenic": {
+          "stored_kgco2e_per_common_unit": 65.06,
           "method": "none"
         }
       },

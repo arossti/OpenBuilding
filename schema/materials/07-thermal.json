@@ -1490,6 +1490,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 0.178,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 0.16,
+          "full_carbon_kgco2e_per_common_unit": 0.18,
           "method": "none"
         }
       },
@@ -11136,7 +11138,6 @@
           "biogenic_factor": 1,
           "storage_retention_pct": 0.9,
           "wwf_storage_factor_kgco2e_per_kgc": 6.58,
-          "stored_kgco2e_per_common_unit": 6.58,
           "full_carbon_kgco2e_per_common_unit": 7.31,
           "carbon_content_kgc_per_unit": 246.62,
           "co2_to_c_molar_ratio": 3.67,
@@ -11336,6 +11337,8 @@
           "carbon_content_pct_kgc_kg": 0.5,
           "biogenic_factor": 0.86,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 2.27,
+          "full_carbon_kgco2e_per_common_unit": 2.52,
           "carbon_content_kgc_per_unit": 27.52,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -11528,6 +11531,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 1.91,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 1.72,
+          "full_carbon_kgco2e_per_common_unit": 1.91,
           "method": "none"
         }
       },
@@ -11736,6 +11741,8 @@
           "carbon_content_pct_kgc_kg": 0.5,
           "biogenic_factor": 0.86,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 3.1,
+          "full_carbon_kgco2e_per_common_unit": 3.44,
           "carbon_content_kgc_per_unit": 52.59,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -11939,6 +11946,8 @@
           "carbon_content_pct_kgc_kg": 0.5,
           "biogenic_factor": 0.86,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 1.35,
+          "full_carbon_kgco2e_per_common_unit": 1.5,
           "carbon_content_kgc_per_unit": 9.98,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -12147,6 +12156,8 @@
           "carbon_content_pct_kgc_kg": 0.5,
           "biogenic_factor": 0.86,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 3.02,
+          "full_carbon_kgco2e_per_common_unit": 3.36,
           "carbon_content_kgc_per_unit": 51.29,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -12361,6 +12372,8 @@
           "carbon_content_pct_kgc_kg": 0.5,
           "biogenic_factor": 0.86,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 1.36,
+          "full_carbon_kgco2e_per_common_unit": 1.51,
           "carbon_content_kgc_per_unit": 10.38,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -12575,6 +12588,8 @@
           "carbon_content_pct_kgc_kg": 0.5,
           "biogenic_factor": 0.84,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 3.01,
+          "full_carbon_kgco2e_per_common_unit": 3.34,
           "carbon_content_kgc_per_unit": 51.15,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -12791,6 +12806,8 @@
           "carbon_content_pct_kgc_kg": 0.5,
           "biogenic_factor": 0.84,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 0.92,
+          "full_carbon_kgco2e_per_common_unit": 1.02,
           "carbon_content_kgc_per_unit": 4.75,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -13007,6 +13024,8 @@
           "carbon_content_pct_kgc_kg": 0.5,
           "biogenic_factor": 0.71,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 2.43,
+          "full_carbon_kgco2e_per_common_unit": 2.7,
           "carbon_content_kgc_per_unit": 40.07,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -13365,6 +13384,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 751,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 8.11,
+          "full_carbon_kgco2e_per_common_unit": 9.01,
           "method": "none"
         }
       },
@@ -13970,6 +13991,7 @@
           "carbon_content_pct_kgc_kg": 0.646,
           "biogenic_factor": 1,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 7.63,
           "full_carbon_kgco2e_per_common_unit": 10.91,
           "carbon_content_kgc_per_unit": 341.73,
           "co2_to_c_molar_ratio": 3.67,
@@ -14170,6 +14192,8 @@
         },
         "biogenic": {
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 4.08,
+          "full_carbon_kgco2e_per_common_unit": 4.53,
           "method": "none"
         }
       },
@@ -14361,6 +14385,7 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 7.514,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 2.74,
           "full_carbon_kgco2e_per_common_unit": 3.04,
           "method": "none"
         }
@@ -14553,7 +14578,6 @@
         },
         "biogenic": {
           "wwf_storage_factor_kgco2e_per_kgc": 15.59,
-          "stored_kgco2e_per_common_unit": 15.59,
           "method": "none"
         }
       },
@@ -14737,7 +14761,6 @@
           "gwp_bio_from_epd_kgco2e_per_common_unit": 1886.06,
           "storage_retention_pct": 0.9,
           "wwf_storage_factor_kgco2e_per_kgc": 15.28,
-          "stored_kgco2e_per_common_unit": 15.28,
           "full_carbon_kgco2e_per_common_unit": 0,
           "method": "none"
         }
@@ -14940,7 +14963,6 @@
           "gwp_bio_from_epd_kgco2e_per_common_unit": 1886.06,
           "storage_retention_pct": 0.9,
           "wwf_storage_factor_kgco2e_per_kgc": 17.99,
-          "stored_kgco2e_per_common_unit": 17.99,
           "full_carbon_kgco2e_per_common_unit": 0,
           "method": "none"
         }
@@ -15143,7 +15165,6 @@
           "gwp_bio_from_epd_kgco2e_per_common_unit": 1886.06,
           "storage_retention_pct": 0.9,
           "wwf_storage_factor_kgco2e_per_kgc": 24.95,
-          "stored_kgco2e_per_common_unit": 24.95,
           "full_carbon_kgco2e_per_common_unit": 0,
           "method": "none"
         }
@@ -15352,7 +15373,6 @@
           "gwp_bio_from_epd_kgco2e_per_common_unit": 1576.54,
           "storage_retention_pct": 0.9,
           "wwf_storage_factor_kgco2e_per_kgc": 10.36,
-          "stored_kgco2e_per_common_unit": 10.36,
           "method": "none"
         }
       },
@@ -15558,7 +15578,6 @@
           "biogenic_factor": 0.815,
           "storage_retention_pct": 0.9,
           "wwf_storage_factor_kgco2e_per_kgc": 9.37,
-          "stored_kgco2e_per_common_unit": 9.37,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
           "notes": "full_C = density × thickness × biogenic_factor × carbon_content × 3.67; stored = full_C × storage_retention"
@@ -17582,6 +17601,7 @@
           "imperial_unit_label": "ft²"
         },
         "biogenic": {
+          "stored_kgco2e_per_common_unit": 1.63,
           "method": "none"
         }
       },
@@ -17763,6 +17783,7 @@
           "carbon_content_pct_kgc_kg": 0.5,
           "biogenic_factor": 0.05,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 1.36,
           "full_carbon_kgco2e_per_common_unit": 0,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -17971,6 +17992,7 @@
           "carbon_content_pct_kgc_kg": 0.5,
           "biogenic_factor": 0.095,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 2.32,
           "full_carbon_kgco2e_per_common_unit": 2.58,
           "carbon_content_kgc_per_unit": 1300.55,
           "co2_to_c_molar_ratio": 3.67,
@@ -18173,6 +18195,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 1.94,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 1.75,
+          "full_carbon_kgco2e_per_common_unit": 1.94,
           "method": "none"
         }
       },
@@ -18373,6 +18397,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 1.93,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 1.74,
+          "full_carbon_kgco2e_per_common_unit": 1.93,
           "method": "none"
         }
       },
@@ -18573,6 +18599,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 1.36,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 1.22,
+          "full_carbon_kgco2e_per_common_unit": 1.36,
           "method": "none"
         }
       },
@@ -18773,6 +18801,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 1.56,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 1.4,
+          "full_carbon_kgco2e_per_common_unit": 1.56,
           "method": "none"
         }
       },
@@ -23549,6 +23579,7 @@
           "imperial_unit_label": "ft²•R"
         },
         "biogenic": {
+          "stored_kgco2e_per_common_unit": 1.63,
           "method": "none"
         }
       },
@@ -23738,6 +23769,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 1.9,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 1.71,
+          "full_carbon_kgco2e_per_common_unit": 1.9,
           "method": "none"
         }
       },
@@ -23925,6 +23958,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 4.4,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 1.58,
+          "full_carbon_kgco2e_per_common_unit": 1.76,
           "method": "none"
         }
       },
@@ -24128,6 +24163,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 4.4,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 1.58,
+          "full_carbon_kgco2e_per_common_unit": 1.76,
           "method": "none"
         }
       },
@@ -24320,6 +24357,7 @@
           "imperial_unit_label": "ft²•R"
         },
         "biogenic": {
+          "stored_kgco2e_per_common_unit": 10.71,
           "method": "none"
         }
       },
@@ -24508,6 +24546,7 @@
           "carbon_content_pct_kgc_kg": 0.45,
           "biogenic_factor": 0.35,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 10.22,
           "full_carbon_kgco2e_per_common_unit": 10.22,
           "carbon_content_kgc_per_unit": 930.83,
           "co2_to_c_molar_ratio": 3.67,
@@ -24708,6 +24747,7 @@
           "carbon_content_pct_kgc_kg": 0.45,
           "biogenic_factor": 0.35,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 13.18,
           "full_carbon_kgco2e_per_common_unit": 10.22,
           "carbon_content_kgc_per_unit": 930.83,
           "co2_to_c_molar_ratio": 3.67,
@@ -24901,6 +24941,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 61.8,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 9.83,
+          "full_carbon_kgco2e_per_common_unit": 10.92,
           "method": "none"
         }
       },
@@ -25104,6 +25146,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 60.5,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 9.62,
+          "full_carbon_kgco2e_per_common_unit": 10.69,
           "method": "none"
         }
       },
@@ -25308,6 +25352,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 65.95,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 13.84,
+          "full_carbon_kgco2e_per_common_unit": 15.38,
           "method": "none"
         }
       },
@@ -25526,6 +25572,7 @@
           "carbon_content_pct_kgc_kg": 0.47,
           "biogenic_factor": 0.28,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 11.63,
           "full_carbon_kgco2e_per_common_unit": 10.23,
           "carbon_content_kgc_per_unit": 1078.33,
           "co2_to_c_molar_ratio": 3.67,
@@ -30344,6 +30391,7 @@
         "biogenic": {
           "carbon_content_pct_kgc_kg": 0.5,
           "biogenic_factor": 1,
+          "stored_kgco2e_per_common_unit": 8.66,
           "carbon_content_kgc_per_unit": 285.5,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -34246,7 +34294,6 @@
           "biogenic_factor": 0.925,
           "storage_retention_pct": 0.9,
           "wwf_storage_factor_kgco2e_per_kgc": 21.68,
-          "stored_kgco2e_per_common_unit": 21.68,
           "full_carbon_kgco2e_per_common_unit": 28.54,
           "carbon_content_kgc_per_unit": 138.46,
           "co2_to_c_molar_ratio": 3.67,
@@ -34454,7 +34501,6 @@
           "biogenic_factor": 0.925,
           "storage_retention_pct": 0.9,
           "wwf_storage_factor_kgco2e_per_kgc": 21.68,
-          "stored_kgco2e_per_common_unit": 21.68,
           "carbon_content_kgc_per_unit": 138.46,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -34661,7 +34707,6 @@
           "biogenic_factor": 0.925,
           "storage_retention_pct": 0.9,
           "wwf_storage_factor_kgco2e_per_kgc": 21.68,
-          "stored_kgco2e_per_common_unit": 21.68,
           "carbon_content_kgc_per_unit": 138.46,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -34868,7 +34913,6 @@
           "biogenic_factor": 0.925,
           "storage_retention_pct": 0.9,
           "wwf_storage_factor_kgco2e_per_kgc": 21.68,
-          "stored_kgco2e_per_common_unit": 21.68,
           "carbon_content_kgc_per_unit": 138.46,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -35075,7 +35119,6 @@
           "biogenic_factor": 0.925,
           "storage_retention_pct": 0.9,
           "wwf_storage_factor_kgco2e_per_kgc": 21.68,
-          "stored_kgco2e_per_common_unit": 21.68,
           "carbon_content_kgc_per_unit": 138.46,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -38822,6 +38865,8 @@
           "carbon_content_pct_kgc_kg": 0.44,
           "biogenic_factor": 0.91,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 40.16,
+          "full_carbon_kgco2e_per_common_unit": 44.62,
           "carbon_content_kgc_per_unit": 64.65,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -39030,6 +39075,8 @@
           "carbon_content_pct_kgc_kg": 0.505,
           "biogenic_factor": 0.9785,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 0.99,
+          "full_carbon_kgco2e_per_common_unit": 1.1,
           "carbon_content_kgc_per_unit": 5.43,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -39216,6 +39263,7 @@
           "imperial_unit_label": "ft²•R"
         },
         "biogenic": {
+          "stored_kgco2e_per_common_unit": 1.03,
           "method": "none"
         }
       },
@@ -39403,6 +39451,8 @@
           "carbon_content_pct_kgc_kg": 0.505,
           "biogenic_factor": 0.9785,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 1.63,
+          "full_carbon_kgco2e_per_common_unit": 1.81,
           "carbon_content_kgc_per_unit": 12.31,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
@@ -39603,6 +39653,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 0.975,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 0.88,
+          "full_carbon_kgco2e_per_common_unit": 0.98,
           "method": "none"
         }
       },
@@ -39802,6 +39854,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 0.858,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 0.77,
+          "full_carbon_kgco2e_per_common_unit": 0.86,
           "method": "none"
         }
       },
@@ -40001,6 +40055,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 1.217,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 1.1,
+          "full_carbon_kgco2e_per_common_unit": 1.22,
           "method": "none"
         }
       },
@@ -40201,6 +40257,8 @@
         "biogenic": {
           "gwp_bio_from_epd_kgco2e_per_common_unit": 0.859,
           "storage_retention_pct": 0.9,
+          "stored_kgco2e_per_common_unit": 0.77,
+          "full_carbon_kgco2e_per_common_unit": 0.86,
           "method": "none"
         }
       },
