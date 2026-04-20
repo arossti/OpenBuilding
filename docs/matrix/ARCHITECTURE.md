@@ -8,17 +8,17 @@ Interactive HTML application mapping **roles, responsibilities, tools, standards
 
 ## Architecture
 
-### Deployed as part of the PDF-Parser app
+### Deployed alongside the rest of the BfCA app ecosystem
 
-The Matrix was consolidated into the PDF-Parser app on 2026-04-18. The canonical source is now `PDF-Parser/matrix.html` (with extracted `matrix.css`), deployed via GitHub Pages alongside the PDF-Parser tool. Users cross-navigate between the two apps using header buttons.
+The Matrix was consolidated into the shared PDF-Parser deploy surface on 2026-04-18; the repository was flattened on 2026-04-20 so all apps now sit at repo root and deploy via the single `_site/` staging step. Users cross-navigate between apps using header buttons.
 
 **Files:**
 
 | File | Purpose |
 |---|---|
-| `PDF-Parser/matrix.html` | Body, data, and JS (~4,360 lines, ~278 KB) |
-| `PDF-Parser/matrix.css` | Light-theme styles (~1,900 lines) |
-| `PDF-Parser/bfcastyles.css` | Shared design tokens + dark header (used by both apps) |
+| `matrix.html` | Body, data, and JS (~4,360 lines, ~278 KB) |
+| `bfcastyles.css` §6 | Matrix light-theme styles (folded in during consolidation) |
+| `bfcastyles.css` §1 Foundation | Shared design tokens + dark header |
 
 **Previous versions:** The history of the step-numbered single-file app (`ec_matrix_step12.html` through `ec_matrix_step15.html`) lives in git history. Prior to consolidation, the app was split inline-CSS per step-numbered file.
 
@@ -69,8 +69,8 @@ The Matrix was consolidated into the PDF-Parser app on 2026-04-18. The canonical
 
 | File | Content |
 |---|---|
-| `PDF-Parser/matrix.html` | Current app (body + data + JS) |
-| `PDF-Parser/matrix.css` | Current app (light-theme styles) |
+| `matrix.html` | Current app (body + data + JS) |
+| `bfcastyles.css` §6 | Current app (light-theme styles, folded in from the old `matrix.css`) |
 | `docs/matrix/ec_matrix_v2.md` | Markdown documentation of the full data model |
 | `docs/matrix/TRIAGE.md` | Role/phase refinement Q&A notes |
 | `docs/PDF References/Building application flow chart Part 9.pdf` | Reference flowchart for building permit process (prescriptive / performance / EnerGuide paths) |

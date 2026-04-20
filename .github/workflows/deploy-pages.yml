@@ -1,4 +1,4 @@
-name: Deploy PDF-Parser to GitHub Pages
+name: Deploy BfCA OpenBuilding to GitHub Pages
 
 on:
   push:
@@ -30,24 +30,35 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Stage schema + BEAM CSV data into PDF-Parser/data
-        # database.html reads the committed BEAM material catalogue from
-        # schema/materials/ and friends. BEAMweb assembly tabs fetch picker
-        # CSVs from docs/csv files from BEAM/. Local dev runs
-        # `npm run stage:data` (see PDF-Parser/package.json) to produce the
-        # same layout.
+      - name: Stage deployable site into _site/
+        # Repo is flat post-cleanup (session 2026-04-20): HTML + CSS + js/
+        # live at root, so we compose a clean Pages artifact here rather
+        # than upload the whole repo (which would otherwise include schema/
+        # as source, docs/, the .md workplans, dev configs, etc.).
+        #
+        # database.html reads the BfCA material catalogue from data/schema/
+        # at runtime; BEAMweb assembly tabs fetch picker CSVs from
+        # data/beam/. Local dev runs `npm run stage:data` to produce the
+        # same data/ layout.
         run: |
-          mkdir -p PDF-Parser/data/schema PDF-Parser/data/beam PDF-Parser/data/beam/samples
-          cp -r schema/materials PDF-Parser/data/schema/
-          cp schema/material.schema.json PDF-Parser/data/schema/
-          cp schema/sample.json PDF-Parser/data/schema/
-          cp "docs/csv files from BEAM/Footings & Slabs.csv" PDF-Parser/data/beam/footings-slabs.csv
-          cp docs/beam-samples/*.json PDF-Parser/data/beam/samples/
+          mkdir -p _site/data/schema _site/data/beam _site/data/beam/samples
+
+          # Deployable app surface
+          cp index.html pdfparser.html matrix.html database.html beamweb.html dependencies.html _site/
+          cp bfcastyles.css _site/
+          cp -r js graphics lib _site/
+
+          # Runtime data (staged from authoritative sources)
+          cp -r schema/materials _site/data/schema/
+          cp schema/material.schema.json _site/data/schema/
+          cp schema/sample.json _site/data/schema/
+          cp "docs/csv files from BEAM/Footings & Slabs.csv" _site/data/beam/footings-slabs.csv
+          cp docs/beam-samples/*.json _site/data/beam/samples/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: PDF-Parser/
+          path: _site/
 
       - name: Deploy to GitHub Pages
         id: deployment

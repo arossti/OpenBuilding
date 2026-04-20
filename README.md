@@ -49,67 +49,75 @@ Dependency manifest with ESM import-graph drift detector. Not nav-linked — for
 
 ## Repository Structure
 
+Flat layout — the repo root is the deployed site. The Pages workflow stages a clean `_site/` from these files and uploads that as the artifact.
+
 ```
 at/
-├── PDF-Parser/                     Deployed root — GitHub Pages serves from here
-│   ├── index.html                  Landing — app directory
-│   ├── pdfparser.html              PDF-Parser — area + volume takeoff
-│   ├── matrix.html                 EC Matrix — compliance grid
-│   ├── database.html               Material Database viewer
-│   ├── beamweb.html                BEAMweb — embodied carbon calculator
-│   ├── dependencies.html           Dev dependency manifest
-│   ├── bfcastyles.css              Single consolidated design system (~5000 lines)
-│   ├── js/                         ESM modules (vanilla JS, no build step)
-│   │   ├── app.mjs                 PDF-Parser bootstrap
-│   │   ├── polygon-tool.mjs        Polygon + window measurement
-│   │   ├── scale-manager.mjs       Scale detection + calibration
-│   │   ├── pdf-loader.mjs          PDF.js integration
-│   │   ├── canvas-viewer.mjs       Viewer transform + render
-│   │   ├── vector-snap.mjs         Vertex snap to PDF vectors
-│   │   ├── sheet-classifier.mjs    Plan / section / elevation inference
-│   │   ├── schedule-parser.mjs     Schedule extraction (in progress)
-│   │   ├── project-store.mjs       PDF-Parser project persistence
-│   │   ├── config.mjs              App constants
-│   │   ├── beamweb.mjs             BEAMweb app entry + tab router
-│   │   ├── database.mjs            Database viewer entry
-│   │   ├── shared/                 Cross-app utilities
-│   │   │   ├── state-manager.mjs   Centralised state + listeners + autosave
-│   │   │   ├── file-handler.mjs    Import / export with quarantine
-│   │   │   └── html-utils.mjs      HTML escape + helpers
-│   │   └── beam/                   BEAMweb-specific modules
-│   │       ├── project-tab.mjs, footings-slabs-tab.mjs
-│   │       ├── materials-db.mjs    GWP + unit-conversion lookups
-│   │       ├── auto-fill.mjs       PROJECT → F&S quantity bridge
-│   │       ├── jurisdictions.mjs   Country / province filter
-│   │       ├── assembly-csv-parser.mjs  Generic assembly-tab CSV parser
-│   │       ├── sample-loader.mjs   Load Sample (DOE Prototype)
-│   │       ├── workbook-mapper.mjs Workbook → state mapper (Phase 1 stub)
-│   │       ├── reference-data.mjs  Glossary + Energy GHG tables
-│   │       └── shared/
-│   │           └── formatters.mjs  fmtKg / fmtQty display formatters
-│   ├── graphics/                   App logos + iconography
-│   ├── lib/                        PDF.js 4.9.155 (local ESM build)
-│   └── data/                       Gitignored — staged at dev/deploy time
-├── schema/                         Materials database (821 records, EN 15804+A2)
-│   ├── material.schema.json        Draft 2020-12 validator
-│   ├── materials/                  8 per-group JSON files (03-concrete ... 31-earthwork)
-│   ├── lookups/                    Enum + inference tables
-│   ├── scripts/                    CSV importer + validator + BEAM sheet fetcher
-│   └── schema.md                   Workplan + lineage
+├── index.html                       Landing — app directory
+├── pdfparser.html                   PDF-Parser — area + volume takeoff
+├── matrix.html                      EC Matrix — compliance grid
+├── database.html                    Material Database viewer
+├── beamweb.html                     BEAMweb — embodied carbon calculator
+├── dependencies.html                Dev dependency manifest
+├── bfcastyles.css                   Single consolidated design system (~5000 lines)
+├── js/                              ESM modules (vanilla JS, no build step)
+│   ├── app.mjs                      PDF-Parser bootstrap
+│   ├── polygon-tool.mjs             Polygon + window measurement
+│   ├── scale-manager.mjs            Scale detection + calibration
+│   ├── pdf-loader.mjs               PDF.js integration
+│   ├── canvas-viewer.mjs            Viewer transform + render
+│   ├── vector-snap.mjs              Vertex snap to PDF vectors
+│   ├── sheet-classifier.mjs         Plan / section / elevation inference
+│   ├── schedule-parser.mjs          Schedule extraction (in progress)
+│   ├── project-store.mjs            PDF-Parser project persistence
+│   ├── config.mjs                   App constants
+│   ├── beamweb.mjs                  BEAMweb app entry + tab router
+│   ├── database.mjs                 Database viewer entry
+│   ├── shared/                      Cross-app utilities
+│   │   ├── state-manager.mjs        Centralised state + listeners + autosave
+│   │   ├── file-handler.mjs         Import / export with quarantine
+│   │   └── html-utils.mjs           HTML escape + helpers
+│   └── beam/                        BEAMweb-specific modules
+│       ├── project-tab.mjs, footings-slabs-tab.mjs
+│       ├── materials-db.mjs         GWP + unit-conversion lookups
+│       ├── auto-fill.mjs            PROJECT → F&S quantity bridge
+│       ├── jurisdictions.mjs        Country / province filter
+│       ├── assembly-csv-parser.mjs  Generic assembly-tab CSV parser
+│       ├── sample-loader.mjs        Load Sample (DOE Prototype) - candidate for filehandler consolidation
+│       ├── workbook-mapper.mjs      Workbook → state mapper (Phase 1 stub)
+│       ├── reference-data.mjs       Glossary + Energy GHG tables
+│       └── shared/
+│           └── formatters.mjs       fmtKg / fmtQty display formatters
+├── graphics/                        App logos + iconography
+├── lib/                             PDF.js 4.9.155 (local ESM build)
+├── data/                            Gitignored — staged at dev/deploy time
+├── schema/                          Material catalogue source-of-truth (821 records, EN 15804+A2)
+│   ├── material.schema.json         Draft 2020-12 validator
+│   ├── materials/                   8 per-group JSON files (03-concrete ... 31-earthwork)
+│   ├── lookups/                     Enum + inference tables
+│   ├── scripts/                     CSV importer + validator + BEAM sheet fetcher
+│   └── schema.md                    Workplan + lineage
 ├── docs/
-│   ├── pdf-parser.md               PDF-Parser workplan + technical docs
-│   ├── matrix/                     EC Matrix docs (ARCHITECTURE, TRIAGE, data model)
-│   ├── beam-samples/               Sample BEAMweb project JSONs (DOE Prototype)
-│   ├── csv files from BEAM/        22 BEAM workbook tab snapshots
-│   ├── PDF References/             Vancouver EC guides, NRC reports, code references
-│   ├── regulatory (Jacob)/         Legacy regulatory research (archived)
-│   ├── ifc (Jacob)/                Legacy IFC exploration
-│   └── cost (Jacob)/               Legacy cost-data research
-├── CCI-tables-20241121/            CCI construction classification taxonomy
-├── BEAMweb.md                      BEAMweb workstream spec + changelog
-├── PDF-BEAMweb-BRIDGE.md           Phase 4b cross-app bridge design spec
-├── CLEANUP-AUDIT.md                Pre-Phase-4b codebase audit (2026-04-20)
-└── CLAUDE.md                       Project instructions for AI-assisted development
+│   ├── sample.pdf                   PDF-Parser dev fixture (to be replaced by TANDEM Maison du Pré)
+│   ├── pdf-resources/               Larger sample PDFs (gitignored)
+│   ├── pdf-parser.md                PDF-Parser workplan + technical docs
+│   ├── matrix/                      EC Matrix docs (ARCHITECTURE, TRIAGE, data model)
+│   ├── beam-samples/                Sample BEAMweb project JSONs (DOE Prototype)
+│   ├── csv files from BEAM/         22 BEAM workbook tab snapshots
+│   ├── PDF References/              Vancouver EC guides, NRC reports, code references
+│   ├── regulatory (Jacob)/          Legacy regulatory research (archived)
+│   ├── ifc (Jacob)/                 Legacy IFC exploration
+│   ├── cost (Jacob)/                Legacy cost-data research
+│   └── workplans/                   Living workstream specs
+│       ├── BEAMweb.md               BEAMweb workstream spec + changelog
+│       ├── PDF-BEAMweb-BRIDGE.md    Phase 4b cross-app bridge design spec
+│       └── CLEANUP-AUDIT.md         Pre-Phase-4b codebase audit (2026-04-20)
+├── CCI-tables-20241121/             CCI construction classification taxonomy
+├── package.json                     npm tooling (ESLint + Prettier) + stage:data
+├── eslint.config.mjs, .prettierrc, .prettierignore
+├── .github/workflows/deploy-pages.yml   Pages artifact staging + deploy
+├── README.md                        This file
+└── CLAUDE.md                        Project instructions for AI-assisted development
 ```
 
 ## Development
@@ -117,9 +125,8 @@ at/
 All apps load as ES modules and require a local server:
 
 ```bash
-cd PDF-Parser
 npm install          # ESLint + Prettier (one-time)
-npm run stage:data   # Copy schema/materials into PDF-Parser/data/ (gitignored) — needed for Database viewer + BEAMweb
+npm run stage:data   # Copy schema/materials + BEAM CSVs + sample projects into data/ (gitignored) — needed for Database viewer + BEAMweb
 npm run serve        # python3 -m http.server 8000 — open http://localhost:8000/
 npm run lint         # ESLint check
 npm run lint:fix     # ESLint auto-fix (includes Prettier)

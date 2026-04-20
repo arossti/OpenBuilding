@@ -48,7 +48,7 @@ Adding `getDimensionSource()` / `setDimensionSource()` for Phase 4b.2 will slot 
 
 ### Zero TODO / FIXME / XXX / HACK comments
 
-Across `PDF-Parser/js/**`, `schema/**`, `docs/**` — none. All deferred work is captured in `BEAMweb.md` and `PDF-BEAMweb-BRIDGE.md` with explicit Q-numbers (Q19–Q26). Clean separation of "code concerns" from "design concerns."
+Across `js/**`, `schema/**`, `docs/**` — none. All deferred work is captured in `BEAMweb.md` and `PDF-BEAMweb-BRIDGE.md` with explicit Q-numbers (Q19–Q26). Clean separation of "code concerns" from "design concerns."
 
 ### Zero docstring drift
 
@@ -68,7 +68,7 @@ Spot-checked 5 modules (`assembly-csv-parser`, `footings-slabs-tab`, `project-ta
 
 ### 1. Georgia → Helvetica sans for headings + heavy text (~10 min)
 
-**Your explicit ask: no serifs on bolded sections.** Currently `--font-head: "Georgia", "Times New Roman", serif` at [`bfcastyles.css:63`](./PDF-Parser/bfcastyles.css#L63), applied via `font-family: var(--font-head)` in 14 contexts across Matrix + BEAMweb (tab labels, group names, section titles, part-splash headers, card titles).
+**Your explicit ask: no serifs on bolded sections.** Currently `--font-head: "Georgia", "Times New Roman", serif` at [`bfcastyles.css:63`](../../bfcastyles.css#L63), applied via `font-family: var(--font-head)` in 14 contexts across Matrix + BEAMweb (tab labels, group names, section titles, part-splash headers, card titles).
 
 **Fix:** one-line token change — `--font-head: "Helvetica Neue", Helvetica, Arial, sans-serif`. Propagates via the token everywhere. Zero inline `font-family: Georgia` usages to track down.
 
@@ -92,7 +92,7 @@ Phase 4 will copy the F&S tab template 11 times. Before it does, lift three help
 
 ### 3. CSS consolidation (~120 min)
 
-Current total: **5,028 lines** ([`bfcastyles.css`](./PDF-Parser/bfcastyles.css); CLAUDE.md says ~4100, **doc is stale** — worth updating the claim). Target per CLAUDE.md: ~1,500 lines. We're ~3.4× the target.
+Current total: **5,028 lines** ([`bfcastyles.css`](../../bfcastyles.css); CLAUDE.md says ~4100, **doc is stale** — worth updating the claim). Target per CLAUDE.md: ~1,500 lines. We're ~3.4× the target.
 
 **Size breakdown by app-section banner:**
 
@@ -127,7 +127,7 @@ Current total: **5,028 lines** ([`bfcastyles.css`](./PDF-Parser/bfcastyles.css);
 
 ### Console noise — 1–2 drops
 
-[`shared/file-handler.mjs:202`](./PDF-Parser/js/shared/file-handler.mjs#L202) has a generic verbose log. Drop or gate behind a debug flag. Everything else (30 total `console.*` calls) is intentional diagnostic instrumentation — lifecycle events, PDF-parse debug traces, fail-fast error signalling. Keep.
+[`shared/file-handler.mjs:202`](../../js/shared/file-handler.mjs#L202) has a generic verbose log. Drop or gate behind a debug flag. Everything else (30 total `console.*` calls) is intentional diagnostic instrumentation — lifecycle events, PDF-parse debug traces, fail-fast error signalling. Keep.
 
 ### CLAUDE.md CSS size claim is stale
 

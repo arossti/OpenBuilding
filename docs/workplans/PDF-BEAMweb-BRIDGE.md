@@ -18,7 +18,7 @@
   3. Shared bridge module `js/shared/polygon-map.mjs`
   4. Source selector UI + fidelity badge on each PROJECT dim row
   5. Numbered labels pass (trivial, can land anytime)
-- **Current reality.** PDF-Parser polygons carry `{id, label, vertices, closed, type: area|window, mode: net|add}` per [`polygon-tool.mjs`](./PDF-Parser/js/polygon-tool.mjs). No component tag. No depth. `volumes[]` stub exists in [`project-store.mjs`](./PDF-Parser/js/project-store.mjs) but empty. Sheet classification (plan/section/elevation) is tracked via [`sheet-classifier.mjs`](./PDF-Parser/js/sheet-classifier.mjs) but semantically inert — doesn't influence measurement semantics. See BEAMweb.md §0 Phase 4b entry for audit findings.
+- **Current reality.** PDF-Parser polygons carry `{id, label, vertices, closed, type: area|window, mode: net|add}` per [`polygon-tool.mjs`](../../js/polygon-tool.mjs). No component tag. No depth. `volumes[]` stub exists in [`project-store.mjs`](../../js/project-store.mjs) but empty. Sheet classification (plan/section/elevation) is tracked via [`sheet-classifier.mjs`](../../js/sheet-classifier.mjs) but semantically inert — doesn't influence measurement semantics. See BEAMweb.md §0 Phase 4b entry for audit findings.
 
 ### What the bridge does
 
@@ -223,7 +223,7 @@ Picked from a dropdown at measurement time, filtered by polygon type + sheet cla
 - `component` — enum value from §3.2, picked at measurement time
 - `depth_m` — optional, null by default; populated for `pad_pier` type via a measurement-dialog input
 - `sheet_id` — denormalized from parent sheet for bridge convenience (saves a lookup)
-- `sheet_class` — denormalized from [`sheet-classifier.mjs`](./PDF-Parser/js/sheet-classifier.mjs)
+- `sheet_class` — denormalized from [`sheet-classifier.mjs`](../../js/sheet-classifier.mjs)
 
 Sheet denormalization makes polygon records self-contained — the bridge doesn't need to reach back into PDF-Parser's sheet map at aggregation time.
 
@@ -380,7 +380,7 @@ New button next to the area-polygon tool in the PDF-Parser toolbar. Red stroke. 
 **Label:** "Trace Length"
 **Tooltip:** "For interior walls, interior footings, and other linear features. Draws open polylines, measures length only."
 
-Implementation: extend [`polygon-tool.mjs`](./PDF-Parser/js/polygon-tool.mjs) to accept `type: polyline`; reuse the vertex-drawing logic; skip closure; label measurement output "length" (m/ft) instead of "perimeter".
+Implementation: extend [`polygon-tool.mjs`](../../js/polygon-tool.mjs) to accept `type: polyline`; reuse the vertex-drawing logic; skip closure; label measurement output "length" (m/ft) instead of "perimeter".
 
 ### 5.5 Component tag picker (PDF-Parser)
 
@@ -405,21 +405,21 @@ When the user draws a polyline tagged `wall_interior` or a closed polygon tagged
 ### 6.2 Phase 4b.1 — Foundation (PDF-Parser Step 10 minimal + PROJECT params)
 
 **PDF-Parser side:**
-- Add `component`, `sheet_id`, `sheet_class` fields to the polygon schema in [`project-store.mjs`](./PDF-Parser/js/project-store.mjs).
-- Add polyline (`type: polyline`) support to [`polygon-tool.mjs`](./PDF-Parser/js/polygon-tool.mjs) + red stroke styling.
+- Add `component`, `sheet_id`, `sheet_class` fields to the polygon schema in [`project-store.mjs`](../../js/project-store.mjs).
+- Add polyline (`type: polyline`) support to [`polygon-tool.mjs`](../../js/polygon-tool.mjs) + red stroke styling.
 - Add component tag dropdown to the measurement panel.
 - Denormalize sheet metadata onto polygons at save time.
 
 **BEAMweb side:**
-- Add `param_*` fields to [`project-tab.mjs`](./PDF-Parser/js/beam/project-tab.mjs) in a new "Geometry Parameters" subsection.
+- Add `param_*` fields to [`project-tab.mjs`](../../js/beam/project-tab.mjs) in a new "Geometry Parameters" subsection.
 - Extend StateManager with `getDimensionSource` / `setDimensionSource` + the new `dimension_sources` JSON key.
 
 No bridge yet. Foundation only.
 
 ### 6.3 Phase 4b.2 — Bridge + selector (MVP)
 
-- Build [`js/shared/polygon-map.mjs`](./PDF-Parser/js/shared/polygon-map.mjs) with `COMPONENT_TO_DIMENSION` lookup + `aggregateFromPolygons(polygons, params, dimId)` helper. Pure data + pure function — testable in isolation.
-- Wire the bridge to listen for PDF-Parser polygon-change events (extending the existing PROJECT → F&S auto-fill pattern from [`auto-fill.mjs`](./PDF-Parser/js/beam/auto-fill.mjs)).
+- Build [`js/shared/polygon-map.mjs`](../../js/shared/polygon-map.mjs) with `COMPONENT_TO_DIMENSION` lookup + `aggregateFromPolygons(polygons, params, dimId)` helper. Pure data + pure function — testable in isolation.
+- Wire the bridge to listen for PDF-Parser polygon-change events (extending the existing PROJECT → F&S auto-fill pattern from [`auto-fill.mjs`](../../js/beam/auto-fill.mjs)).
 - Build the source-selector widget (`js/beam/source-selector.mjs` new) — renders per-dim pill, handles toggle + confirm dialog, fires bridge re-run.
 - Build the fidelity badge renderer — inline caption under each dim.
 - v1 dim coverage:
