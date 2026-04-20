@@ -230,7 +230,7 @@ const PANEL_BODIES = {
         (Phase 5) are stubbed and queued.
       </p>
       <p>
-        See <a href="https://github.com/arossti/OpenBuilding/blob/main/BEAMweb.md" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md</a> for the workplan and open questions.
+        See <a href="https://github.com/arossti/OpenBuilding/blob/main/docs/workplans/BEAMweb.md" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md</a> for the workplan and open questions.
       </p>
       <p>
         Data source: <a href="database.html" class="db-kv-link">BfCA Material Database</a>.
@@ -352,7 +352,7 @@ function defaultStub(tab) {
       </ul>
       <p style="margin-top: 14px;">
         Awaiting BEAM CSV exports (with formulas) from the unlocked workbook.
-        See <a href="https://github.com/arossti/OpenBuilding/blob/main/BEAMweb.md#2-reference-source--the-beam-spreadsheet" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md §2</a>.
+        See <a href="https://github.com/arossti/OpenBuilding/blob/main/docs/workplans/BEAMweb.md#2-reference-source--the-beam-spreadsheet" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md §2</a>.
       </p>
     </div>
   `;

@@ -149,9 +149,14 @@ function _loadFile(file) {
 
 function loadSample() {
   setStatus("Loading sample PDF...", "busy");
-  fetch("sample.pdf")
+  // Source lives at docs/sample.pdf; staged into data/sample.pdf by
+  // `npm run stage:data` locally and by the Pages deploy workflow.
+  fetch("data/sample.pdf")
     .then(function (resp) {
-      if (!resp.ok) throw new Error("Could not fetch sample.pdf (" + resp.status + ")");
+      if (!resp.ok)
+        throw new Error(
+          "Could not fetch sample.pdf (" + resp.status + "). Run `npm run stage:data` to copy the fixture into data/."
+        );
       return resp.arrayBuffer();
     })
     .then(function (buffer) {

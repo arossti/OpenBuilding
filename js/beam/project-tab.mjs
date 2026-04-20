@@ -87,7 +87,13 @@ const INFO_LEFT = [
     options: CONSTRUCTION_TYPES,
     blank: "(select)"
   },
-  { id: "project_dev_stage", label: "Project Development Stage", type: "select", options: DEV_STAGES, blank: "(select)" }
+  {
+    id: "project_dev_stage",
+    label: "Project Development Stage",
+    type: "select",
+    options: DEV_STAGES,
+    blank: "(select)"
+  }
 ];
 
 const INFO_RIGHT = [
