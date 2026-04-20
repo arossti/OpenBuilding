@@ -8,7 +8,7 @@
       "id": "2c53be",
       "external_refs": {
         "beam_id": "2c53be",
-        "beam_csv_row_index": 2
+        "beam_csv_row_index": 13
       },
       "naming": {
         "display_name": "Aggregate / NRMCA / US Average [Industry Avg]",
@@ -181,9 +181,9 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 2,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 13,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "cost": {},
@@ -195,7 +195,7 @@
       "id": "s12345",
       "external_refs": {
         "beam_id": "S12345",
-        "beam_csv_row_index": 616
+        "beam_csv_row_index": 425
       },
       "naming": {
         "display_name": "Ground screw / American Ground Screw / AGS IM3316 / 76 x 1600 mm",
@@ -240,9 +240,6 @@
           "value_kg_m3": 11.93,
           "value_lb_ft3": 0.74,
           "source": "epd"
-        },
-        "dimensions": {
-          "units_per_m2": 1.6
         }
       },
       "carbon": {
@@ -257,11 +254,7 @@
           ]
         },
         "conversion": {
-          "to_common_unit": "m",
-          "factor": 0.625,
-          "factor_formula": "stated_per_1600_mm / units_per_m2",
-          "factor_source": "physical_dimensions",
-          "notes": "1600 mm → m via 1.6 units/m²"
+          "to_common_unit": "m"
         },
         "common": {
           "value_kgco2e": 27.19,
@@ -384,13 +377,11 @@
           "USA",
           "CAN"
         ],
-        "data_added_or_modified": "2024-02-02",
-        "original_beam_added_or_modified_serial": 45324,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 616,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 425,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "cost": {},
@@ -402,7 +393,7 @@
       "id": "s12346",
       "external_refs": {
         "beam_id": "S12346",
-        "beam_csv_row_index": 617
+        "beam_csv_row_index": 426
       },
       "naming": {
         "display_name": "Ground screw / American Ground Screw / AGS IM4516 / 114 x 1600 mm",
@@ -447,9 +438,6 @@
           "value_kg_m3": 17.81,
           "value_lb_ft3": 1.11,
           "source": "epd"
-        },
-        "dimensions": {
-          "units_per_m2": 1.6
         }
       },
       "carbon": {
@@ -464,11 +452,7 @@
           ]
         },
         "conversion": {
-          "to_common_unit": "m",
-          "factor": 0.625,
-          "factor_formula": "stated_per_1600_mm / units_per_m2",
-          "factor_source": "physical_dimensions",
-          "notes": "1600 mm → m via 1.6 units/m²"
+          "to_common_unit": "m"
         },
         "common": {
           "value_kgco2e": 41.19,
@@ -591,13 +575,11 @@
           "USA",
           "CAN"
         ],
-        "data_added_or_modified": "2024-02-02",
-        "original_beam_added_or_modified_serial": 45324,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 617,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 426,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "cost": {},
@@ -609,7 +591,7 @@
       "id": "s12347",
       "external_refs": {
         "beam_id": "S12347",
-        "beam_csv_row_index": 618
+        "beam_csv_row_index": 427
       },
       "naming": {
         "display_name": "Ground screw / Krinner / E-Series E89x1000-E60 / 89 x 1000 mm [EU]",
@@ -788,13 +770,11 @@
         "markets_of_applicability": [
           "EU"
         ],
-        "data_added_or_modified": "2024-02-02",
-        "original_beam_added_or_modified_serial": 45324,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 618,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 427,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "cost": {},
@@ -806,7 +786,7 @@
       "id": "s12348",
       "external_refs": {
         "beam_id": "S12348",
-        "beam_csv_row_index": 619
+        "beam_csv_row_index": 428
       },
       "naming": {
         "display_name": "Ground screw / Krinner / E-Series E140x1600-E76-100 / 140 x 1600 mm [EU]",
@@ -985,13 +965,11 @@
         "markets_of_applicability": [
           "EU"
         ],
-        "data_added_or_modified": "2024-02-02",
-        "original_beam_added_or_modified_serial": 45324,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 619,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 428,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "cost": {},

@@ -5,394 +5,10 @@
     {
       "$schema": "https://bfca.ca/schemas/material-v1.json",
       "schema_version": 1,
-      "id": "www114",
-      "external_refs": {
-        "beam_id": "www114",
-        "beam_csv_row_index": 311
-      },
-      "naming": {
-        "display_name": "Window, double-glazed, PVC-U frame, tilt & turn / [Industry Avg | EU]",
-        "material_name": "Window, PVC-U frame",
-        "product_brand_name": "PVC-U frame, tilt & turn"
-      },
-      "manufacturer": {
-        "name": "aluplast, Deceuninck, Caine, Gargiulo, Gealan, hapa, Internorm, profine, Rehau, Salamander, Schuco, TMP, VEKA",
-        "country_code": "EU",
-        "specifications": "Double pane"
-      },
-      "status": {
-        "listed": true,
-        "do_not_list": false,
-        "is_industry_average": true,
-        "is_beam_average": false,
-        "visibility": "public"
-      },
-      "classification": {
-        "group_prefix": "08",
-        "category": "08_openings",
-        "material_type": "Double pane window",
-        "product_type": "Double pane window",
-        "product_subtype": "PVC-U frame",
-        "typical_elements": [
-          "window",
-          "glazing"
-        ]
-      },
-      "rendering": {
-        "base_color": [
-          0.6,
-          0.75,
-          0.85,
-          0.6
-        ],
-        "metallic": 0,
-        "roughness": 0.1,
-        "has_grain": false
-      },
-      "carbon": {
-        "stated": {
-          "value_kgco2e": 79.2,
-          "per_unit": "m2",
-          "source": "industry_average",
-          "lifecycle_stages": [
-            "A1",
-            "A2",
-            "A3"
-          ]
-        },
-        "conversion": {
-          "to_common_unit": "m2"
-        },
-        "common": {
-          "value_kgco2e": 79.2,
-          "per_functional_unit": "m2",
-          "metric_unit_label": "m²",
-          "imperial_unit_label": "ft²"
-        },
-        "biogenic": {
-          "method": "none"
-        }
-      },
-      "impacts": {
-        "functional_unit": "m2",
-        "gwp_kgco2e": {
-          "total": {
-            "value": 79.2,
-            "source": "beam_derived"
-          },
-          "by_stage": {}
-        },
-        "gwp_bio_kgco2e": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "eutrophication_kgneq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "acidification_kgso2eq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "ozone_depletion_kgcfc11eq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "smog_kgo3eq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "abiotic_depletion_fossil_mj": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "water_consumption_m3": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "primary_energy_nonrenewable_mj": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "primary_energy_renewable_mj": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        }
-      },
-      "epd": {
-        "id": "EPD-QKE-20220002-IBG1-DE",
-        "type": "industry_average",
-        "owner": "QKE, GKFP, EPPA",
-        "prepared_by": "IBU",
-        "program_operator": "IBU",
-        "validation": {
-          "type": "external",
-          "agent": "(can't identify signature)"
-        },
-        "expiry_date": "2027-12-31",
-        "product_service_life_years": 30
-      },
-      "methodology": {
-        "standards": [
-          "EN 15804+A2"
-        ],
-        "pcr_guidelines": "Windows and doors, 01.2021",
-        "lci_database": "Ecoinvent 3.7",
-        "lifecycle_scope": {
-          "stages_included": [
-            "A1",
-            "A2",
-            "A3"
-          ]
-        }
-      },
-      "provenance": {
-        "countries_of_manufacture": [
-          "EU"
-        ],
-        "markets_of_applicability": [
-          "EU"
-        ],
-        "data_added_or_modified": "2024-02-02",
-        "original_beam_added_or_modified_serial": 45324,
-        "import_metadata": {
-          "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 311,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
-        }
-      },
-      "physical": {},
-      "cost": {},
-      "fire": {},
-      "code_compliance": {}
-    },
-    {
-      "$schema": "https://bfca.ca/schemas/material-v1.json",
-      "schema_version": 1,
-      "id": "www121",
-      "external_refs": {
-        "beam_id": "www121",
-        "beam_csv_row_index": 312
-      },
-      "naming": {
-        "display_name": "Window, triple-glazed, PVC-U frame, tilt & turn / [Industry Avg | EU]",
-        "material_name": "Window, PVC-U frame",
-        "product_brand_name": "PVC-U frame, tilt & turn"
-      },
-      "manufacturer": {
-        "name": "aluplast, Deceuninck, Caine, Gargiulo, Gealan, hapa, Internorm, profine, Rehau, Salamander, Schuco, TMP, VEKA",
-        "country_code": "EU",
-        "specifications": "Triple pane"
-      },
-      "status": {
-        "listed": true,
-        "do_not_list": false,
-        "is_industry_average": true,
-        "is_beam_average": false,
-        "visibility": "public"
-      },
-      "classification": {
-        "group_prefix": "08",
-        "category": "08_openings",
-        "material_type": "Triple pane window",
-        "product_type": "Triple pane window",
-        "product_subtype": "PVC-U frame",
-        "typical_elements": [
-          "window",
-          "glazing"
-        ]
-      },
-      "rendering": {
-        "base_color": [
-          0.6,
-          0.75,
-          0.85,
-          0.6
-        ],
-        "metallic": 0,
-        "roughness": 0.1,
-        "has_grain": false
-      },
-      "carbon": {
-        "stated": {
-          "value_kgco2e": 95.2,
-          "per_unit": "m2",
-          "source": "industry_average",
-          "lifecycle_stages": [
-            "A1",
-            "A2",
-            "A3"
-          ]
-        },
-        "conversion": {
-          "to_common_unit": "m2"
-        },
-        "common": {
-          "value_kgco2e": 95.2,
-          "per_functional_unit": "m2",
-          "metric_unit_label": "m²",
-          "imperial_unit_label": "ft²"
-        },
-        "biogenic": {
-          "method": "none"
-        }
-      },
-      "impacts": {
-        "functional_unit": "m2",
-        "gwp_kgco2e": {
-          "total": {
-            "value": 95.2,
-            "source": "beam_derived"
-          },
-          "by_stage": {}
-        },
-        "gwp_bio_kgco2e": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "eutrophication_kgneq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "acidification_kgso2eq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "ozone_depletion_kgcfc11eq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "smog_kgo3eq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "abiotic_depletion_fossil_mj": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "water_consumption_m3": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "primary_energy_nonrenewable_mj": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "primary_energy_renewable_mj": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        }
-      },
-      "epd": {
-        "id": "EPD-QKE-20220156-IBG1-DE",
-        "type": "industry_average",
-        "owner": "QKE, GKFP, EPPA",
-        "prepared_by": "IBU",
-        "program_operator": "IBU",
-        "validation": {
-          "type": "external",
-          "agent": "Dr. Eva Schminkcke"
-        },
-        "expiry_date": "2026-12-31",
-        "product_service_life_years": 30
-      },
-      "methodology": {
-        "standards": [
-          "EN 15804+A2"
-        ],
-        "pcr_guidelines": "Windows and doors, 01.2021",
-        "lci_database": "Ecoinvent 3.7",
-        "lifecycle_scope": {
-          "stages_included": [
-            "A1",
-            "A2",
-            "A3"
-          ]
-        }
-      },
-      "provenance": {
-        "countries_of_manufacture": [
-          "EU"
-        ],
-        "markets_of_applicability": [
-          "EU"
-        ],
-        "data_added_or_modified": "2024-02-02",
-        "original_beam_added_or_modified_serial": 45324,
-        "import_metadata": {
-          "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 312,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
-        }
-      },
-      "physical": {},
-      "cost": {},
-      "fire": {},
-      "code_compliance": {}
-    },
-    {
-      "$schema": "https://bfca.ca/schemas/material-v1.json",
-      "schema_version": 1,
       "id": "a4f3bf",
       "external_refs": {
         "beam_id": "a4f3bf",
-        "beam_csv_row_index": 379
+        "beam_csv_row_index": 720
       },
       "naming": {
         "display_name": "Window - double-glazed / Fiberglass frame / BfCA Study [US & CA]",
@@ -402,7 +18,6 @@
         "name": "BfCA Study (Tally, 2020)",
         "specifications": "Fiberglass frame"
       },
-      "source_notes": "",
       "status": {
         "listed": true,
         "do_not_list": false,
@@ -522,8 +137,7 @@
       "epd": {
         "id": "BfCA Study (Tally)",
         "type": "beam_average",
-        "prepared_by": "J. D. Racusin",
-        "footnote": ""
+        "prepared_by": "J. D. Racusin"
       },
       "methodology": {
         "standards": [],
@@ -539,9 +153,9 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 379,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 720,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "physical": {},
@@ -555,7 +169,7 @@
       "id": "1c4002",
       "external_refs": {
         "beam_id": "1c4002",
-        "beam_csv_row_index": 401
+        "beam_csv_row_index": 721
       },
       "naming": {
         "display_name": "Window - double-glazed / Vinyl frame / BfCA Study [US & CA]",
@@ -565,7 +179,6 @@
         "name": "BfCA Study (Tally, 2020)",
         "specifications": "Vinyl frame"
       },
-      "source_notes": "",
       "status": {
         "listed": true,
         "do_not_list": false,
@@ -683,8 +296,7 @@
       },
       "epd": {
         "id": "BfCA Study (Tally)",
-        "prepared_by": "J. D. Racusin",
-        "footnote": ""
+        "prepared_by": "J. D. Racusin"
       },
       "methodology": {
         "standards": [],
@@ -700,331 +312,9 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 401,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
-        }
-      },
-      "physical": {},
-      "cost": {},
-      "fire": {},
-      "code_compliance": {}
-    },
-    {
-      "$schema": "https://bfca.ca/schemas/material-v1.json",
-      "schema_version": 1,
-      "id": "bc7038",
-      "external_refs": {
-        "beam_id": "bc7038",
-        "beam_csv_row_index": 404
-      },
-      "naming": {
-        "display_name": "Window - triple pane / Fiberglass frame / BfCA Study [US & CA]",
-        "material_name": "Window - triple pane"
-      },
-      "manufacturer": {
-        "name": "BfCA Study (Tally, 2020)",
-        "specifications": "Fiberglass frame"
-      },
-      "source_notes": "",
-      "status": {
-        "listed": true,
-        "do_not_list": false,
-        "is_industry_average": false,
-        "is_beam_average": false,
-        "visibility": "public"
-      },
-      "classification": {
-        "group_prefix": "08",
-        "category": "08_openings",
-        "product_type": "Window",
-        "product_subtype": "Triple glaze",
-        "typical_elements": []
-      },
-      "rendering": {
-        "base_color": [
-          0.6,
-          0.75,
-          0.85,
-          0.6
-        ],
-        "metallic": 0,
-        "roughness": 0.1,
-        "has_grain": false
-      },
-      "carbon": {
-        "stated": {
-          "lifecycle_stages": []
-        },
-        "conversion": {
-          "to_common_unit": "m2 of window"
-        },
-        "common": {
-          "value_kgco2e": 127,
-          "per_functional_unit": "m2 of window",
-          "metric_unit_label": "m²",
-          "imperial_unit_label": "ft²"
-        },
-        "biogenic": {
-          "method": "none"
-        }
-      },
-      "impacts": {
-        "functional_unit": "m2 of window",
-        "gwp_kgco2e": {
-          "total": {
-            "value": 127,
-            "source": "beam_derived"
-          },
-          "by_stage": {}
-        },
-        "gwp_bio_kgco2e": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "eutrophication_kgneq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "acidification_kgso2eq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "ozone_depletion_kgcfc11eq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "smog_kgo3eq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "abiotic_depletion_fossil_mj": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "water_consumption_m3": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "primary_energy_nonrenewable_mj": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "primary_energy_renewable_mj": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        }
-      },
-      "epd": {
-        "id": "BfCA Study (Tally)",
-        "prepared_by": "J. D. Racusin",
-        "footnote": ""
-      },
-      "methodology": {
-        "standards": [],
-        "lifecycle_scope": {
-          "stages_included": []
-        }
-      },
-      "provenance": {
-        "countries_of_manufacture": [],
-        "markets_of_applicability": [
-          "USA",
-          "CAN"
-        ],
-        "import_metadata": {
-          "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 404,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
-        }
-      },
-      "physical": {},
-      "cost": {},
-      "fire": {},
-      "code_compliance": {}
-    },
-    {
-      "$schema": "https://bfca.ca/schemas/material-v1.json",
-      "schema_version": 1,
-      "id": "595ddd",
-      "external_refs": {
-        "beam_id": "595ddd",
-        "beam_csv_row_index": 405
-      },
-      "naming": {
-        "display_name": "Window - triple pane / Vinyl frame / BfCA Study [US & CA]",
-        "material_name": "Window - triple pane"
-      },
-      "manufacturer": {
-        "name": "BfCA Study (Tally, 2020)",
-        "specifications": "Vinyl frame"
-      },
-      "source_notes": "",
-      "status": {
-        "listed": true,
-        "do_not_list": false,
-        "is_industry_average": false,
-        "is_beam_average": false,
-        "visibility": "public"
-      },
-      "classification": {
-        "group_prefix": "08",
-        "category": "08_openings",
-        "product_type": "Window",
-        "product_subtype": "Triple glaze",
-        "typical_elements": []
-      },
-      "rendering": {
-        "base_color": [
-          0.6,
-          0.75,
-          0.85,
-          0.6
-        ],
-        "metallic": 0,
-        "roughness": 0.1,
-        "has_grain": false
-      },
-      "carbon": {
-        "stated": {
-          "lifecycle_stages": []
-        },
-        "conversion": {
-          "to_common_unit": "m2 of window"
-        },
-        "common": {
-          "value_kgco2e": 99,
-          "per_functional_unit": "m2 of window",
-          "metric_unit_label": "m²",
-          "imperial_unit_label": "ft²"
-        },
-        "biogenic": {
-          "method": "none"
-        }
-      },
-      "impacts": {
-        "functional_unit": "m2 of window",
-        "gwp_kgco2e": {
-          "total": {
-            "value": 99,
-            "source": "beam_derived"
-          },
-          "by_stage": {}
-        },
-        "gwp_bio_kgco2e": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "eutrophication_kgneq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "acidification_kgso2eq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "ozone_depletion_kgcfc11eq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "smog_kgo3eq": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "abiotic_depletion_fossil_mj": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "water_consumption_m3": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "primary_energy_nonrenewable_mj": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        },
-        "primary_energy_renewable_mj": {
-          "total": {
-            "value": null,
-            "source": null
-          },
-          "by_stage": {}
-        }
-      },
-      "epd": {
-        "id": "BfCA Study (Tally)",
-        "prepared_by": "J. D. Racusin",
-        "footnote": ""
-      },
-      "methodology": {
-        "standards": [],
-        "lifecycle_scope": {
-          "stages_included": []
-        }
-      },
-      "provenance": {
-        "countries_of_manufacture": [],
-        "markets_of_applicability": [
-          "USA",
-          "CAN"
-        ],
-        "import_metadata": {
-          "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 405,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 721,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "physical": {},
@@ -1038,7 +328,7 @@
       "id": "s76tf2",
       "external_refs": {
         "beam_id": "s76tf2",
-        "beam_csv_row_index": 774
+        "beam_csv_row_index": 724
       },
       "naming": {
         "display_name": "Window - double-glazed / Inline Fiberglass / Series 300, 325, 325, 400 / Fiberglass frame / CAN",
@@ -1051,7 +341,6 @@
         "specifications": "Fiberglass frame"
       },
       "notes": "Assumed to be double-glazed",
-      "source_notes": "",
       "status": {
         "listed": true,
         "do_not_list": false,
@@ -1082,9 +371,9 @@
           "width_m": 1.5
         },
         "additional_factor": {
-          "value": 31.025641025641022,
+          "value": 31.02564103,
           "units": "kg/m2 window",
-          "description": "Nominal 31.025641025641022 kg/m2 window"
+          "description": "Nominal 31.02564103 kg/m2 window"
         }
       },
       "carbon": {
@@ -1193,9 +482,7 @@
         "validation": {
           "type": "external",
           "agent": "ASTM International"
-        },
-        "expiry_date": "2026-10-29",
-        "footnote": ""
+        }
       },
       "methodology": {
         "standards": [
@@ -1217,13 +504,11 @@
         "markets_of_applicability": [
           "CAN"
         ],
-        "data_added_or_modified": "2022-03-19",
-        "original_beam_added_or_modified_serial": 44639,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 774,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 724,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "cost": {},
@@ -1236,7 +521,7 @@
       "id": "www111",
       "external_refs": {
         "beam_id": "www111",
-        "beam_csv_row_index": 775
+        "beam_csv_row_index": 725
       },
       "naming": {
         "display_name": "Window - double-glazed / Andersen / E-Series / Wood frame, aluminum cladding / USA",
@@ -1249,7 +534,6 @@
         "specifications": "Wood frame, aluminum cladding"
       },
       "notes": "No biogenic carbon credited",
-      "source_notes": "",
       "status": {
         "listed": true,
         "do_not_list": false,
@@ -1385,9 +669,7 @@
         "validation": {
           "type": "external",
           "agent": "Tess Garvey, SCS Global Services"
-        },
-        "expiry_date": "2026-09-26",
-        "footnote": ""
+        }
       },
       "methodology": {
         "standards": [],
@@ -1408,13 +690,11 @@
           "USA",
           "CAN"
         ],
-        "data_added_or_modified": "2023-02-26",
-        "original_beam_added_or_modified_serial": 44983,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 775,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 725,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "physical": {},
@@ -1428,7 +708,7 @@
       "id": "www112",
       "external_refs": {
         "beam_id": "www112",
-        "beam_csv_row_index": 776
+        "beam_csv_row_index": 726
       },
       "naming": {
         "display_name": "Window, double-glazed, aluminum frame / Wausau / INvent fixed windows / US",
@@ -1601,13 +881,11 @@
           "USA",
           "CAN"
         ],
-        "data_added_or_modified": "2024-02-01",
-        "original_beam_added_or_modified_serial": 45323,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 776,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 726,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "physical": {},
@@ -1621,7 +899,7 @@
       "id": "www113",
       "external_refs": {
         "beam_id": "www113",
-        "beam_csv_row_index": 777
+        "beam_csv_row_index": 727
       },
       "naming": {
         "display_name": "Window, double-glazed, aluminum frame / Wausau / INvent casement windows / US",
@@ -1794,13 +1072,201 @@
           "USA",
           "CAN"
         ],
-        "data_added_or_modified": "2024-02-01",
-        "original_beam_added_or_modified_serial": 45323,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 777,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 727,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
+        }
+      },
+      "physical": {},
+      "cost": {},
+      "fire": {},
+      "code_compliance": {}
+    },
+    {
+      "$schema": "https://bfca.ca/schemas/material-v1.json",
+      "schema_version": 1,
+      "id": "www114",
+      "external_refs": {
+        "beam_id": "www114",
+        "beam_csv_row_index": 728
+      },
+      "naming": {
+        "display_name": "Window, double-glazed, PVC-U frame, tilt & turn / [Industry Avg | EU]",
+        "material_name": "Window, PVC-U frame",
+        "product_brand_name": "PVC-U frame, tilt & turn"
+      },
+      "manufacturer": {
+        "name": "aluplast, Deceuninck, Caine, Gargiulo, Gealan, hapa, Internorm, profine, Rehau, Salamander, Schuco, TMP, VEKA",
+        "country_code": "EU",
+        "specifications": "Double pane"
+      },
+      "status": {
+        "listed": true,
+        "do_not_list": false,
+        "is_industry_average": true,
+        "is_beam_average": false,
+        "visibility": "public"
+      },
+      "classification": {
+        "group_prefix": "08",
+        "category": "08_openings",
+        "material_type": "Double pane window",
+        "product_type": "Double pane window",
+        "product_subtype": "PVC-U frame",
+        "typical_elements": [
+          "window",
+          "glazing"
+        ]
+      },
+      "rendering": {
+        "base_color": [
+          0.6,
+          0.75,
+          0.85,
+          0.6
+        ],
+        "metallic": 0,
+        "roughness": 0.1,
+        "has_grain": false
+      },
+      "carbon": {
+        "stated": {
+          "value_kgco2e": 79.2,
+          "per_unit": "m2",
+          "source": "industry_average",
+          "lifecycle_stages": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        },
+        "conversion": {
+          "to_common_unit": "m2"
+        },
+        "common": {
+          "value_kgco2e": 79.2,
+          "per_functional_unit": "m2",
+          "metric_unit_label": "m²",
+          "imperial_unit_label": "ft²"
+        },
+        "biogenic": {
+          "method": "none"
+        }
+      },
+      "impacts": {
+        "functional_unit": "m2",
+        "gwp_kgco2e": {
+          "total": {
+            "value": 79.2,
+            "source": "beam_derived"
+          },
+          "by_stage": {}
+        },
+        "gwp_bio_kgco2e": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "eutrophication_kgneq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "acidification_kgso2eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "ozone_depletion_kgcfc11eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "smog_kgo3eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "abiotic_depletion_fossil_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "water_consumption_m3": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_nonrenewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_renewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        }
+      },
+      "epd": {
+        "id": "EPD-QKE-20220002-IBG1-DE",
+        "type": "industry_average",
+        "owner": "QKE, GKFP, EPPA",
+        "prepared_by": "IBU",
+        "program_operator": "IBU",
+        "validation": {
+          "type": "external",
+          "agent": "(can't identify signature)"
+        },
+        "expiry_date": "2027-12-31",
+        "product_service_life_years": 30
+      },
+      "methodology": {
+        "standards": [
+          "EN 15804+A2"
+        ],
+        "pcr_guidelines": "Windows and doors, 01.2021",
+        "lci_database": "Ecoinvent 3.7",
+        "lifecycle_scope": {
+          "stages_included": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        }
+      },
+      "provenance": {
+        "countries_of_manufacture": [
+          "EU"
+        ],
+        "markets_of_applicability": [
+          "EU"
+        ],
+        "import_metadata": {
+          "imported_from": "BEAM Database-DUMP.csv",
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 728,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "physical": {},
@@ -1814,7 +1280,7 @@
       "id": "www115",
       "external_refs": {
         "beam_id": "www115",
-        "beam_csv_row_index": 778
+        "beam_csv_row_index": 729
       },
       "naming": {
         "display_name": "Window, double-glazed, aluminum frame / Kawneer / OptiQ AA5450, TR-9100, 8400TL, AA6400|6500|6600 / Hung & sliding",
@@ -1988,13 +1454,11 @@
           "USA",
           "CAN"
         ],
-        "data_added_or_modified": "2024-02-02",
-        "original_beam_added_or_modified_serial": 45324,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 778,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 729,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "physical": {},
@@ -2008,7 +1472,7 @@
       "id": "www116",
       "external_refs": {
         "beam_id": "www116",
-        "beam_csv_row_index": 779
+        "beam_csv_row_index": 730
       },
       "naming": {
         "display_name": "Window, double-glazed, aluminum frame / Kawneer / Optiq AA4325, 8225TL|TLF, 526, AA 6400|6500, NX-300|3000 / Projected & casement",
@@ -2182,13 +1646,11 @@
           "USA",
           "CAN"
         ],
-        "data_added_or_modified": "2024-02-02",
-        "original_beam_added_or_modified_serial": 45324,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 779,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 730,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "physical": {},
@@ -2202,7 +1664,7 @@
       "id": "www117",
       "external_refs": {
         "beam_id": "www117",
-        "beam_csv_row_index": 780
+        "beam_csv_row_index": 731
       },
       "naming": {
         "display_name": "Window, double-glazed, aluminum frame / AluQuebec / Avg of fixed, casement, slider, hung, tilt & turn, awning",
@@ -2375,13 +1837,11 @@
           "USA",
           "CAN"
         ],
-        "data_added_or_modified": "2024-02-02",
-        "original_beam_added_or_modified_serial": 45324,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 780,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 731,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "physical": {},
@@ -2395,7 +1855,7 @@
       "id": "www118",
       "external_refs": {
         "beam_id": "www118",
-        "beam_csv_row_index": 781
+        "beam_csv_row_index": 732
       },
       "naming": {
         "display_name": "Window, double-glazed, aluminum frame / Arcadia / CV200, T200 / Projected & casement",
@@ -2569,13 +2029,11 @@
           "USA",
           "CAN"
         ],
-        "data_added_or_modified": "2024-02-02",
-        "original_beam_added_or_modified_serial": 45324,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 781,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 732,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "physical": {},
@@ -2589,7 +2047,7 @@
       "id": "www119",
       "external_refs": {
         "beam_id": "www119",
-        "beam_csv_row_index": 782
+        "beam_csv_row_index": 733
       },
       "naming": {
         "display_name": "Window, double-glazed, aluminum frame / EFCO / Xtherm, 5FXT, FX45, 6615, 6621, 6715, FX32, OG32, OG45 / Fixed",
@@ -2762,13 +2220,11 @@
           "USA",
           "CAN"
         ],
-        "data_added_or_modified": "2024-02-02",
-        "original_beam_added_or_modified_serial": 45324,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 782,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 733,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "physical": {},
@@ -2782,7 +2238,7 @@
       "id": "www120",
       "external_refs": {
         "beam_id": "www120",
-        "beam_csv_row_index": 783
+        "beam_csv_row_index": 734
       },
       "naming": {
         "display_name": "Window, double-glazed, aluminum frame / EFCO / Xtherm, 875V, 2700, 2701, 450G, 590X, 6725, PG32, PX32, WV410, WV430 / Projected & casement",
@@ -2955,13 +2411,519 @@
           "USA",
           "CAN"
         ],
-        "data_added_or_modified": "2024-02-02",
-        "original_beam_added_or_modified_serial": 45324,
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-18",
-          "beam_csv_row_index": 783,
-          "beam_csv_sha256": "8a356b280b1171d7679886154d61a939ac35a850295cb5c78ffc4e981d2f813f"
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 734,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
+        }
+      },
+      "physical": {},
+      "cost": {},
+      "fire": {},
+      "code_compliance": {}
+    },
+    {
+      "$schema": "https://bfca.ca/schemas/material-v1.json",
+      "schema_version": 1,
+      "id": "www121",
+      "external_refs": {
+        "beam_id": "www121",
+        "beam_csv_row_index": 735
+      },
+      "naming": {
+        "display_name": "Window, triple-glazed, PVC-U frame, tilt & turn / [Industry Avg | EU]",
+        "material_name": "Window, PVC-U frame",
+        "product_brand_name": "PVC-U frame, tilt & turn"
+      },
+      "manufacturer": {
+        "name": "aluplast, Deceuninck, Caine, Gargiulo, Gealan, hapa, Internorm, profine, Rehau, Salamander, Schuco, TMP, VEKA",
+        "country_code": "EU",
+        "specifications": "Triple pane"
+      },
+      "status": {
+        "listed": true,
+        "do_not_list": false,
+        "is_industry_average": true,
+        "is_beam_average": false,
+        "visibility": "public"
+      },
+      "classification": {
+        "group_prefix": "08",
+        "category": "08_openings",
+        "material_type": "Triple pane window",
+        "product_type": "Triple pane window",
+        "product_subtype": "PVC-U frame",
+        "typical_elements": [
+          "window",
+          "glazing"
+        ]
+      },
+      "rendering": {
+        "base_color": [
+          0.6,
+          0.75,
+          0.85,
+          0.6
+        ],
+        "metallic": 0,
+        "roughness": 0.1,
+        "has_grain": false
+      },
+      "carbon": {
+        "stated": {
+          "value_kgco2e": 95.2,
+          "per_unit": "m2",
+          "source": "industry_average",
+          "lifecycle_stages": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        },
+        "conversion": {
+          "to_common_unit": "m2"
+        },
+        "common": {
+          "value_kgco2e": 95.2,
+          "per_functional_unit": "m2",
+          "metric_unit_label": "m²",
+          "imperial_unit_label": "ft²"
+        },
+        "biogenic": {
+          "method": "none"
+        }
+      },
+      "impacts": {
+        "functional_unit": "m2",
+        "gwp_kgco2e": {
+          "total": {
+            "value": 95.2,
+            "source": "beam_derived"
+          },
+          "by_stage": {}
+        },
+        "gwp_bio_kgco2e": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "eutrophication_kgneq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "acidification_kgso2eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "ozone_depletion_kgcfc11eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "smog_kgo3eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "abiotic_depletion_fossil_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "water_consumption_m3": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_nonrenewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_renewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        }
+      },
+      "epd": {
+        "id": "EPD-QKE-20220156-IBG1-DE",
+        "type": "industry_average",
+        "owner": "QKE, GKFP, EPPA",
+        "prepared_by": "IBU",
+        "program_operator": "IBU",
+        "validation": {
+          "type": "external",
+          "agent": "Dr. Eva Schminkcke"
+        },
+        "expiry_date": "2026-12-31",
+        "product_service_life_years": 30
+      },
+      "methodology": {
+        "standards": [
+          "EN 15804+A2"
+        ],
+        "pcr_guidelines": "Windows and doors, 01.2021",
+        "lci_database": "Ecoinvent 3.7",
+        "lifecycle_scope": {
+          "stages_included": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        }
+      },
+      "provenance": {
+        "countries_of_manufacture": [
+          "EU"
+        ],
+        "markets_of_applicability": [
+          "EU"
+        ],
+        "import_metadata": {
+          "imported_from": "BEAM Database-DUMP.csv",
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 735,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
+        }
+      },
+      "physical": {},
+      "cost": {},
+      "fire": {},
+      "code_compliance": {}
+    },
+    {
+      "$schema": "https://bfca.ca/schemas/material-v1.json",
+      "schema_version": 1,
+      "id": "bc7038",
+      "external_refs": {
+        "beam_id": "bc7038",
+        "beam_csv_row_index": 736
+      },
+      "naming": {
+        "display_name": "Window - triple pane / Fiberglass frame / BfCA Study [US & CA]",
+        "material_name": "Window - triple pane"
+      },
+      "manufacturer": {
+        "name": "BfCA Study (Tally, 2020)",
+        "specifications": "Fiberglass frame"
+      },
+      "status": {
+        "listed": true,
+        "do_not_list": false,
+        "is_industry_average": false,
+        "is_beam_average": false,
+        "visibility": "public"
+      },
+      "classification": {
+        "group_prefix": "08",
+        "category": "08_openings",
+        "product_type": "Window",
+        "product_subtype": "Triple glaze",
+        "typical_elements": []
+      },
+      "rendering": {
+        "base_color": [
+          0.6,
+          0.75,
+          0.85,
+          0.6
+        ],
+        "metallic": 0,
+        "roughness": 0.1,
+        "has_grain": false
+      },
+      "carbon": {
+        "stated": {
+          "lifecycle_stages": []
+        },
+        "conversion": {
+          "to_common_unit": "m2 of window"
+        },
+        "common": {
+          "value_kgco2e": 127,
+          "per_functional_unit": "m2 of window",
+          "metric_unit_label": "m²",
+          "imperial_unit_label": "ft²"
+        },
+        "biogenic": {
+          "method": "none"
+        }
+      },
+      "impacts": {
+        "functional_unit": "m2 of window",
+        "gwp_kgco2e": {
+          "total": {
+            "value": 127,
+            "source": "beam_derived"
+          },
+          "by_stage": {}
+        },
+        "gwp_bio_kgco2e": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "eutrophication_kgneq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "acidification_kgso2eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "ozone_depletion_kgcfc11eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "smog_kgo3eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "abiotic_depletion_fossil_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "water_consumption_m3": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_nonrenewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_renewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        }
+      },
+      "epd": {
+        "id": "BfCA Study (Tally)",
+        "prepared_by": "J. D. Racusin"
+      },
+      "methodology": {
+        "standards": [],
+        "lifecycle_scope": {
+          "stages_included": []
+        }
+      },
+      "provenance": {
+        "countries_of_manufacture": [],
+        "markets_of_applicability": [
+          "USA",
+          "CAN"
+        ],
+        "import_metadata": {
+          "imported_from": "BEAM Database-DUMP.csv",
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 736,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
+        }
+      },
+      "physical": {},
+      "cost": {},
+      "fire": {},
+      "code_compliance": {}
+    },
+    {
+      "$schema": "https://bfca.ca/schemas/material-v1.json",
+      "schema_version": 1,
+      "id": "595ddd",
+      "external_refs": {
+        "beam_id": "595ddd",
+        "beam_csv_row_index": 737
+      },
+      "naming": {
+        "display_name": "Window - triple pane / Vinyl frame / BfCA Study [US & CA]",
+        "material_name": "Window - triple pane"
+      },
+      "manufacturer": {
+        "name": "BfCA Study (Tally, 2020)",
+        "specifications": "Vinyl frame"
+      },
+      "status": {
+        "listed": true,
+        "do_not_list": false,
+        "is_industry_average": false,
+        "is_beam_average": false,
+        "visibility": "public"
+      },
+      "classification": {
+        "group_prefix": "08",
+        "category": "08_openings",
+        "product_type": "Window",
+        "product_subtype": "Triple glaze",
+        "typical_elements": []
+      },
+      "rendering": {
+        "base_color": [
+          0.6,
+          0.75,
+          0.85,
+          0.6
+        ],
+        "metallic": 0,
+        "roughness": 0.1,
+        "has_grain": false
+      },
+      "carbon": {
+        "stated": {
+          "lifecycle_stages": []
+        },
+        "conversion": {
+          "to_common_unit": "m2 of window"
+        },
+        "common": {
+          "value_kgco2e": 99,
+          "per_functional_unit": "m2 of window",
+          "metric_unit_label": "m²",
+          "imperial_unit_label": "ft²"
+        },
+        "biogenic": {
+          "method": "none"
+        }
+      },
+      "impacts": {
+        "functional_unit": "m2 of window",
+        "gwp_kgco2e": {
+          "total": {
+            "value": 99,
+            "source": "beam_derived"
+          },
+          "by_stage": {}
+        },
+        "gwp_bio_kgco2e": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "eutrophication_kgneq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "acidification_kgso2eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "ozone_depletion_kgcfc11eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "smog_kgo3eq": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "abiotic_depletion_fossil_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "water_consumption_m3": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_nonrenewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        },
+        "primary_energy_renewable_mj": {
+          "total": {
+            "value": null,
+            "source": null
+          },
+          "by_stage": {}
+        }
+      },
+      "epd": {
+        "id": "BfCA Study (Tally)",
+        "prepared_by": "J. D. Racusin"
+      },
+      "methodology": {
+        "standards": [],
+        "lifecycle_scope": {
+          "stages_included": []
+        }
+      },
+      "provenance": {
+        "countries_of_manufacture": [],
+        "markets_of_applicability": [
+          "USA",
+          "CAN"
+        ],
+        "import_metadata": {
+          "imported_from": "BEAM Database-DUMP.csv",
+          "import_date": "2026-04-20",
+          "beam_csv_row_index": 737,
+          "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
       },
       "physical": {},
