@@ -16,6 +16,50 @@ import { COUNTRIES, provinceOptions } from "./jurisdictions.mjs";
 
 const VS = StateManager.VALUE_STATES;
 
+// Option lists for informational dropdowns — no cross-dependencies, no calc
+// impact. Order matches the BEAM gSheet validation lists.
+const BUILDING_TYPES = [
+  "Single Detached House",
+  "Semi-Detached House",
+  "Townhouse (single unit)",
+  "Townhouse (all units)",
+  "Apartment (single unit)",
+  "Apartment (all units)",
+  "Office",
+  "Educational",
+  "Religious",
+  "Institutional",
+  "Commercial",
+  "Hospitality",
+  "Industrial",
+  "Agricultural",
+  "Data centre",
+  "Recreational",
+  "Mixed use",
+  "Other"
+];
+
+const CONSTRUCTION_TYPES = [
+  "New Construction",
+  "Off-site Prefabrication",
+  "Interior Renovation",
+  "Shell Renovation",
+  "Energy Retrofit",
+  "Other"
+];
+
+const DEV_STAGES = [
+  "Pre-Design",
+  "Schematic Design",
+  "Design Development",
+  "Construction Documents",
+  "Permits & Contracts",
+  "Materials Procurement",
+  "Construction in Progress",
+  "Construction Complete",
+  "Other"
+];
+
 const INFO_LEFT = [
   { id: "project_name", label: "Project Name", type: "text", required: true },
   { id: "project_scenario", label: "Scenario", type: "text" },
@@ -34,9 +78,15 @@ const INFO_LEFT = [
     optionsFor: "project_country",
     blank: "(select country first)"
   },
-  { id: "project_building_type", label: "Building Type", type: "text" },
-  { id: "project_construction_type", label: "Construction Type", type: "text" },
-  { id: "project_dev_stage", label: "Project Development Stage", type: "text" }
+  { id: "project_building_type", label: "Building Type", type: "select", options: BUILDING_TYPES, blank: "(select)" },
+  {
+    id: "project_construction_type",
+    label: "Construction Type",
+    type: "select",
+    options: CONSTRUCTION_TYPES,
+    blank: "(select)"
+  },
+  { id: "project_dev_stage", label: "Project Development Stage", type: "select", options: DEV_STAGES, blank: "(select)" }
 ];
 
 const INFO_RIGHT = [
@@ -372,9 +422,8 @@ function renderDimRow(f) {
   `;
 }
 
-function renderDimsTable(title, dims) {
+function renderDimsTable(dims) {
   return `
-    <h3 class="bw-section-title">${esc(title)}</h3>
     <table class="bw-dims-table">
       <thead>
         <tr>
@@ -390,29 +439,43 @@ function renderDimsTable(title, dims) {
   `;
 }
 
+// Re-uses the F&S assembly-group chrome (`.bw-asm-group` / `-header` / `-toggle`
+// / `-body`) so the PROJECT sections read as the same card pattern with the
+// same cyan chevron. Open sections show ▼ and omit [hidden]; collapsed ones
+// show ▶ and carry [hidden]. Toggle handler lives in wireProjectForm.
+function renderCollapsibleSection(id, title, bodyHtml, open) {
+  const hiddenAttr = open ? "" : "hidden";
+  const chevron = open ? "▼" : "▶";
+  const aria = open ? "true" : "false";
+  return `
+    <section class="bw-asm-group bw-project-section" data-section-id="${esc(id)}">
+      <header class="bw-asm-group-header">
+        <button class="bw-asm-toggle" type="button" aria-expanded="${aria}" data-toggle-section="${esc(id)}">${chevron}</button>
+        <h3 class="bw-asm-group-name">${esc(title)}</h3>
+      </header>
+      <div class="bw-asm-group-body" ${hiddenAttr}>
+        ${bodyHtml}
+      </div>
+    </section>
+  `;
+}
+
 export function renderProjectPanel() {
+  const infoBody = `
+    <div class="bw-info-grid">
+      <div class="bw-info-col">${INFO_LEFT.map(renderInfoRow).join("")}</div>
+      <div class="bw-info-col">${INFO_RIGHT.map(renderInfoRow).join("")}</div>
+    </div>
+    <p class="bw-legend">
+      <span class="bw-req">*</span> Required for saving projects ·
+      Conditioned area fields are required for calculations.
+    </p>
+  `;
   return `
     <div class="bw-project-panel">
-      <section class="bw-project-section bw-project-info">
-        <h3 class="bw-section-title">Project Information</h3>
-        <div class="bw-info-grid">
-          <div class="bw-info-col">${INFO_LEFT.map(renderInfoRow).join("")}</div>
-          <div class="bw-info-col">${INFO_RIGHT.map(renderInfoRow).join("")}</div>
-        </div>
-        <p class="bw-legend">
-          <span class="bw-req">*</span> Required for saving projects ·
-          Conditioned area fields are required for calculations ·
-          Dropdown fields accept free text until Phase 2.1 wires Categories.csv option lists.
-        </p>
-      </section>
-
-      <section class="bw-project-section bw-project-dims">
-        ${renderDimsTable("Building Dimension Inputs (excluding garage)", DIMS_BUILDING)}
-      </section>
-
-      <section class="bw-project-section bw-project-garage">
-        ${renderDimsTable("Garage Dimension Inputs", DIMS_GARAGE)}
-      </section>
+      ${renderCollapsibleSection("info", "Project Information", infoBody, true)}
+      ${renderCollapsibleSection("building", "Building Dimension Inputs (excluding garage)", renderDimsTable(DIMS_BUILDING), false)}
+      ${renderCollapsibleSection("garage", "Garage Dimension Inputs", renderDimsTable(DIMS_GARAGE), false)}
     </div>
   `;
 }
@@ -518,4 +581,20 @@ export function wireProjectForm() {
   if (!panel) return;
   panel.addEventListener("input", (e) => handleFieldInput(e.target));
   panel.addEventListener("change", (e) => handleFieldInput(e.target));
+
+  // Section collapse/expand — mirrors the F&S group-header click pattern.
+  // Clicks inside a section body pass through (closest finds no header).
+  panel.addEventListener("click", (e) => {
+    const header = e.target.closest(".bw-asm-group-header");
+    if (!header) return;
+    const section = header.closest(".bw-asm-group");
+    const body = section && section.querySelector(".bw-asm-group-body");
+    const btn = header.querySelector(".bw-asm-toggle");
+    if (!body || !btn) return;
+    const open = body.hasAttribute("hidden");
+    if (open) body.removeAttribute("hidden");
+    else body.setAttribute("hidden", "");
+    btn.textContent = open ? "▼" : "▶";
+    btn.setAttribute("aria-expanded", String(open));
+  });
 }

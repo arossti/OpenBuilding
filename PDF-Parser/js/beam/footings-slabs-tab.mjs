@@ -293,14 +293,23 @@ function recomputeAll() {
         // scaling on SUB-SLAB INSULATION, deferred until the BEAM R-value
         // formula is properly ported).
         const effectiveQty = qtyInMaterialUnit !== null ? qtyInMaterialUnit * vals.configRatio : 0;
-        const emissions = computeRowEmissions({
-          select: vals.select,
+        // Potential emissions (what the row would contribute if selected).
+        // Displayed on every row so users can "shop" by GWP — matches the
+        // BEAM gSheet where grey values are visible on every candidate and
+        // the selected material's value gets the amber highlight. Uses the
+        // same compute helper so the gwp/qty/pct short-circuit logic stays
+        // in one place.
+        const potential = computeRowEmissions({
+          select: true,
           qtyInMaterialUnit: effectiveQty,
           pct: vals.pct,
           gwp: dbEntry ? dbEntry.gwp_kgco2e : 0
         });
+        // Contribution to subtotals / totals is still gated by the row's
+        // actual select state — unselected rows don't inflate the tab NET.
+        const emissions = vals.select ? potential : { net: 0, gross: 0, storage_short: 0, storage_long: 0 };
         const netEl = document.getElementById(`bw-fs-net-${codeToDomKey(m)}`);
-        if (netEl) netEl.textContent = fmtKg(emissions.net);
+        if (netEl) netEl.textContent = fmtKg(potential.net);
         groupNet += emissions.net;
         tabNet += emissions.net;
         tabGross += emissions.gross;

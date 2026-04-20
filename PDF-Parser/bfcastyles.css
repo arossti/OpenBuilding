@@ -4080,11 +4080,12 @@ table.beam-glossary-table tbody tr {
   flex-direction: column;
   gap: 20px;
 }
+/* PROJECT sections reuse .bw-asm-group chrome (bg / border / radius) via the
+   collapsible pattern — this class is now just a semantic marker for the
+   three sections (info / building / garage). No layout rules here so the
+   .bw-asm-group and .bw-asm-group-body styles apply cleanly. */
 .bw-project-section {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 16px 18px;
+  /* intentionally empty */
 }
 .bw-section-title {
   font-family: var(--font-head);
@@ -4501,7 +4502,16 @@ tr.bw-asm-row[hidden],
   font-size: 10px;
   color: var(--text-dim);
 }
-.bw-asm-col-foot.expired {
+/* Footnote cell (TD, distinct from the col-header TH above): EPD expiry
+   date and other per-row notes. Default grey for neutral notes; purple
+   accent on the `.expired` modifier so expired EPDs flag without shouting.
+   Historical note: this rule used to be scoped to .bw-asm-col-foot which
+   never matched the actual TD class — the purple never rendered until now. */
+.bw-asm-foot {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.bw-asm-foot.expired {
   color: #c084fc;
 }
 .bw-asm-qty,
@@ -4541,6 +4551,12 @@ tr.bw-asm-row[hidden],
 .bw-asm-row-selected .bw-asm-col-net {
   color: #fb923c;
 }
+/* Selected rows get a cyan qty value so the active pick reads at a glance,
+   matching the cyan group-subtotal colour. Unselected qty stays the default
+   read-only light colour. */
+.bw-asm-row-selected .bw-asm-qty-readonly {
+  color: var(--accent-lit);
+}
 .bw-asm-nofactor {
   color: var(--text-dim);
   font-family: var(--font-mono);
@@ -4555,6 +4571,35 @@ tr.bw-asm-row[hidden],
   margin: 0 auto 20px auto;
   width: 180px;
   height: auto;
+}
+/* Introduction tab: centre-align everything so headings and body text read
+   as a single composed block. Headings keep their baseline size; the list
+   loses bullets so bullet glyphs don't float offset from the centred text. */
+.bw-intro {
+  text-align: center;
+  padding: 28px 32px;
+}
+.bw-intro h3 {
+  margin-top: 20px;
+}
+.bw-intro h3:first-of-type {
+  margin-top: 0;
+}
+.bw-intro p {
+  margin: 6px 0;
+}
+.bw-intro-lede {
+  font-size: 13px;
+  margin: 8px 0 18px 0;
+}
+.bw-intro-list {
+  list-style: none;
+  padding: 0;
+  margin: 6px auto 12px auto;
+  max-width: 680px;
+}
+.bw-intro-list li {
+  margin: 6px 0;
 }
 
 /* ═════════════════════════════════════════════════════════════

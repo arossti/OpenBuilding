@@ -207,31 +207,31 @@ const PANEL_BODIES = {
   project: renderProjectPanel(),
   "footings-slabs": renderFootingsSlabsPanel(),
   introduction: `
-    <div class="beam-tbd" style="text-align: left; padding: 28px 32px;">
+    <div class="beam-tbd bw-intro">
       <img src="graphics/beam-logo.png" alt="BEAM" class="bw-intro-logo" />
-      <h3 style="text-align:center">Welcome to BEAMweb</h3>
-      <p style="text-align:center; font-size: 13px; margin: 8px 0 18px 0;">
+      <h3>Welcome to BEAMweb</h3>
+      <p class="bw-intro-lede">
         A browser port of the BEAM embodied carbon calculator, built for Canadian projects.
       </p>
 
-      <h3 style="margin-top: 20px">How it works</h3>
-      <ul>
+      <h3>How it works</h3>
+      <ul class="bw-intro-list">
         <li>Enter your project meta and areas on the <strong>PROJECT</strong> tab — or import them from a BEAM workbook or a PDF-Parser project.</li>
         <li>For each assembly tab (Footings &amp; Slabs through Garage), select the materials you used and the quantities.</li>
         <li>Material emissions come from the <a href="database.html" class="db-kv-link">BfCA material database</a> — 821 records, full EN 15804+A2 per-stage scope.</li>
         <li>Review the totals on <strong>REVIEW</strong> + <strong>RESULTS</strong>. Print to PDF for a project report.</li>
       </ul>
 
-      <h3 style="margin-top: 20px">Status — Phases 0–3 live</h3>
-      <p style="margin: 6px 0">
+      <h3>Status — Phases 0–3 live</h3>
+      <p>
         State manager, file handler, PROJECT tab, and Footings &amp; Slabs assembly picker are all
         live with BEAM gSheet parity. The other 11 assembly tabs (Phase 4) and REVIEW / RESULTS
         (Phase 5) are stubbed and queued.
       </p>
-      <p style="margin:6px 0">
+      <p>
         See <a href="https://github.com/arossti/OpenBuilding/blob/main/BEAMweb.md" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md</a> for the workplan and open questions.
       </p>
-      <p style="margin:6px 0">
+      <p>
         Data source: <a href="database.html" class="db-kv-link">BfCA Material Database</a>.
         Companion apps: <a href="pdfparser.html" class="db-kv-link">PDF-Parser</a> (area takeoff),
         <a href="matrix.html" class="db-kv-link">EC Matrix</a> (regulatory compliance),
