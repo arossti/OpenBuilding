@@ -59,8 +59,11 @@
   --teal: #2a9d8f;
   --cyan: #00e5ff;
 
-  /* Typography */
-  --font-head: "Georgia", "Times New Roman", serif;
+  /* Typography — all families resolve to sans-serif. `--font-head` is kept
+     as a distinct token so callers can opt into a heavier-feeling UI face
+     later without a global find-replace; today it resolves to the same
+     stack as --font-body. No serifs anywhere in the design system. */
+  --font-head: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-body: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-mono: "Courier New", Courier, monospace;
 
