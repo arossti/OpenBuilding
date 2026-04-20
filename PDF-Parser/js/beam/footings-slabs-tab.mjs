@@ -31,6 +31,16 @@ function fmtKg(v) {
   return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
+// Display formatter for read-only qty inputs. Always shows 1 decimal to match
+// the BEAM gSheet (9.0 m³, 110.4 m²). State holds the full-precision number;
+// only the rendered string is rounded.
+function fmtQty(v) {
+  if (v === null || v === undefined || v === "") return "";
+  const n = Number(v);
+  if (!isFinite(n) || n === 0) return "";
+  return n.toFixed(1);
+}
+
 // Convert a row's code path (T01|C01|S04|43fe24) to a CSS-safe identifier
 // (T01_C01_S04_43fe24). Used as the suffix of every per-row state key,
 // DOM id, and data attribute. Hash alone is not unique - the same material
@@ -218,7 +228,8 @@ function renderMaterialRow(group, sub, m) {
   // refine (e.g. NRMCA rows in a CANADA subgroup get [US & CA] from bracket).
   const rowJur = inferJurisdiction(sub.name, m.name);
   // Render qty blank when 0 so cold-start rows don't visually broadcast "0".
-  const qtyDisplay = vals.qty ? esc(vals.qty) : "";
+  // Display rounded to 1 decimal (BEAM gSheet style); state holds full precision.
+  const qtyDisplay = fmtQty(vals.qty);
   const pctDisplay = (vals.pct * 100).toFixed(0);
   const noFactor = !m.factors;
   return `
@@ -371,7 +382,7 @@ function refreshInputsFromState() {
         const rawQty = StateManager.getValue(f.qty);
         const rawPct = StateManager.getValue(f.pct);
         if (sel) sel.checked = rawSel === true || rawSel === "true";
-        if (qty) qty.value = (rawQty === null || rawQty === "" || Number(rawQty) === 0) ? "" : rawQty;
+        if (qty) qty.value = fmtQty(rawQty);
         if (pct) pct.value = rawPct === null ? "100" : String(Math.round(StateManager.parseNumeric(rawPct, 1) * 100));
         updateRowSelectedClass(rowKey(m), sel ? sel.checked : false);
       }

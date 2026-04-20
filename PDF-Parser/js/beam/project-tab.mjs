@@ -304,7 +304,12 @@ function recomputeVolume(parentId) {
   const l = StateManager.parseNumeric(StateManager.getValue(lId), 0);
   const h = StateManager.parseNumeric(StateManager.getValue(hId), 0);
   const w = StateManager.parseNumeric(StateManager.getValue(wId), 0);
-  const v = Math.round(l * h * w * 10) / 10;
+  // Store full precision in state so downstream calcs (F&S auto-fill,
+  // emissions) use the same number BEAM uses internally. Display is
+  // rounded to 1 decimal to match the BEAM gSheet's visual presentation.
+  // Rounding the stored value cost ~10 kgCO2e on the DOE Prototype's
+  // CONTINUOUS FOOTINGS NRMCA row (9.0 vs 8.965492 -> 2516 vs 2506).
+  const v = l * h * w;
   StateManager.setValue(`${parentId}_volume`, String(v), VS.CALCULATED);
   const out = document.getElementById(`bw-${parentId}_volume`);
   if (out) out.textContent = v.toFixed(1);
