@@ -74,12 +74,23 @@ function currentValues(material, group) {
   return { select, qty, pct, configRatio };
 }
 
-// configRatio = user / BEAM-default. Blank/zero user input means the group
-// has no effective contribution → returns 0 so emissions roll up to 0 until
-// the user enters a value (or loads the sample). The BEAM default is only
-// surfaced as a placeholder + tooltip on the input.
+// "TOTAL ..." configs (TOTAL LENGTH, TOTAL VOLUME, TOTAL REBAR LENGTH) hold
+// the group's quantity directly — the value flows to per-row qty via the
+// config-qty bridge. Scaling configs (THICKNESS, R-VALUE) instead multiply
+// emissions by user / default.
+function isTotalConfig(group) {
+  return !!(group.config && /^TOTAL\b/i.test(group.config.label || ""));
+}
+
+// configRatio = user / BEAM-default for scaling configs. Blank/zero user
+// input means the group has no effective contribution → returns 0 so
+// emissions roll up to 0 until the user enters a value (or loads the
+// sample). The BEAM default is only surfaced as a placeholder + tooltip
+// on the input. TOTAL configs always return 1: the value is already the
+// qty (via the bridge), no extra scaling.
 function groupConfigRatio(group) {
   if (!group.config || !group.config.default) return 1;
+  if (isTotalConfig(group)) return 1;
   const raw = StateManager.getValue(groupCfgId(group));
   if (raw === null || raw === "") return 0;
   const user = StateManager.parseNumeric(raw, 0);
@@ -382,14 +393,67 @@ function refreshInputsFromState() {
   recomputeAll();
 }
 
+// Group-config → row-qty bridge for "TOTAL ..." configs (TOTAL LENGTH on
+// METAL PILE FOUNDATIONS, TOTAL VOLUME on TIMBER PILE FOUNDATION, TOTAL
+// REBAR LENGTH on the three REBAR groups). Mirrors the BEAM gSheet's
+// "config IS the qty for every row in this group" semantic. PROJECT
+// auto-fill bridge handles area/volume groups; this bridge handles
+// length/count groups whose quantity originates inside the assembly tab.
+function propagateConfigToRowQty(group) {
+  if (!isTotalConfig(group)) return false;
+  const cfgVal = StateManager.getValue(groupCfgId(group));
+  const num = StateManager.parseNumeric(cfgVal, 0);
+  const writeVal = num > 0 ? String(num) : "";
+  let touched = false;
+  StateManager.muteListeners();
+  try {
+    for (const sub of group.subgroups) {
+      for (const m of sub.materials) {
+        const f = fieldIds(m);
+        const st = StateManager.getFieldState(f.qty);
+        if (st === VS.USER_MODIFIED) continue; // user override stays
+        StateManager.setValue(f.qty, writeVal, VS.DERIVED);
+        touched = true;
+      }
+    }
+  } finally {
+    StateManager.unmuteListeners();
+  }
+  return touched;
+}
+
+function syncAllTotalConfigsToQty() {
+  if (!parsed) return false;
+  let any = false;
+  for (const group of parsed.groups) {
+    if (propagateConfigToRowQty(group)) any = true;
+  }
+  return any;
+}
+
+function registerGroupConfigQtyBridge() {
+  if (!parsed) return;
+  for (const group of parsed.groups) {
+    if (!isTotalConfig(group)) continue;
+    StateManager.addListener(groupCfgId(group), () => {
+      if (propagateConfigToRowQty(group)) refreshInputsFromState();
+    });
+  }
+  syncAllTotalConfigsToQty();
+}
+
 export function resetFootingsSlabsTab() {
   StateManager.clearByPrefix("fs_");
-  // Re-flow PROJECT auto-fill so DERIVED qtys come back after the wipe.
+  // Re-flow both bridges so DERIVED qtys come back after the wipe.
   syncProjectToFsBridge();
+  syncAllTotalConfigsToQty();
   refreshInputsFromState();
 }
 
 export function refreshFootingsSlabsTab() {
+  // Sample-load writes IMPORTED on group configs but with listeners muted;
+  // re-sync TOTAL configs so propagation lands before the DOM refresh.
+  syncAllTotalConfigsToQty();
   refreshInputsFromState();
   applyJurisdictionFilter();
 }
@@ -512,6 +576,10 @@ export async function wireFootingsSlabsTab() {
   // PROJECT source key (dim_continuous_footings_volume, etc.) and pushes
   // their current values down as DERIVED qty on every matching F&S row.
   registerProjectToFsBridge(parsed);
+  // Wire group-config → row-qty bridge for "TOTAL ..." configs (METAL +
+  // TIMBER PILE FOUNDATIONS, REBAR groups). Listener writes DERIVED qty
+  // to every row in the group whenever the user edits the config input.
+  registerGroupConfigQtyBridge();
   // Wire jurisdiction filter — listen to the two PROJECT keys that drive
   // F&S row visibility and re-apply on every change.
   StateManager.addListener("project_country", applyJurisdictionFilter);

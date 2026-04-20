@@ -46,6 +46,14 @@ export function codeToDomKey(codeOrObj) {
 export function parseAssemblyCsv(csvText) {
   const rows = parseCsvRows(csvText);
   const groups = [];
+  // Cross-row factor sharing keyed by (hash, unit). Same EPD with the same
+  // unit semantics (e.g. rebar at "m" across CONTINUOUS FOOTINGS / SLABS /
+  // COLUMN PADS) shares its factor — the BEAM workbook only fills sample
+  // qty in one of the three groups but the per-m kgCO2e is identical.
+  // Different units block sharing — concrete hash 949348 has per-m³ data
+  // in CONTINUOUS FOOTINGS and per-m²-at-6" data in SLABS; sharing those
+  // would give 30,866 instead of 4,704 on the slab row.
+  const factorByHashUnit = new Map();
   let factorCount = 0;
 
   let currentGroup = null;
@@ -92,14 +100,6 @@ export function parseAssemblyCsv(csvText) {
       const storageLong = parseNum(row[10]);
       const footnote = (row[12] || "").trim();
 
-      // Derive per-unit factor from THIS row's sample only — no cross-row
-      // sharing. The same material hash can appear in groups that measure
-      // quantity differently (m³ in CONTINUOUS FOOTINGS vs m² in CONCRETE
-      // SLABS), so a per-m³ factor leaks ~6× too much when reused on a
-      // per-m²-at-6"-thickness row. Per-row derivation reproduces the
-      // pre-computed sample net for any row whose sample has data; rows
-      // with sample_qty=0 get a null factor and the picker UI shows the
-      // "no-factor" marker until material-DB cross-reference fills them in.
       let factors = null;
       if (sampleQty > 0 && samplePct > 0) {
         const denom = sampleQty * samplePct;
@@ -109,7 +109,9 @@ export function parseAssemblyCsv(csvText) {
           storage_short_per_unit: storageShort / denom,
           storage_long_per_unit: storageLong / denom
         };
-        factorCount++;
+        // First non-zero row per (hash, unit) wins for cross-row sharing.
+        const k = `${hash}|${unit}`;
+        if (!factorByHashUnit.has(k)) factorByHashUnit.set(k, factors);
       }
 
       currentSubgroup.materials.push({
@@ -125,8 +127,24 @@ export function parseAssemblyCsv(csvText) {
         sample_storage_short: storageShort,
         sample_storage_long: storageLong,
         footnote,
-        factors
+        factors // null for now if sample_qty=0; backfilled in the second pass.
       });
+    }
+  }
+
+  // Second pass: backfill factors for rows whose own sample was empty by
+  // looking up another row in the same (hash, unit) bucket. Rows with no
+  // peer (e.g. METAL PILE EPDs that have zero sample data anywhere in the
+  // workbook) stay null and surface the "no-factor" marker until the
+  // material-DB cross-reference lands.
+  for (const g of groups) {
+    for (const sub of g.subgroups) {
+      for (const m of sub.materials) {
+        if (!m.factors) {
+          m.factors = factorByHashUnit.get(`${m.hash}|${m.unit}`) || null;
+        }
+        if (m.factors) factorCount++;
+      }
     }
   }
 
