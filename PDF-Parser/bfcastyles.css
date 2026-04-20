@@ -4502,17 +4502,22 @@ tr.bw-asm-row[hidden],
   font-size: 10px;
   color: var(--text-dim);
 }
-/* Footnote cell (TD, distinct from the col-header TH above): EPD expiry
-   date and other per-row notes. Default grey for neutral notes; purple
-   accent on the `.expired` modifier so expired EPDs flag without shouting.
-   Historical note: this rule used to be scoped to .bw-asm-col-foot which
-   never matched the actual TD class — the purple never rendered until now. */
+/* Footnote cell (TD, distinct from the col-header TH above). The footnote
+   is rendered as two spans: a primary status tag (turns purple on
+   `.expired`) and an optional dim-grey suffix for BfCA annotations fused
+   after a `;` — e.g. `Expired 2025 · BfCA BioC calc by mass`. nowrap so
+   longer combined strings expand the column instead of line-wrapping. */
 .bw-asm-foot {
   font-size: 10px;
   color: var(--text-dim);
+  white-space: nowrap;
 }
-.bw-asm-foot.expired {
+.bw-asm-foot-primary.expired {
   color: #c084fc;
+}
+.bw-asm-foot-sub {
+  color: var(--text-dim);
+  opacity: 0.85;
 }
 .bw-asm-qty,
 .bw-asm-pct {

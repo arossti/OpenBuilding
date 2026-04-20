@@ -225,7 +225,6 @@ function renderMaterialRow(group, sub, m) {
   const k = codeToDomKey(m);
   const netId = `bw-fs-net-${k}`;
   const rowCls = vals.select ? "bw-asm-row bw-asm-row-selected" : "bw-asm-row";
-  const footCls = m.footnote.toLowerCase().includes("expired") ? "bw-asm-foot expired" : "bw-asm-foot";
   // Row jurisdiction inherits subgroup signal + adds material-name [bracket]
   // tag if present. Subgroup banner is the primary; material-level overrides
   // refine (e.g. NRMCA rows in a CANADA subgroup get [US & CA] from bracket).
@@ -253,14 +252,32 @@ function renderMaterialRow(group, sub, m) {
       <td class="bw-asm-col-net">
         <span id="${netId}">0</span>${noFactor ? ' <span class="bw-asm-nofactor" title="No GWP factor for this material in the BfCA materials DB (schema/materials/index.json) — cannot compute.">–</span>' : ""}
       </td>
-      <td class="${footCls}" title="${esc(m.footnote)}">${m.footnote ? esc(truncFoot(m.footnote)) : ""}</td>
+      <td class="bw-asm-foot" title="${esc(m.footnote)}">${renderFootnote(m.footnote)}</td>
     </tr>
   `;
 }
 
-function truncFoot(s) {
-  if (s.length <= 18) return s;
-  return s.slice(0, 16) + "…";
+// Footnote renderer. The BEAM CSVs (and the BfCA materials DB) fuse two
+// kinds of signal into a single footnote string with a `;` separator —
+// e.g. `Expired 2025; BfCA BioC calc by mass`. Left of the `;` is a status
+// tag (commonly the expiry date); right is a BfCA annotation about how the
+// EPD was treated (typically `BfCA BioC calc by mass`: biogenic carbon
+// computed by BfCA using mass, because the source EPD did not report it).
+// We render them as two spans so each reads as its own tag — primary in
+// purple on `Expired *`, suffix in dim grey. Full text stays in the TD
+// title attribute for hover confirmation.
+function renderFootnote(s) {
+  if (!s) return "";
+  const parts = s
+    .split(";")
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const primary = parts.shift() || "";
+  const suffix = parts.join(" · ");
+  const primaryCls = /^expired/i.test(primary) ? "bw-asm-foot-primary expired" : "bw-asm-foot-primary";
+  const primaryHtml = `<span class="${primaryCls}">${esc(primary)}</span>`;
+  const suffixHtml = suffix ? `<span class="bw-asm-foot-sub"> · ${esc(suffix)}</span>` : "";
+  return `${primaryHtml}${suffixHtml}`;
 }
 
 async function loadCsv() {
