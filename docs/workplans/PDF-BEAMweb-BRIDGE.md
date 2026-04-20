@@ -561,6 +561,27 @@ Carrying forward from BEAMweb.md §7 Q19 with updates:
   - (d) **Override the preset after drawing.** Should the user be able to change a polyline's preset later without re-drawing? **Proposal:** yes — same picker accessible via polygon-edit panel. Preset change triggers re-seed on the assembly tab (with USER_MODIFIED rows sticky, as always).
   - (e) **Exterior walls.** Do exterior walls get presets too (Wood 2×4 + cladding-type combo), or are they manual-tuned given their higher variability? **Lean:** same preset mechanism, larger catalogue — but that multiplies the preset list by cladding type. Maybe two dropdowns for exterior: "framing preset" + "cladding preset"? Design call needed.
 
+### Draft ask for Melanie — EPD provenance semantics (Q28 + Q29 consolidated)
+
+Ready-to-paste message. Pairs the two open concerns (EPD-Only filter narrowing 821 → 380, and 34 of 36 BEAM-Avg rows carrying `null` in `carbon.stated.value_kgco2e`) into one ask because both probe the same underlying question: what does "this row has an EPD" actually mean in the BfCA source sheet?
+
+> **Hi Melanie — two questions on the Materials DB schema that we'd love your steer on before we code around them.**
+>
+> **1. EPD-Only filter (Database viewer).** When we tick the "EPD Only" checkbox, the list narrows from 821 to 380 entries. You mentioned in the meeting that every row in the catalogue was informed by an EPD during BfCA's curation, so this 380 number feels too low. Can you help us distinguish:
+>   - Does "informed by an EPD" mean the row has its own underlying EPD document (direct provenance — the 380), OR is the 821 inclusive of rows that were *derived* from EPDs (industry averages, BEAM-Avg rows computed from a peer set, extrapolations for related products)?
+>   - If the 440 delta is "EPD-derived" rows, the filter is correct but the label is misleading — we'd relabel it to "Direct EPD only" or similar. If instead you expect those 440 rows to carry a direct EPD reference the filter is missing, that points at either a data gap (source sheet) or a code gap (filter checks the wrong field).
+>
+> **2. BEAM-Avg rows with null values.** After regenerating from the current DB sheet, 34 of 36 rows flagged as `is_beam_average: true` carry `null` in their stored GWP field. Two rows (XPS BEAM-Avg and one concrete BEAM-Avg) have numeric values populated; the other 34 stay null.
+>
+>   Runtime we handle this — BEAMweb has a `resolveBeamAverage()` helper that computes the mean of same-subgroup peer GWPs at boot when the stored value is null, so all 36 rows end up with usable numbers. But the data question is:
+>   - Is the expectation that a BEAM-Average row has its averaged numeric pre-computed and saved on the row, OR that it stays null and gets computed on demand by consumers?
+>   - If "pre-computed and saved" is the intent, are the 34 currently-null rows a curation-in-progress gap (you're working through them manually), or is there a formula column in the sheet that should be filling those in automatically and isn't?
+>   - Related: the Database viewer's detail pane shows `biogenic method: none`, `biogenic_factor: —`, `carbon_content: — kgC/kg`, `full_C: — kgCO2e`, `stored: — kgCO2e` on wood and biogenic-insulation rows where we'd expect non-zero values. Is that also a source-sheet data gap, a viewer rendering bug (reading the wrong field), or a schema area that hasn't been surfaced through the UI yet?
+>
+> Your answer on (1) tells us how to relabel the filter (or whether we have a bug to fix). Your answer on (2) tells us whether BEAMweb should keep computing averages client-side as a permanent fallback, treat them as a temporary stopgap, or rip the code path out and rely on pre-populated values. Thanks!
+
+Andy to relay; answer will drive follow-up commits on Q28 + Q29.
+
 ---
 
 ## Appendix — implementation sketch
