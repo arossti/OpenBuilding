@@ -342,27 +342,36 @@ Mirroring PDF-Parser + Database viewer conventions for BEAMweb's own code, with 
 - **Namespace**: `window.BEAM.*` (mirrors OBJECTIVE's `window.TEUI.*` so algorithms port directly).
 - **Dependency manifest**: [`dependencies.html`](../../dependencies.html) — central registry of every CDN + version pin + per-app usage matrix. Live load probes. Not nav-linked (dev-only).
 - **OBJECTIVE reuse strategy**: Architecture patterns (3-tier reset, dual-state Target/Reference, section modules, `data-render-section`, `saveStateAndNavigate` cross-app nav) ported by reading OBJECTIVE's code. Files NOT copied verbatim — rewritten as ESM under `js/beam/` with matching API shape so convergence stays cheap.
-- **File layout** (proposed):
+- **File layout** (as shipped — flat repo, post-cleanup 2026-04-20):
   ```
-  BEAMweb/                          or beamweb.html + sibling assets
-  ├── beamweb.html                  Shell page with tab nav + assembly sub-pages
-  ├── beamweb.css                   Dark theme, extends bfcastyles + pdfparser
-  ├── js/
-  │   ├── beamweb.mjs               App entry, boot, router
-  │   ├── state.mjs                 Project state + change events
-  │   ├── calc.mjs                  Pure calc functions, one per component
-  │   ├── excel.mjs                 xlsx reader/writer (OBJECTIVE-derived)
-  │   ├── tabs/
-  │   │   ├── user-input.mjs
-  │   │   ├── footings-slabs.mjs
-  │   │   ├── foundation-walls.mjs
-  │   │   └── ...                   one per BEAM assembly tab
-  │   └── material-picker.mjs       modal/panel, reuses schema/materials/
-  └── data/ or fetch from ../schema/materials/
+  beamweb.html                      Shell page with tab nav; sits at repo root
+  bfcastyles.css  (§8 app-beamweb)  Dark theme, section-scoped inside the single consolidated stylesheet
+  js/
+  ├── beamweb.mjs                   App entry, boot, tab router
+  ├── beam/                         BEAMweb-specific modules
+  │   ├── project-tab.mjs           PROJECT tab (info + dimensions + garage, collapsibles)
+  │   ├── footings-slabs-tab.mjs    F&S assembly picker (template for Phase 4 tabs)
+  │   ├── assembly-csv-parser.mjs   Generic assembly-CSV parser + `computeRowEmissions`
+  │   ├── materials-db.mjs          Per-unit GWP + unit conversion (single source of truth)
+  │   ├── auto-fill.mjs             PROJECT → F&S quantity bridge (DERIVED/USER_MODIFIED precedence)
+  │   ├── jurisdictions.mjs         Country / province filter + cascading dropdowns
+  │   ├── sample-loader.mjs         Load Sample — candidate for FileHandler consolidation
+  │   ├── workbook-mapper.mjs       Workbook → state mapper (Phase 1 stub; fills per-tab as Phase 4 lands)
+  │   ├── reference-data.mjs        Glossary + Energy GHG (Phase 0 read-only)
+  │   └── shared/
+  │       └── formatters.mjs        fmtKg / fmtQty (shared across every assembly tab)
+  ├── shared/                       Cross-app utilities (shipped Phase 1 + cleanup 2026-04-20)
+  │   ├── state-manager.mjs         Field map + listeners + localStorage autosave + VALUE_STATES
+  │   ├── file-handler.mjs          Import / export JSON + xlsx with IMPORT QUARANTINE
+  │   └── html-utils.mjs            `esc()` HTML escape (shared across apps)
+  └── database.mjs                  Database viewer entry (sibling app, shares js/shared/*)
+  data/                             Gitignored — staged from schema/materials/ + docs/ via `npm run stage:data`
   ```
-- **Shared infra to extract** (user flagged: "We will need to update/enhance or create a filehandler and statemanager files, which I do not think we have explicitly created yet"):
-  - `shared/filehandler.mjs` — open/save/import JSON + xlsx; used by both PDF-Parser and BEAMweb
-  - `shared/statemanager.mjs` — project state, change events, undo (?). Both apps can read each other's project JSON.
+  No nested `BEAMweb/` wrapper; no per-app `.mjs`-tree subdir (`tabs/`, `calc.mjs`, `state.mjs`, `excel.mjs` were early-sketch names that didn't survive session 4 structure). BEAMweb-internal calc lives inside each `*-tab.mjs` module; the "pure calc layer" separation deferred until Phase 9 graph work.
+- **Shared infra — status** (user flagged session 2: "We will need to update/enhance or create a filehandler and statemanager files, which I do not think we have explicitly created yet"):
+  - ✅ [`js/shared/state-manager.mjs`](../../js/shared/state-manager.mjs) — shipped Phase 1. Project state map, change events, dependency graph, localStorage autosave, VALUE_STATES precedence, `clearByPrefix` / `muteListeners` / `importState` / `exportState`. Used by every BEAMweb module that touches state (20+ call sites).
+  - ✅ [`js/shared/file-handler.mjs`](../../js/shared/file-handler.mjs) — shipped Phase 1. `.json` / `.csv` / `.xlsx` import + `.json` export, IMPORT QUARANTINE pattern.
+  - ✅ [`js/shared/html-utils.mjs`](../../js/shared/html-utils.mjs) — shipped cleanup 2026-04-20. `esc()` HTML escape consolidated from four near-identical copies across beam/project-tab, beam/footings-slabs-tab, beamweb.mjs, database.mjs.
 
 ### 5.1 Project file shape (locked, session 5)
 
@@ -412,7 +421,7 @@ Small, independently-shippable slices:
 
 1. **Phase 0 — Design lock-in + shared dependency manifest + shell stub** ✅ (session 2, merged via PR #6). Dependency manifest at [`dependencies.html`](../../dependencies.html); shell at [`beamweb.html`](../../beamweb.html) with 18 tabs + stubs; Glossary + Energy GHG populated with real content; nav-btn wired across all apps.
 2. **Phase 1 — Shared infra** 🟡 (session 3, stubs landed). `js/shared/state-manager.mjs` + `js/shared/file-handler.mjs` + `js/beam/workbook-mapper.mjs` committed as Phase-1 stubs with full API surfaces. Still pending: `js/shared/units.mjs` (§9 conversions — metric canonical, imperial display), PDF-Parser refactor to consume the shared infra, flesh out per-tab mapping tables in workbook-mapper as assembly tabs port.
-3. **Phase 2 — PROJECT tab** 🟡 (session 3, partial). PROJECT form shipped ([`js/beam/project-tab.mjs`](../../js/beam/project-tab.mjs)) with ~40 fields, L×H×W → computed volume, StateManager persistence. Still pending: dropdown option lists from `Categories.csv`, metric/imperial toggle (needs `units.mjs` from Phase 1), Filter Concrete action, PDF-Parser JSON import button. Derived-totals shell is trivial once assembly tabs start producing numbers.
+3. **Phase 2 — PROJECT tab** 🟡 (session 3 shipped, sessions 5–6 polished, cross-cuts remain). PROJECT form shipped ([`js/beam/project-tab.mjs`](../../js/beam/project-tab.mjs)) with ~40 fields, L×H×W → computed volume, StateManager persistence. Session 5 added cascading Country/Province dropdowns via [`jurisdictions.mjs`](../../js/beam/jurisdictions.mjs). Session 6 landed collapsible Info/Building/Garage sections + real dropdowns for Building Type (18) / Construction Type (6) / Project Development Stage (9) via inline arrays (Categories.csv parsing was the original plan; inline arrays are simpler and produce the same UI). Still pending: metric/imperial toggle (needs `units.mjs` from Phase 1), Filter Concrete action, and the PDF-Parser source selector (Phase 4b spec in `PDF-BEAMweb-BRIDGE.md`). Derived-totals shell is trivial once assembly tabs start producing numbers.
 4. **Phase 3 — First assembly tab end-to-end** ✅ (session 4, `aa33913` → `4e1614b`). `Footings & Slabs` shipped — all 16 groups × 658 materials, 276 with derived EPD factors, group-header configs (THICKNESS / R-VALUE / TOTAL REBAR LENGTH) editable, linear configRatio scaling, per-row + per-group + per-tab subtotals live, collapsed-by-default overview. Parser + tab-renderer pair is now the template for Phase 4. Parity testing against the BEAM workbook (canonical DOE Prototype project) is the next validation step — expected to surface refinements to the linear scaling assumption in `computeRowEmissions`.
 5. **Phase 4 — Remaining 11 assembly tabs** 🟡 (queue as of 2026-04-19). Each follows the F&S template via the same `assembly-csv-parser.mjs` + a per-tab module. Ordered smallest→largest to shake out column-shape variants on simple tabs first:
    - `Windows` (62 rows)
@@ -444,9 +453,9 @@ Small, independently-shippable slices:
 ### Answered or partly answered
 
 - ✅ **Q1 (tab inventory)** — use the BEAM list, 17 tabs + Energy GHG optional (see §2.1).
-- 🟡 **Q2 (user-facing vs derived vs lookup)** — first-pass classification in §2.1 (user intake = Introduction/PROJECT/assembly tabs; derived = REVIEW/RESULTS; lookup = Glossary/Energy GHG). Confirm when BEAM CSVs arrive.
-- 🟡 **Q4 (material reference encoding)** — assembly tabs pre-curate a subset of BEAM materials as inline rows (see §2.3). Likely resolved by `beam_id` once CSVs come with formulas; confirm.
-- 🟡 **Q5 (per-m² vs mass-based)** — reference-CSV column labels indicate per-functional-unit intensity × section-config × quantity (see §4.1). Confirm formulas from BEAM CSV export.
+- ✅ **Q2 (user-facing vs derived vs lookup)** — classification confirmed: user intake = Introduction / PROJECT / assembly tabs; derived = REVIEW / RESULTS; lookup = Glossary / Energy GHG. BEAM CSVs fetched via `schema/scripts/fetch-beam-sheet.py` (session 3, `3ea823e`); classification holds.
+- ✅ **Q4 (material reference encoding)** — resolved session 5 (`8bee3f4`). `beam_id` routes through [`materials-db.mjs`](../../js/beam/materials-db.mjs) — `getMaterial(hash)` returns the catalogue entry from `schema/materials/index.json` so assembly-CSV picker rows resolve to the same GWP source BEAM gSheet uses internally. No inline row duplication of impact data needed.
+- ✅ **Q5 (per-m² vs mass-based)** — resolved session 5 (`8bee3f4` + `85fd233`). Materials DB carries `functional_unit`; `convertQtyToMaterialUnit(rowQty, rowUnit, dbEntry, group, getValue)` handles unit mismatches (m² row × THICKNESS → m³ for concrete; m² row × R-VALUE → m²·RSI for insulation via RSI = R/5.678). Formula pattern parity-validated on every F&S row tested.
 - ✅ **Q9 (Excel import scope)** — `.xlsx` only (Excel import is a one-way convenience for transition from legacy; no export planned — §0 NOT list).
 - ✅ **Q15 (tab UX)** — mirror the spreadsheet visually and functionally, "so users know and love it" (per §0 edit). Tab sidebar + per-tab pages.
 - ✅ **Q17 (Pages site)** — yes, same Pages site; `beamweb.html` deploys alongside existing apps.
@@ -454,24 +463,24 @@ Small, independently-shippable slices:
 
 ### Still open
 
-**Calculation (blocked on BEAM CSV exports):**
-- Q3: Hidden/locked sheets in BEAM? (Andy has unlocked version — probably no issue.)
+**Calculation:**
 - Q6: Waste factors — baked into material records, applied at component level, or both?
-- Q7: Garage-exclusion rule — separate tab (per BEAM tab list: `Garage` is its own tab), switch, or guidance?
-- Q7a — Section-config unit normalisation: when a material's `functional_unit` is "m² at 3.5 inch" (CLT), does BEAM scale when the user enters a different thickness, or does it expect the functional unit to match the section config?
-- Q7b — Multi-tab lookup chains (does `Exterior Walls` pull summary rows from `Cladding`?).
+- Q7b: Multi-tab lookup chains (does `Exterior Walls` pull summary rows from `Cladding`?). Will surface when Phase 4 tabs (Exterior Walls / Cladding) port.
 
 **Integration:**
-- Q12: Can two projects share polygons (cross-project material reuse), or is each project self-contained?
-- Q13: Does BEAMweb need read access to a completed BEAM workbook (full operational + material scope), or only the material-emissions subset?
+- Q12: Can two projects share polygons (cross-project material reuse), or is each project self-contained? (Phase 4b may sharpen this — see `PDF-BEAMweb-BRIDGE.md` §7 Q19/Q20.)
+- Q13: Does BEAMweb need read access to a completed BEAM workbook (full operational + material scope), or only the material-emissions subset? (Phase 6 concern.)
 - **Q19 (Phase 4b design)** — moved to [`PDF-BEAMweb-BRIDGE.md`](./PDF-BEAMweb-BRIDGE.md) §7. Sub-questions Q19a–e (precedence, aggregation, taxonomy mapping, reset semantics, JSON persistence) resolved in that doc; new Q20–Q26 opened there for caching, auto-re-run, roof-cavity-vs-surface, garage-scope flag, multi-storey wall heights, party/demising naming, and Step 10 ownership.
 
 ### Answered
 
-- ✅ **Q1, Q9, Q14, Q15, Q17, Q18** (tab list, Excel scope, app location, tab UX, Pages site, nav-btn) — resolved above / upthread.
+- ✅ **Q1, Q2, Q4, Q5, Q9, Q15, Q17, Q18** — see list above.
+- ✅ **Q3 (hidden/locked sheets)** — no issue in practice. Andy's unlocked BEAM workbook was exported via `/export?format=xlsx` + openpyxl (`data_only=True`) and produced 22 full-depth tab CSVs on first try.
+- ✅ **Q7 (garage-exclusion rule)** — separate scope via `garage_*` field prefix on PROJECT dimensions. Auto-fill bridge in [`auto-fill.mjs`](../../js/beam/auto-fill.mjs) keeps building and garage quantity flows independent; Garage stays a dedicated Phase 4 tab per BEAM's tab list.
+- ✅ **Q7a (section-config unit normalisation)** — resolved session 5 (`85fd233`). `functional_unit` on the DB entry drives the converter — "m² at 6 inch" pattern handled by `convertQtyToMaterialUnit` + group THICKNESS config; "m²·RSI" handled via R-VALUE config. No separate section-config-to-functional-unit matching step required.
 - ✅ **Q8 (OBJECTIVE file-io)** — Andy will provide ExcelMapper when Phase 6 starts.
 - ✅ **Q10 (HOT2000 `.h2k`)** — **parked indefinitely.** BEAMweb will integrate with OBJECTIVE for operational energy before it parses HOT2000 directly. See §10 below for the OBJECTIVE integration direction.
-- ✅ **Q11 (polygon → component mapping)** — tagged at measurement time in PDF-Parser. The user has the drawing open and the context is fresh when they place a polygon; PDF-Parser adds a `component` attribute to each polygon ("wall_exterior", "roof", "footing", etc.) which BEAMweb reads on import. This is a PDF-Parser Step 10 change; BEAMweb just consumes it.
+- ✅ **Q11 (polygon → component mapping)** — tagged at measurement time in PDF-Parser. The user has the drawing open and the context is fresh when they place a polygon; PDF-Parser adds a `component` attribute to each polygon ("wall_exterior", "roof", "footing", etc.) which BEAMweb reads on import. This is a PDF-Parser Step 10 change; BEAMweb just consumes it. Phase 4b implementation detail in `PDF-BEAMweb-BRIDGE.md` §3.
 - ✅ **Q16 (units)** — metric foundation, display-time conversion, per-user toggle. See §9 below.
 - ✅ **Reference tabs shipped** — Glossary (48 terms, live search) + Energy GHG (13 provinces × 5 fuel factors) are Phase 0 deliverables in `js/beam/reference-data.mjs`.
 
