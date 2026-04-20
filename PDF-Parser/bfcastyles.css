@@ -1182,23 +1182,45 @@ html.app-matrix body {
   font-size: 0.7rem;
   flex-shrink: 0;
 }
-.pip-none {
+/* Status-palette background + text colour applied to every matrix visual
+   class that encodes a compliance level (legend pip, row badge, phase
+   cell, flow-view node). Five-selector groups eliminate the four-way
+   duplication that existed pre-2026-04-20 consolidation. Class names
+   stay per-component (.pip-*, .badge-*, .phase-*, .flow-status-*) so
+   component-specific rules (sizing, borders) can still target each
+   layer independently — only the colour pair is shared here. */
+.pip-none,
+.badge-none,
+.phase-none,
+.flow-status-none {
   background: var(--c-none);
   color: var(--c-none-txt);
 }
-.pip-vol {
+.pip-vol,
+.badge-vol,
+.phase-vol,
+.flow-status-vol {
   background: var(--c-vol);
   color: var(--c-vol-txt);
 }
-.pip-cond {
+.pip-cond,
+.badge-cond,
+.phase-cond,
+.flow-status-cond {
   background: var(--c-cond);
   color: var(--c-cond-txt);
 }
-.pip-emerg {
+.pip-emerg,
+.badge-emerg,
+.phase-emerg,
+.flow-status-emerg {
   background: var(--c-emerg);
   color: var(--c-emerg-txt);
 }
-.pip-mand {
+.pip-mand,
+.badge-mand,
+.phase-mand,
+.flow-status-mand {
   background: var(--c-mand);
   color: var(--c-mand-txt);
 }
@@ -1425,26 +1447,10 @@ html.app-matrix body {
   white-space: nowrap;
   flex-shrink: 0;
 }
-.badge-none {
-  background: var(--c-none);
-  color: var(--c-none-txt);
-}
-.badge-vol {
-  background: var(--c-vol);
-  color: var(--c-vol-txt);
-}
-.badge-cond {
-  background: var(--c-cond);
-  color: var(--c-cond-txt);
-}
-.badge-emerg {
-  background: var(--c-emerg);
-  color: var(--c-emerg-txt);
-}
-.badge-mand {
-  background: var(--c-mand);
-  color: var(--c-mand-txt);
-}
+/* Colour pairs are set by the shared .pip-* / .badge-* / .phase-* /
+   .flow-status-* rule group earlier in this file (search: "Status-palette
+   background"). Only the sizing / border / layout that differs per
+   component lives below. */
 
 /* Expand chevron */
 .chevron {
@@ -1513,27 +1519,8 @@ html.app-matrix body {
   text-overflow: ellipsis;
 }
 
-/* Phase cell status colours */
-.phase-none {
-  background: var(--c-none);
-  color: var(--c-none-txt);
-}
-.phase-vol {
-  background: var(--c-vol);
-  color: var(--c-vol-txt);
-}
-.phase-cond {
-  background: var(--c-cond);
-  color: var(--c-cond-txt);
-}
-.phase-emerg {
-  background: var(--c-emerg);
-  color: var(--c-emerg-txt);
-}
-.phase-mand {
-  background: var(--c-mand);
-  color: var(--c-mand-txt);
-}
+/* Phase cell status colours: shared with the .pip-* / .badge-* /
+   .flow-status-* group above. */
 
 /* ── Professional Requirement Badges ──────────────────── */
 .pro-req-strip {
@@ -2701,26 +2688,8 @@ html.app-matrix body {
   border-left: 7px solid var(--border);
 }
 
-.flow-status-none {
-  background: var(--c-none);
-  color: var(--c-none-txt);
-}
-.flow-status-vol {
-  background: var(--c-vol);
-  color: var(--c-vol-txt);
-}
-.flow-status-cond {
-  background: var(--c-cond);
-  color: var(--c-cond-txt);
-}
-.flow-status-emerg {
-  background: var(--c-emerg);
-  color: var(--c-emerg-txt);
-}
-.flow-status-mand {
-  background: var(--c-mand);
-  color: var(--c-mand-txt);
-}
+/* Flow-view node status colours: shared with the .pip-* / .badge-* /
+   .phase-* group defined earlier. */
 
 .flow-node-none {
   border-top: 3px solid #c8c8c0;
