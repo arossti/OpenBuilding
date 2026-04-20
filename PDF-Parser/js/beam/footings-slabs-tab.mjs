@@ -14,6 +14,8 @@
 // for Load Sample.
 
 import { StateManager } from "../shared/state-manager.mjs";
+import { esc } from "../shared/html-utils.mjs";
+import { fmtKg, fmtQty } from "./shared/formatters.mjs";
 import { parseAssemblyCsv, computeRowEmissions, codeToDomKey } from "./assembly-csv-parser.mjs";
 import { registerProjectToFsBridge, syncProjectToFsBridge } from "./auto-fill.mjs";
 import { inferJurisdiction, matchesFilter } from "./jurisdictions.mjs";
@@ -29,29 +31,6 @@ const VS = StateManager.VALUE_STATES;
 const CSV_PATH = "data/beam/footings-slabs.csv";
 
 let parsed = null; // { groups } once loaded
-
-function esc(s) {
-  return String(s ?? "").replace(
-    /[&<>"']/g,
-    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
-  );
-}
-
-function fmtKg(v) {
-  if (!v || !isFinite(v)) return "0";
-  const n = Math.round(v);
-  return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
-}
-
-// Display formatter for quantities (areas / volumes / lengths). 2 decimals
-// for visual consistency across all assembly tabs — state always holds full
-// precision so calc accuracy is unaffected. Emissions stay integer (fmtKg).
-function fmtQty(v) {
-  if (v === null || v === undefined || v === "") return "";
-  const n = Number(v);
-  if (!isFinite(n) || n === 0) return "";
-  return n.toFixed(2);
-}
 
 function fieldIds(material) {
   const k = codeToDomKey(material);

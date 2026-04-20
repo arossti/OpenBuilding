@@ -10,6 +10,8 @@
 
 /* eslint-disable no-undef */
 
+import { esc as escapeHtml } from "./shared/html-utils.mjs";
+
 const DATA_BASE = "data/schema";
 const INDEX_URL = `${DATA_BASE}/materials/index.json`;
 const GROUP_FILE = (prefix) => `${DATA_BASE}/materials/${groupSlug(prefix)}`;
@@ -849,13 +851,6 @@ function debounce(fn, ms) {
 }
 function short(sha) {
   return sha ? sha.slice(0, 10) : "—";
-}
-function escapeHtml(s) {
-  if (s == null) return "";
-  return String(s).replace(
-    /[&<>"']/g,
-    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
-  );
 }
 function escapeAttr(s) {
   return escapeHtml(s);

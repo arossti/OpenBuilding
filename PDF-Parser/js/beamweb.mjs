@@ -14,6 +14,7 @@
 
 import { ENERGY_GHG, GLOSSARY } from "./beam/reference-data.mjs";
 import { StateManager } from "./shared/state-manager.mjs";
+import { esc as escapeHtml } from "./shared/html-utils.mjs";
 import { renderProjectPanel, wireProjectForm, resetProjectTab } from "./beam/project-tab.mjs";
 import { renderFootingsSlabsPanel, wireFootingsSlabsTab, resetFootingsSlabsTab } from "./beam/footings-slabs-tab.mjs";
 import { loadSample, SAMPLES } from "./beam/sample-loader.mjs";
@@ -501,14 +502,6 @@ function setStatus(msg, kind) {
   if (!el) return;
   el.textContent = msg;
   el.className = kind === "busy" ? "status-busy" : kind === "error" ? "status-error" : "status-ready";
-}
-
-function escapeHtml(s) {
-  if (s == null) return "";
-  return String(s).replace(
-    /[&<>"']/g,
-    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
-  );
 }
 
 // ──────────────────────────────────────────────────────────────────────

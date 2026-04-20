@@ -12,6 +12,7 @@
 // in a follow-up.
 
 import { StateManager } from "../shared/state-manager.mjs";
+import { esc } from "../shared/html-utils.mjs";
 import { COUNTRIES, provinceOptions } from "./jurisdictions.mjs";
 
 const VS = StateManager.VALUE_STATES;
@@ -289,13 +290,6 @@ const DIMS_GARAGE = [
     takeoff: "Garage mass timber framing elements"
   }
 ];
-
-function esc(s) {
-  return String(s ?? "").replace(
-    /[&<>"']/g,
-    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
-  );
-}
 
 function renderInput(f) {
   if (f.type === "select") return renderSelect(f);
