@@ -545,14 +545,55 @@ Carrying forward from BEAMweb.md §7 Q19 with updates:
 
   **Proposal:** run a refresh pass as its own focused branch — re-fetch via `schema/scripts/fetch-beam-sheet.py` against the new workbook URL, re-run the importer against the new DB sheet, re-validate, diff the two generations, flag any rows that changed shape or disappeared. The existing F&S parity tests (commit `8bee3f4`) should still pass against the refreshed data — any numerical shifts are meaningful signals that real-world EPD values moved, not regression. Scope ~1 session. Best sequenced **before Phase 4b.2 lands** so the bridge builds against current data.
 
-- **Q28 — "EPD Only" filter on the Database viewer filters 821 → 380.** Melanie flagged concern in the meeting: by her recollection, every one of the 821 records was informed by an underlying EPD — so a filter narrowing to 380 reads like ~440 rows are being mis-labelled as non-EPD. **Investigation path:** grep `database.mjs` for whatever predicate the "EPD Only" checkbox applies; cross-check against the `schema/materials/*.json` field that predicate reads (likely `epd_id`, `source`, or similar). Possibilities: (a) filter checks a narrower condition than the generic "had an EPD input" (e.g. `source === "epd_direct"` vs including `source === "beam_derived"`), (b) the field is genuinely missing on ~440 records and Q27's refresh will populate it, (c) filter is actually correct but the label "EPD Only" mis-describes what it does (maybe rename to match reality). Needs a look.
+- **Q28 — "EPD Only" filter on the Database viewer filters 821 → 380.** Melanie flagged concern in the meeting: by her recollection, every one of the 821 records was informed by an underlying EPD — so a filter narrowing to 380 reads like ~440 rows are being mis-labelled as non-EPD.
 
-- **Q29 — Biogenic status flags reading `method: none` on rows that should carry biogenic carbon.** Database viewer's detail pane shows `biogenic_factor=—  carbon_content=— kgC/kg  full_C = — kgCO2e  stored = — kgCO2e` on wood / biogenic-insulation rows where non-zero values are expected. **Three hypotheses:**
-  1. Data gap — fields genuinely null in `schema/materials/06-wood.json` + others. Q27 refresh likely resolves.
-  2. Rendering bug — `database.mjs` reads the wrong field name (e.g. `biogenic.method` vs `status.biogenic_method`). Verifiable via a quick schema/JSON spot-check.
-  3. Onboarding gap — Melanie hasn't seen the part of the schema where biogenic lives yet. Not a code issue; calls for a schema walkthrough when next together.
+  **Investigation finding (2026-04-20, post-Q27):** the filter is **heuristic**, not a principled field check. See [`js/database.mjs:238`](../../js/database.mjs#L238):
 
-  **Action:** resolve Q27 first (data refresh) → then re-check a wood row in the viewer. If still `—`, it's (2) or (3).
+  ```js
+  if (state.epdOnly) {
+    // index doesn't carry epd.type — fall back to beam_id prefix heuristic.
+    // beam_id starting with uppercase letters = product-specific BEAM codes;
+    // mixed-case short hex ids are the BEAM-average / industry-average set.
+    if (/^[a-z0-9]{6,}$/.test(e.beam_id || "")) return false;
+  }
+  ```
+
+  The filter excludes rows whose `beam_id` is ≥6 lowercase-hex chars (auto-generated IDs for industry / BEAM-average entries). The 380 visible = rows with uppercase/mixed-case beam_ids = **product-specific EPD rows**. The 440 excluded = industry / BEAM-average rows.
+
+  So the filter is actually "exclude averages", not "show rows with EPD data" — both hypotheses in the original Q28 framing were wrong. **Two fix paths for Melanie to choose:**
+  1. **Relabel** the checkbox to match what it does — "Product EPDs only" or "Exclude Industry & BEAM Averages."
+  2. **Make it principled** — add `epd.type` (or a derived `is_product_specific` boolean) to `schema/materials/index.json` and check that instead of the beam_id regex. Heuristics drift; principled fields don't. This is a small index-generator change in `schema/scripts/beam-csv-to-json.mjs`.
+
+  Recommend path 2, but path 1 is a one-line relabel that immediately de-confuses the UI.
+
+- **Q29 — Biogenic status flags reading `method: none` on rows that should carry biogenic carbon.** Database viewer's detail pane shows `biogenic_factor=—  carbon_content=— kgC/kg  full_C = — kgCO2e  stored = — kgCO2e` on wood / biogenic-insulation rows where non-zero values are expected.
+
+  **Investigation finding (2026-04-20, post-Q27):** it's **two issues compounded**, not one.
+
+  *Wood records split across two method states* (per fresh `06-wood.json` after Q27):
+  - 94 of 160 wood records: `method: "wwf_storage_factor"` with populated `biogenic_factor`, `carbon_content_pct_kgc_kg`, `storage_retention_pct`, `carbon_content_kgc_per_unit` inputs.
+  - 66 of 160 wood records: `method: "none"`. Either intentionally non-biogenic (treated timber where the claim is waived) or curation-in-progress — Melanie's call per-row.
+
+  *The Database viewer detail pane ([`js/database.mjs:637-641`](../../js/database.mjs#L637-L641)) reads fields that don't exist in the source data*:
+
+  ```js
+  biogenic   method: ${bg.method || "—"}
+             biogenic_factor=${fmtOr(bg.biogenic_factor, "—")}  carbon_content=${fmtOr(bg.carbon_content_pct_kgc_kg, "—")} kgC/kg
+             full_C   = density × thickness × bio × C × 3.67 = ${fmtOr(bg.full_carbon_kgco2e_per_common_unit, "—")} kgCO₂e
+             stored   = full_C × ${fmtOr(bg.storage_retention_pct, "—")} = ${fmtOr(bg.stored_kgco2e_per_common_unit, "—")} kgCO₂e
+             C/unit   = ${fmtOr(bg.carbon_content_kgc_per_unit, "—")} kgC
+  ```
+
+  The fields `bg.full_carbon_kgco2e_per_common_unit` and `bg.stored_kgco2e_per_common_unit` **don't exist on any record** — the formula is described in `biogenic.notes` text but never computed and stored. So even on the 94 fully-populated wood rows, the `full_C` and `stored` lines render as `—`.
+
+  **Three fix paths for Melanie to choose:**
+  1. **Source-sheet populates them** — BfCA adds columns for `full_carbon_kgco2e_per_common_unit` and `stored_kgco2e_per_common_unit` as formula-driven cells, and the importer carries them through. Truest to the data-as-source-of-truth model.
+  2. **Viewer computes on the fly** — database.mjs reads the inputs already in the record (biogenic_factor, carbon_content_pct_kgc_kg, storage_retention_pct, plus density and thickness that live elsewhere in the `physical` block) and runs the formula shown in `biogenic.notes`. Keeps the source sheet lean.
+  3. **Viewer drops the display** — remove those two lines from the detail pane if BfCA doesn't want to publish the computed values at all.
+
+  Lean path 2 — the inputs are already there, the formula is documented in `biogenic.notes`, and it stays consistent with the client-side BEAM-Avg averaging pattern (`resolveBeamAverage` in `materials-db.mjs`).
+
+  **Action once Melanie answers:** path 1 → BfCA-side sheet-column additions; path 2 → small edit to `epdMethodBlock()` in `database.mjs` adding a `computeBiogenicFullC(r)` helper; path 3 → delete the two template lines.
 
 - **Q30 — Assembly-preset design questions.** Item 4 from the 2026-04-20 meeting, threaded into §3.2 + §5.7 + §6.6 Phase 4b.5. Open sub-questions:
   - (a) **Preset catalogue.** Initial list proposed in §5.7 (Wood 2×4 / 2×6 / 2×8, Steel stud 3-5/8 / 6, CMU 8, ICF 6, Other). Is this the right set? Canadian-residential-focused, so what's missing? SIP panels? Passive House wall types? TJI floor joists (different takeoff entirely — belongs to floors, not walls)?
