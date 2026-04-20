@@ -10,37 +10,79 @@
 
 export const COUNTRIES = [
   { value: "Canada", label: "Canada" },
-  { value: "United States", label: "United States" },
+  { value: "United States", label: "United States" }
 ];
 
 // Order roughly matches population — most-likely picks first.
 export const CA_PROVINCES = [
-  { value: "Ontario",                  code: "ON" },
-  { value: "Quebec",                   code: "QC" },
-  { value: "British Columbia",         code: "BC" },
-  { value: "Alberta",                  code: "AB" },
-  { value: "Manitoba",                 code: "MB" },
-  { value: "Saskatchewan",             code: "SK" },
-  { value: "Nova Scotia",              code: "NS" },
-  { value: "New Brunswick",            code: "NB" },
+  { value: "Ontario", code: "ON" },
+  { value: "Quebec", code: "QC" },
+  { value: "British Columbia", code: "BC" },
+  { value: "Alberta", code: "AB" },
+  { value: "Manitoba", code: "MB" },
+  { value: "Saskatchewan", code: "SK" },
+  { value: "Nova Scotia", code: "NS" },
+  { value: "New Brunswick", code: "NB" },
   { value: "Newfoundland and Labrador", code: "NL" },
-  { value: "Prince Edward Island",     code: "PE" },
-  { value: "Northwest Territories",    code: "NT" },
-  { value: "Yukon",                    code: "YT" },
-  { value: "Nunavut",                  code: "NU" },
+  { value: "Prince Edward Island", code: "PE" },
+  { value: "Northwest Territories", code: "NT" },
+  { value: "Yukon", code: "YT" },
+  { value: "Nunavut", code: "NU" }
 ];
 
 // US states — recorded for project metadata only. EPD filter does not act
 // on US state because BEAM workbook concrete EPDs are not state-tagged.
 export const US_STATES = [
-  "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
-  "Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa",
-  "Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan",
-  "Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire",
-  "New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio",
-  "Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota",
-  "Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia",
-  "Wisconsin","Wyoming",
+  "Alabama",
+  "Alaska",
+  "Arizona",
+  "Arkansas",
+  "California",
+  "Colorado",
+  "Connecticut",
+  "Delaware",
+  "Florida",
+  "Georgia",
+  "Hawaii",
+  "Idaho",
+  "Illinois",
+  "Indiana",
+  "Iowa",
+  "Kansas",
+  "Kentucky",
+  "Louisiana",
+  "Maine",
+  "Maryland",
+  "Massachusetts",
+  "Michigan",
+  "Minnesota",
+  "Mississippi",
+  "Missouri",
+  "Montana",
+  "Nebraska",
+  "Nevada",
+  "New Hampshire",
+  "New Jersey",
+  "New Mexico",
+  "New York",
+  "North Carolina",
+  "North Dakota",
+  "Ohio",
+  "Oklahoma",
+  "Oregon",
+  "Pennsylvania",
+  "Rhode Island",
+  "South Carolina",
+  "South Dakota",
+  "Tennessee",
+  "Texas",
+  "Utah",
+  "Vermont",
+  "Virginia",
+  "Washington",
+  "West Virginia",
+  "Wisconsin",
+  "Wyoming"
 ].map((v) => ({ value: v }));
 
 export function provinceOptions(country) {
@@ -70,21 +112,24 @@ export function normalizeProvince(input) {
 // short-circuit on a parent.
 const CA_PROVIDER_PROVINCES = [
   ["Ontario Concrete RMCAO", ["Ontario"]],
-  ["Atlantic Concrete Association", ["New Brunswick", "Nova Scotia", "Prince Edward Island", "Newfoundland and Labrador"]],
-  ["Concrete Alberta",      ["Alberta"]],
-  ["Concrete Manitoba",     ["Manitoba"]],
-  ["Concrete Sask",         ["Saskatchewan"]],
-  ["Concrete BC",           ["British Columbia"]],
-  ["RMCAO",                 ["Ontario"]],
-  ["ABQ",                   ["Quebec"]],
-  ["CRMCA",                 "CA-wide"],
+  [
+    "Atlantic Concrete Association",
+    ["New Brunswick", "Nova Scotia", "Prince Edward Island", "Newfoundland and Labrador"]
+  ],
+  ["Concrete Alberta", ["Alberta"]],
+  ["Concrete Manitoba", ["Manitoba"]],
+  ["Concrete Sask", ["Saskatchewan"]],
+  ["Concrete BC", ["British Columbia"]],
+  ["RMCAO", ["Ontario"]],
+  ["ABQ", ["Quebec"]],
+  ["CRMCA", "CA-wide"]
 ];
 
 // Tags that appear in subgroup banner column A (e.g. "CONCRETE – ... – CANADA").
 const SUB_BANNER_TAGS = [
-  { match: /\bCANADIAN\b|\b–\s*CANADA\b/i,   countries: ["CA"] },
+  { match: /\bCANADIAN\b|\b–\s*CANADA\b/i, countries: ["CA"] },
   { match: /\bUS BAR SIZES\b|\b–\s*USA?\b/i, countries: ["US"] },
-  { match: /\bN\.?\s*AMERICA\b/i,            countries: ["US", "CA"] },
+  { match: /\bN\.?\s*AMERICA\b/i, countries: ["US", "CA"] }
 ];
 
 // Tags inside a material-name [bracket] (e.g. "[Industry Avg | US & CA]").

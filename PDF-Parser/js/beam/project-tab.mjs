@@ -17,118 +17,234 @@ import { COUNTRIES, provinceOptions } from "./jurisdictions.mjs";
 const VS = StateManager.VALUE_STATES;
 
 const INFO_LEFT = [
-  { id: "project_name",             label: "Project Name",                   type: "text", required: true },
-  { id: "project_scenario",         label: "Scenario",                       type: "text" },
-  { id: "project_beam_version",     label: "BEAM Version",                   type: "text", readonly: true },
-  { id: "project_designer",         label: "Designer",                       type: "text" },
-  { id: "project_engineer",         label: "Engineer",                       type: "text" },
-  { id: "project_builder",          label: "Builder / Developer",            type: "text" },
-  { id: "project_development",      label: "Development Project",            type: "text" },
-  { id: "project_address",          label: "Address",                        type: "text" },
-  { id: "project_city",             label: "City",                           type: "text" },
-  { id: "project_country",          label: "Country",                        type: "select", options: COUNTRIES, blank: "(select country)" },
-  { id: "project_province_state",   label: "Province / State",               type: "select", optionsFor: "project_country", blank: "(select country first)" },
-  { id: "project_building_type",    label: "Building Type",                  type: "text" },
-  { id: "project_construction_type",label: "Construction Type",              type: "text" },
-  { id: "project_dev_stage",        label: "Project Development Stage",      type: "text" },
+  { id: "project_name", label: "Project Name", type: "text", required: true },
+  { id: "project_scenario", label: "Scenario", type: "text" },
+  { id: "project_beam_version", label: "BEAM Version", type: "text", readonly: true },
+  { id: "project_designer", label: "Designer", type: "text" },
+  { id: "project_engineer", label: "Engineer", type: "text" },
+  { id: "project_builder", label: "Builder / Developer", type: "text" },
+  { id: "project_development", label: "Development Project", type: "text" },
+  { id: "project_address", label: "Address", type: "text" },
+  { id: "project_city", label: "City", type: "text" },
+  { id: "project_country", label: "Country", type: "select", options: COUNTRIES, blank: "(select country)" },
+  {
+    id: "project_province_state",
+    label: "Province / State",
+    type: "select",
+    optionsFor: "project_country",
+    blank: "(select country first)"
+  },
+  { id: "project_building_type", label: "Building Type", type: "text" },
+  { id: "project_construction_type", label: "Construction Type", type: "text" },
+  { id: "project_dev_stage", label: "Project Development Stage", type: "text" }
 ];
 
 const INFO_RIGHT = [
-  { id: "project_construction_year", label: "Construction Year",             type: "number", step: 1 },
-  { id: "project_num_bedrooms",      label: "Number of Bedrooms",            type: "number", step: 1 },
-  { id: "project_stories_above",     label: "Stories Above Grade",           type: "number", step: 1 },
-  { id: "project_total_floor_area",  label: "Total Floor Area",              type: "number", unit: "m²", step: 0.1 },
-  { id: "project_above_grade_area",  label: "Above Grade Conditioned Area",  type: "number", unit: "m²", step: 0.1 },
-  { id: "project_below_grade_area",  label: "Below Grade Conditioned Area",  type: "number", unit: "m²", step: 0.1 },
+  { id: "project_construction_year", label: "Construction Year", type: "number", step: 1 },
+  { id: "project_num_bedrooms", label: "Number of Bedrooms", type: "number", step: 1 },
+  { id: "project_stories_above", label: "Stories Above Grade", type: "number", step: 1 },
+  { id: "project_total_floor_area", label: "Total Floor Area", type: "number", unit: "m²", step: 0.1 },
+  { id: "project_above_grade_area", label: "Above Grade Conditioned Area", type: "number", unit: "m²", step: 0.1 },
+  { id: "project_below_grade_area", label: "Below Grade Conditioned Area", type: "number", unit: "m²", step: 0.1 }
 ];
 
 // Dimension inputs — main building. Order follows PROJECT.csv rows 42-66.
 // Entries with `lhw: true` render as three inputs (Length × Height × Width) → computed volume.
 const DIMS_BUILDING = [
-  { id: "dim_continuous_footings",          label: "CONTINUOUS FOOTINGS VOLUME",   unit: "m³", lhw: true,
+  {
+    id: "dim_continuous_footings",
+    label: "CONTINUOUS FOOTINGS VOLUME",
+    unit: "m³",
+    lhw: true,
     description: "Length × Height × Width of continuous strip footings. Excludes: garage.",
-    takeoff: "Continuous (strip) foundation wall footings (exterior and interior)" },
-  { id: "dim_columns_piers_pads_volume",    label: "COLUMNS/PIERS & PADS VOLUME",  unit: "m³",
-    description: "Total volume of discontinuous foundation elements. Includes: pads/footings, columns/piers/piles. Excludes: garage.",
-    takeoff: "Concrete volume for all discontinuous pads/footings and columns/piers (ext. and int.)" },
-  { id: "dim_foundation_wall_area",         label: "FOUNDATION WALL AREA",          unit: "m²",
-    description: "Total foundation wall surface area (centerline length × height). Includes: basement, party walls. Excludes: openings, garage foundation.",
-    takeoff: "Foundation & basement wall insulation (ext. and int.), interior framing, wall cladding and barriers" },
-  { id: "dim_foundation_slab_floor_area",   label: "FOUNDATION SLAB/FLOOR AREA",    unit: "m²",
+    takeoff: "Continuous (strip) foundation wall footings (exterior and interior)"
+  },
+  {
+    id: "dim_columns_piers_pads_volume",
+    label: "COLUMNS/PIERS & PADS VOLUME",
+    unit: "m³",
+    description:
+      "Total volume of discontinuous foundation elements. Includes: pads/footings, columns/piers/piles. Excludes: garage.",
+    takeoff: "Concrete volume for all discontinuous pads/footings and columns/piers (ext. and int.)"
+  },
+  {
+    id: "dim_foundation_wall_area",
+    label: "FOUNDATION WALL AREA",
+    unit: "m²",
+    description:
+      "Total foundation wall surface area (centerline length × height). Includes: basement, party walls. Excludes: openings, garage foundation.",
+    takeoff: "Foundation & basement wall insulation (ext. and int.), interior framing, wall cladding and barriers"
+  },
+  {
+    id: "dim_foundation_slab_floor_area",
+    label: "FOUNDATION SLAB/FLOOR AREA",
+    unit: "m²",
     description: "Total foundation slab surface area. Excludes: garage slab.",
-    takeoff: "Aggregate base, sub-slab insulation, slab, barriers and basement flooring" },
-  { id: "dim_exterior_wall_area",           label: "EXTERIOR WALL AREA",            unit: "m²",
-    description: "Surface area of exterior walls. Includes: gable ends. Excludes: window & door openings, party walls, garage walls.",
-    takeoff: "Framing, insulation, sheathing, barriers, exterior cladding, and interior cladding of exterior walls" },
-  { id: "dim_window_area",                  label: "WINDOW AREA",                   unit: "m²",
-    description: "Area of window frames (preferred) or rough openings. Includes: full glazing area, skylights. Excludes: garage windows.",
-    takeoff: "Windows of main building" },
-  { id: "dim_party_wall_area",              label: "PARTY WALL AREA",               unit: "m²",
+    takeoff: "Aggregate base, sub-slab insulation, slab, barriers and basement flooring"
+  },
+  {
+    id: "dim_exterior_wall_area",
+    label: "EXTERIOR WALL AREA",
+    unit: "m²",
+    description:
+      "Surface area of exterior walls. Includes: gable ends. Excludes: window & door openings, party walls, garage walls.",
+    takeoff: "Framing, insulation, sheathing, barriers, exterior cladding, and interior cladding of exterior walls"
+  },
+  {
+    id: "dim_window_area",
+    label: "WINDOW AREA",
+    unit: "m²",
+    description:
+      "Area of window frames (preferred) or rough openings. Includes: full glazing area, skylights. Excludes: garage windows.",
+    takeoff: "Windows of main building"
+  },
+  {
+    id: "dim_party_wall_area",
+    label: "PARTY WALL AREA",
+    unit: "m²",
     description: "Wall area that partitions this unit from others. Typical for townhouses & apartment units.",
-    takeoff: "Party wall framing, insulation, sheathing, barriers and interior cladding" },
-  { id: "dim_interior_wall_area",           label: "INTERIOR WALL AREA",            unit: "m²",
-    description: "One side only (centerline) of all interior walls. Includes: interior door area. Excludes: exterior, garage partition and party walls.",
-    takeoff: "Interior wall framing and cladding (assumes both sides are finished by default)" },
-  { id: "dim_framed_floor_area",            label: "FRAMED FLOOR AREA",             unit: "m²",
+    takeoff: "Party wall framing, insulation, sheathing, barriers and interior cladding"
+  },
+  {
+    id: "dim_interior_wall_area",
+    label: "INTERIOR WALL AREA",
+    unit: "m²",
+    description:
+      "One side only (centerline) of all interior walls. Includes: interior door area. Excludes: exterior, garage partition and party walls.",
+    takeoff: "Interior wall framing and cladding (assumes both sides are finished by default)"
+  },
+  {
+    id: "dim_framed_floor_area",
+    label: "FRAMED FLOOR AREA",
+    unit: "m²",
     description: "Above grade flooring area. Excludes: basement floor slab and floor openings.",
-    takeoff: "Floor framing, subfloor, floor insulation, finish flooring" },
-  { id: "dim_finished_ceiling_area",        label: "FINISHED CEILING AREA",         unit: "m²",
+    takeoff: "Floor framing, subfloor, floor insulation, finish flooring"
+  },
+  {
+    id: "dim_finished_ceiling_area",
+    label: "FINISHED CEILING AREA",
+    unit: "m²",
     description: "Total finished ceiling area. Includes: basement ceilings. Excludes: garage ceilings.",
-    takeoff: "Ceiling cladding" },
-  { id: "dim_roof_cavity_insulation_area",  label: "ROOF CAVITY INSULATION AREA",   unit: "m²",
+    takeoff: "Ceiling cladding"
+  },
+  {
+    id: "dim_roof_cavity_insulation_area",
+    label: "ROOF CAVITY INSULATION AREA",
+    unit: "m²",
     description: "Total area of roof insulation.",
-    takeoff: "Flat or sloped roof cavity insulation, ceiling barriers and membranes" },
-  { id: "dim_roof_surface_area",            label: "ROOF SURFACE AREA",             unit: "m²",
+    takeoff: "Flat or sloped roof cavity insulation, ceiling barriers and membranes"
+  },
+  {
+    id: "dim_roof_surface_area",
+    label: "ROOF SURFACE AREA",
+    unit: "m²",
     description: "Total roof surface area. Includes: overhangs.",
-    takeoff: "Roof framing, decking, barriers & membranes, roofing, and insulation parallel to roof surface" },
-  { id: "dim_timber_framing_volume",        label: "TIMBER FRAMING VOLUME",         unit: "m³",
+    takeoff: "Roof framing, decking, barriers & membranes, roofing, and insulation parallel to roof surface"
+  },
+  {
+    id: "dim_timber_framing_volume",
+    label: "TIMBER FRAMING VOLUME",
+    unit: "m³",
     description: "Total volume of wood in heavy timber posts & beams. Steel is entered in Structural Elements.",
-    takeoff: "Mass timber framing elements" },
+    takeoff: "Mass timber framing elements"
+  }
 ];
 
 const DIMS_GARAGE = [
-  { id: "garage_partition_wall_area",       label: "GARAGE PARTITION WALL AREA",    unit: "m²",
-    description: "Wall area that partitions the main building from the garage. Excludes: openings and exterior garage walls.",
-    takeoff: "Partition insulation and interior cladding on garage side" },
-  { id: "garage_continuous_footings",       label: "GARAGE CONTINUOUS FOOTINGS VOLUME", unit: "m³", lhw: true,
+  {
+    id: "garage_partition_wall_area",
+    label: "GARAGE PARTITION WALL AREA",
+    unit: "m²",
+    description:
+      "Wall area that partitions the main building from the garage. Excludes: openings and exterior garage walls.",
+    takeoff: "Partition insulation and interior cladding on garage side"
+  },
+  {
+    id: "garage_continuous_footings",
+    label: "GARAGE CONTINUOUS FOOTINGS VOLUME",
+    unit: "m³",
+    lhw: true,
     description: "Length × Height × Width of garage strip footings.",
-    takeoff: "Continuous garage foundation wall footings" },
-  { id: "garage_columns_piers_pads_volume", label: "GARAGE COLUMNS/PIERS & PADS VOLUME", unit: "m³",
+    takeoff: "Continuous garage foundation wall footings"
+  },
+  {
+    id: "garage_columns_piers_pads_volume",
+    label: "GARAGE COLUMNS/PIERS & PADS VOLUME",
+    unit: "m³",
     description: "Total volume of discontinuous foundation elements. Includes: pads/footings, columns/piers/piles.",
-    takeoff: "Garage concrete volume for discontinuous pads/footings and columns/piers" },
-  { id: "garage_foundation_wall_area",      label: "GARAGE FOUNDATION WALL AREA",   unit: "m²",
+    takeoff: "Garage concrete volume for discontinuous pads/footings and columns/piers"
+  },
+  {
+    id: "garage_foundation_wall_area",
+    label: "GARAGE FOUNDATION WALL AREA",
+    unit: "m²",
     description: "Foundation wall surface area.",
-    takeoff: "Garage foundation walls" },
-  { id: "garage_slab_area",                 label: "GARAGE SLAB AREA",              unit: "m²",
+    takeoff: "Garage foundation walls"
+  },
+  {
+    id: "garage_slab_area",
+    label: "GARAGE SLAB AREA",
+    unit: "m²",
     description: "Slab surface area.",
-    takeoff: "Garage slab, aggregate base" },
-  { id: "garage_floor_area_above",          label: "FLOOR AREA ABOVE GARAGE",       unit: "m²",
+    takeoff: "Garage slab, aggregate base"
+  },
+  {
+    id: "garage_floor_area_above",
+    label: "FLOOR AREA ABOVE GARAGE",
+    unit: "m²",
     description: "Floor area of interior space directly above the garage.",
-    takeoff: "Used to compute garage foundation attribution %" },
-  { id: "garage_foundation_attribution_pct",label: "GARAGE FOUNDATION ATTRIBUTION %", unit: "%", readonly: true,
+    takeoff: "Used to compute garage foundation attribution %"
+  },
+  {
+    id: "garage_foundation_attribution_pct",
+    label: "GARAGE FOUNDATION ATTRIBUTION %",
+    unit: "%",
+    readonly: true,
     description: "Portion of garage foundation attributed to the garage; the rest is attributed to the main building.",
-    takeoff: "Garage footings and foundation walls" },
-  { id: "garage_exterior_wall_area",        label: "GARAGE EXTERIOR WALL AREA",     unit: "m²",
+    takeoff: "Garage footings and foundation walls"
+  },
+  {
+    id: "garage_exterior_wall_area",
+    label: "GARAGE EXTERIOR WALL AREA",
+    unit: "m²",
     description: "Surface area of exterior garage walls. Includes: gable ends. Excludes: openings, partition walls.",
-    takeoff: "Garage exterior wall framing, sheathing, exterior + interior cladding" },
-  { id: "garage_window_area",               label: "GARAGE WINDOW AREA",            unit: "m²",
+    takeoff: "Garage exterior wall framing, sheathing, exterior + interior cladding"
+  },
+  {
+    id: "garage_window_area",
+    label: "GARAGE WINDOW AREA",
+    unit: "m²",
     description: "Area of garage window frames or rough openings.",
-    takeoff: "Garage windows" },
-  { id: "garage_finished_ceiling_area",     label: "GARAGE FINISHED CEILING AREA",  unit: "m²",
+    takeoff: "Garage windows"
+  },
+  {
+    id: "garage_finished_ceiling_area",
+    label: "GARAGE FINISHED CEILING AREA",
+    unit: "m²",
     description: "Garage ceiling area covered by materials.",
-    takeoff: "Garage ceiling cladding, insulation parallel to ceiling" },
-  { id: "garage_roof_surface_area",         label: "GARAGE ROOF SURFACE AREA",      unit: "m²",
+    takeoff: "Garage ceiling cladding, insulation parallel to ceiling"
+  },
+  {
+    id: "garage_roof_surface_area",
+    label: "GARAGE ROOF SURFACE AREA",
+    unit: "m²",
     description: "Garage roof surface area (calculated with roof pitch). Includes: overhangs.",
-    takeoff: "Garage roof framing, decking, roofing, insulation parallel to roof surface" },
-  { id: "garage_timber_framing_volume",     label: "GARAGE TIMBER FRAMING VOLUME",  unit: "m³",
+    takeoff: "Garage roof framing, decking, roofing, insulation parallel to roof surface"
+  },
+  {
+    id: "garage_timber_framing_volume",
+    label: "GARAGE TIMBER FRAMING VOLUME",
+    unit: "m³",
     description: "Volume of wood for heavy timber structures in garage.",
-    takeoff: "Garage mass timber framing elements" },
+    takeoff: "Garage mass timber framing elements"
+  }
 ];
 
 function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (c) => (
-    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
-  ));
+  return String(s ?? "").replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
+  );
 }
 
 function renderInput(f) {
@@ -140,8 +256,10 @@ function renderInput(f) {
     f.readonly ? "readonly" : "",
     f.required ? "required" : "",
     f.step !== undefined ? `step="${f.step}"` : "",
-    f.unit === "m²" || f.unit === "m³" ? "inputmode=\"decimal\"" : "",
-  ].filter(Boolean).join(" ");
+    f.unit === "m²" || f.unit === "m³" ? 'inputmode="decimal"' : ""
+  ]
+    .filter(Boolean)
+    .join(" ");
   const unit = f.unit ? `<span class="bw-unit">${esc(f.unit)}</span>` : "";
   return `<div class="bw-input-wrap"><input class="bw-input" ${attrs} />${unit}</div>`;
 }
@@ -162,13 +280,17 @@ function renderSelect(f) {
     `id="bw-${f.id}"`,
     `data-field-id="${f.id}"`,
     f.required ? "required" : "",
-    f.optionsFor ? `data-options-for="${f.optionsFor}"` : "",
-  ].filter(Boolean).join(" ");
-  const optsHtml = opts.map((o) => {
-    const v = typeof o === "string" ? o : o.value;
-    const label = typeof o === "string" ? o : (o.label || o.value);
-    return `<option value="${esc(v)}">${esc(label)}</option>`;
-  }).join("");
+    f.optionsFor ? `data-options-for="${f.optionsFor}"` : ""
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const optsHtml = opts
+    .map((o) => {
+      const v = typeof o === "string" ? o : o.value;
+      const label = typeof o === "string" ? o : o.label || o.value;
+      return `<option value="${esc(v)}">${esc(label)}</option>`;
+    })
+    .join("");
   return `<div class="bw-input-wrap"><select class="bw-input bw-select" ${attrs}><option value="">${esc(blank)}</option>${optsHtml}</select></div>`;
 }
 
@@ -182,11 +304,15 @@ function refreshDependentSelects(changedFieldId) {
     const stored = StateManager.getValue(f.id);
     const opts = selectOptionsFor(f);
     const blank = f.blank || "(select)";
-    sel.innerHTML = `<option value="">${esc(blank)}</option>` + opts.map((o) => {
-      const v = typeof o === "string" ? o : o.value;
-      const label = typeof o === "string" ? o : (o.label || o.value);
-      return `<option value="${esc(v)}">${esc(label)}</option>`;
-    }).join("");
+    sel.innerHTML =
+      `<option value="">${esc(blank)}</option>` +
+      opts
+        .map((o) => {
+          const v = typeof o === "string" ? o : o.value;
+          const label = typeof o === "string" ? o : o.label || o.value;
+          return `<option value="${esc(v)}">${esc(label)}</option>`;
+        })
+        .join("");
     if (stored && opts.some((o) => (typeof o === "string" ? o : o.value) === stored)) {
       sel.value = stored;
     } else {
@@ -305,14 +431,12 @@ function recomputeVolume(parentId) {
   const h = StateManager.parseNumeric(StateManager.getValue(hId), 0);
   const w = StateManager.parseNumeric(StateManager.getValue(wId), 0);
   // Store full precision in state so downstream calcs (F&S auto-fill,
-  // emissions) use the same number BEAM uses internally. Display is
-  // rounded to 1 decimal to match the BEAM gSheet's visual presentation.
-  // Rounding the stored value cost ~10 kgCO2e on the DOE Prototype's
-  // CONTINUOUS FOOTINGS NRMCA row (9.0 vs 8.965492 -> 2516 vs 2506).
+  // emissions) use the same number BEAM uses internally. Display matches
+  // assembly-tab qty formatter (2 decimals).
   const v = l * h * w;
   StateManager.setValue(`${parentId}_volume`, String(v), VS.CALCULATED);
   const out = document.getElementById(`bw-${parentId}_volume`);
-  if (out) out.textContent = v.toFixed(1);
+  if (out) out.textContent = v.toFixed(2);
 }
 
 function populateInputFromState(fieldId) {

@@ -1,20 +1,16 @@
 /**
  * BEAMweb — app entry + tab router.
  *
- * Phase 0 shell. No calc engine, no live state — just the app frame with
- * all 17 BEAM tabs stubbed. Future phases wire up:
- *   - Phase 1: state-manager.mjs + file-handler.mjs (3-tier reset, localStorage)
- *   - Phase 2: PROJECT tab form + unit converter
- *   - Phase 3: first assembly tab with real material DB fetch + per-row calc
- *   - ...
+ * Live: Introduction, PROJECT, Footings & Slabs, Glossary, Energy GHG.
+ * Stubbed: 11 remaining assembly tabs (Phase 4 queue) + REVIEW + RESULTS
+ * (Phase 5). Each tab declares its `phase` in BEAM_TABS — matching the
+ * BEAMweb.md §6 phase breakdown.
  *
  * Design: BEAMweb code is ESM (matches PDF-Parser conventions). Vendor JS
  * (Bootstrap, SheetJS) loads as classic script tags on the window. OBJECTIVE
- * patterns (3-tier reset, dual-state, data-render-section) are ported by API
+ * patterns (state manager, file handler, cross-app nav) are ported by API
  * shape; no files are copied verbatim.
  */
-
-/* eslint-disable no-undef */
 
 import { ENERGY_GHG, GLOSSARY } from "./beam/reference-data.mjs";
 import { StateManager } from "./shared/state-manager.mjs";
@@ -28,38 +24,53 @@ import { loadSample, SAMPLES } from "./beam/sample-loader.mjs";
 // Each tab declares which phase unlocks its implementation.
 // ──────────────────────────────────────────────────────────────────────
 const BEAM_TABS = [
-  { group: "Project",       tabs: [
-    { id: "introduction",       num: 1,  label: "Introduction",        phase: 0 },
-    { id: "project",            num: 2,  label: "PROJECT",             phase: 0 },
-  ]},
-  { group: "Below-grade",   tabs: [
-    { id: "footings-slabs",     num: 3,  label: "Footings & Slabs",    phase: 0 },
-    { id: "foundation-walls",   num: 4,  label: "Foundation Walls",    phase: 4 },
-  ]},
-  { group: "Structure",     tabs: [
-    { id: "structural-elements",num: 5,  label: "Structural Elements", phase: 4 },
-    { id: "exterior-walls",     num: 6,  label: "Exterior Walls",      phase: 4 },
-    { id: "party-walls",        num: 7,  label: "Party Walls",         phase: 4 },
-    { id: "cladding",           num: 8,  label: "Cladding",            phase: 4 },
-    { id: "windows",            num: 9,  label: "Windows",             phase: 4 },
-    { id: "interior-walls",     num: 10, label: "Interior Walls",      phase: 4 },
-    { id: "floors",             num: 11, label: "Floors",              phase: 4 },
-    { id: "ceilings",           num: 12, label: "Ceilings",            phase: 4 },
-    { id: "roof",               num: 13, label: "Roof",                phase: 4 },
-    { id: "garage",             num: 14, label: "Garage",              phase: 4 },
-  ]},
-  { group: "Review + Outputs", tabs: [
-    { id: "review",             num: 15, label: "REVIEW",              phase: 5 },
-    { id: "results",            num: 16, label: "RESULTS",             phase: 5 },
-    { id: "glossary",           num: 17, label: "Glossary",            phase: 0 },
-  ]},
-  { group: "Reference", tabs: [
-    // Not in BEAM; BEAMweb adds it as informational reference.
-    { id: "energy-ghg",         num: 18, label: "Energy GHG",          phase: 0 },
-  ]},
+  {
+    group: "Project",
+    tabs: [
+      { id: "introduction", num: 1, label: "Introduction", phase: 0 },
+      { id: "project", num: 2, label: "PROJECT", phase: 2 }
+    ]
+  },
+  {
+    group: "Below-grade",
+    tabs: [
+      { id: "footings-slabs", num: 3, label: "Footings & Slabs", phase: 3 },
+      { id: "foundation-walls", num: 4, label: "Foundation Walls", phase: 4 }
+    ]
+  },
+  {
+    group: "Structure",
+    tabs: [
+      { id: "structural-elements", num: 5, label: "Structural Elements", phase: 4 },
+      { id: "exterior-walls", num: 6, label: "Exterior Walls", phase: 4 },
+      { id: "party-walls", num: 7, label: "Party Walls", phase: 4 },
+      { id: "cladding", num: 8, label: "Cladding", phase: 4 },
+      { id: "windows", num: 9, label: "Windows", phase: 4 },
+      { id: "interior-walls", num: 10, label: "Interior Walls", phase: 4 },
+      { id: "floors", num: 11, label: "Floors", phase: 4 },
+      { id: "ceilings", num: 12, label: "Ceilings", phase: 4 },
+      { id: "roof", num: 13, label: "Roof", phase: 4 },
+      { id: "garage", num: 14, label: "Garage", phase: 4 }
+    ]
+  },
+  {
+    group: "Review + Outputs",
+    tabs: [
+      { id: "review", num: 15, label: "REVIEW", phase: 5 },
+      { id: "results", num: 16, label: "RESULTS", phase: 5 },
+      { id: "glossary", num: 17, label: "Glossary", phase: 0 }
+    ]
+  },
+  {
+    group: "Reference",
+    tabs: [
+      // Not in BEAM; BEAMweb adds it as informational reference.
+      { id: "energy-ghg", num: 18, label: "Energy GHG", phase: 0 }
+    ]
+  }
 ];
 
-const FLAT_TABS = BEAM_TABS.flatMap(g => g.tabs);
+const FLAT_TABS = BEAM_TABS.flatMap((g) => g.tabs);
 const DEFAULT_TAB = "introduction";
 
 // ──────────────────────────────────────────────────────────────────────
@@ -67,8 +78,8 @@ const DEFAULT_TAB = "introduction";
 // ──────────────────────────────────────────────────────────────────────
 const state = {
   activeTab: DEFAULT_TAB,
-  materialCount: null,       // set when index.json loads
-  materialIndex: null,       // full index.json payload (lazy)
+  materialCount: null, // set when index.json loads
+  materialIndex: null // full index.json payload (lazy)
 };
 
 // ──────────────────────────────────────────────────────────────────────
@@ -82,14 +93,14 @@ function boot() {
   wireKeyboard();
   wireGlossarySearch();
   wireProjectForm();
-  wireFootingsSlabsTab();  // fires async fetch for data/beam/footings-slabs.csv
+  wireFootingsSlabsTab(); // fires async fetch for data/beam/footings-slabs.csv
   setActiveTab(readInitialTabFromHash() || DEFAULT_TAB);
   loadMaterialIndex();
 }
 
 function wireGlossarySearch() {
   const input = document.getElementById("beam-glossary-search");
-  const body  = document.getElementById("beam-glossary-body");
+  const body = document.getElementById("beam-glossary-body");
   const count = document.getElementById("beam-glossary-count");
   if (!input || !body || !count) return;
   input.addEventListener("input", () => {
@@ -147,9 +158,15 @@ function renderContentShell() {
   content.replaceChildren(frag);
 }
 
+// Tabs whose `phase` number reflects a SHIPPED phase rather than a queued one.
+// New tab pills should say "Phase N · live" for these; everything else is
+// "Unlocks Phase N".
+const SHIPPED_PHASES = new Set([0, 1, 2, 3]);
+
 function renderPanelBody(tab) {
-  const phaseCls = tab.phase === 0 ? "ready" : (tab.phase === 2 ? "next" : "");
-  const phaseLabel = tab.phase === 0 ? "Phase 0 · shell" : `Unlocks Phase ${tab.phase}`;
+  const isShipped = SHIPPED_PHASES.has(tab.phase);
+  const phaseCls = isShipped ? "ready" : "";
+  const phaseLabel = isShipped ? `Phase ${tab.phase} · live` : `Unlocks Phase ${tab.phase}`;
   const body = PANEL_BODIES[tab.id] || defaultStub(tab);
   return `
     <div class="beam-panel-header">
@@ -183,7 +200,7 @@ const PANEL_SUBTITLES = {
   review: "Inputs sanity-check · area/volume reconciliation · warnings",
   results: "Project EC total · per-component breakdown · operational + embodied summary",
   glossary: `${GLOSSARY.length} terms and definitions from the BEAM workbook`,
-  "energy-ghg": `Province-by-province GHG intensities for operational energy (reference only)`,
+  "energy-ghg": `Province-by-province GHG intensities for operational energy (reference only)`
 };
 
 const PANEL_BODIES = {
@@ -205,9 +222,11 @@ const PANEL_BODIES = {
         <li>Review the totals on <strong>REVIEW</strong> + <strong>RESULTS</strong>. Print to PDF for a project report.</li>
       </ul>
 
-      <h3 style="margin-top: 20px">Status — Phase 0 shell only</h3>
-      <p style="margin:6px 0">
-        This is the navigation shell. Tabs are stubbed. Calc engine, state management, and file I/O land in Phases 1–3.
+      <h3 style="margin-top: 20px">Status — Phases 0–3 live</h3>
+      <p style="margin: 6px 0">
+        State manager, file handler, PROJECT tab, and Footings &amp; Slabs assembly picker are all
+        live with BEAM gSheet parity. The other 11 assembly tabs (Phase 4) and REVIEW / RESULTS
+        (Phase 5) are stubbed and queued.
       </p>
       <p style="margin:6px 0">
         See <a href="https://github.com/arossti/OpenBuilding/blob/main/BEAMweb.md" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md</a> for the workplan and open questions.
@@ -222,7 +241,7 @@ const PANEL_BODIES = {
     </div>
   `,
   glossary: renderGlossaryPanel(),
-  "energy-ghg": renderEnergyGhgPanel(),
+  "energy-ghg": renderEnergyGhgPanel()
 };
 
 function renderGlossaryPanel() {
@@ -258,7 +277,9 @@ function renderGlossaryPanel() {
 }
 
 function renderEnergyGhgPanel() {
-  const rows = ENERGY_GHG.factors.map(f => `
+  const rows = ENERGY_GHG.factors
+    .map(
+      (f) => `
     <tr>
       <td class="beam-ref-term">${escapeHtml(f.province)}</td>
       <td class="num">${formatFactor(f.electricity_kgco2e_per_kwh)}</td>
@@ -267,7 +288,9 @@ function renderEnergyGhgPanel() {
       <td class="num">${formatFactor(f.propane_kgco2e_per_l)}</td>
       <td class="num">${formatFactor(f.wood_kgco2e_per_kg)}</td>
     </tr>
-  `).join("");
+  `
+    )
+    .join("");
   return `
     <div class="beam-ref-pane">
       <div class="beam-ref-intro">
@@ -338,7 +361,7 @@ function defaultStub(tab) {
 // Tab routing
 // ──────────────────────────────────────────────────────────────────────
 function setActiveTab(tabId) {
-  if (!FLAT_TABS.some(t => t.id === tabId)) tabId = DEFAULT_TAB;
+  if (!FLAT_TABS.some((t) => t.id === tabId)) tabId = DEFAULT_TAB;
   state.activeTab = tabId;
   for (const btn of document.querySelectorAll(".beam-tab-button")) {
     btn.classList.toggle("active", btn.dataset.tabId === tabId);
@@ -353,7 +376,7 @@ function setActiveTab(tabId) {
 }
 function readInitialTabFromHash() {
   const id = (location.hash || "").replace(/^#/, "");
-  return id && FLAT_TABS.some(t => t.id === id) ? id : null;
+  return id && FLAT_TABS.some((t) => t.id === id) ? id : null;
 }
 function wireKeyboard() {
   window.addEventListener("hashchange", () => setActiveTab(readInitialTabFromHash() || state.activeTab));
@@ -363,8 +386,8 @@ function wireKeyboard() {
 // Action bar — New / Open / Save / Import / Load Sample / Reset Tab.
 // ──────────────────────────────────────────────────────────────────────
 const TAB_RESETTERS = {
-  "project":        { label: "PROJECT",            fn: resetProjectTab },
-  "footings-slabs": { label: "Footings & Slabs",   fn: resetFootingsSlabsTab },
+  project: { label: "PROJECT", fn: resetProjectTab },
+  "footings-slabs": { label: "Footings & Slabs", fn: resetFootingsSlabsTab }
 };
 
 function handleResetActiveTab() {
@@ -377,7 +400,7 @@ function handleResetActiveTab() {
   }
   const ok = window.confirm(
     `Reset "${entry.label}" to a blank state?\n\n` +
-    `This clears only the inputs on this tab. Other tabs, PDF-Parser polygon data, and any saved project file are preserved.`
+      `This clears only the inputs on this tab. Other tabs, PDF-Parser polygon data, and any saved project file are preserved.`
   );
   if (!ok) return;
   entry.fn();
@@ -388,7 +411,7 @@ function handleResetActiveTab() {
 function handleNewProject() {
   const ok = window.confirm(
     "Start a fresh project?\n\n" +
-    "This clears all inputs across every tab. Use Save first if you want to keep the current project."
+      "This clears all inputs across every tab. Use Save first if you want to keep the current project."
   );
   if (!ok) return;
   StateManager.clear();
@@ -402,8 +425,8 @@ async function handleLoadSample() {
   const entry = SAMPLES[sampleId];
   const ok = window.confirm(
     `Load "${entry.label}"?\n\n` +
-    `This populates PROJECT and assembly tabs with the BEAM workbook reference values. ` +
-    `Existing inputs in those fields will be overwritten — Save first if you want to keep your work.`
+      `This populates PROJECT and assembly tabs with the BEAM workbook reference values. ` +
+      `Existing inputs in those fields will be overwritten — Save first if you want to keep your work.`
   );
   if (!ok) return;
   setStatus(`Loading sample: ${entry.label}…`, "busy");
@@ -424,13 +447,14 @@ async function handleLoadSample() {
 
 function wireActionBar() {
   const handlers = {
-    "beam-new-project":      handleNewProject,
-    "beam-open-project":     () => notImplemented("Open project JSON — file-handler import wiring lands next."),
-    "beam-save-project":     () => notImplemented("Save project JSON — file-handler export wiring lands next."),
-    "beam-import-xlsx":      () => notImplemented("Import xlsx — needs excel-mapper (Phase 6; SheetJS already loaded)."),
-    "beam-import-pdf-parser":() => notImplemented("Import PDF-Parser project — needs polygon→assembly mapping (Phase 8)."),
-    "beam-load-sample":      handleLoadSample,
-    "beam-reset":            handleResetActiveTab,
+    "beam-new-project": handleNewProject,
+    "beam-open-project": () => notImplemented("Open project JSON — file-handler import wiring lands next."),
+    "beam-save-project": () => notImplemented("Save project JSON — file-handler export wiring lands next."),
+    "beam-import-xlsx": () => notImplemented("Import xlsx — needs excel-mapper (Phase 6; SheetJS already loaded)."),
+    "beam-import-pdf-parser": () =>
+      notImplemented("Import PDF-Parser project — needs polygon→assembly mapping (Phase 8)."),
+    "beam-load-sample": handleLoadSample,
+    "beam-reset": handleResetActiveTab
   };
   for (const [id, fn] of Object.entries(handlers)) {
     const el = document.getElementById(id);
@@ -455,8 +479,7 @@ async function loadMaterialIndex() {
     const idx = await res.json();
     state.materialCount = idx.count;
     state.materialIndex = idx;
-    document.getElementById("beam-material-count").textContent =
-      `${idx.count.toLocaleString()}-material`;
+    document.getElementById("beam-material-count").textContent = `${idx.count.toLocaleString()}-material`;
     document.getElementById("beam-material-source").textContent =
       `materials: ${idx.count} records · sha ${short(idx.generated_from_csv_sha256)}`;
   } catch (err) {
@@ -466,7 +489,9 @@ async function loadMaterialIndex() {
     setStatus("Material catalogue not staged — run `npm run stage:data` in PDF-Parser/", "error");
   }
 }
-function short(sha) { return sha ? sha.slice(0, 10) : "—"; }
+function short(sha) {
+  return sha ? sha.slice(0, 10) : "—";
+}
 
 // ──────────────────────────────────────────────────────────────────────
 // Status helpers
@@ -475,14 +500,15 @@ function setStatus(msg, kind) {
   const el = document.getElementById("beam-status-msg");
   if (!el) return;
   el.textContent = msg;
-  el.className = kind === "busy"  ? "status-busy"
-               : kind === "error" ? "status-error"
-               : "status-ready";
+  el.className = kind === "busy" ? "status-busy" : kind === "error" ? "status-error" : "status-ready";
 }
 
 function escapeHtml(s) {
   if (s == null) return "";
-  return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  return String(s).replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
+  );
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -494,7 +520,7 @@ window.BEAM = {
   setActiveTab,
   TABS: BEAM_TABS,
   FLAT_TABS,
-  version: "0.0.1-alpha",
+  version: "0.0.1-alpha"
 };
 
 // ──────────────────────────────────────────────────────────────────────

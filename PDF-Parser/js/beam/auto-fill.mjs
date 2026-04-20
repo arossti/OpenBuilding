@@ -25,6 +25,7 @@
 // Add new mappings here as Phase 4 tabs land.
 
 import { StateManager } from "../shared/state-manager.mjs";
+import { codeToDomKey } from "./assembly-csv-parser.mjs";
 import { refreshFootingsSlabsTab } from "./footings-slabs-tab.mjs";
 
 const VS = StateManager.VALUE_STATES;
@@ -44,7 +45,7 @@ const VS = StateManager.VALUE_STATES;
 //     (own TOTAL REBAR LENGTH at group banner)
 const PROJECT_TO_FS_GROUPS = {
   dim_continuous_footings_volume: ["CONTINUOUS CONCRETE FOOTINGS"],
-  dim_columns_piers_pads_volume:  ["CONCRETE COLUMN PADS & PIERS"],
+  dim_columns_piers_pads_volume: ["CONCRETE COLUMN PADS & PIERS"],
   dim_foundation_slab_floor_area: [
     "CONCRETE SLABS",
     "EARTHEN FLOOR SYSTEMS",
@@ -52,8 +53,8 @@ const PROJECT_TO_FS_GROUPS = {
     "SUB-SLAB INSULATION",
     "BARRIERS AND MEMBRANES",
     "BASEMENT FLOORING",
-    "AGGREGATE BASE",
-  ],
+    "AGGREGATE BASE"
+  ]
 };
 
 let registered = false;
@@ -82,10 +83,10 @@ function applyOneSource(parsedFs, projectKey, value) {
       if (!group) continue;
       for (const sub of group.subgroups) {
         for (const m of sub.materials) {
-          // Per-row state key — must match the rowKey() helper in
-          // footings-slabs-tab.mjs (full code path, not hash alone) so the
-          // DOM input bound to fs_<full_code>_qty receives the write.
-          const fId = `fs_${m.code.replace(/\|/g, "_")}_qty`;
+          // Per-row state key — shared codeToDomKey() helper (the same one
+          // F&S uses when binding inputs) keeps both sides in sync. If you
+          // change the key shape, only the helper has to move.
+          const fId = `fs_${codeToDomKey(m)}_qty`;
           const st = StateManager.getFieldState(fId);
           // Only user-typed values are sticky. Bridge overrides IMPORTED
           // (sample-loaded) + DERIVED + CALCULATED + null.

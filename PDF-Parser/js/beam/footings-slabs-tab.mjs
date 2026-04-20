@@ -1,28 +1,32 @@
 // footings-slabs-tab.mjs
-// First live assembly tab. Loads the BEAM F&S CSV snapshot at tab-wire time,
-// parses it via assembly-csv-parser, renders a 3-level picker (group →
-// subgroup → material rows), wires select/qty/pct inputs to StateManager,
-// computes per-row emissions live, and rolls up per-group + per-tab totals.
+// First live assembly tab — template for the 11 Phase 4 tabs to follow.
+// Loads the BEAM F&S CSV snapshot at tab-wire time, parses it via
+// assembly-csv-parser, renders a 3-level picker (group → subgroup →
+// material rows), wires SELECT / % / group-config inputs to StateManager
+// (qty cells are read-only, populated by PROJECT auto-fill or sample
+// loader), computes per-row emissions live, and rolls up per-group +
+// per-tab totals (NET / GROSS / STORAGE Short / STORAGE Long).
 //
-// Parity-first (session 3 decision): emission factors are derived from the
-// committed CSV (BEAM's precomputed NET/GROSS columns), not from
-// schema/materials/. That migration comes after BfCA validates functional
-// parity on a canonical project.
+// Parity-first (locked session 3, validated session 5): emission factors
+// are derived per-row from the BEAM CSV's pre-computed NET/GROSS columns,
+// not from schema/materials/. Migration to the materials DB unlocks the
+// full per-stage EN 15804+A2 scope and lands after Phase 4 ports.
 
 import { StateManager } from "../shared/state-manager.mjs";
-import { parseAssemblyCsv, computeRowEmissions } from "./assembly-csv-parser.mjs";
+import { parseAssemblyCsv, computeRowEmissions, codeToDomKey } from "./assembly-csv-parser.mjs";
 import { registerProjectToFsBridge, syncProjectToFsBridge } from "./auto-fill.mjs";
 import { inferJurisdiction, matchesFilter } from "./jurisdictions.mjs";
 
 const VS = StateManager.VALUE_STATES;
 const CSV_PATH = "data/beam/footings-slabs.csv";
 
-let parsed = null;  // { groups, factorCount } once loaded
+let parsed = null; // { groups, factorCount } once loaded
 
 function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (c) => (
-    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
-  ));
+  return String(s ?? "").replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
+  );
 }
 
 function fmtKg(v) {
@@ -31,37 +35,27 @@ function fmtKg(v) {
   return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
-// Display formatter for read-only qty inputs. Always shows 1 decimal to match
-// the BEAM gSheet (9.0 m³, 110.4 m²). State holds the full-precision number;
-// only the rendered string is rounded.
+// Display formatter for quantities (areas / volumes / lengths). 2 decimals
+// for visual consistency across all assembly tabs — state always holds full
+// precision so calc accuracy is unaffected. Emissions stay integer (fmtKg).
 function fmtQty(v) {
   if (v === null || v === undefined || v === "") return "";
   const n = Number(v);
   if (!isFinite(n) || n === 0) return "";
-  return n.toFixed(1);
-}
-
-// Convert a row's code path (T01|C01|S04|43fe24) to a CSS-safe identifier
-// (T01_C01_S04_43fe24). Used as the suffix of every per-row state key,
-// DOM id, and data attribute. Hash alone is not unique - the same material
-// EPD appears in several F&S groups (e.g. a concrete mix shows under
-// CONTINUOUS FOOTINGS, COLUMN PADS, and SLABS) - so we must qualify by the
-// full path or row state cross-talks across groups.
-function rowKey(material) {
-  return material.code.replace(/\|/g, "_");
+  return n.toFixed(2);
 }
 
 function fieldIds(material) {
-  const k = rowKey(material);
+  const k = codeToDomKey(material);
   return {
     sel: `fs_${k}_sel`,
     qty: `fs_${k}_qty`,
-    pct: `fs_${k}_pct`,
+    pct: `fs_${k}_pct`
   };
 }
 
 function groupCfgId(group) {
-  return `fs_${group.code.replace(/\|/g, "_")}_cfg`;
+  return `fs_${codeToDomKey(group)}_cfg`;
 }
 
 // Cold-start contract: no BEAM CSV sample values bleed in as defaults.
@@ -73,7 +67,7 @@ function currentValues(material, group) {
   const rawSel = StateManager.getValue(f.sel);
   const rawQty = StateManager.getValue(f.qty);
   const rawPct = StateManager.getValue(f.pct);
-  const select = rawSel === null ? false : (rawSel === "true" || rawSel === true);
+  const select = rawSel === null ? false : rawSel === "true" || rawSel === true;
   const qty = StateManager.parseNumeric(rawQty, 0);
   const pct = rawPct === null ? 1 : StateManager.parseNumeric(rawPct, 1);
   const configRatio = groupConfigRatio(group);
@@ -151,7 +145,7 @@ function renderGroup(group) {
         <h3 class="bw-asm-group-name">${esc(group.name)}</h3>
         ${cfgHtml}
         <span class="bw-asm-group-subtotal">
-          <span class="bw-asm-group-subtotal-val" id="bw-fs-sub-${hashOf(group.code)}">0</span>
+          <span class="bw-asm-group-subtotal-val" id="bw-fs-sub-${codeToDomKey(group)}">0</span>
           <span class="bw-asm-group-subtotal-unit">kgCO2e net</span>
         </span>
       </header>
@@ -168,9 +162,8 @@ function renderGroupConfig(group) {
   const val = current !== null && current !== "" ? esc(current) : "";
   const placeholder = group.config.default !== null ? esc(group.config.default) : "";
   const unitTxt = group.config.unit || "";
-  const tip = group.config.default !== null
-    ? `BEAM default: ${group.config.default}${unitTxt ? " " + unitTxt : ""}`
-    : "";
+  const tip =
+    group.config.default !== null ? `BEAM default: ${group.config.default}${unitTxt ? " " + unitTxt : ""}` : "";
   const unit = unitTxt ? `<span class="bw-asm-cfg-unit">${esc(unitTxt)}</span>` : "";
   return `
     <label class="bw-asm-cfg" title="${esc(tip)}">
@@ -183,9 +176,7 @@ function renderGroupConfig(group) {
 
 function jurAttrs(jur) {
   const c = (jur.countries || []).join(",");
-  const p = jur.provinces === "CA-wide"
-    ? "ca-wide"
-    : (Array.isArray(jur.provinces) ? jur.provinces.join(",") : "");
+  const p = jur.provinces === "CA-wide" ? "ca-wide" : Array.isArray(jur.provinces) ? jur.provinces.join(",") : "";
   return `data-jur-countries="${esc(c)}" data-jur-provinces="${esc(p)}"`;
 }
 
@@ -219,7 +210,7 @@ function renderSubgroup(group, sub) {
 function renderMaterialRow(group, sub, m) {
   const ids = fieldIds(m);
   const vals = currentValues(m, group);
-  const k = rowKey(m);
+  const k = codeToDomKey(m);
   const netId = `bw-fs-net-${k}`;
   const rowCls = vals.select ? "bw-asm-row bw-asm-row-selected" : "bw-asm-row";
   const footCls = m.footnote.toLowerCase().includes("expired") ? "bw-asm-foot expired" : "bw-asm-foot";
@@ -259,10 +250,6 @@ function truncFoot(s) {
   return s.slice(0, 16) + "…";
 }
 
-function hashOf(groupCode) {
-  return groupCode.replace(/\|/g, "_");
-}
-
 async function loadCsv() {
   const res = await fetch(CSV_PATH, { cache: "no-cache" });
   if (!res.ok) throw new Error(`Failed to load ${CSV_PATH}: HTTP ${res.status}`);
@@ -271,7 +258,10 @@ async function loadCsv() {
 
 function recomputeAll() {
   if (!parsed) return;
-  let tabNet = 0, tabGross = 0, tabStShort = 0, tabStLong = 0;
+  let tabNet = 0,
+    tabGross = 0,
+    tabStShort = 0,
+    tabStLong = 0;
 
   for (const group of parsed.groups) {
     let groupNet = 0;
@@ -283,9 +273,9 @@ function recomputeAll() {
           qty: vals.qty,
           pct: vals.pct,
           factors: m.factors,
-          configRatio: vals.configRatio,
+          configRatio: vals.configRatio
         });
-        const netEl = document.getElementById(`bw-fs-net-${rowKey(m)}`);
+        const netEl = document.getElementById(`bw-fs-net-${codeToDomKey(m)}`);
         if (netEl) netEl.textContent = fmtKg(emissions.net);
         groupNet += emissions.net;
         tabNet += emissions.net;
@@ -294,7 +284,7 @@ function recomputeAll() {
         tabStLong += emissions.storage_long;
       }
     }
-    const subEl = document.getElementById(`bw-fs-sub-${hashOf(group.code)}`);
+    const subEl = document.getElementById(`bw-fs-sub-${codeToDomKey(group)}`);
     if (subEl) subEl.textContent = fmtKg(groupNet);
   }
 
@@ -302,7 +292,7 @@ function recomputeAll() {
     net: document.getElementById("bw-fs-total-net"),
     gross: document.getElementById("bw-fs-total-gross"),
     stshort: document.getElementById("bw-fs-total-stshort"),
-    stlong: document.getElementById("bw-fs-total-stlong"),
+    stlong: document.getElementById("bw-fs-total-stlong")
   };
   if (totalEls.net) totalEls.net.textContent = fmtKg(tabNet);
   if (totalEls.gross) totalEls.gross.textContent = fmtKg(tabGross);
@@ -352,7 +342,8 @@ function wireInputs(panel) {
     const btn = header.querySelector(".bw-asm-toggle");
     if (!body || !btn) return;
     const open = body.hasAttribute("hidden");
-    if (open) body.removeAttribute("hidden"); else body.setAttribute("hidden", "");
+    if (open) body.removeAttribute("hidden");
+    else body.setAttribute("hidden", "");
     btn.textContent = open ? "▼" : "▶";
     btn.setAttribute("aria-expanded", String(open));
   });
@@ -369,7 +360,7 @@ function refreshInputsFromState() {
       const cfgEl = panel.querySelector(`input[data-field-id="${groupCfgId(group)}"]`);
       if (cfgEl) {
         const v = StateManager.getValue(groupCfgId(group));
-        cfgEl.value = (v === null || v === "") ? "" : v;
+        cfgEl.value = v === null || v === "" ? "" : v;
       }
     }
     for (const sub of group.subgroups) {
@@ -384,7 +375,7 @@ function refreshInputsFromState() {
         if (sel) sel.checked = rawSel === true || rawSel === "true";
         if (qty) qty.value = fmtQty(rawQty);
         if (pct) pct.value = rawPct === null ? "100" : String(Math.round(StateManager.parseNumeric(rawPct, 1) * 100));
-        updateRowSelectedClass(rowKey(m), sel ? sel.checked : false);
+        updateRowSelectedClass(codeToDomKey(m), sel ? sel.checked : false);
       }
     }
   }
@@ -423,7 +414,8 @@ function applyJurisdictionFilter() {
   if (!panel) return;
   const country = StateManager.getValue("project_country") || "";
   const province = StateManager.getValue("project_province_state") || "";
-  let totalRows = 0, hiddenRows = 0;
+  let totalRows = 0,
+    hiddenRows = 0;
 
   for (const row of panel.querySelectorAll("tr.bw-asm-row")) {
     totalRows++;
@@ -512,7 +504,7 @@ export async function wireFootingsSlabsTab() {
   const note = document.getElementById("bw-fs-load-note");
   if (note) {
     const matCount = parsed.groups.reduce((n, g) => n + g.subgroups.reduce((m, s) => m + s.materials.length, 0), 0);
-    note.textContent = `${parsed.groups.length} groups · ${matCount} materials · ${parsed.factorCount} with factors. Phase 3 MVP — parity testing pending.`;
+    note.textContent = `${parsed.groups.length} groups · ${matCount} materials · ${parsed.factorCount} with factors. BEAM gSheet parity validated.`;
   }
 
   wireInputs(panel);

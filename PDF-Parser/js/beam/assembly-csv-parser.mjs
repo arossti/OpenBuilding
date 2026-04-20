@@ -27,6 +27,22 @@
 
 const CODE_RE = /^T\d+(\|[^|]+)*$/;
 
+// Convert a BEAM code path (e.g. "T01|C01|S04|43fe24" for a material row, or
+// "T01|C06" for a group banner) into a CSS-safe identifier suffix used by
+// every consumer of the parser as the unique key for state slots, DOM IDs,
+// and data attributes. Accepts either a string code or a {code} object so
+// callers can pass a material/group/subgroup directly.
+//
+// Hash-only keys are NOT unique — the same material EPD appears in several
+// F&S groups (e.g. a concrete mix shows under CONTINUOUS FOOTINGS, COLUMN
+// PADS, and SLABS). All consumers MUST go through this helper so adding a
+// new assembly tab can't accidentally re-introduce the cross-talk bug.
+export function codeToDomKey(codeOrObj) {
+  const code = typeof codeOrObj === "string" ? codeOrObj : codeOrObj && codeOrObj.code;
+  if (!code) return "";
+  return code.replace(/\|/g, "_");
+}
+
 export function parseAssemblyCsv(csvText) {
   const rows = parseCsvRows(csvText);
   const groups = [];
@@ -49,7 +65,7 @@ export function parseAssemblyCsv(csvText) {
           code,
           name: aText,
           config: extractInlineConfig(row),
-          subgroups: [],
+          subgroups: []
         };
         groups.push(currentGroup);
         currentSubgroup = null;
@@ -57,7 +73,7 @@ export function parseAssemblyCsv(csvText) {
         currentSubgroup = {
           code,
           name: aText,
-          materials: [],
+          materials: []
         };
         currentGroup.subgroups.push(currentSubgroup);
       }
@@ -91,7 +107,7 @@ export function parseAssemblyCsv(csvText) {
           net_per_unit: netKgco2e / denom,
           gross_per_unit: grossKgco2e / denom,
           storage_short_per_unit: storageShort / denom,
-          storage_long_per_unit: storageLong / denom,
+          storage_long_per_unit: storageLong / denom
         };
         factorCount++;
       }
@@ -109,7 +125,7 @@ export function parseAssemblyCsv(csvText) {
         sample_storage_short: storageShort,
         sample_storage_long: storageLong,
         footnote,
-        factors,
+        factors
       });
     }
   }
@@ -150,8 +166,12 @@ function parseCsvRows(text) {
     const ch = text[i];
     if (inQuotes) {
       if (ch === '"') {
-        if (text[i + 1] === '"') { cell += '"'; i++; }
-        else { inQuotes = false; }
+        if (text[i + 1] === '"') {
+          cell += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
       } else {
         cell += ch;
       }
@@ -201,6 +221,6 @@ export function computeRowEmissions({ select, qty, pct, factors, configRatio = 1
     net: factors.net_per_unit * m,
     gross: factors.gross_per_unit * m,
     storage_short: factors.storage_short_per_unit * m,
-    storage_long: factors.storage_long_per_unit * m,
+    storage_long: factors.storage_long_per_unit * m
   };
 }

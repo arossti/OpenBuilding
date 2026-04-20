@@ -20,8 +20,8 @@ export const SAMPLES = {
   "single-family-home": {
     label: "Single-Family Home (DOE Prototype)",
     json: "data/beam/samples/single-family-home.json",
-    description: "BEAM workbook reference project — used for parity testing against the gSheet.",
-  },
+    description: "BEAM workbook reference project — used for parity testing against the gSheet."
+  }
 };
 
 export async function loadSample(sampleId = "single-family-home") {
@@ -57,6 +57,6 @@ export async function loadSample(sampleId = "single-family-home") {
     sampleId,
     label: entry.label,
     projectFieldCount: Object.keys(data.fields || data).length,
-    fsFieldCount: fsCount,
+    fsFieldCount: fsCount
   };
 }

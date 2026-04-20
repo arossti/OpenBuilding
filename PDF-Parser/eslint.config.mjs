@@ -27,14 +27,20 @@ export default [
         document: "readonly",
         console: "readonly",
         setTimeout: "readonly",
+        clearTimeout: "readonly",
         setInterval: "readonly",
         clearInterval: "readonly",
         localStorage: "readonly",
+        location: "readonly",
+        history: "readonly",
         Blob: "readonly",
         URL: "readonly",
         fetch: "readonly",
         FileReader: "readonly",
+        TextDecoder: "readonly",
         HTMLCanvasElement: "readonly",
+        HTMLInputElement: "readonly",
+        HTMLSelectElement: "readonly",
         CanvasRenderingContext2D: "readonly",
         MouseEvent: "readonly",
         KeyboardEvent: "readonly",
@@ -43,6 +49,8 @@ export default [
         prompt: "readonly",
         alert: "readonly",
         confirm: "readonly",
+        // Vendor globals attached to window by classic <script> tags
+        XLSX: "readonly",
         // App globals
         PP: "writable"
       }
