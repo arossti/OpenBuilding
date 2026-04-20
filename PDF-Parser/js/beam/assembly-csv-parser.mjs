@@ -30,12 +30,11 @@ const CODE_RE = /^T\d+(\|[^|]+)*$/;
 export function parseAssemblyCsv(csvText) {
   const rows = parseCsvRows(csvText);
   const groups = [];
-  const factorByHash = new Map();  // material hash -> kgCO2e per unit
+  let factorCount = 0;
 
   let currentGroup = null;
   let currentSubgroup = null;
 
-  // First pass: build the hierarchy + collect sample values
   for (const row of rows) {
     const code = (row[13] || "").trim();
     if (!CODE_RE.test(code)) continue;
@@ -77,6 +76,26 @@ export function parseAssemblyCsv(csvText) {
       const storageLong = parseNum(row[10]);
       const footnote = (row[12] || "").trim();
 
+      // Derive per-unit factor from THIS row's sample only — no cross-row
+      // sharing. The same material hash can appear in groups that measure
+      // quantity differently (m³ in CONTINUOUS FOOTINGS vs m² in CONCRETE
+      // SLABS), so a per-m³ factor leaks ~6× too much when reused on a
+      // per-m²-at-6"-thickness row. Per-row derivation reproduces the
+      // pre-computed sample net for any row whose sample has data; rows
+      // with sample_qty=0 get a null factor and the picker UI shows the
+      // "no-factor" marker until material-DB cross-reference fills them in.
+      let factors = null;
+      if (sampleQty > 0 && samplePct > 0) {
+        const denom = sampleQty * samplePct;
+        factors = {
+          net_per_unit: netKgco2e / denom,
+          gross_per_unit: grossKgco2e / denom,
+          storage_short_per_unit: storageShort / denom,
+          storage_long_per_unit: storageLong / denom,
+        };
+        factorCount++;
+      }
+
       currentSubgroup.materials.push({
         code,
         hash,
@@ -90,37 +109,12 @@ export function parseAssemblyCsv(csvText) {
         sample_storage_short: storageShort,
         sample_storage_long: storageLong,
         footnote,
+        factors,
       });
-
-      // Collect per-unit factor when the sample has a non-zero base.
-      // Same material hash appears in multiple groups (e.g. a concrete mix
-      // shows under both CONTINUOUS FOOTINGS and COLUMN PADS); the sample
-      // project populates qty on some rows and leaves 0.0 on others.
-      // First non-zero row wins — all duplicates share the same EPD factor.
-      if (sampleQty > 0 && samplePct > 0 && !factorByHash.has(hash)) {
-        factorByHash.set(hash, {
-          net_per_unit: netKgco2e / (sampleQty * samplePct),
-          gross_per_unit: grossKgco2e / (sampleQty * samplePct),
-          storage_short_per_unit: storageShort / (sampleQty * samplePct),
-          storage_long_per_unit: storageLong / (sampleQty * samplePct),
-        });
-      }
     }
   }
 
-  // Second pass: attach factors to every material entry (including the
-  // zero-sample rows). A `null` factor means we couldn't derive one from
-  // any sample row — keep the row in the picker but compute as 0 until
-  // Phase 3b introduces Materials-DB cross-reference.
-  for (const g of groups) {
-    for (const sub of g.subgroups) {
-      for (const m of sub.materials) {
-        m.factors = factorByHash.get(m.hash) || null;
-      }
-    }
-  }
-
-  return { groups, factorCount: factorByHash.size };
+  return { groups, factorCount };
 }
 
 function extractInlineConfig(row) {
