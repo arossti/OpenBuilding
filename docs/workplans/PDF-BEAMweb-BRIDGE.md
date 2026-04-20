@@ -2,7 +2,7 @@
 
 > **Cross-app bridge: PDF-Parser polygons → BEAMweb PROJECT dimensions.** This is the Phase 4b detailed spec scoped in [BEAMweb.md §6](./BEAMweb.md) + [§7 Q19](./BEAMweb.md). Read BEAMweb.md §0, §5.1, and §7 Q19 first for the parent-workstream context (state model, flat-dict project JSON, source precedence).
 >
-> **Status:** draft, pre-implementation. Opened 2026-04-20. Pending Andy's takeoff-strategy map (in progress as of writing). Expect revisions before any code lands.
+> **Status:** draft, partial implementation started. Opened 2026-04-20; numbered labels (Phase 4b.0) shipped on `PDF-Bridge` branch (commit `f93217d`) the same day. Updated post-BfCA-team review 2026-04-20 — four items from the team meeting threaded into the spec. See "Team feedback 2026-04-20" box in §0 for where each one landed.
 
 ---
 
@@ -19,6 +19,21 @@
   4. Source selector UI + fidelity badge on each PROJECT dim row
   5. Numbered labels pass (trivial, can land anytime)
 - **Current reality.** PDF-Parser polygons carry `{id, label, vertices, closed, type: area|window, mode: net|add}` per [`polygon-tool.mjs`](../../js/polygon-tool.mjs). No component tag. No depth. `volumes[]` stub exists in [`project-store.mjs`](../../js/project-store.mjs) but empty. Sheet classification (plan/section/elevation) is tracked via [`sheet-classifier.mjs`](../../js/sheet-classifier.mjs) but semantically inert — doesn't influence measurement semantics. See BEAMweb.md §0 Phase 4b entry for audit findings.
+
+### Team feedback — 2026-04-20
+
+Four items from the BfCA team meeting threaded into the spec. Summary + where each one lives:
+
+1. **Stale BEAM workbook + materials DB sources.** The 22 BEAM tab CSVs committed session 3 (`3ea823e`) were fetched from an older workbook URL. Current authoritative URLs are the Google Sheets in the `external-links` footnote below. Refresh pass pending. See §7 **Q27**.
+2. **"EPD Only" filter on Database viewer narrows 821 → 380.** Melanie flagged concern: all 821 entries were informed by EPDs per her review of the import, so the 380 filter number reads like there's missing EPD provenance on ~440 rows. Investigation item — likely a mis-labelled filter criterion (filtering something narrower than "has EPD data"), not a data gap. See §7 **Q28**.
+3. **Biogenic status flags showing `method: none`.** Database viewer's detail pane reads `biogenic_factor=—  carbon_content=— kgC/kg  full_C = — kgCO2e  stored = — kgCO2e` for rows where biogenic carbon is expected (wood, biogenic insulation). Either a data gap (likely resolved by Q27 refresh), a UI rendering bug (reading the wrong field), or an onboarding-friction gap (Melanie may not have seen where biogenic lands in the schema yet). See §7 **Q29**.
+4. **Assembly-preset picker on wall polylines.** Current workflow (BEAM gSheet-style) requires the user to manually tune percentages across framing + cladding + insulation after the picker populates rows. Melanie's ask: when the user draws a wall polyline (red), offer an assembly preset — "Wood 2×4", "Wood 2×6", "Steel stud", etc. — which seeds the downstream F&S-style assembly tab with sensible default percentages the user can still tune. This is a meaningful UX + data addition. See §3.2 (polyline components extended), §5.7 (new preset UX), §6.3 (sequencing), and §7 **Q30** (open design questions).
+
+**External links (non-gitignored — live-only references):**
+- BEAMs workbook: `https://docs.google.com/spreadsheets/d/1LjOpDTjfGQvvfRGCpDb8KkHcUtHzUC5UbvfV-wXy13g/edit?gid=175800287#gid=175800287`
+- BfCA Materials DB: `https://docs.google.com/spreadsheets/d/1-gd2iH7UIoDuEt7gIC35PbgJf2sO5go9IwjkSxue-UA/edit?gid=170425505#gid=170425505`
+
+Record kept here (not in app code) because these are source URLs for upstream refresh, not runtime fetches. When Q27 refresh lands, the committed CSVs in `docs/csv files from BEAM/` and the JSONs in `schema/materials/` update from these sources.
 
 ### What the bridge does
 
@@ -200,6 +215,8 @@ Picked from a dropdown at measurement time, filtered by polygon type + sheet cla
 - `wall_interior` — interior partition centerline; Σ length × `param_wall_height_m` = interior wall area
 - `footing_interior` — interior footing beneath a load-bearing wall; Σ length × `param_footing_height_m` × `param_footing_width_m` = volume
 
+Polyline polygons tagged `wall_interior` (and, by extension, any perimeter polygon tagged `exterior_perimeter` that feeds a wall area) carry an additional **`assembly_preset`** attribute. Picked at measurement time alongside the component tag. See §5.7 for the UX; §7 Q30 for the open design questions (preset catalogue, percentages source of truth, multi-preset-per-dimension semantics).
+
 **Section-sheet components** (deferred to v2) — most section-derived values are covered by project parameters for v1.
 
 ### 3.3 Polygon metadata additions (Step 10 schema)
@@ -215,7 +232,8 @@ Picked from a dropdown at measurement time, filtered by polygon type + sheet cla
   "component": "wall_exterior",
   "depth_m": null,
   "sheet_id": "A-301",
-  "sheet_class": "elevation"
+  "sheet_class": "elevation",
+  "assembly_preset": null
 }
 ```
 
@@ -224,6 +242,7 @@ Picked from a dropdown at measurement time, filtered by polygon type + sheet cla
 - `depth_m` — optional, null by default; populated for `pad_pier` type via a measurement-dialog input
 - `sheet_id` — denormalized from parent sheet for bridge convenience (saves a lookup)
 - `sheet_class` — denormalized from [`sheet-classifier.mjs`](../../js/sheet-classifier.mjs)
+- `assembly_preset` — optional, null by default; populated for `wall_interior` / `wall_exterior` / `exterior_perimeter` / `wall_party` when the user picks a preset from §5.7 (`wood_2x4`, `wood_2x6`, `steel_stud_3_5`, etc.). Seeds the Phase 4 assembly tab's picker-row percentages; user can still tune.
 
 Sheet denormalization makes polygon records self-contained — the bridge doesn't need to reach back into PDF-Parser's sheet map at aggregation time.
 
@@ -394,13 +413,52 @@ On polygon creation/edit, a "Tag" dropdown appears in the measurement panel.
 
 When the user draws a polyline tagged `wall_interior` or a closed polygon tagged `exterior_perimeter`, and `param_wall_height_m` is blank on PROJECT, the PDF-Parser sidebar shows an inline prompt: "Set Wall Height on PROJECT tab" (with a click-through link). Non-blocking — user can draw freely and fill the param later.
 
+### 5.7 Assembly-preset picker on wall polylines (meeting 2026-04-20, Melanie)
+
+**Problem being solved.** BEAM gSheet's current workflow populates every candidate material in a wall-assembly picker (framing + sheathing + cladding + insulation + barriers + interior finish), each at 0% by default. The user then manually tunes percentages across dozens of rows to describe a single wall assembly. This is a known pain point — same assembly typed repeatedly across projects.
+
+**The preset.** When the user draws a wall polyline (`type: polyline`, `component: wall_interior`) or a perimeter polygon (`type: area`, `component: exterior_perimeter`), the PDF-Parser measurement panel shows a second dropdown below the component tag: **Assembly preset**. Values (v1 catalogue — subject to BfCA team validation, see Q30):
+
+- Wood 2×4 @ 16" o.c. (light framing)
+- Wood 2×6 @ 16" o.c. (medium framing)
+- Wood 2×8 @ 16" o.c. (heavy framing)
+- Steel stud 3-5/8"
+- Steel stud 6"
+- CMU 8" (concrete masonry unit)
+- ICF 6" (insulated concrete form)
+- Other / custom (user handles percentages manually, as today)
+
+The preset is carried on the polygon record (`assembly_preset` field per §3.3). When the bridge runs, it:
+1. Derives the dimension value (length × height → m² as before).
+2. **Passes the preset name through to the downstream assembly tab** (Interior Walls, Exterior Walls, Party Walls when those Phase 4 tabs port) so the picker rows open with sensible defaults rather than every row at 0%.
+
+**Default seeding.** Each preset maps to a small table: `{ row_hash → percent }` applied on the assembly tab's first render when the dimension is sourced from `pdf-parser` and the row isn't USER_MODIFIED. Values stay editable — the preset is a seed, not a lock.
+
+Example (illustrative — actual values need Melanie's sign-off; see Q30):
+```
+wood_2x4_16oc:
+  - SPF dimension lumber 2x4 → ~12% by volume share
+  - Drywall 1/2" (interior) → 100% (one side)
+  - Batt insulation R-13 → 100% (cavity fill)
+  - Vapour barrier → 100%
+  - Framing connectors → auto (depth implicit)
+```
+
+**Multi-preset per dimension.** If a user draws three polylines (`wall_interior`) with different presets (e.g. two walls are 2×4, one is 2×6), the bridge routes each polyline to its own F&S-style row group. The `dim_interior_wall_area` total still sums across all polylines, but the assembly tab renders multiple pre-populated groups — one per distinct preset.
+
+**Why this lives on the polyline, not on the PROJECT tab.** Wall assemblies in residential construction vary by location (exterior walls one build-up, party walls another, interior walls yet another). Per-polygon tagging is finer-grained than per-dimension and matches how drawings actually describe assemblies.
+
+**Preset catalogue location.** Proposed: a new file `js/shared/assembly-presets.mjs` (or similar) exports `ASSEMBLY_PRESETS`, a data table mapping preset IDs → display label + the default row-seed table. Lives in `js/shared/` because both PDF-Parser (picker UI) and BEAMweb (assembly tabs) consume it.
+
+**Scope implication.** This is a non-trivial addition that interacts with Phase 4 (the actual Interior Walls / Exterior Walls / Party Walls assembly tabs — none of which have ported yet). Until those tabs port, the preset is metadata on the polyline that nothing downstream consumes. Sequenced in §6.3 (carried on polygons Phase 4b.1) + §6 new Phase 4b.5 (wire to assembly tabs once they port).
+
 ---
 
 ## 6. Sequencing / phases
 
-### 6.1 Phase 4b.0 — Zero-dep standalone (land anytime)
+### 6.1 Phase 4b.0 — Zero-dep standalone (**✅ shipped** on `PDF-Bridge` commit `f93217d`, 2026-04-20)
 
-- **Numbered labels** (§5.3) — one label-string change per field in `project-tab.mjs`. No behavior impact, no risk. Can ship as a standalone commit.
+- **Numbered labels** (§5.3) — one label-string change per field in `project-tab.mjs`. No behavior impact, no risk. Shipped as a standalone commit alongside the Q25 Party → Party / Demising label update.
 
 ### 6.2 Phase 4b.1 — Foundation (PDF-Parser Step 10 minimal + PROJECT params)
 
@@ -443,7 +501,14 @@ Ships ~16 of 18 building dims + 3 info quantities + most garage dims. **~60% of 
 - Bulk "Use PDF-Parser for all connected dims" action on the PROJECT header.
 - Pitched-roof cavity handling (Q22 resolved).
 
-### 6.6 Never (decided non-goals)
+### 6.6 Phase 4b.5 — Assembly-preset wire-through (meeting 2026-04-20, Melanie)
+
+- `js/shared/assembly-presets.mjs` (new): `ASSEMBLY_PRESETS` catalogue — preset ID → display label + default `{ row_hash → percent }` seed table. Preset list per §5.7 (subject to Q30 refinement).
+- PDF-Parser measurement panel: second dropdown on `wall_interior` / `exterior_perimeter` polylines — "Assembly preset" (persists to polygon `assembly_preset` field per §3.3).
+- Bridge passes `assembly_preset` through to the downstream Phase 4 assembly tab (Interior Walls / Exterior Walls / Party Walls) when those ship. Assembly tab seeds row percentages from the preset on first render — editable, not locked.
+- **Gated on:** the actual Phase 4 assembly tab ports (Interior Walls, Exterior Walls, Party Walls — §6 Phase 4 queue in BEAMweb.md). Until then, the preset is captured on the polygon but downstream is a no-op. Metadata-only in the interim is fine — preserves user intent for when tabs port.
+
+### 6.7 Never (decided non-goals)
 
 - Timber framing volume from polygons (see §1 Non-goals).
 - HOT2000 operational energy (BEAMweb.md §10).
@@ -471,6 +536,30 @@ Carrying forward from BEAMweb.md §7 Q19 with updates:
 - **Q24 — Multi-storey wall-height handling.** `param_wall_height_m` is a single scalar. Multi-storey buildings have per-storey heights. MVP assumes a single weighted wall height (user computes externally). **Future:** add `param_wall_height_storey_1`, `_storey_2`, ... with a `stories_above_grade`-driven renderer. Deferred past v1.
 - **Q25 — Party/Demising wall naming in code.** Field stays `dim_party_wall_area` in code + project JSON (BEAM gSheet compatibility), UI label shows "Party / Demising Wall Area" per Andy's 2026-04-20 call. Non-breaking.
 - **Q26 — PDF-Parser Step 10 ownership.** Who writes Step 10 — is it part of this Phase 4b scope or a separate PDF-Parser workstream that Phase 4b consumes? **Proposal:** the polygon-schema changes in §3.3 + the polyline tool + the component dropdown live in a new PDF-Parser session branch (`pdfparser-step10` or similar) and land via their own PR before Phase 4b.2 starts. Phase 4b.2 assumes they're available.
+
+### Opened by BfCA team meeting (2026-04-20)
+
+- **Q27 — Upstream BEAM + materials DB refresh.** The 22 BEAM tab CSVs in `docs/csv files from BEAM/` and the 821-record `schema/materials/` catalogue were both built from an older workbook URL (session 3, `3ea823e`). Team confirmed the current authoritative sources are:
+  - BEAMs workbook: `https://docs.google.com/spreadsheets/d/1LjOpDTjfGQvvfRGCpDb8KkHcUtHzUC5UbvfV-wXy13g/edit?gid=175800287#gid=175800287`
+  - BfCA materials DB: `https://docs.google.com/spreadsheets/d/1-gd2iH7UIoDuEt7gIC35PbgJf2sO5go9IwjkSxue-UA/edit?gid=170425505#gid=170425505`
+
+  **Proposal:** run a refresh pass as its own focused branch — re-fetch via `schema/scripts/fetch-beam-sheet.py` against the new workbook URL, re-run the importer against the new DB sheet, re-validate, diff the two generations, flag any rows that changed shape or disappeared. The existing F&S parity tests (commit `8bee3f4`) should still pass against the refreshed data — any numerical shifts are meaningful signals that real-world EPD values moved, not regression. Scope ~1 session. Best sequenced **before Phase 4b.2 lands** so the bridge builds against current data.
+
+- **Q28 — "EPD Only" filter on the Database viewer filters 821 → 380.** Melanie flagged concern in the meeting: by her recollection, every one of the 821 records was informed by an underlying EPD — so a filter narrowing to 380 reads like ~440 rows are being mis-labelled as non-EPD. **Investigation path:** grep `database.mjs` for whatever predicate the "EPD Only" checkbox applies; cross-check against the `schema/materials/*.json` field that predicate reads (likely `epd_id`, `source`, or similar). Possibilities: (a) filter checks a narrower condition than the generic "had an EPD input" (e.g. `source === "epd_direct"` vs including `source === "beam_derived"`), (b) the field is genuinely missing on ~440 records and Q27's refresh will populate it, (c) filter is actually correct but the label "EPD Only" mis-describes what it does (maybe rename to match reality). Needs a look.
+
+- **Q29 — Biogenic status flags reading `method: none` on rows that should carry biogenic carbon.** Database viewer's detail pane shows `biogenic_factor=—  carbon_content=— kgC/kg  full_C = — kgCO2e  stored = — kgCO2e` on wood / biogenic-insulation rows where non-zero values are expected. **Three hypotheses:**
+  1. Data gap — fields genuinely null in `schema/materials/06-wood.json` + others. Q27 refresh likely resolves.
+  2. Rendering bug — `database.mjs` reads the wrong field name (e.g. `biogenic.method` vs `status.biogenic_method`). Verifiable via a quick schema/JSON spot-check.
+  3. Onboarding gap — Melanie hasn't seen the part of the schema where biogenic lives yet. Not a code issue; calls for a schema walkthrough when next together.
+
+  **Action:** resolve Q27 first (data refresh) → then re-check a wood row in the viewer. If still `—`, it's (2) or (3).
+
+- **Q30 — Assembly-preset design questions.** Item 4 from the 2026-04-20 meeting, threaded into §3.2 + §5.7 + §6.6 Phase 4b.5. Open sub-questions:
+  - (a) **Preset catalogue.** Initial list proposed in §5.7 (Wood 2×4 / 2×6 / 2×8, Steel stud 3-5/8 / 6, CMU 8, ICF 6, Other). Is this the right set? Canadian-residential-focused, so what's missing? SIP panels? Passive House wall types? TJI floor joists (different takeoff entirely — belongs to floors, not walls)?
+  - (b) **Default percentages source of truth.** Does BfCA already have an authoritative table mapping assembly → default material mix (e.g. "Wood 2×4 @ 16" o.c." → SPF 12% by volume + drywall 100% one side + batt R-13 100% cavity + vapour barrier 100%)? If yes, grab it; if no, needs a BfCA-side exercise to codify the defaults before we can wire them.
+  - (c) **Multi-preset per dimension.** If user draws three `wall_interior` polylines with different presets, does the resulting Interior Walls assembly tab render three separate picker groups (one per preset) or flatten into a single group with weighted averages? **Proposal:** three separate groups is more faithful to the data and easier to audit; flattening only in the dim total.
+  - (d) **Override the preset after drawing.** Should the user be able to change a polyline's preset later without re-drawing? **Proposal:** yes — same picker accessible via polygon-edit panel. Preset change triggers re-seed on the assembly tab (with USER_MODIFIED rows sticky, as always).
+  - (e) **Exterior walls.** Do exterior walls get presets too (Wood 2×4 + cladding-type combo), or are they manual-tuned given their higher variability? **Lean:** same preset mechanism, larger catalogue — but that multiplies the preset list by cladding type. Maybe two dropdowns for exterior: "framing preset" + "cladding preset"? Design call needed.
 
 ---
 
