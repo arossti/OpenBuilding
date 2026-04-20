@@ -17,7 +17,13 @@ import { StateManager } from "../shared/state-manager.mjs";
 import { parseAssemblyCsv, computeRowEmissions, codeToDomKey } from "./assembly-csv-parser.mjs";
 import { registerProjectToFsBridge, syncProjectToFsBridge } from "./auto-fill.mjs";
 import { inferJurisdiction, matchesFilter } from "./jurisdictions.mjs";
-import { loadMaterialsDb, getMaterial, convertQtyToMaterialUnit, getLoadStats } from "./materials-db.mjs";
+import {
+  loadMaterialsDb,
+  getMaterial,
+  convertQtyToMaterialUnit,
+  getLoadStats,
+  resolveBeamAverage
+} from "./materials-db.mjs";
 
 const VS = StateManager.VALUE_STATES;
 const CSV_PATH = "data/beam/footings-slabs.csv";
@@ -84,31 +90,13 @@ function isTotalConfig(group) {
   return !!(group.config && /^TOTAL\b/i.test(group.config.label || ""));
 }
 
-// THICKNESS configs are handled by the materials-db unit converter
-// (m² row × thickness_m → m³ for the per-m³ concrete factor). Don't
-// double-count here.
-function isThicknessConfig(group) {
-  return !!(group.config && /^THICKNESS$/i.test(group.config.label || ""));
-}
-
-// configRatio = user / BEAM-default. Used today only for R-VALUE on
-// SUB-SLAB INSULATION as a linear-scaling proxy (placeholder until the
-// BEAM R-value formula is properly ported — uses material R-per-inch
-// and density). At default R the ratio is 1 and the calc matches BEAM;
-// user-modified R scales linearly. TOTAL configs flow to qty via the
-// config-qty bridge → ratio 1. THICKNESS configs flow through the
-// unit converter → ratio 1. Every other case currently returns 0 when
-// the user has blanked the input so emissions don't fire on a missing
-// config.
-function groupConfigRatio(group) {
-  if (!group.config || !group.config.default) return 1;
-  if (isTotalConfig(group)) return 1;
-  if (isThicknessConfig(group)) return 1;
-  const raw = StateManager.getValue(groupCfgId(group));
-  if (raw === null || raw === "") return 0;
-  const user = StateManager.parseNumeric(raw, 0);
-  if (!user) return 0;
-  return user / group.config.default;
+// All scaling configs in F&S today (THICKNESS, R-VALUE, TOTAL ...) are
+// handled by the materials-db unit converter or the config-qty bridge —
+// not by a multiplicative ratio. configRatio is kept at 1 across the
+// board. The function survives only as a hook for future scaling configs
+// that the unit converter does not cover yet.
+function groupConfigRatio(_group) {
+  return 1;
 }
 
 export function renderFootingsSlabsPanel() {
@@ -588,6 +576,22 @@ export async function wireFootingsSlabsTab() {
   }
 
   parsed = parseAssemblyCsv(csv);
+
+  // Compute "BEAM Avg" entries client-side: BfCA's DB stores these with
+  // gwp_kgco2e=null because BEAM derives them on the fly from same-subgroup
+  // peer entries. We do the same here so the no-factor marker doesn't
+  // dangle on workbook-default SELECT'd rows like XPS BEAM Avg.
+  let resolvedAvgs = 0;
+  for (const g of parsed.groups) {
+    for (const sub of g.subgroups) {
+      const peerEntries = sub.materials.map((m) => getMaterial(m.hash)).filter(Boolean);
+      for (const m of sub.materials) {
+        const entry = getMaterial(m.hash);
+        if (resolveBeamAverage(entry, peerEntries)) resolvedAvgs++;
+      }
+    }
+  }
+
   const matCount = parsed.groups.reduce((n, g) => n + g.subgroups.reduce((m, s) => m + s.materials.length, 0), 0);
   // Count materials whose hash resolves to a DB entry with a non-zero GWP.
   let withFactor = 0;
@@ -601,7 +605,7 @@ export async function wireFootingsSlabsTab() {
   }
   const stats = getLoadStats();
   console.log(
-    `[footings-slabs-tab] ${parsed.groups.length} groups, ${matCount} materials, ${withFactor} with GWP factors (materials DB: ${stats?.count} entries)`
+    `[footings-slabs-tab] ${parsed.groups.length} groups, ${matCount} materials, ${withFactor} with GWP factors (DB: ${stats?.count} entries, ${resolvedAvgs} BEAM-Avg resolved)`
   );
 
   const body = document.getElementById("bw-fs-body");
