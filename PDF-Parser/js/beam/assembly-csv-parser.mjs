@@ -27,15 +27,29 @@
 
 const CODE_RE = /^T\d+(\|[^|]+)*$/;
 
+// Convert a BEAM code path (e.g. "T01|C01|S04|43fe24" for a material row, or
+// "T01|C06" for a group banner) into a CSS-safe identifier suffix used by
+// every consumer of the parser as the unique key for state slots, DOM IDs,
+// and data attributes. Accepts either a string code or a {code} object so
+// callers can pass a material/group/subgroup directly.
+//
+// Hash-only keys are NOT unique — the same material EPD appears in several
+// F&S groups (e.g. a concrete mix shows under CONTINUOUS FOOTINGS, COLUMN
+// PADS, and SLABS). All consumers MUST go through this helper so adding a
+// new assembly tab can't accidentally re-introduce the cross-talk bug.
+export function codeToDomKey(codeOrObj) {
+  const code = typeof codeOrObj === "string" ? codeOrObj : codeOrObj && codeOrObj.code;
+  if (!code) return "";
+  return code.replace(/\|/g, "_");
+}
+
 export function parseAssemblyCsv(csvText) {
   const rows = parseCsvRows(csvText);
   const groups = [];
-  const factorByHash = new Map();  // material hash -> kgCO2e per unit
 
   let currentGroup = null;
   let currentSubgroup = null;
 
-  // First pass: build the hierarchy + collect sample values
   for (const row of rows) {
     const code = (row[13] || "").trim();
     if (!CODE_RE.test(code)) continue;
@@ -50,7 +64,7 @@ export function parseAssemblyCsv(csvText) {
           code,
           name: aText,
           config: extractInlineConfig(row),
-          subgroups: [],
+          subgroups: []
         };
         groups.push(currentGroup);
         currentSubgroup = null;
@@ -58,13 +72,17 @@ export function parseAssemblyCsv(csvText) {
         currentSubgroup = {
           code,
           name: aText,
-          materials: [],
+          materials: []
         };
         currentGroup.subgroups.push(currentSubgroup);
       }
       // depth 1 (T01 alone) is the tab itself — skip silently
     } else if (depth === 4 && currentSubgroup) {
-      // Material row
+      // Material row. The CSV's pre-computed NET/GROSS columns are kept
+      // as `sample_*` for the Load Sample fixture (UI selects + qty defaults)
+      // but are NOT consumed for factor derivation — per-unit factors are
+      // looked up at calc time from materials-db.mjs (single source of
+      // truth: schema/materials/index.json).
       const hash = code.split("|").pop();
       const name = (row[1] || "").trim();
       const sampleQty = parseNum(row[2]);
@@ -89,38 +107,12 @@ export function parseAssemblyCsv(csvText) {
         sample_gross: grossKgco2e,
         sample_storage_short: storageShort,
         sample_storage_long: storageLong,
-        footnote,
+        footnote
       });
-
-      // Collect per-unit factor when the sample has a non-zero base.
-      // Same material hash appears in multiple groups (e.g. a concrete mix
-      // shows under both CONTINUOUS FOOTINGS and COLUMN PADS); the sample
-      // project populates qty on some rows and leaves 0.0 on others.
-      // First non-zero row wins — all duplicates share the same EPD factor.
-      if (sampleQty > 0 && samplePct > 0 && !factorByHash.has(hash)) {
-        factorByHash.set(hash, {
-          net_per_unit: netKgco2e / (sampleQty * samplePct),
-          gross_per_unit: grossKgco2e / (sampleQty * samplePct),
-          storage_short_per_unit: storageShort / (sampleQty * samplePct),
-          storage_long_per_unit: storageLong / (sampleQty * samplePct),
-        });
-      }
     }
   }
 
-  // Second pass: attach factors to every material entry (including the
-  // zero-sample rows). A `null` factor means we couldn't derive one from
-  // any sample row — keep the row in the picker but compute as 0 until
-  // Phase 3b introduces Materials-DB cross-reference.
-  for (const g of groups) {
-    for (const sub of g.subgroups) {
-      for (const m of sub.materials) {
-        m.factors = factorByHash.get(m.hash) || null;
-      }
-    }
-  }
-
-  return { groups, factorCount: factorByHash.size };
+  return { groups };
 }
 
 function extractInlineConfig(row) {
@@ -156,8 +148,12 @@ function parseCsvRows(text) {
     const ch = text[i];
     if (inQuotes) {
       if (ch === '"') {
-        if (text[i + 1] === '"') { cell += '"'; i++; }
-        else { inQuotes = false; }
+        if (text[i + 1] === '"') {
+          cell += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
       } else {
         cell += ch;
       }
@@ -187,26 +183,23 @@ function parseCsvRows(text) {
 }
 
 /**
- * Compute live emissions for a picker row given user inputs + base factor.
- * Returns { net, gross, storage_short, storage_long } in kgCO2e.
- * All values 0 when select is false, factors are null, or qty/pct <= 0.
+ * Compute live emissions for a picker row. Caller resolves the per-unit GWP
+ * factor from materials-db.mjs and converts the row qty into the material's
+ * functional_unit (via convertQtyToMaterialUnit). This function is just the
+ * final multiply.
  *
- * configRatio scales emissions for group-header configs (THICKNESS, R-VALUE,
- * TOTAL REBAR LENGTH). Derived from user_config_value / default_config_value.
- * Assumes linear scaling — matches BEAM's formulas for the straightforward
- * cases (more thickness = proportionally more concrete = proportionally more
- * emissions). May need refinement for non-linear cases during parity testing.
- * Defaults to 1.0 when the group has no config or the config default is null.
+ *   net = qtyInMaterialUnit × pct × gwp_per_unit
+ *
+ * Returns 0 across the board when select is false, gwp is missing, or
+ * qty/pct ≤ 0. GROSS, STORAGE Short, STORAGE Long are placeholders matching
+ * NET for non-biogenic materials — biogenic carbon handling lands when
+ * the materials-db starts surfacing per-stage EN 15804+A2 data.
  */
-export function computeRowEmissions({ select, qty, pct, factors, configRatio = 1 }) {
-  if (!select || !factors || !(qty > 0) || !(pct > 0)) {
+export function computeRowEmissions({ select, qtyInMaterialUnit, pct, gwp }) {
+  if (!select || !gwp || !(qtyInMaterialUnit > 0) || !(pct > 0)) {
     return { net: 0, gross: 0, storage_short: 0, storage_long: 0 };
   }
-  const m = qty * pct * configRatio;
-  return {
-    net: factors.net_per_unit * m,
-    gross: factors.gross_per_unit * m,
-    storage_short: factors.storage_short_per_unit * m,
-    storage_long: factors.storage_long_per_unit * m,
-  };
+  const m = qtyInMaterialUnit * pct;
+  const net = m * gwp;
+  return { net, gross: net, storage_short: 0, storage_long: 0 };
 }

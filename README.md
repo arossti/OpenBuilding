@@ -4,9 +4,13 @@ Research, prototyping, and tooling for embodied carbon (EC) assessment in Canadi
 
 ## Live Tools
 
-Both tools are deployed via GitHub Pages and share a unified dark-chrome design system with cross-navigation.
+Five browser-native apps plus a dev dependency manifest, all deployed via GitHub Pages from one directory. Shared dark-chrome design system, shared material database, cross-app navigation.
 
-### PDF-Parser — Construction Document Area Extraction
+### Landing — `/`
+
+App directory with cards linking to each tool.
+
+### PDF-Parser — `/pdfparser.html`
 
 Client-side tool for extracting area and volume data from construction document PDFs. Loads a PDF, identifies architectural plans, and lets users measure areas with polygon or rectangle tools — purpose-built for the area/volume inputs needed by BEAM and wbLCA tools.
 
@@ -20,7 +24,7 @@ Client-side tool for extracting area and volume data from construction document 
 - Ruler tool with tick marks and dual-unit labels
 - Unified undo/redo (polygons + rulers), JSON project save/load/import, CSV export
 
-### EC Matrix — Canadian Embodied Carbon Compliance Matrix
+### EC Matrix — `/matrix.html`
 
 Interactive reference mapping roles, responsibilities, tools, standards, and compliance requirements for EC assessments across Canadian building types, sizes, jurisdictions, and project phases. Aligned to NBC/NECB 2025 Draft.
 
@@ -31,49 +35,100 @@ Interactive reference mapping roles, responsibilities, tools, standards, and com
 - 2025 code updates panel, PT equivalents, standards tooltips, BEM glossary
 - Persona quick-filter chips for common role scenarios
 
+### Material Database — `/database.html`
+
+BfCA material catalogue viewer. 821 EPDs across 8 material groups, full EN 15804+A2 per-stage impact scope, sortable + searchable + filterable by group / country / lifecycle stage. Collapsible group sections mirror the assembly-tab structure in BEAMweb.
+
+### BEAMweb — `/beamweb.html`
+
+Browser port of the BEAM embodied-carbon calculator. Phase 3 live: PROJECT metadata + dimension form with source-selectable inputs, plus the first live assembly picker (Footings & Slabs, 16 groups × 658 materials, gSheet parity-validated on every row tested). Reads per-unit GWP factors directly from the same BfCA materials catalogue as the Database viewer. Phases 4+ queued: 11 remaining assembly tabs (Windows → Garage) + REVIEW + RESULTS.
+
+### Dev Dependencies — `/dependencies.html`
+
+Dependency manifest with ESM import-graph drift detector. Not nav-linked — for maintainers.
+
 ## Repository Structure
 
 ```
 at/
-├── PDF-Parser/          Area extraction tool + EC Matrix app
-│   ├── index.html       PDF-Parser app (dark theme)
-│   ├── matrix.html      EC Matrix app (light theme, with Part 9/Part 3 splash)
-│   ├── bfcastyles.css   Shared design system
-│   ├── pdfparser.css    PDF-Parser styles
-│   ├── matrix.css       EC Matrix styles
-│   ├── js/              10 ESM modules (vanilla JS)
-│   └── lib/             PDF.js 4.9.155 (local ESM build)
-├── schema/              Materials database JSON schema (in progress)
-│   └── schema.md        Workplan for BEAM materials port + wbLCA extensibility
-├── docs/                App documentation + reference materials
-│   ├── pdf-parser.md    PDF-Parser workplan + technical docs
-│   ├── matrix/          EC Matrix docs (ARCHITECTURE, TRIAGE, data model)
-│   ├── PDF References/  Vancouver EC guides, NRC reports, code references
-│   ├── regulatory (Jacob)/  Legacy regulatory research (stale, kept for reference)
-│   ├── ifc (Jacob)/         Legacy IFC exploration + IFCLCA permission notes
-│   └── cost (Jacob)/        Legacy cost-data research
-├── CCI-tables/          CCI construction classification taxonomy
-└── CLAUDE.md            Project instructions for AI-assisted development
+├── PDF-Parser/                     Deployed root — GitHub Pages serves from here
+│   ├── index.html                  Landing — app directory
+│   ├── pdfparser.html              PDF-Parser — area + volume takeoff
+│   ├── matrix.html                 EC Matrix — compliance grid
+│   ├── database.html               Material Database viewer
+│   ├── beamweb.html                BEAMweb — embodied carbon calculator
+│   ├── dependencies.html           Dev dependency manifest
+│   ├── bfcastyles.css              Single consolidated design system (~5000 lines)
+│   ├── js/                         ESM modules (vanilla JS, no build step)
+│   │   ├── app.mjs                 PDF-Parser bootstrap
+│   │   ├── polygon-tool.mjs        Polygon + window measurement
+│   │   ├── scale-manager.mjs       Scale detection + calibration
+│   │   ├── pdf-loader.mjs          PDF.js integration
+│   │   ├── canvas-viewer.mjs       Viewer transform + render
+│   │   ├── vector-snap.mjs         Vertex snap to PDF vectors
+│   │   ├── sheet-classifier.mjs    Plan / section / elevation inference
+│   │   ├── schedule-parser.mjs     Schedule extraction (in progress)
+│   │   ├── project-store.mjs       PDF-Parser project persistence
+│   │   ├── config.mjs              App constants
+│   │   ├── beamweb.mjs             BEAMweb app entry + tab router
+│   │   ├── database.mjs            Database viewer entry
+│   │   ├── shared/                 Cross-app utilities
+│   │   │   ├── state-manager.mjs   Centralised state + listeners + autosave
+│   │   │   ├── file-handler.mjs    Import / export with quarantine
+│   │   │   └── html-utils.mjs      HTML escape + helpers
+│   │   └── beam/                   BEAMweb-specific modules
+│   │       ├── project-tab.mjs, footings-slabs-tab.mjs
+│   │       ├── materials-db.mjs    GWP + unit-conversion lookups
+│   │       ├── auto-fill.mjs       PROJECT → F&S quantity bridge
+│   │       ├── jurisdictions.mjs   Country / province filter
+│   │       ├── assembly-csv-parser.mjs  Generic assembly-tab CSV parser
+│   │       ├── sample-loader.mjs   Load Sample (DOE Prototype)
+│   │       ├── workbook-mapper.mjs Workbook → state mapper (Phase 1 stub)
+│   │       ├── reference-data.mjs  Glossary + Energy GHG tables
+│   │       └── shared/
+│   │           └── formatters.mjs  fmtKg / fmtQty display formatters
+│   ├── graphics/                   App logos + iconography
+│   ├── lib/                        PDF.js 4.9.155 (local ESM build)
+│   └── data/                       Gitignored — staged at dev/deploy time
+├── schema/                         Materials database (821 records, EN 15804+A2)
+│   ├── material.schema.json        Draft 2020-12 validator
+│   ├── materials/                  8 per-group JSON files (03-concrete ... 31-earthwork)
+│   ├── lookups/                    Enum + inference tables
+│   ├── scripts/                    CSV importer + validator + BEAM sheet fetcher
+│   └── schema.md                   Workplan + lineage
+├── docs/
+│   ├── pdf-parser.md               PDF-Parser workplan + technical docs
+│   ├── matrix/                     EC Matrix docs (ARCHITECTURE, TRIAGE, data model)
+│   ├── beam-samples/               Sample BEAMweb project JSONs (DOE Prototype)
+│   ├── csv files from BEAM/        22 BEAM workbook tab snapshots
+│   ├── PDF References/             Vancouver EC guides, NRC reports, code references
+│   ├── regulatory (Jacob)/         Legacy regulatory research (archived)
+│   ├── ifc (Jacob)/                Legacy IFC exploration
+│   └── cost (Jacob)/               Legacy cost-data research
+├── CCI-tables-20241121/            CCI construction classification taxonomy
+├── BEAMweb.md                      BEAMweb workstream spec + changelog
+├── PDF-BEAMweb-BRIDGE.md           Phase 4b cross-app bridge design spec
+├── CLEANUP-AUDIT.md                Pre-Phase-4b codebase audit (2026-04-20)
+└── CLAUDE.md                       Project instructions for AI-assisted development
 ```
 
 ## Development
 
-PDF-Parser requires a local server for ESM module imports:
+All apps load as ES modules and require a local server:
 
 ```bash
 cd PDF-Parser
 npm install          # ESLint + Prettier (one-time)
-npm run serve        # python3 -m http.server 8000
+npm run stage:data   # Copy schema/materials into PDF-Parser/data/ (gitignored) — needed for Database viewer + BEAMweb
+npm run serve        # python3 -m http.server 8000 — open http://localhost:8000/
 npm run lint         # ESLint check
 npm run lint:fix     # ESLint auto-fix (includes Prettier)
 npm run format       # Prettier on CSS/HTML/JS
 ```
 
-Matrix App (`ec_matrix_step15.html`) opens directly in a browser — no server needed.
-
 ## Context
 
-This work is part of the NRCan Codes Accelerator Fund (CAF), with a near-term focus on combined operational and embodied carbon analysis for Part 9 and Part 3 buildings. The PDF-Parser and EC Matrix are complementary tools: the Matrix maps *what* EC requirements apply; the Parser extracts the *area and volume data* needed to run the assessment.
+This work is part of the NRCan Codes Accelerator Fund (CAF), with a near-term focus on combined operational and embodied carbon analysis for Part 9 and Part 3 buildings. The four apps are complementary: **EC Matrix** maps *what* EC requirements apply; **PDF-Parser** extracts the *area and volume data*; the **Material Database** is the EPD catalogue those areas multiply against; **BEAMweb** is the calculation surface that ties it all together into a project-level embodied carbon total.
 
 ## Scope
 

@@ -37,11 +37,12 @@ jobs:
         # `npm run stage:data` (see PDF-Parser/package.json) to produce the
         # same layout.
         run: |
-          mkdir -p PDF-Parser/data/schema PDF-Parser/data/beam
+          mkdir -p PDF-Parser/data/schema PDF-Parser/data/beam PDF-Parser/data/beam/samples
           cp -r schema/materials PDF-Parser/data/schema/
           cp schema/material.schema.json PDF-Parser/data/schema/
           cp schema/sample.json PDF-Parser/data/schema/
           cp "docs/csv files from BEAM/Footings & Slabs.csv" PDF-Parser/data/beam/footings-slabs.csv
+          cp docs/beam-samples/*.json PDF-Parser/data/beam/samples/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

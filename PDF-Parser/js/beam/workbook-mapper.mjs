@@ -32,7 +32,7 @@ const SHEET_NAMES = Object.freeze({
   ROOF: "Roof",
   GARAGE: "Garage",
   REVIEW: "REVIEW",
-  RESULTS: "RESULTS",
+  RESULTS: "RESULTS"
 });
 
 // Per-tab cell → fieldId mapping. Keys match BEAM tab names above.
@@ -61,7 +61,7 @@ const TAB_MAPPINGS = Object.freeze({
   [SHEET_NAMES.FLOORS]: {},
   [SHEET_NAMES.CEILINGS]: {},
   [SHEET_NAMES.ROOF]: {},
-  [SHEET_NAMES.GARAGE]: {},
+  [SHEET_NAMES.GARAGE]: {}
 });
 
 function extractCellValue(cell) {
@@ -105,7 +105,9 @@ function mapWorkbookToState(workbook) {
     mappedTabs++;
   }
 
-  console.log(`[WorkbookMapper] mapped ${mappedTabs} tabs (${missingTabs} missing), ${Object.keys(state).length} fields`);
+  console.log(
+    `[WorkbookMapper] mapped ${mappedTabs} tabs (${missingTabs} missing), ${Object.keys(state).length} fields`
+  );
   return state;
 }
 
@@ -116,7 +118,7 @@ function getSheetNames() {
 export const WorkbookMapper = {
   SHEET_NAMES,
   mapWorkbookToState,
-  getSheetNames,
+  getSheetNames
 };
 
 if (typeof window !== "undefined") {

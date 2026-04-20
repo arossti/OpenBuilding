@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BEAM — Embodied Carbon Calculator (BfCA)</title>
-    <meta name="description" content="Browser port of the BEAM embodied carbon calculator. Calculates material emissions for Canadian construction projects using the BfCA JSON material database." />
+    <meta
+      name="description"
+      content="Browser port of the BEAM embodied carbon calculator. Calculates material emissions for Canadian construction projects using the BfCA JSON material database."
+    />
 
     <!-- CSS: single consolidated file (bfcastyles.css holds shared + per-app rules scoped by html class). Bootstrap only on BEAMweb for modals/dropdowns. -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
@@ -21,8 +24,15 @@
       <header class="site-header beam-header">
         <img src="graphics/beam-logo.png" alt="BEAM" class="header-logo" />
         <div class="beam-title-block">
-          <h1 class="beam-title">BEAM <span style="font-size:12px;font-weight:normal;color:var(--text-dim)">· BfCA Embodied Carbon Calculator</span></h1>
-          <span class="beam-subtitle">JS port of BEAM · Phase 0 shell · consumes the <span id="beam-material-count">BfCA</span> material database</span>
+          <h1 class="beam-title">
+            BEAM
+            <span style="font-size: 12px; font-weight: normal; color: var(--text-dim)"
+              >· BfCA Embodied Carbon Calculator</span
+            >
+          </h1>
+          <span class="beam-subtitle"
+            >JS port of BEAM · consumes the <span id="beam-material-count">BfCA</span> material database</span
+          >
         </div>
         <div class="beam-spacer"></div>
         <nav class="beam-nav">
@@ -38,7 +48,11 @@
       <div id="beam-action-bar">
         <!-- Import / Export dropdown (Bootstrap-powered) -->
         <div class="btn-group" role="group">
-          <button class="beam-action-btn primary" id="beam-new-project" title="Start a fresh project (clears current state)">
+          <button
+            class="beam-action-btn primary"
+            id="beam-new-project"
+            title="Start a fresh project (clears current state)"
+          >
             <i class="bi bi-file-earmark-plus"></i> New
           </button>
         </div>
@@ -55,21 +69,37 @@
         <div class="beam-action-sep"></div>
 
         <div class="btn-group" role="group">
-          <button class="beam-action-btn" id="beam-import-xlsx" title="Import a BEAM workbook (.xlsx) into this project">
+          <button
+            class="beam-action-btn"
+            id="beam-import-xlsx"
+            title="Import a BEAM workbook (.xlsx) into this project"
+          >
             <i class="bi bi-file-earmark-spreadsheet"></i> Import xlsx
           </button>
-          <button class="beam-action-btn" id="beam-import-pdf-parser" title="Pull areas from a saved PDF-Parser project JSON">
+          <button
+            class="beam-action-btn"
+            id="beam-import-pdf-parser"
+            title="Pull areas from a saved PDF-Parser project JSON"
+          >
             <i class="bi bi-file-earmark-ruled"></i> Import PDF-Parser
           </button>
         </div>
 
         <div class="beam-action-sep"></div>
 
-        <button class="beam-action-btn disabled" id="beam-tilt" title="Force recalculation (useful when totals look stale) — available once calc engine lands in Phase 3">
-          <i class="bi bi-arrow-repeat"></i> Tilt
+        <button
+          class="beam-action-btn"
+          id="beam-load-sample"
+          title="Load the BEAM Single-Family Home (DOE Prototype) sample project into the current state"
+        >
+          <i class="bi bi-folder-symlink"></i> Load Sample
         </button>
-        <button class="beam-action-btn disabled" id="beam-reset" title="3-tier reset: undo changes / clear imports / factory reset — available once state manager lands in Phase 1">
-          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        <button
+          class="beam-action-btn"
+          id="beam-reset"
+          title="Reset the active tab to a blank state. Other tabs and PDF-Parser polygon data are preserved."
+        >
+          <i class="bi bi-arrow-counterclockwise"></i> Reset Tab
         </button>
 
         <span class="beam-project-name" id="beam-project-name">(untitled project)</span>
@@ -95,10 +125,17 @@
 
       <!-- ── Status bar ──────────────────────────────────── -->
       <div id="beam-status-bar">
-        <span id="beam-status-msg" class="status-ready">Shell ready · no calc engine yet · phase 0</span>
+        <span id="beam-status-msg" class="status-ready"
+          >Ready · cold-start blank state · Footings &amp; Slabs live (Phase 3)</span
+        >
         <span class="beam-spacer"></span>
         <span id="beam-material-source" class="beam-build-tag">materials: data/schema/materials/index.json</span>
-        <span class="beam-build-tag">build: BEAMweb alpha · <a href="dependencies.html" style="color: var(--text-dim); text-decoration: none;" title="Dependency manifest">deps</a></span>
+        <span class="beam-build-tag"
+          >build: BEAMweb alpha ·
+          <a href="dependencies.html" style="color: var(--text-dim); text-decoration: none" title="Dependency manifest"
+            >deps</a
+          ></span
+        >
       </div>
     </div>
 

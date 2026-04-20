@@ -10,61 +10,81 @@
 
 /* eslint-disable no-undef */
 
+import { esc as escapeHtml } from "./shared/html-utils.mjs";
+
 const DATA_BASE = "data/schema";
 const INDEX_URL = `${DATA_BASE}/materials/index.json`;
 const GROUP_FILE = (prefix) => `${DATA_BASE}/materials/${groupSlug(prefix)}`;
 
 const GROUPS = {
-  "03": { label: "Concrete",  file: "03-concrete.json"  },
-  "04": { label: "Masonry",   file: "04-masonry.json"   },
-  "05": { label: "Metals",    file: "05-metals.json"    },
-  "06": { label: "Wood",      file: "06-wood.json"      },
-  "07": { label: "Thermal",   file: "07-thermal.json"   },
-  "08": { label: "Openings",  file: "08-openings.json"  },
-  "09": { label: "Finishes",  file: "09-finishes.json"  },
-  "31": { label: "Earthwork", file: "31-earthwork.json" },
+  "03": { label: "Concrete", file: "03-concrete.json" },
+  "04": { label: "Masonry", file: "04-masonry.json" },
+  "05": { label: "Metals", file: "05-metals.json" },
+  "06": { label: "Wood", file: "06-wood.json" },
+  "07": { label: "Thermal", file: "07-thermal.json" },
+  "08": { label: "Openings", file: "08-openings.json" },
+  "09": { label: "Finishes", file: "09-finishes.json" },
+  31: { label: "Earthwork", file: "31-earthwork.json" }
 };
 function groupSlug(prefix) {
   return (GROUPS[prefix] && GROUPS[prefix].file) || null;
 }
 
-const ALL_STAGES = ["A1","A2","A3","A4","A5","B1","B2","B3","B4","B5","B6","B7","C1","C2","C3","C4","D"];
+const ALL_STAGES = [
+  "A1",
+  "A2",
+  "A3",
+  "A4",
+  "A5",
+  "B1",
+  "B2",
+  "B3",
+  "B4",
+  "B5",
+  "B6",
+  "B7",
+  "C1",
+  "C2",
+  "C3",
+  "C4",
+  "D"
+];
 const STAGE_GROUPS = [
-  { group: "Product (A1–A3)", stages: ["A1","A2","A3"] },
-  { group: "Construction", stages: ["A4","A5"] },
-  { group: "Use — in-service", stages: ["B1","B2","B3","B4","B5"] },
-  { group: "Use — operational", stages: ["B6","B7"] },
-  { group: "End of life", stages: ["C1","C2","C3","C4"] },
-  { group: "Beyond", stages: ["D"] },
+  { group: "Product (A1–A3)", stages: ["A1", "A2", "A3"] },
+  { group: "Construction", stages: ["A4", "A5"] },
+  { group: "Use — in-service", stages: ["B1", "B2", "B3", "B4", "B5"] },
+  { group: "Use — operational", stages: ["B6", "B7"] },
+  { group: "End of life", stages: ["C1", "C2", "C3", "C4"] },
+  { group: "Beyond", stages: ["D"] }
 ];
 const IMPACT_CATEGORIES = [
-  { key: "gwp_kgco2e",                    label: "GWP",                 unit: "kgCO₂e" },
-  { key: "gwp_bio_kgco2e",                label: "GWP-bio",             unit: "kgCO₂e" },
-  { key: "eutrophication_kgneq",          label: "Eutrophication",      unit: "kgN eq" },
-  { key: "acidification_kgso2eq",         label: "Acidification",       unit: "kgSO₂ eq" },
-  { key: "ozone_depletion_kgcfc11eq",     label: "Ozone depletion",     unit: "kgCFC-11 eq" },
-  { key: "smog_kgo3eq",                   label: "Smog",                unit: "kgO₃ eq" },
-  { key: "abiotic_depletion_fossil_mj",   label: "Abiotic depl. (foss)",unit: "MJ" },
-  { key: "water_consumption_m3",          label: "Water consumption",   unit: "m³" },
-  { key: "primary_energy_nonrenewable_mj",label: "Primary E (non-ren)", unit: "MJ" },
-  { key: "primary_energy_renewable_mj",   label: "Primary E (renew)",   unit: "MJ" },
+  { key: "gwp_kgco2e", label: "GWP", unit: "kgCO₂e" },
+  { key: "gwp_bio_kgco2e", label: "GWP-bio", unit: "kgCO₂e" },
+  { key: "eutrophication_kgneq", label: "Eutrophication", unit: "kgN eq" },
+  { key: "acidification_kgso2eq", label: "Acidification", unit: "kgSO₂ eq" },
+  { key: "ozone_depletion_kgcfc11eq", label: "Ozone depletion", unit: "kgCFC-11 eq" },
+  { key: "smog_kgo3eq", label: "Smog", unit: "kgO₃ eq" },
+  { key: "abiotic_depletion_fossil_mj", label: "Abiotic depl. (foss)", unit: "MJ" },
+  { key: "water_consumption_m3", label: "Water consumption", unit: "m³" },
+  { key: "primary_energy_nonrenewable_mj", label: "Primary E (non-ren)", unit: "MJ" },
+  { key: "primary_energy_renewable_mj", label: "Primary E (renew)", unit: "MJ" }
 ];
 
 // ────────────────────────────────────────────────────────────
 // State
 // ────────────────────────────────────────────────────────────
 const state = {
-  indexEntries: [],         // all entries from index.json
-  groupCache: new Map(),    // group_prefix → records[] (lazy)
-  recordCache: new Map(),   // id → full record (from per-group file)
-  view: [],                 // filtered + sorted entries
+  indexEntries: [], // all entries from index.json
+  groupCache: new Map(), // group_prefix → records[] (lazy)
+  recordCache: new Map(), // id → full record (from per-group file)
+  view: [], // filtered + sorted entries
   activeGroups: new Set(),
   search: "",
   epdOnly: false,
   sortKey: "display_name",
   sortDir: "asc",
-  expanded: new Set(),      // ids of rows expanded
-  expandedGroups: new Set(),// group_prefix values expanded in grouped (no-filter) view
+  expanded: new Set(), // ids of rows expanded
+  expandedGroups: new Set() // group_prefix values expanded in grouped (no-filter) view
 };
 
 // ────────────────────────────────────────────────────────────
@@ -77,7 +97,8 @@ async function boot() {
     if (!res.ok) throw new Error(`index.json: ${res.status}`);
     const idx = await res.json();
     state.indexEntries = idx.entries || [];
-    document.getElementById("db-source-note").textContent = `source: ${idx.count} records · sha ${short(idx.generated_from_csv_sha256)}`;
+    document.getElementById("db-source-note").textContent =
+      `source: ${idx.count} records · sha ${short(idx.generated_from_csv_sha256)}`;
     renderGroupChips();
     wireControls();
     applyFilters();
@@ -96,11 +117,14 @@ async function boot() {
 function wireControls() {
   const search = document.getElementById("db-search");
   const clear = document.getElementById("db-clear-search");
-  search.addEventListener("input", debounce(() => {
-    state.search = search.value.trim().toLowerCase();
-    clear.hidden = state.search.length === 0;
-    applyFilters();
-  }, 120));
+  search.addEventListener(
+    "input",
+    debounce(() => {
+      state.search = search.value.trim().toLowerCase();
+      clear.hidden = state.search.length === 0;
+      applyFilters();
+    }, 120)
+  );
   clear.addEventListener("click", () => {
     search.value = "";
     state.search = "";
@@ -181,7 +205,7 @@ function renderGroupChips() {
   }
   const container = document.getElementById("db-groups-chips");
   // Preserve the "Groups" label; remove anything else
-  [...container.querySelectorAll(".db-chip")].forEach(n => n.remove());
+  [...container.querySelectorAll(".db-chip")].forEach((n) => n.remove());
   const sorted = [...counts.keys()].sort();
   for (const prefix of sorted) {
     const btn = document.createElement("button");
@@ -230,7 +254,7 @@ function applyFilters() {
     let av = a[key];
     let bv = b[key];
     if (av == null && bv == null) return 0;
-    if (av == null) return 1;       // nulls last
+    if (av == null) return 1; // nulls last
     if (bv == null) return -1;
     if (typeof av === "number" && typeof bv === "number") return (av - bv) * dir;
     return String(av).localeCompare(String(bv), undefined, { numeric: true }) * dir;
@@ -244,8 +268,7 @@ function applyFilters() {
 
   document.getElementById("db-result-count").textContent =
     `${state.view.length.toLocaleString()} of ${state.indexEntries.length.toLocaleString()} materials`;
-  document.getElementById("db-count-label").textContent =
-    `${state.indexEntries.length} materials`;
+  document.getElementById("db-count-label").textContent = `${state.indexEntries.length} materials`;
   renderRows();
 }
 
@@ -256,8 +279,7 @@ function renderRows() {
   const tbody = document.getElementById("db-rows");
   updateExpandToggleLabel();
   if (state.view.length === 0) {
-    tbody.innerHTML =
-      `<tr><td colspan="8" class="db-empty-state">No materials match the current filters.<br>Try clearing the search box or removing group chips.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="db-empty-state">No materials match the current filters.<br>Try clearing the search box or removing group chips.</td></tr>`;
     return;
   }
   // When the user is searching or has chip filters active, flatten the list
@@ -391,7 +413,7 @@ async function loadFullRecord(id) {
     if (!res.ok) throw new Error(`${fileName}: ${res.status}`);
     const doc = await res.json();
     state.groupCache.set(prefix, doc.records || []);
-    for (const r of (doc.records || [])) state.recordCache.set(r.id, r);
+    for (const r of doc.records || []) state.recordCache.set(r.id, r);
     setStatus("Ready.", "ready");
   }
   return state.recordCache.get(id);
@@ -467,7 +489,7 @@ function identityBlock(r) {
 
   const elList = document.createElement("div");
   elList.className = "db-tag-list";
-  for (const e of (cls.typical_elements || [])) {
+  for (const e of cls.typical_elements || []) {
     const t = document.createElement("span");
     t.className = "db-tag";
     t.textContent = e;
@@ -484,20 +506,22 @@ function identityBlock(r) {
     swatch.innerHTML = `<span class="db-kv-null">—</span>`;
   }
 
-  box.appendChild(kv([
-    ["id",                 r.id],
-    ["beam_id",            (r.external_refs || {}).beam_id],
-    ["display_name",       (r.naming || {}).display_name],
-    ["material_name",      (r.naming || {}).material_name],
-    ["product_brand_name", (r.naming || {}).product_brand_name],
-    ["group",              cls.group_prefix || null],
-    ["material_type",      cls.material_type],
-    ["product_type",       cls.product_type],
-    ["product_subtype",    cls.product_subtype],
-    ["typical_elements",   elList],
-    ["rendering.color",    swatch],
-    ["rendering.grain",    rnd.has_grain ? "yes" : rnd.has_grain === false ? "no" : null],
-  ]));
+  box.appendChild(
+    kv([
+      ["id", r.id],
+      ["beam_id", (r.external_refs || {}).beam_id],
+      ["display_name", (r.naming || {}).display_name],
+      ["material_name", (r.naming || {}).material_name],
+      ["product_brand_name", (r.naming || {}).product_brand_name],
+      ["group", cls.group_prefix || null],
+      ["material_type", cls.material_type],
+      ["product_type", cls.product_type],
+      ["product_subtype", cls.product_subtype],
+      ["typical_elements", elList],
+      ["rendering.color", swatch],
+      ["rendering.grain", rnd.has_grain ? "yes" : rnd.has_grain === false ? "no" : null]
+    ])
+  );
   return box;
 }
 
@@ -511,27 +535,39 @@ function provenanceBlock(r) {
     if (!list || list.length === 0) return "—";
     return list.join(", ");
   };
-  const statusTags = ["listed","do_not_list","is_industry_average","is_beam_average"]
-    .filter(k => s[k]).map(k => `<span class="db-tag">${k}</span>`).join("");
+  const statusTags = ["listed", "do_not_list", "is_industry_average", "is_beam_average"]
+    .filter((k) => s[k])
+    .map((k) => `<span class="db-tag">${k}</span>`)
+    .join("");
   const statusEl = document.createElement("span");
   statusEl.innerHTML = `${statusTags || '<span class="db-kv-null">—</span>'} <span class="db-tag">visibility: ${escapeHtml(s.visibility || "—")}</span>`;
 
   const link = m.website
-    ? (() => { const a = document.createElement("a"); a.className = "db-kv-link"; a.href = m.website; a.target = "_blank"; a.rel = "noopener"; a.textContent = m.website; return a; })()
+    ? (() => {
+        const a = document.createElement("a");
+        a.className = "db-kv-link";
+        a.href = m.website;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = m.website;
+        return a;
+      })()
     : null;
 
-  box.appendChild(kv([
-    ["manufacturer",   m.name],
-    ["country_code",   m.country_code],
-    ["specifications", m.specifications],
-    ["website",        link],
-    ["countries_of_manufacture", countries(p.countries_of_manufacture)],
-    ["markets_of_applicability", countries(p.markets_of_applicability)],
-    ["data_added_or_modified",   p.data_added_or_modified],
-    ["status flags",             statusEl],
-    ["source_notes",             r.source_notes],
-    ["notes",                    r.notes],
-  ]));
+  box.appendChild(
+    kv([
+      ["manufacturer", m.name],
+      ["country_code", m.country_code],
+      ["specifications", m.specifications],
+      ["website", link],
+      ["countries_of_manufacture", countries(p.countries_of_manufacture)],
+      ["markets_of_applicability", countries(p.markets_of_applicability)],
+      ["data_added_or_modified", p.data_added_or_modified],
+      ["status flags", statusEl],
+      ["source_notes", r.source_notes],
+      ["notes", r.notes]
+    ])
+  );
   return box;
 }
 
@@ -542,21 +578,23 @@ function physicalBlock(r) {
   const dim = phy.dimensions || {};
   const af = phy.additional_factor || {};
   const box = document.createElement("div");
-  box.appendChild(kv([
-    ["density",           fmtDualDensity(d)],
-    ["density.source",    d.source],
-    ["thermal.conductivity (W/mK)", th.conductivity_w_mk],
-    ["thermal.r_value/inch (imp)",  th.r_value_per_inch_imperial],
-    ["thermal.heat_capacity (J/kgK)", th.heat_capacity_j_kgk],
-    ["moisture_content_pct", phy.moisture_content_pct],
-    ["mass_per_unit_kg",     phy.mass_per_unit_kg],
-    ["dimensions.length_m",  dim.length_m],
-    ["dimensions.width_m",   dim.width_m],
-    ["dimensions.depth_m",   dim.depth_m],
-    ["dimensions.units_per_m2", dim.units_per_m2],
-    ["additional_factor",    af.value != null ? `${af.value} ${af.units || ""}`.trim() : null],
-    ["additional_factor.description", af.description],
-  ]));
+  box.appendChild(
+    kv([
+      ["density", fmtDualDensity(d)],
+      ["density.source", d.source],
+      ["thermal.conductivity (W/mK)", th.conductivity_w_mk],
+      ["thermal.r_value/inch (imp)", th.r_value_per_inch_imperial],
+      ["thermal.heat_capacity (J/kgK)", th.heat_capacity_j_kgk],
+      ["moisture_content_pct", phy.moisture_content_pct],
+      ["mass_per_unit_kg", phy.mass_per_unit_kg],
+      ["dimensions.length_m", dim.length_m],
+      ["dimensions.width_m", dim.width_m],
+      ["dimensions.depth_m", dim.depth_m],
+      ["dimensions.units_per_m2", dim.units_per_m2],
+      ["additional_factor", af.value != null ? `${af.value} ${af.units || ""}`.trim() : null],
+      ["additional_factor.description", af.description]
+    ])
+  );
   return box;
 }
 
@@ -586,8 +624,7 @@ function carbonGraphBlock(r) {
   flow.style.border = "1px solid var(--border)";
   flow.style.borderRadius = "4px";
   flow.style.marginBottom = "10px";
-  flow.textContent =
-    `stated     ${fmtOr(st.value_kgco2e, "—")} kgCO₂e / ${st.per_unit || "?"}   [source: ${st.source || "—"}]
+  flow.textContent = `stated     ${fmtOr(st.value_kgco2e, "—")} kgCO₂e / ${st.per_unit || "?"}   [source: ${st.source || "—"}]
              stages declared: ${(st.lifecycle_stages || []).join(", ") || "—"}
       │
       ▼   ${cv.factor_formula || "—"}
@@ -604,13 +641,17 @@ biogenic   method: ${bg.method || "—"}
            C/unit   = ${fmtOr(bg.carbon_content_kgc_per_unit, "—")} kgC`;
   wrap.appendChild(flow);
 
-  wrap.appendChild(kv([
-    ["conversion.notes", cv.notes],
-    ["biogenic.notes",   bg.notes],
-  ]));
+  wrap.appendChild(
+    kv([
+      ["conversion.notes", cv.notes],
+      ["biogenic.notes", bg.notes]
+    ])
+  );
   return wrap;
 }
-function fmtOr(v, dash) { return v == null ? dash : v; }
+function fmtOr(v, dash) {
+  return v == null ? dash : v;
+}
 
 function impactMatrixBlock(r) {
   const impacts = r.impacts || {};
@@ -661,9 +702,10 @@ function impactMatrixBlock(r) {
     tdTotal.className = "im-total";
     const tv = block.total && block.total.value;
     const ts = block.total && block.total.source;
-    tdTotal.innerHTML = tv == null
-      ? `<span class="im-null">—</span>`
-      : `${fmtNum(tv)}<span class="im-src im-src-${ts || ""}">${escapeHtml(ts || "")}</span>`;
+    tdTotal.innerHTML =
+      tv == null
+        ? `<span class="im-null">—</span>`
+        : `${fmtNum(tv)}<span class="im-src im-src-${ts || ""}">${escapeHtml(ts || "")}</span>`;
     tr.appendChild(tdTotal);
 
     for (const s of ALL_STAGES) {
@@ -698,63 +740,79 @@ function fmtNum(n) {
 function epdMethodBlock(r) {
   const epd = r.epd || {};
   const met = r.methodology || {};
-  const cc  = r.code_compliance || {};
+  const cc = r.code_compliance || {};
   const fire = r.fire || {};
   const box = document.createElement("div");
 
   const epdLink = epd.source_document_url
-    ? (() => { const a = document.createElement("a"); a.className = "db-kv-link"; a.href = epd.source_document_url; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Open EPD document"; return a; })()
+    ? (() => {
+        const a = document.createElement("a");
+        a.className = "db-kv-link";
+        a.href = epd.source_document_url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = "Open EPD document";
+        return a;
+      })()
     : null;
   const validation = epd.validation || {};
 
   const standards = document.createElement("div");
   standards.className = "db-tag-list";
-  for (const s of (met.standards || [])) {
-    const t = document.createElement("span"); t.className = "db-tag"; t.textContent = s;
+  for (const s of met.standards || []) {
+    const t = document.createElement("span");
+    t.className = "db-tag";
+    t.textContent = s;
     standards.appendChild(t);
   }
   if (standards.childElementCount === 0) standards.innerHTML = `<span class="db-kv-null">—</span>`;
 
   const stages = document.createElement("div");
   stages.className = "db-tag-list";
-  for (const s of ((met.lifecycle_scope || {}).stages_included || [])) {
-    const t = document.createElement("span"); t.className = "db-tag"; t.textContent = s;
+  for (const s of (met.lifecycle_scope || {}).stages_included || []) {
+    const t = document.createElement("span");
+    t.className = "db-tag";
+    t.textContent = s;
     stages.appendChild(t);
   }
   if (stages.childElementCount === 0) stages.innerHTML = `<span class="db-kv-null">—</span>`;
 
-  box.appendChild(kv([
-    ["epd.id",               epd.id],
-    ["epd.type",             epd.type],
-    ["epd.owner",            epd.owner],
-    ["epd.prepared_by",      epd.prepared_by],
-    ["epd.program_operator", epd.program_operator],
-    ["epd.validation",       `${validation.type || "—"} · ${validation.agent || "—"}`],
-    ["epd.expiry_date",      epd.expiry_date],
-    ["epd.service_life_yr",  epd.product_service_life_years],
-    ["epd.source",           epdLink],
-    ["epd.footnote",         epd.footnote],
-    ["—", ""],
-    ["methodology.standards",        standards],
-    ["methodology.pcr_guidelines",   met.pcr_guidelines],
-    ["methodology.lca_method",       met.lca_method],
-    ["methodology.lca_software",     met.lca_software],
-    ["methodology.lci_database",     met.lci_database],
-    ["lifecycle_scope.stages",       stages],
-    ["lifecycle_scope.cutoff_pct",   (met.lifecycle_scope || {}).cutoff_rule_pct],
-    ["lifecycle_scope.allocation",   (met.lifecycle_scope || {}).allocation_method],
-    ["—", ""],
-    ["fire.combustibility",  fire.combustibility],
-    ["fire.frr_hours",       fire.frr_hours],
-    ["fire.ulc_listing",     fire.ulc_listing],
-    ["code_compliance.nbc_part_9_suitable",   boolOrNull(cc.nbc_part_9_suitable)],
-    ["code_compliance.nbc_part_3_suitable",   boolOrNull(cc.nbc_part_3_suitable)],
-    ["code_compliance.vbbl_s10_4_accepted",   boolOrNull(cc.vbbl_s10_4_accepted)],
-    ["code_compliance.cov_appendix_ii_listed",boolOrNull(cc.cov_appendix_ii_listed)],
-  ]));
+  box.appendChild(
+    kv([
+      ["epd.id", epd.id],
+      ["epd.type", epd.type],
+      ["epd.owner", epd.owner],
+      ["epd.prepared_by", epd.prepared_by],
+      ["epd.program_operator", epd.program_operator],
+      ["epd.validation", `${validation.type || "—"} · ${validation.agent || "—"}`],
+      ["epd.expiry_date", epd.expiry_date],
+      ["epd.service_life_yr", epd.product_service_life_years],
+      ["epd.source", epdLink],
+      ["epd.footnote", epd.footnote],
+      ["—", ""],
+      ["methodology.standards", standards],
+      ["methodology.pcr_guidelines", met.pcr_guidelines],
+      ["methodology.lca_method", met.lca_method],
+      ["methodology.lca_software", met.lca_software],
+      ["methodology.lci_database", met.lci_database],
+      ["lifecycle_scope.stages", stages],
+      ["lifecycle_scope.cutoff_pct", (met.lifecycle_scope || {}).cutoff_rule_pct],
+      ["lifecycle_scope.allocation", (met.lifecycle_scope || {}).allocation_method],
+      ["—", ""],
+      ["fire.combustibility", fire.combustibility],
+      ["fire.frr_hours", fire.frr_hours],
+      ["fire.ulc_listing", fire.ulc_listing],
+      ["code_compliance.nbc_part_9_suitable", boolOrNull(cc.nbc_part_9_suitable)],
+      ["code_compliance.nbc_part_3_suitable", boolOrNull(cc.nbc_part_3_suitable)],
+      ["code_compliance.vbbl_s10_4_accepted", boolOrNull(cc.vbbl_s10_4_accepted)],
+      ["code_compliance.cov_appendix_ii_listed", boolOrNull(cc.cov_appendix_ii_listed)]
+    ])
+  );
   return box;
 }
-function boolOrNull(v) { return v === true ? "yes" : v === false ? "no" : null; }
+function boolOrNull(v) {
+  return v === true ? "yes" : v === false ? "no" : null;
+}
 
 function rawJsonBlock(r) {
   const pre = document.createElement("pre");
@@ -794,11 +852,9 @@ function debounce(fn, ms) {
 function short(sha) {
   return sha ? sha.slice(0, 10) : "—";
 }
-function escapeHtml(s) {
-  if (s == null) return "";
-  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function escapeAttr(s) {
+  return escapeHtml(s);
 }
-function escapeAttr(s) { return escapeHtml(s); }
 
 // ────────────────────────────────────────────────────────────
 // Start

@@ -18,7 +18,7 @@ const VALUE_STATES = Object.freeze({
   IMPORTED: "imported",
   USER_MODIFIED: "user-modified",
   CALCULATED: "calculated",
-  DERIVED: "derived",
+  DERIVED: "derived"
 });
 
 const STORAGE_KEY = "BEAM_Calculator_State";
@@ -38,7 +38,10 @@ function parseNumeric(value, defaultValue = 0) {
   if (value === null || value === undefined) return defaultValue;
   if (typeof value === "number") return isNaN(value) ? defaultValue : value;
   if (typeof value !== "string") return defaultValue;
-  const cleaned = value.replace(/[$£€¥]/g, "").replace(/,/g, "").trim();
+  const cleaned = value
+    .replace(/[$£€¥]/g, "")
+    .replace(/,/g, "")
+    .trim();
   if (cleaned === "" || cleaned.toUpperCase() === "N/A") return defaultValue;
   const n = parseFloat(cleaned);
   return isNaN(n) ? defaultValue : n;
@@ -64,18 +67,22 @@ function formatNumber(value, formatType = "number-2dp") {
     return n.toLocaleString(undefined, {
       style: "percent",
       minimumFractionDigits: dpPart ? decimals : 0,
-      maximumFractionDigits: dpPart ? decimals : 0,
+      maximumFractionDigits: dpPart ? decimals : 0
     });
   }
   return n.toLocaleString(undefined, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-    useGrouping: useCommas,
+    useGrouping: useCommas
   });
 }
 
 function getValue(fieldId) {
   return fields.has(fieldId) ? fields.get(fieldId).value : null;
+}
+
+function getFieldState(fieldId) {
+  return fields.has(fieldId) ? fields.get(fieldId).state : null;
 }
 
 function setValue(fieldId, value, state = VALUE_STATES.USER_MODIFIED) {
@@ -145,13 +152,20 @@ function notifyListeners(fieldId, newValue, oldValue, state) {
   const set = listeners.get(fieldId);
   if (!set) return;
   for (const cb of set) {
-    try { cb(newValue, oldValue, fieldId, state); }
-    catch (err) { console.error(`[StateManager] listener error for ${fieldId}:`, err); }
+    try {
+      cb(newValue, oldValue, fieldId, state);
+    } catch (err) {
+      console.error(`[StateManager] listener error for ${fieldId}:`, err);
+    }
   }
 }
 
-function muteListeners() { listenersActive = false; }
-function unmuteListeners() { listenersActive = true; }
+function muteListeners() {
+  listenersActive = false;
+}
+function unmuteListeners() {
+  listenersActive = true;
+}
 
 function saveState() {
   const state = {};
@@ -200,6 +214,25 @@ function clear() {
   }
 }
 
+function clearByPrefix(prefix) {
+  if (!prefix) return 0;
+  let removed = 0;
+  for (const id of [...fields.keys()]) {
+    if (id.startsWith(prefix)) {
+      const old = fields.get(id);
+      fields.delete(id);
+      delete lastImportedState[id];
+      notifyListeners(id, null, old?.value, "cleared");
+      removed++;
+    }
+  }
+  if (removed) {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(saveState, 1000);
+  }
+  return removed;
+}
+
 function exportState() {
   const out = {};
   for (const [id, field] of fields) out[id] = field.value;
@@ -219,6 +252,7 @@ function getLastImportedState() {
 export const StateManager = {
   VALUE_STATES,
   getValue,
+  getFieldState,
   setValue,
   registerDependency,
   markDependentsDirty,
@@ -231,11 +265,12 @@ export const StateManager = {
   saveState,
   loadState,
   clear,
+  clearByPrefix,
   exportState,
   importState,
   getLastImportedState,
   parseNumeric,
-  formatNumber,
+  formatNumber
 };
 
 if (typeof window !== "undefined") {

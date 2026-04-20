@@ -71,8 +71,11 @@ async function handleFileSelect(event) {
 
 function withQuarantine(fn) {
   StateManager.muteListeners();
-  try { fn(); }
-  finally { StateManager.unmuteListeners(); }
+  try {
+    fn();
+  } finally {
+    StateManager.unmuteListeners();
+  }
   if (calculator?.calculateAll) calculator.calculateAll();
 }
 
@@ -126,8 +129,10 @@ function parseCsvRow(row) {
   for (let i = 0; i < row.length; i++) {
     const ch = row[i];
     if (ch === '"') {
-      if (inQuotes && row[i + 1] === '"') { cur += '"'; i++; }
-      else inQuotes = !inQuotes;
+      if (inQuotes && row[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else inQuotes = !inQuotes;
     } else if (ch === "," && !inQuotes) {
       out.push(cur.trim());
       cur = "";
@@ -143,7 +148,7 @@ function exportJson() {
     format: "beamweb-project",
     version: 1,
     exportedAt: new Date().toISOString(),
-    fields: state,
+    fields: state
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const name = sanitize(state.project_name || "BEAMweb-project") + ".json";
@@ -193,12 +198,17 @@ function triggerDownload(blob, filename) {
 
 function showStatus(message, type = "info") {
   const area = document.getElementById("feedback-area");
-  if (!area) { console.log(`[FileHandler] ${message}`); return; }
+  if (!area) {
+    console.log(`[FileHandler] ${message}`);
+    return;
+  }
   const colors = { info: "#0dcaf0", success: "#198754", warning: "#ffc107", error: "#dc3545" };
   area.textContent = message;
   area.style.color = colors[type] || colors.info;
   if (type === "info" || type === "success") {
-    setTimeout(() => { if (area.textContent === message) area.textContent = ""; }, 5000);
+    setTimeout(() => {
+      if (area.textContent === message) area.textContent = "";
+    }, 5000);
   }
 }
 
@@ -210,7 +220,7 @@ export const FileHandler = {
   importWorkbook,
   exportJson,
   exportCsv,
-  showStatus,
+  showStatus
 };
 
 if (typeof window !== "undefined") {

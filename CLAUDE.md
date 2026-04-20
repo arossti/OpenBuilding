@@ -32,7 +32,7 @@ Deployed from `PDF-Parser/` via GitHub Actions (`.github/workflows/deploy-pages.
 
 ### Styling — single consolidated file
 
-`PDF-Parser/bfcastyles.css` (~4100 lines) is the single source of truth for every app's styles. Rules are section/app-scoped via html classes:
+`PDF-Parser/bfcastyles.css` (~5000 lines) is the single source of truth for every app's styles. Rules are section/app-scoped via html classes:
 
 - `<html class="theme-dark app-pdfparser">` — PDF-Parser
 - `<html class="theme-dark app-database">` — Database viewer
