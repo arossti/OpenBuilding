@@ -440,7 +440,7 @@ async function handleLoadSample() {
   } catch (err) {
     console.error("[load-sample]", err);
     setStatus(
-      `Load Sample failed: ${err.message}. Run \`npm run stage:data\` to copy sample JSON into PDF-Parser/data/.`,
+      `Load Sample failed: ${err.message}. Run \`npm run stage:data\` to copy sample JSON into data/.`,
       "error"
     );
   }

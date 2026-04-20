@@ -2,12 +2,12 @@
 *.tgz
 .obsidian
 node_modules/
-PDF-Parser/logs/
+logs/
 
-# Local staging of source data into PDF-Parser/data/ via `npm run stage:data`.
+# Local staging of source data into data/ via `npm run stage:data`.
 # Not committed — the Pages workflow does the same copy at deploy time.
-PDF-Parser/data/schema/
-PDF-Parser/data/beam/
+data/schema/
+data/beam/
 
 # Large binary files (will be managed with DVC)
 *.ifc
@@ -15,7 +15,7 @@ PDF-Parser/data/beam/
 
 # Documents — kept locally, not tracked in git
 *.pdf
-!PDF-Parser/sample.pdf
+!docs/sample.pdf
 *.docx
 *.xlsx
 *.xls

@@ -573,7 +573,7 @@ export async function wireFootingsSlabsTab() {
   } catch (err) {
     const note = document.getElementById("bw-fs-load-note");
     if (note) {
-      note.textContent = `Could not load F&S data: ${err.message}. Run \`npm run stage:data\` to refresh PDF-Parser/data/.`;
+      note.textContent = `Could not load F&S data: ${err.message}. Run \`npm run stage:data\` to refresh data/.`;
       note.classList.add("bw-asm-error");
     }
     console.error("[footings-slabs-tab]", err);

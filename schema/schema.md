@@ -18,7 +18,7 @@
 - **Branch**: `schema` on both remotes (`origin` = bfca-labs/at, `openbuilding` = arossti/OpenBuilding)
 - **Last commit at time of writing**: `f82094c` — Phase 1.5 Database viewer + detail-pane clip fix.
 - **Phase 1 status**: All technical acceptance criteria met. PR ready to open on `arossti/OpenBuilding`.
-- **Phase 1.5 status**: Database viewer shipped — stakeholder-facing tabular browser at `PDF-Parser/database.html`, proves the catalogue consumption pattern and will become live on Pages once the PR merges.
+- **Phase 1.5 status**: Database viewer shipped — stakeholder-facing tabular browser at `database.html`, proves the catalogue consumption pattern and will become live on Pages once the PR merges.
 - **Next phase**: Phase 3 (PDF-Parser material picker) is unblocked and recommended next. Phase 2 (EPD PDF parser) waits on a sample EPD PDF from the user.
 
 ### Recommended next action
@@ -69,9 +69,8 @@ Memory files at `/Users/andrewthomson/.claude/projects/<path-hash>/memory/MEMORY
 | `schema/materials/index.json` | ✅ Lightweight picker catalogue (821 entries × 8 fields, ~290 KB pretty) |
 | `schema/materials/NN-<slug>.json` | ✅ Per-CSI-division sparse records (8 files: 03–09, 31) |
 | `schema/materials/import-report.json` | ✅ Manual-review flags (unresolved divisions, blank IDs) |
-| `PDF-Parser/database.html` | ✅ Phase 1.5 — stakeholder viewer for the full catalogue |
-| `PDF-Parser/database.css` | ✅ Database viewer styles (dark theme, extends bfcastyles + pdfparser) |
-| `PDF-Parser/js/database.mjs` | ✅ Database viewer logic (sortable table, lazy per-division fetch, expandable detail with full per-stage matrix) |
+| `database.html` | ✅ Phase 1.5 — stakeholder viewer for the full catalogue |
+| `js/database.mjs` | ✅ Database viewer logic (sortable table, lazy per-group fetch, expandable detail with full per-stage matrix). Styles live in `bfcastyles.css` §7. |
 
 ### Known gotchas / lossy-import hazards
 
@@ -88,7 +87,7 @@ See §6.2 for full table. Headline items:
 - Don't rename top-level schema blocks without updating `sample.json`, the Full Field Inventory (§5.1), and the IFC alignment table (§5.4) in the same commit.
 - Don't embed numeric field IDs in the JSON data (use path strings + short block codes from §5.2).
 - Don't add comments (`//`) to `sample.json` — strict JSON only. Use `_prefixed` sibling fields for annotations.
-- Don't commit large binaries — `*.pdf`, `*.docx`, `*.xlsx` are gitignored except `PDF-Parser/sample.pdf`.
+- Don't commit large binaries — `*.pdf`, `*.docx`, `*.xlsx` are gitignored except `docs/sample.pdf`.
 - Don't add `Co-Authored-By: Claude Sonnet` — use the model tag shown in the active environment (currently Opus 4.7).
 
 ### Verification commands (quick sanity checks)
@@ -165,11 +164,11 @@ Priority ordering. Each phase is independently valuable; later phases depend on 
 
 **Goal**: Interim stakeholder-facing HTML viewer for the full 821-record catalogue so BfCA / NRCan / AIBC can review the schema choices in a real UI before committing further down the pipeline. Lets teams see the empty per-stage slots and understand what the EPD parser (Phase 2) will fill.
 
-- [x] **`PDF-Parser/database.html`** — standalone page, dark theme, reuses `bfcastyles.css` + `pdfparser.css` + new `database.css`. Shared header nav across PDF-Parser / Matrix / Database.
+- [x] **`database.html`** — standalone page, dark theme, reuses `bfcastyles.css` (Database styles live in §7 of the consolidated stylesheet). Shared header nav across PDF-Parser / Matrix / Database / BEAMweb.
 - [x] **Main table**: sortable columns (BEAM ID, Display Name, Division, Material, GWP, functional unit, typical elements), sticky header, live search, division chips with per-division counts, EPD-only toggle.
 - [x] **Expanded row detail** (accordion, collapsed by default; Carbon Calc Graph opens by default): Identity & Classification, Manufacturer & Provenance, Physical Properties, Carbon Calc Graph (ASCII flow diagram of BEAM's audit trail), Impacts per-stage matrix, EPD/Methodology/Code Compliance, Raw JSON.
 - [x] **Per-stage matrix**: 10 categories × (Total + 17 stages), horizontal scroll, sticky first column + total column, per-cell source tag (beam_derived / epd_direct) for provenance at a glance.
-- [x] **Data staging**: `npm run stage:data` in `PDF-Parser/` copies `schema/` outputs into `PDF-Parser/data/schema/`. Pages workflow does the same copy before upload. Staged dir gitignored to avoid doubling ~4 MB of committed data.
+- [x] **Data staging**: `npm run stage:data` at repo root copies `schema/` outputs into `data/schema/`. Pages workflow does the same copy into `_site/data/schema/` before upload. Staged dir gitignored to avoid doubling ~4 MB of committed data.
 - [x] **Local test**: all resources 200 via `npm run serve`; Node syntax clean; 821 entries load.
 
 ### Phase 2 — EPD PDF parser
@@ -178,7 +177,7 @@ Priority ordering. Each phase is independently valuable; later phases depend on 
 
 - Prerequisite: Phase 1 complete (need real records to diff new EPD data against).
 - Prerequisite: User shares a sample EPD PDF (pending as of 2026-04-18 afternoon).
-- Approach: reuse PDF.js from `PDF-Parser/lib/` for PDF rendering and text extraction.
+- Approach: reuse PDF.js from `lib/` for PDF rendering and text extraction.
 - Section mapping already documented in §5.5 — EPD "Declared unit" → `carbon.stated.{value_kgco2e, per_unit}`, etc.
 - Output: JSON patch (new record, or diff against existing) with `source: "epd_direct"` on every impact value.
 - Human-in-the-loop: low-confidence fields flagged for manual review before merge.
@@ -881,7 +880,7 @@ Scoping: not a Phase 1 deliverable. Phase 1 ships the intensity-only material re
 ## Appendix B — Changelog
 
 - **2026-04-18 `f82094c`** — Database viewer fix: removed 620px max-height cap on detail pane that clipped the impact matrix at 7 of 10 categories.
-- **2026-04-18 `b40ac44`** — Phase 1.5 Database viewer shipped: `PDF-Parser/database.html` + `database.css` + `js/database.mjs`. Sortable + filterable table, expandable row detail with full 10×18 per-stage impact matrix (horizontal scroll), carbon calc graph as ASCII flow diagram, raw JSON inspector. Data staged into `PDF-Parser/data/schema/` via `npm run stage:data` (local) or workflow step (Pages). Nav cross-links added across PDF-Parser / Matrix / Database.
+- **2026-04-18 `b40ac44`** — Phase 1.5 Database viewer shipped: `database.html` + `js/database.mjs` (styles in `bfcastyles.css` §7). Sortable + filterable table, expandable row detail with full 10×18 per-stage impact matrix (horizontal scroll), carbon calc graph as ASCII flow diagram, raw JSON inspector. Data staged into `data/schema/` via `npm run stage:data` (local) or workflow step (Pages). Nav cross-links added across PDF-Parser / Matrix / Database. *(Paths updated post-flatten 2026-04-20; originally all under `PDF-Parser/`.)*
 - **2026-04-18 `e66e513`** — CI fix: gated the Pages deploy job to `arossti/OpenBuilding` only (bfca-labs/at is private, no Pages site → 404). Cosmetic failure noise on the private mirror now suppressed.
 - **2026-04-18 `009a9c5`** — Sparse-by-default serialization. Per-material records omit null scalar leaves and empty sub-objects. 15 top-level object blocks, `impacts.<category>.total` (as `{value, source}`), `impacts.<category>.by_stage`, and all arrays stay present for safe traversal. Full template structure remains documented in `sample.json` and `material.schema.json`. Size: per-record ~13 KB → ~4 KB, batch 18 MB → 4.3 MB (76% reduction). Validator relaxed (required arrays pruned to structural members only; additionalProperties:false and enums/patterns unchanged); 822/822 records still pass.
 - **2026-04-18 `c71ef7d`** — Added `material.schema.json` (JSON Schema Draft 2020-12) and `scripts/validate.mjs` (zero-dep walker).

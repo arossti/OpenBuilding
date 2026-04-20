@@ -720,40 +720,47 @@ A2.1,NET TOTAL,,,,,42.53,,457.87,
 ## File Structure
 
 ```
-at/
-├── PDF-Parser/
-│   ├── index.html              ← PDF-Parser app shell
-│   ├── matrix.html             ← EC Matrix app (cards + flow views + Part splash)
-│   ├── bfcastyles.css          ← shared design system (reset, tokens, header, logo)
-│   ├── pdfparser.css           ← PDF-Parser dark-theme styles
-│   ├── matrix.css              ← EC Matrix light-theme styles
-│   ├── package.json            ← npm scripts: lint, format, serve
-│   ├── eslint.config.mjs       ← ESLint flat config (ES5 rules + Prettier)
-│   ├── .prettierrc             ← Prettier config (120col, 2-space, double quotes)
-│   ├── serve.sh                ← dev server launcher (python3 http.server)
-│   ├── graphics/               ← logos and images
-│   ├── lib/
-│   │   ├── pdf.min.mjs         ← PDF.js 4.9.155 ESM (349 KB)
-│   │   └── pdf.worker.min.mjs  ← PDF.js web worker (1.3 MB)
-│   ├── js/
-│   │   ├── config.mjs          ← constants, scale patterns, colours
-│   │   ├── pdf-loader.mjs      ← PDF.js wrapper
-│   │   ├── sheet-classifier.mjs ← title block / sheet type
-│   │   ├── scale-manager.mjs   ← scale detection + calibration
-│   │   ├── canvas-viewer.mjs   ← two-canvas + pan/zoom + marquee
-│   │   ├── polygon-tool.mjs    ← polygon measurement + undo/redo
-│   │   ├── vector-snap.mjs     ← vector geometry + snap
-│   │   ├── schedule-parser.mjs ← table extraction
-│   │   ├── project-store.mjs   ← data model + export
-│   │   └── app.mjs             ← main controller + UI
-│   ├── logs/                   ← debug logs (git-ignored)
-│   └── PDF resources/          ← reference PDFs (git-ignored)
+at/                              ← repo root is the deployed site (flat since 2026-04-20)
+├── index.html                   ← landing / app directory
+├── pdfparser.html               ← PDF-Parser app
+├── matrix.html                  ← EC Matrix app
+├── database.html                ← BfCA Material Database viewer
+├── beamweb.html                 ← BEAMweb embodied-carbon calculator
+├── dependencies.html            ← Dev dependency manifest
+├── bfcastyles.css               ← single consolidated design system (~5000 lines)
+├── package.json                 ← npm scripts: lint, format, serve, stage:data
+├── eslint.config.mjs            ← ESLint flat config
+├── .prettierrc, .prettierignore
+├── graphics/                    ← logos and images
+├── lib/
+│   ├── pdf.min.mjs              ← PDF.js 4.9.155 ESM (349 KB)
+│   └── pdf.worker.min.mjs       ← PDF.js web worker (1.3 MB)
+├── js/
+│   ├── config.mjs               ← constants, scale patterns, colours
+│   ├── pdf-loader.mjs           ← PDF.js wrapper
+│   ├── sheet-classifier.mjs     ← title block / sheet type
+│   ├── scale-manager.mjs        ← scale detection + calibration
+│   ├── canvas-viewer.mjs        ← two-canvas + pan/zoom + marquee
+│   ├── polygon-tool.mjs         ← polygon measurement + undo/redo
+│   ├── vector-snap.mjs          ← vector geometry + snap
+│   ├── schedule-parser.mjs      ← table extraction
+│   ├── project-store.mjs        ← data model + export
+│   ├── app.mjs                  ← PDF-Parser main controller + UI
+│   ├── beamweb.mjs, database.mjs  ← BEAMweb + Database viewer entries
+│   ├── shared/                  ← cross-app utilities (StateManager, FileHandler, html-utils)
+│   └── beam/                    ← BEAMweb internals + beam/shared/formatters
+├── data/                        ← gitignored; staged via `npm run stage:data`
+├── schema/                      ← material-catalogue source of truth
+├── logs/                        ← gitignored dev pasteboard
 └── docs/
-    ├── pdf-parser.md           ← this workplan
-    └── matrix/
-        ├── ARCHITECTURE.md     ← Matrix data model + conventions
-        ├── TRIAGE.md           ← role/phase refinement Q&A
-        └── ec_matrix_v2.md     ← full data model documentation
+    ├── sample.pdf               ← PDF-Parser dev fixture
+    ├── pdf-resources/           ← larger sample PDFs (gitignored)
+    ├── pdf-parser.md            ← this workplan
+    ├── matrix/                  ← Matrix docs (ARCHITECTURE / TRIAGE / ec_matrix_v2)
+    ├── beam-samples/            ← DOE Prototype project JSONs
+    ├── csv files from BEAM/     ← 22 BEAM workbook snapshots
+    ├── PDF References/          ← Vancouver EC guides, NRC reports
+    └── workplans/               ← BEAMweb / Bridge / audit specs (living docs)
 ```
 
 Version tracking is via git commits, not step-numbered files.
