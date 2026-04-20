@@ -82,7 +82,10 @@ function applyOneSource(parsedFs, projectKey, value) {
       if (!group) continue;
       for (const sub of group.subgroups) {
         for (const m of sub.materials) {
-          const fId = `fs_${m.hash}_qty`;
+          // Per-row state key — must match the rowKey() helper in
+          // footings-slabs-tab.mjs (full code path, not hash alone) so the
+          // DOM input bound to fs_<full_code>_qty receives the write.
+          const fId = `fs_${m.code.replace(/\|/g, "_")}_qty`;
           const st = StateManager.getFieldState(fId);
           // Only user-typed values are sticky. Bridge overrides IMPORTED
           // (sample-loaded) + DERIVED + CALCULATED + null.
