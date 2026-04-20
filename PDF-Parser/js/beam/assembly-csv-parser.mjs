@@ -46,15 +46,6 @@ export function codeToDomKey(codeOrObj) {
 export function parseAssemblyCsv(csvText) {
   const rows = parseCsvRows(csvText);
   const groups = [];
-  // Cross-row factor sharing keyed by (hash, unit). Same EPD with the same
-  // unit semantics (e.g. rebar at "m" across CONTINUOUS FOOTINGS / SLABS /
-  // COLUMN PADS) shares its factor — the BEAM workbook only fills sample
-  // qty in one of the three groups but the per-m kgCO2e is identical.
-  // Different units block sharing — concrete hash 949348 has per-m³ data
-  // in CONTINUOUS FOOTINGS and per-m²-at-6" data in SLABS; sharing those
-  // would give 30,866 instead of 4,704 on the slab row.
-  const factorByHashUnit = new Map();
-  let factorCount = 0;
 
   let currentGroup = null;
   let currentSubgroup = null;
@@ -87,7 +78,11 @@ export function parseAssemblyCsv(csvText) {
       }
       // depth 1 (T01 alone) is the tab itself — skip silently
     } else if (depth === 4 && currentSubgroup) {
-      // Material row
+      // Material row. The CSV's pre-computed NET/GROSS columns are kept
+      // as `sample_*` for the Load Sample fixture (UI selects + qty defaults)
+      // but are NOT consumed for factor derivation — per-unit factors are
+      // looked up at calc time from materials-db.mjs (single source of
+      // truth: schema/materials/index.json).
       const hash = code.split("|").pop();
       const name = (row[1] || "").trim();
       const sampleQty = parseNum(row[2]);
@@ -99,20 +94,6 @@ export function parseAssemblyCsv(csvText) {
       const storageShort = parseNum(row[9]);
       const storageLong = parseNum(row[10]);
       const footnote = (row[12] || "").trim();
-
-      let factors = null;
-      if (sampleQty > 0 && samplePct > 0) {
-        const denom = sampleQty * samplePct;
-        factors = {
-          net_per_unit: netKgco2e / denom,
-          gross_per_unit: grossKgco2e / denom,
-          storage_short_per_unit: storageShort / denom,
-          storage_long_per_unit: storageLong / denom
-        };
-        // First non-zero row per (hash, unit) wins for cross-row sharing.
-        const k = `${hash}|${unit}`;
-        if (!factorByHashUnit.has(k)) factorByHashUnit.set(k, factors);
-      }
 
       currentSubgroup.materials.push({
         code,
@@ -126,29 +107,12 @@ export function parseAssemblyCsv(csvText) {
         sample_gross: grossKgco2e,
         sample_storage_short: storageShort,
         sample_storage_long: storageLong,
-        footnote,
-        factors // null for now if sample_qty=0; backfilled in the second pass.
+        footnote
       });
     }
   }
 
-  // Second pass: backfill factors for rows whose own sample was empty by
-  // looking up another row in the same (hash, unit) bucket. Rows with no
-  // peer (e.g. METAL PILE EPDs that have zero sample data anywhere in the
-  // workbook) stay null and surface the "no-factor" marker until the
-  // material-DB cross-reference lands.
-  for (const g of groups) {
-    for (const sub of g.subgroups) {
-      for (const m of sub.materials) {
-        if (!m.factors) {
-          m.factors = factorByHashUnit.get(`${m.hash}|${m.unit}`) || null;
-        }
-        if (m.factors) factorCount++;
-      }
-    }
-  }
-
-  return { groups, factorCount };
+  return { groups };
 }
 
 function extractInlineConfig(row) {
@@ -219,26 +183,23 @@ function parseCsvRows(text) {
 }
 
 /**
- * Compute live emissions for a picker row given user inputs + base factor.
- * Returns { net, gross, storage_short, storage_long } in kgCO2e.
- * All values 0 when select is false, factors are null, or qty/pct <= 0.
+ * Compute live emissions for a picker row. Caller resolves the per-unit GWP
+ * factor from materials-db.mjs and converts the row qty into the material's
+ * functional_unit (via convertQtyToMaterialUnit). This function is just the
+ * final multiply.
  *
- * configRatio scales emissions for group-header configs (THICKNESS, R-VALUE,
- * TOTAL REBAR LENGTH). Derived from user_config_value / default_config_value.
- * Assumes linear scaling — matches BEAM's formulas for the straightforward
- * cases (more thickness = proportionally more concrete = proportionally more
- * emissions). May need refinement for non-linear cases during parity testing.
- * Defaults to 1.0 when the group has no config or the config default is null.
+ *   net = qtyInMaterialUnit × pct × gwp_per_unit
+ *
+ * Returns 0 across the board when select is false, gwp is missing, or
+ * qty/pct ≤ 0. GROSS, STORAGE Short, STORAGE Long are placeholders matching
+ * NET for non-biogenic materials — biogenic carbon handling lands when
+ * the materials-db starts surfacing per-stage EN 15804+A2 data.
  */
-export function computeRowEmissions({ select, qty, pct, factors, configRatio = 1 }) {
-  if (!select || !factors || !(qty > 0) || !(pct > 0)) {
+export function computeRowEmissions({ select, qtyInMaterialUnit, pct, gwp }) {
+  if (!select || !gwp || !(qtyInMaterialUnit > 0) || !(pct > 0)) {
     return { net: 0, gross: 0, storage_short: 0, storage_long: 0 };
   }
-  const m = qty * pct * configRatio;
-  return {
-    net: factors.net_per_unit * m,
-    gross: factors.gross_per_unit * m,
-    storage_short: factors.storage_short_per_unit * m,
-    storage_long: factors.storage_long_per_unit * m
-  };
+  const m = qtyInMaterialUnit * pct;
+  const net = m * gwp;
+  return { net, gross: net, storage_short: 0, storage_long: 0 };
 }

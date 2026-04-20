@@ -3,24 +3,26 @@
 // Loads the BEAM F&S CSV snapshot at tab-wire time, parses it via
 // assembly-csv-parser, renders a 3-level picker (group → subgroup →
 // material rows), wires SELECT / % / group-config inputs to StateManager
-// (qty cells are read-only, populated by PROJECT auto-fill or sample
-// loader), computes per-row emissions live, and rolls up per-group +
-// per-tab totals (NET / GROSS / STORAGE Short / STORAGE Long).
+// (qty cells are read-only, populated by PROJECT auto-fill or the
+// group-config qty bridge), computes per-row emissions live, and rolls up
+// per-group + per-tab totals (NET / GROSS / STORAGE Short / STORAGE Long).
 //
-// Parity-first (locked session 3, validated session 5): emission factors
-// are derived per-row from the BEAM CSV's pre-computed NET/GROSS columns,
-// not from schema/materials/. Migration to the materials DB unlocks the
-// full per-stage EN 15804+A2 scope and lands after Phase 4 ports.
+// Per-unit emission factors are looked up from the BfCA materials DB
+// (schema/materials/index.json) via materials-db.mjs — the single source
+// of truth that BEAM's gSheet itself uses internally. The assembly CSV
+// only provides STRUCTURE (groups, subgroups, rows) + sample UI defaults
+// for Load Sample.
 
 import { StateManager } from "../shared/state-manager.mjs";
 import { parseAssemblyCsv, computeRowEmissions, codeToDomKey } from "./assembly-csv-parser.mjs";
 import { registerProjectToFsBridge, syncProjectToFsBridge } from "./auto-fill.mjs";
 import { inferJurisdiction, matchesFilter } from "./jurisdictions.mjs";
+import { loadMaterialsDb, getMaterial, convertQtyToMaterialUnit, getLoadStats } from "./materials-db.mjs";
 
 const VS = StateManager.VALUE_STATES;
 const CSV_PATH = "data/beam/footings-slabs.csv";
 
-let parsed = null; // { groups, factorCount } once loaded
+let parsed = null; // { groups } once loaded
 
 function esc(s) {
   return String(s ?? "").replace(
@@ -82,15 +84,26 @@ function isTotalConfig(group) {
   return !!(group.config && /^TOTAL\b/i.test(group.config.label || ""));
 }
 
-// configRatio = user / BEAM-default for scaling configs. Blank/zero user
-// input means the group has no effective contribution → returns 0 so
-// emissions roll up to 0 until the user enters a value (or loads the
-// sample). The BEAM default is only surfaced as a placeholder + tooltip
-// on the input. TOTAL configs always return 1: the value is already the
-// qty (via the bridge), no extra scaling.
+// THICKNESS configs are handled by the materials-db unit converter
+// (m² row × thickness_m → m³ for the per-m³ concrete factor). Don't
+// double-count here.
+function isThicknessConfig(group) {
+  return !!(group.config && /^THICKNESS$/i.test(group.config.label || ""));
+}
+
+// configRatio = user / BEAM-default. Used today only for R-VALUE on
+// SUB-SLAB INSULATION as a linear-scaling proxy (placeholder until the
+// BEAM R-value formula is properly ported — uses material R-per-inch
+// and density). At default R the ratio is 1 and the calc matches BEAM;
+// user-modified R scales linearly. TOTAL configs flow to qty via the
+// config-qty bridge → ratio 1. THICKNESS configs flow through the
+// unit converter → ratio 1. Every other case currently returns 0 when
+// the user has blanked the input so emissions don't fire on a missing
+// config.
 function groupConfigRatio(group) {
   if (!group.config || !group.config.default) return 1;
   if (isTotalConfig(group)) return 1;
+  if (isThicknessConfig(group)) return 1;
   const raw = StateManager.getValue(groupCfgId(group));
   if (raw === null || raw === "") return 0;
   const user = StateManager.parseNumeric(raw, 0);
@@ -233,7 +246,8 @@ function renderMaterialRow(group, sub, m) {
   // Display rounded to 1 decimal (BEAM gSheet style); state holds full precision.
   const qtyDisplay = fmtQty(vals.qty);
   const pctDisplay = (vals.pct * 100).toFixed(0);
-  const noFactor = !m.factors;
+  const dbEntry = getMaterial(m.hash);
+  const noFactor = !dbEntry || !dbEntry.gwp_kgco2e;
   return `
     <tr class="${rowCls}" data-row-key="${k}" data-group-code="${esc(group.code)}" ${jurAttrs(rowJur)}>
       <td class="bw-asm-col-sel">
@@ -249,7 +263,7 @@ function renderMaterialRow(group, sub, m) {
         <span class="bw-asm-pct-sign">%</span>
       </td>
       <td class="bw-asm-col-net">
-        <span id="${netId}">0</span>${noFactor ? ' <span class="bw-asm-nofactor" title="No emission factor in this CSV — cross-reference from Materials DB pending">–</span>' : ""}
+        <span id="${netId}">0</span>${noFactor ? ' <span class="bw-asm-nofactor" title="No GWP factor for this material in the BfCA materials DB (schema/materials/index.json) — cannot compute.">–</span>' : ""}
       </td>
       <td class="${footCls}" title="${esc(m.footnote)}">${m.footnote ? esc(truncFoot(m.footnote)) : ""}</td>
     </tr>
@@ -279,12 +293,23 @@ function recomputeAll() {
     for (const sub of group.subgroups) {
       for (const m of sub.materials) {
         const vals = currentValues(m, group);
+        // Resolve per-unit GWP from the materials DB (BEAM uses the same
+        // catalogue internally) and convert the row's qty into the
+        // material's functional_unit if they differ — e.g. m² slab row +
+        // m³ concrete factor + THICKNESS group config.
+        const dbEntry = getMaterial(m.hash);
+        const qtyInMaterialUnit = dbEntry
+          ? convertQtyToMaterialUnit(vals.qty, m.unit, dbEntry, group, StateManager.getValue)
+          : null;
+        // configRatio is 1 except for R-VALUE groups (placeholder linear
+        // scaling on SUB-SLAB INSULATION, deferred until the BEAM R-value
+        // formula is properly ported).
+        const effectiveQty = qtyInMaterialUnit !== null ? qtyInMaterialUnit * vals.configRatio : 0;
         const emissions = computeRowEmissions({
           select: vals.select,
-          qty: vals.qty,
+          qtyInMaterialUnit: effectiveQty,
           pct: vals.pct,
-          factors: m.factors,
-          configRatio: vals.configRatio
+          gwp: dbEntry ? dbEntry.gwp_kgco2e : 0
         });
         const netEl = document.getElementById(`bw-fs-net-${codeToDomKey(m)}`);
         if (netEl) netEl.textContent = fmtKg(emissions.net);
@@ -548,11 +573,14 @@ export async function wireFootingsSlabsTab() {
 
   let csv;
   try {
-    csv = await loadCsv();
+    // Load assembly CSV + materials DB in parallel — the DB is needed
+    // before render so the no-factor marker is accurate per row.
+    const [csvText] = await Promise.all([loadCsv(), loadMaterialsDb()]);
+    csv = csvText;
   } catch (err) {
     const note = document.getElementById("bw-fs-load-note");
     if (note) {
-      note.textContent = `Could not load ${CSV_PATH}: ${err.message}. Run \`npm run stage:data\` to copy the BEAM CSVs into place.`;
+      note.textContent = `Could not load F&S data: ${err.message}. Run \`npm run stage:data\` to refresh PDF-Parser/data/.`;
       note.classList.add("bw-asm-error");
     }
     console.error("[footings-slabs-tab]", err);
@@ -560,15 +588,28 @@ export async function wireFootingsSlabsTab() {
   }
 
   parsed = parseAssemblyCsv(csv);
-  console.log(`[footings-slabs-tab] parsed ${parsed.groups.length} groups, ${parsed.factorCount} emission factors`);
+  const matCount = parsed.groups.reduce((n, g) => n + g.subgroups.reduce((m, s) => m + s.materials.length, 0), 0);
+  // Count materials whose hash resolves to a DB entry with a non-zero GWP.
+  let withFactor = 0;
+  for (const g of parsed.groups) {
+    for (const sub of g.subgroups) {
+      for (const m of sub.materials) {
+        const e = getMaterial(m.hash);
+        if (e && e.gwp_kgco2e) withFactor++;
+      }
+    }
+  }
+  const stats = getLoadStats();
+  console.log(
+    `[footings-slabs-tab] ${parsed.groups.length} groups, ${matCount} materials, ${withFactor} with GWP factors (materials DB: ${stats?.count} entries)`
+  );
 
   const body = document.getElementById("bw-fs-body");
   if (body) body.innerHTML = renderBody(parsed);
 
   const note = document.getElementById("bw-fs-load-note");
   if (note) {
-    const matCount = parsed.groups.reduce((n, g) => n + g.subgroups.reduce((m, s) => m + s.materials.length, 0), 0);
-    note.textContent = `${parsed.groups.length} groups · ${matCount} materials · ${parsed.factorCount} with factors. BEAM gSheet parity validated.`;
+    note.textContent = `${parsed.groups.length} groups · ${matCount} materials · ${withFactor} with GWP factors (BfCA DB ${stats?.count} records).`;
   }
 
   wireInputs(panel);
