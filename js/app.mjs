@@ -608,9 +608,15 @@ function _handleOverlayClick(e) {
   var pt = Viewer.eventToPdfCoords(e);
   var hitRadius = 10 / (Viewer.getZoom() * (150 / 72)); // ~10 screen pixels → PDF units
 
+  // Polyline tool owns its first click: always plant a new polyline vertex
+  // rather than editing an adjacent area polygon. Skipping these hit-tests
+  // prevents interior walls drawn up to a slab edge from accidentally
+  // dragging/inserting vertices on the slab polygon.
+  var isPolylineTool = _currentTool === "polyline";
+
   // Priority 1: Click near an existing vertex — start drag
   var hit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
-  if (hit && !PolygonTool.isDrawing()) {
+  if (hit && !PolygonTool.isDrawing() && !isPolylineTool) {
     PolygonTool.startDrag(_currentPage, hit.polyIdx, hit.vertIdx);
     Viewer.onOverlayMouseMove(_handleDragMove);
     _bindDragEnd();
@@ -621,7 +627,7 @@ function _handleOverlayClick(e) {
 
   // Priority 2: Click near an edge — insert vertex and start dragging it
   var edgeHit = PolygonTool.hitTestEdge(_currentPage, pt, hitRadius);
-  if (edgeHit && !PolygonTool.isDrawing()) {
+  if (edgeHit && !PolygonTool.isDrawing() && !isPolylineTool) {
     var newIdx = PolygonTool.insertVertex(_currentPage, edgeHit.polyIdx, edgeHit.edgeIdx, edgeHit.point);
     if (newIdx >= 0) {
       PolygonTool.startDrag(_currentPage, edgeHit.polyIdx, newIdx);
@@ -1114,9 +1120,12 @@ function _handleOverlayMouseMove(e) {
   // Redraw if snap state changed (to show/hide indicator)
   if (_snapTarget !== prevSnap) Viewer.requestRedraw();
 
-  // Show contextual cursor when hovering near draggable geometry
+  // Show contextual cursor when hovering near draggable geometry — but not
+  // while the polyline tool is active, since that tool ignores drag-edit
+  // hit-tests (see _handleOverlayClick). Showing the move/cell cursor there
+  // would mislead the user.
   var wrap = document.getElementById("viewer-wrap");
-  if (!PolygonTool.isDrawing() && !_rectStart) {
+  if (!PolygonTool.isDrawing() && !_rectStart && _currentTool !== "polyline") {
     var vertHit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
     if (vertHit) {
       if (wrap) wrap.style.cursor = "move";

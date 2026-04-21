@@ -2,7 +2,7 @@
 
 > **Cross-app bridge: PDF-Parser polygons → BEAMweb PROJECT dimensions.** This is the Phase 4b detailed spec scoped in [BEAMweb.md §6](./BEAMweb.md) + [§7 Q19](./BEAMweb.md). Read BEAMweb.md §0, §5.1, and §7 Q19 first for the parent-workstream context (state model, flat-dict project JSON, source precedence).
 >
-> **Status:** draft, partial implementation started. Opened 2026-04-20; numbered labels (Phase 4b.0) shipped on `PDF-Bridge` branch (commit `f93217d`) the same day. Updated post-BfCA-team review 2026-04-20 — four items from the team meeting threaded into the spec. See "Team feedback 2026-04-20" box in §0 for where each one landed.
+> **Status:** Phase 4b.2 (bridge MVP) shipped on `PDF-Bridge` branch, 2026-04-21. End-to-end flow working: Parser persists to IndexedDB, BEAMweb reads + aggregates, "Import from PDF-Parser" modal previews and writes dims. See [§0 Shipped update](#shipped-update--2026-04-21) for the commit list and architectural deltas from the original spec.
 
 ---
 
@@ -35,6 +35,47 @@ Four items from the BfCA team meeting threaded into the spec. Summary + where ea
 
 Record kept here (not in app code) because these are source URLs for upstream refresh, not runtime fetches. When Q27 refresh lands, the committed CSVs in `docs/csv files from BEAM/` and the JSONs in `schema/materials/` update from these sources.
 
+### Shipped update — 2026-04-21
+
+Phase 4b.0 through 4b.2 landed on the `PDF-Bridge` branch across 13 commits between 2026-04-20 and 2026-04-21. End-to-end import flow is working: polygons drawn in PDF-Parser autosave to IndexedDB, BEAMweb's "Import from PDF-Parser" button reads them, previews computed dimensions, and writes selected rows into StateManager with provenance tracked via `dimension_sources`.
+
+**Commits on `PDF-Bridge` (in order):**
+
+| Commit | Scope |
+|---|---|
+| `f93217d` | Phase 4b.0 — numbered labels on 30 quantitative PROJECT inputs |
+| `529e297` | Phase 4b.1 — PDF-Parser polygon schema + polyline type + component-tag picker |
+| `f07181b` | Phase 4b.1 — BEAMweb `param_*` fields + `dimension_sources` map |
+| `cd0b2a2` | Summary Table + CSV: Type + Tag columns on every row |
+| `5e9e22d` | Summary Table + CSV: Preset column |
+| `f907888` | IndexedDB autosave + cross-session restore in PDF-Parser |
+| `74f6108` | `target="_blank"` on inter-app nav (side-by-side tab workflow) |
+| `9efed2d` | Phase 4b.2 — bridge aggregator (`polygon-map.mjs`) + BEAMweb import modal |
+| `2e8c31d` | 0.00→— fix; sheet-title fallback to classification; inline Tag + Preset selects |
+| `3367bf8` | PDF-Parser sidebar Geometry Parameters panel + bridge fallback to Parser params |
+| `f4e590d` | Cross-feeds: one polygon serves multiple dims (slab area + slab perimeter) |
+| `tbd` | Polyline-tool hit-test guard (don't grab adjacent polygon edges mid-drawing) + this docs update |
+
+**Architectural deltas from the original spec:**
+
+- **Cross-tab persistence via IndexedDB** was not in the original spec. Added to solve the "reload PDF every time you switch apps" problem. Stores full project JSON + PDF blob keyed by uuid. Doubles as the cross-tab bus — BEAMweb reads PDF-Parser's saved projects directly from the same origin's DB, no BroadcastChannel or postMessage needed.
+- **Multi-tab workflow (`target="_blank"`)** replaces the implicit single-tab assumption. Each app lives in its own tab so the Parser can stay alive with a loaded PDF while BEAMweb pulls takeoffs next door.
+- **Parser-side Geometry Parameters panel.** The original spec put `param_*` inputs only on BEAMweb's PROJECT tab. Shipped mirror on the Parser sidebar so drawing-adjacent scalars (wall height, roof pitch, footing dims) can be entered without context-switching. Values write to `project.params` in IndexedDB; BEAMweb reads them as a fallback when its own StateManager params are blank.
+- **Cross-feeds**, new: one polygon feeds multiple dims. `slab_foundation` polygon's area → foundation slab + below-grade + total floor; same polygon's perimeter → foundation wall (× basement height) + continuous footings (× H × W). `slab_above_grade` polygon's perimeter is a fallback for exterior wall area when no elevation walls are drawn. Explicit tags (`exterior_perimeter`, `wall_exterior`) supersede implicit cross-feeds when present. See §3.6.
+- **Manual Import button instead of auto-reflow.** Original spec (§2.2, §2.4, Q21) described a "source selector pill per dim" with auto-reflow on polygon change. Shipped: a single "Import from PDF-Parser" button in BEAMweb's action bar that opens a preview modal with per-dim checkboxes. User explicitly applies selected rows. Simpler, predictable, no dialogs asking to overwrite USER_MODIFIED values mid-session. Per-dim source pills can still land later if the single-button model proves limiting.
+- **Inline Tag + Preset re-editing.** Summary Table rows now render Tag and Preset as `<select>` cells that re-classify a polygon in place. User-friendlier than "pick polygon on the plan to edit its tag."
+
+**What's NOT shipped yet (still pending):**
+
+- **Source selector widget** (§5.1) — replaced for now by the global Import button. Revisit if users want per-dim source control beyond "apply this import and stop."
+- **Fidelity badge inline under each dim input on PROJECT** (§5.2). Import modal's "Source" column covers this during import; PROJECT tab does not yet annotate imported values.
+- **Auto-re-run on polygon change** (Q21) — explicit Import-button workflow instead.
+- **Sheet-class validation banners on offending polygons** (§3.4). Warnings surface in the Import preview only, not inline in the Parser UI.
+- **Clickable sheet refs / deep links** from fidelity text to the Parser at a specific sheet (§5.2 end). Trivial to wire once we add the URL-fragment protocol.
+- **`depth_m` field + column/pad volume** (§6.4 / Phase 4b.3).
+- **Cross-app bulk "Use PDF-Parser for all" action** (§6.5 Phase 4b.4).
+- **Assembly-preset wire-through to Phase 4 tabs** (§6.6 Phase 4b.5) — presets persist on polygons but no assembly tab consumes them yet.
+
 ### What the bridge does
 
 A user draws polygons in PDF-Parser across plan views, elevations, and (future) sections. Each polygon carries a `component` tag picked at measurement time. The bridge aggregates matching polygons across sheets and flows derived values into BEAMweb PROJECT dimension fields via `StateManager.setValue(fieldId, value, VALUE_STATES.DERIVED)`, with the per-dim source set to `pdf-parser`. User manual edits (USER_MODIFIED) override; the selector can be toggled to re-flow on demand.
@@ -50,12 +91,13 @@ Some dimensions derive directly from polygons (slab area = Σ plan polygons tagg
 
 ### Where to pick up next (cold-start one-liner)
 
-1. Verify Andy's takeoff-strategy map has been integrated (may change the component enum in §3).
-2. Land Phase 0 (numbered UI labels per §5.3) — trivial, standalone, no dependencies.
-3. Confirm PDF-Parser Step 10 status. If not started, coordinate taxonomy decisions in §3 before touching polygon schema.
-4. Build `js/shared/polygon-map.mjs` per §3.2 — pure data + aggregation helpers. Ships with a unit test against a hand-authored polygon fixture.
-5. Add `param_*` fields to PROJECT per §2.5 — new section in `project-tab.mjs` or contextual inline.
-6. Wire source selector UI per §5.1. End-to-end test against the DOE Prototype sample project.
+Phase 4b.0 + 4b.1 + 4b.2 are all shipped (see [Shipped update](#shipped-update--2026-04-21)). Natural follow-ups in priority order:
+
+1. Merge `PDF-Bridge` to `main` once Andy has smoke-tested the end-to-end flow.
+2. Phase 4b.3 — `depth_m` on polygons + column/pad volume dim (§6.4). Small surgical add.
+3. Fidelity badge on PROJECT dim inputs (§5.2) — annotates imported values with "pdf:poly_... (2 polygons)" so the user sees provenance without opening the import modal. One render-layer addition + a `dimension_sources` read.
+4. Garage scope boolean (Q23) — unlocks all garage dim mappings.
+5. Phase 4b.4 polish (§6.5) + Phase 4b.5 assembly-preset wire-through (gated on Phase 4 assembly tabs porting to BEAMweb).
 
 ---
 
@@ -271,6 +313,21 @@ When the bridge falls back from a preferred path to a secondary path, the fideli
 
 The `⚠ elevations preferred` inline warning makes the fallback visible, not silent.
 
+### 3.6 Cross-feeds: one polygon feeds multiple dims (added 2026-04-21)
+
+A plan-view polygon carries two geometric quantities that both describe useful things: its **area** (the slab / floor surface) and its **perimeter** (the slab / floor edge — which is also the foundation wall footprint, the continuous footing run, and the above-grade exterior wall run depending on which floor it's on). Requiring the user to trace the same outline twice (once as `slab_foundation`, once as `exterior_perimeter`) is redundant.
+
+The aggregator encodes implicit cross-feeds on the area-polygon tags:
+
+| Source tag | Area feeds | Perimeter cross-feeds | Superseded by |
+|---|---|---|---|
+| `slab_foundation` | `dim_foundation_slab_floor_area`, `project_below_grade_area`, `project_total_floor_area` | `dim_foundation_wall_area` × `param_basement_height_m` + `dim_continuous_footings` × `param_footing_height_m` × `param_footing_width_m` | explicit `exterior_perimeter` polygon |
+| `slab_above_grade` | `dim_framed_floor_area`, `dim_finished_ceiling_area`, `project_above_grade_area`, `project_total_floor_area` | `dim_exterior_wall_area` × `param_wall_height_m` *(fallback only — secondary path)* | explicit `wall_exterior` (on elevation) **or** explicit `exterior_perimeter` polygon |
+
+The `supersededBy` list names the tags that, when present anywhere in the project, preempt the implicit cross-feed. Explicit traces always win — a user who took the trouble to draw a separate `exterior_perimeter` polygon intended it to be authoritative. Primary contributions (e.g. `footing_interior` polylines into `dim_continuous_footings`) sum independently of the cross-feed suppression logic.
+
+Cross-feed contributions are attached to their dim with `isCrossFeed: true` and a descriptive summary string ("1 slab foundation polygon — basement-slab perimeter × basement_height_m (2.4)") so the Import preview distinguishes them from primary contributions in the source column.
+
 ---
 
 ## 4. Dimension mapping table
@@ -460,33 +517,40 @@ wood_2x4_16oc:
 
 - **Numbered labels** (§5.3) — one label-string change per field in `project-tab.mjs`. No behavior impact, no risk. Shipped as a standalone commit alongside the Q25 Party → Party / Demising label update.
 
-### 6.2 Phase 4b.1 — Foundation (PDF-Parser Step 10 minimal + PROJECT params)
+### 6.2 Phase 4b.1 — Foundation (PDF-Parser Step 10 minimal + PROJECT params) (**✅ shipped** 2026-04-20)
 
-**PDF-Parser side:**
-- Add `component`, `sheet_id`, `sheet_class` fields to the polygon schema in [`project-store.mjs`](../../js/project-store.mjs).
-- Add polyline (`type: polyline`) support to [`polygon-tool.mjs`](../../js/polygon-tool.mjs) + red stroke styling.
-- Add component tag dropdown to the measurement panel.
-- Denormalize sheet metadata onto polygons at save time.
+**PDF-Parser side (commit `529e297`):**
+- ✅ Added `component`, `depth_m`, `sheet_id`, `sheet_class`, `assembly_preset` fields to the polygon schema in [`project-store.mjs`](../../js/project-store.mjs).
+- ✅ Added polyline (`type: polyline`) support to [`polygon-tool.mjs`](../../js/polygon-tool.mjs) with red stroke + length-only measurement + Enter-to-finalize flow.
+- ✅ Added component tag dropdown to the toolbar, context-switched per tool. Assembly preset dropdown appears for wall-type components.
+- ✅ Denormalized sheet metadata onto polygons at save time.
 
-**BEAMweb side:**
-- Add `param_*` fields to [`project-tab.mjs`](../../js/beam/project-tab.mjs) in a new "Geometry Parameters" subsection.
-- Extend StateManager with `getDimensionSource` / `setDimensionSource` + the new `dimension_sources` JSON key.
+**BEAMweb side (commit `f07181b`):**
+- ✅ Added `param_*` fields to [`project-tab.mjs`](../../js/beam/project-tab.mjs) in a new "Geometry Parameters" collapsible section.
+- ✅ Extended StateManager with `getDimensionSource` / `setDimensionSource` + `exportDimensionSources` / `importDimensionSources`. File handler round-trips the new `dimension_sources` top-level key in exported JSON.
 
-No bridge yet. Foundation only.
+### 6.3 Phase 4b.2 — Bridge + Import modal (MVP) (**✅ shipped** 2026-04-20 → 2026-04-21)
 
-### 6.3 Phase 4b.2 — Bridge + selector (MVP)
-
-- Build [`js/shared/polygon-map.mjs`](../../js/shared/polygon-map.mjs) with `COMPONENT_TO_DIMENSION` lookup + `aggregateFromPolygons(polygons, params, dimId)` helper. Pure data + pure function — testable in isolation.
-- Wire the bridge to listen for PDF-Parser polygon-change events (extending the existing PROJECT → F&S auto-fill pattern from [`auto-fill.mjs`](../../js/beam/auto-fill.mjs)).
-- Build the source-selector widget (`js/beam/source-selector.mjs` new) — renders per-dim pill, handles toggle + confirm dialog, fires bridge re-run.
-- Build the fidelity badge renderer — inline caption under each dim.
-- v1 dim coverage:
+- ✅ Built [`js/shared/polygon-map.mjs`](../../js/shared/polygon-map.mjs) with `COMPONENT_TO_DIMENSION` lookup + `aggregateOne` + `computeAllDimensions` + cross-feed support + pitch-factor helpers. Pure data + pure functions; consumed by both sides of the bridge. (commits `9efed2d`, `f4e590d`)
+- ✅ Cross-tab persistence via IndexedDB (`js/shared/indexed-db-store.mjs`), ProjectStore autosave, auto-restore on Parser init. (commit `f907888`)
+- ✅ `target="_blank"` on cross-app nav so apps stay alive in separate tabs. (commit `74f6108`)
+- ✅ Built [`js/beam/pdf-bridge-import.mjs`](../../js/beam/pdf-bridge-import.mjs) — reads Parser projects from IndexedDB, runs aggregator, returns preview with diff rows, applies selected rows via `StateManager.setValue` + `setDimensionSource`. (commit `9efed2d`)
+- ✅ Import from PDF-Parser modal: project picker when multiple sessions, param-missing warning banner, per-dim checkbox table showing current vs computed, source column with contributing polygons + sheets + assembly presets + warnings. Apply writes through and refreshes PROJECT tab. (commit `9efed2d`)
+- ✅ Display fixes: `0.00→—` when required param missing, classification fallback for junk sheet titles, inline Tag + Preset selects in Summary Table. (commit `2e8c31d`)
+- ✅ Parser-side Geometry Parameters panel in sidebar; bridge reads Parser params as fallback when StateManager is blank; Apply back-fills StateManager from Parser params. (commit `3367bf8`)
+- ✅ Cross-feeds: implicit perimeter derivations so a single slab polygon feeds foundation wall + continuous footings alongside the slab area it was drawn for. Supersedes-logic preserves user's explicit traces. (commit `f4e590d`)
+- v1 dim coverage shipped:
   - ✅ slab-based: `project_total_floor_area`, `project_above_grade_area`, `project_below_grade_area`, `dim_foundation_slab_floor_area`, `dim_framed_floor_area`, `dim_finished_ceiling_area`
   - ✅ elevation-based walls + windows: `dim_exterior_wall_area`, `dim_party_wall_area`, `dim_window_area`
-  - ✅ param-multiplied: `dim_continuous_footings_volume`, `dim_foundation_wall_area`, `dim_interior_wall_area`, `dim_roof_surface_area`
+  - ✅ param-multiplied: `dim_continuous_footings`, `dim_foundation_wall_area`, `dim_interior_wall_area`, `dim_roof_surface_area`
   - ✅ flat-roof: `dim_roof_cavity_insulation_area`
 
-Ships ~16 of 18 building dims + 3 info quantities + most garage dims. **~60% of PROJECT quantitative inputs auto-derived on day one.**
+**~16 of 18 building dims + 3 info quantities auto-derivable. Garage dims deferred pending Q23 resolution.**
+
+Deferred from the original Phase 4b.2 scope (re-sequenced into polish or later phases):
+- Source selector widget (§5.1) — see Shipped update in §0.
+- Fidelity badge inline under each dim (§5.2).
+- Auto-re-run on polygon-change event (Q21) — replaced by Import-button workflow.
 
 ### 6.4 Phase 4b.3 — Step 10 depth
 
@@ -529,13 +593,13 @@ Carrying forward from BEAMweb.md §7 Q19 with updates:
 
 ### New questions opened by this spec
 
-- **Q20 — Caching last-computed values.** Should the fidelity badge cache the last-computed value + timestamp, so switching sources doesn't force a re-run every time? Light — doable in v1 as `{value, computed_at, summary}` per dim, or defer to polish phase.
-- **Q21 — Auto-re-run on polygon change.** When the user draws/edits a polygon in PDF-Parser while a PROJECT dim is set to `pdf-parser` source, does the bridge auto-re-run, or does the user have to manually toggle / confirm? **MVP proposal:** auto-re-run with a subtle banner on PROJECT ("PDF-Parser updated — 3 dims refreshed") for the first few seconds after change. Prevents stale data without nagging dialogs. Debounced ~500ms.
-- **Q22 — Roof cavity vs roof surface.** In residential, cavity insulation area ≠ pitched roof surface area. Flat roof: cavity ≈ plan area. Pitched roof: cavity ≈ plan area (above-ceiling insulation, not following the rafters); surface > plan area (pitch factor). Can a single `roof_plan` polygon feed both dims with different derivations? **Proposal:** yes. `roof_plan` → `dim_roof_cavity_insulation_area` direct + `dim_roof_surface_area` × pitch. Add a `roof_cavity_override` tag for when the user wants to draw a different shape (e.g., cathedral ceiling).
-- **Q23 — Garage polygon tagging.** Option A: duplicate component tags with `garage_` prefix (`slab_garage`, `wall_garage_exterior`, etc.). Option B: polygons carry a `scope: "building" | "garage"` boolean and reuse building-side component tags. **Leaning B** — cleaner enum, less duplication, lets a user tag `scope: garage` retroactively without re-tagging. Compile-time check in the bridge: a polygon with `scope: garage` routes to `garage_*` target dims instead of `dim_*`.
-- **Q24 — Multi-storey wall-height handling.** `param_wall_height_m` is a single scalar. Multi-storey buildings have per-storey heights. MVP assumes a single weighted wall height (user computes externally). **Future:** add `param_wall_height_storey_1`, `_storey_2`, ... with a `stories_above_grade`-driven renderer. Deferred past v1.
-- **Q25 — Party/Demising wall naming in code.** Field stays `dim_party_wall_area` in code + project JSON (BEAM gSheet compatibility), UI label shows "Party / Demising Wall Area" per Andy's 2026-04-20 call. Non-breaking.
-- **Q26 — PDF-Parser Step 10 ownership.** Who writes Step 10 — is it part of this Phase 4b scope or a separate PDF-Parser workstream that Phase 4b consumes? **Proposal:** the polygon-schema changes in §3.3 + the polyline tool + the component dropdown live in a new PDF-Parser session branch (`pdfparser-step10` or similar) and land via their own PR before Phase 4b.2 starts. Phase 4b.2 assumes they're available.
+- ✅ **Q20 — Caching last-computed values.** Moot in the current manual-Import model — preview always runs fresh. Re-opens if auto-reflow returns.
+- ✅ **Q21 — Auto-re-run on polygon change.** Replaced by explicit Import button in BEAMweb action bar. User-triggered, not event-driven. Revisit if users report friction with manual trigger.
+- ✅ **Q22 — Roof cavity vs roof surface.** Shipped per proposal — one `roof_plan` polygon feeds both `dim_roof_cavity_insulation_area` (direct plan area, pitch backed out) and `dim_roof_surface_area` (plan × pitch factor). `roof_cavity_override` tag available for cathedral ceilings. See `computeContribution` in [polygon-map.mjs](../../js/shared/polygon-map.mjs).
+- **Q23 — Garage polygon tagging.** Still open. Leaning B (scope boolean + reuse building tags). Not blocking the building-side flow; garage dims will wire in when a user asks for them.
+- **Q24 — Multi-storey wall-height handling.** Still open / deferred.
+- ✅ **Q25 — Party/Demising wall naming in code.** Shipped. Field ID `dim_party_wall_area`, UI label "Party / Demising Wall Area".
+- ✅ **Q26 — PDF-Parser Step 10 ownership.** Resolved as part of Phase 4b.1 scope (single branch, single PR). Polygon schema + polyline + component dropdown shipped in commit `529e297`.
 
 ### Opened by BfCA team meeting (2026-04-20)
 
