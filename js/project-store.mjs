@@ -4,11 +4,15 @@
 
 import { VERSION } from "./config.mjs";
 import * as PolygonTool from "./polygon-tool.mjs";
+import * as IDB from "./shared/indexed-db-store.mjs";
 
 var _project = _emptyProject();
+var _saveTimer = null;
+var _autosaveEnabled = true;
 
 function _emptyProject() {
   return {
+    uuid: null,
     version: VERSION,
     fileName: "",
     createdAt: null,
@@ -22,6 +26,7 @@ function _emptyProject() {
 
 export function initFromPdf(fileName, pageCount) {
   _project = _emptyProject();
+  _project.uuid = IDB.generateUUID();
   _project.fileName = fileName;
   _project.pageCount = pageCount;
   _project.createdAt = new Date().toISOString();
@@ -37,6 +42,7 @@ export function initFromPdf(fileName, pageCount) {
       rulers: []
     });
   }
+  _touch();
 }
 
 export function setClassifications(classResults) {
@@ -133,6 +139,63 @@ export function setRoomSchedule(rooms) {
 
 function _touch() {
   _project.updatedAt = new Date().toISOString();
+  _scheduleAutosave();
+}
+
+// Debounced write to IndexedDB. BEAMweb reads this record (in a separate tab)
+// to flow polygon takeoffs into PROJECT dimensions, so "autosave" is also
+// "cross-tab handoff". 500ms matches the typing debounce pattern elsewhere.
+function _scheduleAutosave() {
+  if (!_autosaveEnabled) return;
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(_persistToIDB, 500);
+}
+
+function _persistToIDB() {
+  if (!_project.uuid) return;
+  IDB.putProject({
+    uuid: _project.uuid,
+    pdfFileName: _project.fileName,
+    pdfPageCount: _project.pageCount,
+    projectJson: _project,
+    updatedAt: _project.updatedAt
+  }).catch(function (err) {
+    console.warn("[ProjectStore] IndexedDB autosave failed:", err);
+  });
+}
+
+export function getActiveUuid() {
+  return _project.uuid || null;
+}
+
+// Restore flows (IndexedDB hydrate, JSON import) mutate ProjectStore many times
+// before the final state is known. Pausing autosave avoids writing transient
+// intermediate records to IndexedDB; resumeAutosave schedules a single
+// consolidated write at the end.
+export function pauseAutosave() {
+  _autosaveEnabled = false;
+}
+
+export function resumeAutosave() {
+  _autosaveEnabled = true;
+  _scheduleAutosave();
+}
+
+// Replaces the in-memory project with a saved record (e.g. from IndexedDB
+// restore or JSON import). Suppresses autosave during the replacement so
+// we don't ping-pong a fresh write on top of what we just loaded.
+export function restoreProject(projectJson) {
+  _autosaveEnabled = false;
+  _project = projectJson;
+  if (!_project.uuid) _project.uuid = IDB.generateUUID();
+  _autosaveEnabled = true;
+}
+
+// Stash the PDF bytes alongside the project so a returning user doesn't
+// have to re-drop the file. Called by app.mjs after loadPdf succeeds.
+export function setPdfBytes(blob) {
+  if (!_project.uuid) return Promise.resolve();
+  return IDB.putPdfBytes(_project.uuid, blob);
 }
 
 export function toJSON() {

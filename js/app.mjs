@@ -21,6 +21,7 @@ import * as PolygonTool from "./polygon-tool.mjs";
 import * as VectorSnap from "./vector-snap.mjs";
 import * as ScheduleParser from "./schedule-parser.mjs";
 import * as ProjectStore from "./project-store.mjs";
+import * as IDBStore from "./shared/indexed-db-store.mjs";
 
 /* ── DOM refs ─────────────────────────────────────────── */
 
@@ -119,6 +120,13 @@ function init() {
 
   setStatus("Ready — drop a PDF or click Browse", "ready");
   console.log("[PDF-Parser] Ready");
+
+  // Attempt to restore the most recent session from IndexedDB. Silent no-op
+  // if nothing is persisted yet. Status message updates on success.
+  _tryRestoreLastSession().then(function (restored) {
+    if (!restored) return;
+    console.log("[PDF-Parser] Restore initiated from IndexedDB");
+  });
 }
 
 /* ── File loading ─────────────────────────────────────── */
@@ -174,7 +182,8 @@ function loadSample() {
     });
 }
 
-function loadPdf(buffer, fileName) {
+function loadPdf(buffer, fileName, opts) {
+  opts = opts || {};
   console.log("[PDF-Parser] Loading:", fileName, "(" + (buffer.byteLength / 1048576).toFixed(1) + " MB)");
 
   Loader.reset();
@@ -197,6 +206,14 @@ function loadPdf(buffer, fileName) {
     .then(function (result) {
       console.log("[PDF-Parser] Loaded:", result.pageCount, "pages");
       ProjectStore.initFromPdf(fileName, result.pageCount);
+      // Persist PDF bytes for cross-session restore — skipped in the restore
+      // path since the bytes are already in IndexedDB.
+      if (!opts.skipBlobPersist) {
+        var pdfBlob = new Blob([buffer], { type: "application/pdf" });
+        ProjectStore.setPdfBytes(pdfBlob).catch(function (err) {
+          console.warn("[PDF-Parser] PDF blob persistence failed:", err);
+        });
+      }
 
       // Show loading overlay, hide drop zone
       els.dropZone.style.display = "none";
@@ -226,12 +243,36 @@ function loadPdf(buffer, fileName) {
               if (results[i].classification === "plan") planCount++;
             }
 
+            // Restore path — overlay the saved project on top of the fresh
+            // init + classify that just ran. restoreProject replaces the
+            // ProjectStore payload; _hydrateFromProjectData also loads
+            // polygons, calibrations, and rulers into the live modules.
+            var restored = null;
+            if (opts.restoreData) {
+              restored = _hydrateFromProjectData(opts.restoreData, result.pageCount);
+              _updateThumbnailLabels(
+                ProjectStore.getProject().pages.map(function (p) {
+                  return { pageNum: p.pageNum, sheetId: p.sheetId, sheetTitle: p.sheetTitle };
+                })
+              );
+            }
+
             // Hide loading, show viewer
             loadingOverlay.style.display = "none";
             els.viewerWrap.style.display = "";
 
-            setStatus("Found " + planCount + " plan sheets. Press S to confirm scale.", "ready");
+            if (restored) {
+              setStatus(
+                "Session restored — " + restored.areas + " areas, " + restored.windows + " windows, " + restored.rulers + " rulers",
+                "ready"
+              );
+            } else {
+              setStatus("Found " + planCount + " plan sheets. Press S to confirm scale.", "ready");
+            }
             goToPage(1);
+
+            // Re-enable autosave after the restore dust has settled.
+            if (opts.restoreData) ProjectStore.resumeAutosave();
 
             // Background: find room schedule
             ScheduleParser.findRoomScheduleInDocument().then(function (schedData) {
@@ -266,6 +307,37 @@ function loadPdf(buffer, fileName) {
       setStatus("Error loading PDF: " + err.message, "error");
       loadingOverlay.style.display = "none";
       console.error(err);
+      if (opts.restoreData) ProjectStore.resumeAutosave();
+    });
+}
+
+// Auto-restore the most-recently-touched session from IndexedDB. Returns a
+// Promise<boolean> — true if a restore was kicked off, false if nothing to
+// restore (or restore was declined). Restore reuses loadPdf's render pipeline
+// so calibrations, classifications, and polygons all flow through the same
+// code path the JSON importer already exercises.
+function _tryRestoreLastSession() {
+  return IDBStore.listProjects()
+    .then(function (projects) {
+      if (!projects || projects.length === 0) return false;
+      var latest = projects[0];
+      if (!latest.projectJson || !latest.projectJson.pages) return false;
+      return IDBStore.getPdfBytes(latest.uuid).then(function (blob) {
+        if (!blob) return false;
+        setStatus("Restoring " + latest.pdfFileName + "\u2026", "busy");
+        ProjectStore.pauseAutosave();
+        return blob.arrayBuffer().then(function (buffer) {
+          loadPdf(buffer, latest.pdfFileName, {
+            skipBlobPersist: true,
+            restoreData: latest.projectJson
+          });
+          return true;
+        });
+      });
+    })
+    .catch(function (err) {
+      console.warn("[PDF-Parser] restore failed:", err);
+      return false;
     });
 }
 
@@ -2323,6 +2395,43 @@ function _bindJsonImport() {
   }
 }
 
+// Hydrate live modules (PolygonTool, ScaleManager, ruler state) from a
+// persisted project JSON. Used by both JSON import and IndexedDB restore.
+// Caller is responsible for having loaded the PDF first (polyline rendering
+// needs an active page / scale calibration).
+function _hydrateFromProjectData(data, pdfPageCount) {
+  ProjectStore.restoreProject(data);
+
+  var areaCount = 0,
+    winCount = 0,
+    rulerCount = 0;
+  var maxPage = Math.min(data.pageCount, pdfPageCount);
+
+  for (var i = 0; i < maxPage; i++) {
+    var page = data.pages[i];
+    var pageNum = page.pageNum || i + 1;
+    if (page.polygons && page.polygons.length > 0) {
+      PolygonTool.loadPolygons(pageNum, page.polygons);
+      for (var pi = 0; pi < page.polygons.length; pi++) {
+        if (page.polygons[pi].type === "window") winCount++;
+        else areaCount++;
+      }
+    }
+    if (page.calibration) ScaleManager.restoreCalibration(pageNum, page.calibration);
+    if (page.rulers && page.rulers.length > 0) {
+      _rulers[pageNum] = page.rulers.slice();
+      rulerCount += page.rulers.length;
+    }
+  }
+
+  _rulerUndoStack = [];
+  _rulerRedoStack = [];
+  _undoOrder = [];
+  _redoOrder = [];
+
+  return { areas: areaCount, windows: winCount, rulers: rulerCount };
+}
+
 function _importJsonFile(file) {
   var reader = new FileReader();
   reader.onload = function (e) {
@@ -2355,45 +2464,10 @@ function _importJsonFile(file) {
       if (!proceed) return;
     }
 
-    // Restore project data into ProjectStore
-    ProjectStore.fromJSON(JSON.stringify(data));
-
-    // Restore per-page data into live modules
-    var areaCount = 0,
-      winCount = 0,
-      rulerCount = 0;
-    var maxPage = Math.min(data.pageCount, pdfPageCount);
-
-    for (var i = 0; i < maxPage; i++) {
-      var page = data.pages[i];
-      var pageNum = page.pageNum || i + 1;
-
-      // Restore polygons
-      if (page.polygons && page.polygons.length > 0) {
-        PolygonTool.loadPolygons(pageNum, page.polygons);
-        for (var pi = 0; pi < page.polygons.length; pi++) {
-          if (page.polygons[pi].type === "window") winCount++;
-          else areaCount++;
-        }
-      }
-
-      // Restore calibration
-      if (page.calibration) {
-        ScaleManager.restoreCalibration(pageNum, page.calibration);
-      }
-
-      // Restore rulers
-      if (page.rulers && page.rulers.length > 0) {
-        _rulers[pageNum] = page.rulers.slice();
-        rulerCount += page.rulers.length;
-      }
-    }
-
-    // Reset undo stacks (import is a fresh starting point)
-    _rulerUndoStack = [];
-    _rulerRedoStack = [];
-    _undoOrder = [];
-    _redoOrder = [];
+    var counts = _hydrateFromProjectData(data, pdfPageCount);
+    var areaCount = counts.areas;
+    var winCount = counts.windows;
+    var rulerCount = counts.rulers;
 
     // Refresh current page display
     var pageData = ProjectStore.getPage(_currentPage);
