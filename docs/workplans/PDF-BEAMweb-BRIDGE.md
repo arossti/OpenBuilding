@@ -37,9 +37,13 @@ Record kept here (not in app code) because these are source URLs for upstream re
 
 ### Shipped update — 2026-04-21
 
-Phase 4b.0 through 4b.2 landed on the `PDF-Bridge` branch across 13 commits between 2026-04-20 and 2026-04-21. End-to-end import flow is working: polygons drawn in PDF-Parser autosave to IndexedDB, BEAMweb's "Import from PDF-Parser" button reads them, previews computed dimensions, and writes selected rows into StateManager with provenance tracked via `dimension_sources`.
+Phase 4b.0 through 4b.2 shipped on `PDF-Bridge` (merged to `main` as PR #1, 2026-04-21). Follow-on work continues on `PDF-Bridge-2` — F&S flow fix + §8 planning note + dependency-graph stub.
 
-**Commits on `PDF-Bridge` (in order):**
+**Active branch:** `PDF-Bridge-2` (based on `main` after PR #1 merge). Future agents: `git checkout PDF-Bridge-2` to continue; `git log main..HEAD` to see work since the merge.
+
+**Testing status:** PR #1 merged based on the test checklist in its body, **without explicit verification runs**. Andy flagged a post-merge regression that became `85dd39d` (F&S did not flow from imported PROJECT values); verified by Andy in-tab afterward. Second-round testing of the full Import → Apply → F&S loop on `PDF-Bridge-2` is in progress as of end-of-session 2026-04-21. Multi-tag extension (see Q31) is the next round of tagging work.
+
+**Commits on `PDF-Bridge` (merged to `main`, in order):**
 
 | Commit | Scope |
 |---|---|
@@ -54,7 +58,15 @@ Phase 4b.0 through 4b.2 landed on the `PDF-Bridge` branch across 13 commits betw
 | `2e8c31d` | 0.00→— fix; sheet-title fallback to classification; inline Tag + Preset selects |
 | `3367bf8` | PDF-Parser sidebar Geometry Parameters panel + bridge fallback to Parser params |
 | `f4e590d` | Cross-feeds: one polygon serves multiple dims (slab area + slab perimeter) |
-| `tbd` | Polyline-tool hit-test guard (don't grab adjacent polygon edges mid-drawing) + this docs update |
+| `a49d02d` | Polyline-tool hit-test guard + workplan doc update |
+
+**Commits on `PDF-Bridge-2` (in-flight, not yet merged, in order):**
+
+| Commit | Scope |
+|---|---|
+| `85dd39d` | Post-import flow fix: `syncProjectToFsBridge()` + LHW decomposition so F&S picks up imported values |
+| `101b6e9` | BEAMweb.md §8 — planning note for eventual dependency-graph migration (listener → graph) |
+| `e492cad` | Dependency Graph stub: StateManager.exportDependencyGraph + new tab 19 + OBJECTIVE-shape scaffolding |
 
 **Architectural deltas from the original spec:**
 
@@ -91,13 +103,15 @@ Some dimensions derive directly from polygons (slab area = Σ plan polygons tagg
 
 ### Where to pick up next (cold-start one-liner)
 
-Phase 4b.0 + 4b.1 + 4b.2 are all shipped (see [Shipped update](#shipped-update--2026-04-21)). Natural follow-ups in priority order:
+`PDF-Bridge` is merged to `main` (PR #1). Active branch is `PDF-Bridge-2` with three commits in flight (see the table above). Next agent: `git checkout PDF-Bridge-2`, read §7 Q31 for Andy's latest ask, skim the PR #1 test plan to see what's been verified so far. Natural follow-ups in priority order:
 
-1. Merge `PDF-Bridge` to `main` once Andy has smoke-tested the end-to-end flow.
-2. Phase 4b.3 — `depth_m` on polygons + column/pad volume dim (§6.4). Small surgical add.
-3. Fidelity badge on PROJECT dim inputs (§5.2) — annotates imported values with "pdf:poly_... (2 polygons)" so the user sees provenance without opening the import modal. One render-layer addition + a `dimension_sources` read.
-4. Garage scope boolean (Q23) — unlocks all garage dim mappings.
-5. Phase 4b.4 polish (§6.5) + Phase 4b.5 assembly-preset wire-through (gated on Phase 4 assembly tabs porting to BEAMweb).
+1. **Multi-tag extension (Q31)** — Andy's next-round tagging work. Collect the specific tag→dim mappings he wants added, extend `COMPONENT_TO_DIMENSION.crossFeeds` entries in [polygon-map.mjs](../../js/shared/polygon-map.mjs). No structural code changes.
+2. **Phase 4b.3 — `depth_m` + pad/pier volume** (§6.4). Schema field on polygons + UI input + aggregator path. ~200 lines, self-contained.
+3. **Fidelity badge on PROJECT dim inputs** (§5.2) — render the `dimension_sources` string under each imported dim's input so provenance is visible without opening the Import modal. ~100 lines in [project-tab.mjs](../../js/beam/project-tab.mjs).
+4. **Clickable sheet deep-link** — `pdfparser.html#sheet=A-301` URL fragment protocol. ~80 lines both sides.
+5. **Bulk "Use PDF-Parser for all" action** — one-click variant of the Import modal that applies every computable dim. ~40 lines on top of existing `applyImport`.
+6. **Garage scope boolean (Q23)** — unlocks all garage dim mappings.
+7. **Phase 4b.4 polish** + **Phase 4b.5 assembly-preset wire-through** (gated on Phase 4 assembly tabs porting).
 
 ---
 
@@ -598,6 +612,11 @@ Carrying forward from BEAMweb.md §7 Q19 with updates:
 - ✅ **Q22 — Roof cavity vs roof surface.** Shipped per proposal — one `roof_plan` polygon feeds both `dim_roof_cavity_insulation_area` (direct plan area, pitch backed out) and `dim_roof_surface_area` (plan × pitch factor). `roof_cavity_override` tag available for cathedral ceilings. See `computeContribution` in [polygon-map.mjs](../../js/shared/polygon-map.mjs).
 - **Q23 — Garage polygon tagging.** Still open. Leaning B (scope boolean + reuse building tags). Not blocking the building-side flow; garage dims will wire in when a user asks for them.
 - **Q24 — Multi-storey wall-height handling.** Still open / deferred.
+- **Q31 — Multi-tag extension (Andy, 2026-04-21).** Cross-feeds (§3.6) let one polygon drive multiple dims via area + perimeter, with `supersededBy` resolving priority. Andy flagged during the F&S testing round that more tag→dim mappings deserve the same treatment. Specific items to queue:
+  - (a) **Which additional tag combinations?** Andy to enumerate — candidates include `roof_plan` perimeter feeding fascia/soffit length, `floor_area` (non-`slab_above_grade`) area feeding a generic finished area, `exterior_perimeter` perimeter feeding additional envelope dims.
+  - (b) **Extension pattern.** Each new mapping adds either a fresh entry in `COMPONENT_TO_DIMENSION[component].crossFeeds[]` (if it's a secondary feed off an existing tag) or a new `COMPONENT_TO_DIMENSION` component with its own primary targetDim plus crossFeeds. No structural changes to `polygon-map.mjs` — the runCrossFeeds pass already handles arbitrary new entries.
+  - (c) **Supersedes semantics.** Each new cross-feed declares its own `supersededBy` list so user-explicit tags always win. Review the lattice at the same time — if tag A supersedes B and B supersedes C, is A→C implicit? Currently no; the mapping is flat. Formalise if/when users want transitive supersedes.
+  - (d) **UI impact.** None on the Parser side. The Import preview already renders multiple contributors per dim with joined summaries — adding more cross-feeds just makes those summaries richer.
 - ✅ **Q25 — Party/Demising wall naming in code.** Shipped. Field ID `dim_party_wall_area`, UI label "Party / Demising Wall Area".
 - ✅ **Q26 — PDF-Parser Step 10 ownership.** Resolved as part of Phase 4b.1 scope (single branch, single PR). Polygon schema + polyline + component dropdown shipped in commit `529e297`.
 
