@@ -32,18 +32,116 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
 
   result.scale = detectScale(textItems);
 
+  // Candidate titles — plausible drawing-name strings. Rejects numeric-only,
+  // too-short/too-long, the sheet-id pattern, and noise like revision dates.
   var titleCandidates = tbItems.filter(function (item) {
     var s = item.str.trim();
-    return s.length > 3 && s.length < 60 && !sheetIdPattern.test(s) && !/^\d+$/.test(s);
+    if (s.length <= 3 || s.length >= 60) return false;
+    if (sheetIdPattern.test(s)) return false;
+    if (/^\d+$/.test(s)) return false;
+    return !_looksLikeTitleNoise(s);
   });
-  if (titleCandidates.length > 0) {
+
+  // Three-tier title picker (best → fallback):
+  //   1. Labelled title ("Sheet Name: FLOOR PLAN") — highest-signal match.
+  //   2. Largest font among candidates — drawing titles are usually the
+  //      most prominent text in a title block.
+  //   3. Bottom-most candidate — legacy fallback.
+  var title = _findLabelledTitle(tbItems);
+  if (!title && titleCandidates.length > 0) {
+    title = _findLargestFontTitle(titleCandidates);
+  }
+  if (!title && titleCandidates.length > 0) {
     titleCandidates.sort(function (a, b) {
       return a.y - b.y;
     });
-    result.sheetTitle = titleCandidates[titleCandidates.length - 1].str.trim();
+    title = titleCandidates[titleCandidates.length - 1].str.trim();
   }
+  result.sheetTitle = title || null;
 
   return result;
+}
+
+// Regexes for known title-block labels. Matches the whole item when the
+// label appears alone ("Sheet Name:"), and also handles inline forms where
+// the label and value share one text item ("Sheet Name: FLOOR PLAN").
+var _TITLE_LABEL_PATTERNS = [
+  /^(?:sheet|drawing|dwg)\s+(?:name|title)\s*:?\s*$/i,
+  /^title\s*:?\s*$/i,
+  /^name\s*:?\s*$/i
+];
+var _TITLE_INLINE_PATTERN = /^(?:sheet|drawing|dwg)\s+(?:name|title)\s*:\s*(.+)$/i;
+
+function _findLabelledTitle(tbItems) {
+  // Pass 1 — inline form: one item contains both "Sheet Name:" and the title.
+  for (var i = 0; i < tbItems.length; i++) {
+    var s = tbItems[i].str.trim();
+    var m = s.match(_TITLE_INLINE_PATTERN);
+    if (m && m[1]) {
+      var val = m[1].trim();
+      if (val.length >= 3 && val.length < 60 && !_looksLikeTitleNoise(val)) return val;
+    }
+  }
+
+  // Pass 2 — split form: a label item + a nearby value. "Nearby" means the
+  // closest item that's either to the right on the same row or directly
+  // below the label, within a loose bounding region.
+  for (var j = 0; j < tbItems.length; j++) {
+    var labelItem = tbItems[j];
+    var labelText = labelItem.str.trim();
+    if (!_TITLE_LABEL_PATTERNS.some(function (p) { return p.test(labelText); })) continue;
+
+    var best = null;
+    var bestDist = Infinity;
+    var labelRight = labelItem.x + (labelItem.width || 0);
+
+    for (var k = 0; k < tbItems.length; k++) {
+      if (k === j) continue;
+      var item = tbItems[k];
+      var text = item.str.trim();
+      if (text.length < 3 || text.length >= 60) continue;
+      if (_TITLE_LABEL_PATTERNS.some(function (p) { return p.test(text); })) continue;
+      if (_looksLikeTitleNoise(text)) continue;
+
+      var sameRow = Math.abs(item.y - labelItem.y) < 5;
+      var rightOfLabel = item.x >= labelRight - 2;
+      var directlyBelow = item.y > labelItem.y && item.y - labelItem.y < 25;
+      if (!((sameRow && rightOfLabel) || directlyBelow)) continue;
+
+      var dx = item.x - labelItem.x;
+      var dy = item.y - labelItem.y;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = text;
+      }
+    }
+    if (best) return best;
+  }
+
+  return null;
+}
+
+function _findLargestFontTitle(titleCandidates) {
+  var sorted = titleCandidates.slice().sort(function (a, b) {
+    return (b.fontSize || 0) - (a.fontSize || 0);
+  });
+  return sorted[0].str.trim();
+}
+
+// Reject common title-block noise — revision lines, dates, signatures,
+// authored-by notes, "page N of M", scale text. Catches the values that
+// slipped through the length filter in the old picker.
+function _looksLikeTitleNoise(s) {
+  if (/\brev(ision|\.)?\b/i.test(s)) return true;
+  if (/\b(issued|drawn|checked|approved)\b/i.test(s)) return true;
+  if (/\bscale\b/i.test(s)) return true;
+  if (/^\s*page\s+\d/i.test(s)) return true;
+  if (/\d{4}[-\/.]\d{1,2}[-\/.]\d{1,2}/.test(s)) return true; // YYYY-MM-DD
+  if (/\d{1,2}[-\/.]\d{1,2}[-\/.]\d{2,4}/.test(s)) return true; // DD-MM-YY
+  if (/^\s*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)\w*\s+\d{1,2}/i.test(s)) return true;
+  if (/\b(OAA|OAQ|OAO|MRAIC|FRAIC|P\.?Eng)\b/.test(s)) return true; // professional signature suffixes
+  return false;
 }
 
 /**
