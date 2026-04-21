@@ -56,6 +56,12 @@ export function setClassifications(classResults) {
 export function savePolygons(pageNum, polygons) {
   var page = _project.pages[pageNum - 1];
   if (page) {
+    // Sheet metadata denormalized onto each polygon so downstream consumers
+    // (BEAMweb) don't have to join back to the page record. Page-level
+    // classification is authoritative; polygon's own sheet_id/sheet_class
+    // fields are only used as a fallback when the page isn't classified yet.
+    var pageSheetId = page.sheetId || null;
+    var pageSheetClass = page.classification || null;
     page.polygons = polygons.map(function (p) {
       return {
         id: p.id,
@@ -63,7 +69,12 @@ export function savePolygons(pageNum, polygons) {
         vertices: p.vertices.slice(),
         closed: p.closed,
         type: p.type || "area",
-        mode: p.mode || "net"
+        mode: p.mode || "net",
+        component: p.component || null,
+        depth_m: p.depth_m != null ? p.depth_m : null,
+        sheet_id: pageSheetId || p.sheet_id || null,
+        sheet_class: pageSheetClass || p.sheet_class || null,
+        assembly_preset: p.assembly_preset || null
       };
     });
     _touch();

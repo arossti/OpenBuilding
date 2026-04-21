@@ -33,6 +33,23 @@
           <option value="net">Net (subtract)</option>
           <option value="add">Add</option>
         </select>
+        <button class="tool-btn" data-tool="polyline" data-tip="Polyline [P] — linear feature (interior wall, footing)">
+          <i class="bi bi-bezier2"></i>
+        </button>
+        <select id="component-tag" title="Component tag — classifies polygons for BEAMweb" onchange="PP.setComponentTag(this.value)">
+          <option value="">(no tag)</option>
+        </select>
+        <select id="assembly-preset" title="Assembly preset — seeds BEAMweb assembly tabs" onchange="PP.setAssemblyPreset(this.value)" style="display:none">
+          <option value="">(no preset)</option>
+          <option value="wood_2x4">Wood 2x4</option>
+          <option value="wood_2x6">Wood 2x6</option>
+          <option value="wood_2x8">Wood 2x8</option>
+          <option value="wood_2x10">Wood 2x10</option>
+          <option value="steel_stud">Steel stud</option>
+          <option value="icf">ICF</option>
+          <option value="concrete_block">Concrete block</option>
+          <option value="other">Other</option>
+        </select>
         <button class="tool-btn" data-tool="ruler" data-tip="Ruler [L] — measure a linear distance">
           <i class="bi bi-rulers"></i>
         </button>
@@ -121,7 +138,8 @@
             <input type="file" id="file-input" accept="application/pdf" />
             <div class="drop-hint" style="margin-top: 24px">
               <span class="key-hint">S</span> Scale &nbsp; <span class="key-hint">M</span> Measure &nbsp;
-              <span class="key-hint">W</span> Window &nbsp; <span class="key-hint">C</span> Calibrate &nbsp;
+              <span class="key-hint">W</span> Window &nbsp; <span class="key-hint">P</span> Polyline &nbsp;
+              <span class="key-hint">C</span> Calibrate &nbsp;
               <span class="key-hint">F</span> Fit &nbsp; <span class="key-hint">Scroll</span> Zoom at cursor &nbsp;
               <span class="key-hint">Mid-click</span> Pan &nbsp; <span class="key-hint">&larr;&rarr;</span> Pages
             </div>

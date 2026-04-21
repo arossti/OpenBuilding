@@ -29,6 +29,10 @@ var _currentPage = 0;
 var _currentTool = "navigate";
 var _measureMethod = "rectangle"; // "polygon" or "rectangle"
 var _windowMode = "net"; // "net" or "add"
+// Phase 4b.1 — bridge metadata selected at draw time. Stamped onto each
+// new polygon's record via opts in startPolygon. Null when not classified.
+var _componentTag = null;
+var _assemblyPreset = null;
 var _calibPoint1 = null;
 var _rectStart = null; // first corner for bounding rectangle
 var _rectCurrent = null; // live cursor position for rubber-band preview
@@ -109,6 +113,9 @@ function init() {
   _bindJsonImport();
   _bindToolbar();
   _bindKeyboard();
+
+  // Sync the component-tag select with the starting tool (navigate ⇒ hidden).
+  _rebuildComponentTagSelect();
 
   setStatus("Ready — drop a PDF or click Browse", "ready");
   console.log("[PDF-Parser] Ready");
@@ -557,6 +564,7 @@ function _handleOverlayClick(e) {
 
   if (_currentTool === "measure") _handleMeasureClick(pt);
   else if (_currentTool === "window") _handleWindowClick(pt);
+  else if (_currentTool === "polyline") _handlePolylineClick(pt);
   else if (_currentTool === "calibrate") _handleCalibrateClick(pt);
   else if (_currentTool === "ruler") _handleRulerClick(pt);
 }
@@ -611,6 +619,85 @@ function setWindowMode(mode) {
   document.getElementById("window-mode").value = mode;
 }
 
+/* ── Phase 4b.1 — Component tag + assembly preset ────── */
+
+// Options per tool. Measure tool classifies area polygons; polyline tool
+// classifies linear features. Window tool is handled separately (auto-tagged).
+var COMPONENT_OPTIONS = {
+  measure: [
+    { value: "", label: "(no tag)" },
+    { value: "wall_exterior", label: "Wall — exterior" },
+    { value: "wall_interior", label: "Wall — interior" },
+    { value: "slab_foundation", label: "Slab — foundation" },
+    { value: "slab_suspended", label: "Slab — suspended" },
+    { value: "roof", label: "Roof" },
+    { value: "floor_area", label: "Floor area" },
+    { value: "footprint", label: "Footprint" },
+    { value: "site_area", label: "Site area" },
+    { value: "building_envelope", label: "Building envelope" }
+  ],
+  polyline: [
+    { value: "", label: "(no tag)" },
+    { value: "wall_interior_linear", label: "Wall — interior (linear)" },
+    { value: "footing_interior", label: "Footing — interior" },
+    { value: "partition_length", label: "Partition length" }
+  ]
+};
+
+// Component tags where an assembly preset is meaningful. Other tags (slabs,
+// roofs, footings) will pick up their material spec from the BEAMweb tab
+// that consumes them, not from the polygon.
+var ASSEMBLY_COMPONENTS = {
+  wall_exterior: true,
+  wall_interior: true,
+  wall_interior_linear: true
+};
+
+function _rebuildComponentTagSelect() {
+  var sel = document.getElementById("component-tag");
+  if (!sel) return;
+  var opts = COMPONENT_OPTIONS[_currentTool];
+  if (!opts) {
+    sel.style.display = "none";
+    document.getElementById("assembly-preset").style.display = "none";
+    return;
+  }
+  sel.style.display = "";
+  sel.innerHTML = "";
+  for (var i = 0; i < opts.length; i++) {
+    var o = document.createElement("option");
+    o.value = opts[i].value;
+    o.textContent = opts[i].label;
+    sel.appendChild(o);
+  }
+  // Preserve the user's selection if still valid under the new tool.
+  var keep = false;
+  for (var j = 0; j < opts.length; j++) {
+    if (opts[j].value === _componentTag) {
+      keep = true;
+      break;
+    }
+  }
+  if (!keep) _componentTag = null;
+  sel.value = _componentTag || "";
+  _updateAssemblyPresetVisibility();
+}
+
+function _updateAssemblyPresetVisibility() {
+  var presetSel = document.getElementById("assembly-preset");
+  if (!presetSel) return;
+  presetSel.style.display = _componentTag && ASSEMBLY_COMPONENTS[_componentTag] ? "" : "none";
+}
+
+function setComponentTag(value) {
+  _componentTag = value || null;
+  _updateAssemblyPresetVisibility();
+}
+
+function setAssemblyPreset(value) {
+  _assemblyPreset = value || null;
+}
+
 /* ── Generic polygon/rectangle handlers (shared by Measure + Window) ── */
 
 function _handleGenericPolygonClick(pt, opts) {
@@ -655,7 +742,7 @@ function _handleMeasureClick(pt) {
   if (!ScaleManager.isCalibrated(_currentPage) && !PolygonTool.isDrawing() && !_rectStart) {
     setStatus("No confirmed scale. Press S to set scale first, or measurements will be uncalibrated.", "error");
   }
-  var opts = { type: "area" };
+  var opts = { type: "area", component: _componentTag, assembly_preset: _assemblyPreset };
   if (_measureMethod === "rectangle") {
     _handleGenericRectangleClick(pt, opts);
   } else {
@@ -667,7 +754,9 @@ function _handleWindowClick(pt) {
   if (!ScaleManager.isCalibrated(_currentPage) && !PolygonTool.isDrawing() && !_rectStart) {
     setStatus("No confirmed scale. Press S to set scale first, or measurements will be uncalibrated.", "error");
   }
-  var opts = { type: "window", mode: _windowMode };
+  // Window tool auto-tags as window_opening — the component picker is scoped
+  // to measure/polyline tools where classification is ambiguous.
+  var opts = { type: "window", mode: _windowMode, component: "window_opening" };
   if (_measureMethod === "rectangle") {
     _handleGenericRectangleClick(pt, opts);
   } else {
@@ -675,12 +764,27 @@ function _handleWindowClick(pt) {
   }
 }
 
+function _handlePolylineClick(pt) {
+  if (!ScaleManager.isCalibrated(_currentPage) && !PolygonTool.isDrawing()) {
+    setStatus("No confirmed scale. Press S to set scale first, or measurements will be uncalibrated.", "error");
+  }
+  var opts = { type: "polyline", component: _componentTag, assembly_preset: _assemblyPreset };
+  // Polylines are open paths — reuse polygon-click flow but closePolygon()
+  // terminates at the double-click (enter key) rather than snapping to first vertex.
+  if (!PolygonTool.isDrawing()) {
+    PolygonTool.startPolygon(_currentPage, null, opts);
+    PolygonTool.addVertex(pt);
+    setStatus("Click vertices... press Enter or double-click to finish", "busy");
+  } else {
+    PolygonTool.addVertex(pt);
+  }
+  Viewer.requestRedraw();
+}
+
 function _onPolygonComplete(opts) {
-  var isWindow = opts && opts.type === "window";
-  setStatus(
-    (isWindow ? "Window" : "Area") + " measured" + (ScaleManager.isCalibrated(_currentPage) ? "" : " (uncalibrated)"),
-    "ready"
-  );
+  var type = opts && opts.type;
+  var label = type === "window" ? "Window" : type === "polyline" ? "Polyline" : "Area";
+  setStatus(label + " measured" + (ScaleManager.isCalibrated(_currentPage) ? "" : " (uncalibrated)"), "ready");
   _refreshMeasurements();
   ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
 }
@@ -887,6 +991,7 @@ function _handleOverlayMouseMove(e) {
   var cursorMap = {
     measure: "crosshair",
     window: "crosshair",
+    polyline: "crosshair",
     calibrate: "crosshair",
     ruler: "crosshair",
     navigate: "default"
@@ -1117,12 +1222,16 @@ function setTool(tool) {
   var cursorMap = {
     measure: "crosshair",
     window: "crosshair",
+    polyline: "crosshair",
     calibrate: "crosshair",
     ruler: "crosshair",
     navigate: "default"
   };
   var wrap = document.getElementById("viewer-wrap");
   if (wrap) wrap.style.cursor = cursorMap[tool] || "default";
+  // Repopulate the component-tag options for the new tool (measure vs polyline
+  // have different taxonomies; other tools hide the selects entirely).
+  _rebuildComponentTagSelect();
 }
 
 /* ── Keyboard ─────────────────────────────────────────── */
@@ -1172,6 +1281,15 @@ function _bindKeyboard() {
     }
 
     switch (e.key) {
+      case "Enter":
+        // Finalize in-progress polyline. Polylines don't auto-close on
+        // first-vertex snap like polygons, so they need an explicit end key.
+        if (PolygonTool.isDrawing() && _currentTool === "polyline") {
+          PolygonTool.closePolygon();
+          _onPolygonComplete({ type: "polyline" });
+          Viewer.requestRedraw();
+        }
+        break;
       case "Escape":
         // Cascade: cancel the most immediate in-progress action
         // 0a. Summary table open? Close it.
@@ -1274,6 +1392,9 @@ function _bindKeyboard() {
         break;
       case "w":
         setTool("window");
+        break;
+      case "p":
+        setTool("polyline");
         break;
       case "r":
         setMeasureMethod(_measureMethod === "polygon" ? "rectangle" : "polygon");
@@ -1415,14 +1536,32 @@ function _updateMeasurements() {
   var walls = assoc.walls;
   var orphans = assoc.orphanWindows;
 
-  if (walls.length === 0 && orphans.length === 0) {
+  // Polylines — collected separately since they have length-only measurements.
+  var allMeas = PolygonTool.getAllMeasurements(_currentPage);
+  var polylines = [];
+  var allPolys = PolygonTool.getPolygons(_currentPage);
+  for (var pi = 0; pi < allMeas.length; pi++) {
+    if (allMeas[pi].type === "polyline") {
+      // Find the raw array index for delete/rename wiring.
+      for (var pj = 0; pj < allPolys.length; pj++) {
+        if (allPolys[pj].id === allMeas[pi].id) {
+          polylines.push({ measurement: allMeas[pi], polyIdx: pj });
+          break;
+        }
+      }
+    }
+  }
+
+  if (walls.length === 0 && orphans.length === 0 && polylines.length === 0) {
     els.measurePanel.innerHTML =
-      "<p class='empty'>No measurements on this page.<br><span style='font-size:10px;color:var(--text-dim);'>Press <b>M</b> to measure areas, <b>W</b> for windows.</span></p>";
+      "<p class='empty'>No measurements on this page.<br><span style='font-size:10px;color:var(--text-dim);'>Press <b>M</b> to measure areas, <b>W</b> for windows, <b>P</b> for polylines.</span></p>";
     return;
   }
 
   var hasScale =
-    (walls.length > 0 && walls[0].measurement.calibrated) || (orphans.length > 0 && orphans[0].measurement.calibrated);
+    (walls.length > 0 && walls[0].measurement.calibrated) ||
+    (orphans.length > 0 && orphans[0].measurement.calibrated) ||
+    (polylines.length > 0 && polylines[0].measurement.calibrated);
   var html = "";
   var netTotalM2 = 0,
     netTotalFt2 = 0;
@@ -1555,6 +1694,36 @@ function _updateMeasurements() {
         html += "<td class='num' colspan='2'>\u2014</td>";
       }
       html += "<td class='del-cell' data-poly-idx='" + orphans[o].polyIdx + "' title='Delete'>\u00D7</td></tr>";
+    }
+    html += "</tbody></table>";
+  }
+
+  // ── Polylines (linear features — interior walls, interior footings) ──
+  if (polylines.length > 0) {
+    html += "<div class='measure-header' style='margin-top:8px;color:#e63946;'>Polylines</div>";
+    html += "<table><thead><tr><th>Label</th>";
+    if (hasScale) {
+      html += "<th>m</th><th>ft</th>";
+    } else {
+      html += "<th colspan='2' style='color:var(--gold);font-size:10px;'>No scale</th>";
+    }
+    html += "<th></th></tr></thead><tbody>";
+    for (var pk = 0; pk < polylines.length; pk++) {
+      var pm = polylines[pk].measurement;
+      html += "<tr style='color:#e63946;'>";
+      html +=
+        "<td class='label-cell' data-poly-idx='" +
+        polylines[pk].polyIdx +
+        "' title='Click to rename'>" +
+        pm.label +
+        "</td>";
+      if (hasScale && pm.lengthM !== null) {
+        html += "<td class='num'>" + pm.lengthM.toFixed(2) + "</td>";
+        html += "<td class='num'>" + pm.lengthFt.toFixed(2) + "</td>";
+      } else {
+        html += "<td class='num' colspan='2'>\u2014</td>";
+      }
+      html += "<td class='del-cell' data-poly-idx='" + polylines[pk].polyIdx + "' title='Delete'>\u00D7</td></tr>";
     }
     html += "</tbody></table>";
   }
@@ -2220,6 +2389,9 @@ window.PP = {
   // Measure method
   setMeasureMethod: setMeasureMethod,
   setWindowMode: setWindowMode,
+  // Phase 4b.1 — component tag + assembly preset
+  setComponentTag: setComponentTag,
+  setAssemblyPreset: setAssemblyPreset,
   // Auto-detect
   autoDetect: autoDetect,
   // Summary table
