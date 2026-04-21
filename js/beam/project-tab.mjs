@@ -207,6 +207,55 @@ const DIMS_BUILDING = [
   }
 ];
 
+// Geometry Parameters — scalar values used by the PDF-BEAMweb bridge to derive
+// dimensions from PDF-Parser polygons. See docs/workplans/PDF-BEAMweb-BRIDGE.md
+// §2.5. Wall height × perimeter length → exterior wall area; roof pitch lifts
+// a roof plan area to a roof surface area; footing H×W × interior-footing
+// polyline length → footing volume. These are project-wide scalars, not
+// per-takeoff values — enter once, reuse across calcs.
+const PARAMS = [
+  {
+    id: "param_wall_height_m",
+    label: "Wall Height",
+    type: "number",
+    unit: "m",
+    step: 0.01,
+    description: "Typical above-grade floor-to-ceiling height. Used to lift perimeter lengths to exterior wall area."
+  },
+  {
+    id: "param_basement_height_m",
+    label: "Basement Height",
+    type: "number",
+    unit: "m",
+    step: 0.01,
+    description: "Basement floor-to-ceiling height. Used to lift foundation perimeter to foundation wall area."
+  },
+  {
+    id: "param_roof_pitch_deg",
+    label: "Roof Pitch",
+    type: "number",
+    unit: "°",
+    step: 0.5,
+    description: "Average roof pitch (in degrees). Converts roof plan area to roof surface area via 1/cos(pitch)."
+  },
+  {
+    id: "param_footing_height_m",
+    label: "Footing Height",
+    type: "number",
+    unit: "m",
+    step: 0.01,
+    description: "Typical strip-footing height. Used with interior-footing polyline length to derive volume."
+  },
+  {
+    id: "param_footing_width_m",
+    label: "Footing Width",
+    type: "number",
+    unit: "m",
+    step: 0.01,
+    description: "Typical strip-footing width. Used with interior-footing polyline length to derive volume."
+  }
+];
+
 const DIMS_GARAGE = [
   {
     id: "garage_partition_wall_area",
@@ -460,6 +509,16 @@ function renderCollapsibleSection(id, title, bodyHtml, open) {
   `;
 }
 
+function renderParamRow(f) {
+  return `
+    <div class="bw-field bw-field-info">
+      <label class="bw-label" for="bw-${f.id}">${esc(f.label)}</label>
+      ${renderInput(f)}
+      <div class="bw-dim-desc">${esc(f.description)}</div>
+    </div>
+  `;
+}
+
 export function renderProjectPanel() {
   const infoBody = `
     <div class="bw-info-grid">
@@ -471,9 +530,19 @@ export function renderProjectPanel() {
       Conditioned area fields are required for calculations.
     </p>
   `;
+  const paramsBody = `
+    <div class="bw-info-grid">
+      <div class="bw-info-col">${PARAMS.slice(0, 3).map(renderParamRow).join("")}</div>
+      <div class="bw-info-col">${PARAMS.slice(3).map(renderParamRow).join("")}</div>
+    </div>
+    <p class="bw-legend">
+      Used by the PDF-Parser bridge to derive areas and volumes from polyline takeoffs.
+    </p>
+  `;
   return `
     <div class="bw-project-panel">
       ${renderCollapsibleSection("info", "Project Information", infoBody, true)}
+      ${renderCollapsibleSection("params", "Geometry Parameters", paramsBody, false)}
       ${renderCollapsibleSection("building", "Building Dimension Inputs (excluding garage)", renderDimsTable(DIMS_BUILDING), false)}
       ${renderCollapsibleSection("garage", "Garage Dimension Inputs", renderDimsTable(DIMS_GARAGE), false)}
     </div>
@@ -481,7 +550,7 @@ export function renderProjectPanel() {
 }
 
 function allFields() {
-  return [...INFO_LEFT, ...INFO_RIGHT, ...DIMS_BUILDING, ...DIMS_GARAGE];
+  return [...INFO_LEFT, ...INFO_RIGHT, ...PARAMS, ...DIMS_BUILDING, ...DIMS_GARAGE];
 }
 
 function lhwChildIds(parentId) {
@@ -541,6 +610,7 @@ export function resetProjectTab() {
   StateManager.clearByPrefix("project_");
   StateManager.clearByPrefix("dim_");
   StateManager.clearByPrefix("garage_");
+  StateManager.clearByPrefix("param_");
   // Blank every input + select in the PROJECT panel, then recompute LHW volumes (all 0).
   const panel = document.getElementById("beam-panel-project");
   if (panel) {
