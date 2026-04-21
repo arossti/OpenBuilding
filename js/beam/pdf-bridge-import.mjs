@@ -141,8 +141,10 @@ function buildSummary(agg) {
     return "no polygons feeding this dim";
   }
   if (agg.contributors.length === 1) return agg.contributors[0].summary;
-  const polyCount = agg.contributors.reduce((n, c) => n + (c.polygons ? c.polygons.length : 0), 0);
-  return `${polyCount} polygons from ${agg.contributors.length} components`;
+  // Multi-contributor (e.g. interior-footing polylines + slab-perimeter cross-feed
+  // both feeding continuous_footings). Keep each contributor visible so the user
+  // can see the component breakdown instead of a single collapsed count.
+  return agg.contributors.map((c) => c.summary).join(" + ");
 }
 
 function extractMissingParams(agg) {

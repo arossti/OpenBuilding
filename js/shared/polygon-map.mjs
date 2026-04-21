@@ -22,20 +22,53 @@
 // multiplyByParam: scale by a param_* value from StateManager.
 // multiplyByPitchFactor: scale by 1/cos(param_roof_pitch_deg).
 // fallback: secondary path when the primary produces zero polygons.
+// Cross-feeds let one polygon drive multiple dims via different geometric
+// interpretations (area + perimeter). A slab polygon's area feeds the slab
+// dim; the same polygon's perimeter feeds foundation walls and continuous
+// footings without the user tracing the outline twice. Each cross-feed
+// declares `supersededBy` — component tags that, when present anywhere in
+// the project, preempt the implicit path so explicit traces (e.g. a user
+// deliberately tagging `exterior_perimeter` or drawing elevation walls)
+// remain the authoritative source.
 export const COMPONENT_TO_DIMENSION = {
   slab_foundation: {
     type: "area",
     targetDim: "dim_foundation_slab_floor_area",
     targetDimExtras: ["project_below_grade_area", "project_total_floor_area"],
     aggregate: "sumArea",
-    requiredSheetClass: ["plan"]
+    requiredSheetClass: ["plan"],
+    crossFeeds: [
+      {
+        dim: "dim_foundation_wall_area",
+        aggregate: "sumPerimeter",
+        multiplyByParam: "param_basement_height_m",
+        supersededBy: ["exterior_perimeter"],
+        summaryVerb: "basement-slab perimeter"
+      },
+      {
+        dim: "dim_continuous_footings",
+        aggregate: "sumPerimeter",
+        multiplyByParams: ["param_footing_height_m", "param_footing_width_m"],
+        supersededBy: ["exterior_perimeter"],
+        summaryVerb: "basement-slab perimeter"
+      }
+    ]
   },
   slab_above_grade: {
     type: "area",
     targetDim: "dim_framed_floor_area",
     targetDimExtras: ["dim_finished_ceiling_area", "project_above_grade_area", "project_total_floor_area"],
     aggregate: "sumArea",
-    requiredSheetClass: ["plan"]
+    requiredSheetClass: ["plan"],
+    crossFeeds: [
+      {
+        dim: "dim_exterior_wall_area",
+        aggregate: "sumPerimeter",
+        multiplyByParam: "param_wall_height_m",
+        supersededBy: ["wall_exterior", "exterior_perimeter"],
+        summaryVerb: "above-grade slab perimeter"
+      }
+    ]
   },
   wall_exterior: {
     type: "area",
@@ -484,16 +517,108 @@ export function computeAllDimensions({ projectJson, params }) {
     }
   }
 
-  // Third pass — fold unfilled dims into the result with null value so the
+  // Third pass — run cross-feeds. Each contributing component that has
+  // polygons AND declares crossFeeds routes extra values through different
+  // aggregates (usually sumArea → sumPerimeter) into other dims. A cross-feed
+  // is suppressed whenever any explicit "supersededBy" component has polygons
+  // in the project, so a slab_foundation trace stops feeding the foundation
+  // wall dim the moment the user draws an explicit exterior_perimeter.
+  const presentComponents = new Set(flat.map((p) => p.component).filter(Boolean));
+  runCrossFeeds({ flat, params, result, presentComponents });
+
+  // Fourth pass — fold unfilled dims into the result with null value so the
   // preview UI can show them as "no polygons feeding this dim yet".
   for (const spec of Object.values(COMPONENT_TO_DIMENSION)) {
     const dims = [spec.targetDim, ...(spec.targetDimExtras || [])];
     for (const dimId of dims) {
       if (!(dimId in result)) result[dimId] = { value: null, contributors: [], warnings: [] };
     }
+    if (spec.crossFeeds) {
+      for (const feed of spec.crossFeeds) {
+        if (!(feed.dim in result)) result[feed.dim] = { value: null, contributors: [], warnings: [] };
+      }
+    }
   }
 
   return result;
+}
+
+function runCrossFeeds({ flat, params, result, presentComponents }) {
+  for (const [component, spec] of Object.entries(COMPONENT_TO_DIMENSION)) {
+    if (!spec.crossFeeds || spec.crossFeeds.length === 0) continue;
+    const matches = flat.filter((p) => p.component === component);
+    if (matches.length === 0) continue;
+
+    for (const feed of spec.crossFeeds) {
+      const supersededBy = Array.isArray(feed.supersededBy)
+        ? feed.supersededBy
+        : feed.supersededBy
+          ? [feed.supersededBy]
+          : [];
+      const superseded = supersededBy.some((c) => presentComponents.has(c));
+      if (superseded) continue;
+
+      const reducer = AGGREGATORS[feed.aggregate];
+      if (!reducer) continue;
+      let raw = reducer(matches);
+
+      // Apply params — any missing param downgrades the feed to a warning.
+      const missingParams = [];
+      const paramsUsed = [];
+      if (feed.multiplyByParam) {
+        const v = parseParam(params, feed.multiplyByParam);
+        if (v == null) missingParams.push(feed.multiplyByParam);
+        else {
+          raw *= v;
+          paramsUsed.push({ name: feed.multiplyByParam, value: v });
+        }
+      }
+      if (feed.multiplyByParams) {
+        for (const key of feed.multiplyByParams) {
+          const v = parseParam(params, key);
+          if (v == null) missingParams.push(key);
+          else {
+            raw *= v;
+            paramsUsed.push({ name: key, value: v });
+          }
+        }
+      }
+
+      if (!result[feed.dim]) result[feed.dim] = { value: null, contributors: [], warnings: [] };
+      if (missingParams.length > 0) {
+        for (const p of missingParams) result[feed.dim].warnings.push(`required param missing: ${p}`);
+        continue;
+      }
+
+      if (result[feed.dim].value == null) result[feed.dim].value = 0;
+      result[feed.dim].value += raw;
+      result[feed.dim].contributors.push({
+        component,
+        value: raw,
+        summary: buildCrossFeedSummary(component, matches.length, feed, paramsUsed),
+        polygons: matches.map((p) => ({
+          id: p.id,
+          label: p.label,
+          sheet_id: p.sheet_id,
+          sheet_title: p.sheet_title,
+          pageNum: p.pageNum,
+          assembly_preset: p.assembly_preset
+        })),
+        sheets: Array.from(new Set(matches.map((p) => p.sheet_id).filter(Boolean))),
+        assembly_presets: Array.from(new Set(matches.map((p) => p.assembly_preset).filter(Boolean))),
+        isCrossFeed: true
+      });
+    }
+  }
+}
+
+function buildCrossFeedSummary(component, n, feed, paramsUsed) {
+  const noun = n === 1 ? "polygon" : "polygons";
+  const verb = feed.summaryVerb || feed.aggregate;
+  const paramStr = paramsUsed.map((p) => `${p.name.replace("param_", "")} (${p.value})`).join(" \u00d7 ");
+  let s = `${n} ${component.replace(/_/g, " ")} ${noun} \u2014 ${verb}`;
+  if (paramStr) s += ` \u00d7 ${paramStr}`;
+  return s;
 }
 
 function computeContribution(dimId, spec, agg, params, component) {
