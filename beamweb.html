@@ -79,7 +79,7 @@
           <button
             class="beam-action-btn"
             id="beam-import-pdf-parser"
-            title="Pull areas from a saved PDF-Parser project JSON"
+            title="Pull areas and volumes from a saved PDF-Parser session (IndexedDB)"
           >
             <i class="bi bi-file-earmark-ruled"></i> Import PDF-Parser
           </button>
@@ -108,6 +108,24 @@
         <input type="file" id="beam-file-open" accept=".json" hidden />
         <input type="file" id="beam-file-xlsx" accept=".xlsx,.xls" hidden />
         <input type="file" id="beam-file-pdfparser" accept=".json" hidden />
+      </div>
+
+      <!-- ── Import from PDF-Parser modal ──────────────────── -->
+      <div id="bw-pdf-import-backdrop"></div>
+      <div id="bw-pdf-import-modal">
+        <div class="bw-pdf-import-header">
+          <span class="bw-pdf-import-title">Import from PDF-Parser</span>
+          <button class="bw-pdf-import-close" id="bw-pdf-import-close" title="Close">&times;</button>
+        </div>
+        <div class="bw-pdf-import-body" id="bw-pdf-import-body">
+          <p class="bw-pdf-import-empty">Loading saved PDF-Parser projects…</p>
+        </div>
+        <div class="bw-pdf-import-footer">
+          <span class="bw-pdf-import-hint" id="bw-pdf-import-hint"></span>
+          <span class="spacer"></span>
+          <button class="beam-action-btn" id="bw-pdf-import-cancel">Cancel</button>
+          <button class="beam-action-btn primary" id="bw-pdf-import-apply" disabled>Apply selected</button>
+        </div>
       </div>
 
       <!-- ── Main: tabs sidebar + content panel ──────────── -->

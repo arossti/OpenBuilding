@@ -15,9 +15,10 @@
 import { ENERGY_GHG, GLOSSARY } from "./beam/reference-data.mjs";
 import { StateManager } from "./shared/state-manager.mjs";
 import { esc as escapeHtml } from "./shared/html-utils.mjs";
-import { renderProjectPanel, wireProjectForm, resetProjectTab } from "./beam/project-tab.mjs";
+import { renderProjectPanel, wireProjectForm, resetProjectTab, refreshProjectForm } from "./beam/project-tab.mjs";
 import { renderFootingsSlabsPanel, wireFootingsSlabsTab, resetFootingsSlabsTab } from "./beam/footings-slabs-tab.mjs";
 import { loadSample, SAMPLES } from "./beam/sample-loader.mjs";
+import * as PdfBridge from "./beam/pdf-bridge-import.mjs";
 
 // ──────────────────────────────────────────────────────────────────────
 // Tab definitions
@@ -91,6 +92,7 @@ function boot() {
   renderSidebar();
   renderContentShell();
   wireActionBar();
+  wireImportModal();
   wireKeyboard();
   wireGlossarySearch();
   wireProjectForm();
@@ -452,8 +454,7 @@ function wireActionBar() {
     "beam-open-project": () => notImplemented("Open project JSON — file-handler import wiring lands next."),
     "beam-save-project": () => notImplemented("Save project JSON — file-handler export wiring lands next."),
     "beam-import-xlsx": () => notImplemented("Import xlsx — needs excel-mapper (Phase 6; SheetJS already loaded)."),
-    "beam-import-pdf-parser": () =>
-      notImplemented("Import PDF-Parser project — needs polygon→assembly mapping (Phase 8)."),
+    "beam-import-pdf-parser": handleImportPdfParser,
     "beam-load-sample": handleLoadSample,
     "beam-reset": handleResetActiveTab
   };
@@ -466,6 +467,222 @@ const READY_MSG = "Ready · cold-start blank state · Phase 3 (Footings & Slabs 
 function notImplemented(msg) {
   setStatus(`not yet implemented · ${msg}`, "busy");
   setTimeout(() => setStatus(READY_MSG, "ready"), 3500);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// PDF-Parser import modal
+// ──────────────────────────────────────────────────────────────────────
+// Reads saved PDF-Parser projects from IndexedDB, runs the bridge aggregator
+// against the user's current param_* values, and previews the proposed
+// changes in a modal. Only rows the user checks are written on Apply.
+
+const importModalState = {
+  projects: [],
+  activeUuid: null,
+  preview: null
+};
+
+async function handleImportPdfParser() {
+  openImportModal();
+  try {
+    importModalState.projects = await PdfBridge.listProjects();
+  } catch (err) {
+    console.error("[BEAMweb] failed to read PDF-Parser projects:", err);
+    renderImportEmpty(
+      "Could not read saved PDF-Parser projects from IndexedDB. Open the PDF-Parser tab, load a PDF, then try again."
+    );
+    return;
+  }
+  if (importModalState.projects.length === 0) {
+    renderImportEmpty(
+      "No PDF-Parser projects found. Open the PDF-Parser tab, load a drawing, tag some polygons, then return here."
+    );
+    return;
+  }
+  importModalState.activeUuid = importModalState.projects[0].uuid;
+  await refreshImportPreview();
+}
+
+function openImportModal() {
+  document.getElementById("bw-pdf-import-backdrop").classList.add("visible");
+  document.getElementById("bw-pdf-import-modal").classList.add("visible");
+  document.getElementById("bw-pdf-import-apply").disabled = true;
+  document.getElementById("bw-pdf-import-hint").textContent = "";
+  document.getElementById("bw-pdf-import-body").innerHTML =
+    '<p class="bw-pdf-import-empty">Loading saved PDF-Parser projects\u2026</p>';
+}
+
+function closeImportModal() {
+  document.getElementById("bw-pdf-import-backdrop").classList.remove("visible");
+  document.getElementById("bw-pdf-import-modal").classList.remove("visible");
+  importModalState.projects = [];
+  importModalState.activeUuid = null;
+  importModalState.preview = null;
+}
+
+function renderImportEmpty(msg) {
+  document.getElementById("bw-pdf-import-body").innerHTML = `<p class="bw-pdf-import-empty">${escapeHtml(msg)}</p>`;
+  document.getElementById("bw-pdf-import-apply").disabled = true;
+}
+
+async function refreshImportPreview() {
+  const body = document.getElementById("bw-pdf-import-body");
+  body.innerHTML = '<p class="bw-pdf-import-empty">Computing dimensions\u2026</p>';
+  const preview = await PdfBridge.buildPreview(importModalState.activeUuid);
+  importModalState.preview = preview;
+  body.innerHTML = renderImportBody(preview);
+  wireImportBody();
+}
+
+function renderImportBody(preview) {
+  const { project, rows, paramsComplete } = preview;
+  const picker = renderImportPicker(project.uuid);
+  const paramWarn = paramsComplete
+    ? ""
+    : '<div class="bw-pdf-import-warn">One or more geometry parameters are blank on PROJECT. Dimensions depending on those params cannot import until they are filled in — open PROJECT → Geometry Parameters.</div>';
+
+  const hasApplicable = rows.some((r) => r.hasValue);
+  if (!hasApplicable) {
+    return (
+      picker +
+      paramWarn +
+      '<p class="bw-pdf-import-empty">No polygons in this project carry component tags that map to BEAMweb dimensions yet. Tag polygons in PDF-Parser (foundation slab, exterior wall, interior polyline, etc.) and try again.</p>'
+    );
+  }
+
+  const tableRows = rows.map(renderImportRow).join("");
+  return `
+    ${picker}
+    ${paramWarn}
+    <table class="bw-pdf-import-table">
+      <thead>
+        <tr>
+          <th style="width:24px;"><input type="checkbox" id="bw-pdf-import-all" checked /></th>
+          <th>Dimension</th>
+          <th class="num">Current</th>
+          <th class="num">Computed</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+  `;
+}
+
+function renderImportPicker(activeUuid) {
+  if (importModalState.projects.length <= 1) {
+    const p = importModalState.projects[0];
+    return `<div class="bw-pdf-import-picker"><label>Project</label><span>${escapeHtml(p.pdfFileName)} \u00b7 saved ${formatRelativeTime(p.updatedAt)}</span></div>`;
+  }
+  const options = importModalState.projects
+    .map((p) => {
+      const sel = p.uuid === activeUuid ? " selected" : "";
+      return `<option value="${p.uuid}"${sel}>${escapeHtml(p.pdfFileName)} \u00b7 ${formatRelativeTime(p.updatedAt)}</option>`;
+    })
+    .join("");
+  return `<div class="bw-pdf-import-picker"><label>Project</label><select id="bw-pdf-import-project">${options}</select></div>`;
+}
+
+function renderImportRow(row) {
+  const currentStr = row.current != null ? Number(row.current).toFixed(2) : "\u2014";
+  const computedStr = row.hasValue ? Number(row.computed).toFixed(2) : "\u2014";
+  const deltaClass =
+    row.hasValue && row.current != null && Number(row.current) !== row.computed ? "delta overwrite" : "delta";
+  const checked = row.hasValue ? "checked" : "";
+  const disabled = row.hasValue ? "" : "disabled";
+  const skipped = row.hasValue ? "" : "skipped";
+
+  let sourceHtml = `<div class="bw-pdf-import-summary">${escapeHtml(row.summary)}</div>`;
+  const sheets = collectSheets(row.contributors);
+  if (sheets.length) sourceHtml += `<div class="bw-pdf-import-sheets">sheets: ${escapeHtml(sheets.join(", "))}</div>`;
+  if (row.assemblyPresets && row.assemblyPresets.length)
+    sourceHtml += `<div class="bw-pdf-import-sheets">preset: ${escapeHtml(row.assemblyPresets.join(", "))}</div>`;
+  if (row.missingParams && row.missingParams.length)
+    sourceHtml += `<div class="bw-pdf-import-warn-inline">missing: ${escapeHtml(row.missingParams.join(", "))}</div>`;
+
+  return `
+    <tr class="${skipped}" data-dim-id="${row.dimId}">
+      <td><input type="checkbox" class="bw-pdf-import-row-cb" ${checked} ${disabled} data-dim-id="${row.dimId}" /></td>
+      <td><span class="bw-pdf-import-dim">${escapeHtml(row.dimId)}</span></td>
+      <td class="num">${currentStr}</td>
+      <td class="num ${deltaClass}">${computedStr}</td>
+      <td>${sourceHtml}</td>
+    </tr>
+  `;
+}
+
+function collectSheets(contributors) {
+  const s = new Set();
+  for (const c of contributors) for (const sh of c.sheets || []) s.add(sh);
+  return Array.from(s);
+}
+
+function formatRelativeTime(iso) {
+  if (!iso) return "just now";
+  const d = new Date(iso);
+  const now = Date.now();
+  const deltaMin = Math.round((now - d.getTime()) / 60000);
+  if (deltaMin < 1) return "just now";
+  if (deltaMin < 60) return `${deltaMin}m ago`;
+  if (deltaMin < 1440) return `${Math.round(deltaMin / 60)}h ago`;
+  return d.toLocaleString();
+}
+
+function wireImportBody() {
+  const projectSel = document.getElementById("bw-pdf-import-project");
+  if (projectSel) {
+    projectSel.addEventListener("change", (e) => {
+      importModalState.activeUuid = e.target.value;
+      refreshImportPreview();
+    });
+  }
+
+  const allCb = document.getElementById("bw-pdf-import-all");
+  if (allCb) {
+    allCb.addEventListener("change", () => {
+      const rows = document.querySelectorAll(".bw-pdf-import-row-cb:not(:disabled)");
+      for (const cb of rows) cb.checked = allCb.checked;
+      updateApplyButton();
+    });
+  }
+
+  const rowCbs = document.querySelectorAll(".bw-pdf-import-row-cb");
+  for (const cb of rowCbs) cb.addEventListener("change", updateApplyButton);
+  updateApplyButton();
+}
+
+function updateApplyButton() {
+  const applyBtn = document.getElementById("bw-pdf-import-apply");
+  const hint = document.getElementById("bw-pdf-import-hint");
+  const checked = document.querySelectorAll(".bw-pdf-import-row-cb:checked");
+  applyBtn.disabled = checked.length === 0;
+  hint.textContent = checked.length ? `${checked.length} dimension${checked.length === 1 ? "" : "s"} selected` : "";
+}
+
+async function applyImportSelection() {
+  const checked = document.querySelectorAll(".bw-pdf-import-row-cb:checked");
+  const dimIds = Array.from(checked).map((cb) => cb.dataset.dimId);
+  if (dimIds.length === 0) return;
+  try {
+    const result = await PdfBridge.applyImport(importModalState.activeUuid, dimIds);
+    setStatus(
+      `Imported ${result.applied} dimension${result.applied === 1 ? "" : "s"} from PDF-Parser · ${escapeHtml(result.project.pdfFileName)}`,
+      "ready"
+    );
+    closeImportModal();
+    // Refresh the PROJECT tab so the new values render in their inputs.
+    refreshProjectForm();
+  } catch (err) {
+    console.error("[BEAMweb] PDF-Parser import failed:", err);
+    setStatus(`PDF-Parser import failed: ${err.message}`, "error");
+  }
+}
+
+function wireImportModal() {
+  document.getElementById("bw-pdf-import-close").addEventListener("click", closeImportModal);
+  document.getElementById("bw-pdf-import-cancel").addEventListener("click", closeImportModal);
+  document.getElementById("bw-pdf-import-backdrop").addEventListener("click", closeImportModal);
+  document.getElementById("bw-pdf-import-apply").addEventListener("click", applyImportSelection);
 }
 
 // ──────────────────────────────────────────────────────────────────────

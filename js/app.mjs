@@ -693,36 +693,43 @@ function setWindowMode(mode) {
 
 /* ── Phase 4b.1 — Component tag + assembly preset ────── */
 
-// Options per tool. Measure tool classifies area polygons; polyline tool
-// classifies linear features. Window tool is handled separately (auto-tagged).
+// Options per tool — aligned to the bridge spec component taxonomy
+// (docs/workplans/PDF-BEAMweb-BRIDGE.md §3.2). Tags drive which BEAMweb
+// dim fields a polygon feeds via js/shared/polygon-map.mjs.
 var COMPONENT_OPTIONS = {
   measure: [
     { value: "", label: "(no tag)" },
-    { value: "wall_exterior", label: "Wall — exterior" },
-    { value: "wall_interior", label: "Wall — interior" },
-    { value: "slab_foundation", label: "Slab — foundation" },
-    { value: "slab_suspended", label: "Slab — suspended" },
-    { value: "roof", label: "Roof" },
-    { value: "floor_area", label: "Floor area" },
-    { value: "footprint", label: "Footprint" },
-    { value: "site_area", label: "Site area" },
-    { value: "building_envelope", label: "Building envelope" }
+    // Elevation sheets — surface-area tags
+    { value: "wall_exterior", label: "Wall — exterior (elevation)" },
+    { value: "wall_party", label: "Wall — party / demising (elevation)" },
+    // Plan sheets — area tags
+    { value: "slab_foundation", label: "Slab — foundation (plan)" },
+    { value: "slab_above_grade", label: "Slab — above-grade (plan)" },
+    { value: "exterior_perimeter", label: "Exterior perimeter (plan)" },
+    { value: "pad_pier", label: "Pad / pier (plan)" },
+    { value: "roof_plan", label: "Roof — plan area" },
+    { value: "roof_cavity", label: "Roof cavity insulation (plan)" },
+    // Informational — not mapped to a BEAMweb dim
+    { value: "footprint", label: "Building footprint (reference)" },
+    { value: "site_area", label: "Site area (reference)" },
+    { value: "building_envelope", label: "Building envelope (reference)" }
   ],
   polyline: [
     { value: "", label: "(no tag)" },
-    { value: "wall_interior_linear", label: "Wall — interior (linear)" },
-    { value: "footing_interior", label: "Footing — interior" },
-    { value: "partition_length", label: "Partition length" }
+    { value: "wall_interior", label: "Wall — interior" },
+    { value: "footing_interior", label: "Footing — interior" }
   ]
 };
 
-// Component tags where an assembly preset is meaningful. Other tags (slabs,
-// roofs, footings) will pick up their material spec from the BEAMweb tab
-// that consumes them, not from the polygon.
+// Component tags where an assembly preset is meaningful — wall assemblies
+// carry cladding + insulation + framing mixes that seed the downstream
+// BEAMweb Phase 4 assembly tabs. Slabs, roofs, and footings take their
+// material spec from the consuming tab, not from the polygon.
 var ASSEMBLY_COMPONENTS = {
   wall_exterior: true,
+  wall_party: true,
   wall_interior: true,
-  wall_interior_linear: true
+  exterior_perimeter: true
 };
 
 function _rebuildComponentTagSelect() {
