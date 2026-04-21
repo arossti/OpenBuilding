@@ -1960,9 +1960,10 @@ function _renderSummaryTable() {
   var project = ProjectStore.getProject();
   var html = "<table><thead><tr>";
   html += "<th>Sheet</th><th>Label</th>";
+  html += "<th>Type</th><th>Tag</th>";
   html += "<th>Gross m\u00B2</th><th>Net m\u00B2</th>";
   html += "<th>Gross ft\u00B2</th><th>Net ft\u00B2</th>";
-  html += "<th>Perimeter m</th><th></th>";
+  html += "<th>Length / Perim m</th><th></th>";
   html += "</tr></thead><tbody>";
 
   var grandGrossM2 = 0,
@@ -1976,14 +1977,28 @@ function _renderSummaryTable() {
     var page = project.pages[p];
     var pageNum = page.pageNum;
     var assoc = PolygonTool.buildAssociationMap(pageNum);
-    if (assoc.walls.length === 0 && assoc.orphanWindows.length === 0) continue;
+    // Polylines are linear features — collected separately since they don't
+    // associate with walls/windows and carry length instead of area.
+    var allMeas = PolygonTool.getAllMeasurements(pageNum);
+    var allPolys = PolygonTool.getPolygons(pageNum);
+    var polylines = [];
+    for (var mi = 0; mi < allMeas.length; mi++) {
+      if (allMeas[mi].type !== "polyline") continue;
+      for (var mj = 0; mj < allPolys.length; mj++) {
+        if (allPolys[mj].id === allMeas[mi].id) {
+          polylines.push({ measurement: allMeas[mi], polyIdx: mj });
+          break;
+        }
+      }
+    }
+    if (assoc.walls.length === 0 && assoc.orphanWindows.length === 0 && polylines.length === 0) continue;
 
     var sheetLabel = page.sheetId || "Page " + pageNum;
     var sheetTitle = page.sheetTitle ? " \u2014 " + page.sheetTitle : "";
     hasAnyData = true;
 
     // Sheet header row
-    html += "<tr class='summary-sheet-row'><td colspan='8'>" + sheetLabel + sheetTitle + "</td></tr>";
+    html += "<tr class='summary-sheet-row'><td colspan='10'>" + sheetLabel + sheetTitle + "</td></tr>";
 
     var pageGrossM2 = 0,
       pageNetM2 = 0,
@@ -2038,6 +2053,8 @@ function _renderSummaryTable() {
         wm.label +
         netSuffix +
         "</td>";
+      html += "<td class='type-cell'>area</td>";
+      html += "<td class='tag-cell'>" + (wm.component || "\u2014") + "</td>";
       if (wm.areaM2 !== null) {
         html += "<td class='num'>" + wm.areaM2.toFixed(2) + "</td>";
         html += "<td class='num'>" + wallNetM2.toFixed(2) + "</td>";
@@ -2073,6 +2090,8 @@ function _renderSummaryTable() {
             " " +
             cm.label +
             "</td>";
+          html += "<td class='type-cell' style='font-size:10px;'>window</td>";
+          html += "<td class='tag-cell' style='font-size:10px;'>" + (cm.component || "window_opening") + "</td>";
           if (cm.areaM2 !== null) {
             html += "<td class='num' style='font-size:10px;'>" + cPrefix + cm.areaM2.toFixed(2) + "</td>";
             html += "<td class='num' style='font-size:10px;'></td>";
@@ -2111,6 +2130,8 @@ function _renderSummaryTable() {
         "' title='Click to rename'>" +
         om.label +
         " (unassociated)</td>";
+      html += "<td class='type-cell'>window</td>";
+      html += "<td class='tag-cell'>" + (om.component || "window_opening") + "</td>";
       if (om.areaM2 !== null) {
         html += "<td class='num'>" + oPrefix + om.areaM2.toFixed(2) + "</td><td class='num'></td>";
         html += "<td class='num'>" + oPrefix + om.areaFt2.toFixed(2) + "</td><td class='num'></td>";
@@ -2127,9 +2148,38 @@ function _renderSummaryTable() {
       html += "</tr>";
     }
 
-    // Page subtotal
+    // Polyline rows — linear features (interior walls, interior footings).
+    // Length goes in the shared "Length / Perim m" column; area columns blank.
+    for (var pk = 0; pk < polylines.length; pk++) {
+      var ple = polylines[pk];
+      var pm = ple.measurement;
+      html += "<tr style='color:#e63946;'>";
+      html += "<td></td>";
+      html +=
+        "<td class='label-cell' data-poly-idx='" +
+        ple.polyIdx +
+        "' data-page-num='" +
+        pageNum +
+        "' title='Click to rename'>" +
+        pm.label +
+        "</td>";
+      html += "<td class='type-cell'>polyline</td>";
+      html += "<td class='tag-cell'>" + (pm.component || "\u2014") + "</td>";
+      html += "<td class='num' colspan='4'>\u2014</td>";
+      html += "<td class='num'>" + (pm.lengthM !== null ? pm.lengthM.toFixed(2) : "") + "</td>";
+      html +=
+        "<td class='del-cell' data-poly-idx='" +
+        ple.polyIdx +
+        "' data-page-num='" +
+        pageNum +
+        "' title='Delete'>\u00D7</td>";
+      html += "</tr>";
+    }
+
+    // Page subtotal — only meaningful when the page has area measurements.
     if (assoc.walls.length > 1 || assoc.orphanWindows.length > 0) {
       html += "<tr class='summary-total-row'><td></td><td>" + sheetLabel + " Total</td>";
+      html += "<td colspan='2'></td>";
       html += "<td class='num'>" + pageGrossM2.toFixed(2) + "</td>";
       html += "<td class='num'>" + pageNetM2.toFixed(2) + "</td>";
       html += "<td class='num'>" + pageGrossFt2.toFixed(2) + "</td>";
@@ -2146,6 +2196,7 @@ function _renderSummaryTable() {
   // Grand total
   if (hasAnyData) {
     html += "<tr class='summary-grand-total'><td></td><td>Grand Total</td>";
+    html += "<td colspan='2'></td>";
     html += "<td class='num'>" + grandGrossM2.toFixed(2) + "</td>";
     html += "<td class='num'>" + grandNetM2.toFixed(2) + "</td>";
     html += "<td class='num'>" + grandGrossFt2.toFixed(2) + "</td>";

@@ -143,7 +143,9 @@ export function fromJSON(jsonStr) {
 }
 
 export function measurementsToCSV() {
-  var lines = ["Sheet,Label,Type,Mode,Gross (m\u00B2),Net (m\u00B2),Gross (ft\u00B2),Net (ft\u00B2),Perimeter (m)"];
+  var lines = [
+    "Sheet,Label,Type,Tag,Mode,Gross (m\u00B2),Net (m\u00B2),Gross (ft\u00B2),Net (ft\u00B2),Length/Perim (m)"
+  ];
   for (var i = 0; i < _project.pages.length; i++) {
     var page = _project.pages[i];
     var sheetLabel = page.sheetId || "Page " + page.pageNum;
@@ -187,6 +189,7 @@ export function measurementsToCSV() {
           sheetLabel,
           '"' + wm.label + '"',
           "area",
+          wm.component || "",
           "",
           wm.areaM2 !== null ? wm.areaM2.toFixed(2) : "",
           wallNetM2 !== null ? wallNetM2.toFixed(2) : "",
@@ -204,6 +207,7 @@ export function measurementsToCSV() {
             sheetLabel,
             '"  ' + cm.label + '"',
             "window",
+            cm.component || "window_opening",
             cm.mode || "net",
             cm.areaM2 !== null ? cm.areaM2.toFixed(2) : "",
             "",
@@ -224,6 +228,7 @@ export function measurementsToCSV() {
           sheetLabel,
           '"' + om.label + ' (unassociated)"',
           "window",
+          om.component || "window_opening",
           om.mode || "net",
           om.areaM2 !== null ? om.areaM2.toFixed(2) : "",
           "",
@@ -234,13 +239,35 @@ export function measurementsToCSV() {
       );
     }
 
-    // Summary rows
+    // Polylines — linear features; length goes in the shared Length/Perim column.
+    var allMeas = PolygonTool.getAllMeasurements(page.pageNum);
+    for (var pm2 = 0; pm2 < allMeas.length; pm2++) {
+      if (allMeas[pm2].type !== "polyline") continue;
+      var pm = allMeas[pm2];
+      hasData = true;
+      lines.push(
+        [
+          sheetLabel,
+          '"' + pm.label + '"',
+          "polyline",
+          pm.component || "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          pm.lengthM !== null ? pm.lengthM.toFixed(2) : ""
+        ].join(",")
+      );
+    }
+
+    // Summary rows — area totals only (polylines don't contribute to area).
     if (hasData) {
       lines.push(
-        [sheetLabel, "GROSS TOTAL", "", "", grossTotalM2.toFixed(2), "", grossTotalFt2.toFixed(2), "", ""].join(",")
+        [sheetLabel, "GROSS TOTAL", "", "", "", grossTotalM2.toFixed(2), "", grossTotalFt2.toFixed(2), "", ""].join(",")
       );
       lines.push(
-        [sheetLabel, "NET TOTAL", "", "", "", netTotalM2.toFixed(2), "", netTotalFt2.toFixed(2), ""].join(",")
+        [sheetLabel, "NET TOTAL", "", "", "", "", netTotalM2.toFixed(2), "", netTotalFt2.toFixed(2), ""].join(",")
       );
     }
   }
