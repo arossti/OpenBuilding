@@ -20,7 +20,11 @@ function _emptyProject() {
     pageCount: 0,
     pages: [],
     scheduleData: { rooms: null },
-    volumes: []
+    volumes: [],
+    // Project-level geometry params (wall height, roof pitch, etc.). Entered
+    // in the Parser sidebar; consumed by BEAMweb's bridge aggregator as a
+    // fallback when its own StateManager param_* fields are blank.
+    params: {}
   };
 }
 
@@ -196,6 +200,24 @@ export function restoreProject(projectJson) {
 export function setPdfBytes(blob) {
   if (!_project.uuid) return Promise.resolve();
   return IDB.putPdfBytes(_project.uuid, blob);
+}
+
+export function setParam(key, value) {
+  if (!_project.params) _project.params = {};
+  if (value === null || value === undefined || value === "") {
+    delete _project.params[key];
+  } else {
+    _project.params[key] = value;
+  }
+  _touch();
+}
+
+export function getParam(key) {
+  return _project.params ? _project.params[key] : undefined;
+}
+
+export function getAllParams() {
+  return _project.params ? Object.assign({}, _project.params) : {};
 }
 
 export function toJSON() {

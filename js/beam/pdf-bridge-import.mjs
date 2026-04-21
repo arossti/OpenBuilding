@@ -18,8 +18,10 @@ import { computeAllDimensions, COMPONENT_TO_DIMENSION } from "../shared/polygon-
 
 const VS = StateManager.VALUE_STATES;
 
-// Params the aggregator needs. Pulled live from StateManager so
-// re-opening the preview picks up any edits the user made in between.
+// Params the aggregator needs. Resolved with StateManager as primary source
+// (BEAMweb PROJECT → Geometry Parameters — user's authoritative values) and
+// the Parser-side project.params as fallback (entered in the Parser sidebar
+// before ever opening BEAMweb). Either side can seed the bridge.
 const PARAM_FIELDS = [
   "param_wall_height_m",
   "param_basement_height_m",
@@ -28,9 +30,17 @@ const PARAM_FIELDS = [
   "param_footing_width_m"
 ];
 
-function readParams() {
+function readParams(project) {
   const params = {};
-  for (const key of PARAM_FIELDS) params[key] = StateManager.getValue(key);
+  const fromProject = (project && project.projectJson && project.projectJson.params) || {};
+  for (const key of PARAM_FIELDS) {
+    const fromState = StateManager.getValue(key);
+    if (fromState != null && fromState !== "") {
+      params[key] = fromState;
+    } else if (fromProject[key] != null && fromProject[key] !== "") {
+      params[key] = fromProject[key];
+    }
+  }
   return params;
 }
 
@@ -41,7 +51,7 @@ export async function listProjects() {
 export async function buildPreview(projectUuid) {
   const project = await IDB.getProject(projectUuid);
   if (!project) throw new Error("project not found: " + projectUuid);
-  const params = readParams();
+  const params = readParams(project);
   const dims = computeAllDimensions({ projectJson: project.projectJson, params });
 
   // Pair each computed dim with its current StateManager value so the UI
@@ -86,6 +96,18 @@ export async function applyImport(projectUuid, dimIdsToApply) {
 
   StateManager.muteListeners();
   try {
+    // Propagate any Parser-side params into StateManager when BEAMweb's own
+    // values are blank. Keeps PROJECT → Geometry Parameters in sync with the
+    // Parser sidebar without forcing the user to re-type values.
+    const parserParams = (preview.project.projectJson && preview.project.projectJson.params) || {};
+    for (const key of PARAM_FIELDS) {
+      const current = StateManager.getValue(key);
+      if ((current == null || current === "") && parserParams[key] != null && parserParams[key] !== "") {
+        StateManager.setValue(key, String(parserParams[key]), VS.IMPORTED);
+        StateManager.setDimensionSource(key, "pdf:param");
+      }
+    }
+
     for (const row of preview.rows) {
       if (!toApplySet.has(row.dimId) || !row.hasValue) continue;
       StateManager.setValue(row.dimId, String(row.computed), VS.IMPORTED);

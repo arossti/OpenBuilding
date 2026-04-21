@@ -87,6 +87,7 @@ function init() {
   els.thumbStrip = document.getElementById("thumb-strip");
   els.sheetInfo = document.getElementById("sheet-info");
   els.measurePanel = document.getElementById("measure-panel");
+  els.paramsPanel = document.getElementById("params-panel");
   els.statusBar = document.getElementById("status-bar");
   els.zoomLabel = document.getElementById("zoom-label");
   els.scaleLabel = document.getElementById("scale-label");
@@ -117,6 +118,7 @@ function init() {
 
   // Sync the component-tag select with the starting tool (navigate ⇒ hidden).
   _rebuildComponentTagSelect();
+  _renderParamsPanel();
 
   setStatus("Ready — drop a PDF or click Browse", "ready");
   console.log("[PDF-Parser] Ready");
@@ -269,6 +271,9 @@ function loadPdf(buffer, fileName, opts) {
             } else {
               setStatus("Found " + planCount + " plan sheets. Press S to confirm scale.", "ready");
             }
+            // Refresh the geometry-params panel so restored project.params
+            // populate (or fresh inits clear) the sidebar inputs.
+            _renderParamsPanel();
             goToPage(1);
 
             // Re-enable autosave after the restore dust has settled.
@@ -731,6 +736,62 @@ var ASSEMBLY_COMPONENTS = {
   wall_interior: true,
   exterior_perimeter: true
 };
+
+// Geometry parameters — scalars that lift polygon measurements into BEAMweb
+// dimensions (wall height × perimeter → area, etc.). Field IDs match the
+// param_* names on BEAMweb's PROJECT tab so the values round-trip via the
+// bridge. Stored on the Parser's project.params in IndexedDB.
+var GEOMETRY_PARAMS = [
+  { id: "param_wall_height_m", label: "Wall Height", unit: "m", step: 0.01 },
+  { id: "param_basement_height_m", label: "Basement Height", unit: "m", step: 0.01 },
+  { id: "param_roof_pitch_deg", label: "Roof Pitch", unit: "\u00b0", step: 0.5 },
+  { id: "param_footing_height_m", label: "Footing Height", unit: "m", step: 0.01 },
+  { id: "param_footing_width_m", label: "Footing Width", unit: "m", step: 0.01 }
+];
+
+// Render the Geometry Parameters panel in the sidebar. Values persist via
+// ProjectStore.setParam → project.params → IndexedDB (where BEAMweb picks
+// them up as a fallback when its own StateManager param_* are blank).
+function _renderParamsPanel() {
+  if (!els.paramsPanel) return;
+  var html = '<div class="pdf-params-header">Geometry Parameters</div>';
+  html += '<div class="pdf-params-hint">Fed to BEAMweb on import \u2014 lifts perimeters \u2192 areas + areas \u2192 volumes.</div>';
+  html += '<div class="pdf-params-rows">';
+  for (var i = 0; i < GEOMETRY_PARAMS.length; i++) {
+    var p = GEOMETRY_PARAMS[i];
+    var current = ProjectStore.getParam(p.id);
+    var val = current != null ? current : "";
+    html +=
+      '<div class="pdf-params-row">' +
+      '<label class="pdf-params-label" for="pdf-param-' +
+      p.id +
+      '">' +
+      p.label +
+      "</label>" +
+      '<input class="pdf-params-input" id="pdf-param-' +
+      p.id +
+      '" type="number" step="' +
+      p.step +
+      '" value="' +
+      val +
+      '" data-param-key="' +
+      p.id +
+      '" />' +
+      '<span class="pdf-params-unit">' +
+      p.unit +
+      "</span>" +
+      "</div>";
+  }
+  html += "</div>";
+  els.paramsPanel.innerHTML = html;
+
+  var inputs = els.paramsPanel.querySelectorAll(".pdf-params-input");
+  for (var j = 0; j < inputs.length; j++) {
+    inputs[j].addEventListener("change", function () {
+      ProjectStore.setParam(this.dataset.paramKey, this.value);
+    });
+  }
+}
 
 function _rebuildComponentTagSelect() {
   var sel = document.getElementById("component-tag");
