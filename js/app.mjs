@@ -1960,7 +1960,7 @@ function _renderSummaryTable() {
   var project = ProjectStore.getProject();
   var html = "<table><thead><tr>";
   html += "<th>Sheet</th><th>Label</th>";
-  html += "<th>Type</th><th>Tag</th>";
+  html += "<th>Type</th><th>Tag</th><th>Preset</th>";
   html += "<th>Gross m\u00B2</th><th>Net m\u00B2</th>";
   html += "<th>Gross ft\u00B2</th><th>Net ft\u00B2</th>";
   html += "<th>Length / Perim m</th><th></th>";
@@ -1998,7 +1998,7 @@ function _renderSummaryTable() {
     hasAnyData = true;
 
     // Sheet header row
-    html += "<tr class='summary-sheet-row'><td colspan='10'>" + sheetLabel + sheetTitle + "</td></tr>";
+    html += "<tr class='summary-sheet-row'><td colspan='11'>" + sheetLabel + sheetTitle + "</td></tr>";
 
     var pageGrossM2 = 0,
       pageNetM2 = 0,
@@ -2055,6 +2055,7 @@ function _renderSummaryTable() {
         "</td>";
       html += "<td class='type-cell'>area</td>";
       html += "<td class='tag-cell'>" + (wm.component || "\u2014") + "</td>";
+      html += "<td class='preset-cell'>" + (wm.assembly_preset || "\u2014") + "</td>";
       if (wm.areaM2 !== null) {
         html += "<td class='num'>" + wm.areaM2.toFixed(2) + "</td>";
         html += "<td class='num'>" + wallNetM2.toFixed(2) + "</td>";
@@ -2092,6 +2093,7 @@ function _renderSummaryTable() {
             "</td>";
           html += "<td class='type-cell' style='font-size:10px;'>window</td>";
           html += "<td class='tag-cell' style='font-size:10px;'>" + (cm.component || "window_opening") + "</td>";
+          html += "<td class='preset-cell' style='font-size:10px;'>" + (cm.assembly_preset || "\u2014") + "</td>";
           if (cm.areaM2 !== null) {
             html += "<td class='num' style='font-size:10px;'>" + cPrefix + cm.areaM2.toFixed(2) + "</td>";
             html += "<td class='num' style='font-size:10px;'></td>";
@@ -2132,6 +2134,7 @@ function _renderSummaryTable() {
         " (unassociated)</td>";
       html += "<td class='type-cell'>window</td>";
       html += "<td class='tag-cell'>" + (om.component || "window_opening") + "</td>";
+      html += "<td class='preset-cell'>" + (om.assembly_preset || "\u2014") + "</td>";
       if (om.areaM2 !== null) {
         html += "<td class='num'>" + oPrefix + om.areaM2.toFixed(2) + "</td><td class='num'></td>";
         html += "<td class='num'>" + oPrefix + om.areaFt2.toFixed(2) + "</td><td class='num'></td>";
@@ -2165,6 +2168,7 @@ function _renderSummaryTable() {
         "</td>";
       html += "<td class='type-cell'>polyline</td>";
       html += "<td class='tag-cell'>" + (pm.component || "\u2014") + "</td>";
+      html += "<td class='preset-cell'>" + (pm.assembly_preset || "\u2014") + "</td>";
       html += "<td class='num' colspan='4'>\u2014</td>";
       html += "<td class='num'>" + (pm.lengthM !== null ? pm.lengthM.toFixed(2) : "") + "</td>";
       html +=
@@ -2179,7 +2183,7 @@ function _renderSummaryTable() {
     // Page subtotal — only meaningful when the page has area measurements.
     if (assoc.walls.length > 1 || assoc.orphanWindows.length > 0) {
       html += "<tr class='summary-total-row'><td></td><td>" + sheetLabel + " Total</td>";
-      html += "<td colspan='2'></td>";
+      html += "<td colspan='3'></td>";
       html += "<td class='num'>" + pageGrossM2.toFixed(2) + "</td>";
       html += "<td class='num'>" + pageNetM2.toFixed(2) + "</td>";
       html += "<td class='num'>" + pageGrossFt2.toFixed(2) + "</td>";
@@ -2196,7 +2200,7 @@ function _renderSummaryTable() {
   // Grand total
   if (hasAnyData) {
     html += "<tr class='summary-grand-total'><td></td><td>Grand Total</td>";
-    html += "<td colspan='2'></td>";
+    html += "<td colspan='3'></td>";
     html += "<td class='num'>" + grandGrossM2.toFixed(2) + "</td>";
     html += "<td class='num'>" + grandNetM2.toFixed(2) + "</td>";
     html += "<td class='num'>" + grandGrossFt2.toFixed(2) + "</td>";

@@ -144,7 +144,7 @@ export function fromJSON(jsonStr) {
 
 export function measurementsToCSV() {
   var lines = [
-    "Sheet,Label,Type,Tag,Mode,Gross (m\u00B2),Net (m\u00B2),Gross (ft\u00B2),Net (ft\u00B2),Length/Perim (m)"
+    "Sheet,Label,Type,Tag,Preset,Mode,Gross (m\u00B2),Net (m\u00B2),Gross (ft\u00B2),Net (ft\u00B2),Length/Perim (m)"
   ];
   for (var i = 0; i < _project.pages.length; i++) {
     var page = _project.pages[i];
@@ -190,6 +190,7 @@ export function measurementsToCSV() {
           '"' + wm.label + '"',
           "area",
           wm.component || "",
+          wm.assembly_preset || "",
           "",
           wm.areaM2 !== null ? wm.areaM2.toFixed(2) : "",
           wallNetM2 !== null ? wallNetM2.toFixed(2) : "",
@@ -208,6 +209,7 @@ export function measurementsToCSV() {
             '"  ' + cm.label + '"',
             "window",
             cm.component || "window_opening",
+            cm.assembly_preset || "",
             cm.mode || "net",
             cm.areaM2 !== null ? cm.areaM2.toFixed(2) : "",
             "",
@@ -229,6 +231,7 @@ export function measurementsToCSV() {
           '"' + om.label + ' (unassociated)"',
           "window",
           om.component || "window_opening",
+          om.assembly_preset || "",
           om.mode || "net",
           om.areaM2 !== null ? om.areaM2.toFixed(2) : "",
           "",
@@ -251,6 +254,7 @@ export function measurementsToCSV() {
           '"' + pm.label + '"',
           "polyline",
           pm.component || "",
+          pm.assembly_preset || "",
           "",
           "",
           "",
@@ -264,10 +268,12 @@ export function measurementsToCSV() {
     // Summary rows — area totals only (polylines don't contribute to area).
     if (hasData) {
       lines.push(
-        [sheetLabel, "GROSS TOTAL", "", "", "", grossTotalM2.toFixed(2), "", grossTotalFt2.toFixed(2), "", ""].join(",")
+        [sheetLabel, "GROSS TOTAL", "", "", "", "", grossTotalM2.toFixed(2), "", grossTotalFt2.toFixed(2), "", ""].join(
+          ","
+        )
       );
       lines.push(
-        [sheetLabel, "NET TOTAL", "", "", "", "", netTotalM2.toFixed(2), "", netTotalFt2.toFixed(2), ""].join(",")
+        [sheetLabel, "NET TOTAL", "", "", "", "", "", netTotalM2.toFixed(2), "", netTotalFt2.toFixed(2), ""].join(",")
       );
     }
   }
