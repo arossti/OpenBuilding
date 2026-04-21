@@ -486,6 +486,40 @@ export function renamePolygon(pageNum, polyIdx, newLabel) {
   if (polys && polys[polyIdx]) polys[polyIdx].label = newLabel;
 }
 
+// Mutate the bridge-relevant metadata on an existing polygon. Used by the
+// inline Tag / Preset selects in the sidebar + Summary Table so a user can
+// re-classify a polygon without re-drawing it.
+export function setComponent(pageNum, polyIdx, component) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) return;
+  polys[polyIdx].component = component || null;
+  // Preset only makes sense for wall-ish components; clear it if the new tag
+  // doesn't carry an assembly concept, so stale presets don't silently ride
+  // along after a re-classification.
+  if (!_componentCarriesPreset(component)) polys[polyIdx].assembly_preset = null;
+}
+
+export function setAssemblyPreset(pageNum, polyIdx, preset) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) return;
+  polys[polyIdx].assembly_preset = preset || null;
+}
+
+var _ASSEMBLY_BEARING_COMPONENTS = {
+  wall_exterior: true,
+  wall_party: true,
+  wall_interior: true,
+  exterior_perimeter: true
+};
+
+export function componentCarriesPreset(component) {
+  return _componentCarriesPreset(component);
+}
+
+function _componentCarriesPreset(component) {
+  return !!(component && _ASSEMBLY_BEARING_COMPONENTS[component]);
+}
+
 export function getPolygons(pageNum) {
   return _polygons[pageNum] || [];
 }

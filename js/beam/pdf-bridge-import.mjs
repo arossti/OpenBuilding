@@ -109,10 +109,15 @@ function buildProvenance(projectUuid, polyIds) {
 
 function buildSummary(agg) {
   if (!agg.contributors || agg.contributors.length === 0) {
-    if (agg.warnings && agg.warnings.length) return agg.warnings[0];
+    if (agg.warnings && agg.warnings.length) {
+      // Missing-param warnings are actionable (user can type the value); sheet-class
+      // hints are background noise. Surface the former when both are present.
+      const missing = agg.warnings.find((w) => /required param missing/i.test(w));
+      if (missing) return missing;
+      return agg.warnings[0];
+    }
     return "no polygons feeding this dim";
   }
-  // If one contributor, use its summary verbatim. If multiple, fold.
   if (agg.contributors.length === 1) return agg.contributors[0].summary;
   const polyCount = agg.contributors.reduce((n, c) => n + (c.polygons ? c.polygons.length : 0), 0);
   return `${polyCount} polygons from ${agg.contributors.length} components`;

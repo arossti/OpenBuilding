@@ -2035,6 +2035,74 @@ function closeSummaryTable() {
   document.getElementById("summary-panel").classList.remove("visible");
 }
 
+// Pick a reliable descriptor for a sheet header. The title-block scan in
+// sheet-classifier.mjs is best-effort and regularly picks up disclaimer /
+// general-notes body text when the title block is missing or atypical — so
+// only show sheetTitle if it's short and doesn't look like a sentence. In
+// every other case, fall back to the deterministic classification
+// ("Plan", "Elevation", etc.).
+function _buildSheetTail(page) {
+  var classification = page.classification ? _capitalize(page.classification) : "";
+  var title = (page.sheetTitle || "").trim();
+  var looksLikeBodyText = title.length > 50 || /^(this|the following|all\s|general\s+notes|notes?:|drawings?\s)/i.test(title);
+  if (title && !looksLikeBodyText) return " \u2014 " + title;
+  if (classification) return " \u2014 " + classification;
+  return "";
+}
+
+function _capitalize(s) {
+  if (!s) return "";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// Assembly-preset option set. Mirrors the toolbar select in pdfparser.html —
+// kept inline here so re-classifying from the Summary Table doesn't require
+// fishing the option list out of the DOM.
+var ASSEMBLY_PRESET_OPTIONS = [
+  { value: "", label: "(no preset)" },
+  { value: "wood_2x4", label: "Wood 2x4" },
+  { value: "wood_2x6", label: "Wood 2x6" },
+  { value: "wood_2x8", label: "Wood 2x8" },
+  { value: "wood_2x10", label: "Wood 2x10" },
+  { value: "steel_stud", label: "Steel stud" },
+  { value: "icf", label: "ICF" },
+  { value: "concrete_block", label: "Concrete block" },
+  { value: "other", label: "Other" }
+];
+
+function _renderTagSelect(polyType, polyIdx, pageNum, currentValue, small) {
+  if (polyType === "window") {
+    // Windows are auto-tagged; keep static.
+    var sizeAttr = small ? " style='font-size:10px;'" : "";
+    return "<td class='tag-cell'" + sizeAttr + ">" + (currentValue || "window_opening") + "</td>";
+  }
+  var toolKey = polyType === "polyline" ? "polyline" : "measure";
+  var opts = COMPONENT_OPTIONS[toolKey] || [];
+  var html = "<td class='tag-cell'" + (small ? " style='font-size:10px;'" : "") + ">";
+  html += "<select class='summary-tag-select bw-inline-select' data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "'>";
+  for (var i = 0; i < opts.length; i++) {
+    var sel = opts[i].value === (currentValue || "") ? " selected" : "";
+    html += "<option value='" + opts[i].value + "'" + sel + ">" + opts[i].label + "</option>";
+  }
+  html += "</select></td>";
+  return html;
+}
+
+function _renderPresetSelect(component, polyIdx, pageNum, currentPreset, small) {
+  var sizeAttr = small ? " style='font-size:10px;'" : "";
+  if (!PolygonTool.componentCarriesPreset(component)) {
+    return "<td class='preset-cell'" + sizeAttr + ">\u2014</td>";
+  }
+  var html = "<td class='preset-cell'" + sizeAttr + ">";
+  html += "<select class='summary-preset-select bw-inline-select' data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "'>";
+  for (var i = 0; i < ASSEMBLY_PRESET_OPTIONS.length; i++) {
+    var sel = ASSEMBLY_PRESET_OPTIONS[i].value === (currentPreset || "") ? " selected" : "";
+    html += "<option value='" + ASSEMBLY_PRESET_OPTIONS[i].value + "'" + sel + ">" + ASSEMBLY_PRESET_OPTIONS[i].label + "</option>";
+  }
+  html += "</select></td>";
+  return html;
+}
+
 function _renderSummaryTable() {
   var project = ProjectStore.getProject();
   var html = "<table><thead><tr>";
@@ -2073,11 +2141,11 @@ function _renderSummaryTable() {
     if (assoc.walls.length === 0 && assoc.orphanWindows.length === 0 && polylines.length === 0) continue;
 
     var sheetLabel = page.sheetId || "Page " + pageNum;
-    var sheetTitle = page.sheetTitle ? " \u2014 " + page.sheetTitle : "";
+    var tail = _buildSheetTail(page);
     hasAnyData = true;
 
     // Sheet header row
-    html += "<tr class='summary-sheet-row'><td colspan='11'>" + sheetLabel + sheetTitle + "</td></tr>";
+    html += "<tr class='summary-sheet-row'><td colspan='11'>" + sheetLabel + tail + "</td></tr>";
 
     var pageGrossM2 = 0,
       pageNetM2 = 0,
@@ -2133,8 +2201,8 @@ function _renderSummaryTable() {
         netSuffix +
         "</td>";
       html += "<td class='type-cell'>area</td>";
-      html += "<td class='tag-cell'>" + (wm.component || "\u2014") + "</td>";
-      html += "<td class='preset-cell'>" + (wm.assembly_preset || "\u2014") + "</td>";
+      html += _renderTagSelect("area", wall.polyIdx, pageNum, wm.component, false);
+      html += _renderPresetSelect(wm.component, wall.polyIdx, pageNum, wm.assembly_preset, false);
       if (wm.areaM2 !== null) {
         html += "<td class='num'>" + wm.areaM2.toFixed(2) + "</td>";
         html += "<td class='num'>" + wallNetM2.toFixed(2) + "</td>";
@@ -2171,8 +2239,8 @@ function _renderSummaryTable() {
             cm.label +
             "</td>";
           html += "<td class='type-cell' style='font-size:10px;'>window</td>";
-          html += "<td class='tag-cell' style='font-size:10px;'>" + (cm.component || "window_opening") + "</td>";
-          html += "<td class='preset-cell' style='font-size:10px;'>" + (cm.assembly_preset || "\u2014") + "</td>";
+          html += _renderTagSelect("window", child.polyIdx, pageNum, cm.component, true);
+          html += _renderPresetSelect(cm.component, child.polyIdx, pageNum, cm.assembly_preset, true);
           if (cm.areaM2 !== null) {
             html += "<td class='num' style='font-size:10px;'>" + cPrefix + cm.areaM2.toFixed(2) + "</td>";
             html += "<td class='num' style='font-size:10px;'></td>";
@@ -2212,8 +2280,8 @@ function _renderSummaryTable() {
         om.label +
         " (unassociated)</td>";
       html += "<td class='type-cell'>window</td>";
-      html += "<td class='tag-cell'>" + (om.component || "window_opening") + "</td>";
-      html += "<td class='preset-cell'>" + (om.assembly_preset || "\u2014") + "</td>";
+      html += _renderTagSelect("window", assoc.orphanWindows[o].polyIdx, pageNum, om.component, false);
+      html += _renderPresetSelect(om.component, assoc.orphanWindows[o].polyIdx, pageNum, om.assembly_preset, false);
       if (om.areaM2 !== null) {
         html += "<td class='num'>" + oPrefix + om.areaM2.toFixed(2) + "</td><td class='num'></td>";
         html += "<td class='num'>" + oPrefix + om.areaFt2.toFixed(2) + "</td><td class='num'></td>";
@@ -2246,8 +2314,8 @@ function _renderSummaryTable() {
         pm.label +
         "</td>";
       html += "<td class='type-cell'>polyline</td>";
-      html += "<td class='tag-cell'>" + (pm.component || "\u2014") + "</td>";
-      html += "<td class='preset-cell'>" + (pm.assembly_preset || "\u2014") + "</td>";
+      html += _renderTagSelect("polyline", ple.polyIdx, pageNum, pm.component, false);
+      html += _renderPresetSelect(pm.component, ple.polyIdx, pageNum, pm.assembly_preset, false);
       html += "<td class='num' colspan='4'>\u2014</td>";
       html += "<td class='num'>" + (pm.lengthM !== null ? pm.lengthM.toFixed(2) : "") + "</td>";
       html +=
@@ -2337,6 +2405,34 @@ function _renderSummaryTable() {
         Viewer.requestRedraw();
       }
       setStatus("Measurement deleted", "ready");
+    });
+  }
+
+  // Bind inline Tag + Preset selects — changing either one re-classifies
+  // the polygon, persists via savePolygons, and re-renders the table (so
+  // the preset column visibility updates when Tag toggles in/out of a
+  // wall-type component).
+  var tagSelects = panel.querySelectorAll(".summary-tag-select");
+  for (var ts = 0; ts < tagSelects.length; ts++) {
+    tagSelects[ts].addEventListener("change", function () {
+      var idx = parseInt(this.dataset.polyIdx, 10);
+      var pg = parseInt(this.dataset.pageNum, 10);
+      PolygonTool.setComponent(pg, idx, this.value);
+      ProjectStore.savePolygons(pg, PolygonTool.getPolygons(pg));
+      _renderSummaryTable();
+      if (pg === _currentPage) _refreshMeasurements();
+      setStatus("Tag updated", "ready");
+    });
+  }
+
+  var presetSelects = panel.querySelectorAll(".summary-preset-select");
+  for (var ps = 0; ps < presetSelects.length; ps++) {
+    presetSelects[ps].addEventListener("change", function () {
+      var idx = parseInt(this.dataset.polyIdx, 10);
+      var pg = parseInt(this.dataset.pageNum, 10);
+      PolygonTool.setAssemblyPreset(pg, idx, this.value);
+      ProjectStore.savePolygons(pg, PolygonTool.getPolygons(pg));
+      setStatus("Preset updated", "ready");
     });
   }
 }

@@ -458,16 +458,17 @@ export function computeAllDimensions({ projectJson, params }) {
   }
 
   // Second pass — route each component's value to its target dim(s).
+  // value stays null until at least one contribution actually resolves; rows
+  // that collect only warnings (e.g. missing param) must surface as "no value"
+  // in the preview, not as 0.00.
   for (const [component, agg] of Object.entries(perComponent)) {
     const spec = COMPONENT_TO_DIMENSION[component];
     const dims = [spec.targetDim, ...(spec.targetDimExtras || [])];
     for (const dimId of dims) {
-      if (!result[dimId]) result[dimId] = { value: 0, contributors: [], warnings: [] };
-      // Per-dim value computation — some dims need a different formula than
-      // the component's primary aggregate (e.g. exterior_perimeter feeds
-      // dim_continuous_footings as a volume, not an area).
+      if (!result[dimId]) result[dimId] = { value: null, contributors: [], warnings: [] };
       const contribution = computeContribution(dimId, spec, agg, params, component);
       if (contribution.value != null) {
+        if (result[dimId].value == null) result[dimId].value = 0;
         result[dimId].value += contribution.value;
         result[dimId].contributors.push({
           component,

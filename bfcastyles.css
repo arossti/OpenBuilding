@@ -1011,6 +1011,27 @@ html.theme-dark body {
   text-align: right;
 }
 
+/* Inline Tag / Preset selects in the Summary Table — compact, low-chrome
+   so the row still reads as tabular data, not a form. */
+#summary-content select.bw-inline-select {
+  background: transparent;
+  color: var(--text);
+  border: 1px dashed var(--border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 11px;
+  font-family: inherit;
+  max-width: 160px;
+  cursor: pointer;
+}
+#summary-content select.bw-inline-select:hover {
+  border-color: var(--accent-lit);
+}
+#summary-content select.bw-inline-select:focus {
+  outline: 1px solid var(--accent-lit);
+  outline-offset: 1px;
+}
+
 .summary-sheet-row td {
   padding-top: 12px !important;
   font-size: 12px !important;
