@@ -19,6 +19,7 @@ import { renderProjectPanel, wireProjectForm, resetProjectTab, refreshProjectFor
 import { renderFootingsSlabsPanel, wireFootingsSlabsTab, resetFootingsSlabsTab } from "./beam/footings-slabs-tab.mjs";
 import { loadSample, SAMPLES } from "./beam/sample-loader.mjs";
 import * as PdfBridge from "./beam/pdf-bridge-import.mjs";
+import { syncProjectToFsBridge } from "./beam/auto-fill.mjs";
 
 // ──────────────────────────────────────────────────────────────────────
 // Tab definitions
@@ -670,8 +671,12 @@ async function applyImportSelection() {
       "ready"
     );
     closeImportModal();
-    // Refresh the PROJECT tab so the new values render in their inputs.
+    // Refresh the PROJECT tab so the new values render in their inputs AND
+    // LHW fields recompute their _volume (as CALCULATED). Then push the
+    // updated PROJECT state into F&S via the bridge's imperative sync — the
+    // auto-fill listeners did not fire during applyImport's muted batch.
     refreshProjectForm();
+    syncProjectToFsBridge();
   } catch (err) {
     console.error("[BEAMweb] PDF-Parser import failed:", err);
     setStatus(`PDF-Parser import failed: ${err.message}`, "error");

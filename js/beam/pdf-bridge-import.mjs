@@ -30,6 +30,24 @@ const PARAM_FIELDS = [
   "param_footing_width_m"
 ];
 
+// Dims that render as L × H × W inputs on PROJECT. Their storage keys are
+// `${id}_length` / `${id}_height` / `${id}_width`; `${id}_volume` is CALCULATED
+// from the three children via recomputeVolume. Writing the parent id directly
+// would land in a key nothing reads, so decompose on apply: volume ÷ (H × W)
+// = length, then push H + W from the params. recomputeVolume fires after
+// refreshProjectForm and notifies the auto-fill listener that flows the
+// volume downstream to F&S.
+const LHW_DIMS = {
+  dim_continuous_footings: {
+    heightParam: "param_footing_height_m",
+    widthParam: "param_footing_width_m"
+  },
+  garage_continuous_footings: {
+    heightParam: "param_footing_height_m",
+    widthParam: "param_footing_width_m"
+  }
+};
+
 function readParams(project) {
   const params = {};
   const fromProject = (project && project.projectJson && project.projectJson.params) || {};
@@ -110,8 +128,8 @@ export async function applyImport(projectUuid, dimIdsToApply) {
 
     for (const row of preview.rows) {
       if (!toApplySet.has(row.dimId) || !row.hasValue) continue;
-      StateManager.setValue(row.dimId, String(row.computed), VS.IMPORTED);
       const polyIds = row.contributors.flatMap((c) => (c.polygons || []).map((p) => p.id));
+      writeDimValue(row, preview.params);
       polyIdsByDim[row.dimId] = polyIds;
       StateManager.setDimensionSource(row.dimId, buildProvenance(projectUuid, polyIds));
       applied++;
@@ -121,6 +139,28 @@ export async function applyImport(projectUuid, dimIdsToApply) {
   }
 
   return { applied, polyIdsByDim, project: preview.project };
+}
+
+function writeDimValue(row, params) {
+  const lhw = LHW_DIMS[row.dimId];
+  if (!lhw) {
+    StateManager.setValue(row.dimId, String(row.computed), VS.IMPORTED);
+    return;
+  }
+  const H = Number(params[lhw.heightParam]);
+  const W = Number(params[lhw.widthParam]);
+  if (!Number.isFinite(H) || H <= 0 || !Number.isFinite(W) || W <= 0) {
+    // Params missing — fall back to writing the computed volume directly.
+    // recomputeVolume will zero it out on next refresh, but at least the row
+    // persists in state and we have a paper trail. In practice this branch
+    // should not fire because the preview already guards on missing params.
+    StateManager.setValue(`${row.dimId}_volume`, String(row.computed), VS.IMPORTED);
+    return;
+  }
+  const length = row.computed / (H * W);
+  StateManager.setValue(`${row.dimId}_length`, String(Number(length.toFixed(4))), VS.IMPORTED);
+  StateManager.setValue(`${row.dimId}_height`, String(H), VS.IMPORTED);
+  StateManager.setValue(`${row.dimId}_width`, String(W), VS.IMPORTED);
 }
 
 function buildProvenance(projectUuid, polyIds) {
