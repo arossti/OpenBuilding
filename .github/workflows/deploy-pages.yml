@@ -54,6 +54,7 @@ jobs:
           cp schema/sample.json _site/data/schema/
           cp "docs/csv files from BEAM/Footings & Slabs.csv" _site/data/beam/footings-slabs.csv
           cp docs/beam-samples/*.json _site/data/beam/samples/
+          cp docs/sample.pdf _site/data/sample.pdf
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

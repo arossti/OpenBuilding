@@ -4,14 +4,15 @@
 
 import * as Viewer from "./canvas-viewer.mjs";
 import * as ScaleManager from "./scale-manager.mjs";
-import { POLY_COLORS, DEFAULT_DPI, M2_TO_FT2, AREA_EDGE, AREA_FILL, WIN_EDGE, WIN_FILL } from "./config.mjs";
+import { POLY_COLORS, DEFAULT_DPI, M2_TO_FT2, AREA_EDGE, AREA_FILL, WIN_EDGE, WIN_FILL, POLYLINE_EDGE } from "./config.mjs";
 
 var _polygons = {};
 var _activePolyId = null,
   _activePage = 0;
 var _colorIdx = 0,
   _nextId = 1,
-  _nextWinId = 1;
+  _nextWinId = 1,
+  _nextLineId = 1;
 var _undoStack = []; // snapshots for undo
 var _redoStack = [];
 var _onUndoPushCallback = null;
@@ -67,14 +68,20 @@ export function canRedo() {
 export function startPolygon(pageNum, label, opts) {
   if (!_polygons[pageNum]) _polygons[pageNum] = [];
   _pushUndo(pageNum);
-  var type = (opts && opts.type) || "area";
-  var mode = (opts && opts.mode) || "net";
-  var defaultLabel = type === "window" ? "Window " + _nextWinId++ : "Area " + _nextId++;
-  // Keep counters in sync — only increment the relevant one
-  if (type !== "window") {
-    /* _nextId already incremented */
+  opts = opts || {};
+  var type = opts.type || "area";
+  var mode = opts.mode || "net";
+  var defaultLabel, id;
+  if (type === "window") {
+    defaultLabel = "Window " + _nextWinId++;
+    id = "win_" + Date.now();
+  } else if (type === "polyline") {
+    defaultLabel = "Line " + _nextLineId++;
+    id = "line_" + Date.now();
+  } else {
+    defaultLabel = "Area " + _nextId++;
+    id = "poly_" + Date.now();
   }
-  var id = (type === "window" ? "win_" : "poly_") + Date.now();
   _polygons[pageNum].push({
     id: id,
     label: label || defaultLabel,
@@ -83,6 +90,12 @@ export function startPolygon(pageNum, label, opts) {
     type: type,
     mode: mode,
     color: POLY_COLORS[_colorIdx % POLY_COLORS.length],
+    // Phase 4b.1 — bridge fields (null when not classified)
+    component: opts.component || null,
+    depth_m: opts.depth_m != null ? opts.depth_m : null,
+    sheet_id: opts.sheet_id || null,
+    sheet_class: opts.sheet_class || null,
+    assembly_preset: opts.assembly_preset || null,
     _pageNum: pageNum
   });
   _colorIdx++;
@@ -99,7 +112,11 @@ export function addVertex(pt) {
 
 export function closePolygon() {
   var poly = _getActivePoly();
-  if (!poly || poly.vertices.length < 3) return;
+  if (!poly) return;
+  // Polylines "finalize" at ≥2 vertices; closed flag means "done drawing",
+  // not geometrically closed. Areas/windows need ≥3 to form a polygon.
+  var minVerts = poly.type === "polyline" ? 2 : 3;
+  if (poly.vertices.length < minVerts) return;
   poly.closed = true;
   _activePolyId = null;
 }
@@ -182,9 +199,12 @@ export function buildAssociationMap(pageNum) {
   var walls = [],
     windowEntries = [];
 
-  // Partition closed polygons — polyIdx is the raw array index for delete/rename
+  // Partition closed polygons — polyIdx is the raw array index for delete/rename.
+  // Polylines are linear features (no area), so they don't participate in the
+  // wall/window association.
   for (var i = 0; i < polys.length; i++) {
     if (!polys[i].closed) continue;
+    if (polys[i].type === "polyline") continue;
     var m = getMeasurement(pageNum, i);
     if (!m) continue;
     var entry = { measurement: m, polyIdx: i, vertices: polys[i].vertices };
@@ -229,11 +249,43 @@ export function getMeasurement(pageNum, polyIdx) {
   if (!polys || !polys[polyIdx]) return null;
   var poly = polys[polyIdx];
   if (!poly.closed) return null;
+  var calibrated = ScaleManager.isCalibrated(pageNum);
+
+  // Shared bridge fields — null when the polygon has not been classified.
+  var bridge = {
+    component: poly.component || null,
+    depth_m: poly.depth_m != null ? poly.depth_m : null,
+    sheet_id: poly.sheet_id || null,
+    sheet_class: poly.sheet_class || null,
+    assembly_preset: poly.assembly_preset || null
+  };
+
+  if (poly.type === "polyline") {
+    // Polylines are linear — length only, no area.
+    var lenPdf = computePerimeterPdf(poly.vertices, false);
+    var lenM = ScaleManager.pdfToMetres(pageNum, lenPdf);
+    return {
+      id: poly.id,
+      label: poly.label,
+      type: "polyline",
+      mode: poly.mode || "net",
+      lengthM: lenM,
+      lengthFt: lenM !== null ? lenM / 0.3048 : null,
+      vertexCount: poly.vertices.length,
+      perimPdf: lenPdf,
+      calibrated: calibrated,
+      component: bridge.component,
+      depth_m: bridge.depth_m,
+      sheet_id: bridge.sheet_id,
+      sheet_class: bridge.sheet_class,
+      assembly_preset: bridge.assembly_preset
+    };
+  }
+
   var areaPdf = computeAreaPdf(poly.vertices);
   var perimPdf = computePerimeterPdf(poly.vertices, true);
   var areaM2 = ScaleManager.pdfAreaToM2(pageNum, areaPdf);
   var perimM = ScaleManager.pdfToMetres(pageNum, perimPdf);
-  var calibrated = ScaleManager.isCalibrated(pageNum);
   return {
     id: poly.id,
     label: poly.label,
@@ -245,7 +297,12 @@ export function getMeasurement(pageNum, polyIdx) {
     vertexCount: poly.vertices.length,
     areaPdf: areaPdf,
     perimPdf: perimPdf,
-    calibrated: calibrated
+    calibrated: calibrated,
+    component: bridge.component,
+    depth_m: bridge.depth_m,
+    sheet_id: bridge.sheet_id,
+    sheet_class: bridge.sheet_class,
+    assembly_preset: bridge.assembly_preset
   };
 }
 
@@ -297,9 +354,10 @@ function _drawPoly(ctx, poly) {
 
   ctx.save();
 
-  // Edge colour: cyan for areas, gold for windows
+  // Edge colour: cyan for areas, gold for windows, red for polylines (no fill).
   var isWindow = poly.type === "window";
-  var edgeColor = isWindow ? WIN_EDGE : AREA_EDGE;
+  var isPolyline = poly.type === "polyline";
+  var edgeColor = isPolyline ? POLYLINE_EDGE : isWindow ? WIN_EDGE : AREA_EDGE;
   var fillColor = isWindow ? WIN_FILL : AREA_FILL;
   ctx.strokeStyle = edgeColor;
   ctx.lineWidth = 3;
@@ -311,7 +369,8 @@ function _drawPoly(ctx, poly) {
     var pi = Viewer.pdfToCanvas(verts[i]);
     ctx.lineTo(pi.x, pi.y);
   }
-  if (poly.closed) {
+  // Polylines never geometrically close or fill — they are linear features.
+  if (poly.closed && !isPolyline) {
     ctx.closePath();
     ctx.fillStyle = fillColor;
     ctx.fill();
@@ -339,19 +398,30 @@ function _drawPoly(ctx, poly) {
     }
     var center = Viewer.pdfToCanvas({ x: cx / verts.length, y: cy / verts.length });
 
-    // Compute area text — walls with children show net area
-    var areaPdf = computeAreaPdf(verts);
-    var areaM2 = ScaleManager.pdfAreaToM2(poly._pageNum || 0, areaPdf);
-    var netOverride = _netAreaCache[poly.id];
+    // Measurement text — walls with children show net area; polylines show length.
     var line2 = "",
       line3 = "";
-    if (areaM2 !== null) {
-      var displayM2 = netOverride && !isWindow ? netOverride.netM2 : areaM2;
-      var displayFt2 = netOverride && !isWindow ? netOverride.netFt2 : areaM2 * M2_TO_FT2;
-      line2 = displayM2.toFixed(1) + " m\u00B2" + (netOverride && !isWindow ? " net" : "");
-      line3 = displayFt2.toFixed(1) + " ft\u00B2";
+    if (isPolyline) {
+      var lenPdf = computePerimeterPdf(verts, false);
+      var lenM = ScaleManager.pdfToMetres(poly._pageNum || 0, lenPdf);
+      if (lenM !== null) {
+        line2 = lenM.toFixed(2) + " m";
+        line3 = (lenM / 0.3048).toFixed(2) + " ft";
+      } else {
+        line2 = "(uncalibrated)";
+      }
     } else {
-      line2 = "(uncalibrated)";
+      var areaPdf = computeAreaPdf(verts);
+      var areaM2 = ScaleManager.pdfAreaToM2(poly._pageNum || 0, areaPdf);
+      var netOverride = _netAreaCache[poly.id];
+      if (areaM2 !== null) {
+        var displayM2 = netOverride && !isWindow ? netOverride.netM2 : areaM2;
+        var displayFt2 = netOverride && !isWindow ? netOverride.netFt2 : areaM2 * M2_TO_FT2;
+        line2 = displayM2.toFixed(1) + " m\u00B2" + (netOverride && !isWindow ? " net" : "");
+        line3 = displayFt2.toFixed(1) + " ft\u00B2";
+      } else {
+        line2 = "(uncalibrated)";
+      }
     }
 
     // Background pill — large, high-contrast, 3 lines
@@ -377,15 +447,15 @@ function _drawPoly(ctx, poly) {
     var y1 = pillTop + 22;
     ctx.fillText(line1, center.x, y1);
 
-    // Line 2: metric area — cyan for areas, gold for windows
+    // Line 2: metric measurement — cyan for areas, gold for windows, red for polylines.
     ctx.font = "20px Helvetica Neue, sans-serif";
-    ctx.fillStyle = isWindow ? WIN_EDGE : AREA_EDGE;
+    ctx.fillStyle = isPolyline ? POLYLINE_EDGE : isWindow ? WIN_EDGE : AREA_EDGE;
     var y2 = y1 + 24;
     ctx.fillText(line2, center.x, y2);
 
-    // Line 3: imperial area — lighter variant
+    // Line 3: imperial measurement — lighter variant.
     if (line3) {
-      ctx.fillStyle = isWindow ? "rgba(255, 215, 0, 0.65)" : "rgba(0, 229, 255, 0.65)";
+      ctx.fillStyle = isPolyline ? "rgba(230, 57, 70, 0.65)" : isWindow ? "rgba(255, 215, 0, 0.65)" : "rgba(0, 229, 255, 0.65)";
       var y3 = y2 + 22;
       ctx.fillText(line3, center.x, y3);
     }
@@ -414,6 +484,40 @@ export function deleteLastPolygon(pageNum) {
 export function renamePolygon(pageNum, polyIdx, newLabel) {
   var polys = _polygons[pageNum];
   if (polys && polys[polyIdx]) polys[polyIdx].label = newLabel;
+}
+
+// Mutate the bridge-relevant metadata on an existing polygon. Used by the
+// inline Tag / Preset selects in the sidebar + Summary Table so a user can
+// re-classify a polygon without re-drawing it.
+export function setComponent(pageNum, polyIdx, component) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) return;
+  polys[polyIdx].component = component || null;
+  // Preset only makes sense for wall-ish components; clear it if the new tag
+  // doesn't carry an assembly concept, so stale presets don't silently ride
+  // along after a re-classification.
+  if (!_componentCarriesPreset(component)) polys[polyIdx].assembly_preset = null;
+}
+
+export function setAssemblyPreset(pageNum, polyIdx, preset) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) return;
+  polys[polyIdx].assembly_preset = preset || null;
+}
+
+var _ASSEMBLY_BEARING_COMPONENTS = {
+  wall_exterior: true,
+  wall_party: true,
+  wall_interior: true,
+  exterior_perimeter: true
+};
+
+export function componentCarriesPreset(component) {
+  return _componentCarriesPreset(component);
+}
+
+function _componentCarriesPreset(component) {
+  return !!(component && _ASSEMBLY_BEARING_COMPONENTS[component]);
 }
 
 export function getPolygons(pageNum) {
@@ -584,6 +688,7 @@ export function reset() {
   _colorIdx = 0;
   _nextId = 1;
   _nextWinId = 1;
+  _nextLineId = 1;
   _undoStack = [];
   _redoStack = [];
 }
@@ -602,16 +707,25 @@ export function loadPolygons(pageNum, polygons) {
       type: p.type || "area",
       mode: p.mode || "net",
       color: POLY_COLORS[_colorIdx++ % POLY_COLORS.length],
+      component: p.component || null,
+      depth_m: p.depth_m != null ? p.depth_m : null,
+      sheet_id: p.sheet_id || null,
+      sheet_class: p.sheet_class || null,
+      assembly_preset: p.assembly_preset || null,
       _pageNum: pageNum
     };
   });
   // Update counters to avoid ID collisions
   var areaCount = 0,
-    winCount = 0;
+    winCount = 0,
+    lineCount = 0;
   for (var i = 0; i < _polygons[pageNum].length; i++) {
-    if (_polygons[pageNum][i].type === "window") winCount++;
+    var t = _polygons[pageNum][i].type;
+    if (t === "window") winCount++;
+    else if (t === "polyline") lineCount++;
     else areaCount++;
   }
   if (areaCount >= _nextId) _nextId = areaCount + 1;
   if (winCount >= _nextWinId) _nextWinId = winCount + 1;
+  if (lineCount >= _nextLineId) _nextLineId = lineCount + 1;
 }

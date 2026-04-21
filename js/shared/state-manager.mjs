@@ -30,6 +30,14 @@ const calculatedFields = new Set();
 const dirtyFields = new Set();
 const listeners = new Map();
 
+// Parallel map keyed by dim_* / garage_* field ids. Records where a dimension
+// value came from when it was not typed by the user: "pdf:<poly_id>" for a
+// single-polygon import, "pdf:sum:<id>+<id>" for an aggregated import. Once
+// the user overrides, the importer must clear (or set to "user") so the
+// provenance badge in the UI stops claiming the value came from PDF-Parser.
+// Bridge spec §3.3: persisted in exported JSON as a parallel top-level map.
+const dimensionSources = new Map();
+
 let listenersActive = true;
 let lastImportedState = {};
 let autoSaveTimer = null;
@@ -205,6 +213,7 @@ function clear() {
   dependencies.clear();
   calculatedFields.clear();
   dirtyFields.clear();
+  dimensionSources.clear();
   lastImportedState = {};
   try {
     localStorage.removeItem(STORAGE_KEY);
@@ -222,6 +231,7 @@ function clearByPrefix(prefix) {
       const old = fields.get(id);
       fields.delete(id);
       delete lastImportedState[id];
+      dimensionSources.delete(id);
       notifyListeners(id, null, old?.value, "cleared");
       removed++;
     }
@@ -231,6 +241,32 @@ function clearByPrefix(prefix) {
     autoSaveTimer = setTimeout(saveState, 1000);
   }
   return removed;
+}
+
+function getDimensionSource(fieldId) {
+  return dimensionSources.has(fieldId) ? dimensionSources.get(fieldId) : null;
+}
+
+function setDimensionSource(fieldId, src) {
+  if (!fieldId) return;
+  if (src === null || src === undefined || src === "") {
+    dimensionSources.delete(fieldId);
+  } else {
+    dimensionSources.set(fieldId, String(src));
+  }
+}
+
+function exportDimensionSources() {
+  const out = {};
+  for (const [id, src] of dimensionSources) out[id] = src;
+  return out;
+}
+
+function importDimensionSources(data) {
+  if (!data || typeof data !== "object") return;
+  for (const [id, src] of Object.entries(data)) {
+    setDimensionSource(id, src);
+  }
 }
 
 function exportState() {
@@ -269,6 +305,10 @@ export const StateManager = {
   exportState,
   importState,
   getLastImportedState,
+  getDimensionSource,
+  setDimensionSource,
+  exportDimensionSources,
+  importDimensionSources,
   parseNumeric,
   formatNumber
 };

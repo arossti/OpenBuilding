@@ -1,7 +1,7 @@
 ,"PROJECT NAME:    Sample Project DOE Prototype
 SCENARIO:              Baseline
 BEAM VERSION:     V1.1",,,,,,,,,,
-,,SELECTED PROJECT MATERIALS REVIEW,32743.13378,32743.13378,0,0,,,,MATERIAL CARBON INTENSITY,
+,,SELECTED PROJECT MATERIALS REVIEW,31616.44287,31616.44287,0,0,,,,MATERIAL CARBON INTENSITY,
 SECTION,CATEGORY,MATERIAL,"NET
 EMISSIONS
 kg CO₂e","GROSS
@@ -11,15 +11,14 @@ Short Cycle
 kg CO₂","STORAGE
 Long Cycle
 kg CO₂",QTY,,ID,MCI,MCI UNITS
-Footings & Slabs,CONTINUOUS CONCRETE FOOTINGS,"Concrete - 2501-3000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",2791.764554,2791.764554,0,0,8.965492,m³,T01|C01|S04|43fe24,311.39,kg CO₂e/m³
+Footings & Slabs,CONTINUOUS CONCRETE FOOTINGS,"Concrete - 0-2500 psi, Standard mix / NRMCA [Industry Avg | US & CA]",2506.392944,2506.392944,0,0,8.965492,m³,T01|C01|S05|949348,279.56,kg CO₂e/m³
 Footings & Slabs,CONCRETE SLABS,"Concrete - 0-2500 psi, Standard mix / NRMCA [Industry Avg | US & CA]",4703.585818,4703.585818,0,0.0,110.4,m²,T01|C06|S05|949348,42.604944,kg CO₂e/m²
 Footings & Slabs,REBAR FOR CONTINUOUS FOOTINGS,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #5",112.5513928,112.5513928,0,0.0,84.7,m,T01|C02|S02|REB005,1.328824,kg CO₂e/m
 Footings & Slabs,REINFORCING MESH FOR SLAB,"Welded wire reinforcement / Insteel Industries / 6"" x 6"" x 6/6g [US & CA]",391.5336,391.5336,0,0.0,110.4,m²,T01|C05|S01|WIR001,3.5465,kg CO₂e/m²
-Footings & Slabs,SUB-SLAB INSULATION,"EPS foam board / Type IX / R 4.2-inch, 25 psi / EPS Industry Alliance [Industry Avg | US & CA]",841.3193015,841.3193015,0,0.0,110.4,m²,T01|C08|S01|EPS001,7.620645847,kg CO₂e/m²
 Footings & Slabs,BARRIERS AND MEMBRANES,"Barrier, sheet / Polyethylene sheet / 10 mil",67.344,67.344,0,0.0,110.4,m²,T01|C15|S01|bbb033,0.61,kg CO₂e/m²
 Footings & Slabs,BASEMENT FLOORING,Rigid core vinyl flooring  / Resilient Floor Covering Institute [Industry Avg | US & CA],1584.24,1584.24,0,0.0,77.28,m²,T01|C09|S05|lvt000,20.5,kg CO₂e/m²
 Footings & Slabs,BASEMENT FLOORING,Ceramic tile / Tile Council of North America/ 18.8 kg/m2 / [Industry Avg | US & CA] ,466.992,466.992,0,0.0,33.12,m²,T01|C09|S03|CER000,14.1,kg CO₂e/m²
-Footings & Slabs,AGGREGATE BASE,Aggregate / NRMCA / US Average [Industry Avg],269.4120275,269.4120275,0,0.0,110.4,m²,T01|C10|S01|2c53be,,
+Footings & Slabs,AGGREGATE BASE,Aggregate / NRMCA / US Average [Industry Avg],269.4120275,269.4120275,0,0.0,110.4,m²,T01|C10|S01|2c53be,2.440326336,kg CO₂e/m²
 Exterior Walls,LIGHT WOOD FRAME WALLS,Wood / SPF / 2x6 Lumber / AWC & CWC [Industry Avg | US & CA],413.9987148,413.9987148,0,0.0,187.8,m²,T04|C02|S01|c309dk,,
 Exterior Walls,STRUCTURAL SHEATHING,"OSB sheathing / 5/8"" / AWC & CWC [Industry Avg | US & CA]",723.4376011,723.4376011,0,0.0,187.8,m²,T04|C04|S02|68328c,,
 Exterior Walls,BARRIERS AND MEMBRANES,Sheet Barrier Permeable / [BEAM Avg],136.155,136.155,0,0.0,187.8,m²,T04|C16|S01|SBP00X,,
@@ -42,6 +41,7 @@ Roof,ROOF DECKING,"OSB sheathing / 5/8"" / AWC & CWC [Industry Avg | US & CA]",4
 Roof,ROOFING,Asphalt Shingles / Asphalt Roofing Manufacturers Association / Fiberglass Asphalt Shingles [Industry Avg | US & CA],509.394,509.394,0,0.0,116.3,m²,T11|C05|S04|rrr110,,
 Roof,ROOF CAVITY INSULATION,Fiberglass loose fill / NAIMA /  R 2.2-inch [Industry Avg | N.America],941.2970764,941.2970764,0,0.0,110.4,m²,T11|C06|S08|INS008,,
 Roof,BARRIERS AND MEMBRANES,Ceiling Sheet Barrier / [BEAM Avg],68.61159273,68.61159273,0,0.0,110.4,m²,T11|C09|S03|csb00x,,
+,,,,,,,,,,,
 ,,,,,,,,,,,
 ,,,,,,,,,,,
 ,,,,,,,,,,,

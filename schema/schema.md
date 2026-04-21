@@ -23,7 +23,7 @@
 
 ### Recommended next action
 
-**Phase 1 + 1.5 shipped and merged to `main`.** Active workstream has pivoted to [`BEAMweb.md`](../BEAMweb.md) at repo root — a full JS port of the BEAM (Google Sheets) embodied-carbon calculator that will eventually consume this schema directly. The originally-planned Phase 3 standalone material picker has been folded into BEAMweb as one of its UI components.
+**Phase 1 + 1.5 shipped and merged to `main`.** Active workstream has pivoted to [`BEAMweb.md`](../docs/workplans/BEAMweb.md) (now under `docs/workplans/`) — a full JS port of the BEAM (Google Sheets) embodied-carbon calculator that will eventually consume this schema directly. The originally-planned Phase 3 standalone material picker has been folded into BEAMweb as one of its UI components.
 
 **Parity-then-migrate plan (locked 2026-04-18 session 3).** BEAMweb first ships matching the BEAM workbook's per-row emissions values exactly — using the precomputed NET/GROSS columns baked into the Google Sheet, not the full materials JSON DB. This keeps the initial port low-risk: same inputs produce the same outputs, which is the bar the BfCA team needs to clear before endorsing a web replacement for a tool their users already trust.
 

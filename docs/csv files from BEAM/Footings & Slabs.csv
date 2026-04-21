@@ -1,7 +1,7 @@
 , FOOTINGS & SLABS,,,,,,,,,,,,
 ,"PROJECT NAME:    Sample Project DOE Prototype
 SCENARIO:              Baseline
-BEAM VERSION:     V1.1",SECTION COMPLETE?,False,,,,"11,229   ","11,229   ",0   ,0   ,,,T01
+BEAM VERSION:     V1.1",SECTION COMPLETE?,False,,,,"10,102   ","10,102   ",0   ,0   ,,,T01
 "
 Select materials in your project using the checkboxes (col. G). Once selected, the emissions of these materials will be added to the section SUBTOTAL (G2) and to the project total. 
 
@@ -167,13 +167,13 @@ CONCRETE – 31-35 MPa – CANADA,,,,,,,,,,,,,T01|C01|S03
 ,"Concrete – 35 MPa, 20% FA, GU / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,3214.487502,3214.487502,0,0,,,T01|C01|S03|aaacc101
 ,"Concrete – 35 MPa, 20% FA, GUL / Concrete Alberta [Industry Avg | CA]",8.965492,m³,1.0,,False,2902.30907,2902.30907,0,0,,,T01|C01|S03|A12365
 CONCRETE – <= 2500 psi – N.AMERICA,,,,,,,,,,,,,T01|C01|S05
-,"Concrete - 0-2500 psi, Standard mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2506.392944,2506.392944,0,0,,Expired 2024,T01|C01|S05|949348
+,"Concrete - 0-2500 psi, Standard mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,True,2506.392944,2506.392944,0,0,,Expired 2024,T01|C01|S05|949348
 ,"Concrete - 0-2500 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2166.331832,2166.331832,0,0,,Expired 2024,T01|C01|S05|b7e1fe
 ,"Concrete - 0-2500 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,1976.173747,1976.173747,0,0,,Expired 2024,T01|C01|S05|d6132a
 ,"Concrete - 0-2500 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,1790.63289,1790.63289,0,0,,Expired 2024,T01|C01|S05|921b8b
 ,"Concrete - 0-2500 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,1602.31273,1602.31273,0,0,,Expired 2024,T01|C01|S05|1a5a48
 CONCRETE – 2501-3000 psi – N.AMERICA,,,,,,,,,,,,,T01|C01|S04
-,"Concrete - 2501-3000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,True,2791.764554,2791.764554,0,0,,Expired 2024,T01|C01|S04|43fe24
+,"Concrete - 2501-3000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2791.764554,2791.764554,0,0,,Expired 2024,T01|C01|S04|43fe24
 ,"Concrete - 2501-3000 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2406.427708,2406.427708,0,0,,Expired 2024,T01|C01|S04|a7c43b
 ,"Concrete - 2501-3000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,2190.269696,2190.269696,0,0,,Expired 2024,T01|C01|S04|809f93
 ,"Concrete - 2501-3000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",8.965492,m³,1.0,,False,1979.759943,1979.759943,0,0,,Expired 2024,T01|C01|S04|c50635
@@ -359,7 +359,7 @@ CONCRETE – 4001-5000 psi – N.AMERICA,,,,,,,,,,,,,T01|C11|S07
 ,"Concrete - 4001-5000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S07|s33340
 ,"Concrete - 4001-5000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S07|s33341
 ,"Concrete - 4001-5000 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",0,m³,1.0,,False,0,0,0,0,,Expired 2024,T01|C11|S07|s33342
-METAL PILE FOUNDATIONS,,TOTAL LENGTH,,m,,,,,,,,,T01|C03
+METAL PILE FOUNDATIONS,,TOTAL LENGTH,0.0,m,,,,,,,,,T01|C03
 STEEL HELICAL PILES 🤚,,,,,,,,,,,,,T01|C03|S01
 ,"Helical pier / Generic / 3"" Nominal Pipe, 3.5 x 3/16"" (89 x 5.5 mm), 10"" Helix, Sched 40 Galvanized steel [Industry Avg]",0,m,1.0,,False,0,0,0,0,,Expired 2021,T01|C03|S01|541b20
 STEEL SCREW PILES 🤚,,,,,,,,,,,,,T01|C03|S02
@@ -367,7 +367,7 @@ STEEL SCREW PILES 🤚,,,,,,,,,,,,,T01|C03|S02
 ,Ground screw / American Ground Screw / AGS IM4516 / 114 x 1600 mm,0,m,1.0,,False,0,0,0,0,,,T01|C03|S02|S12346
 ,Ground screw / American Ground Screw / AGS IM3316 / 76 x 1600 mm,0,m,1.0,,False,0,0,0,0,,,T01|C03|S02|S12345
 ,Ground screw / Krinner / E-Series E89x1000-E60 / 89 x 1000 mm [EU],0,m,1.0,,False,0,0,0,0,,,T01|C03|S02|S12347
-TIMBER PILE FOUNDATION,,TOTAL VOLUME,,m³,,,,,,,,,T01|C14
+TIMBER PILE FOUNDATION,,TOTAL VOLUME,0.0,m³,,,,,,,,,T01|C14
 TIMBER PILES,,,,,,,,,,,,,T01|C14|S01
 ,Wood / SPF / Lumber by volume / AWC & CWC [Industry Avg | US & CA] ,0,m³,1.0,,False,0,0,0,0,False,Expired 2025; BfCA BioC calc by mass,T01|C14|S01|9219e5
 CONCRETE SLABS,,THICKNESS,6.0,in,,,,,,,,,T01|C06
@@ -623,7 +623,7 @@ XPS FOAM BOARD,,,,,,,,,,,,,T01|C08|S08
 ,XPS foam board / SOPREMA / SOPRA-XPS (entire product line) / R 5.0-inch,110.4,m²,1.0,,False,374.4578232,374.4578232,0,0,,"A1-A3, B1",T01|C08|S08|3kglse
 EPS FOAM BOARD,,,,,,,,,,,,,T01|C08|S01
 ,"EPS foam board / Type XV / R 4.3-inch, 60 psi / EPS Industry Alliance [Industry Avg | US & CA]",110.4,m²,1.0,,False,1368.143239,1368.143239,0,0,,,T01|C08|S01|EPS000
-,"EPS foam board / Type IX / R 4.2-inch, 25 psi / EPS Industry Alliance [Industry Avg | US & CA]",110.4,m²,1.0,,True,841.3193015,841.3193015,0,0,,,T01|C08|S01|EPS001
+,"EPS foam board / Type IX / R 4.2-inch, 25 psi / EPS Industry Alliance [Industry Avg | US & CA]",110.4,m²,1.0,,False,841.3193015,841.3193015,0,0,,,T01|C08|S01|EPS001
 ,"EPS foam board / Type II / R 4.0-inch, 15 psi / EPS Industry Alliance [Industry Avg | US & CA]",110.4,m²,1.0,,False,667.0460176,667.0460176,0,0,,,T01|C08|S01|EPS002
 ,"EPS foam board / Type I / R 3.6-inch, 10 psi / EPS Industry Alliance [Industry Avg | US & CA]",110.4,m²,1.0,,False,491.91969,491.91969,0,0,,,T01|C08|S01|EPS003
 EPS FOAM BOARD WITH GRAPHITE,,,,,,,,,,,,,T01|C08|S07

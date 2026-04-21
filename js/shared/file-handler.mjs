@@ -85,6 +85,8 @@ function importJson(data) {
     for (const [fieldId, value] of Object.entries(data.fields || data)) {
       StateManager.setValue(fieldId, value, StateManager.VALUE_STATES.IMPORTED);
     }
+    // Restore PDF-Parser provenance if present (Phase 4b.1+ exports carry this).
+    if (data.dimension_sources) StateManager.importDimensionSources(data.dimension_sources);
   });
   showStatus(`Imported ${Object.keys(data.fields || data).length} fields from JSON`, "success");
 }
@@ -144,11 +146,15 @@ function parseCsvRow(row) {
 
 function exportJson() {
   const state = StateManager.exportState();
+  const sources = StateManager.exportDimensionSources();
   const payload = {
     format: "beamweb-project",
     version: 1,
     exportedAt: new Date().toISOString(),
-    fields: state
+    fields: state,
+    // Parallel map: dimension field id → provenance string (e.g. "pdf:poly_123").
+    // Empty when nothing has been imported from PDF-Parser yet.
+    dimension_sources: sources
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const name = sanitize(state.project_name || "BEAMweb-project") + ".json";

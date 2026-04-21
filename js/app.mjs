@@ -21,6 +21,7 @@ import * as PolygonTool from "./polygon-tool.mjs";
 import * as VectorSnap from "./vector-snap.mjs";
 import * as ScheduleParser from "./schedule-parser.mjs";
 import * as ProjectStore from "./project-store.mjs";
+import * as IDBStore from "./shared/indexed-db-store.mjs";
 
 /* ── DOM refs ─────────────────────────────────────────── */
 
@@ -29,6 +30,10 @@ var _currentPage = 0;
 var _currentTool = "navigate";
 var _measureMethod = "rectangle"; // "polygon" or "rectangle"
 var _windowMode = "net"; // "net" or "add"
+// Phase 4b.1 — bridge metadata selected at draw time. Stamped onto each
+// new polygon's record via opts in startPolygon. Null when not classified.
+var _componentTag = null;
+var _assemblyPreset = null;
 var _calibPoint1 = null;
 var _rectStart = null; // first corner for bounding rectangle
 var _rectCurrent = null; // live cursor position for rubber-band preview
@@ -82,6 +87,7 @@ function init() {
   els.thumbStrip = document.getElementById("thumb-strip");
   els.sheetInfo = document.getElementById("sheet-info");
   els.measurePanel = document.getElementById("measure-panel");
+  els.paramsPanel = document.getElementById("params-panel");
   els.statusBar = document.getElementById("status-bar");
   els.zoomLabel = document.getElementById("zoom-label");
   els.scaleLabel = document.getElementById("scale-label");
@@ -110,8 +116,19 @@ function init() {
   _bindToolbar();
   _bindKeyboard();
 
+  // Sync the component-tag select with the starting tool (navigate ⇒ hidden).
+  _rebuildComponentTagSelect();
+  _renderParamsPanel();
+
   setStatus("Ready — drop a PDF or click Browse", "ready");
   console.log("[PDF-Parser] Ready");
+
+  // Attempt to restore the most recent session from IndexedDB. Silent no-op
+  // if nothing is persisted yet. Status message updates on success.
+  _tryRestoreLastSession().then(function (restored) {
+    if (!restored) return;
+    console.log("[PDF-Parser] Restore initiated from IndexedDB");
+  });
 }
 
 /* ── File loading ─────────────────────────────────────── */
@@ -149,9 +166,14 @@ function _loadFile(file) {
 
 function loadSample() {
   setStatus("Loading sample PDF...", "busy");
-  fetch("sample.pdf")
+  // Source lives at docs/sample.pdf; staged into data/sample.pdf by
+  // `npm run stage:data` locally and by the Pages deploy workflow.
+  fetch("data/sample.pdf")
     .then(function (resp) {
-      if (!resp.ok) throw new Error("Could not fetch sample.pdf (" + resp.status + ")");
+      if (!resp.ok)
+        throw new Error(
+          "Could not fetch sample.pdf (" + resp.status + "). Run `npm run stage:data` to copy the fixture into data/."
+        );
       return resp.arrayBuffer();
     })
     .then(function (buffer) {
@@ -162,7 +184,8 @@ function loadSample() {
     });
 }
 
-function loadPdf(buffer, fileName) {
+function loadPdf(buffer, fileName, opts) {
+  opts = opts || {};
   console.log("[PDF-Parser] Loading:", fileName, "(" + (buffer.byteLength / 1048576).toFixed(1) + " MB)");
 
   Loader.reset();
@@ -185,6 +208,14 @@ function loadPdf(buffer, fileName) {
     .then(function (result) {
       console.log("[PDF-Parser] Loaded:", result.pageCount, "pages");
       ProjectStore.initFromPdf(fileName, result.pageCount);
+      // Persist PDF bytes for cross-session restore — skipped in the restore
+      // path since the bytes are already in IndexedDB.
+      if (!opts.skipBlobPersist) {
+        var pdfBlob = new Blob([buffer], { type: "application/pdf" });
+        ProjectStore.setPdfBytes(pdfBlob).catch(function (err) {
+          console.warn("[PDF-Parser] PDF blob persistence failed:", err);
+        });
+      }
 
       // Show loading overlay, hide drop zone
       els.dropZone.style.display = "none";
@@ -214,12 +245,39 @@ function loadPdf(buffer, fileName) {
               if (results[i].classification === "plan") planCount++;
             }
 
+            // Restore path — overlay the saved project on top of the fresh
+            // init + classify that just ran. restoreProject replaces the
+            // ProjectStore payload; _hydrateFromProjectData also loads
+            // polygons, calibrations, and rulers into the live modules.
+            var restored = null;
+            if (opts.restoreData) {
+              restored = _hydrateFromProjectData(opts.restoreData, result.pageCount);
+              _updateThumbnailLabels(
+                ProjectStore.getProject().pages.map(function (p) {
+                  return { pageNum: p.pageNum, sheetId: p.sheetId, sheetTitle: p.sheetTitle };
+                })
+              );
+            }
+
             // Hide loading, show viewer
             loadingOverlay.style.display = "none";
             els.viewerWrap.style.display = "";
 
-            setStatus("Found " + planCount + " plan sheets. Press S to confirm scale.", "ready");
+            if (restored) {
+              setStatus(
+                "Session restored — " + restored.areas + " areas, " + restored.windows + " windows, " + restored.rulers + " rulers",
+                "ready"
+              );
+            } else {
+              setStatus("Found " + planCount + " plan sheets. Press S to confirm scale.", "ready");
+            }
+            // Refresh the geometry-params panel so restored project.params
+            // populate (or fresh inits clear) the sidebar inputs.
+            _renderParamsPanel();
             goToPage(1);
+
+            // Re-enable autosave after the restore dust has settled.
+            if (opts.restoreData) ProjectStore.resumeAutosave();
 
             // Background: find room schedule
             ScheduleParser.findRoomScheduleInDocument().then(function (schedData) {
@@ -254,6 +312,37 @@ function loadPdf(buffer, fileName) {
       setStatus("Error loading PDF: " + err.message, "error");
       loadingOverlay.style.display = "none";
       console.error(err);
+      if (opts.restoreData) ProjectStore.resumeAutosave();
+    });
+}
+
+// Auto-restore the most-recently-touched session from IndexedDB. Returns a
+// Promise<boolean> — true if a restore was kicked off, false if nothing to
+// restore (or restore was declined). Restore reuses loadPdf's render pipeline
+// so calibrations, classifications, and polygons all flow through the same
+// code path the JSON importer already exercises.
+function _tryRestoreLastSession() {
+  return IDBStore.listProjects()
+    .then(function (projects) {
+      if (!projects || projects.length === 0) return false;
+      var latest = projects[0];
+      if (!latest.projectJson || !latest.projectJson.pages) return false;
+      return IDBStore.getPdfBytes(latest.uuid).then(function (blob) {
+        if (!blob) return false;
+        setStatus("Restoring " + latest.pdfFileName + "\u2026", "busy");
+        ProjectStore.pauseAutosave();
+        return blob.arrayBuffer().then(function (buffer) {
+          loadPdf(buffer, latest.pdfFileName, {
+            skipBlobPersist: true,
+            restoreData: latest.projectJson
+          });
+          return true;
+        });
+      });
+    })
+    .catch(function (err) {
+      console.warn("[PDF-Parser] restore failed:", err);
+      return false;
     });
 }
 
@@ -519,9 +608,15 @@ function _handleOverlayClick(e) {
   var pt = Viewer.eventToPdfCoords(e);
   var hitRadius = 10 / (Viewer.getZoom() * (150 / 72)); // ~10 screen pixels → PDF units
 
+  // Polyline tool owns its first click: always plant a new polyline vertex
+  // rather than editing an adjacent area polygon. Skipping these hit-tests
+  // prevents interior walls drawn up to a slab edge from accidentally
+  // dragging/inserting vertices on the slab polygon.
+  var isPolylineTool = _currentTool === "polyline";
+
   // Priority 1: Click near an existing vertex — start drag
   var hit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
-  if (hit && !PolygonTool.isDrawing()) {
+  if (hit && !PolygonTool.isDrawing() && !isPolylineTool) {
     PolygonTool.startDrag(_currentPage, hit.polyIdx, hit.vertIdx);
     Viewer.onOverlayMouseMove(_handleDragMove);
     _bindDragEnd();
@@ -532,7 +627,7 @@ function _handleOverlayClick(e) {
 
   // Priority 2: Click near an edge — insert vertex and start dragging it
   var edgeHit = PolygonTool.hitTestEdge(_currentPage, pt, hitRadius);
-  if (edgeHit && !PolygonTool.isDrawing()) {
+  if (edgeHit && !PolygonTool.isDrawing() && !isPolylineTool) {
     var newIdx = PolygonTool.insertVertex(_currentPage, edgeHit.polyIdx, edgeHit.edgeIdx, edgeHit.point);
     if (newIdx >= 0) {
       PolygonTool.startDrag(_currentPage, edgeHit.polyIdx, newIdx);
@@ -552,6 +647,7 @@ function _handleOverlayClick(e) {
 
   if (_currentTool === "measure") _handleMeasureClick(pt);
   else if (_currentTool === "window") _handleWindowClick(pt);
+  else if (_currentTool === "polyline") _handlePolylineClick(pt);
   else if (_currentTool === "calibrate") _handleCalibrateClick(pt);
   else if (_currentTool === "ruler") _handleRulerClick(pt);
 }
@@ -606,6 +702,148 @@ function setWindowMode(mode) {
   document.getElementById("window-mode").value = mode;
 }
 
+/* ── Phase 4b.1 — Component tag + assembly preset ────── */
+
+// Options per tool — aligned to the bridge spec component taxonomy
+// (docs/workplans/PDF-BEAMweb-BRIDGE.md §3.2). Tags drive which BEAMweb
+// dim fields a polygon feeds via js/shared/polygon-map.mjs.
+var COMPONENT_OPTIONS = {
+  measure: [
+    { value: "", label: "(no tag)" },
+    // Elevation sheets — surface-area tags
+    { value: "wall_exterior", label: "Wall — exterior (elevation)" },
+    { value: "wall_party", label: "Wall — party / demising (elevation)" },
+    // Plan sheets — area tags
+    { value: "slab_foundation", label: "Slab — foundation (plan)" },
+    { value: "slab_above_grade", label: "Slab — above-grade (plan)" },
+    { value: "exterior_perimeter", label: "Exterior perimeter (plan)" },
+    { value: "pad_pier", label: "Pad / pier (plan)" },
+    { value: "roof_plan", label: "Roof — plan area" },
+    { value: "roof_cavity", label: "Roof cavity insulation (plan)" },
+    // Informational — not mapped to a BEAMweb dim
+    { value: "footprint", label: "Building footprint (reference)" },
+    { value: "site_area", label: "Site area (reference)" },
+    { value: "building_envelope", label: "Building envelope (reference)" }
+  ],
+  polyline: [
+    { value: "", label: "(no tag)" },
+    { value: "wall_interior", label: "Wall — interior" },
+    { value: "footing_interior", label: "Footing — interior" }
+  ]
+};
+
+// Component tags where an assembly preset is meaningful — wall assemblies
+// carry cladding + insulation + framing mixes that seed the downstream
+// BEAMweb Phase 4 assembly tabs. Slabs, roofs, and footings take their
+// material spec from the consuming tab, not from the polygon.
+var ASSEMBLY_COMPONENTS = {
+  wall_exterior: true,
+  wall_party: true,
+  wall_interior: true,
+  exterior_perimeter: true
+};
+
+// Geometry parameters — scalars that lift polygon measurements into BEAMweb
+// dimensions (wall height × perimeter → area, etc.). Field IDs match the
+// param_* names on BEAMweb's PROJECT tab so the values round-trip via the
+// bridge. Stored on the Parser's project.params in IndexedDB.
+var GEOMETRY_PARAMS = [
+  { id: "param_wall_height_m", label: "Wall Height", unit: "m", step: 0.01 },
+  { id: "param_basement_height_m", label: "Basement Height", unit: "m", step: 0.01 },
+  { id: "param_roof_pitch_deg", label: "Roof Pitch", unit: "\u00b0", step: 0.5 },
+  { id: "param_footing_height_m", label: "Footing Height", unit: "m", step: 0.01 },
+  { id: "param_footing_width_m", label: "Footing Width", unit: "m", step: 0.01 }
+];
+
+// Render the Geometry Parameters panel in the sidebar. Values persist via
+// ProjectStore.setParam → project.params → IndexedDB (where BEAMweb picks
+// them up as a fallback when its own StateManager param_* are blank).
+function _renderParamsPanel() {
+  if (!els.paramsPanel) return;
+  var html = '<div class="pdf-params-header">Geometry Parameters</div>';
+  html += '<div class="pdf-params-hint">Fed to BEAMweb on import \u2014 lifts perimeters \u2192 areas + areas \u2192 volumes.</div>';
+  html += '<div class="pdf-params-rows">';
+  for (var i = 0; i < GEOMETRY_PARAMS.length; i++) {
+    var p = GEOMETRY_PARAMS[i];
+    var current = ProjectStore.getParam(p.id);
+    var val = current != null ? current : "";
+    html +=
+      '<div class="pdf-params-row">' +
+      '<label class="pdf-params-label" for="pdf-param-' +
+      p.id +
+      '">' +
+      p.label +
+      "</label>" +
+      '<input class="pdf-params-input" id="pdf-param-' +
+      p.id +
+      '" type="number" step="' +
+      p.step +
+      '" value="' +
+      val +
+      '" data-param-key="' +
+      p.id +
+      '" />' +
+      '<span class="pdf-params-unit">' +
+      p.unit +
+      "</span>" +
+      "</div>";
+  }
+  html += "</div>";
+  els.paramsPanel.innerHTML = html;
+
+  var inputs = els.paramsPanel.querySelectorAll(".pdf-params-input");
+  for (var j = 0; j < inputs.length; j++) {
+    inputs[j].addEventListener("change", function () {
+      ProjectStore.setParam(this.dataset.paramKey, this.value);
+    });
+  }
+}
+
+function _rebuildComponentTagSelect() {
+  var sel = document.getElementById("component-tag");
+  if (!sel) return;
+  var opts = COMPONENT_OPTIONS[_currentTool];
+  if (!opts) {
+    sel.style.display = "none";
+    document.getElementById("assembly-preset").style.display = "none";
+    return;
+  }
+  sel.style.display = "";
+  sel.innerHTML = "";
+  for (var i = 0; i < opts.length; i++) {
+    var o = document.createElement("option");
+    o.value = opts[i].value;
+    o.textContent = opts[i].label;
+    sel.appendChild(o);
+  }
+  // Preserve the user's selection if still valid under the new tool.
+  var keep = false;
+  for (var j = 0; j < opts.length; j++) {
+    if (opts[j].value === _componentTag) {
+      keep = true;
+      break;
+    }
+  }
+  if (!keep) _componentTag = null;
+  sel.value = _componentTag || "";
+  _updateAssemblyPresetVisibility();
+}
+
+function _updateAssemblyPresetVisibility() {
+  var presetSel = document.getElementById("assembly-preset");
+  if (!presetSel) return;
+  presetSel.style.display = _componentTag && ASSEMBLY_COMPONENTS[_componentTag] ? "" : "none";
+}
+
+function setComponentTag(value) {
+  _componentTag = value || null;
+  _updateAssemblyPresetVisibility();
+}
+
+function setAssemblyPreset(value) {
+  _assemblyPreset = value || null;
+}
+
 /* ── Generic polygon/rectangle handlers (shared by Measure + Window) ── */
 
 function _handleGenericPolygonClick(pt, opts) {
@@ -650,7 +888,7 @@ function _handleMeasureClick(pt) {
   if (!ScaleManager.isCalibrated(_currentPage) && !PolygonTool.isDrawing() && !_rectStart) {
     setStatus("No confirmed scale. Press S to set scale first, or measurements will be uncalibrated.", "error");
   }
-  var opts = { type: "area" };
+  var opts = { type: "area", component: _componentTag, assembly_preset: _assemblyPreset };
   if (_measureMethod === "rectangle") {
     _handleGenericRectangleClick(pt, opts);
   } else {
@@ -662,7 +900,9 @@ function _handleWindowClick(pt) {
   if (!ScaleManager.isCalibrated(_currentPage) && !PolygonTool.isDrawing() && !_rectStart) {
     setStatus("No confirmed scale. Press S to set scale first, or measurements will be uncalibrated.", "error");
   }
-  var opts = { type: "window", mode: _windowMode };
+  // Window tool auto-tags as window_opening — the component picker is scoped
+  // to measure/polyline tools where classification is ambiguous.
+  var opts = { type: "window", mode: _windowMode, component: "window_opening" };
   if (_measureMethod === "rectangle") {
     _handleGenericRectangleClick(pt, opts);
   } else {
@@ -670,12 +910,27 @@ function _handleWindowClick(pt) {
   }
 }
 
+function _handlePolylineClick(pt) {
+  if (!ScaleManager.isCalibrated(_currentPage) && !PolygonTool.isDrawing()) {
+    setStatus("No confirmed scale. Press S to set scale first, or measurements will be uncalibrated.", "error");
+  }
+  var opts = { type: "polyline", component: _componentTag, assembly_preset: _assemblyPreset };
+  // Polylines are open paths — reuse polygon-click flow but closePolygon()
+  // terminates at the double-click (enter key) rather than snapping to first vertex.
+  if (!PolygonTool.isDrawing()) {
+    PolygonTool.startPolygon(_currentPage, null, opts);
+    PolygonTool.addVertex(pt);
+    setStatus("Click vertices... press Enter or double-click to finish", "busy");
+  } else {
+    PolygonTool.addVertex(pt);
+  }
+  Viewer.requestRedraw();
+}
+
 function _onPolygonComplete(opts) {
-  var isWindow = opts && opts.type === "window";
-  setStatus(
-    (isWindow ? "Window" : "Area") + " measured" + (ScaleManager.isCalibrated(_currentPage) ? "" : " (uncalibrated)"),
-    "ready"
-  );
+  var type = opts && opts.type;
+  var label = type === "window" ? "Window" : type === "polyline" ? "Polyline" : "Area";
+  setStatus(label + " measured" + (ScaleManager.isCalibrated(_currentPage) ? "" : " (uncalibrated)"), "ready");
   _refreshMeasurements();
   ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
 }
@@ -865,9 +1120,12 @@ function _handleOverlayMouseMove(e) {
   // Redraw if snap state changed (to show/hide indicator)
   if (_snapTarget !== prevSnap) Viewer.requestRedraw();
 
-  // Show contextual cursor when hovering near draggable geometry
+  // Show contextual cursor when hovering near draggable geometry — but not
+  // while the polyline tool is active, since that tool ignores drag-edit
+  // hit-tests (see _handleOverlayClick). Showing the move/cell cursor there
+  // would mislead the user.
   var wrap = document.getElementById("viewer-wrap");
-  if (!PolygonTool.isDrawing() && !_rectStart) {
+  if (!PolygonTool.isDrawing() && !_rectStart && _currentTool !== "polyline") {
     var vertHit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
     if (vertHit) {
       if (wrap) wrap.style.cursor = "move";
@@ -882,6 +1140,7 @@ function _handleOverlayMouseMove(e) {
   var cursorMap = {
     measure: "crosshair",
     window: "crosshair",
+    polyline: "crosshair",
     calibrate: "crosshair",
     ruler: "crosshair",
     navigate: "default"
@@ -1112,12 +1371,16 @@ function setTool(tool) {
   var cursorMap = {
     measure: "crosshair",
     window: "crosshair",
+    polyline: "crosshair",
     calibrate: "crosshair",
     ruler: "crosshair",
     navigate: "default"
   };
   var wrap = document.getElementById("viewer-wrap");
   if (wrap) wrap.style.cursor = cursorMap[tool] || "default";
+  // Repopulate the component-tag options for the new tool (measure vs polyline
+  // have different taxonomies; other tools hide the selects entirely).
+  _rebuildComponentTagSelect();
 }
 
 /* ── Keyboard ─────────────────────────────────────────── */
@@ -1167,6 +1430,15 @@ function _bindKeyboard() {
     }
 
     switch (e.key) {
+      case "Enter":
+        // Finalize in-progress polyline. Polylines don't auto-close on
+        // first-vertex snap like polygons, so they need an explicit end key.
+        if (PolygonTool.isDrawing() && _currentTool === "polyline") {
+          PolygonTool.closePolygon();
+          _onPolygonComplete({ type: "polyline" });
+          Viewer.requestRedraw();
+        }
+        break;
       case "Escape":
         // Cascade: cancel the most immediate in-progress action
         // 0a. Summary table open? Close it.
@@ -1269,6 +1541,9 @@ function _bindKeyboard() {
         break;
       case "w":
         setTool("window");
+        break;
+      case "p":
+        setTool("polyline");
         break;
       case "r":
         setMeasureMethod(_measureMethod === "polygon" ? "rectangle" : "polygon");
@@ -1410,14 +1685,32 @@ function _updateMeasurements() {
   var walls = assoc.walls;
   var orphans = assoc.orphanWindows;
 
-  if (walls.length === 0 && orphans.length === 0) {
+  // Polylines — collected separately since they have length-only measurements.
+  var allMeas = PolygonTool.getAllMeasurements(_currentPage);
+  var polylines = [];
+  var allPolys = PolygonTool.getPolygons(_currentPage);
+  for (var pi = 0; pi < allMeas.length; pi++) {
+    if (allMeas[pi].type === "polyline") {
+      // Find the raw array index for delete/rename wiring.
+      for (var pj = 0; pj < allPolys.length; pj++) {
+        if (allPolys[pj].id === allMeas[pi].id) {
+          polylines.push({ measurement: allMeas[pi], polyIdx: pj });
+          break;
+        }
+      }
+    }
+  }
+
+  if (walls.length === 0 && orphans.length === 0 && polylines.length === 0) {
     els.measurePanel.innerHTML =
-      "<p class='empty'>No measurements on this page.<br><span style='font-size:10px;color:var(--text-dim);'>Press <b>M</b> to measure areas, <b>W</b> for windows.</span></p>";
+      "<p class='empty'>No measurements on this page.<br><span style='font-size:10px;color:var(--text-dim);'>Press <b>M</b> to measure areas, <b>W</b> for windows, <b>P</b> for polylines.</span></p>";
     return;
   }
 
   var hasScale =
-    (walls.length > 0 && walls[0].measurement.calibrated) || (orphans.length > 0 && orphans[0].measurement.calibrated);
+    (walls.length > 0 && walls[0].measurement.calibrated) ||
+    (orphans.length > 0 && orphans[0].measurement.calibrated) ||
+    (polylines.length > 0 && polylines[0].measurement.calibrated);
   var html = "";
   var netTotalM2 = 0,
     netTotalFt2 = 0;
@@ -1550,6 +1843,36 @@ function _updateMeasurements() {
         html += "<td class='num' colspan='2'>\u2014</td>";
       }
       html += "<td class='del-cell' data-poly-idx='" + orphans[o].polyIdx + "' title='Delete'>\u00D7</td></tr>";
+    }
+    html += "</tbody></table>";
+  }
+
+  // ── Polylines (linear features — interior walls, interior footings) ──
+  if (polylines.length > 0) {
+    html += "<div class='measure-header' style='margin-top:8px;color:#e63946;'>Polylines</div>";
+    html += "<table><thead><tr><th>Label</th>";
+    if (hasScale) {
+      html += "<th>m</th><th>ft</th>";
+    } else {
+      html += "<th colspan='2' style='color:var(--gold);font-size:10px;'>No scale</th>";
+    }
+    html += "<th></th></tr></thead><tbody>";
+    for (var pk = 0; pk < polylines.length; pk++) {
+      var pm = polylines[pk].measurement;
+      html += "<tr style='color:#e63946;'>";
+      html +=
+        "<td class='label-cell' data-poly-idx='" +
+        polylines[pk].polyIdx +
+        "' title='Click to rename'>" +
+        pm.label +
+        "</td>";
+      if (hasScale && pm.lengthM !== null) {
+        html += "<td class='num'>" + pm.lengthM.toFixed(2) + "</td>";
+        html += "<td class='num'>" + pm.lengthFt.toFixed(2) + "</td>";
+      } else {
+        html += "<td class='num' colspan='2'>\u2014</td>";
+      }
+      html += "<td class='del-cell' data-poly-idx='" + polylines[pk].polyIdx + "' title='Delete'>\u00D7</td></tr>";
     }
     html += "</tbody></table>";
   }
@@ -1782,13 +2105,82 @@ function closeSummaryTable() {
   document.getElementById("summary-panel").classList.remove("visible");
 }
 
+// Pick a reliable descriptor for a sheet header. The title-block scan in
+// sheet-classifier.mjs is best-effort and regularly picks up disclaimer /
+// general-notes body text when the title block is missing or atypical — so
+// only show sheetTitle if it's short and doesn't look like a sentence. In
+// every other case, fall back to the deterministic classification
+// ("Plan", "Elevation", etc.).
+function _buildSheetTail(page) {
+  var classification = page.classification ? _capitalize(page.classification) : "";
+  var title = (page.sheetTitle || "").trim();
+  var looksLikeBodyText = title.length > 50 || /^(this|the following|all\s|general\s+notes|notes?:|drawings?\s)/i.test(title);
+  if (title && !looksLikeBodyText) return " \u2014 " + title;
+  if (classification) return " \u2014 " + classification;
+  return "";
+}
+
+function _capitalize(s) {
+  if (!s) return "";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// Assembly-preset option set. Mirrors the toolbar select in pdfparser.html —
+// kept inline here so re-classifying from the Summary Table doesn't require
+// fishing the option list out of the DOM.
+var ASSEMBLY_PRESET_OPTIONS = [
+  { value: "", label: "(no preset)" },
+  { value: "wood_2x4", label: "Wood 2x4" },
+  { value: "wood_2x6", label: "Wood 2x6" },
+  { value: "wood_2x8", label: "Wood 2x8" },
+  { value: "wood_2x10", label: "Wood 2x10" },
+  { value: "steel_stud", label: "Steel stud" },
+  { value: "icf", label: "ICF" },
+  { value: "concrete_block", label: "Concrete block" },
+  { value: "other", label: "Other" }
+];
+
+function _renderTagSelect(polyType, polyIdx, pageNum, currentValue, small) {
+  if (polyType === "window") {
+    // Windows are auto-tagged; keep static.
+    var sizeAttr = small ? " style='font-size:10px;'" : "";
+    return "<td class='tag-cell'" + sizeAttr + ">" + (currentValue || "window_opening") + "</td>";
+  }
+  var toolKey = polyType === "polyline" ? "polyline" : "measure";
+  var opts = COMPONENT_OPTIONS[toolKey] || [];
+  var html = "<td class='tag-cell'" + (small ? " style='font-size:10px;'" : "") + ">";
+  html += "<select class='summary-tag-select bw-inline-select' data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "'>";
+  for (var i = 0; i < opts.length; i++) {
+    var sel = opts[i].value === (currentValue || "") ? " selected" : "";
+    html += "<option value='" + opts[i].value + "'" + sel + ">" + opts[i].label + "</option>";
+  }
+  html += "</select></td>";
+  return html;
+}
+
+function _renderPresetSelect(component, polyIdx, pageNum, currentPreset, small) {
+  var sizeAttr = small ? " style='font-size:10px;'" : "";
+  if (!PolygonTool.componentCarriesPreset(component)) {
+    return "<td class='preset-cell'" + sizeAttr + ">\u2014</td>";
+  }
+  var html = "<td class='preset-cell'" + sizeAttr + ">";
+  html += "<select class='summary-preset-select bw-inline-select' data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "'>";
+  for (var i = 0; i < ASSEMBLY_PRESET_OPTIONS.length; i++) {
+    var sel = ASSEMBLY_PRESET_OPTIONS[i].value === (currentPreset || "") ? " selected" : "";
+    html += "<option value='" + ASSEMBLY_PRESET_OPTIONS[i].value + "'" + sel + ">" + ASSEMBLY_PRESET_OPTIONS[i].label + "</option>";
+  }
+  html += "</select></td>";
+  return html;
+}
+
 function _renderSummaryTable() {
   var project = ProjectStore.getProject();
   var html = "<table><thead><tr>";
   html += "<th>Sheet</th><th>Label</th>";
+  html += "<th>Type</th><th>Tag</th><th>Preset</th>";
   html += "<th>Gross m\u00B2</th><th>Net m\u00B2</th>";
   html += "<th>Gross ft\u00B2</th><th>Net ft\u00B2</th>";
-  html += "<th>Perimeter m</th><th></th>";
+  html += "<th>Length / Perim m</th><th></th>";
   html += "</tr></thead><tbody>";
 
   var grandGrossM2 = 0,
@@ -1802,14 +2194,28 @@ function _renderSummaryTable() {
     var page = project.pages[p];
     var pageNum = page.pageNum;
     var assoc = PolygonTool.buildAssociationMap(pageNum);
-    if (assoc.walls.length === 0 && assoc.orphanWindows.length === 0) continue;
+    // Polylines are linear features — collected separately since they don't
+    // associate with walls/windows and carry length instead of area.
+    var allMeas = PolygonTool.getAllMeasurements(pageNum);
+    var allPolys = PolygonTool.getPolygons(pageNum);
+    var polylines = [];
+    for (var mi = 0; mi < allMeas.length; mi++) {
+      if (allMeas[mi].type !== "polyline") continue;
+      for (var mj = 0; mj < allPolys.length; mj++) {
+        if (allPolys[mj].id === allMeas[mi].id) {
+          polylines.push({ measurement: allMeas[mi], polyIdx: mj });
+          break;
+        }
+      }
+    }
+    if (assoc.walls.length === 0 && assoc.orphanWindows.length === 0 && polylines.length === 0) continue;
 
     var sheetLabel = page.sheetId || "Page " + pageNum;
-    var sheetTitle = page.sheetTitle ? " \u2014 " + page.sheetTitle : "";
+    var tail = _buildSheetTail(page);
     hasAnyData = true;
 
     // Sheet header row
-    html += "<tr class='summary-sheet-row'><td colspan='8'>" + sheetLabel + sheetTitle + "</td></tr>";
+    html += "<tr class='summary-sheet-row'><td colspan='11'>" + sheetLabel + tail + "</td></tr>";
 
     var pageGrossM2 = 0,
       pageNetM2 = 0,
@@ -1864,6 +2270,9 @@ function _renderSummaryTable() {
         wm.label +
         netSuffix +
         "</td>";
+      html += "<td class='type-cell'>area</td>";
+      html += _renderTagSelect("area", wall.polyIdx, pageNum, wm.component, false);
+      html += _renderPresetSelect(wm.component, wall.polyIdx, pageNum, wm.assembly_preset, false);
       if (wm.areaM2 !== null) {
         html += "<td class='num'>" + wm.areaM2.toFixed(2) + "</td>";
         html += "<td class='num'>" + wallNetM2.toFixed(2) + "</td>";
@@ -1899,6 +2308,9 @@ function _renderSummaryTable() {
             " " +
             cm.label +
             "</td>";
+          html += "<td class='type-cell' style='font-size:10px;'>window</td>";
+          html += _renderTagSelect("window", child.polyIdx, pageNum, cm.component, true);
+          html += _renderPresetSelect(cm.component, child.polyIdx, pageNum, cm.assembly_preset, true);
           if (cm.areaM2 !== null) {
             html += "<td class='num' style='font-size:10px;'>" + cPrefix + cm.areaM2.toFixed(2) + "</td>";
             html += "<td class='num' style='font-size:10px;'></td>";
@@ -1937,6 +2349,9 @@ function _renderSummaryTable() {
         "' title='Click to rename'>" +
         om.label +
         " (unassociated)</td>";
+      html += "<td class='type-cell'>window</td>";
+      html += _renderTagSelect("window", assoc.orphanWindows[o].polyIdx, pageNum, om.component, false);
+      html += _renderPresetSelect(om.component, assoc.orphanWindows[o].polyIdx, pageNum, om.assembly_preset, false);
       if (om.areaM2 !== null) {
         html += "<td class='num'>" + oPrefix + om.areaM2.toFixed(2) + "</td><td class='num'></td>";
         html += "<td class='num'>" + oPrefix + om.areaFt2.toFixed(2) + "</td><td class='num'></td>";
@@ -1953,9 +2368,39 @@ function _renderSummaryTable() {
       html += "</tr>";
     }
 
-    // Page subtotal
+    // Polyline rows — linear features (interior walls, interior footings).
+    // Length goes in the shared "Length / Perim m" column; area columns blank.
+    for (var pk = 0; pk < polylines.length; pk++) {
+      var ple = polylines[pk];
+      var pm = ple.measurement;
+      html += "<tr style='color:#e63946;'>";
+      html += "<td></td>";
+      html +=
+        "<td class='label-cell' data-poly-idx='" +
+        ple.polyIdx +
+        "' data-page-num='" +
+        pageNum +
+        "' title='Click to rename'>" +
+        pm.label +
+        "</td>";
+      html += "<td class='type-cell'>polyline</td>";
+      html += _renderTagSelect("polyline", ple.polyIdx, pageNum, pm.component, false);
+      html += _renderPresetSelect(pm.component, ple.polyIdx, pageNum, pm.assembly_preset, false);
+      html += "<td class='num' colspan='4'>\u2014</td>";
+      html += "<td class='num'>" + (pm.lengthM !== null ? pm.lengthM.toFixed(2) : "") + "</td>";
+      html +=
+        "<td class='del-cell' data-poly-idx='" +
+        ple.polyIdx +
+        "' data-page-num='" +
+        pageNum +
+        "' title='Delete'>\u00D7</td>";
+      html += "</tr>";
+    }
+
+    // Page subtotal — only meaningful when the page has area measurements.
     if (assoc.walls.length > 1 || assoc.orphanWindows.length > 0) {
       html += "<tr class='summary-total-row'><td></td><td>" + sheetLabel + " Total</td>";
+      html += "<td colspan='3'></td>";
       html += "<td class='num'>" + pageGrossM2.toFixed(2) + "</td>";
       html += "<td class='num'>" + pageNetM2.toFixed(2) + "</td>";
       html += "<td class='num'>" + pageGrossFt2.toFixed(2) + "</td>";
@@ -1972,6 +2417,7 @@ function _renderSummaryTable() {
   // Grand total
   if (hasAnyData) {
     html += "<tr class='summary-grand-total'><td></td><td>Grand Total</td>";
+    html += "<td colspan='3'></td>";
     html += "<td class='num'>" + grandGrossM2.toFixed(2) + "</td>";
     html += "<td class='num'>" + grandNetM2.toFixed(2) + "</td>";
     html += "<td class='num'>" + grandGrossFt2.toFixed(2) + "</td>";
@@ -2029,6 +2475,34 @@ function _renderSummaryTable() {
         Viewer.requestRedraw();
       }
       setStatus("Measurement deleted", "ready");
+    });
+  }
+
+  // Bind inline Tag + Preset selects — changing either one re-classifies
+  // the polygon, persists via savePolygons, and re-renders the table (so
+  // the preset column visibility updates when Tag toggles in/out of a
+  // wall-type component).
+  var tagSelects = panel.querySelectorAll(".summary-tag-select");
+  for (var ts = 0; ts < tagSelects.length; ts++) {
+    tagSelects[ts].addEventListener("change", function () {
+      var idx = parseInt(this.dataset.polyIdx, 10);
+      var pg = parseInt(this.dataset.pageNum, 10);
+      PolygonTool.setComponent(pg, idx, this.value);
+      ProjectStore.savePolygons(pg, PolygonTool.getPolygons(pg));
+      _renderSummaryTable();
+      if (pg === _currentPage) _refreshMeasurements();
+      setStatus("Tag updated", "ready");
+    });
+  }
+
+  var presetSelects = panel.querySelectorAll(".summary-preset-select");
+  for (var ps = 0; ps < presetSelects.length; ps++) {
+    presetSelects[ps].addEventListener("change", function () {
+      var idx = parseInt(this.dataset.polyIdx, 10);
+      var pg = parseInt(this.dataset.pageNum, 10);
+      PolygonTool.setAssemblyPreset(pg, idx, this.value);
+      ProjectStore.savePolygons(pg, PolygonTool.getPolygons(pg));
+      setStatus("Preset updated", "ready");
     });
   }
 }
@@ -2094,6 +2568,43 @@ function _bindJsonImport() {
   }
 }
 
+// Hydrate live modules (PolygonTool, ScaleManager, ruler state) from a
+// persisted project JSON. Used by both JSON import and IndexedDB restore.
+// Caller is responsible for having loaded the PDF first (polyline rendering
+// needs an active page / scale calibration).
+function _hydrateFromProjectData(data, pdfPageCount) {
+  ProjectStore.restoreProject(data);
+
+  var areaCount = 0,
+    winCount = 0,
+    rulerCount = 0;
+  var maxPage = Math.min(data.pageCount, pdfPageCount);
+
+  for (var i = 0; i < maxPage; i++) {
+    var page = data.pages[i];
+    var pageNum = page.pageNum || i + 1;
+    if (page.polygons && page.polygons.length > 0) {
+      PolygonTool.loadPolygons(pageNum, page.polygons);
+      for (var pi = 0; pi < page.polygons.length; pi++) {
+        if (page.polygons[pi].type === "window") winCount++;
+        else areaCount++;
+      }
+    }
+    if (page.calibration) ScaleManager.restoreCalibration(pageNum, page.calibration);
+    if (page.rulers && page.rulers.length > 0) {
+      _rulers[pageNum] = page.rulers.slice();
+      rulerCount += page.rulers.length;
+    }
+  }
+
+  _rulerUndoStack = [];
+  _rulerRedoStack = [];
+  _undoOrder = [];
+  _redoOrder = [];
+
+  return { areas: areaCount, windows: winCount, rulers: rulerCount };
+}
+
 function _importJsonFile(file) {
   var reader = new FileReader();
   reader.onload = function (e) {
@@ -2126,45 +2637,10 @@ function _importJsonFile(file) {
       if (!proceed) return;
     }
 
-    // Restore project data into ProjectStore
-    ProjectStore.fromJSON(JSON.stringify(data));
-
-    // Restore per-page data into live modules
-    var areaCount = 0,
-      winCount = 0,
-      rulerCount = 0;
-    var maxPage = Math.min(data.pageCount, pdfPageCount);
-
-    for (var i = 0; i < maxPage; i++) {
-      var page = data.pages[i];
-      var pageNum = page.pageNum || i + 1;
-
-      // Restore polygons
-      if (page.polygons && page.polygons.length > 0) {
-        PolygonTool.loadPolygons(pageNum, page.polygons);
-        for (var pi = 0; pi < page.polygons.length; pi++) {
-          if (page.polygons[pi].type === "window") winCount++;
-          else areaCount++;
-        }
-      }
-
-      // Restore calibration
-      if (page.calibration) {
-        ScaleManager.restoreCalibration(pageNum, page.calibration);
-      }
-
-      // Restore rulers
-      if (page.rulers && page.rulers.length > 0) {
-        _rulers[pageNum] = page.rulers.slice();
-        rulerCount += page.rulers.length;
-      }
-    }
-
-    // Reset undo stacks (import is a fresh starting point)
-    _rulerUndoStack = [];
-    _rulerRedoStack = [];
-    _undoOrder = [];
-    _redoOrder = [];
+    var counts = _hydrateFromProjectData(data, pdfPageCount);
+    var areaCount = counts.areas;
+    var winCount = counts.windows;
+    var rulerCount = counts.rulers;
 
     // Refresh current page display
     var pageData = ProjectStore.getPage(_currentPage);
@@ -2215,6 +2691,9 @@ window.PP = {
   // Measure method
   setMeasureMethod: setMeasureMethod,
   setWindowMode: setWindowMode,
+  // Phase 4b.1 — component tag + assembly preset
+  setComponentTag: setComponentTag,
+  setAssemblyPreset: setAssemblyPreset,
   // Auto-detect
   autoDetect: autoDetect,
   // Summary table

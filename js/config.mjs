@@ -74,6 +74,11 @@ export var AREA_EDGE = "#00e5ff";
 export var AREA_FILL = "rgba(0, 229, 255, 0.08)";
 export var WIN_EDGE = "#ffd700";
 export var WIN_FILL = "rgba(255, 215, 0, 0.08)";
+// Polyline — red, no fill. Used for linear features (interior walls,
+// interior footings) whose length × a PROJECT-level param gives an area
+// or volume. See PDF-BEAMweb-BRIDGE.md §3.1 / §3.2.
+export var POLYLINE_EDGE = "#e63946";
+export var POLYLINE_FILL = "rgba(230, 57, 70, 0.08)"; // unused — polylines do not close
 
 /* ── Unit conversion ──────────────────────────────────── */
 

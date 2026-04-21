@@ -309,18 +309,39 @@ function buildRecord({ row, rowIndex, lookups, warnings, csvSha256 }) {
   }
   const conversionFactor = conversionDivisor ? Math.round((1 / conversionDivisor) * 1000000) / 1000000 : null;
 
-  // --- carbon.biogenic: AE = full-C formula, AB = AE*AF ------------------
+  // --- carbon.biogenic ----------------------------------------------------
+  // Sheet column map (BfCA Materials DB, confirmed 2026-04-20 Q29 investigation):
+  //   X  = Biogenic carbon factor                          -> biogenicFactor
+  //   Y  = % Carbon content (kgC/kg)                       -> carbonContent
+  //   Z  = Biogenic Storage kgCO2e/(common unit)           -> stored (post-retention)
+  //   AB = WWF Storage Factor kgCO2e/kgC                   -> wwf_storage_factor
+  //   AE = Biogenic CO2 kg - full C value                  -> full_C (pre-retention)
+  //   AF = Storage % Reduction                             -> storageRetention
+  //
+  // Relationship: stored (Z) = full_C (AE) × storageRetention (AF). Many rows
+  // populate only one of {AE, Z} — when AE is blank but Z is present, derive
+  // full_C from Z/AF. Bug prior to this fix: importer read AB for stored,
+  // producing null stored on rows where Z carried the real value (BAM002
+  // surfaced this: Z=12.97, AB=blank; old code wrote stored=null, new code
+  // writes stored=12.97, full_C=12.97/0.9=14.41).
   const biogenicFullRaw = readRaw(row, "AE").trim();
   const biogenicFullEval = biogenicFullRaw.startsWith("=") ? evalArithmeticFormula(biogenicFullRaw, row) : (biogenicFullRaw ? Number(biogenicFullRaw) : null);
-  const biogenicFull = biogenicFullEval !== null && Number.isFinite(biogenicFullEval) ? Math.round(biogenicFullEval * 100) / 100 : null;
-  const biogenicStoredRaw = readRaw(row, "AB").trim();
+  let biogenicFull = biogenicFullEval !== null && Number.isFinite(biogenicFullEval) ? Math.round(biogenicFullEval * 100) / 100 : null;
+  const biogenicStoredRaw = readRaw(row, "Z").trim();
   const biogenicStoredEval = biogenicStoredRaw.startsWith("=") ? evalArithmeticFormula(biogenicStoredRaw, row) : (biogenicStoredRaw ? Number(biogenicStoredRaw) : null);
   const biogenicStored = biogenicStoredEval !== null && Number.isFinite(biogenicStoredEval) ? Math.round(biogenicStoredEval * 100) / 100 : null;
+  const wwfFactorRaw = readRaw(row, "AB").trim();
+  const wwfFactorEval = wwfFactorRaw.startsWith("=") ? evalArithmeticFormula(wwfFactorRaw, row) : (wwfFactorRaw ? Number(wwfFactorRaw) : null);
+  const wwfStorageFactor = wwfFactorEval !== null && Number.isFinite(wwfFactorEval) ? Math.round(wwfFactorEval * 100) / 100 : null;
   const density = readNum(row, "AG");
   const addnFactor = readNum(row, "AI");
   const biogenicFactor = readNum(row, "X");
   const carbonContent = readNum(row, "Y");
   const storageRetention = readNum(row, "AF");
+  // Derive full_C from stored when AE is blank but Z + AF are present.
+  if (biogenicFull === null && biogenicStored !== null && storageRetention !== null && storageRetention > 0) {
+    biogenicFull = Math.round((biogenicStored / storageRetention) * 100) / 100;
+  }
   // carbon_content_kgc_per_unit = density × thickness × biogenicFactor × carbonContent (no CO2/C ratio)
   let carbonContentKgcPerUnit = null;
   if (density !== null && addnFactor !== null && biogenicFactor !== null && carbonContent !== null) {
@@ -471,7 +492,7 @@ function buildRecord({ row, rowIndex, lookups, warnings, csvSha256 }) {
         "carbon_content_pct_kgc_kg": carbonContent,
         "biogenic_factor": biogenicFactor,
         "storage_retention_pct": storageRetention,
-        "wwf_storage_factor_kgco2e_per_kgc": biogenicStored,
+        "wwf_storage_factor_kgco2e_per_kgc": wwfStorageFactor,
         "stored_kgco2e_per_common_unit": biogenicStored,
         "full_carbon_kgco2e_per_common_unit": biogenicFull,
         "carbon_content_kgc_per_unit": carbonContentKgcPerUnit,

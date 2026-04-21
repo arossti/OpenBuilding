@@ -460,6 +460,64 @@ html.theme-dark body {
   border-top: 1px solid var(--accent);
   padding-top: 4px;
 }
+
+/* ── Geometry Parameters panel (sidebar) ─────────────────────── */
+
+#params-panel {
+  border-top: 1px solid var(--border);
+  padding: 8px 10px;
+  font-size: 11px;
+}
+.pdf-params-header {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+.pdf-params-hint {
+  font-size: 10px;
+  color: var(--text-dim);
+  opacity: 0.75;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+.pdf-params-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pdf-params-row {
+  display: grid;
+  grid-template-columns: 1fr 70px 20px;
+  align-items: center;
+  gap: 4px;
+}
+.pdf-params-label {
+  font-size: 11px;
+  color: var(--text);
+}
+.pdf-params-input {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  text-align: right;
+  width: 100%;
+}
+.pdf-params-input:focus {
+  outline: 1px solid var(--accent-lit);
+  outline-offset: 1px;
+}
+.pdf-params-unit {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-align: left;
+}
 .measure-header {
   font-size: 10px;
   color: var(--text-dim);
@@ -1009,6 +1067,27 @@ html.theme-dark body {
 #summary-content td.num {
   font-family: var(--font-mono);
   text-align: right;
+}
+
+/* Inline Tag / Preset selects in the Summary Table — compact, low-chrome
+   so the row still reads as tabular data, not a form. */
+#summary-content select.bw-inline-select {
+  background: transparent;
+  color: var(--text);
+  border: 1px dashed var(--border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 11px;
+  font-family: inherit;
+  max-width: 160px;
+  cursor: pointer;
+}
+#summary-content select.bw-inline-select:hover {
+  border-color: var(--accent-lit);
+}
+#summary-content select.bw-inline-select:focus {
+  outline: 1px solid var(--accent-lit);
+  outline-offset: 1px;
 }
 
 .summary-sheet-row td {
@@ -4577,6 +4656,178 @@ tr.bw-asm-row[hidden],
 }
 .bw-intro-list li {
   margin: 6px 0;
+}
+
+/* ── PDF-Parser import modal ─────────────────────────────────── */
+
+#bw-pdf-import-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1000;
+}
+#bw-pdf-import-backdrop.visible {
+  display: block;
+}
+
+#bw-pdf-import-modal {
+  display: none;
+  position: fixed;
+  top: 5%;
+  left: 8%;
+  right: 8%;
+  bottom: 5%;
+  background: var(--bg-panel, #1a1a1a);
+  border: 1px solid var(--accent, #2a5c3f);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  z-index: 1001;
+  flex-direction: column;
+  overflow: hidden;
+}
+#bw-pdf-import-modal.visible {
+  display: flex;
+}
+.bw-pdf-import-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border, #333);
+  flex-shrink: 0;
+}
+.bw-pdf-import-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-lit, #4ade80);
+}
+.bw-pdf-import-close {
+  background: transparent;
+  border: none;
+  color: var(--text-dim, #888);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0 6px;
+  line-height: 1;
+}
+.bw-pdf-import-close:hover {
+  color: var(--text, #fff);
+}
+.bw-pdf-import-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 18px;
+}
+.bw-pdf-import-footer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 18px;
+  border-top: 1px solid var(--border, #333);
+  flex-shrink: 0;
+}
+.bw-pdf-import-footer .spacer {
+  flex: 1;
+}
+.bw-pdf-import-hint {
+  font-size: 11px;
+  color: var(--text-dim, #888);
+}
+.bw-pdf-import-picker {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border, #333);
+}
+.bw-pdf-import-picker label {
+  font-size: 11px;
+  color: var(--text-dim, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.bw-pdf-import-picker select {
+  flex: 1;
+  background: var(--bg, #0d0d0d);
+  color: var(--text, #fff);
+  border: 1px solid var(--border, #333);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 12px;
+}
+.bw-pdf-import-warn {
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  background: rgba(234, 179, 8, 0.12);
+  border-left: 3px solid #eab308;
+  font-size: 12px;
+  color: #facc15;
+}
+.bw-pdf-import-empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-dim, #888);
+  font-size: 13px;
+}
+table.bw-pdf-import-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+table.bw-pdf-import-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-weight: 500;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim, #888);
+  border-bottom: 1px solid var(--border, #333);
+  background: var(--bg-panel, #1a1a1a);
+  position: sticky;
+  top: 0;
+}
+table.bw-pdf-import-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: top;
+}
+table.bw-pdf-import-table tr.skipped td {
+  opacity: 0.5;
+}
+table.bw-pdf-import-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+table.bw-pdf-import-table .delta {
+  color: #4ade80;
+}
+table.bw-pdf-import-table .delta.overwrite {
+  color: #fbbf24;
+}
+.bw-pdf-import-dim {
+  font-family: var(--font-mono, ui-monospace);
+  font-size: 11px;
+  color: var(--text, #fff);
+}
+.bw-pdf-import-summary {
+  font-size: 11px;
+  color: var(--text-dim, #888);
+  margin-top: 2px;
+}
+.bw-pdf-import-sheets {
+  font-size: 10px;
+  color: var(--accent-lit, #4ade80);
+  margin-top: 2px;
+}
+.bw-pdf-import-warn-inline {
+  font-size: 10px;
+  color: #facc15;
+  margin-top: 2px;
 }
 
 /* ═════════════════════════════════════════════════════════════
