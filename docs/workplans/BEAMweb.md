@@ -488,7 +488,7 @@ Small, independently-shippable slices:
 
 ## 8. State architecture — future (dependency graph)
 
-**Status:** planning note only, not built. Captures the migration target before listener sprawl forces it.
+**Status:** Stub scaffolding shipped 2026-04-21 on `PDF-Bridge-2`. `StateManager.exportDependencyGraph()` emits OBJECTIVE-shape `{ nodes, links, meta }` with architectural nodes (Foundation / Coordination / Application) wired. New `Dependency Graph` tab in BEAMweb renders a text snapshot of the architecture; d3 + dagre CDN scripts are deferred-loaded but dormant. Full D3 port drops into `js/beam/dependency-graph.mjs`'s existing `initialize() / render() / setupSvg() / createFilterControls() / createInfoPanel()` interfaces when the migration trigger fires.
 
 ### Where we are today (2026-04-21)
 

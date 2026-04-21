@@ -269,6 +269,196 @@ function importDimensionSources(data) {
   }
 }
 
+// ── Dependency graph export ──────────────────────────────
+// Emits a { nodes, links } payload in the shape OBJECTIVE's
+// 4011-Dependency.js consumes, so the eventual BEAMweb graph
+// renderer can port directly once the migration trigger in
+// BEAMweb.md §8 fires. Today this is read by the dormant
+// dependency-graph stub to show architecture + any registered
+// field edges. Field edges stay sparse until auto-fill.mjs's
+// listeners get rewritten as `registerDependency()` calls.
+//
+// Architectural nodes are fixed (mirrors OBJECTIVE's pattern):
+// Foundation = state/storage primitives, Coordination = the
+// bridges and orchestration glue, Application = the user-facing
+// tabs. Tab nodes map onto BEAM_TABS. Mode argument is reserved
+// for the day we add a dual-state (target / reference) view;
+// today only "target" is populated.
+
+const ARCHITECTURAL_NODES = [
+  {
+    id: "FOUNDATION-StateManager",
+    group: "Foundation",
+    type: "module",
+    architecturalLayer: "Foundation",
+    label: "StateManager",
+    description: "Central state store + dependency registry"
+  },
+  {
+    id: "FOUNDATION-ProjectStore",
+    group: "Foundation",
+    type: "module",
+    architecturalLayer: "Foundation",
+    label: "PDF-Parser ProjectStore",
+    description: "PDF-Parser polygons + params, IndexedDB backed"
+  },
+  {
+    id: "FOUNDATION-MaterialsIndex",
+    group: "Foundation",
+    type: "module",
+    architecturalLayer: "Foundation",
+    label: "Materials Index",
+    description: "821-record BfCA material catalogue"
+  },
+  {
+    id: "COORDINATION-PolygonMap",
+    group: "Coordination",
+    type: "module",
+    architecturalLayer: "Coordination",
+    label: "polygon-map (bridge aggregator)",
+    description: "Component tags \u2192 BEAMweb dims + cross-feeds"
+  },
+  {
+    id: "COORDINATION-PdfBridgeImport",
+    group: "Coordination",
+    type: "module",
+    architecturalLayer: "Coordination",
+    label: "pdf-bridge-import",
+    description: "BEAMweb-side import flow + preview + apply"
+  },
+  {
+    id: "COORDINATION-AutoFill",
+    group: "Coordination",
+    type: "module",
+    architecturalLayer: "Coordination",
+    label: "PROJECT \u2192 F&S auto-fill",
+    description: "Per-key listeners that propagate PROJECT edits to F&S rows"
+  },
+  {
+    id: "COORDINATION-FileHandler",
+    group: "Coordination",
+    type: "module",
+    architecturalLayer: "Coordination",
+    label: "File handler",
+    description: "Project JSON + CSV + XLSX import/export"
+  },
+  {
+    id: "APPLICATION-Intro",
+    group: "Application",
+    type: "module",
+    architecturalLayer: "Application",
+    label: "Intro tab"
+  },
+  {
+    id: "APPLICATION-Project",
+    group: "Application",
+    type: "module",
+    architecturalLayer: "Application",
+    label: "PROJECT tab",
+    description: "Dimension inputs + geometry parameters"
+  },
+  {
+    id: "APPLICATION-FootingsSlabs",
+    group: "Application",
+    type: "module",
+    architecturalLayer: "Application",
+    label: "Footings & Slabs tab",
+    description: "Phase 3 live consumer of PROJECT"
+  },
+  {
+    id: "APPLICATION-Glossary",
+    group: "Application",
+    type: "module",
+    architecturalLayer: "Application",
+    label: "Glossary tab"
+  },
+  {
+    id: "APPLICATION-EnergyGhg",
+    group: "Application",
+    type: "module",
+    architecturalLayer: "Application",
+    label: "Energy / GHG reference tab"
+  }
+];
+
+const ARCHITECTURAL_LINKS = [
+  { source: "FOUNDATION-StateManager", target: "COORDINATION-PdfBridgeImport" },
+  { source: "FOUNDATION-StateManager", target: "COORDINATION-AutoFill" },
+  { source: "FOUNDATION-StateManager", target: "COORDINATION-FileHandler" },
+  { source: "FOUNDATION-StateManager", target: "APPLICATION-Project" },
+  { source: "FOUNDATION-StateManager", target: "APPLICATION-FootingsSlabs" },
+  { source: "FOUNDATION-ProjectStore", target: "COORDINATION-PolygonMap" },
+  { source: "FOUNDATION-ProjectStore", target: "COORDINATION-PdfBridgeImport" },
+  { source: "FOUNDATION-MaterialsIndex", target: "APPLICATION-FootingsSlabs" },
+  { source: "COORDINATION-PolygonMap", target: "COORDINATION-PdfBridgeImport" },
+  { source: "COORDINATION-PdfBridgeImport", target: "APPLICATION-Project" },
+  { source: "COORDINATION-AutoFill", target: "APPLICATION-FootingsSlabs" },
+  { source: "COORDINATION-FileHandler", target: "FOUNDATION-StateManager" },
+  { source: "APPLICATION-Project", target: "APPLICATION-FootingsSlabs" }
+];
+
+function exportDependencyGraph(options) {
+  const opts = options || {};
+  const mode = opts.mode || "target";
+  const includeArchitectural = opts.includeArchitectural !== false;
+
+  const nodesById = new Map();
+  const links = [];
+
+  if (includeArchitectural) {
+    for (const node of ARCHITECTURAL_NODES) nodesById.set(node.id, { ...node });
+    for (const link of ARCHITECTURAL_LINKS) {
+      links.push({ source: link.source, target: link.target, dependencyMode: "architectural" });
+    }
+  }
+
+  // Field-level edges from the dependencies Map. Empty today for BEAMweb
+  // because auto-fill wires PROJECT \u2192 F&S via listeners rather than
+  // StateManager.registerDependency. Light-up happens during the §8 migration.
+  const emitFieldEdge = (sourceId, targetId, dependencyMode) => {
+    if (!nodesById.has(sourceId)) {
+      nodesById.set(sourceId, { id: sourceId, type: "field", group: inferFieldGroup(sourceId), dependencyMode });
+    }
+    if (!nodesById.has(targetId)) {
+      nodesById.set(targetId, { id: targetId, type: "field", group: inferFieldGroup(targetId), dependencyMode });
+    }
+    links.push({ source: sourceId, target: targetId, dependencyMode });
+  };
+
+  if (mode === "target" || mode === "both") {
+    for (const [sourceId, targetSet] of dependencies) {
+      for (const targetId of targetSet) emitFieldEdge(sourceId, targetId, "target");
+    }
+  }
+  if (mode === "reference" || mode === "both") {
+    // Reference mode reserved for future dual-state (prefixed ref_ fields).
+    // Today BEAMweb has a single state so this path is a no-op; leaving the
+    // scaffold so OBJECTIVE-style dual analysis slots in when we need it.
+  }
+
+  return {
+    nodes: Array.from(nodesById.values()),
+    links,
+    meta: {
+      mode,
+      includeArchitectural,
+      fieldCount: fields.size,
+      registeredDependencies: dependencies.size,
+      generatedAt: new Date().toISOString()
+    }
+  };
+}
+
+function inferFieldGroup(fieldId) {
+  if (!fieldId) return "Other";
+  if (fieldId.startsWith("dim_")) return "PROJECT Dimensions";
+  if (fieldId.startsWith("param_")) return "Geometry Parameters";
+  if (fieldId.startsWith("garage_")) return "Garage";
+  if (fieldId.startsWith("project_")) return "Project Info";
+  if (fieldId.startsWith("fs_")) return "Footings & Slabs";
+  return "Other";
+}
+
 function exportState() {
   const out = {};
   for (const [id, field] of fields) out[id] = field.value;
@@ -309,6 +499,7 @@ export const StateManager = {
   setDimensionSource,
   exportDimensionSources,
   importDimensionSources,
+  exportDependencyGraph,
   parseNumeric,
   formatNumber
 };

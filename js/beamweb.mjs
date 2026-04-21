@@ -20,6 +20,7 @@ import { renderFootingsSlabsPanel, wireFootingsSlabsTab, resetFootingsSlabsTab }
 import { loadSample, SAMPLES } from "./beam/sample-loader.mjs";
 import * as PdfBridge from "./beam/pdf-bridge-import.mjs";
 import { syncProjectToFsBridge } from "./beam/auto-fill.mjs";
+import { renderDependencyGraphPanel, wireDependencyGraphTab } from "./beam/dependency-graph-tab.mjs";
 
 // ──────────────────────────────────────────────────────────────────────
 // Tab definitions
@@ -68,7 +69,10 @@ const BEAM_TABS = [
     group: "Reference",
     tabs: [
       // Not in BEAM; BEAMweb adds it as informational reference.
-      { id: "energy-ghg", num: 18, label: "Energy GHG", phase: 0 }
+      { id: "energy-ghg", num: 18, label: "Energy GHG", phase: 0 },
+      // Developer/meta view of the state-architecture graph. Stub today
+      // (scaffolding for the OBJECTIVE-style port, see BEAMweb.md §8).
+      { id: "dependency-graph", num: 19, label: "Dependency Graph", phase: 0 }
     ]
   }
 ];
@@ -98,6 +102,7 @@ function boot() {
   wireGlossarySearch();
   wireProjectForm();
   wireFootingsSlabsTab(); // fires async fetch for data/beam/footings-slabs.csv
+  wireDependencyGraphTab();
   setActiveTab(readInitialTabFromHash() || DEFAULT_TAB);
   loadMaterialIndex();
 }
@@ -204,12 +209,14 @@ const PANEL_SUBTITLES = {
   review: "Inputs sanity-check · area/volume reconciliation · warnings",
   results: "Project EC total · per-component breakdown · operational + embodied summary",
   glossary: `${GLOSSARY.length} terms and definitions from the BEAM workbook`,
-  "energy-ghg": `Province-by-province GHG intensities for operational energy (reference only)`
+  "energy-ghg": `Province-by-province GHG intensities for operational energy (reference only)`,
+  "dependency-graph": "Architecture snapshot — Foundation / Coordination / Application modules + registered field edges"
 };
 
 const PANEL_BODIES = {
   project: renderProjectPanel(),
   "footings-slabs": renderFootingsSlabsPanel(),
+  "dependency-graph": renderDependencyGraphPanel(),
   introduction: `
     <div class="beam-tbd bw-intro">
       <img src="graphics/beam-logo.png" alt="BEAM" class="bw-intro-logo" />
