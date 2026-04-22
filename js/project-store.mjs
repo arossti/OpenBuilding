@@ -84,7 +84,8 @@ export function savePolygons(pageNum, polygons) {
         depth_m: p.depth_m != null ? p.depth_m : null,
         sheet_id: pageSheetId || p.sheet_id || null,
         sheet_class: pageSheetClass || p.sheet_class || null,
-        assembly_preset: p.assembly_preset || null
+        assembly_preset: p.assembly_preset || null,
+        scope: p.scope === "garage" ? "garage" : "building"
       };
     });
     _touch();

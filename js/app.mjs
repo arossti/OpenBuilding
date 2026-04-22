@@ -2211,6 +2211,21 @@ function _renderTagSelect(polyType, polyIdx, pageNum, currentValue, small) {
   return html;
 }
 
+// Per-polygon scope: "building" (default) or "garage". Orthogonal to the
+// component tag — a slab_foundation polygon with scope="garage" flows to
+// garage_slab_area while the same tag with scope="building" flows to
+// dim_foundation_slab_floor_area. See polygon-map.mjs targetDimsForScope.
+function _renderScopeSelect(polyIdx, pageNum, currentScope, small) {
+  var sizeAttr = small ? " style='font-size:10px;'" : "";
+  var html = "<td class='scope-cell'" + sizeAttr + ">";
+  html += "<select class='summary-scope-select bw-inline-select' data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "'>";
+  var scope = currentScope === "garage" ? "garage" : "building";
+  html += "<option value='building'" + (scope === "building" ? " selected" : "") + ">Building</option>";
+  html += "<option value='garage'" + (scope === "garage" ? " selected" : "") + ">Garage</option>";
+  html += "</select></td>";
+  return html;
+}
+
 // Per-polygon depth input, rendered only for components whose aggregator
 // consumes depth (today: pad_pier plan-area * depth -> volume). Other tags
 // render an em-dash so the column reads as "not applicable" rather than "zero".
@@ -2248,7 +2263,7 @@ function _renderSummaryTable() {
   var project = ProjectStore.getProject();
   var html = "<table><thead><tr>";
   html += "<th>Sheet</th><th>Label</th>";
-  html += "<th>Type</th><th>Tag</th><th>Preset</th>";
+  html += "<th>Type</th><th>Tag</th><th>Scope</th><th>Preset</th>";
   html += "<th>Gross m\u00B2</th><th>Net m\u00B2</th>";
   html += "<th>Gross ft\u00B2</th><th>Net ft\u00B2</th>";
   html += "<th>Depth m</th>";
@@ -2287,7 +2302,7 @@ function _renderSummaryTable() {
     hasAnyData = true;
 
     // Sheet header row
-    html += "<tr class='summary-sheet-row'><td colspan='12'>" + sheetLabel + tail + "</td></tr>";
+    html += "<tr class='summary-sheet-row'><td colspan='13'>" + sheetLabel + tail + "</td></tr>";
 
     var pageGrossM2 = 0,
       pageNetM2 = 0,
@@ -2344,6 +2359,7 @@ function _renderSummaryTable() {
         "</td>";
       html += "<td class='type-cell'>area</td>";
       html += _renderTagSelect("area", wall.polyIdx, pageNum, wm.component, false);
+      html += _renderScopeSelect(wall.polyIdx, pageNum, wm.scope, false);
       html += _renderPresetSelect(wm.component, wall.polyIdx, pageNum, wm.assembly_preset, false);
       if (wm.areaM2 !== null) {
         html += "<td class='num'>" + wm.areaM2.toFixed(2) + "</td>";
@@ -2383,6 +2399,7 @@ function _renderSummaryTable() {
             "</td>";
           html += "<td class='type-cell' style='font-size:10px;'>window</td>";
           html += _renderTagSelect("window", child.polyIdx, pageNum, cm.component, true);
+          html += _renderScopeSelect(child.polyIdx, pageNum, cm.scope, true);
           html += _renderPresetSelect(cm.component, child.polyIdx, pageNum, cm.assembly_preset, true);
           if (cm.areaM2 !== null) {
             html += "<td class='num' style='font-size:10px;'>" + cPrefix + cm.areaM2.toFixed(2) + "</td>";
@@ -2425,6 +2442,7 @@ function _renderSummaryTable() {
         " (unassociated)</td>";
       html += "<td class='type-cell'>window</td>";
       html += _renderTagSelect("window", assoc.orphanWindows[o].polyIdx, pageNum, om.component, false);
+      html += _renderScopeSelect(assoc.orphanWindows[o].polyIdx, pageNum, om.scope, false);
       html += _renderPresetSelect(om.component, assoc.orphanWindows[o].polyIdx, pageNum, om.assembly_preset, false);
       if (om.areaM2 !== null) {
         html += "<td class='num'>" + oPrefix + om.areaM2.toFixed(2) + "</td><td class='num'></td>";
@@ -2460,6 +2478,7 @@ function _renderSummaryTable() {
         "</td>";
       html += "<td class='type-cell'>polyline</td>";
       html += _renderTagSelect("polyline", ple.polyIdx, pageNum, pm.component, false);
+      html += _renderScopeSelect(ple.polyIdx, pageNum, pm.scope, false);
       html += _renderPresetSelect(pm.component, ple.polyIdx, pageNum, pm.assembly_preset, false);
       html += "<td class='num' colspan='4'>\u2014</td>";
       html += _renderDepthInput(pm.component, ple.polyIdx, pageNum, pm.depth_m, false);
@@ -2476,7 +2495,7 @@ function _renderSummaryTable() {
     // Page subtotal — only meaningful when the page has area measurements.
     if (assoc.walls.length > 1 || assoc.orphanWindows.length > 0) {
       html += "<tr class='summary-total-row'><td></td><td>" + sheetLabel + " Total</td>";
-      html += "<td colspan='3'></td>";
+      html += "<td colspan='4'></td>";
       html += "<td class='num'>" + pageGrossM2.toFixed(2) + "</td>";
       html += "<td class='num'>" + pageNetM2.toFixed(2) + "</td>";
       html += "<td class='num'>" + pageGrossFt2.toFixed(2) + "</td>";
@@ -2493,7 +2512,7 @@ function _renderSummaryTable() {
   // Grand total
   if (hasAnyData) {
     html += "<tr class='summary-grand-total'><td></td><td>Grand Total</td>";
-    html += "<td colspan='3'></td>";
+    html += "<td colspan='4'></td>";
     html += "<td class='num'>" + grandGrossM2.toFixed(2) + "</td>";
     html += "<td class='num'>" + grandNetM2.toFixed(2) + "</td>";
     html += "<td class='num'>" + grandGrossFt2.toFixed(2) + "</td>";
@@ -2579,6 +2598,21 @@ function _renderSummaryTable() {
       PolygonTool.setAssemblyPreset(pg, idx, this.value);
       ProjectStore.savePolygons(pg, PolygonTool.getPolygons(pg));
       setStatus("Preset updated", "ready");
+    });
+  }
+
+  // Scope selects — flipping to "garage" reroutes a polygon's contribution
+  // to the garage_* dim counterpart via polygon-map's two-scope aggregator.
+  // No re-render needed: only the polygon record changes, visible columns
+  // (Tag/Preset/Depth) are unaffected.
+  var scopeSelects = panel.querySelectorAll(".summary-scope-select");
+  for (var ss = 0; ss < scopeSelects.length; ss++) {
+    scopeSelects[ss].addEventListener("change", function () {
+      var idx = parseInt(this.dataset.polyIdx, 10);
+      var pg = parseInt(this.dataset.pageNum, 10);
+      PolygonTool.setScope(pg, idx, this.value);
+      ProjectStore.savePolygons(pg, PolygonTool.getPolygons(pg));
+      setStatus("Scope updated: " + this.value, "ready");
     });
   }
 

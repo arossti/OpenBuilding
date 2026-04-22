@@ -35,11 +35,13 @@ export const COMPONENT_TO_DIMENSION = {
     type: "area",
     targetDim: "dim_foundation_slab_floor_area",
     targetDimExtras: ["project_below_grade_area", "project_total_floor_area"],
+    garageTargetDim: "garage_slab_area",
     aggregate: "sumArea",
     requiredSheetClass: ["plan"],
     crossFeeds: [
       {
         dim: "dim_foundation_wall_area",
+        garageDim: "garage_foundation_wall_area",
         aggregate: "sumPerimeter",
         multiplyByParam: "param_basement_height_m",
         supersededBy: ["exterior_perimeter"],
@@ -47,6 +49,7 @@ export const COMPONENT_TO_DIMENSION = {
       },
       {
         dim: "dim_continuous_footings",
+        garageDim: "garage_continuous_footings",
         aggregate: "sumPerimeter",
         multiplyByParams: ["param_footing_height_m", "param_footing_width_m"],
         supersededBy: ["exterior_perimeter"],
@@ -58,11 +61,14 @@ export const COMPONENT_TO_DIMENSION = {
     type: "area",
     targetDim: "dim_framed_floor_area",
     targetDimExtras: ["dim_finished_ceiling_area", "project_above_grade_area", "project_total_floor_area"],
+    garageTargetDim: "garage_slab_area",
+    garageTargetDimExtras: ["garage_floor_area_above", "garage_finished_ceiling_area"],
     aggregate: "sumArea",
     requiredSheetClass: ["plan"],
     crossFeeds: [
       {
         dim: "dim_exterior_wall_area",
+        garageDim: "garage_exterior_wall_area",
         aggregate: "sumPerimeter",
         multiplyByParam: "param_wall_height_m",
         supersededBy: ["wall_exterior", "exterior_perimeter"],
@@ -73,6 +79,7 @@ export const COMPONENT_TO_DIMENSION = {
   wall_exterior: {
     type: "area",
     targetDim: "dim_exterior_wall_area",
+    garageTargetDim: "garage_exterior_wall_area",
     aggregate: "sumNetArea",
     requiredSheetClass: ["elevation"],
     fallback: {
@@ -91,6 +98,8 @@ export const COMPONENT_TO_DIMENSION = {
     type: "area",
     targetDim: "dim_foundation_wall_area",
     targetDimExtras: ["dim_continuous_footings"],
+    garageTargetDim: "garage_foundation_wall_area",
+    garageTargetDimExtras: ["garage_continuous_footings"],
     aggregate: "sumPerimeter",
     requiredSheetClass: ["plan"],
     multiplyByParam: "param_basement_height_m",
@@ -102,6 +111,7 @@ export const COMPONENT_TO_DIMENSION = {
     type: "area",
     targetDim: "dim_roof_surface_area",
     targetDimExtras: ["dim_roof_cavity_insulation_area"],
+    garageTargetDim: "garage_roof_surface_area",
     aggregate: "sumArea",
     requiredSheetClass: ["plan"],
     multiplyByPitchFactor: "param_roof_pitch_deg"
@@ -115,6 +125,7 @@ export const COMPONENT_TO_DIMENSION = {
   pad_pier: {
     type: "area",
     targetDim: "dim_columns_piers_pads_volume",
+    garageTargetDim: "garage_columns_piers_pads_volume",
     aggregate: "sumAreaTimesDepth",
     requiredSheetClass: ["plan"],
     wave: "v2"
@@ -122,12 +133,14 @@ export const COMPONENT_TO_DIMENSION = {
   window_opening: {
     type: "window",
     targetDim: "dim_window_area",
+    garageTargetDim: "garage_window_area",
     aggregate: "sumArea",
     requiredSheetClass: ["elevation"]
   },
   wall_interior: {
     type: "polyline",
     targetDim: "dim_interior_wall_area",
+    garageTargetDim: "garage_partition_wall_area",
     aggregate: "sumLength",
     requiredSheetClass: ["plan"],
     multiplyByParam: "param_wall_height_m"
@@ -231,6 +244,7 @@ export function flattenProjectPolygons(projectJson) {
         pageNum: page.pageNum,
         assembly_preset: p.assembly_preset || null,
         depth_m: p.depth_m || null,
+        scope: p.scope === "garage" ? "garage" : "building",
         mode: p.mode || "net",
         measurement,
         children: []
@@ -358,18 +372,28 @@ function pointInPolygon(pt, vertices) {
 //     sheets: [unique sheet ids], warnings: [string], usedFallback: bool }
 // Value is null when the path can't resolve (missing param, no polygons
 // and no fallback).
-export function aggregateOne({ flatPolygons, params, component }) {
+export function aggregateOne({ flatPolygons, params, component, scope }) {
   const spec = COMPONENT_TO_DIMENSION[component];
   if (!spec) return { value: null, summary: "unknown component", warnings: [`unknown component: ${component}`] };
 
-  const matches = flatPolygons.filter((p) => p.component === component);
+  // Scope filter: when scope is explicitly provided, only polygons matching
+  // that scope (defaulting to "building" on legacy records) contribute. When
+  // scope is omitted we keep the pre-M5 behaviour of aggregating every match
+  // regardless of scope — used by callers that just want a raw total.
+  const scopeMatches = (p) => {
+    if (!scope) return true;
+    const polyScope = p.scope === "garage" ? "garage" : "building";
+    return polyScope === scope;
+  };
+
+  const matches = flatPolygons.filter((p) => p.component === component && scopeMatches(p));
   const warnings = [];
   let usedFallback = false;
   let polygons = matches;
 
   if (matches.length === 0 && spec.fallback) {
     const fbComp = spec.fallback.fromComponent;
-    const fbMatches = flatPolygons.filter((p) => p.component === fbComp);
+    const fbMatches = flatPolygons.filter((p) => p.component === fbComp && scopeMatches(p));
     if (fbMatches.length > 0) {
       usedFallback = true;
       polygons = fbMatches;
@@ -481,61 +505,73 @@ export function computeAllDimensions({ projectJson, params }) {
   const flat = flattenProjectPolygons(projectJson);
   const result = {};
 
-  // First pass — run aggregateOne for each component that has polygons.
-  const perComponent = {};
-  for (const component of Object.keys(COMPONENT_TO_DIMENSION)) {
-    const matches = flat.filter((p) => p.component === component);
-    if (matches.length === 0 && !COMPONENT_TO_DIMENSION[component].fallback) continue;
-    const agg = aggregateOne({ flatPolygons: flat, params, component });
-    if (agg.polygons && agg.polygons.length > 0) perComponent[component] = agg;
-  }
+  // Two-scope pass: polygons carry scope="building" (default) or "garage"
+  // (Q23 option B — reuse the component taxonomy, partition at aggregation
+  // time). Building-scoped polygons route to targetDim + targetDimExtras;
+  // garage-scoped polygons route to garageTargetDim + garageTargetDimExtras
+  // where the spec declares them. Specs without garage fields simply emit
+  // no contribution on the garage pass, so legacy consumers stay quiet.
+  for (const scope of ["building", "garage"]) {
+    const perComponent = {};
+    for (const component of Object.keys(COMPONENT_TO_DIMENSION)) {
+      const matches = flat.filter((p) => p.component === component && scopeMatches(p, scope));
+      if (matches.length === 0 && !COMPONENT_TO_DIMENSION[component].fallback) continue;
+      const agg = aggregateOne({ flatPolygons: flat, params, component, scope });
+      if (agg.polygons && agg.polygons.length > 0) perComponent[component] = agg;
+    }
 
-  // Second pass — route each component's value to its target dim(s).
-  // value stays null until at least one contribution actually resolves; rows
-  // that collect only warnings (e.g. missing param) must surface as "no value"
-  // in the preview, not as 0.00.
-  for (const [component, agg] of Object.entries(perComponent)) {
-    const spec = COMPONENT_TO_DIMENSION[component];
-    const dims = [spec.targetDim, ...(spec.targetDimExtras || [])];
-    for (const dimId of dims) {
-      if (!result[dimId]) result[dimId] = { value: null, contributors: [], warnings: [] };
-      const contribution = computeContribution(dimId, spec, agg, params, component);
-      if (contribution.value != null) {
-        if (result[dimId].value == null) result[dimId].value = 0;
-        result[dimId].value += contribution.value;
-        result[dimId].contributors.push({
-          component,
-          value: contribution.value,
-          summary: contribution.summary || agg.summary,
-          polygons: agg.polygons,
-          sheets: agg.sheets,
-          assembly_presets: uniquePresets(agg.polygons)
-        });
+    for (const [component, agg] of Object.entries(perComponent)) {
+      const spec = COMPONENT_TO_DIMENSION[component];
+      const dims = targetDimsForScope(spec, scope);
+      for (const dimId of dims) {
+        if (!result[dimId]) result[dimId] = { value: null, contributors: [], warnings: [] };
+        const contribution = computeContribution(dimId, spec, agg, params, component);
+        if (contribution.value != null) {
+          if (result[dimId].value == null) result[dimId].value = 0;
+          result[dimId].value += contribution.value;
+          result[dimId].contributors.push({
+            component,
+            scope,
+            value: contribution.value,
+            summary: contribution.summary || agg.summary,
+            polygons: agg.polygons,
+            sheets: agg.sheets,
+            assembly_presets: uniquePresets(agg.polygons)
+          });
+        }
+        if (agg.warnings && agg.warnings.length) result[dimId].warnings.push(...agg.warnings);
+        if (contribution.warnings && contribution.warnings.length) result[dimId].warnings.push(...contribution.warnings);
       }
-      if (agg.warnings && agg.warnings.length) result[dimId].warnings.push(...agg.warnings);
-      if (contribution.warnings && contribution.warnings.length) result[dimId].warnings.push(...contribution.warnings);
     }
   }
 
-  // Third pass — run cross-feeds. Each contributing component that has
-  // polygons AND declares crossFeeds routes extra values through different
-  // aggregates (usually sumArea → sumPerimeter) into other dims. A cross-feed
-  // is suppressed whenever any explicit "supersededBy" component has polygons
-  // in the project, so a slab_foundation trace stops feeding the foundation
-  // wall dim the moment the user draws an explicit exterior_perimeter.
+  // Cross-feeds are scope-aware too — each feed carries an optional `garageDim`
+  // that gets targeted when the feeder polygon is garage-scoped. supersededBy
+  // continues to gate the feed on presence of explicit tags (regardless of
+  // scope, for now — garage users who trace an explicit exterior_perimeter get
+  // the same suppression behaviour as building users).
   const presentComponents = new Set(flat.map((p) => p.component).filter(Boolean));
   runCrossFeeds({ flat, params, result, presentComponents });
 
-  // Fourth pass — fold unfilled dims into the result with null value so the
-  // preview UI can show them as "no polygons feeding this dim yet".
+  // Fold unfilled dims into the result with null value so the preview UI can
+  // render "no polygons feeding this dim yet". Covers both building and
+  // garage target dims declared across every spec.
   for (const spec of Object.values(COMPONENT_TO_DIMENSION)) {
-    const dims = [spec.targetDim, ...(spec.targetDimExtras || [])];
+    const dims = [
+      spec.targetDim,
+      ...(spec.targetDimExtras || []),
+      spec.garageTargetDim,
+      ...(spec.garageTargetDimExtras || [])
+    ].filter(Boolean);
     for (const dimId of dims) {
       if (!(dimId in result)) result[dimId] = { value: null, contributors: [], warnings: [] };
     }
     if (spec.crossFeeds) {
       for (const feed of spec.crossFeeds) {
-        if (!(feed.dim in result)) result[feed.dim] = { value: null, contributors: [], warnings: [] };
+        if (feed.dim && !(feed.dim in result)) result[feed.dim] = { value: null, contributors: [], warnings: [] };
+        if (feed.garageDim && !(feed.garageDim in result)) {
+          result[feed.garageDim] = { value: null, contributors: [], warnings: [] };
+        }
       }
     }
   }
@@ -543,71 +579,95 @@ export function computeAllDimensions({ projectJson, params }) {
   return result;
 }
 
+function scopeMatches(polygon, scope) {
+  const polyScope = polygon.scope === "garage" ? "garage" : "building";
+  return polyScope === scope;
+}
+
+function targetDimsForScope(spec, scope) {
+  if (scope === "garage") {
+    if (!spec.garageTargetDim) return [];
+    return [spec.garageTargetDim, ...(spec.garageTargetDimExtras || [])];
+  }
+  return [spec.targetDim, ...(spec.targetDimExtras || [])];
+}
+
 function runCrossFeeds({ flat, params, result, presentComponents }) {
   for (const [component, spec] of Object.entries(COMPONENT_TO_DIMENSION)) {
     if (!spec.crossFeeds || spec.crossFeeds.length === 0) continue;
-    const matches = flat.filter((p) => p.component === component);
-    if (matches.length === 0) continue;
 
-    for (const feed of spec.crossFeeds) {
-      const supersededBy = Array.isArray(feed.supersededBy)
-        ? feed.supersededBy
-        : feed.supersededBy
-          ? [feed.supersededBy]
-          : [];
-      const superseded = supersededBy.some((c) => presentComponents.has(c));
-      if (superseded) continue;
+    // Partition feeder polygons by scope so building-scoped slab perimeter
+    // flows into dim_foundation_wall_area while garage-scoped slab perimeter
+    // routes to garage_foundation_wall_area — and supersededBy still gates
+    // each pass independently.
+    for (const scope of ["building", "garage"]) {
+      const matches = flat.filter((p) => p.component === component && scopeMatches(p, scope));
+      if (matches.length === 0) continue;
 
-      const reducer = AGGREGATORS[feed.aggregate];
-      if (!reducer) continue;
-      let raw = reducer(matches);
+      for (const feed of spec.crossFeeds) {
+        const targetDim = scope === "garage" ? feed.garageDim : feed.dim;
+        if (!targetDim) continue;
 
-      // Apply params — any missing param downgrades the feed to a warning.
-      const missingParams = [];
-      const paramsUsed = [];
-      if (feed.multiplyByParam) {
-        const v = parseParam(params, feed.multiplyByParam);
-        if (v == null) missingParams.push(feed.multiplyByParam);
-        else {
-          raw *= v;
-          paramsUsed.push({ name: feed.multiplyByParam, value: v });
-        }
-      }
-      if (feed.multiplyByParams) {
-        for (const key of feed.multiplyByParams) {
-          const v = parseParam(params, key);
-          if (v == null) missingParams.push(key);
+        const supersededBy = Array.isArray(feed.supersededBy)
+          ? feed.supersededBy
+          : feed.supersededBy
+            ? [feed.supersededBy]
+            : [];
+        const superseded = supersededBy.some((c) => presentComponents.has(c));
+        if (superseded) continue;
+
+        const reducer = AGGREGATORS[feed.aggregate];
+        if (!reducer) continue;
+        let raw = reducer(matches);
+
+        // Apply params — any missing param downgrades the feed to a warning.
+        const missingParams = [];
+        const paramsUsed = [];
+        if (feed.multiplyByParam) {
+          const v = parseParam(params, feed.multiplyByParam);
+          if (v == null) missingParams.push(feed.multiplyByParam);
           else {
             raw *= v;
-            paramsUsed.push({ name: key, value: v });
+            paramsUsed.push({ name: feed.multiplyByParam, value: v });
           }
         }
-      }
+        if (feed.multiplyByParams) {
+          for (const key of feed.multiplyByParams) {
+            const v = parseParam(params, key);
+            if (v == null) missingParams.push(key);
+            else {
+              raw *= v;
+              paramsUsed.push({ name: key, value: v });
+            }
+          }
+        }
 
-      if (!result[feed.dim]) result[feed.dim] = { value: null, contributors: [], warnings: [] };
-      if (missingParams.length > 0) {
-        for (const p of missingParams) result[feed.dim].warnings.push(`required param missing: ${p}`);
-        continue;
-      }
+        if (!result[targetDim]) result[targetDim] = { value: null, contributors: [], warnings: [] };
+        if (missingParams.length > 0) {
+          for (const p of missingParams) result[targetDim].warnings.push(`required param missing: ${p}`);
+          continue;
+        }
 
-      if (result[feed.dim].value == null) result[feed.dim].value = 0;
-      result[feed.dim].value += raw;
-      result[feed.dim].contributors.push({
-        component,
-        value: raw,
-        summary: buildCrossFeedSummary(component, matches.length, feed, paramsUsed),
-        polygons: matches.map((p) => ({
-          id: p.id,
-          label: p.label,
-          sheet_id: p.sheet_id,
-          sheet_title: p.sheet_title,
-          pageNum: p.pageNum,
-          assembly_preset: p.assembly_preset
-        })),
-        sheets: Array.from(new Set(matches.map((p) => p.sheet_id).filter(Boolean))),
-        assembly_presets: Array.from(new Set(matches.map((p) => p.assembly_preset).filter(Boolean))),
-        isCrossFeed: true
-      });
+        if (result[targetDim].value == null) result[targetDim].value = 0;
+        result[targetDim].value += raw;
+        result[targetDim].contributors.push({
+          component,
+          scope,
+          value: raw,
+          summary: buildCrossFeedSummary(component, matches.length, feed, paramsUsed),
+          polygons: matches.map((p) => ({
+            id: p.id,
+            label: p.label,
+            sheet_id: p.sheet_id,
+            sheet_title: p.sheet_title,
+            pageNum: p.pageNum,
+            assembly_preset: p.assembly_preset
+          })),
+          sheets: Array.from(new Set(matches.map((p) => p.sheet_id).filter(Boolean))),
+          assembly_presets: Array.from(new Set(matches.map((p) => p.assembly_preset).filter(Boolean))),
+          isCrossFeed: true
+        });
+      }
     }
   }
 }
@@ -628,11 +688,20 @@ function computeContribution(dimId, spec, agg, params, component) {
   //                                    → dim_continuous_footings (perim × H × W).
 
   // Base case — the component's primary target dim uses agg.value directly
-  // once the aggregator's own multiplyByParam has been applied.
-  if (dimId === spec.targetDim) return { value: agg.value, summary: agg.summary };
+  // once the aggregator's own multiplyByParam has been applied. Matches both
+  // the building target (targetDim) and the garage mirror (garageTargetDim)
+  // so scope-routed primary-path values pass straight through.
+  if (dimId === spec.targetDim || dimId === spec.garageTargetDim) {
+    return { value: agg.value, summary: agg.summary };
+  }
 
-  // Extra dim — may need a different formula.
-  if (component === "exterior_perimeter" && dimId === "dim_continuous_footings") {
+  // Extra dim — may need a different formula. The exterior_perimeter
+  // continuous-footings override mirrors for garage: same back-out math,
+  // different target dim.
+  if (
+    component === "exterior_perimeter" &&
+    (dimId === "dim_continuous_footings" || dimId === "garage_continuous_footings")
+  ) {
     // agg.value here is perim × param_basement_height_m from the spec.
     // We want perim × footing_height × footing_width. Back out the mult.
     const basementH = parseParam(params, "param_basement_height_m");
