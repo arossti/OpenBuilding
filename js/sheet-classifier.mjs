@@ -36,26 +36,14 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
 
   result.scale = detectScale(textItems);
 
-  // Candidate titles — plausible drawing-name strings. Length / numeric /
-  // sheet-id guards only. Noise ("Revisions:", "Issued For:", signatures,
-  // dates) is filtered structurally downstream: nothing becomes a title
-  // unless it (a) contains a drawing-type keyword AS ANCHOR or
-  // (b) shares font size + adjacency with one that does. Anything else
-  // stays on the bench.
-  var titleCandidates = tbItems.filter(function (item) {
-    var s = item.str.trim();
-    if (s.length <= 3 || s.length >= 60) return false;
-    if (sheetIdPattern.test(s)) return false;
-    if (/^\d+$/.test(s)) return false;
-    return true;
-  });
-
   // Strict triage — the title MUST contain a primary drawing-type keyword.
-  // If no candidate contains one, sheetTitle stays null and the display
-  // layer falls through to classification ("Plan"/"Other") or the page
-  // number. Per Andy: better to show "Page 11 — Other" than to guess and
-  // land on "Revisions:" or some other stray label.
-  result.sheetTitle = _findDrawingTypeTitle(titleCandidates) || null;
+  // tbItems are clustered into rows inside _findDrawingTypeTitle so text
+  // that PDF.js splits into multiple items ("WEST" + "ELEVATION" on the
+  // same baseline) rejoins before the keyword check runs. If no row
+  // contains a drawing-type keyword, sheetTitle stays null and the display
+  // layer falls through to classification — better "Page 11 — Other" than
+  // a hallucinated guess.
+  result.sheetTitle = _findDrawingTypeTitle(tbItems) || null;
 
   return result;
 }
@@ -67,59 +55,121 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
 // share font size and proximity with the anchor.
 var _DRAWING_TYPE_RX = /\b(plan|elevation|section|site|key[\s-]*plan)\b/i;
 
-function _findDrawingTypeTitle(titleCandidates) {
-  if (titleCandidates.length === 0) return null;
-  var typed = titleCandidates.filter(function (item) {
-    return _DRAWING_TYPE_RX.test(item.str);
+// Cluster tbItems into rows by Y position, then search joined row text for
+// the drawing-type keyword. Row-based search handles PDF.js chunking — a
+// title like "WEST ELEVATION" rendered as ["WEST", "ELEVATION"] (two items
+// at the same baseline) joins back to "WEST ELEVATION" before the regex
+// runs. Handles multi-line titles by pulling adjacent same-font rows.
+function _findDrawingTypeTitle(tbItems) {
+  if (!tbItems || tbItems.length === 0) return null;
+  var rows = _clusterRows(tbItems);
+
+  // Rows whose joined text contains a drawing-type keyword.
+  var typed = rows.filter(function (r) {
+    if (r.text.length < 4 || r.text.length >= 80) return false;
+    return _DRAWING_TYPE_RX.test(r.text);
   });
   if (typed.length === 0) return null;
+
+  // Rank: largest font wins; tie-break toward the bottom-right of the title
+  // block (visually lower = higher y in our top-left coord system; further
+  // right = higher x). Matches the BfCA title-block convention Andy flagged.
   typed.sort(function (a, b) {
-    return (b.fontSize || 0) - (a.fontSize || 0);
+    var fontDiff = (b.fontSize || 0) - (a.fontSize || 0);
+    if (Math.abs(fontDiff) > 0.5) return fontDiff;
+    var yDiff = b.y - a.y;
+    if (Math.abs(yDiff) > 5) return yDiff;
+    return b.xMax - a.xMax;
   });
-  return _stackTitle(typed[0], titleCandidates);
-}
+  var anchor = typed[0];
 
-// Assemble the full title around a keyword-anchor: pull same-font candidates
-// on the same row (e.g. "WEST" next to "ELEVATION") plus vertically adjacent
-// rows ("North Elevation" + "Right Side"). Siblings must match font size and
-// either overlap horizontally or share a centerline with the anchor.
-function _stackTitle(anchor, allCandidates) {
-  var anchorFont = anchor.fontSize || 0;
-  var fontTol = Math.max(1.0, anchorFont * 0.1);
-  var rowYTol = Math.max(3, anchorFont * 0.3);
-  var lineGap = anchorFont ? anchorFont * 2.2 : 30;
-  var alignTol = Math.max(40, anchorFont * 3);
-  var anchorCenter = anchor.x + (anchor.width || 0) / 2;
-  var anchorRight = anchor.x + (anchor.width || 0);
+  // Pull adjacent rows at the same font size for multi-line titles
+  // ("North Elevation" / "Right Side"). Siblings must sit within ~2.5x
+  // font height vertically AND horizontally overlap or share a centerline.
+  var fontTol = Math.max(1.0, anchor.fontSize * 0.1);
+  var lineGap = anchor.fontSize ? anchor.fontSize * 2.5 : 40;
+  var anchorMid = (anchor.xMin + anchor.xMax) / 2;
+  var alignTol = Math.max(40, anchor.fontSize * 3);
 
-  var siblings = allCandidates.filter(function (item) {
-    if (item === anchor) return false;
-    if (Math.abs((item.fontSize || 0) - anchorFont) > fontTol) return false;
-    var dy = item.y - anchor.y;
-    if (Math.abs(dy) < rowYTol) return true; // same row
-    if (Math.abs(dy) > lineGap) return false; // too far vertically
-    var itemCenter = item.x + (item.width || 0) / 2;
-    var itemRight = item.x + (item.width || 0);
-    var overlap = item.x < anchorRight && itemRight > anchor.x;
-    var centered = Math.abs(itemCenter - anchorCenter) < alignTol;
+  var stack = rows.filter(function (r) {
+    if (r === anchor) return true;
+    if (Math.abs(r.fontSize - anchor.fontSize) > fontTol) return false;
+    var dy = Math.abs(r.y - anchor.y);
+    if (dy === 0 || dy > lineGap) return false;
+    var rMid = (r.xMin + r.xMax) / 2;
+    var overlap = r.xMin < anchor.xMax && r.xMax > anchor.xMin;
+    var centered = Math.abs(rMid - anchorMid) < alignTol;
     return overlap || centered;
   });
-
-  var group = [anchor].concat(siblings);
-  group.sort(function (a, b) {
-    if (Math.abs(a.y - b.y) > rowYTol) return a.y - b.y;
-    return a.x - b.x;
+  stack.sort(function (a, b) {
+    return a.y - b.y;
   });
 
-  var text = group
-    .map(function (i) {
-      return i.str.trim();
+  var title = stack
+    .map(function (r) {
+      return r.text;
     })
-    .filter(Boolean)
     .join(" ")
+    .replace(/\s+/g, " ")
     .trim();
-  if (text.length > 100) return anchor.str.trim();
-  return text;
+  if (title.length > 100) return anchor.text;
+  return title;
+}
+
+// Row clustering — items whose y values fall within the same bucket share
+// a line. Bucket size scales with the row's font size so small-font lines
+// aren't merged with large-font titles.
+function _clusterRows(items) {
+  if (!items.length) return [];
+  var sorted = items.slice().sort(function (a, b) {
+    if (Math.abs(a.y - b.y) > 2) return a.y - b.y;
+    return a.x - b.x;
+  });
+  var rows = [];
+  var bucket = [sorted[0]];
+  for (var i = 1; i < sorted.length; i++) {
+    var curr = sorted[i];
+    var last = bucket[bucket.length - 1];
+    var tol = Math.max(3, (last.fontSize || 12) * 0.3);
+    if (Math.abs(curr.y - last.y) <= tol) {
+      bucket.push(curr);
+    } else {
+      rows.push(_finalizeRow(bucket));
+      bucket = [curr];
+    }
+  }
+  if (bucket.length) rows.push(_finalizeRow(bucket));
+  return rows;
+}
+
+function _finalizeRow(items) {
+  items.sort(function (a, b) {
+    return a.x - b.x;
+  });
+  var text = items
+    .map(function (i) {
+      return i.str;
+    })
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+  var fontSize = items.reduce(function (m, i) {
+    return Math.max(m, i.fontSize || 0);
+  }, 0);
+  var xMin = items.reduce(function (m, i) {
+    return Math.min(m, i.x);
+  }, Infinity);
+  var xMax = items.reduce(function (m, i) {
+    return Math.max(m, i.x + (i.width || 0));
+  }, -Infinity);
+  return {
+    text: text,
+    fontSize: fontSize,
+    y: items[0].y,
+    xMin: xMin,
+    xMax: xMax,
+    items: items
+  };
 }
 
 // Reject common title-block noise — revision lines, dates, signatures,
