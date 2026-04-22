@@ -612,8 +612,10 @@ function _handleOverlayClick(e) {
   // Polyline so interior walls drawn up to a slab edge don't drag/insert
   // vertices on the slab. Ruler so a ruler endpoint landing inside a
   // polygon edge's hit zone plants the endpoint instead of mutating the
-  // polygon.
-  var skipsPolygonEdit = _currentTool === "polyline" || _currentTool === "ruler";
+  // polygon. Calibrate for the same reason — a user who calibrates after
+  // areas have been drawn (rare but real) shouldn't modify geometry.
+  var skipsPolygonEdit =
+    _currentTool === "polyline" || _currentTool === "ruler" || _currentTool === "calibrate";
 
   // Priority 1: Click near an existing vertex — start drag
   var hit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
