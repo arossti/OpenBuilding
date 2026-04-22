@@ -15,8 +15,12 @@ IMPERIAL_SCALES.forEach(function (s) {
 });
 
 export function parseTitleBlock(textItems, pageWidth, pageHeight) {
+  // Title blocks occupy the right-hand strip of the sheet and typically
+  // span full height (general notes at top, sheet-number at bottom). No
+  // y constraint — noise filtering downstream rejects irrelevant strip
+  // content (revision labels, issued-for tables, address fields, etc).
   var tbItems = textItems.filter(function (item) {
-    return item.x > pageWidth * 0.65 && item.y > pageHeight * 0.75;
+    return item.x > pageWidth * 0.65;
   });
 
   var result = { sheetId: null, sheetTitle: null, scale: null, raw: tbItems };
@@ -42,38 +46,22 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
     return !_looksLikeTitleNoise(s);
   });
 
-  // Triage picker — highest precision first, fallbacks cascade down.
-  //   1. Drawing-type keyword match + same-font sibling stacking:
-  //      any candidate containing plan/section/elevation/site/etc. is
-  //      almost certainly the drawing title. Anchor on that item, then
-  //      pull same-font siblings that sit on the same row or stacked
-  //      vertically to reassemble multi-line titles.
-  //   2. Largest font among candidates — fallback when no drawing-type
-  //      keyword appears (rare).
-  //   3. Bottom-most candidate — legacy last resort.
-  var title = _findDrawingTypeTitle(titleCandidates);
-  if (!title && titleCandidates.length > 0) {
-    titleCandidates.sort(function (a, b) {
-      return (b.fontSize || 0) - (a.fontSize || 0);
-    });
-    title = titleCandidates[0].str.trim();
-  }
-  if (!title && titleCandidates.length > 0) {
-    titleCandidates.sort(function (a, b) {
-      return a.y - b.y;
-    });
-    title = titleCandidates[titleCandidates.length - 1].str.trim();
-  }
-  result.sheetTitle = title || null;
+  // Strict triage — the title MUST contain a primary drawing-type keyword.
+  // If no candidate contains one, sheetTitle stays null and the display
+  // layer falls through to classification ("Plan"/"Other") or the page
+  // number. Per Andy: better to show "Page 11 — Other" than to guess and
+  // land on "Revisions:" or some other stray label.
+  result.sheetTitle = _findDrawingTypeTitle(titleCandidates) || null;
 
   return result;
 }
 
-// Required keyword on the title anchor. Plans, sections, elevations, and
-// site drawings nearly always carry one of these words. Orientation and
-// level hints (north/south/basement/ground/etc.) aren't required for the
-// anchor — they ride along as siblings when they share font size + proximity.
-var _DRAWING_TYPE_RX = /\b(plan|elevation|section|detail|schedule|site|key[\s-]*plan|framing|notes?)\b/i;
+// Required keyword on the title anchor. Scoped to the four drawing types
+// BfCA actually cares about: plans, sections, elevations, site / key plan.
+// Levels + orientations (north/south/basement/ground/first/second) don't
+// anchor on their own but ride along as siblings via _stackTitle when they
+// share font size and proximity with the anchor.
+var _DRAWING_TYPE_RX = /\b(plan|elevation|section|site|key[\s-]*plan)\b/i;
 
 function _findDrawingTypeTitle(titleCandidates) {
   if (titleCandidates.length === 0) return null;
@@ -134,8 +122,11 @@ function _stackTitle(anchor, allCandidates) {
 // authored-by notes, "page N of M", scale text. Catches the values that
 // slipped through the length filter in the old picker.
 function _looksLikeTitleNoise(s) {
-  if (/\brev(ision|\.)?\b/i.test(s)) return true;
-  if (/\b(issued|drawn|checked|approved)\b/i.test(s)) return true;
+  // Rev / Revs / Rev. / Revision / Revisions / Revisions: — the trailing
+  // optional `s?` catches plurals and the word boundary fires against both
+  // word-end and punctuation-end forms.
+  if (/\brev(?:ision|\.)?s?\b/i.test(s)) return true;
+  if (/\b(issued|drawn|checked|approved|consultants?|seals?)\b/i.test(s)) return true;
   if (/\bscale\b/i.test(s)) return true;
   if (/^\s*page\s+\d/i.test(s)) return true;
   if (/\d{4}[-\/.]\d{1,2}[-\/.]\d{1,2}/.test(s)) return true; // YYYY-MM-DD
