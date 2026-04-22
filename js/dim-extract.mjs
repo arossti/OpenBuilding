@@ -112,6 +112,78 @@ export function parseMetric(str) {
 }
 
 /**
+ * Pre-pass: join horizontally-adjacent same-row text items into single
+ * strings. pdfjs 4.x emits per-glyph text items on many CAD PDFs (every
+ * character arrives as its own fragment with width ~3pt), which breaks
+ * the whole-string regex below — "2,901.6" arrives as seven items:
+ * "2", ",", "9", "0", "1", ".", "6". pdfjs 5.x already coalesces into
+ * words so this pass is idempotent there (gaps between words exceed the
+ * half-char-width threshold so nothing merges).
+ *
+ * Merge rule: same y (within max(3pt, 0.3 * fontHeight)) AND the gap
+ * between prev.right and curr.left is <= half the character width. No
+ * space insertion — any actual whitespace in the source is preserved
+ * because it arrives as its own (possibly zero-width) item.
+ *
+ * Returns a new text-item array. Input is not mutated.
+ *
+ * @param {Array} textItems
+ * @returns {Array}
+ */
+export function consolidateTextItems(textItems) {
+  if (!Array.isArray(textItems) || textItems.length === 0) return textItems || [];
+
+  var sorted = textItems.slice().sort(function (a, b) {
+    if (Math.abs(a.y - b.y) > 3) return a.y - b.y;
+    return a.x - b.x;
+  });
+
+  var out = [];
+  var curr = null;
+  for (var i = 0; i < sorted.length; i++) {
+    var t = sorted[i];
+    if (!curr) {
+      curr = _cloneItem(t);
+      continue;
+    }
+    var charSize = curr.height || curr.fontSize || 5;
+    // Tight row tolerance — stacked fraction pairs (e.g. "17'-11 3/4""
+    // renders the numerator and denominator with y-offset ~3pt). A looser
+    // tolerance swallows those into a single consolidated item and the
+    // fraction-merge pass misses them. 1pt floor handles sub-pixel baseline
+    // jitter on v4's per-glyph text items, which share an exact y.
+    var rowTol = Math.max(1, charSize * 0.15);
+    var sameRow = Math.abs(t.y - curr.y) <= rowTol;
+    var prevRight = curr.x + (curr.width || 0);
+    var gap = t.x - prevRight;
+    var charW = charSize * 0.5;
+    if (sameRow && gap <= charW) {
+      curr.str = curr.str + (t.str || "");
+      curr.width = t.x + (t.width || 0) - curr.x;
+      if ((t.height || 0) > (curr.height || 0)) curr.height = t.height;
+      if ((t.fontSize || 0) > (curr.fontSize || 0)) curr.fontSize = t.fontSize;
+    } else {
+      if ((curr.str || "").length > 0) out.push(curr);
+      curr = _cloneItem(t);
+    }
+  }
+  if (curr && (curr.str || "").length > 0) out.push(curr);
+  return out;
+}
+
+function _cloneItem(t) {
+  return {
+    str: t.str || "",
+    x: t.x,
+    y: t.y,
+    width: t.width || 0,
+    height: t.height || 0,
+    fontName: t.fontName || "",
+    fontSize: t.fontSize || 0
+  };
+}
+
+/**
  * Pre-pass: merge split numerator/denominator fraction pairs back into
  * their predecessor dim item. CAD renders `17'-11 3/4"` as three text
  * items ("17'-11" + "3 " + "4") with the numerator slightly above and
@@ -329,7 +401,11 @@ export function extractDimensions(textItems, segments, opts) {
   var declared = opts.declaredScale || null;
   var declaredPpm = scaleToPdfUnitsPerMetre(declared);
 
-  var merged = mergeFractionItems(textItems);
+  // Consolidate per-glyph fragments (pdfjs 4.x on CAD PDFs) into words
+  // before anything else runs. Idempotent on already-consolidated input
+  // (pdfjs 5.x / PDFs that emit word-level text items).
+  var consolidated = consolidateTextItems(textItems);
+  var merged = mergeFractionItems(consolidated);
 
   // Pass 1: parse every text item; keep successful parses with source and position.
   var raw = [];
