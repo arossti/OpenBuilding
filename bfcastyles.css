@@ -4824,6 +4824,15 @@ table.bw-pdf-import-table .delta.overwrite {
   color: var(--accent-lit, #4ade80);
   margin-top: 2px;
 }
+.bw-sheet-link {
+  color: var(--accent-lit, #4ade80);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(74, 222, 128, 0.4);
+}
+.bw-sheet-link:hover {
+  text-decoration-color: currentColor;
+}
 .bw-pdf-import-warn-inline {
   font-size: 10px;
   color: #facc15;

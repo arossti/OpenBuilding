@@ -651,7 +651,7 @@ function renderImportRow(row) {
 
   let sourceHtml = `<div class="bw-pdf-import-summary">${escapeHtml(row.summary)}</div>`;
   const sheets = collectSheets(row.contributors);
-  if (sheets.length) sourceHtml += `<div class="bw-pdf-import-sheets">sheets: ${escapeHtml(sheets.join(", "))}</div>`;
+  if (sheets.length) sourceHtml += `<div class="bw-pdf-import-sheets">sheets: ${renderSheetLinks(sheets)}</div>`;
   if (row.assemblyPresets && row.assemblyPresets.length)
     sourceHtml += `<div class="bw-pdf-import-sheets">preset: ${escapeHtml(row.assemblyPresets.join(", "))}</div>`;
   if (row.missingParams && row.missingParams.length)
@@ -672,6 +672,19 @@ function collectSheets(contributors) {
   const s = new Set();
   for (const c of contributors) for (const sh of c.sheets || []) s.add(sh);
   return Array.from(s);
+}
+
+// Render sheet IDs as deep links into the PDF-Parser app. target="pdf-parser-tab"
+// is a named browsing-context so the same Parser tab gets navigated and focused
+// when the user clicks multiple sheet refs — avoids a new tab per click.
+// Parser reads #sheet=X on load and on hashchange; see _applySheetHash in app.mjs.
+function renderSheetLinks(sheets) {
+  return sheets
+    .map((s) => {
+      const encoded = encodeURIComponent(s);
+      return `<a href="pdfparser.html#sheet=${encoded}" target="pdf-parser-tab" class="bw-sheet-link">${escapeHtml(s)}</a>`;
+    })
+    .join(", ");
 }
 
 function formatRelativeTime(iso) {

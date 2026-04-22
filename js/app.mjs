@@ -95,6 +95,12 @@ function init() {
   els.toolBtns = document.querySelectorAll(".tool-btn");
 
   Viewer.init("viewer-container", "pdf-canvas", "overlay-canvas");
+
+  // Sheet deep-link: listen for hash changes so the same Parser tab can be
+  // re-targeted by successive BEAMweb sheet clicks (target="pdf-parser-tab").
+  window.addEventListener("hashchange", function () {
+    _applySheetHash();
+  });
   Viewer.setDrawCallback(function (ctx, pageNum) {
     PolygonTool.draw(ctx, pageNum);
     _drawRulers(ctx, pageNum);
@@ -274,7 +280,10 @@ function loadPdf(buffer, fileName, opts) {
             // Refresh the geometry-params panel so restored project.params
             // populate (or fresh inits clear) the sidebar inputs.
             _renderParamsPanel();
-            goToPage(1);
+            // If the URL was opened with #sheet=X, jump to that sheet.
+            // Otherwise start on page 1. Hashchange listener (wired in init)
+            // handles subsequent mid-session navigation.
+            if (!_applySheetHash()) goToPage(1);
 
             // Re-enable autosave after the restore dust has settled.
             if (opts.restoreData) ProjectStore.resumeAutosave();
@@ -347,6 +356,44 @@ function _tryRestoreLastSession() {
 }
 
 /* ── Navigation ───────────────────────────────────────── */
+
+/**
+ * Find the first page whose sheetId matches. Returns pageNum or null.
+ * Used by the sheet-deep-link protocol (#sheet=A-301 URL fragment).
+ */
+function _findPageBySheetId(sheetId) {
+  var project = ProjectStore.getProject();
+  if (!project || !project.pages) return null;
+  for (var i = 0; i < project.pages.length; i++) {
+    if (project.pages[i].sheetId === sheetId) {
+      return project.pages[i].pageNum;
+    }
+  }
+  return null;
+}
+
+/**
+ * Read the URL hash. If it encodes #sheet=X, jump to the page whose
+ * sheetId matches. Returns true if we navigated, false if the hash was
+ * absent or did not resolve. BEAMweb's Import modal + fidelity badges
+ * emit these links with target="pdf-parser-tab" so subsequent clicks
+ * reuse the same Parser tab rather than spawning new ones.
+ */
+function _applySheetHash() {
+  var hash = (window.location.hash || "").replace(/^#/, "");
+  if (!hash) return false;
+  var m = /(?:^|&)sheet=([^&]+)/.exec(hash);
+  if (!m) return false;
+  var targetSheet = decodeURIComponent(m[1]);
+  var pageNum = _findPageBySheetId(targetSheet);
+  if (!pageNum) {
+    setStatus('Sheet "' + targetSheet + '" not found in the loaded drawing set.', "error");
+    return false;
+  }
+  goToPage(pageNum);
+  setStatus("Jumped to sheet " + targetSheet + " (page " + pageNum + ").", "ready");
+  return true;
+}
 
 function goToPage(pageNum) {
   var pageCount = Loader.getPageCount();
