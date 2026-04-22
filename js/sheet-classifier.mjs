@@ -54,7 +54,12 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
 // _DRAWING_TYPE_RX is kept for classifySheet() below (which matches on
 // the full title string to decide plan/elevation/section/site).
 var _DRAWING_TYPE_RX = /\b(plan|elevation|section|site|key[\s-]*plan)\b/i;
-var _TITLE_EXTRACT_RX = /((?:\b(?:north|south|east|west|nw|ne|sw|se|front|rear|left|right|first|second|third|1st|2nd|3rd|ground|main|upper|lower|basement|roof|foundation|floor|storey|story|level|key|site)\b\s+){0,3})\b(plan|elevation|section|site|key[\s-]*plan)\b/i;
+// Trailing suffix group (optional) captures section identifiers —
+// "A-A", "AA", "AB", "A1", "1-1", "1A" — without grabbing a bare digit
+// like the "6" in "UPPER FLOOR PLAN 6 3". Requires at least two
+// characters or a hyphen pair, so single-letter / single-digit
+// suffixes drop on the floor (user's call: "SECTION" alone is fine).
+var _TITLE_EXTRACT_RX = /((?:\b(?:north|south|east|west|nw|ne|sw|se|front|rear|left|right|first|second|third|1st|2nd|3rd|ground|main|upper|lower|basement|roof|foundation|floor|storey|story|level|key|site)\b\s+){0,3})\b(plan|elevation|section|site|key[\s-]*plan)\b(?:\s+([A-Z]-[A-Z]|[A-Z]{2}|\d-\d|[A-Z]\d|\d[A-Z]))?/i;
 
 // Row-cluster all text on the page, then extract the cleanest title PHRASE
 // from each row using _TITLE_EXTRACT_RX (keyword + optional leading
