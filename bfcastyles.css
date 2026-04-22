@@ -1090,6 +1090,28 @@ html.theme-dark body {
   outline-offset: 1px;
 }
 
+/* Depth input in Summary Table — same inline, low-chrome pattern as Tag /
+   Preset. Narrow because typical values are 0.2–1.5 m (footing depths,
+   pier penetrations). */
+#summary-content input.bw-inline-input {
+  background: transparent;
+  color: var(--text);
+  border: 1px dashed var(--border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 11px;
+  font-family: inherit;
+  width: 60px;
+  text-align: right;
+}
+#summary-content input.bw-inline-input:hover {
+  border-color: var(--accent-lit);
+}
+#summary-content input.bw-inline-input:focus {
+  outline: 1px solid var(--accent-lit);
+  outline-offset: 1px;
+}
+
 .summary-sheet-row td {
   padding-top: 12px !important;
   font-size: 12px !important;

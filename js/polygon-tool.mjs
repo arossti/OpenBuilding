@@ -505,6 +505,33 @@ export function setAssemblyPreset(pageNum, polyIdx, preset) {
   polys[polyIdx].assembly_preset = preset || null;
 }
 
+// Per-polygon depth (m). Currently meaningful only for `pad_pier` polygons,
+// where it multiplies the plan area into a volume via the sumAreaTimesDepth
+// aggregator in polygon-map.mjs. Stored as a Number (not string) so the
+// aggregator can read directly; null when unset.
+export function setDepth(pageNum, polyIdx, depth_m) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) return;
+  if (depth_m === null || depth_m === undefined || depth_m === "") {
+    polys[polyIdx].depth_m = null;
+    return;
+  }
+  var n = Number(depth_m);
+  polys[polyIdx].depth_m = isFinite(n) && n > 0 ? n : null;
+}
+
+// Component tags whose aggregator consumes `depth_m`. Only `pad_pier` today
+// (plan-area × depth → volume). Extending this set tomorrow means adding a
+// depth-consuming aggregator path in polygon-map.mjs, not just listing the
+// tag here.
+var _DEPTH_BEARING_COMPONENTS = {
+  pad_pier: true
+};
+
+export function componentCarriesDepth(component) {
+  return !!(component && _DEPTH_BEARING_COMPONENTS[component]);
+}
+
 var _ASSEMBLY_BEARING_COMPONENTS = {
   wall_exterior: true,
   wall_party: true,

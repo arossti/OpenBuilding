@@ -2211,6 +2211,24 @@ function _renderTagSelect(polyType, polyIdx, pageNum, currentValue, small) {
   return html;
 }
 
+// Per-polygon depth input, rendered only for components whose aggregator
+// consumes depth (today: pad_pier plan-area * depth -> volume). Other tags
+// render an em-dash so the column reads as "not applicable" rather than "zero".
+function _renderDepthInput(component, polyIdx, pageNum, currentDepth, small) {
+  var sizeAttr = small ? " style='font-size:10px;'" : "";
+  if (!PolygonTool.componentCarriesDepth(component)) {
+    return "<td class='depth-cell'" + sizeAttr + ">—</td>";
+  }
+  var val = currentDepth != null && isFinite(Number(currentDepth)) ? String(currentDepth) : "";
+  var html = "<td class='depth-cell'" + sizeAttr + ">";
+  html +=
+    "<input type='number' step='0.01' min='0' class='summary-depth-input bw-inline-input' " +
+    "data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "' " +
+    "value='" + val + "' placeholder='m' />";
+  html += "</td>";
+  return html;
+}
+
 function _renderPresetSelect(component, polyIdx, pageNum, currentPreset, small) {
   var sizeAttr = small ? " style='font-size:10px;'" : "";
   if (!PolygonTool.componentCarriesPreset(component)) {
@@ -2233,6 +2251,7 @@ function _renderSummaryTable() {
   html += "<th>Type</th><th>Tag</th><th>Preset</th>";
   html += "<th>Gross m\u00B2</th><th>Net m\u00B2</th>";
   html += "<th>Gross ft\u00B2</th><th>Net ft\u00B2</th>";
+  html += "<th>Depth m</th>";
   html += "<th>Length / Perim m</th><th></th>";
   html += "</tr></thead><tbody>";
 
@@ -2268,7 +2287,7 @@ function _renderSummaryTable() {
     hasAnyData = true;
 
     // Sheet header row
-    html += "<tr class='summary-sheet-row'><td colspan='11'>" + sheetLabel + tail + "</td></tr>";
+    html += "<tr class='summary-sheet-row'><td colspan='12'>" + sheetLabel + tail + "</td></tr>";
 
     var pageGrossM2 = 0,
       pageNetM2 = 0,
@@ -2334,6 +2353,7 @@ function _renderSummaryTable() {
       } else {
         html += "<td class='num' colspan='4'>\u2014</td>";
       }
+      html += _renderDepthInput(wm.component, wall.polyIdx, pageNum, wm.depth_m, false);
       html += "<td class='num'>" + (wm.perimeterM !== null ? wm.perimeterM.toFixed(2) : "") + "</td>";
       html +=
         "<td class='del-cell' data-poly-idx='" +
@@ -2372,6 +2392,7 @@ function _renderSummaryTable() {
           } else {
             html += "<td colspan='4'></td>";
           }
+          html += _renderDepthInput(cm.component, child.polyIdx, pageNum, cm.depth_m, true);
           html +=
             "<td class='num' style='font-size:10px;'>" +
             (cm.perimeterM !== null ? cm.perimeterM.toFixed(2) : "") +
@@ -2411,6 +2432,7 @@ function _renderSummaryTable() {
       } else {
         html += "<td colspan='4'>\u2014</td>";
       }
+      html += _renderDepthInput(om.component, assoc.orphanWindows[o].polyIdx, pageNum, om.depth_m, false);
       html += "<td class='num'>" + (om.perimeterM !== null ? om.perimeterM.toFixed(2) : "") + "</td>";
       html +=
         "<td class='del-cell' data-poly-idx='" +
@@ -2440,6 +2462,7 @@ function _renderSummaryTable() {
       html += _renderTagSelect("polyline", ple.polyIdx, pageNum, pm.component, false);
       html += _renderPresetSelect(pm.component, ple.polyIdx, pageNum, pm.assembly_preset, false);
       html += "<td class='num' colspan='4'>\u2014</td>";
+      html += _renderDepthInput(pm.component, ple.polyIdx, pageNum, pm.depth_m, false);
       html += "<td class='num'>" + (pm.lengthM !== null ? pm.lengthM.toFixed(2) : "") + "</td>";
       html +=
         "<td class='del-cell' data-poly-idx='" +
@@ -2458,7 +2481,7 @@ function _renderSummaryTable() {
       html += "<td class='num'>" + pageNetM2.toFixed(2) + "</td>";
       html += "<td class='num'>" + pageGrossFt2.toFixed(2) + "</td>";
       html += "<td class='num'>" + pageNetFt2.toFixed(2) + "</td>";
-      html += "<td colspan='2'></td></tr>";
+      html += "<td colspan='3'></td></tr>";
     }
 
     grandGrossM2 += pageGrossM2;
@@ -2475,7 +2498,7 @@ function _renderSummaryTable() {
     html += "<td class='num'>" + grandNetM2.toFixed(2) + "</td>";
     html += "<td class='num'>" + grandGrossFt2.toFixed(2) + "</td>";
     html += "<td class='num'>" + grandNetFt2.toFixed(2) + "</td>";
-    html += "<td colspan='2'></td></tr>";
+    html += "<td colspan='3'></td></tr>";
   }
 
   html += "</tbody></table>";
@@ -2556,6 +2579,20 @@ function _renderSummaryTable() {
       PolygonTool.setAssemblyPreset(pg, idx, this.value);
       ProjectStore.savePolygons(pg, PolygonTool.getPolygons(pg));
       setStatus("Preset updated", "ready");
+    });
+  }
+
+  // Depth inputs — meaningful for pad_pier (plan-area * depth -> volume).
+  // Use `change` (not `input`) so partial typing doesn't thrash the save
+  // pipeline; the value commits when the field loses focus or Enter is pressed.
+  var depthInputs = panel.querySelectorAll(".summary-depth-input");
+  for (var di = 0; di < depthInputs.length; di++) {
+    depthInputs[di].addEventListener("change", function () {
+      var idx = parseInt(this.dataset.polyIdx, 10);
+      var pg = parseInt(this.dataset.pageNum, 10);
+      PolygonTool.setDepth(pg, idx, this.value);
+      ProjectStore.savePolygons(pg, PolygonTool.getPolygons(pg));
+      setStatus("Depth updated", "ready");
     });
   }
 }
