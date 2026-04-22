@@ -337,7 +337,18 @@ function _tryRestoreLastSession() {
       var latest = projects[0];
       if (!latest.projectJson || !latest.projectJson.pages) return false;
       return IDBStore.getPdfBytes(latest.uuid).then(function (blob) {
-        if (!blob) return false;
+        // Missing or zero-byte blob = corrupt / never-persisted state. Don't
+        // hand pdfjs an empty buffer (it throws InvalidPDFException and the
+        // console lights up on every boot). Silently skip and drop the
+        // orphan record so we don't retry it next session.
+        if (!blob || blob.size === 0) {
+          if (blob && blob.size === 0) {
+            IDBStore.deleteProject(latest.uuid).catch(function () {
+              /* best-effort cleanup */
+            });
+          }
+          return false;
+        }
         setStatus("Restoring " + latest.pdfFileName + "\u2026", "busy");
         ProjectStore.pauseAutosave();
         return blob.arrayBuffer().then(function (buffer) {
