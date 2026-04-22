@@ -42,14 +42,21 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
     return !_looksLikeTitleNoise(s);
   });
 
-  // Three-tier title picker (best → fallback):
-  //   1. Labelled title ("Sheet Name: FLOOR PLAN") — highest-signal match.
-  //   2. Largest font among candidates — drawing titles are usually the
-  //      most prominent text in a title block.
-  //   3. Bottom-most candidate — legacy fallback.
-  var title = _findLabelledTitle(tbItems);
+  // Triage picker — highest precision first, fallbacks cascade down.
+  //   1. Drawing-type keyword match + same-font sibling stacking:
+  //      any candidate containing plan/section/elevation/site/etc. is
+  //      almost certainly the drawing title. Anchor on that item, then
+  //      pull same-font siblings that sit on the same row or stacked
+  //      vertically to reassemble multi-line titles.
+  //   2. Largest font among candidates — fallback when no drawing-type
+  //      keyword appears (rare).
+  //   3. Bottom-most candidate — legacy last resort.
+  var title = _findDrawingTypeTitle(titleCandidates);
   if (!title && titleCandidates.length > 0) {
-    title = _findLargestFontTitle(titleCandidates);
+    titleCandidates.sort(function (a, b) {
+      return (b.fontSize || 0) - (a.fontSize || 0);
+    });
+    title = titleCandidates[0].str.trim();
   }
   if (!title && titleCandidates.length > 0) {
     titleCandidates.sort(function (a, b) {
@@ -62,71 +69,65 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
   return result;
 }
 
-// Regexes for known title-block labels. Matches the whole item when the
-// label appears alone ("Sheet Name:"), and also handles inline forms where
-// the label and value share one text item ("Sheet Name: FLOOR PLAN").
-var _TITLE_LABEL_PATTERNS = [
-  /^(?:sheet|drawing|dwg)\s+(?:name|title)\s*:?\s*$/i,
-  /^title\s*:?\s*$/i,
-  /^name\s*:?\s*$/i
-];
-var _TITLE_INLINE_PATTERN = /^(?:sheet|drawing|dwg)\s+(?:name|title)\s*:\s*(.+)$/i;
+// Required keyword on the title anchor. Plans, sections, elevations, and
+// site drawings nearly always carry one of these words. Orientation and
+// level hints (north/south/basement/ground/etc.) aren't required for the
+// anchor — they ride along as siblings when they share font size + proximity.
+var _DRAWING_TYPE_RX = /\b(plan|elevation|section|detail|schedule|site|key[\s-]*plan|framing|notes?)\b/i;
 
-function _findLabelledTitle(tbItems) {
-  // Pass 1 — inline form: one item contains both "Sheet Name:" and the title.
-  for (var i = 0; i < tbItems.length; i++) {
-    var s = tbItems[i].str.trim();
-    var m = s.match(_TITLE_INLINE_PATTERN);
-    if (m && m[1]) {
-      var val = m[1].trim();
-      if (val.length >= 3 && val.length < 60 && !_looksLikeTitleNoise(val)) return val;
-    }
-  }
-
-  // Pass 2 — split form: a label item + a nearby value. "Nearby" means the
-  // closest item that's either to the right on the same row or directly
-  // below the label, within a loose bounding region.
-  for (var j = 0; j < tbItems.length; j++) {
-    var labelItem = tbItems[j];
-    var labelText = labelItem.str.trim();
-    if (!_TITLE_LABEL_PATTERNS.some(function (p) { return p.test(labelText); })) continue;
-
-    var best = null;
-    var bestDist = Infinity;
-    var labelRight = labelItem.x + (labelItem.width || 0);
-
-    for (var k = 0; k < tbItems.length; k++) {
-      if (k === j) continue;
-      var item = tbItems[k];
-      var text = item.str.trim();
-      if (text.length < 3 || text.length >= 60) continue;
-      if (_TITLE_LABEL_PATTERNS.some(function (p) { return p.test(text); })) continue;
-      if (_looksLikeTitleNoise(text)) continue;
-
-      var sameRow = Math.abs(item.y - labelItem.y) < 5;
-      var rightOfLabel = item.x >= labelRight - 2;
-      var directlyBelow = item.y > labelItem.y && item.y - labelItem.y < 25;
-      if (!((sameRow && rightOfLabel) || directlyBelow)) continue;
-
-      var dx = item.x - labelItem.x;
-      var dy = item.y - labelItem.y;
-      var dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < bestDist) {
-        bestDist = dist;
-        best = text;
-      }
-    }
-    if (best) return best;
-  }
-
-  return null;
-}
-
-function _findLargestFontTitle(titleCandidates) {
-  var sorted = titleCandidates.slice().sort(function (a, b) {
+function _findDrawingTypeTitle(titleCandidates) {
+  if (titleCandidates.length === 0) return null;
+  var typed = titleCandidates.filter(function (item) {
+    return _DRAWING_TYPE_RX.test(item.str);
+  });
+  if (typed.length === 0) return null;
+  typed.sort(function (a, b) {
     return (b.fontSize || 0) - (a.fontSize || 0);
   });
-  return sorted[0].str.trim();
+  return _stackTitle(typed[0], titleCandidates);
+}
+
+// Assemble the full title around a keyword-anchor: pull same-font candidates
+// on the same row (e.g. "WEST" next to "ELEVATION") plus vertically adjacent
+// rows ("North Elevation" + "Right Side"). Siblings must match font size and
+// either overlap horizontally or share a centerline with the anchor.
+function _stackTitle(anchor, allCandidates) {
+  var anchorFont = anchor.fontSize || 0;
+  var fontTol = Math.max(1.0, anchorFont * 0.1);
+  var rowYTol = Math.max(3, anchorFont * 0.3);
+  var lineGap = anchorFont ? anchorFont * 2.2 : 30;
+  var alignTol = Math.max(40, anchorFont * 3);
+  var anchorCenter = anchor.x + (anchor.width || 0) / 2;
+  var anchorRight = anchor.x + (anchor.width || 0);
+
+  var siblings = allCandidates.filter(function (item) {
+    if (item === anchor) return false;
+    if (Math.abs((item.fontSize || 0) - anchorFont) > fontTol) return false;
+    var dy = item.y - anchor.y;
+    if (Math.abs(dy) < rowYTol) return true; // same row
+    if (Math.abs(dy) > lineGap) return false; // too far vertically
+    var itemCenter = item.x + (item.width || 0) / 2;
+    var itemRight = item.x + (item.width || 0);
+    var overlap = item.x < anchorRight && itemRight > anchor.x;
+    var centered = Math.abs(itemCenter - anchorCenter) < alignTol;
+    return overlap || centered;
+  });
+
+  var group = [anchor].concat(siblings);
+  group.sort(function (a, b) {
+    if (Math.abs(a.y - b.y) > rowYTol) return a.y - b.y;
+    return a.x - b.x;
+  });
+
+  var text = group
+    .map(function (i) {
+      return i.str.trim();
+    })
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  if (text.length > 100) return anchor.str.trim();
+  return text;
 }
 
 // Reject common title-block noise — revision lines, dates, signatures,

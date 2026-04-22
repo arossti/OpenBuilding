@@ -2114,7 +2114,10 @@ function closeSummaryTable() {
 function _buildSheetTail(page) {
   var classification = page.classification ? _capitalize(page.classification) : "";
   var title = (page.sheetTitle || "").trim();
-  var looksLikeBodyText = title.length > 50 || /^(this|the following|all\s|general\s+notes|notes?:|drawings?\s)/i.test(title);
+  // 80-char cap leaves headroom for multi-line stacks like
+  // "FOUNDATION PLAN — Continuous Footings Layout". Sentence-prefix filter
+  // still rejects prose that slips under the length limit.
+  var looksLikeBodyText = title.length > 80 || /^(this|the following|all\s|general\s+notes|notes?:|drawings?\s)/i.test(title);
   if (title && !looksLikeBodyText) return " \u2014 " + title;
   if (classification) return " \u2014 " + classification;
   return "";
