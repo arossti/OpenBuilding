@@ -2114,11 +2114,7 @@ function closeSummaryTable() {
 function _buildSheetTail(page) {
   var classification = page.classification ? _capitalize(page.classification) : "";
   var title = (page.sheetTitle || "").trim();
-  // 80-char cap leaves room for legit multi-line titles ("North Elevation
-  // Right Side" through "Foundation Plan - Continuous Footings Layout")
-  // while still rejecting general-notes paragraphs. Sentence-prefix filter
-  // catches prose that slips under the length limit.
-  var looksLikeBodyText = title.length > 80 || /^(this|the following|all\s|general\s+notes|notes?:|drawings?\s)/i.test(title);
+  var looksLikeBodyText = title.length > 50 || /^(this|the following|all\s|general\s+notes|notes?:|drawings?\s)/i.test(title);
   if (title && !looksLikeBodyText) return " \u2014 " + title;
   if (classification) return " \u2014 " + classification;
   return "";
