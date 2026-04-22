@@ -96,6 +96,11 @@ export function startPolygon(pageNum, label, opts) {
     sheet_id: opts.sheet_id || null,
     sheet_class: opts.sheet_class || null,
     assembly_preset: opts.assembly_preset || null,
+    // Phase 4b.5 — building vs garage scope (Q23 option B). Defaults to
+    // "building"; user flips to "garage" via the Summary Table inline
+    // select. Aggregator routes garage-scoped polygons to the garage_*
+    // dim counterparts, reusing the same component taxonomy.
+    scope: opts.scope === "garage" ? "garage" : "building",
     _pageNum: pageNum
   });
   _colorIdx++;
@@ -257,7 +262,8 @@ export function getMeasurement(pageNum, polyIdx) {
     depth_m: poly.depth_m != null ? poly.depth_m : null,
     sheet_id: poly.sheet_id || null,
     sheet_class: poly.sheet_class || null,
-    assembly_preset: poly.assembly_preset || null
+    assembly_preset: poly.assembly_preset || null,
+    scope: poly.scope === "garage" ? "garage" : "building"
   };
 
   if (poly.type === "polyline") {
@@ -278,7 +284,8 @@ export function getMeasurement(pageNum, polyIdx) {
       depth_m: bridge.depth_m,
       sheet_id: bridge.sheet_id,
       sheet_class: bridge.sheet_class,
-      assembly_preset: bridge.assembly_preset
+      assembly_preset: bridge.assembly_preset,
+      scope: bridge.scope
     };
   }
 
@@ -302,7 +309,8 @@ export function getMeasurement(pageNum, polyIdx) {
     depth_m: bridge.depth_m,
     sheet_id: bridge.sheet_id,
     sheet_class: bridge.sheet_class,
-    assembly_preset: bridge.assembly_preset
+    assembly_preset: bridge.assembly_preset,
+    scope: bridge.scope
   };
 }
 
@@ -503,6 +511,42 @@ export function setAssemblyPreset(pageNum, polyIdx, preset) {
   var polys = _polygons[pageNum];
   if (!polys || !polys[polyIdx]) return;
   polys[polyIdx].assembly_preset = preset || null;
+}
+
+// Per-polygon depth (m). Currently meaningful only for `pad_pier` polygons,
+// where it multiplies the plan area into a volume via the sumAreaTimesDepth
+// aggregator in polygon-map.mjs. Stored as a Number (not string) so the
+// aggregator can read directly; null when unset.
+export function setDepth(pageNum, polyIdx, depth_m) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) return;
+  if (depth_m === null || depth_m === undefined || depth_m === "") {
+    polys[polyIdx].depth_m = null;
+    return;
+  }
+  var n = Number(depth_m);
+  polys[polyIdx].depth_m = isFinite(n) && n > 0 ? n : null;
+}
+
+// Component tags whose aggregator consumes `depth_m`. Only `pad_pier` today
+// (plan-area × depth → volume). Extending this set tomorrow means adding a
+// depth-consuming aggregator path in polygon-map.mjs, not just listing the
+// tag here.
+var _DEPTH_BEARING_COMPONENTS = {
+  pad_pier: true
+};
+
+export function componentCarriesDepth(component) {
+  return !!(component && _DEPTH_BEARING_COMPONENTS[component]);
+}
+
+// Per-polygon scope override: "building" or "garage". Anything else
+// (null, undefined, "") normalises to "building" so legacy polygons
+// round-trip without code changes elsewhere.
+export function setScope(pageNum, polyIdx, scope) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) return;
+  polys[polyIdx].scope = scope === "garage" ? "garage" : "building";
 }
 
 var _ASSEMBLY_BEARING_COMPONENTS = {

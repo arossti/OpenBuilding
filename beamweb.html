@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BEAM — Embodied Carbon Calculator (BfCA)</title>
+    <link rel="icon" type="image/png" href="graphics/BFCA-LOGO-sm.png" />
     <meta
       name="description"
       content="Browser port of the BEAM embodied carbon calculator. Calculates material emissions for Canadian construction projects using the BfCA JSON material database."
@@ -84,10 +85,17 @@
           </button>
           <button
             class="beam-action-btn"
-            id="beam-import-pdf-parser"
-            title="Pull areas and volumes from a saved PDF-Parser session (IndexedDB)"
+            id="beam-trust-pdf-parser"
+            title="Trust: apply every dimension PDF-Parser can compute, no review step (uses the most recently saved parser session)"
           >
-            <i class="bi bi-file-earmark-ruled"></i> Import PDF-Parser
+            <i class="bi bi-lightning-charge"></i> Trust
+          </button>
+          <button
+            class="beam-action-btn"
+            id="beam-import-pdf-parser"
+            title="Trust + Verify: open the review modal to pick which dimensions to import (available any time, even after a Trust apply)"
+          >
+            <i class="bi bi-file-earmark-ruled"></i> Trust + Verify
           </button>
         </div>
 

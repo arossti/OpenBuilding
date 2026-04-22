@@ -131,7 +131,13 @@ export async function applyImport(projectUuid, dimIdsToApply) {
       const polyIds = row.contributors.flatMap((c) => (c.polygons || []).map((p) => p.id));
       writeDimValue(row, preview.params);
       polyIdsByDim[row.dimId] = polyIds;
-      StateManager.setDimensionSource(row.dimId, buildProvenance(projectUuid, polyIds));
+      StateManager.setDimensionSource(
+        row.dimId,
+        buildProvenance(projectUuid, polyIds, {
+          summary: row.summary,
+          sheets: collectSheets(row.contributors)
+        })
+      );
       applied++;
     }
   } finally {
@@ -163,10 +169,27 @@ function writeDimValue(row, params) {
   StateManager.setValue(`${row.dimId}_width`, String(W), VS.IMPORTED);
 }
 
-function buildProvenance(projectUuid, polyIds) {
-  if (!polyIds || polyIds.length === 0) return "pdf";
-  if (polyIds.length === 1) return `pdf:${polyIds[0]}`;
-  return `pdf:sum:${polyIds.join("+")}`;
+// Provenance is stored as a JSON-encoded envelope on dimension_sources.
+// The envelope lets PROJECT render a rich fidelity badge (summary +
+// clickable sheet refs) without re-reading IndexedDB on every repaint.
+// A plain-string fallback is emitted when the caller lacks rich context
+// (e.g. param-propagation path) — render paths must handle both.
+function buildProvenance(projectUuid, polyIds, extras) {
+  extras = extras || {};
+  const envelope = {
+    type: "pdf-parser",
+    projectUuid,
+    polyIds: Array.isArray(polyIds) ? polyIds : [],
+    summary: extras.summary || "",
+    sheets: Array.isArray(extras.sheets) ? extras.sheets : []
+  };
+  return JSON.stringify(envelope);
+}
+
+function collectSheets(contributors) {
+  const s = new Set();
+  for (const c of contributors || []) for (const sh of c.sheets || []) s.add(sh);
+  return Array.from(s);
 }
 
 function buildSummary(agg) {

@@ -607,6 +607,54 @@ BEAMweb applies the Energy GHG factors (tab 18) to produce operational emissions
 
 ---
 
+## 12. Dev tooling — PDF-Parser debug harness (planning)
+
+**Status:** planning note only, not built. Captures a dev-loop improvement that would have cut the PR #2 sheet-title saga from 8 commits to ~2, and sets up the next PDF-Parser polish pass (magic-wand auto-detect) to avoid the same feedback-loop friction.
+
+### The problem
+
+When an agent or human debugs PDF-Parser extraction (text items, geometry, classifier decisions), the feedback loop today is: edit code → user drops PDF into the browser → user screenshots the result → agent guesses what went wrong → repeat. The sheet-title work went 8 commits because we were reasoning about pdfjs coordinate systems and text chunking from assumptions rather than from actual extracted data. That's a durable class of friction, not a one-off.
+
+### Short-term: CLI debug harness
+
+`schema/scripts/debug-pdf-extract.mjs` (~100 lines):
+
+- Takes a PDF path as argv.
+- Uses `pdfjs-dist` (already a repo dep, node-compatible build available).
+- For each page: extracts text items, geometry (if relevant), runs any classifier/parser entry points in sheet-classifier.mjs / polygon-tool helpers.
+- Dumps JSON: raw text items with coords/fonts/width, clustered rows, classifier outputs (sheetId, sheetTitle, classification, scale), any intermediate state.
+- Invokable from any shell: `node schema/scripts/debug-pdf-extract.mjs path/to.pdf`.
+- Agent runs it via Bash, sees the ACTUAL data the classifier sees, iterates against real PDFs without the human-in-loop screenshot round-trip.
+
+**Spinoff: fixture-based regression tests.** Save a few pages' raw text items as JSON into `test/fixtures/sheet-classifier/`, write a tiny runner that asserts expected titles/classifications. Any future change to sheet-classifier exercises the fixtures. Catches regressions like the "Revisions:" / "Right Side" misfires at commit time instead of at user-test time.
+
+### Target use case: advanced geometry capture
+
+The class of work this enables isn't one feature — it's the whole PDF-Parser polish pass around reading geometry out of CAD-emitted drawings. Concrete candidates:
+
+- **Magic-wand auto-detect polish.** Today the `bi-magic` detector only picks up **closed polygons**. Real CAD plans emit open quads (individual wall segments), stroked paths (walls as stacked parallel lines with no filled interior), and room outlines implied by wall edges without explicit closure. To usefully auto-detect rooms / slabs / building footprints we need to: cluster nearby edge segments into wall groups, build implicit boundaries by treating clustered walls as closed, flood-fill interior points or run connected-component analysis, reject tiny / degenerate regions.
+- **Dimension-string extraction.** Read numeric dimension callouts ("25'-6"", "3200mm") and pair them with the geometry they annotate. Auto-calibration without a scale-bar drop.
+- **Scale inference.** Cross-check declared scale against known-length dimensions in the drawing — catch cases where the title block says 1:50 but the drawing was scaled up/down.
+- **Component recognition.** Symbol-matching for doors, windows, stairs, fixtures — seed the polygon taxonomy automatically where the CAD file uses consistent block libraries.
+- **Polyline → wall-run reconstruction.** Turn a stroked-line wall drawing into centerlines the interior-wall polyline tool can consume directly.
+
+All of these are heuristic-heavy, depend on CAD style variation, and share the same debugging pain: the current flow (screenshot → guess → re-test) makes each iteration slow. Fast iteration through the CLI harness (edit algorithm → run against fixture PDFs → inspect raw geometry + algorithm output) is the bottleneck buster.
+
+### Other observation paths considered
+
+| Option | Setup cost | Verdict |
+|---|---|---|
+| CLI harness + Bash tool | ~30 min to build | **Start here.** Agent-autonomous, zero workflow change for user. |
+| Fixture-based tests | ~1 hour (build on harness) | Worth doing as part of first polish pass so regressions are caught at the source. |
+| [Playwright MCP](https://github.com/anthropics/anthropic-quickstarts) | ~15 min user-side config | Real browser automation, console capture, DOM inspection. Next level up — use when the CLI harness doesn't cover a DOM-level interaction. |
+| Ad-hoc `window.__debugDump()` helper + paste back to agent | None | Zero-setup fallback for weird cases. Requires human-in-loop per cycle. |
+
+### Trigger
+
+Pick up (1) when the first PDF-Parser polish task lands — most likely the magic-wand auto-detect refinement (open-quad clustering, implicit boundary detection). Pairs with Q31 in `PDF-BEAMweb-BRIDGE.md` §7 if multi-tag extension hits an extraction-level bug. Layer (3) on top when DOM-level interaction debugging is needed.
+
+---
+
 ## Appendix — Branch + repo state
 
 - `main` sits at `c7a2dcc` (PR #7, "BEAMweb: Phase 1 shared infra + Phase 2 PROJECT + Phase 3 Footings & Slabs", merged 2026-04-19). All Phase 4+ work lives on the feature branch until next merge.
