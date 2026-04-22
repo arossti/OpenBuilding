@@ -15,19 +15,16 @@ IMPERIAL_SCALES.forEach(function (s) {
 });
 
 export function parseTitleBlock(textItems, pageWidth, pageHeight) {
-  // Title blocks occupy the right-hand strip of the sheet and typically
-  // span full height (general notes at top, sheet-number at bottom). No
-  // y constraint — noise filtering downstream rejects irrelevant strip
-  // content (revision labels, issued-for tables, address fields, etc).
-  var tbItems = textItems.filter(function (item) {
-    return item.x > pageWidth * 0.65;
-  });
-
-  var result = { sheetId: null, sheetTitle: null, scale: null, raw: tbItems };
+  // No region filter. pdf-loader.mjs stores `x` in PDF user-space without
+  // applying the page's rotation transform, so rotated sheets (common from
+  // CAD exports) end up with the visual "right side" landing at a small X
+  // in our coords. A strict keyword + font-size filter on the full page is
+  // more robust than guessing which corner the title block lives in.
+  var result = { sheetId: null, sheetTitle: null, scale: null, raw: textItems };
 
   var sheetIdPattern = /^[A-Z]\d+\.\d+$/;
-  for (var i = 0; i < tbItems.length; i++) {
-    var s = tbItems[i].str.trim();
+  for (var i = 0; i < textItems.length; i++) {
+    var s = textItems[i].str.trim();
     if (sheetIdPattern.test(s)) {
       result.sheetId = s;
       break;
@@ -36,14 +33,11 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
 
   result.scale = detectScale(textItems);
 
-  // Strict triage — the title MUST contain a primary drawing-type keyword.
-  // tbItems are clustered into rows inside _findDrawingTypeTitle so text
-  // that PDF.js splits into multiple items ("WEST" + "ELEVATION" on the
-  // same baseline) rejoins before the keyword check runs. If no row
-  // contains a drawing-type keyword, sheetTitle stays null and the display
-  // layer falls through to classification — better "Page 11 — Other" than
-  // a hallucinated guess.
-  result.sheetTitle = _findDrawingTypeTitle(tbItems) || null;
+  // Drawing-type keyword is the sole gate. Row-clustering inside
+  // _findDrawingTypeTitle rejoins PDF.js-chunked items ("WEST" + "ELEVATION"
+  // on the same baseline) before the regex runs. No match → null →
+  // display layer falls through to classification.
+  result.sheetTitle = _findDrawingTypeTitle(textItems) || null;
 
   return result;
 }
@@ -55,37 +49,46 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
 // share font size and proximity with the anchor.
 var _DRAWING_TYPE_RX = /\b(plan|elevation|section|site|key[\s-]*plan)\b/i;
 
-// Cluster tbItems into rows by Y position, then search joined row text for
-// the drawing-type keyword. Row-based search handles PDF.js chunking — a
-// title like "WEST ELEVATION" rendered as ["WEST", "ELEVATION"] (two items
-// at the same baseline) joins back to "WEST ELEVATION" before the regex
-// runs. Handles multi-line titles by pulling adjacent same-font rows.
-function _findDrawingTypeTitle(tbItems) {
-  if (!tbItems || tbItems.length === 0) return null;
-  var rows = _clusterRows(tbItems);
+// Row-cluster all text on the page, then pick the most title-like row.
+// Triage is a PREFERENCE, not a hard gate: rows containing a drawing-type
+// keyword (plan / elevation / section / site) are preferred, but if none
+// surface, we fall through to the largest-font row overall. Avoids
+// returning "Other" when the title is plain text but doesn't happen to
+// use one of our primary keywords.
+function _findDrawingTypeTitle(textItems) {
+  if (!textItems || textItems.length === 0) return null;
+  var rows = _clusterRows(textItems);
 
-  // Rows whose joined text contains a drawing-type keyword.
-  var typed = rows.filter(function (r) {
-    if (r.text.length < 4 || r.text.length >= 80) return false;
+  var candidates = rows.filter(function (r) {
+    if (r.text.length < 4 || r.text.length > 80) return false;
+    if (/^\d+$/.test(r.text)) return false;
+    return true;
+  });
+  if (candidates.length === 0) return null;
+
+  // Preference pass — rows whose joined text carries a drawing-type keyword.
+  // If any match, constrain the anchor pool to them.
+  var typed = candidates.filter(function (r) {
     return _DRAWING_TYPE_RX.test(r.text);
   });
-  if (typed.length === 0) return null;
+  var pool = typed.length > 0 ? typed : candidates;
 
-  // Rank: largest font wins; tie-break toward the bottom-right of the title
-  // block (visually lower = higher y in our top-left coord system; further
-  // right = higher x). Matches the BfCA title-block convention Andy flagged.
-  typed.sort(function (a, b) {
+  // Pool is ranked largest font first. Ties break toward the bottom-right
+  // (visually lower = higher y in our top-left coords; further right =
+  // higher xMax) since drawing titles conventionally sit in that corner
+  // of the title block.
+  pool.sort(function (a, b) {
     var fontDiff = (b.fontSize || 0) - (a.fontSize || 0);
     if (Math.abs(fontDiff) > 0.5) return fontDiff;
     var yDiff = b.y - a.y;
     if (Math.abs(yDiff) > 5) return yDiff;
     return b.xMax - a.xMax;
   });
-  var anchor = typed[0];
+  var anchor = pool[0];
 
-  // Pull adjacent rows at the same font size for multi-line titles
-  // ("North Elevation" / "Right Side"). Siblings must sit within ~2.5x
-  // font height vertically AND horizontally overlap or share a centerline.
+  // Multi-line stacking: pull same-font rows that sit adjacent to the
+  // anchor (within ~2.5x font height) AND overlap horizontally or share a
+  // centerline. Handles "North Elevation" / "Right Side".
   var fontTol = Math.max(1.0, anchor.fontSize * 0.1);
   var lineGap = anchor.fontSize ? anchor.fontSize * 2.5 : 40;
   var anchorMid = (anchor.xMin + anchor.xMax) / 2;
