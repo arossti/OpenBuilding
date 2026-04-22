@@ -42,81 +42,54 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
   return result;
 }
 
-// Required keyword on the title anchor. Scoped to the four drawing types
-// BfCA actually cares about: plans, sections, elevations, site / key plan.
-// Levels + orientations (north/south/basement/ground/first/second) don't
-// anchor on their own but ride along as siblings via _stackTitle when they
-// share font size and proximity with the anchor.
+// Two regexes work together:
+//
+// _TITLE_EXTRACT_RX matches the drawing-title PHRASE inside a row of text,
+// optionally preceded by up to three orientation / level qualifiers. We
+// return the matched phrase, not the whole row — so a row like
+// "WHITE 6\" FASCIA SCALE: 3/16\"=1'-0\" EAST ELEVATION" yields just
+// "EAST ELEVATION". Keeps titles tight; drops noisy callouts that happen
+// to share a baseline with the actual title text.
+//
+// _DRAWING_TYPE_RX is kept for classifySheet() below (which matches on
+// the full title string to decide plan/elevation/section/site).
 var _DRAWING_TYPE_RX = /\b(plan|elevation|section|site|key[\s-]*plan)\b/i;
+var _TITLE_EXTRACT_RX = /((?:\b(?:north|south|east|west|nw|ne|sw|se|front|rear|left|right|first|second|third|1st|2nd|3rd|ground|main|upper|lower|basement|roof|foundation|floor|storey|story|level|key|site)\b\s+){0,3})\b(plan|elevation|section|site|key[\s-]*plan)\b/i;
 
-// Row-cluster all text on the page, then pick the most title-like row.
-// Triage is a PREFERENCE, not a hard gate: rows containing a drawing-type
-// keyword (plan / elevation / section / site) are preferred, but if none
-// surface, we fall through to the largest-font row overall. Avoids
-// returning "Other" when the title is plain text but doesn't happen to
-// use one of our primary keywords.
+// Row-cluster all text on the page, then extract the cleanest title PHRASE
+// from each row using _TITLE_EXTRACT_RX (keyword + optional leading
+// orientation/level qualifiers). Returning the extracted phrase — not the
+// whole row — trims off unrelated callouts that happen to share a baseline
+// with the title, so "WHITE 6\" FASCIA SCALE: 3/16\"=1'-0\" EAST ELEVATION"
+// becomes "EAST ELEVATION" and "2/6 SCALE: 3/16\"=1'-0\" UPPER FLOOR PLAN
+// 6 3" becomes "UPPER FLOOR PLAN".
 function _findDrawingTypeTitle(textItems) {
   if (!textItems || textItems.length === 0) return null;
   var rows = _clusterRows(textItems);
 
-  var candidates = rows.filter(function (r) {
-    if (r.text.length < 4 || r.text.length > 80) return false;
-    if (/^\d+$/.test(r.text)) return false;
-    return true;
-  });
-  if (candidates.length === 0) return null;
+  var extracted = [];
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    if (/^\d+$/.test(row.text)) continue;
+    var m = row.text.match(_TITLE_EXTRACT_RX);
+    if (!m) continue;
+    var phrase = m[0].replace(/\s+/g, " ").trim();
+    if (phrase.length < 4) continue;
+    extracted.push({ row: row, phrase: phrase });
+  }
+  if (extracted.length === 0) return null;
 
-  // Preference pass — rows whose joined text carries a drawing-type keyword.
-  // If any match, constrain the anchor pool to them.
-  var typed = candidates.filter(function (r) {
-    return _DRAWING_TYPE_RX.test(r.text);
-  });
-  var pool = typed.length > 0 ? typed : candidates;
-
-  // Pool is ranked largest font first. Ties break toward the bottom-right
-  // (visually lower = higher y in our top-left coords; further right =
-  // higher xMax) since drawing titles conventionally sit in that corner
-  // of the title block.
-  pool.sort(function (a, b) {
-    var fontDiff = (b.fontSize || 0) - (a.fontSize || 0);
+  // Rank by row font size (largest = most title-like). Ties break toward
+  // the bottom-right of the page — BfCA title-block convention (large y =
+  // visually lower in our top-left coords; large xMax = further right).
+  extracted.sort(function (a, b) {
+    var fontDiff = (b.row.fontSize || 0) - (a.row.fontSize || 0);
     if (Math.abs(fontDiff) > 0.5) return fontDiff;
-    var yDiff = b.y - a.y;
+    var yDiff = b.row.y - a.row.y;
     if (Math.abs(yDiff) > 5) return yDiff;
-    return b.xMax - a.xMax;
+    return b.row.xMax - a.row.xMax;
   });
-  var anchor = pool[0];
-
-  // Multi-line stacking: pull same-font rows that sit adjacent to the
-  // anchor (within ~2.5x font height) AND overlap horizontally or share a
-  // centerline. Handles "North Elevation" / "Right Side".
-  var fontTol = Math.max(1.0, anchor.fontSize * 0.1);
-  var lineGap = anchor.fontSize ? anchor.fontSize * 2.5 : 40;
-  var anchorMid = (anchor.xMin + anchor.xMax) / 2;
-  var alignTol = Math.max(40, anchor.fontSize * 3);
-
-  var stack = rows.filter(function (r) {
-    if (r === anchor) return true;
-    if (Math.abs(r.fontSize - anchor.fontSize) > fontTol) return false;
-    var dy = Math.abs(r.y - anchor.y);
-    if (dy === 0 || dy > lineGap) return false;
-    var rMid = (r.xMin + r.xMax) / 2;
-    var overlap = r.xMin < anchor.xMax && r.xMax > anchor.xMin;
-    var centered = Math.abs(rMid - anchorMid) < alignTol;
-    return overlap || centered;
-  });
-  stack.sort(function (a, b) {
-    return a.y - b.y;
-  });
-
-  var title = stack
-    .map(function (r) {
-      return r.text;
-    })
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (title.length > 100) return anchor.text;
-  return title;
+  return extracted[0].phrase;
 }
 
 // Row clustering — items whose y values fall within the same bucket share
