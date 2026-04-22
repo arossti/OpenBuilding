@@ -98,9 +98,8 @@ at/
 │   ├── scripts/                     CSV importer + validator + BEAM sheet fetcher
 │   └── schema.md                    Workplan + lineage
 ├── docs/
-│   ├── sample.pdf                   PDF-Parser dev fixture (to be replaced by TANDEM Maison du Pré)
-│   ├── pdf-resources/               Larger sample PDFs (gitignored)
-│   ├── pdf-parser.md                PDF-Parser workplan + technical docs
+│   ├── sample.pdf                   PDF-Parser dev fixture (generic name; swapped for a better drawing set at release)
+│   ├── pdf-samples/                 Larger sample PDFs for parser testing (gitignored)
 │   ├── matrix/                      EC Matrix docs (ARCHITECTURE, TRIAGE, data model)
 │   ├── beam-samples/                Sample BEAMweb project JSONs (DOE Prototype)
 │   ├── csv files from BEAM/         22 BEAM workbook tab snapshots
@@ -108,10 +107,12 @@ at/
 │   ├── regulatory (Jacob)/          Legacy regulatory research (archived)
 │   ├── ifc (Jacob)/                 Legacy IFC exploration
 │   ├── cost (Jacob)/                Legacy cost-data research
-│   └── workplans/                   Living workstream specs
-│       ├── BEAMweb.md               BEAMweb workstream spec + changelog
-│       ├── PDF-BEAMweb-BRIDGE.md    Phase 4b cross-app bridge design spec
-│       └── CLEANUP-AUDIT.md         Pre-Phase-4b codebase audit (2026-04-20)
+│   ├── workplans/                   Living workstream specs
+│   │   ├── BEAMweb.md               BEAMweb workstream spec + changelog
+│   │   ├── PDF-BEAMweb-BRIDGE.md    Phase 4b cross-app bridge design spec
+│   │   └── CLEANUP-AUDIT.md         Pre-Phase-4b codebase audit (2026-04-20)
+│   └── completed/                   Shipped workplans kept briefly for reference, then bulk-deleted
+│       └── pdf-parser.md            PDF-Parser workplan (Steps 1–10 + PDF-Bridge phases all shipped)
 ├── CCI-tables-20241121/             CCI construction classification taxonomy
 ├── package.json                     npm tooling (ESLint + Prettier) + stage:data
 ├── eslint.config.mjs, .prettierrc, .prettierignore
