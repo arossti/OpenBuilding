@@ -463,6 +463,7 @@ function wireActionBar() {
     "beam-save-project": () => notImplemented("Save project JSON — file-handler export wiring lands next."),
     "beam-import-xlsx": () => notImplemented("Import xlsx — needs excel-mapper (Phase 6; SheetJS already loaded)."),
     "beam-import-pdf-parser": handleImportPdfParser,
+    "beam-trust-pdf-parser": handleTrustPdfParser,
     "beam-load-sample": handleLoadSample,
     "beam-reset": handleResetActiveTab
   };
@@ -509,6 +510,54 @@ async function handleImportPdfParser() {
   }
   importModalState.activeUuid = importModalState.projects[0].uuid;
   await refreshImportPreview();
+}
+
+// Trust: one-click bulk apply of every computable dim from the most
+// recently saved PDF-Parser project. Skips the review modal entirely.
+// Trust + Verify (the modal) stays available anytime — users can always
+// re-open it to audit what landed.
+async function handleTrustPdfParser() {
+  let projects;
+  try {
+    projects = await PdfBridge.listProjects();
+  } catch (err) {
+    console.error("[BEAMweb] Trust: failed to read PDF-Parser projects:", err);
+    setStatus("Trust: could not read PDF-Parser sessions from IndexedDB.", "error");
+    return;
+  }
+  if (projects.length === 0) {
+    setStatus("Trust: no saved PDF-Parser session found. Use PDF-Parser first.", "error");
+    return;
+  }
+  const project = projects[0];
+  let preview;
+  try {
+    preview = await PdfBridge.buildPreview(project.uuid);
+  } catch (err) {
+    console.error("[BEAMweb] Trust: preview failed:", err);
+    setStatus(`Trust: preview failed · ${err.message}`, "error");
+    return;
+  }
+  const dimIds = preview.rows.filter((r) => r.hasValue).map((r) => r.dimId);
+  if (dimIds.length === 0) {
+    setStatus(
+      "Trust: no computable dimensions in the latest PDF-Parser session. Tag polygons there first.",
+      "error"
+    );
+    return;
+  }
+  try {
+    const result = await PdfBridge.applyImport(project.uuid, dimIds);
+    setStatus(
+      `Trust: imported ${result.applied} dimension${result.applied === 1 ? "" : "s"} from ${escapeHtml(project.pdfFileName)} · click Trust + Verify to review`,
+      "ready"
+    );
+    refreshProjectForm();
+    syncProjectToFsBridge();
+  } catch (err) {
+    console.error("[BEAMweb] Trust apply failed:", err);
+    setStatus(`Trust: apply failed · ${err.message}`, "error");
+  }
 }
 
 function openImportModal() {
