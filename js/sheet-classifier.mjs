@@ -36,14 +36,18 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
 
   result.scale = detectScale(textItems);
 
-  // Candidate titles — plausible drawing-name strings. Rejects numeric-only,
-  // too-short/too-long, the sheet-id pattern, and noise like revision dates.
+  // Candidate titles — plausible drawing-name strings. Length / numeric /
+  // sheet-id guards only. Noise ("Revisions:", "Issued For:", signatures,
+  // dates) is filtered structurally downstream: nothing becomes a title
+  // unless it (a) contains a drawing-type keyword AS ANCHOR or
+  // (b) shares font size + adjacency with one that does. Anything else
+  // stays on the bench.
   var titleCandidates = tbItems.filter(function (item) {
     var s = item.str.trim();
     if (s.length <= 3 || s.length >= 60) return false;
     if (sheetIdPattern.test(s)) return false;
     if (/^\d+$/.test(s)) return false;
-    return !_looksLikeTitleNoise(s);
+    return true;
   });
 
   // Strict triage — the title MUST contain a primary drawing-type keyword.
@@ -121,21 +125,6 @@ function _stackTitle(anchor, allCandidates) {
 // Reject common title-block noise — revision lines, dates, signatures,
 // authored-by notes, "page N of M", scale text. Catches the values that
 // slipped through the length filter in the old picker.
-function _looksLikeTitleNoise(s) {
-  // Rev / Revs / Rev. / Revision / Revisions / Revisions: — the trailing
-  // optional `s?` catches plurals and the word boundary fires against both
-  // word-end and punctuation-end forms.
-  if (/\brev(?:ision|\.)?s?\b/i.test(s)) return true;
-  if (/\b(issued|drawn|checked|approved|consultants?|seals?)\b/i.test(s)) return true;
-  if (/\bscale\b/i.test(s)) return true;
-  if (/^\s*page\s+\d/i.test(s)) return true;
-  if (/\d{4}[-\/.]\d{1,2}[-\/.]\d{1,2}/.test(s)) return true; // YYYY-MM-DD
-  if (/\d{1,2}[-\/.]\d{1,2}[-\/.]\d{2,4}/.test(s)) return true; // DD-MM-YY
-  if (/^\s*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)\w*\s+\d{1,2}/i.test(s)) return true;
-  if (/\b(OAA|OAQ|OAO|MRAIC|FRAIC|P\.?Eng)\b/.test(s)) return true; // professional signature suffixes
-  return false;
-}
-
 /**
  * Join text items spatially — only insert a space when items are
  * far enough apart. This prevents "48" split across two items
