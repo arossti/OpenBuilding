@@ -452,6 +452,7 @@ function renderDimRow(f) {
           </div>
           <div class="bw-dim-desc">${esc(f.description)}</div>
           <div class="bw-dim-takeoff">Used for: ${esc(f.takeoff)}</div>
+          <div class="bw-fidelity-badge" data-badge-for="${f.id}"></div>
         </td>
       </tr>
     `;
@@ -466,6 +467,7 @@ function renderDimRow(f) {
       <td class="bw-dim-desc-cell" colspan="2">
         <div class="bw-dim-desc">${esc(f.description)}</div>
         <div class="bw-dim-takeoff">Used for: ${esc(f.takeoff)}</div>
+        <div class="bw-fidelity-badge" data-badge-for="${f.id}"></div>
       </td>
     </tr>
   `;
@@ -515,6 +517,7 @@ function renderParamRow(f) {
       <label class="bw-label" for="bw-${f.id}">${esc(f.label)}</label>
       ${renderInput(f)}
       <div class="bw-dim-desc">${esc(f.description)}</div>
+      <div class="bw-fidelity-badge" data-badge-for="${f.id}"></div>
     </div>
   `;
 }
@@ -602,8 +605,68 @@ function refreshProjectInputsFromState() {
   }
 }
 
+/**
+ * Populate or clear the fidelity badge under a single dim or param input.
+ * The badge's provenance comes from StateManager.getDimensionSource(fieldId)
+ * which is set by the PDF-Parser bridge on import and cleared on user edit.
+ *
+ * Two envelope formats are handled:
+ *   1. JSON  — { type, projectUuid, polyIds, summary, sheets }
+ *              — the rich shape written by the bridge; renders summary + sheet links.
+ *   2. Plain — "pdf" / "pdf:param" / legacy poly-ID join
+ *              — rendered as a compact "PDF-Parser" pill with no detail.
+ */
+function renderFidelityBadge(fieldId) {
+  const el = document.querySelector(`.bw-fidelity-badge[data-badge-for="${fieldId}"]`);
+  if (!el) return;
+  const src = StateManager.getDimensionSource(fieldId);
+  if (!src) {
+    el.innerHTML = "";
+    el.classList.remove("bw-fidelity-badge-on");
+    return;
+  }
+  let payload = null;
+  try {
+    const parsed = JSON.parse(src);
+    if (parsed && typeof parsed === "object" && parsed.type) payload = parsed;
+  } catch (_err) {
+    /* legacy plain-string format */
+  }
+  const prefix = `<span class="bw-fidelity-label">PDF-Parser</span>`;
+  let body;
+  if (payload) {
+    const summary = payload.summary ? `<span class="bw-fidelity-summary">${esc(payload.summary)}</span>` : "";
+    const sheetsHtml = (payload.sheets || []).length
+      ? `<span class="bw-fidelity-sheets">· sheets: ${renderSheetLinks(payload.sheets)}</span>`
+      : "";
+    body = `${summary}${sheetsHtml}`;
+  } else {
+    body = src === "pdf:param" ? `<span class="bw-fidelity-summary">project-level parameter</span>` : "";
+  }
+  el.innerHTML = `${prefix} ${body}`;
+  el.classList.add("bw-fidelity-badge-on");
+}
+
+// Sheet IDs become deep links back into PDF-Parser (named-target so the same
+// Parser tab handles successive clicks — see M2 commit). Kept inline here
+// rather than importing from beamweb.mjs to avoid a cross-module cycle.
+function renderSheetLinks(sheets) {
+  return sheets
+    .map((s) => {
+      const encoded = encodeURIComponent(s);
+      return `<a href="pdfparser.html#sheet=${encoded}" target="pdf-parser-tab" class="bw-sheet-link">${esc(s)}</a>`;
+    })
+    .join(", ");
+}
+
+function refreshFidelityBadges() {
+  const nodes = document.querySelectorAll(".bw-fidelity-badge[data-badge-for]");
+  for (const n of nodes) renderFidelityBadge(n.dataset.badgeFor);
+}
+
 export function refreshProjectForm() {
   refreshProjectInputsFromState();
+  refreshFidelityBadges();
 }
 
 export function resetProjectTab() {
@@ -633,8 +696,18 @@ function handleFieldInput(target) {
   const fieldId = target.dataset.fieldId;
   if (!fieldId) return;
   StateManager.setValue(fieldId, target.value, VS.USER_MODIFIED);
+  // User manual edit invalidates any PDF-Parser provenance on this field —
+  // clear the dimension source and refresh the fidelity badge to hide.
+  // For LHW children, also clear the parent volume's source since the user
+  // is now driving that composite.
+  StateManager.setDimensionSource(fieldId, null);
+  renderFidelityBadge(fieldId);
   const parent = target.dataset.volumeParent;
-  if (parent) recomputeVolume(parent);
+  if (parent) {
+    recomputeVolume(parent);
+    StateManager.setDimensionSource(parent, null);
+    renderFidelityBadge(parent);
+  }
   // If this field feeds another select's options (e.g. country -> province),
   // re-render the dependent select(s).
   refreshDependentSelects(fieldId);

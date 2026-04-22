@@ -4833,6 +4833,33 @@ table.bw-pdf-import-table .delta.overwrite {
 .bw-sheet-link:hover {
   text-decoration-color: currentColor;
 }
+
+/* Fidelity badge: rendered under each imported PROJECT dim / param input.
+   Empty by default; bw-fidelity-badge-on applied when provenance is set.
+   Kept dim grey so the number stays the visual anchor; the badge is
+   ambient detail the user can glance at. */
+.bw-fidelity-badge {
+  font-size: 10px;
+  line-height: 1.4;
+  color: #9ca3af;
+  margin-top: 4px;
+  font-style: italic;
+}
+.bw-fidelity-badge:empty {
+  margin-top: 0;
+}
+.bw-fidelity-label {
+  color: var(--accent-lit, #4ade80);
+  font-style: normal;
+  font-weight: 600;
+  margin-right: 4px;
+}
+.bw-fidelity-summary {
+  color: #cbd5e1;
+}
+.bw-fidelity-sheets {
+  margin-left: 2px;
+}
 .bw-pdf-import-warn-inline {
   font-size: 10px;
   color: #facc15;
