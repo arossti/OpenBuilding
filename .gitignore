@@ -4,6 +4,12 @@
 node_modules/
 logs/
 
+# Playwright MCP working dir (console logs + snapshot YAMLs from agent-driven tests)
+.playwright-mcp/
+
+# Local working notes
+BfCA Server Commands.txt
+
 # Local staging of source data into data/ via `npm run stage:data`.
 # Not committed — the Pages workflow does the same copy at deploy time.
 data/schema/
