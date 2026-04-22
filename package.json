@@ -11,7 +11,8 @@
     "format:check": "prettier --check 'js/**/*.mjs' '*.css' '*.html'",
     "serve": "python3 schema/scripts/nocache-serve.py 8000",
     "stage:data": "mkdir -p data/schema data/beam data/beam/samples && cp -r schema/materials data/schema/ && cp schema/material.schema.json data/schema/ && cp schema/sample.json data/schema/ && cp \"docs/csv files from BEAM/Footings & Slabs.csv\" data/beam/footings-slabs.csv && cp docs/beam-samples/*.json data/beam/samples/ && cp docs/sample.pdf data/sample.pdf && echo 'Staged schema + BEAM picker CSVs + sample projects + PDF-Parser sample PDF into data/'",
-    "debug:pdf": "node schema/scripts/debug-pdf-extract.mjs"
+    "debug:pdf": "node schema/scripts/debug-pdf-extract.mjs",
+    "test:dim-extract": "node schema/scripts/test-dim-extract.mjs"
   },
   "devDependencies": {
     "eslint": "^10.1.0",
