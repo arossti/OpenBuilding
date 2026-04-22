@@ -19,6 +19,7 @@ import * as ScaleManager from "./scale-manager.mjs";
 import * as Viewer from "./canvas-viewer.mjs";
 import * as PolygonTool from "./polygon-tool.mjs";
 import * as VectorSnap from "./vector-snap.mjs";
+import { extractDimensions } from "./dim-extract.mjs";
 import * as ScheduleParser from "./schedule-parser.mjs";
 import * as ProjectStore from "./project-store.mjs";
 import * as IDBStore from "./shared/indexed-db-store.mjs";
@@ -1591,6 +1592,9 @@ function _bindKeyboard() {
       case "d":
         autoDetect();
         break;
+      case "a":
+        autoCalibrate();
+        break;
       case "l":
         setTool("ruler");
         break;
@@ -2150,6 +2154,279 @@ function _placeDetectedOutline(candidate, idx, total) {
   var areaStr = areaM2 !== null ? areaM2.toFixed(1) + " m\u00B2" : "(uncalibrated)";
   var hint = total > 1 ? " Press D again to cycle (" + (idx + 1) + "/" + total + ")." : "";
   setStatus("Outline: " + areaStr + ", " + verts.length + " vertices." + hint, "ready");
+}
+
+/* ── Auto-calibrate from dimension strings (MAGIC C3) ───── */
+
+// A declared scale and a detected scale agree if implied pdfUnitsPerMetre
+// match within 3% — the threshold below which page-to-paper rescaling
+// (ANSI D saved as 11x17 for printing) is usually not an issue.
+var _SCALE_AGREEMENT_TOLERANCE = 0.03;
+
+function autoCalibrate() {
+  if (!Loader.isLoaded()) return;
+  var pageNum = _currentPage;
+  setStatus("Scanning text + geometry for dimension callouts...", "busy");
+
+  Promise.all([Loader.getTextContent(pageNum), VectorSnap.extractGeometry(pageNum)]).then(function (results) {
+    var textItems = results[0];
+    var geo = results[1];
+    var declaredCal = ScaleManager.getCalibration(pageNum);
+    var declaredScale =
+      declaredCal && declaredCal.ratio
+        ? { ratio: declaredCal.ratio, raw: declaredCal.ratioLabel }
+        : SheetClassifier.detectScale(textItems);
+
+    var result = extractDimensions(textItems, geo.segments, { declaredScale: declaredScale });
+
+    console.log(
+      "[Auto-cal] Page " +
+        pageNum +
+        ": " +
+        result.callouts.length +
+        " paired callouts (" +
+        result.unpaired.length +
+        " parsed but unpaired), " +
+        "declaredPPM=" +
+        (result.declaredPdfUnitsPerMetre ? result.declaredPdfUnitsPerMetre.toFixed(2) : "?") +
+        ", impliedMedian=" +
+        (result.impliedPdfUnitsPerMetreMedian ? result.impliedPdfUnitsPerMetreMedian.toFixed(2) : "?") +
+        ", agreement=" +
+        (result.scaleAgreement !== null ? (result.scaleAgreement * 100).toFixed(2) + "%" : "?")
+    );
+
+    if (result.callouts.length === 0) {
+      setStatus(
+        "No dimension callouts paired to segments. " +
+          (result.unpaired.length > 0
+            ? result.unpaired.length + " dims parsed but none matched a segment length."
+            : "No dim-shaped text found.") +
+          " Try manual calibrate (C) instead.",
+        "error"
+      );
+      _showScaleFeedback(
+        "⚠️",
+        "No Auto-Calibration Candidates",
+        "Could not find a dimension string paired to a matching line segment on this page.<br><br>" +
+          (result.unpaired.length > 0
+            ? "<b>" +
+              result.unpaired.length +
+              "</b> dimension strings were parsed from the text, but none matched a segment length within the scale-agreement tolerance. The drawing may use curved leaders or the declared scale may be wildly off.<br><br>"
+            : "No dimension strings were found in the page text.<br><br>") +
+          "Press <b>C</b> to calibrate manually by clicking two points on a known dimension.",
+        "#e9c46a",
+        false
+      );
+      return;
+    }
+
+    // Pick the highest-confidence callout with a horizontal segment +
+    // longest paired length. Horizontal building widths are the most
+    // reliable real-world reference; longer segments give the smallest
+    // relative error from pixel quantization.
+    var sorted = result.callouts.slice().sort(function (a, b) {
+      var aH = a.segment.orientation === "horizontal" ? 1 : 0;
+      var bH = b.segment.orientation === "horizontal" ? 1 : 0;
+      if (aH !== bH) return bH - aH;
+      var scoreDiff = b.confidence - a.confidence;
+      if (Math.abs(scoreDiff) > 0.05) return scoreDiff;
+      return b.segment.length - a.segment.length;
+    });
+    var best = sorted[0];
+    var detectedPPM = best.impliedPdfUnitsPerMetre;
+    if (!isFinite(detectedPPM) || detectedPPM <= 0) {
+      setStatus("Auto-calibrate found a candidate but failed to compute scale.", "error");
+      return;
+    }
+
+    var declaredPPM = result.declaredPdfUnitsPerMetre;
+    var hasDeclared = declaredPPM && isFinite(declaredPPM);
+    var agreement = hasDeclared ? 1 - Math.abs(detectedPPM - declaredPPM) / declaredPPM : null;
+    var disagree = hasDeclared && agreement !== null && agreement < 1 - _SCALE_AGREEMENT_TOLERANCE;
+
+    var detectedRatio = _ppmToRatio(detectedPPM);
+    var detectedLabel = "1:" + detectedRatio;
+
+    if (hasDeclared && !disagree) {
+      ScaleManager.calibrateFromDimension(pageNum, declaredPPM, {
+        ratio: (declaredCal && declaredCal.ratio) || _ppmToRatio(declaredPPM),
+        ratioLabel:
+          (declaredCal && declaredCal.ratioLabel) ||
+          (declaredScale && declaredScale.raw) ||
+          "1:" + _ppmToRatio(declaredPPM),
+        dimText: best.text,
+        dimMeters: best.valueMeters,
+        segmentLength: best.segment.length
+      });
+      ProjectStore.saveCalibration(pageNum, ScaleManager.getCalibration(pageNum));
+      closeScalePanel();
+      _updateSheetInfo(ProjectStore.getPage(pageNum));
+      _updateScaleLabel();
+      _refreshMeasurements();
+      Viewer.requestRedraw();
+      setStatus(
+        "Scale confirmed by auto-calibrate: " +
+          ((declaredCal && declaredCal.ratioLabel) || "1:" + _ppmToRatio(declaredPPM)) +
+          " (from " +
+          result.callouts.length +
+          " dim callouts)",
+        "ready"
+      );
+      _showScaleFeedback(
+        "✓✓",
+        "Scale Confirmed",
+        "Declared scale <b>" +
+          ((declaredCal && declaredCal.ratioLabel) || declaredScale.raw) +
+          "</b> is within " +
+          ((1 - agreement) * 100).toFixed(1) +
+          "% of the detected scale from " +
+          result.callouts.length +
+          " dimension callouts on this page.<br><br>" +
+          'Reference: "<b>' +
+          best.text +
+          '</b>" = ' +
+          best.valueMeters.toFixed(3) +
+          "m on a " +
+          best.segment.length.toFixed(0) +
+          "pt segment.<br><br>" +
+          "Page is now marked <b>VERIFIED</b> — area measurements use this scale.",
+        "var(--accent-lit)",
+        false
+      );
+      return;
+    }
+
+    if (disagree) {
+      _showScaleDisagreement(pageNum, {
+        declaredLabel: (declaredCal && declaredCal.ratioLabel) || declaredScale.raw,
+        declaredRatio: (declaredCal && declaredCal.ratio) || _ppmToRatio(declaredPPM),
+        declaredPPM: declaredPPM,
+        detectedRatio: detectedRatio,
+        detectedLabel: detectedLabel,
+        detectedPPM: detectedPPM,
+        bestText: best.text,
+        bestMeters: best.valueMeters,
+        bestSegmentLength: best.segment.length,
+        calloutCount: result.callouts.length,
+        disagreementPct: (1 - agreement) * 100
+      });
+      return;
+    }
+
+    // No declared scale — land detected directly.
+    ScaleManager.calibrateFromDimension(pageNum, detectedPPM, {
+      ratio: detectedRatio,
+      ratioLabel: detectedLabel,
+      dimText: best.text,
+      dimMeters: best.valueMeters,
+      segmentLength: best.segment.length
+    });
+    ProjectStore.saveCalibration(pageNum, ScaleManager.getCalibration(pageNum));
+    closeScalePanel();
+    _updateSheetInfo(ProjectStore.getPage(pageNum));
+    _updateScaleLabel();
+    _refreshMeasurements();
+    Viewer.requestRedraw();
+    setStatus(
+      "Auto-calibrated: " + detectedLabel + " from " + result.callouts.length + " dim callouts",
+      "ready"
+    );
+    _showScaleFeedback(
+      "✨",
+      "Auto-Calibrated",
+      "Detected <b>" +
+        detectedLabel +
+        "</b> from " +
+        result.callouts.length +
+        " dimension callouts on this page.<br><br>" +
+        'Reference: "<b>' +
+        best.text +
+        '</b>" = ' +
+        best.valueMeters.toFixed(3) +
+        "m on a " +
+        best.segment.length.toFixed(0) +
+        "pt segment.<br><br>" +
+        "Page is now marked <b>VERIFIED</b>.",
+      "var(--accent-lit)",
+      false
+    );
+  });
+}
+
+// Disagreement modal — MVP uses window.confirm because the existing
+// _showScaleFeedback widget is single-action (OK). A dedicated 3-way
+// panel is a UX follow-up.
+function _showScaleDisagreement(pageNum, info) {
+  var msg =
+    "Scale mismatch detected.\n\n" +
+    "Declared scale: " +
+    info.declaredLabel +
+    " (~" +
+    info.declaredPPM.toFixed(1) +
+    " units/m)\n" +
+    "Detected from dims: " +
+    info.detectedLabel +
+    " (~" +
+    info.detectedPPM.toFixed(1) +
+    " units/m)\n" +
+    'Reference: "' +
+    info.bestText +
+    '" = ' +
+    info.bestMeters.toFixed(3) +
+    "m on " +
+    info.bestSegmentLength.toFixed(0) +
+    "pt (" +
+    info.calloutCount +
+    " dims total)\n" +
+    "Disagreement: " +
+    info.disagreementPct.toFixed(1) +
+    "%\n\n" +
+    "The PDF may have been printed at a different size than drawn.\n\n" +
+    "OK = use DETECTED scale, Cancel = keep DECLARED scale.";
+  var useDetected = window.confirm(msg);
+  if (useDetected) {
+    ScaleManager.calibrateFromDimension(pageNum, info.detectedPPM, {
+      ratio: info.detectedRatio,
+      ratioLabel: info.detectedLabel,
+      dimText: info.bestText,
+      dimMeters: info.bestMeters,
+      segmentLength: info.bestSegmentLength
+    });
+    ProjectStore.saveCalibration(pageNum, ScaleManager.getCalibration(pageNum));
+    closeScalePanel();
+    _updateSheetInfo(ProjectStore.getPage(pageNum));
+    _updateScaleLabel();
+    _refreshMeasurements();
+    Viewer.requestRedraw();
+    setStatus(
+      "Using detected scale " +
+        info.detectedLabel +
+        " (declared was " +
+        info.declaredLabel +
+        ", " +
+        info.disagreementPct.toFixed(1) +
+        "% off)",
+      "ready"
+    );
+  } else {
+    setStatus(
+      "Keeping declared scale " +
+        info.declaredLabel +
+        " (auto-detect suggested " +
+        info.detectedLabel +
+        ")",
+      "ready"
+    );
+  }
+}
+
+// Inverse of ScaleManager.accept(): given pdfUnitsPerMetre, return the
+// nearest integer 1:N ratio. mmPerPdfUnit = 25.4/72, so
+// ratio = (72 * 1000) / (25.4 * ppm).
+function _ppmToRatio(ppm) {
+  if (!ppm || !isFinite(ppm) || ppm <= 0) return null;
+  var r = (72 * 1000) / (25.4 * ppm);
+  return Math.round(r);
 }
 
 /* ── Summary Table Modal ──────────────────────────────── */
@@ -2831,6 +3108,8 @@ window.PP = {
   setAssemblyPreset: setAssemblyPreset,
   // Auto-detect
   autoDetect: autoDetect,
+  // Auto-calibrate (MAGIC C3)
+  autoCalibrate: autoCalibrate,
   // Summary table
   openSummaryTable: openSummaryTable,
   closeSummaryTable: closeSummaryTable,
