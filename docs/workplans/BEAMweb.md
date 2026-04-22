@@ -486,6 +486,56 @@ Small, independently-shippable slices:
 
 ---
 
+## 8. State architecture — future (dependency graph)
+
+**Status:** Stub scaffolding shipped 2026-04-21 on `PDF-Bridge-2`. `StateManager.exportDependencyGraph()` emits OBJECTIVE-shape `{ nodes, links, meta }` with architectural nodes (Foundation / Coordination / Application) wired. New `Dependency Graph` tab in BEAMweb renders a text snapshot of the architecture; d3 + dagre CDN scripts are deferred-loaded but dormant. Full D3 port drops into `js/beam/dependency-graph.mjs`'s existing `initialize() / render() / setupSvg() / createFilterControls() / createInfoPanel()` interfaces when the migration trigger fires.
+
+### Where we are today (2026-04-21)
+
+Cross-tab state flow uses a two-layer pattern:
+
+1. **Per-key listeners** in [`js/beam/auto-fill.mjs`](../../js/beam/auto-fill.mjs) — `StateManager.addListener(projectKey, callback)` for each PROJECT → F&S dependency (currently 3 keys: `dim_continuous_footings_volume`, `dim_columns_piers_pads_volume`, `dim_foundation_slab_floor_area`).
+2. **Imperative sync** — `syncProjectToFsBridge()` walks every source key and pushes current values downstream. Called from `sample-loader.mjs` after Load Sample, from `footings-slabs-tab.mjs` after a reset, and from `pdf-bridge-import.mjs` after an Import (bypasses the muted-listener problem during bulk writes).
+
+This works while only F&S consumes PROJECT. It does not scale gracefully:
+
+- Each new Phase 4 tab (Foundation Walls, Exterior Walls, Party Walls, Windows, Interior Walls, Cladding, ...) adds its own listener cluster + its own `sync*Bridge()` function we have to remember to call after every bulk operation.
+- As calc chains deepen (PROJECT → F&S → REVIEW → RESULTS), listener cascades fan out unpredictably. The current model has no view of "what recomputes when".
+- Muted-batch operations (Import, Load Sample, Reset) each need a matching list of imperative sync calls. Easy to forget one; hard to audit.
+
+### Where we go when the shape bites (target pattern)
+
+Port OBJECTIVE's [`4011-StateManager.js`](https://github.com/arossti/OBJECTIVE) dependency-graph model, adapted to BEAMweb's flat-dict contract. Primitives already exist on `StateManager` — `registerDependency(sourceId, targetId)`, `markDependentsDirty`, `getDirtyFields`, `clearDirtyStatus` — they just aren't exercised yet.
+
+**Shape:**
+
+- Each consumer tab declares dependency edges once at registration time: "F&S depends on `dim_foundation_slab_floor_area`, `dim_continuous_footings_volume`, ...". Edges populate the StateManager dependency graph.
+- Each consumer tab exposes a single `recomputeTab()` hook — reads current state of all its inputs, updates its fields, refreshes its UI. No event-shape assumptions, no per-key logic.
+- `StateManager.flushDirty()` (new) walks the dirty set → for each dirty source, finds dependent consumers → calls each affected `recomputeTab()` exactly once → clears dirty flags.
+- Any bulk operation ends with `flushDirty()`. Same single call replaces every `syncProjectToFsBridge()` / `syncProjectToFwBridge()` / ... today.
+- OBJECTIVE's d3-driven dependency visualiser ports alongside — renders the graph so a developer can see "if I change this field, here's what recomputes". Debuggability scales with tab count instead of fighting it.
+
+**Trigger condition for migration:**
+
+Any one of:
+
+1. The fourth consumer tab ports (Foundation Walls + Exterior Walls + Party Walls + Interior Walls all queue behind F&S per §6 phase breakdown).
+2. A three-level dep chain appears (PROJECT → F&S → REVIEW, or PROJECT → multiple assemblies → RESULTS totalling).
+3. A bulk operation reaches five or more imperative sync calls.
+
+Whichever fires first. At 3 keys + 1 consumer today, the current pattern is cheaper than the migration; at ~6 keys + 4 consumers it flips.
+
+**Migration path:**
+
+1. F&S is the reference tab — migrate it first. Current `applyOneSource` logic becomes the body of `recomputeFootingsSlabsTab()`. Listener registrations replaced by `registerDependency` edges.
+2. `syncProjectToFsBridge()` removed; callers switch to `StateManager.flushDirty()`.
+3. Each new Phase 4 tab port drops straight into the pattern — ~10 lines of dependency + recompute registration vs. today's "new listener cluster + new sync function + update every bulk caller".
+4. d3 visualiser ports last — nice-to-have, lights up once there's enough graph to look at.
+
+**Deferred but planned.** Revisit when any trigger above fires. Andy has the OBJECTIVE dependency-graph + d3 viz ready to port when we hit that moment.
+
+---
+
 ## 9. Units — metric canonical, imperial display layer
 
 **Storage contract** — every numeric field in every project JSON is stored in metric (m, m², m³, kg, kgCO2e). There is no imperial mirror in the serialized file. Consumers that want imperial compute it at display time.
