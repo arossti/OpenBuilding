@@ -608,15 +608,16 @@ function _handleOverlayClick(e) {
   var pt = Viewer.eventToPdfCoords(e);
   var hitRadius = 10 / (Viewer.getZoom() * (150 / 72)); // ~10 screen pixels → PDF units
 
-  // Polyline tool owns its first click: always plant a new polyline vertex
-  // rather than editing an adjacent area polygon. Skipping these hit-tests
-  // prevents interior walls drawn up to a slab edge from accidentally
-  // dragging/inserting vertices on the slab polygon.
-  var isPolylineTool = _currentTool === "polyline";
+  // Tools that own their click: don't hijack to edit an adjacent polygon.
+  // Polyline so interior walls drawn up to a slab edge don't drag/insert
+  // vertices on the slab. Ruler so a ruler endpoint landing inside a
+  // polygon edge's hit zone plants the endpoint instead of mutating the
+  // polygon.
+  var skipsPolygonEdit = _currentTool === "polyline" || _currentTool === "ruler";
 
   // Priority 1: Click near an existing vertex — start drag
   var hit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
-  if (hit && !PolygonTool.isDrawing() && !isPolylineTool) {
+  if (hit && !PolygonTool.isDrawing() && !skipsPolygonEdit) {
     PolygonTool.startDrag(_currentPage, hit.polyIdx, hit.vertIdx);
     Viewer.onOverlayMouseMove(_handleDragMove);
     _bindDragEnd();
@@ -627,7 +628,7 @@ function _handleOverlayClick(e) {
 
   // Priority 2: Click near an edge — insert vertex and start dragging it
   var edgeHit = PolygonTool.hitTestEdge(_currentPage, pt, hitRadius);
-  if (edgeHit && !PolygonTool.isDrawing() && !isPolylineTool) {
+  if (edgeHit && !PolygonTool.isDrawing() && !skipsPolygonEdit) {
     var newIdx = PolygonTool.insertVertex(_currentPage, edgeHit.polyIdx, edgeHit.edgeIdx, edgeHit.point);
     if (newIdx >= 0) {
       PolygonTool.startDrag(_currentPage, edgeHit.polyIdx, newIdx);
