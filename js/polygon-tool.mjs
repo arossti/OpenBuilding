@@ -110,6 +110,10 @@ export function startPolygon(pageNum, label, opts) {
     // select. Aggregator routes garage-scoped polygons to the garage_*
     // dim counterparts, reusing the same component taxonomy.
     scope: opts.scope === "garage" ? "garage" : "building",
+    // C7 — wall-candidate positions from shrink-wrap, for edge-scrub
+    // snap detents. `{vert: [...x-coords...], horiz: [...y-coords...]}`
+    // when the polygon came from Auto-Detect; null for hand-drawn.
+    _shrinkCandidates: null,
     _pageNum: pageNum
   });
   _colorIdx++;
@@ -730,6 +734,150 @@ export function isDragging() {
   return _dragState !== null;
 }
 
+/* ── C7 edge drag (shrink-wrap candidate snap) ────────── */
+
+var _edgeDragState = null; // { pageNum, polyIdx, edgeIdx, origin, axis, v1Idx, v2Idx }
+
+/**
+ * Classify a closed-polygon edge as "horizontal" (constant y), "vertical"
+ * (constant x), or null (diagonal). Orthogonality tolerance is 0.5 pt to
+ * match shrinkWrapBuilding's orthogonal-segment filter.
+ */
+export function edgeOrientation(poly, edgeIdx) {
+  if (!poly || !poly.closed) return null;
+  var verts = poly.vertices;
+  var n = verts.length;
+  if (n < 3 || edgeIdx < 0 || edgeIdx >= n) return null;
+  var a = verts[edgeIdx];
+  var b = verts[(edgeIdx + 1) % n];
+  var dx = Math.abs(b.x - a.x);
+  var dy = Math.abs(b.y - a.y);
+  if (dy < 0.5 && dx >= 1) return "horizontal";
+  if (dx < 0.5 && dy >= 1) return "vertical";
+  return null;
+}
+
+/** Attach shrink-wrap wall-candidate arrays to an existing polygon. */
+export function setShrinkCandidates(pageNum, polyIdx, candidates) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) return;
+  polys[polyIdx]._shrinkCandidates = candidates || null;
+}
+
+export function getShrinkCandidates(pageNum, polyIdx) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) return null;
+  return polys[polyIdx]._shrinkCandidates || null;
+}
+
+/**
+ * Start dragging a whole edge perpendicular to itself. Both endpoints
+ * move together. Only meaningful for orthogonal edges — caller should
+ * check `edgeOrientation()` first. Saves undo state.
+ */
+export function startEdgeDrag(pageNum, polyIdx, edgeIdx) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) return false;
+  var poly = polys[polyIdx];
+  var orient = edgeOrientation(poly, edgeIdx);
+  if (!orient) return false;
+  var v1Idx = edgeIdx;
+  var v2Idx = (edgeIdx + 1) % poly.vertices.length;
+  var origin = orient === "horizontal" ? poly.vertices[v1Idx].y : poly.vertices[v1Idx].x;
+  _pushUndo(pageNum);
+  _edgeDragState = {
+    pageNum: pageNum,
+    polyIdx: polyIdx,
+    edgeIdx: edgeIdx,
+    axis: orient, // "horizontal" (move in y) | "vertical" (move in x)
+    v1Idx: v1Idx,
+    v2Idx: v2Idx,
+    origin: origin
+  };
+  return true;
+}
+
+/**
+ * Free-follow the pointer during edge drag. Updates both endpoints'
+ * perpendicular coord to the pointer position; preserves the other
+ * coord on each vertex (keeps the edge axis-aligned).
+ */
+export function moveEdgeDrag(pt) {
+  if (!_edgeDragState) return;
+  var polys = _polygons[_edgeDragState.pageNum];
+  var poly = polys && polys[_edgeDragState.polyIdx];
+  if (!poly) return;
+  var v1 = poly.vertices[_edgeDragState.v1Idx];
+  var v2 = poly.vertices[_edgeDragState.v2Idx];
+  if (_edgeDragState.axis === "horizontal") {
+    v1.y = pt.y;
+    v2.y = pt.y;
+  } else {
+    v1.x = pt.x;
+    v2.x = pt.x;
+  }
+}
+
+/**
+ * End the edge drag. If the polygon has shrink-wrap candidates, snap the
+ * edge's perpendicular coord to the nearest candidate — unconditionally.
+ * The edge-drag metaphor is "scrub through wall detents," so the edge
+ * always settles on a detent. (If the user wants free placement, they
+ * click-insert-vertex instead and drag that vertex.) When the polygon
+ * has no candidates, leave the free-drag position.
+ *
+ * @returns {{snapped: boolean, to: number|null}}
+ */
+export function endEdgeDrag() {
+  if (!_edgeDragState) return { snapped: false, to: null };
+
+  var polys = _polygons[_edgeDragState.pageNum];
+  var poly = polys && polys[_edgeDragState.polyIdx];
+  var result = { snapped: false, to: null };
+
+  if (poly) {
+    var v1 = poly.vertices[_edgeDragState.v1Idx];
+    var v2 = poly.vertices[_edgeDragState.v2Idx];
+    var cands =
+      poly._shrinkCandidates && _edgeDragState.axis === "horizontal"
+        ? poly._shrinkCandidates.horiz
+        : poly._shrinkCandidates && _edgeDragState.axis === "vertical"
+          ? poly._shrinkCandidates.vert
+          : null;
+
+    if (cands && cands.length > 0) {
+      var cur = _edgeDragState.axis === "horizontal" ? v1.y : v1.x;
+      var bestDist = Infinity;
+      var bestVal = null;
+      for (var i = 0; i < cands.length; i++) {
+        var d = Math.abs(cands[i] - cur);
+        if (d < bestDist) {
+          bestDist = d;
+          bestVal = cands[i];
+        }
+      }
+      if (bestVal != null) {
+        if (_edgeDragState.axis === "horizontal") {
+          v1.y = bestVal;
+          v2.y = bestVal;
+        } else {
+          v1.x = bestVal;
+          v2.x = bestVal;
+        }
+        result.snapped = true;
+        result.to = bestVal;
+      }
+    }
+  }
+
+  _edgeDragState = null;
+  return result;
+}
+
+export function isEdgeDragging() {
+  return _edgeDragState !== null;
+}
+
 function _getActivePoly() {
   if (!_activePolyId) return null;
   var polys = _polygons[_activePage] || [];
@@ -769,6 +917,8 @@ export function loadPolygons(pageNum, polygons) {
       sheet_id: p.sheet_id || null,
       sheet_class: p.sheet_class || null,
       assembly_preset: p.assembly_preset || null,
+      scope: p.scope === "garage" ? "garage" : "building",
+      _shrinkCandidates: p._shrinkCandidates || null,
       _pageNum: pageNum
     };
   });

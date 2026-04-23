@@ -693,9 +693,28 @@ function _handleOverlayClick(e) {
     return;
   }
 
-  // Priority 2: Click near an edge — insert vertex and start dragging it
+  // Priority 2: Click near an edge.
+  //  - If the polygon carries shrink-wrap candidates AND the edge is
+  //    orthogonal, drag the whole edge perpendicular to itself; release
+  //    snaps to the nearest wall-candidate detent (C7b).
+  //  - Otherwise fall back to the legacy behavior: insert a new vertex
+  //    at the closest point and drag it.
   var edgeHit = PolygonTool.hitTestEdge(_currentPage, pt, hitRadius);
   if (edgeHit && !PolygonTool.isDrawing() && !skipsPolygonEdit) {
+    var polysForEdge = PolygonTool.getPolygons(_currentPage);
+    var edgePoly = polysForEdge[edgeHit.polyIdx];
+    var orient = PolygonTool.edgeOrientation(edgePoly, edgeHit.edgeIdx);
+    var hasCandidates = !!(edgePoly && edgePoly._shrinkCandidates);
+    if (orient && hasCandidates) {
+      if (PolygonTool.startEdgeDrag(_currentPage, edgeHit.polyIdx, edgeHit.edgeIdx)) {
+        Viewer.onOverlayMouseMove(_handleDragMove);
+        _bindDragEnd();
+        Viewer.requestRedraw();
+        var wrap3 = document.getElementById("viewer-wrap");
+        if (wrap3) wrap3.style.cursor = orient === "horizontal" ? "ns-resize" : "ew-resize";
+        return;
+      }
+    }
     var newIdx = PolygonTool.insertVertex(_currentPage, edgeHit.polyIdx, edgeHit.edgeIdx, edgeHit.point);
     if (newIdx >= 0) {
       PolygonTool.startDrag(_currentPage, edgeHit.polyIdx, newIdx);
@@ -721,8 +740,17 @@ function _handleOverlayClick(e) {
 }
 
 function _handleDragMove(e) {
-  if (!PolygonTool.isDragging()) return;
   var pt = Viewer.eventToPdfCoords(e);
+
+  if (PolygonTool.isEdgeDragging()) {
+    // Edge drag has no vector-snap overlay — it follows the pointer
+    // freely and snaps to wall-candidate detents on release only.
+    PolygonTool.moveEdgeDrag(pt);
+    Viewer.requestRedraw();
+    return;
+  }
+
+  if (!PolygonTool.isDragging()) return;
   // Snap during vertex drag
   var snapRadius = 12 / (Viewer.getZoom() * (150 / 72));
   var snap = VectorSnap.findSnap(_currentPage, pt, snapRadius);
@@ -735,20 +763,33 @@ function _handleDragMove(e) {
 function _bindDragEnd() {
   function onUp() {
     window.removeEventListener("mouseup", onUp);
+    var wrap = document.getElementById("viewer-wrap");
+    var cursorMap = {
+      measure: "crosshair",
+      window: "crosshair",
+      calibrate: "crosshair",
+      ruler: "crosshair",
+      navigate: "default"
+    };
+
+    if (PolygonTool.isEdgeDragging()) {
+      var snap = PolygonTool.endEdgeDrag();
+      setStatus(snap.snapped ? "Edge snapped to wall candidate." : "Edge moved.", "ready");
+      _snapTarget = null;
+      Viewer.onOverlayMouseMove(_handleOverlayMouseMove);
+      if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
+      _refreshMeasurements();
+      ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
+      Viewer.requestRedraw();
+      return;
+    }
+
     if (PolygonTool.isDragging()) {
       var mergeRadius = 10 / (Viewer.getZoom() * (150 / 72));
       var merged = PolygonTool.endDrag(mergeRadius);
       if (merged) setStatus("Vertices merged", "ready");
       _snapTarget = null; // clear snap indicator
       Viewer.onOverlayMouseMove(_handleOverlayMouseMove);
-      var wrap = document.getElementById("viewer-wrap");
-      var cursorMap = {
-        measure: "crosshair",
-        window: "crosshair",
-        calibrate: "crosshair",
-        ruler: "crosshair",
-        navigate: "default"
-      };
       if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
       // Update measurements and save
       _refreshMeasurements();
@@ -1193,6 +1234,12 @@ function _handleOverlayMouseMove(e) {
   // while the polyline tool is active, since that tool ignores drag-edit
   // hit-tests (see _handleOverlayClick). Showing the move/cell cursor there
   // would mislead the user.
+  //
+  // Cursor vocabulary (C7a):
+  //   move      — over a vertex (drag vertex)
+  //   ew-resize — over a vertical orthogonal edge of a shrink-wrap polygon (edge-drag, x-axis)
+  //   ns-resize — over a horizontal orthogonal edge of a shrink-wrap polygon (edge-drag, y-axis)
+  //   cell      — over any edge without an edge-drag affordance (insert-vertex fallback)
   var wrap = document.getElementById("viewer-wrap");
   if (!PolygonTool.isDrawing() && !_rectStart && _currentTool !== "polyline") {
     var vertHit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
@@ -1202,7 +1249,15 @@ function _handleOverlayMouseMove(e) {
     }
     var edgeHit = PolygonTool.hitTestEdge(_currentPage, pt, hitRadius);
     if (edgeHit) {
-      if (wrap) wrap.style.cursor = "cell";
+      var polysForHover = PolygonTool.getPolygons(_currentPage);
+      var hoverPoly = polysForHover[edgeHit.polyIdx];
+      var hoverOrient = PolygonTool.edgeOrientation(hoverPoly, edgeHit.edgeIdx);
+      var hoverHasCands = !!(hoverPoly && hoverPoly._shrinkCandidates);
+      if (hoverOrient && hoverHasCands) {
+        if (wrap) wrap.style.cursor = hoverOrient === "horizontal" ? "ns-resize" : "ew-resize";
+      } else if (wrap) {
+        wrap.style.cursor = "cell";
+      }
       return;
     }
   }
@@ -2114,7 +2169,16 @@ function autoDetect() {
 
       if (wrap && wrap.polygon) {
         var polyArea = _polygonArea(wrap.polygon);
-        _placeDetectedOutline({ path: wrap.polygon, area: polyArea }, 0, 1, textItems);
+        var shrinkCandidates = {
+          vert: wrap.wallVertPositions || [],
+          horiz: wrap.wallHorizPositions || []
+        };
+        _placeDetectedOutline(
+          { path: wrap.polygon, area: polyArea, shrinkCandidates: shrinkCandidates },
+          0,
+          1,
+          textItems
+        );
         return;
       }
 
@@ -2200,6 +2264,15 @@ function _placeDetectedOutline(candidate, idx, total, textItems) {
     if (autoTag.preset) {
       PolygonTool.setAssemblyPreset(_currentPage, newPolyIdx, autoTag.preset);
     }
+  }
+
+  // C7 — attach wall-candidate arrays so subsequent edge-drag interactions
+  // can snap through the shrink-wrap detents. Only present when the
+  // polygon came from the shrink-wrap path (not the closed-polygon
+  // fallback), so hand-edited polygons keep their legacy click-to-insert
+  // behavior.
+  if (newPolyIdx >= 0 && candidate.shrinkCandidates) {
+    PolygonTool.setShrinkCandidates(_currentPage, newPolyIdx, candidate.shrinkCandidates);
   }
 
   _refreshMeasurements();

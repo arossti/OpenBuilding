@@ -50,6 +50,14 @@ var WALL_PARALLEL_MIN_OFFSET = 3;
 var WALL_PARALLEL_MAX_OFFSET = 25;
 var WALL_OVERLAP_MIN = 40;
 
+// Cluster wall-candidate positions within this many pt when surfacing
+// them to C7's edge-scrub UI. Raw wall-segment positions include partner
+// strokes (inner + outer face of every wall drawn as two parallels), so
+// every real wall produces two closely-spaced candidates; 5pt coalesces
+// partner-pair duplicates and tick-mark noise without collapsing real
+// distinct walls (minimum partition-wall spacing in practice > 10pt).
+var WALL_CANDIDATE_CLUSTER_RADIUS = 5;
+
 /**
  * @param {Array} segments   — [{x1,y1,x2,y2}]
  * @param {Array} textItems  — [{str, x, y, width, height}]  (unused in v1, reserved for later)
@@ -124,7 +132,18 @@ export function classifyLayers(segments, textItems, pageW, pageH, opts) {
  * @param {Array} drawingSegments — from classifyLayers().drawingSegments
  * @param {Object} drawingAreaBbox — from classifyLayers().drawingAreaBbox
  * @param {Object} [opts]
- * @returns {{polygon, bbox, wallHorizCount, wallVertCount, reason} | null}
+ * @returns {{
+ *   polygon, bbox,
+ *   wallHorizCount, wallVertCount,
+ *   wallVertPositions, wallHorizPositions,
+ *   reason
+ * } | null}
+ *
+ * wallVertPositions / wallHorizPositions are the perpendicular coords
+ * (x for vertical walls, y for horizontal walls) of detected wall-pair
+ * clusters, sorted ascending and clustered within 5pt. C7's edge-scrub
+ * UI uses these as snap detents: dragging a vertical polygon edge snaps
+ * through wallVertPositions; a horizontal edge through wallHorizPositions.
  */
 export function shrinkWrapBuilding(drawingSegments, drawingAreaBbox, opts) {
   opts = opts || {};
@@ -209,13 +228,56 @@ export function shrinkWrapBuilding(drawingSegments, drawingAreaBbox, opts) {
     { x: minX, y: maxY }
   ];
 
+  var wallVertPositions = _clusterPositions(wallVert, "x", WALL_CANDIDATE_CLUSTER_RADIUS);
+  var wallHorizPositions = _clusterPositions(wallHoriz, "y", WALL_CANDIDATE_CLUSTER_RADIUS);
+
   return {
     polygon: polygon,
     bbox: { minX: minX, minY: minY, maxX: maxX, maxY: maxY },
     wallHorizCount: wallHoriz.length,
     wallVertCount: wallVert.length,
+    wallVertPositions: wallVertPositions,
+    wallHorizPositions: wallHorizPositions,
     reason: null
   };
+}
+
+/**
+ * Collapse perpendicular-axis values (x of vertical walls, y of
+ * horizontal walls) into a sorted deduped list. Values within
+ * `clusterRadius` pt of each other collapse to their mean — partner
+ * strokes of the same wall (inner + outer face) + duplicate segments
+ * from the same stroke would otherwise show up as two adjacent detents
+ * that feel sticky under a drag.
+ */
+function _clusterPositions(segs, axisVal, clusterRadius) {
+  if (!segs || segs.length === 0) return [];
+  var vals = segs
+    .map(function (s) {
+      return s[axisVal];
+    })
+    .slice()
+    .sort(function (a, b) {
+      return a - b;
+    });
+
+  var out = [];
+  var clusterStart = vals[0];
+  var sum = vals[0];
+  var n = 1;
+  for (var i = 1; i < vals.length; i++) {
+    if (vals[i] - clusterStart <= clusterRadius) {
+      sum += vals[i];
+      n += 1;
+    } else {
+      out.push(sum / n);
+      clusterStart = vals[i];
+      sum = vals[i];
+      n = 1;
+    }
+  }
+  out.push(sum / n);
+  return out;
 }
 
 /**
