@@ -4,6 +4,7 @@
 
 import * as Loader from "./pdf-loader.mjs";
 import { computeAreaPdf } from "./polygon-tool.mjs";
+import { walkOperatorList } from "./geometry-walk.mjs";
 
 var _geometry = {};
 
@@ -13,42 +14,10 @@ export function extractGeometry(pageNum) {
   return Promise.all([Loader.getOperatorList(pageNum), Loader.getViewportTransform(pageNum)]).then(function (results) {
     var ops = results[0];
     var vpTx = results[1]; // viewport transform [a,b,c,d,e,f]
-
-    // ── CTM (Current Transformation Matrix) tracking ──
-    // The content stream has transform operators (cm) that scale/translate
-    // coordinates. We must track these and compose with the viewport transform.
-    // Matrix format: [a, b, c, d, e, f] representing:
-    //   | a c e |
-    //   | b d f |
-    //   | 0 0 1 |
-
-    var ctm = [1, 0, 0, 1, 0, 0]; // identity
-    var ctmStack = [];
-
-    function multiplyMatrix(m1, m2) {
-      return [
-        m1[0] * m2[0] + m1[2] * m2[1],
-        m1[1] * m2[0] + m1[3] * m2[1],
-        m1[0] * m2[2] + m1[2] * m2[3],
-        m1[1] * m2[2] + m1[3] * m2[3],
-        m1[0] * m2[4] + m1[2] * m2[5] + m1[4],
-        m1[1] * m2[4] + m1[3] * m2[5] + m1[5]
-      ];
-    }
-
-    // Compose viewport transform with current CTM, then apply to a point
-    function tp(x, y) {
-      // Apply CTM first: content-space → page user-space
-      var px = ctm[0] * x + ctm[2] * y + ctm[4];
-      var py = ctm[1] * x + ctm[3] * y + ctm[5];
-      // Apply viewport transform: page user-space → canvas-space (PDF points)
-      var cx = vpTx[0] * px + vpTx[2] * py + vpTx[4];
-      var cy = vpTx[1] * px + vpTx[3] * py + vpTx[5];
-      return { x: cx, y: cy };
-    }
     var OPS = Loader.getOPS();
 
-    // Diagnostic: log what OPS constants we're using and what's in the stream
+    // Diagnostic log — fires once per session so the operator frequency
+    // is available when debugging a wand failure on an unfamiliar PDF.
     if (!_geometry._logged) {
       _geometry._logged = true;
       var fnCounts = {};
@@ -74,155 +43,10 @@ export function extractGeometry(pageNum) {
       console.log("[VectorSnap] Total operators:", ops.fnArray.length);
     }
 
-    var segments = [],
-      closedPaths = [];
-    var currentPath = [];
-    var curX = 0,
-      curY = 0,
-      pathStartX = 0,
-      pathStartY = 0;
-
-    for (var i = 0; i < ops.fnArray.length; i++) {
-      var fn = ops.fnArray[i],
-        args = ops.argsArray[i];
-
-      // CTM tracking: save/restore/transform
-      if (fn === OPS.save) {
-        ctmStack.push(ctm.slice());
-        continue;
-      }
-      if (fn === OPS.restore) {
-        if (ctmStack.length > 0) ctm = ctmStack.pop();
-        continue;
-      }
-      if (fn === OPS.transform) {
-        // args = [a, b, c, d, e, f] — concatenate with current CTM
-        ctm = multiplyMatrix(ctm, args);
-        continue;
-      }
-
-      // PDF.js 4.x batches path ops into constructPath
-      if (fn === OPS.constructPath) {
-        // args[0] = array of sub-op codes, args[1] = array of coordinates
-        var subOps = args[0];
-        var coords = args[1];
-        var ci = 0; // coordinate index
-
-        for (var s = 0; s < subOps.length; s++) {
-          var subOp = subOps[s];
-
-          if (subOp === OPS.moveTo) {
-            var mp = tp(coords[ci++], coords[ci++]);
-            curX = mp.x;
-            curY = mp.y;
-            pathStartX = curX;
-            pathStartY = curY;
-            if (currentPath.length >= 2) _addPathSegments(currentPath, segments);
-            currentPath = [{ x: curX, y: curY }];
-          } else if (subOp === OPS.lineTo) {
-            var lp = tp(coords[ci++], coords[ci++]);
-            curX = lp.x;
-            curY = lp.y;
-            currentPath.push({ x: curX, y: curY });
-          } else if (subOp === OPS.curveTo || subOp === OPS.curveTo2 || subOp === OPS.curveTo3) {
-            var numCoords = subOp === OPS.curveTo ? 6 : 4;
-            var cp = tp(coords[ci + numCoords - 2], coords[ci + numCoords - 1]);
-            curX = cp.x;
-            curY = cp.y;
-            ci += numCoords;
-            currentPath.push({ x: curX, y: curY });
-          } else if (subOp === OPS.rectangle) {
-            var rawX = coords[ci++],
-              rawY = coords[ci++],
-              rawW = coords[ci++],
-              rawH = coords[ci++];
-            if (currentPath.length >= 2) _addPathSegments(currentPath, segments);
-            currentPath = [];
-            var r0 = tp(rawX, rawY),
-              r1 = tp(rawX + rawW, rawY);
-            var r2 = tp(rawX + rawW, rawY + rawH),
-              r3 = tp(rawX, rawY + rawH);
-            var rect = [r0, r1, r2, r3];
-            closedPaths.push(rect);
-            _addPathSegments(rect.concat([rect[0]]), segments);
-          } else if (subOp === OPS.closePath) {
-            if (currentPath.length >= 3) {
-              currentPath.push({ x: pathStartX, y: pathStartY });
-              closedPaths.push(currentPath.slice());
-              _addPathSegments(currentPath, segments);
-            }
-            currentPath = [];
-          }
-        }
-        continue;
-      }
-
-      // Legacy individual operators (PDF.js 3.x or simple PDFs)
-      switch (fn) {
-        case OPS.moveTo:
-          var lmp = tp(args[0], args[1]);
-          curX = lmp.x;
-          curY = lmp.y;
-          pathStartX = curX;
-          pathStartY = curY;
-          if (currentPath.length >= 2) _addPathSegments(currentPath, segments);
-          currentPath = [{ x: curX, y: curY }];
-          break;
-        case OPS.lineTo:
-          var llp = tp(args[0], args[1]);
-          currentPath.push({ x: llp.x, y: llp.y });
-          curX = llp.x;
-          curY = llp.y;
-          break;
-        case OPS.rectangle:
-          var lr0 = tp(args[0], args[1]),
-            lr1 = tp(args[0] + args[2], args[1]);
-          var lr2 = tp(args[0] + args[2], args[1] + args[3]),
-            lr3 = tp(args[0], args[1] + args[3]);
-          var rect2 = [lr0, lr1, lr2, lr3];
-          closedPaths.push(rect2);
-          _addPathSegments(rect2.concat([rect2[0]]), segments);
-          break;
-        case OPS.closePath:
-          if (currentPath.length >= 3) {
-            currentPath.push({ x: pathStartX, y: pathStartY });
-            closedPaths.push(currentPath.slice());
-            _addPathSegments(currentPath, segments);
-          }
-          currentPath = [];
-          break;
-        case OPS.stroke:
-        case OPS.fill:
-        case OPS.fillStroke:
-        case OPS.eoFill:
-        case OPS.eoFillStroke:
-          if (currentPath.length >= 2) _addPathSegments(currentPath, segments);
-          currentPath = [];
-          break;
-      }
-    }
-
-    var epMap = {};
-    for (var si = 0; si < segments.length; si++) {
-      var seg = segments[si];
-      var k1 = Math.round(seg.x1) + "," + Math.round(seg.y1);
-      var k2 = Math.round(seg.x2) + "," + Math.round(seg.y2);
-      if (!epMap[k1]) epMap[k1] = { x: seg.x1, y: seg.y1 };
-      if (!epMap[k2]) epMap[k2] = { x: seg.x2, y: seg.y2 };
-    }
-    var endpoints = [];
-    for (var key in epMap) endpoints.push(epMap[key]);
-
-    var result = { segments: segments, endpoints: endpoints, closedPaths: closedPaths };
+    var result = walkOperatorList(ops, vpTx, OPS);
     _geometry[pageNum] = result;
     return result;
   });
-}
-
-function _addPathSegments(path, segments) {
-  for (var i = 0; i < path.length - 1; i++) {
-    segments.push({ x1: path[i].x, y1: path[i].y, x2: path[i + 1].x, y2: path[i + 1].y });
-  }
 }
 
 /**

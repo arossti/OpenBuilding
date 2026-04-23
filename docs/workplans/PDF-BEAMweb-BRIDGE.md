@@ -35,13 +35,38 @@ Four items from the BfCA team meeting threaded into the spec. Summary + where ea
 
 Record kept here (not in app code) because these are source URLs for upstream refresh, not runtime fetches. When Q27 refresh lands, the committed CSVs in `docs/csv files from BEAM/` and the JSONs in `schema/materials/` update from these sources.
 
-### Shipped update — 2026-04-21
+### Shipped update — 2026-04-22 (PR #11 merged)
 
-Phase 4b.0 through 4b.2 shipped on `PDF-Bridge` (merged to `main` as PR #1, 2026-04-21). Follow-on work continues on `PDF-Bridge-2` — F&S flow fix + §8 planning note + dependency-graph stub.
+Phase 4b is now **~95% shipped**. PR #11 (merge commit `49c35b4`) closed out the five bridge-UX milestones plus two long-standing polygon-edit bugs and built the dev-harness infrastructure for the next Polish pass. All items in the prior-session "What's NOT shipped yet" list except sheet-class validation banners and the source-selector widget (the latter explicitly replaced by the Trust / Trust + Verify button pair — see M1) are now on `main`.
 
-**Active branch:** `PDF-Bridge-2` (based on `main` after PR #1 merge). Future agents: `git checkout PDF-Bridge-2` to continue; `git log main..HEAD` to see work since the merge.
+**Active branch:** `Magic-Wand-Polish` (fresh off `main` after PR #11 merge). Future agents: `git checkout Magic-Wand-Polish` to continue; `git log main..HEAD` = empty until work lands.
 
-**Testing status:** PR #1 merged based on the test checklist in its body, **without explicit verification runs**. Andy flagged a post-merge regression that became `85dd39d` (F&S did not flow from imported PROJECT values); verified by Andy in-tab afterward. Second-round testing of the full Import → Apply → F&S loop on `PDF-Bridge-2` is in progress as of end-of-session 2026-04-21. Multi-tag extension (see Q31) is the next round of tagging work.
+**Testing status:** Every milestone was Playwright-verified against seeded IndexedDB fixtures **before commit** (per Andy's "tests before commits" directive). PR #11's test plan ran end-to-end on merge day, all checks passed. No post-merge regressions flagged.
+
+**Commits on PR #11 (merged to `main` as `49c35b4`, in order):**
+
+| Commit | Scope |
+|---|---|
+| `be1ba92` | CLI debug harness at `schema/scripts/debug-pdf-extract.mjs` + `pdfjs-dist` devDep + `npm run debug:pdf` + `.gitignore` for `.playwright-mcp/` |
+| `4f9b820` | Favicons linked on all 6 apps (silences `/favicon.ico` 404) |
+| `403b8c9` | Ruler click no longer edits polygon edges (broadens the polyline-tool guard to cover ruler) |
+| `07dd8a0` | Calibrate click no longer edits polygon edges (symmetric fix) |
+| `990ae94` | **M1** — Trust + Trust + Verify split (one-click bulk, modal always available post-import) |
+| `4631169` | **M2** — Sheet deep-links (`pdfparser.html#sheet=A-101` + `target="pdf-parser-tab"` named window so successive clicks reuse the same Parser tab, not spawn a new one per click) |
+| `a8e5045` | **M3** — Fidelity badge under every imported PROJECT dim + param (JSON envelope, clickable sheet refs, auto-clears on USER_MODIFIED) |
+| `a539c79` | **M4** — `depth_m` per polygon + Summary Table inline input + `dim_columns_piers_pads_volume` aggregator (Phase 4b.3 done) |
+| `944c720` | **M5** — Q23 garage scope: per-polygon `scope` field ("building" \| "garage"), two-pass scope-partitioned aggregator, 8 specs extended with `garageTargetDim` / `garageDim` counterparts |
+| `804882f` | Docs: `docs/pdf-parser.md` → `docs/completed/pdf-parser.md` (new `completed/` folder convention) |
+| `cf8552f` | Docs: `docs/pdf-resources/` → `docs/pdf-samples/` (ends the visual collision with `docs/PDF References/`) |
+| `5b10897` | PDF-Parser: restore path skips zero-byte PDF blobs + drops the orphan record (fixes `InvalidPDFException` on boot) |
+
+---
+
+### Shipped update — 2026-04-21 (PR #1 through the pre-PR-#11 state)
+
+Phase 4b.0 through 4b.2 shipped on `PDF-Bridge` (merged to `main` as PR #1, 2026-04-21). Follow-on work continued on `PDF-Bridge-2` — F&S flow fix + §8 planning note + dependency-graph stub. PR #2 (`e15fe8f`) rolled those into `main`.
+
+**Testing status (historical):** PR #1 merged based on the test checklist in its body, **without explicit verification runs**. Andy flagged a post-merge regression that became `85dd39d` (F&S did not flow from imported PROJECT values); verified by Andy in-tab afterward. Second-round testing of the full Import → Apply → F&S loop landed on `PDF-Bridge-2`. Multi-tag extension (see Q31) was the next round of tagging work — re-tested and confirmed working on 2026-04-22; Q31 now largely resolved (see §7).
 
 **Commits on `PDF-Bridge` (merged to `main`, in order):**
 
@@ -77,16 +102,21 @@ Phase 4b.0 through 4b.2 shipped on `PDF-Bridge` (merged to `main` as PR #1, 2026
 - **Manual Import button instead of auto-reflow.** Original spec (§2.2, §2.4, Q21) described a "source selector pill per dim" with auto-reflow on polygon change. Shipped: a single "Import from PDF-Parser" button in BEAMweb's action bar that opens a preview modal with per-dim checkboxes. User explicitly applies selected rows. Simpler, predictable, no dialogs asking to overwrite USER_MODIFIED values mid-session. Per-dim source pills can still land later if the single-button model proves limiting.
 - **Inline Tag + Preset re-editing.** Summary Table rows now render Tag and Preset as `<select>` cells that re-classify a polygon in place. User-friendlier than "pick polygon on the plan to edit its tag."
 
-**What's NOT shipped yet (still pending):**
+**What's shipped since the 2026-04-21 entry (all on `main` via PR #11):**
 
-- **Source selector widget** (§5.1) — replaced for now by the global Import button. Revisit if users want per-dim source control beyond "apply this import and stop."
-- **Fidelity badge inline under each dim input on PROJECT** (§5.2). Import modal's "Source" column covers this during import; PROJECT tab does not yet annotate imported values.
-- **Auto-re-run on polygon change** (Q21) — explicit Import-button workflow instead.
-- **Sheet-class validation banners on offending polygons** (§3.4). Warnings surface in the Import preview only, not inline in the Parser UI.
-- **Clickable sheet refs / deep links** from fidelity text to the Parser at a specific sheet (§5.2 end). Trivial to wire once we add the URL-fragment protocol.
-- **`depth_m` field + column/pad volume** (§6.4 / Phase 4b.3).
-- **Cross-app bulk "Use PDF-Parser for all" action** (§6.5 Phase 4b.4).
-- **Assembly-preset wire-through to Phase 4 tabs** (§6.6 Phase 4b.5) — presets persist on polygons but no assembly tab consumes them yet.
+- ✅ **Fidelity badge** on PROJECT dims + params (commit `a8e5045`) — JSON envelope provenance, clickable sheet refs, auto-clears on USER_MODIFIED.
+- ✅ **Clickable sheet deep-links** (commit `4631169`) — `pdfparser.html#sheet=X` protocol + `target="pdf-parser-tab"` named window for no-tab-mania.
+- ✅ **`depth_m` + pad/pier volume** (commit `a539c79`) — Phase 4b.3 complete.
+- ✅ **Cross-app bulk action** (commit `990ae94`) — Trust button = one-click bulk import; Trust + Verify = the existing modal, available anytime.
+- ✅ **Q23 garage scope** (commit `944c720`) — per-polygon scope boolean, scope-aware aggregator, 8 specs extended with `garageTargetDim` / `garageDim`.
+
+**What's still not shipped (deferred or out-of-scope for the bridge workstream):**
+
+- **Source selector widget per dim** (§5.1) — explicitly replaced by the Trust / Trust + Verify button pair. Only revisit if users ask for per-dim granularity beyond "apply this import and stop."
+- **Auto-re-run on polygon change** (Q21) — replaced by the explicit Trust button. User-triggered, not event-driven.
+- **Sheet-class validation banners on offending polygons** (§3.4) — low-value cosmetic; warnings still surface in the Import preview only.
+- **Draw-time scope picker** (new 2026-04-22) — today scope is set post-hoc via the Summary Table inline select. A toolbar scope toggle next to the component-tag dropdown would let users set scope at draw time. Small UX follow-up.
+- **Assembly-preset wire-through to Phase 4 tabs** (§6.6 Phase 4b.5) — presets persist on polygons but no assembly tab consumes them yet. Gated on BEAMweb Phase 4 assembly-tab ports, not on the bridge.
 
 ### What the bridge does
 
@@ -101,17 +131,19 @@ Some dimensions derive directly from polygons (slab area = Σ plan polygons tagg
 - **No timber takeoff.** Heavy timber elements are discrete line items, not a drawing-takeoff product. Belong on Structural Elements tab, not summed on PROJECT. See §1 Non-goals.
 - **No cross-project polygon sharing** (see BEAMweb.md §7 Q12).
 
-### Where to pick up next (cold-start one-liner)
+### Where to pick up next (cold-start one-liner, 2026-04-22)
 
-`PDF-Bridge` is merged to `main` (PR #1). Active branch is `PDF-Bridge-2` with three commits in flight (see the table above). Next agent: `git checkout PDF-Bridge-2`, read §7 Q31 for Andy's latest ask, skim the PR #1 test plan to see what's been verified so far. Natural follow-ups in priority order:
+PR #11 is merged (`main` at `49c35b4`). Active branch is **`Magic-Wand-Polish`** — branched clean off post-merge `main`, empty of commits. **Bridge work is substantially done**; the branch exists to return to the PDF-Parser **Magic-Wand auto-detect polish pass** that was the original intent before bridge work consumed the prior session. See the handoff prompt that spawned this session for Magic-Wand-specific context.
 
-1. **Multi-tag extension (Q31)** — Andy's next-round tagging work. Collect the specific tag→dim mappings he wants added, extend `COMPONENT_TO_DIMENSION.crossFeeds` entries in [polygon-map.mjs](../../js/shared/polygon-map.mjs). No structural code changes.
-2. **Phase 4b.3 — `depth_m` + pad/pier volume** (§6.4). Schema field on polygons + UI input + aggregator path. ~200 lines, self-contained.
-3. **Fidelity badge on PROJECT dim inputs** (§5.2) — render the `dimension_sources` string under each imported dim's input so provenance is visible without opening the Import modal. ~100 lines in [project-tab.mjs](../../js/beam/project-tab.mjs).
-4. **Clickable sheet deep-link** — `pdfparser.html#sheet=A-301` URL fragment protocol. ~80 lines both sides.
-5. **Bulk "Use PDF-Parser for all" action** — one-click variant of the Import modal that applies every computable dim. ~40 lines on top of existing `applyImport`.
-6. **Garage scope boolean (Q23)** — unlocks all garage dim mappings.
-7. **Phase 4b.4 polish** + **Phase 4b.5 assembly-preset wire-through** (gated on Phase 4 assembly tabs porting).
+Remaining bridge-concern items are all either data-tasks, gated on other work, or low-priority UX polish:
+
+1. **Q31 multi-tag extension** — cross-feeds confirmed working on re-test 2026-04-22; resolved. Only item left is the UX sub-item (b) in §7 Q31: retroactive multi-tag chips in the Summary Table. Add when a real-world case surfaces that the implicit cross-feed can't express.
+2. **Q27 upstream BEAM + materials-DB refresh** — re-fetch the current Google Sheet URLs, diff the generations, flag row changes. Standalone session worth, ideally before the release push.
+3. **Draw-time scope picker** — toolbar scope toggle at measurement time alongside the component-tag dropdown. ~50 lines. Low priority; Summary Table inline select already handles the re-scope case.
+4. **Phase 4b.5 assembly-preset wire-through** — gated on Phase 4 BEAMweb assembly-tab ports. Presets persist on polygons today but downstream is a no-op until those tabs land. Check in on BEAMweb progress before picking this up.
+5. **Sheet-class validation banners on offending polygons** (§3.4) — lowest priority; warnings already surface in the Import preview.
+
+For the actual **Magic-Wand Polish** direction (what `Magic-Wand-Polish` the branch is for), see [`BEAMweb.md §12`](./BEAMweb.md) for the dev-tooling context + the handoff prompt for specific targets (open-quad clustering, auto-calibration, dimension-string extraction).
 
 ---
 

@@ -104,6 +104,46 @@ export function calibrate(pageNum, p1, p2, realDistance, unit, meta) {
   );
 }
 
+/* ── Auto-calibrate from a detected dimension ─────────── */
+
+/**
+ * Set a VERIFIED calibration from a pdfUnitsPerMetre already computed
+ * upstream (by js/dim-extract.mjs, which paired a dimension callout to
+ * its segment and divided segment-length / dim-value). Mirrors
+ * `calibrate()`'s state shape but skips the two-point click step —
+ * the dim/segment pair IS the reference.
+ *
+ * @param {number} pageNum
+ * @param {number} pdfUnitsPerMetre
+ * @param {Object} [meta]  {ratio, ratioLabel, dimText, dimMeters, segmentLength, source}
+ */
+export function calibrateFromDimension(pageNum, pdfUnitsPerMetre, meta) {
+  if (!isFinite(pdfUnitsPerMetre) || pdfUnitsPerMetre <= 0) return;
+  meta = meta || {};
+  var existing = _calibrations[pageNum];
+  _calibrations[pageNum] = {
+    state: STATE.VERIFIED,
+    ratio: meta.ratio || (existing && existing.ratio) || null,
+    ratioLabel: meta.ratioLabel || (existing && existing.ratioLabel) || "auto-calibrated",
+    pdfUnitsPerMetre: pdfUnitsPerMetre,
+    source: "auto-dim",
+    dimText: meta.dimText || null,
+    dimMeters: meta.dimMeters || null,
+    segmentLength: meta.segmentLength || null
+  };
+  console.log(
+    "[ScaleManager] Page " +
+      pageNum +
+      " VERIFIED (auto-dim): " +
+      (meta.dimText ? '"' + meta.dimText + '" = ' + (meta.dimMeters || 0).toFixed(3) + "m / " : "") +
+      "seg " +
+      (meta.segmentLength || 0).toFixed(1) +
+      "pt → " +
+      pdfUnitsPerMetre.toFixed(2) +
+      " units/m"
+  );
+}
+
 /* ── Conversion (works for ACCEPTED and VERIFIED) ─────── */
 
 export function pdfToMetres(pageNum, pdfDistance) {

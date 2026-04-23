@@ -540,10 +540,7 @@ async function handleTrustPdfParser() {
   }
   const dimIds = preview.rows.filter((r) => r.hasValue).map((r) => r.dimId);
   if (dimIds.length === 0) {
-    setStatus(
-      "Trust: no computable dimensions in the latest PDF-Parser session. Tag polygons there first.",
-      "error"
-    );
+    setStatus("Trust: no computable dimensions in the latest PDF-Parser session. Tag polygons there first.", "error");
     return;
   }
   try {

@@ -51,12 +51,8 @@ export function wireDependencyGraphTab() {
   activateBtn.addEventListener("click", () => {
     if (!graphInstance) {
       graphInstance = new DependencyGraph("#bw-depgraph .bw-depgraph-container");
-      const controlsWrap = document.querySelector(
-        "#bw-depgraph .dependency-graph-controls-wrapper"
-      );
-      const infoWrap = document.querySelector(
-        "#bw-depgraph .dependency-graph-info-wrapper"
-      );
+      const controlsWrap = document.querySelector("#bw-depgraph .dependency-graph-controls-wrapper");
+      const infoWrap = document.querySelector("#bw-depgraph .dependency-graph-info-wrapper");
       if (controlsWrap) graphInstance.createFilterControls(controlsWrap);
       if (infoWrap) graphInstance.createInfoPanel(infoWrap);
     }

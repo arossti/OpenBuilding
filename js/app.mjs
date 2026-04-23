@@ -19,6 +19,8 @@ import * as ScaleManager from "./scale-manager.mjs";
 import * as Viewer from "./canvas-viewer.mjs";
 import * as PolygonTool from "./polygon-tool.mjs";
 import * as VectorSnap from "./vector-snap.mjs";
+import { extractDimensions } from "./dim-extract.mjs";
+import { classifyLayers, shrinkWrapBuilding } from "./shrink-wrap.mjs";
 import * as ScheduleParser from "./schedule-parser.mjs";
 import * as ProjectStore from "./project-store.mjs";
 import * as IDBStore from "./shared/indexed-db-store.mjs";
@@ -271,7 +273,13 @@ function loadPdf(buffer, fileName, opts) {
 
             if (restored) {
               setStatus(
-                "Session restored — " + restored.areas + " areas, " + restored.windows + " windows, " + restored.rulers + " rulers",
+                "Session restored — " +
+                  restored.areas +
+                  " areas, " +
+                  restored.windows +
+                  " windows, " +
+                  restored.rulers +
+                  " rulers",
                 "ready"
               );
             } else {
@@ -672,8 +680,7 @@ function _handleOverlayClick(e) {
   // polygon edge's hit zone plants the endpoint instead of mutating the
   // polygon. Calibrate for the same reason — a user who calibrates after
   // areas have been drawn (rare but real) shouldn't modify geometry.
-  var skipsPolygonEdit =
-    _currentTool === "polyline" || _currentTool === "ruler" || _currentTool === "calibrate";
+  var skipsPolygonEdit = _currentTool === "polyline" || _currentTool === "ruler" || _currentTool === "calibrate";
 
   // Priority 1: Click near an existing vertex — start drag
   var hit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
@@ -822,7 +829,8 @@ var GEOMETRY_PARAMS = [
 function _renderParamsPanel() {
   if (!els.paramsPanel) return;
   var html = '<div class="pdf-params-header">Geometry Parameters</div>';
-  html += '<div class="pdf-params-hint">Fed to BEAMweb on import \u2014 lifts perimeters \u2192 areas + areas \u2192 volumes.</div>';
+  html +=
+    '<div class="pdf-params-hint">Fed to BEAMweb on import \u2014 lifts perimeters \u2192 areas + areas \u2192 volumes.</div>';
   html += '<div class="pdf-params-rows">';
   for (var i = 0; i < GEOMETRY_PARAMS.length; i++) {
     var p = GEOMETRY_PARAMS[i];
@@ -1591,6 +1599,9 @@ function _bindKeyboard() {
       case "d":
         autoDetect();
         break;
+      case "a":
+        autoCalibrate();
+        break;
       case "l":
         setTool("ruler");
         break;
@@ -2030,85 +2041,115 @@ function setStatus(msg, type) {
 var _detectCandidates = []; // cached candidates from last detect
 var _detectIndex = 0; // which candidate we're showing
 
+// MAGIC.md C4 — sheet-scope filter. Wand (autoDetect) and
+// auto-calibrate only run on sheets classified as plan or elevation.
+// Sections use the ruler tool for F2F / F2C heights (no fill capture).
+// Sites / details / title sheets: manual measurement only.
+function _requireDrawingSheet(pageNum, actionLabel) {
+  var page = ProjectStore.getPage(pageNum);
+  var cls = page && page.classification;
+  if (cls === "plan" || cls === "elevation") return true;
+  var msg;
+  if (cls === "section") {
+    msg =
+      actionLabel +
+      " is disabled on section sheets — use the ruler (L) for F2F / F2C heights, or draw polygons manually (M).";
+  } else if (cls === "site") {
+    msg = actionLabel + " is disabled on site plans — use manual measurement (M or R).";
+  } else {
+    msg =
+      actionLabel +
+      ' runs on plan or elevation sheets only (this sheet is classified as "' +
+      (cls || "other") +
+      '"). Use manual measurement (M or R) instead.';
+  }
+  setStatus(msg, "error");
+  return false;
+}
+
 function autoDetect() {
   if (!Loader.isLoaded()) return;
+  if (!_requireDrawingSheet(_currentPage, "Auto-Detect")) return;
 
-  // If we already scanned this page, cycle through candidates or bail
-  if (_detectCandidates._page === _currentPage) {
-    if (_detectCandidates.length > 0) {
-      _detectIndex = (_detectIndex + 1) % _detectCandidates.length;
-      _placeDetectedOutline(_detectCandidates[_detectIndex], _detectIndex, _detectCandidates.length);
-    } else {
-      setStatus(
-        "No vector geometry on this page. This may be a scanned/raster PDF — use manual measurement (M/R).",
-        "error"
-      );
-    }
-    return;
-  }
+  setStatus("Finding building outline...", "busy");
+  var pageNum = _currentPage;
 
-  setStatus("Scanning vector geometry...", "busy");
+  Promise.all([Loader.getTextContent(pageNum), VectorSnap.extractGeometry(pageNum), Loader.getPageSize(pageNum)]).then(
+    function (results) {
+      var textItems = results[0];
+      var geo = results[1];
+      var size = results[2];
 
-  VectorSnap.extractGeometry(_currentPage).then(function (geo) {
-    return Loader.getPageSize(_currentPage).then(function (size) {
-      var candidates = VectorSnap.getClosedPathsByArea(_currentPage, size.width, size.height);
-      candidates._page = _currentPage;
-      _detectCandidates = candidates;
-      _detectIndex = 0;
-
-      // Log diagnostics
-      console.log(
-        "[Auto-detect] Page " +
-          _currentPage +
-          ": " +
-          geo.segments.length +
-          " line segments, " +
-          geo.endpoints.length +
-          " endpoints, " +
-          geo.closedPaths.length +
-          " closed paths total, " +
-          candidates.length +
-          " candidates (filtered by area)"
-      );
-
-      if (candidates.length > 0) {
-        for (var i = 0; i < Math.min(candidates.length, 5); i++) {
-          var areaM2 = ScaleManager.pdfAreaToM2(_currentPage, candidates[i].area);
-          console.log(
-            "  Candidate " +
-              (i + 1) +
-              ": " +
-              candidates[i].path.length +
-              " vertices, " +
-              (areaM2 ? areaM2.toFixed(1) + " m²" : "uncalibrated")
-          );
-        }
-        _placeDetectedOutline(candidates[0], 0, candidates.length);
-      } else if (geo.segments.length === 0) {
-        // No vector geometry at all — likely a scanned/raster PDF
+      // Raster PDF with no vector geometry — bail early.
+      if (geo.segments.length === 0) {
         setStatus(
           "No vector data found — this appears to be a scanned/raster PDF. Use manual measurement (M or R).",
           "error"
         );
-        console.log("[Auto-detect] Page has zero vector geometry. This is a raster/scanned PDF.");
-      } else {
-        setStatus(
-          "No closed outlines found (" +
-            geo.segments.length +
-            " line segments, but no closed shapes). Use manual measurement (M or R).",
-          "error"
-        );
-        console.log(
-          "[Auto-detect] " +
-            geo.segments.length +
-            " segments, " +
-            geo.closedPaths.length +
-            " closed paths (likely hatching/fills). " +
-            "Building walls drawn as individual segments, not closed polylines."
-        );
+        console.log("[Auto-detect] Page has zero vector geometry. Raster/scanned PDF.");
+        return;
       }
-    });
-  });
+
+      // Layer-peel (C4): separate sheet-border chaff from drawing geometry.
+      var layers = classifyLayers(geo.segments, textItems, size.width, size.height);
+
+      // Shrink-wrap (C5): find the building outline via parallel-pair wall
+      // detection + 5-95 percentile trimming of wall positions.
+      var wrap = shrinkWrapBuilding(layers.drawingSegments, layers.drawingAreaBbox);
+
+      console.log(
+        "[Auto-detect] Page " +
+          pageNum +
+          ": " +
+          geo.segments.length +
+          " segments, layer-peel → " +
+          layers.summary.drawing +
+          " drawing / " +
+          layers.summary.pageBorder +
+          " pageBorder, shrink-wrap → " +
+          (wrap && wrap.polygon
+            ? wrap.wallHorizCount + "H + " + wrap.wallVertCount + "V walls, 4-vertex polygon"
+            : "FAILED (" + (wrap ? wrap.reason : "null") + ")")
+      );
+
+      if (wrap && wrap.polygon) {
+        var polyArea = _polygonArea(wrap.polygon);
+        _placeDetectedOutline({ path: wrap.polygon, area: polyArea }, 0, 1);
+        return;
+      }
+
+      // Fallback — legacy closed-polygon detector (kept until shrink-wrap
+      // proves itself in real use; then retire per MAGIC.md C5 discussion).
+      var candidates = VectorSnap.getClosedPathsByArea(pageNum, size.width, size.height);
+      if (candidates.length > 0) {
+        _placeDetectedOutline(candidates[0], 0, 1);
+        setStatus(
+          "Shrink-wrap did not find wall pairs (" +
+            (wrap ? wrap.reason : "no drawing segments") +
+            "). Fell back to first closed-polygon candidate.",
+          "ready"
+        );
+        return;
+      }
+
+      setStatus(
+        "No building outline detected on this page. " +
+          (wrap && wrap.reason ? "Shrink-wrap: " + wrap.reason + ". " : "") +
+          "Use manual measurement (M or R).",
+        "error"
+      );
+    }
+  );
+}
+
+function _polygonArea(pts) {
+  var a = 0;
+  for (var i = 0; i < pts.length; i++) {
+    var p0 = pts[i];
+    var p1 = pts[(i + 1) % pts.length];
+    a += p0.x * p1.y - p1.x * p0.y;
+  }
+  return Math.abs(a) / 2;
 }
 
 function _placeDetectedOutline(candidate, idx, total) {
@@ -2152,6 +2193,273 @@ function _placeDetectedOutline(candidate, idx, total) {
   setStatus("Outline: " + areaStr + ", " + verts.length + " vertices." + hint, "ready");
 }
 
+/* ── Auto-calibrate from dimension strings (MAGIC C3) ───── */
+
+// A declared scale and a detected scale agree if implied pdfUnitsPerMetre
+// match within 3% — the threshold below which page-to-paper rescaling
+// (ANSI D saved as 11x17 for printing) is usually not an issue.
+var _SCALE_AGREEMENT_TOLERANCE = 0.03;
+
+function autoCalibrate() {
+  if (!Loader.isLoaded()) return;
+  if (!_requireDrawingSheet(_currentPage, "Auto-Calibrate")) return;
+  var pageNum = _currentPage;
+  setStatus("Scanning text + geometry for dimension callouts...", "busy");
+
+  Promise.all([Loader.getTextContent(pageNum), VectorSnap.extractGeometry(pageNum)]).then(function (results) {
+    var textItems = results[0];
+    var geo = results[1];
+    var declaredCal = ScaleManager.getCalibration(pageNum);
+    var declaredScale =
+      declaredCal && declaredCal.ratio
+        ? { ratio: declaredCal.ratio, raw: declaredCal.ratioLabel }
+        : SheetClassifier.detectScale(textItems);
+
+    var result = extractDimensions(textItems, geo.segments, { declaredScale: declaredScale });
+
+    console.log(
+      "[Auto-cal] Page " +
+        pageNum +
+        ": " +
+        result.callouts.length +
+        " paired callouts (" +
+        result.unpaired.length +
+        " parsed but unpaired), " +
+        "declaredPPM=" +
+        (result.declaredPdfUnitsPerMetre ? result.declaredPdfUnitsPerMetre.toFixed(2) : "?") +
+        ", impliedMedian=" +
+        (result.impliedPdfUnitsPerMetreMedian ? result.impliedPdfUnitsPerMetreMedian.toFixed(2) : "?") +
+        ", agreement=" +
+        (result.scaleAgreement !== null ? (result.scaleAgreement * 100).toFixed(2) + "%" : "?")
+    );
+
+    if (result.callouts.length === 0) {
+      setStatus(
+        "No dimension callouts paired to segments. " +
+          (result.unpaired.length > 0
+            ? result.unpaired.length + " dims parsed but none matched a segment length."
+            : "No dim-shaped text found.") +
+          " Try manual calibrate (C) instead.",
+        "error"
+      );
+      _showScaleFeedback(
+        "⚠️",
+        "No Auto-Calibration Candidates",
+        "Could not find a dimension string paired to a matching line segment on this page.<br><br>" +
+          (result.unpaired.length > 0
+            ? "<b>" +
+              result.unpaired.length +
+              "</b> dimension strings were parsed from the text, but none matched a segment length within the scale-agreement tolerance. The drawing may use curved leaders or the declared scale may be wildly off.<br><br>"
+            : "No dimension strings were found in the page text.<br><br>") +
+          "Press <b>C</b> to calibrate manually by clicking two points on a known dimension.",
+        "#e9c46a",
+        false
+      );
+      return;
+    }
+
+    // Pick the highest-confidence callout with a horizontal segment +
+    // longest paired length. Horizontal building widths are the most
+    // reliable real-world reference; longer segments give the smallest
+    // relative error from pixel quantization.
+    var sorted = result.callouts.slice().sort(function (a, b) {
+      var aH = a.segment.orientation === "horizontal" ? 1 : 0;
+      var bH = b.segment.orientation === "horizontal" ? 1 : 0;
+      if (aH !== bH) return bH - aH;
+      var scoreDiff = b.confidence - a.confidence;
+      if (Math.abs(scoreDiff) > 0.05) return scoreDiff;
+      return b.segment.length - a.segment.length;
+    });
+    var best = sorted[0];
+    var detectedPPM = best.impliedPdfUnitsPerMetre;
+    if (!isFinite(detectedPPM) || detectedPPM <= 0) {
+      setStatus("Auto-calibrate found a candidate but failed to compute scale.", "error");
+      return;
+    }
+
+    var declaredPPM = result.declaredPdfUnitsPerMetre;
+    var hasDeclared = declaredPPM && isFinite(declaredPPM);
+    var agreement = hasDeclared ? 1 - Math.abs(detectedPPM - declaredPPM) / declaredPPM : null;
+    var disagree = hasDeclared && agreement !== null && agreement < 1 - _SCALE_AGREEMENT_TOLERANCE;
+
+    var detectedRatio = _ppmToRatio(detectedPPM);
+    var detectedLabel = "1:" + detectedRatio;
+
+    if (hasDeclared && !disagree) {
+      ScaleManager.calibrateFromDimension(pageNum, declaredPPM, {
+        ratio: (declaredCal && declaredCal.ratio) || _ppmToRatio(declaredPPM),
+        ratioLabel:
+          (declaredCal && declaredCal.ratioLabel) ||
+          (declaredScale && declaredScale.raw) ||
+          "1:" + _ppmToRatio(declaredPPM),
+        dimText: best.text,
+        dimMeters: best.valueMeters,
+        segmentLength: best.segment.length
+      });
+      ProjectStore.saveCalibration(pageNum, ScaleManager.getCalibration(pageNum));
+      closeScalePanel();
+      _updateSheetInfo(ProjectStore.getPage(pageNum));
+      _updateScaleLabel();
+      _refreshMeasurements();
+      Viewer.requestRedraw();
+      setStatus(
+        "Scale confirmed by auto-calibrate: " +
+          ((declaredCal && declaredCal.ratioLabel) || "1:" + _ppmToRatio(declaredPPM)) +
+          " (from " +
+          result.callouts.length +
+          " dim callouts)",
+        "ready"
+      );
+      _showScaleFeedback(
+        "✓✓",
+        "Scale Confirmed",
+        "Declared scale <b>" +
+          ((declaredCal && declaredCal.ratioLabel) || declaredScale.raw) +
+          "</b> is within " +
+          ((1 - agreement) * 100).toFixed(1) +
+          "% of the detected scale from " +
+          result.callouts.length +
+          " dimension callouts on this page.<br><br>" +
+          'Reference: "<b>' +
+          best.text +
+          '</b>" = ' +
+          best.valueMeters.toFixed(3) +
+          "m on a " +
+          best.segment.length.toFixed(0) +
+          "pt segment.<br><br>" +
+          "Page is now marked <b>VERIFIED</b> — area measurements use this scale.",
+        "var(--accent-lit)",
+        false
+      );
+      return;
+    }
+
+    if (disagree) {
+      _showScaleDisagreement(pageNum, {
+        declaredLabel: (declaredCal && declaredCal.ratioLabel) || declaredScale.raw,
+        declaredRatio: (declaredCal && declaredCal.ratio) || _ppmToRatio(declaredPPM),
+        declaredPPM: declaredPPM,
+        detectedRatio: detectedRatio,
+        detectedLabel: detectedLabel,
+        detectedPPM: detectedPPM,
+        bestText: best.text,
+        bestMeters: best.valueMeters,
+        bestSegmentLength: best.segment.length,
+        calloutCount: result.callouts.length,
+        disagreementPct: (1 - agreement) * 100
+      });
+      return;
+    }
+
+    // No declared scale — land detected directly.
+    ScaleManager.calibrateFromDimension(pageNum, detectedPPM, {
+      ratio: detectedRatio,
+      ratioLabel: detectedLabel,
+      dimText: best.text,
+      dimMeters: best.valueMeters,
+      segmentLength: best.segment.length
+    });
+    ProjectStore.saveCalibration(pageNum, ScaleManager.getCalibration(pageNum));
+    closeScalePanel();
+    _updateSheetInfo(ProjectStore.getPage(pageNum));
+    _updateScaleLabel();
+    _refreshMeasurements();
+    Viewer.requestRedraw();
+    setStatus("Auto-calibrated: " + detectedLabel + " from " + result.callouts.length + " dim callouts", "ready");
+    _showScaleFeedback(
+      "✨",
+      "Auto-Calibrated",
+      "Detected <b>" +
+        detectedLabel +
+        "</b> from " +
+        result.callouts.length +
+        " dimension callouts on this page.<br><br>" +
+        'Reference: "<b>' +
+        best.text +
+        '</b>" = ' +
+        best.valueMeters.toFixed(3) +
+        "m on a " +
+        best.segment.length.toFixed(0) +
+        "pt segment.<br><br>" +
+        "Page is now marked <b>VERIFIED</b>.",
+      "var(--accent-lit)",
+      false
+    );
+  });
+}
+
+// Disagreement modal — MVP uses window.confirm because the existing
+// _showScaleFeedback widget is single-action (OK). A dedicated 3-way
+// panel is a UX follow-up.
+function _showScaleDisagreement(pageNum, info) {
+  var msg =
+    "Scale mismatch detected.\n\n" +
+    "Declared scale: " +
+    info.declaredLabel +
+    " (~" +
+    info.declaredPPM.toFixed(1) +
+    " units/m)\n" +
+    "Detected from dims: " +
+    info.detectedLabel +
+    " (~" +
+    info.detectedPPM.toFixed(1) +
+    " units/m)\n" +
+    'Reference: "' +
+    info.bestText +
+    '" = ' +
+    info.bestMeters.toFixed(3) +
+    "m on " +
+    info.bestSegmentLength.toFixed(0) +
+    "pt (" +
+    info.calloutCount +
+    " dims total)\n" +
+    "Disagreement: " +
+    info.disagreementPct.toFixed(1) +
+    "%\n\n" +
+    "The PDF may have been printed at a different size than drawn.\n\n" +
+    "OK = use DETECTED scale, Cancel = keep DECLARED scale.";
+  var useDetected = window.confirm(msg);
+  if (useDetected) {
+    ScaleManager.calibrateFromDimension(pageNum, info.detectedPPM, {
+      ratio: info.detectedRatio,
+      ratioLabel: info.detectedLabel,
+      dimText: info.bestText,
+      dimMeters: info.bestMeters,
+      segmentLength: info.bestSegmentLength
+    });
+    ProjectStore.saveCalibration(pageNum, ScaleManager.getCalibration(pageNum));
+    closeScalePanel();
+    _updateSheetInfo(ProjectStore.getPage(pageNum));
+    _updateScaleLabel();
+    _refreshMeasurements();
+    Viewer.requestRedraw();
+    setStatus(
+      "Using detected scale " +
+        info.detectedLabel +
+        " (declared was " +
+        info.declaredLabel +
+        ", " +
+        info.disagreementPct.toFixed(1) +
+        "% off)",
+      "ready"
+    );
+  } else {
+    setStatus(
+      "Keeping declared scale " + info.declaredLabel + " (auto-detect suggested " + info.detectedLabel + ")",
+      "ready"
+    );
+  }
+}
+
+// Inverse of ScaleManager.accept(): given pdfUnitsPerMetre, return the
+// nearest integer 1:N ratio. mmPerPdfUnit = 25.4/72, so
+// ratio = (72 * 1000) / (25.4 * ppm).
+function _ppmToRatio(ppm) {
+  if (!ppm || !isFinite(ppm) || ppm <= 0) return null;
+  var r = (72 * 1000) / (25.4 * ppm);
+  return Math.round(r);
+}
+
 /* ── Summary Table Modal ──────────────────────────────── */
 
 function openSummaryTable() {
@@ -2178,7 +2486,8 @@ function _buildSheetTail(page) {
   // 80-char cap leaves headroom for multi-line stacks like
   // "FOUNDATION PLAN — Continuous Footings Layout". Sentence-prefix filter
   // still rejects prose that slips under the length limit.
-  var looksLikeBodyText = title.length > 80 || /^(this|the following|all\s|general\s+notes|notes?:|drawings?\s)/i.test(title);
+  var looksLikeBodyText =
+    title.length > 80 || /^(this|the following|all\s|general\s+notes|notes?:|drawings?\s)/i.test(title);
   if (title && !looksLikeBodyText) return " \u2014 " + title;
   if (classification) return " \u2014 " + classification;
   return "";
@@ -2213,7 +2522,12 @@ function _renderTagSelect(polyType, polyIdx, pageNum, currentValue, small) {
   var toolKey = polyType === "polyline" ? "polyline" : "measure";
   var opts = COMPONENT_OPTIONS[toolKey] || [];
   var html = "<td class='tag-cell'" + (small ? " style='font-size:10px;'" : "") + ">";
-  html += "<select class='summary-tag-select bw-inline-select' data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "'>";
+  html +=
+    "<select class='summary-tag-select bw-inline-select' data-poly-idx='" +
+    polyIdx +
+    "' data-page-num='" +
+    pageNum +
+    "'>";
   for (var i = 0; i < opts.length; i++) {
     var sel = opts[i].value === (currentValue || "") ? " selected" : "";
     html += "<option value='" + opts[i].value + "'" + sel + ">" + opts[i].label + "</option>";
@@ -2229,7 +2543,12 @@ function _renderTagSelect(polyType, polyIdx, pageNum, currentValue, small) {
 function _renderScopeSelect(polyIdx, pageNum, currentScope, small) {
   var sizeAttr = small ? " style='font-size:10px;'" : "";
   var html = "<td class='scope-cell'" + sizeAttr + ">";
-  html += "<select class='summary-scope-select bw-inline-select' data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "'>";
+  html +=
+    "<select class='summary-scope-select bw-inline-select' data-poly-idx='" +
+    polyIdx +
+    "' data-page-num='" +
+    pageNum +
+    "'>";
   var scope = currentScope === "garage" ? "garage" : "building";
   html += "<option value='building'" + (scope === "building" ? " selected" : "") + ">Building</option>";
   html += "<option value='garage'" + (scope === "garage" ? " selected" : "") + ">Garage</option>";
@@ -2249,8 +2568,14 @@ function _renderDepthInput(component, polyIdx, pageNum, currentDepth, small) {
   var html = "<td class='depth-cell'" + sizeAttr + ">";
   html +=
     "<input type='number' step='0.01' min='0' class='summary-depth-input bw-inline-input' " +
-    "data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "' " +
-    "value='" + val + "' placeholder='m' />";
+    "data-poly-idx='" +
+    polyIdx +
+    "' data-page-num='" +
+    pageNum +
+    "' " +
+    "value='" +
+    val +
+    "' placeholder='m' />";
   html += "</td>";
   return html;
 }
@@ -2261,10 +2586,22 @@ function _renderPresetSelect(component, polyIdx, pageNum, currentPreset, small) 
     return "<td class='preset-cell'" + sizeAttr + ">\u2014</td>";
   }
   var html = "<td class='preset-cell'" + sizeAttr + ">";
-  html += "<select class='summary-preset-select bw-inline-select' data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "'>";
+  html +=
+    "<select class='summary-preset-select bw-inline-select' data-poly-idx='" +
+    polyIdx +
+    "' data-page-num='" +
+    pageNum +
+    "'>";
   for (var i = 0; i < ASSEMBLY_PRESET_OPTIONS.length; i++) {
     var sel = ASSEMBLY_PRESET_OPTIONS[i].value === (currentPreset || "") ? " selected" : "";
-    html += "<option value='" + ASSEMBLY_PRESET_OPTIONS[i].value + "'" + sel + ">" + ASSEMBLY_PRESET_OPTIONS[i].label + "</option>";
+    html +=
+      "<option value='" +
+      ASSEMBLY_PRESET_OPTIONS[i].value +
+      "'" +
+      sel +
+      ">" +
+      ASSEMBLY_PRESET_OPTIONS[i].label +
+      "</option>";
   }
   html += "</select></td>";
   return html;
@@ -2831,6 +3168,8 @@ window.PP = {
   setAssemblyPreset: setAssemblyPreset,
   // Auto-detect
   autoDetect: autoDetect,
+  // Auto-calibrate (MAGIC C3)
+  autoCalibrate: autoCalibrate,
   // Summary table
   openSummaryTable: openSummaryTable,
   closeSummaryTable: closeSummaryTable,

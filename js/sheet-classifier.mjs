@@ -22,12 +22,41 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
   // more robust than guessing which corner the title block lives in.
   var result = { sheetId: null, sheetTitle: null, scale: null, raw: textItems };
 
+  // First try raw-item match — works on Calgary-style CAD exports that
+  // emit the sheet id as a single text item.
   var sheetIdPattern = /^[A-Z]\d+\.\d+$/;
   for (var i = 0; i < textItems.length; i++) {
     var s = textItems[i].str.trim();
     if (sheetIdPattern.test(s)) {
       result.sheetId = s;
       break;
+    }
+  }
+  // Fallback — scan spatial-joined rows for the sheetId pattern embedded
+  // in longer strings. Catches per-glyph text (pdfjs v4 on ArchiCad-
+  // style CID-font PDFs) where "A2.44" arrives as five separate items
+  // "A" + "2" + "." + "4" + "4" and the raw-item loop misses it.
+  //
+  // Pages often contain multiple sheet-id-shaped strings — section and
+  // elevation callouts ("A4.01", "A5.05", etc.) scattered across the
+  // drawing. The SHEET'S OWN id is conventionally the largest-font one,
+  // sitting alone in the title block. Collect all candidates, then pick
+  // the largest fontSize (tie-break on lowest-on-page, since title
+  // blocks conventionally live at the bottom-right).
+  if (!result.sheetId) {
+    var idInRow = /\b([A-Z]\d+\.\d+)\b/;
+    var rows = _clusterRows(textItems);
+    var candidates = [];
+    for (var r = 0; r < rows.length; r++) {
+      var m = rows[r].text.match(idInRow);
+      if (m) candidates.push({ id: m[1], fontSize: rows[r].fontSize || 0, y: rows[r].y });
+    }
+    if (candidates.length > 0) {
+      candidates.sort(function (a, b) {
+        if (Math.abs(a.fontSize - b.fontSize) > 0.5) return b.fontSize - a.fontSize;
+        return b.y - a.y;
+      });
+      result.sheetId = candidates[0].id;
     }
   }
 
@@ -59,7 +88,8 @@ var _DRAWING_TYPE_RX = /\b(plan|elevation|section|site|key[\s-]*plan)\b/i;
 // like the "6" in "UPPER FLOOR PLAN 6 3". Requires at least two
 // characters or a hyphen pair, so single-letter / single-digit
 // suffixes drop on the floor (user's call: "SECTION" alone is fine).
-var _TITLE_EXTRACT_RX = /((?:\b(?:north|south|east|west|nw|ne|sw|se|front|rear|left|right|first|second|third|1st|2nd|3rd|ground|main|upper|lower|basement|roof|foundation|floor|storey|story|level|key|site)\b\s+){0,3})\b(plan|elevation|section|site|key[\s-]*plan)\b(?:\s+([A-Z]-[A-Z]|[A-Z]{2}|\d-\d|[A-Z]\d|\d[A-Z]))?/i;
+var _TITLE_EXTRACT_RX =
+  /((?:\b(?:north|south|east|west|nw|ne|sw|se|front|rear|left|right|first|second|third|1st|2nd|3rd|ground|main|upper|lower|basement|roof|foundation|floor|storey|story|level|key|site)\b\s+){0,3})\b(plan|elevation|section|site|key[\s-]*plan)\b(?:\s+([A-Z]-[A-Z]|[A-Z]{2}|\d-\d|[A-Z]\d|\d[A-Z]))?/i;
 
 // Row-cluster all text on the page, then extract the cleanest title PHRASE
 // from each row using _TITLE_EXTRACT_RX (keyword + optional leading
@@ -127,13 +157,13 @@ function _finalizeRow(items) {
   items.sort(function (a, b) {
     return a.x - b.x;
   });
-  var text = items
-    .map(function (i) {
-      return i.str;
-    })
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
+  // Spatial join — insert a space only when the gap between adjacent
+  // items exceeds half a character width. Naive " ".join() produces
+  // "F O U N D A T I O N P L A N" on pdfjs v4 per-glyph output
+  // (ArchiCad exports) and breaks the downstream \bplan\b regex;
+  // spatial join preserves real word boundaries while collapsing
+  // per-glyph runs back into "FOUNDATION PLAN".
+  var text = _spatialJoin(items).replace(/\s+/g, " ").trim();
   var fontSize = items.reduce(function (m, i) {
     return Math.max(m, i.fontSize || 0);
   }, 0);
@@ -182,8 +212,14 @@ function _spatialJoin(textItems) {
       var prevRight = prev.x + (prev.width || 0);
       var gap = curr.x - prevRight;
       var charWidth = prev.fontSize ? prev.fontSize * 0.5 : 4;
-      // Only add space if gap is more than ~half a character width
-      if (gap > charWidth) {
+      // Insert a space when items are visibly separated (gap >
+      // half-char-width) OR when they overlap by more than 2pt (real
+      // overlap = prev.width is bogus or items are distinct — pdfjs v4
+      // TJ-advanced text on Calgary emits "FOUNDATION PLAN" with
+      // width=179 that visually overlaps the next dim). Sub-pixel
+      // overlaps (~-0.02pt ArchiCad kerning) are same-word kerning
+      // precision — keep as continuous so per-glyph runs coalesce.
+      if (gap > charWidth || gap < -2) {
         parts.push(" ");
       }
     }
@@ -255,9 +291,18 @@ export function classifySheet(sheetId, sheetTitle) {
   if (/\b3d\b|\bview/.test(title)) return CLASS.OTHER;
 
   if (sheetId) {
-    var prefix = sheetId.replace(/[\d.]+$/, "");
-    if (SHEET_PREFIXES[prefix.substring(0, 2)]) return SHEET_PREFIXES[prefix.substring(0, 2)];
-    if (SHEET_PREFIXES[prefix.substring(0, 1)]) return SHEET_PREFIXES[prefix.substring(0, 1)];
+    // ANSI A-series convention (Andy 2026-04-23): A0/A1 general/site,
+    // A2/A3 plans, A4 elevations, A5 sections, etc. Extract leading
+    // letter + first digit block (e.g. "A2.44" → "A2") and look up
+    // 2-char prefix first, 1-char fallback. The old regex
+    // `/[\d.]+$/` stripped ALL trailing digits/dots and left just "A",
+    // which SHEET_PREFIXES doesn't key on → everything misclassified.
+    var prefixMatch = sheetId.match(/^([A-Z]+)(\d*)/);
+    var letters = prefixMatch ? prefixMatch[1] : "";
+    var firstDigit = prefixMatch && prefixMatch[2] ? prefixMatch[2].charAt(0) : "";
+    var twoChar = letters.charAt(0) + firstDigit;
+    if (twoChar.length === 2 && SHEET_PREFIXES[twoChar]) return SHEET_PREFIXES[twoChar];
+    if (letters && SHEET_PREFIXES[letters.charAt(0)]) return SHEET_PREFIXES[letters.charAt(0)];
   }
 
   return CLASS.OTHER;

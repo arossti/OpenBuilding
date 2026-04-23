@@ -6,6 +6,13 @@
 
 ## 0. Cold-start handoff (read this first)
 
+### Status as of 2026-04-22 (session 7 — Trust / Trust+Verify + fidelity badge on PROJECT landed via PR #11)
+
+- **PR #11 merged** to `main` at `49c35b4` — end of session 7. Bridge UX milestones M1–M5 all shipped (Trust / Trust + Verify import split, sheet deep-links with reusable named tab, fidelity badge under every imported PROJECT dim + param with clickable sheet refs, `depth_m` + pad/pier volume = Phase 4b.3, Q23 garage scope). Also shipped: PDF-Parser UX guards (ruler + calibrate no longer edit polygon edges on click), favicons site-wide, CLI debug harness + Playwright MCP infra, zero-byte-blob restore fix, doc reorganisation (`docs/completed/`, `docs/pdf-samples/`). Full commit map in [`PDF-BEAMweb-BRIDGE.md §0`](./PDF-BEAMweb-BRIDGE.md).
+- **Active branch**: `Magic-Wand-Polish` (fresh off post-merge `main`). Created for the PDF-Parser polish pass that the prior session's branch name promised but did not deliver — the bridge work ate the session.
+- **Architectural touches this session**: Trust / Trust + Verify action-bar pair in [`js/beamweb.mjs`](../../js/beamweb.mjs) + [`beamweb.html`](../../beamweb.html); `renderFidelityBadge` + `refreshFidelityBadges` in [`js/beam/project-tab.mjs`](../../js/beam/project-tab.mjs); provenance envelope now JSON-encoded in [`js/beam/pdf-bridge-import.mjs`](../../js/beam/pdf-bridge-import.mjs) (legacy plain strings still parsed). `.bw-fidelity-badge` + `.bw-sheet-link` rules added to the BEAMweb CSS section. No F&S / assembly math touched; session 5–6 parity locks unchanged.
+- **Dev loop note (2026-04-22 lesson)**: the default `npm run serve` (python3 http.server) does **not** send `Cache-Control: no-store`, so Chromium heuristic-caches `.mjs` modules across navigations and stale code serves during rapid iteration. For Playwright-driven verification the prior agent stood up `/tmp/bfca-nocache-serve.py` on port 8001 — simple http.server subclass that sends `Cache-Control: no-store, no-cache, must-revalidate, max-age=0` on every response. Worth upgrading `npm run serve` to the same semantics at some point if agent-driven testing gets heavier use. See `PDF-BEAMweb-BRIDGE.md` §0 Session 7 update for the full context.
+
 ### Status as of 2026-04-20 (session 6 — F&S shop-by-GWP per-row display, PROJECT collapsibles + real dropdowns, Intro centring, footnote two-tone split)
 
 - **Session 6 on `beamweb-tabs-2`** — two commits of cosmetic / UX polish on top of the session-5 parity work. Everything architectural stays locked (flat-dict project JSON, materials-DB as single GWP source, m²·RSI R-VALUE conversion, client-side BEAM-Avg compute, per-tab Reset, read-only assembly qty cells, jurisdiction filter). Tip at `6d15584`.
@@ -607,9 +614,11 @@ BEAMweb applies the Energy GHG factors (tab 18) to produce operational emissions
 
 ---
 
-## 12. Dev tooling — PDF-Parser debug harness (planning)
+## 12. Dev tooling — PDF-Parser debug harness (shipped 2026-04-22, PR #11)
 
-**Status:** planning note only, not built. Captures a dev-loop improvement that would have cut the PR #2 sheet-title saga from 8 commits to ~2, and sets up the next PDF-Parser polish pass (magic-wand auto-detect) to avoid the same feedback-loop friction.
+**Status:** ✅ shipped. [`schema/scripts/debug-pdf-extract.mjs`](../../schema/scripts/debug-pdf-extract.mjs) is live, wired as `npm run debug:pdf`. Dumps text items + operator list + classifier output as JSON. Playwright MCP configured at user scope in `~/.claude.json` (named target `pdf-parser-tab` for tab-reuse). Both together close the feedback-loop friction this section identified before the work landed. Magic-Wand Polish branch (`Magic-Wand-Polish`, 2026-04-22) uses this infra as its iteration loop.
+
+**Original planning context (kept as record):**
 
 ### The problem
 

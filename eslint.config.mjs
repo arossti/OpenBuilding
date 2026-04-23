@@ -38,6 +38,8 @@ export default [
         fetch: "readonly",
         FileReader: "readonly",
         TextDecoder: "readonly",
+        indexedDB: "readonly",
+        crypto: "readonly",
         HTMLCanvasElement: "readonly",
         HTMLInputElement: "readonly",
         HTMLSelectElement: "readonly",
