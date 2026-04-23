@@ -20,6 +20,7 @@ import * as Viewer from "./canvas-viewer.mjs";
 import * as PolygonTool from "./polygon-tool.mjs";
 import * as VectorSnap from "./vector-snap.mjs";
 import { extractDimensions } from "./dim-extract.mjs";
+import { classifyLayers, shrinkWrapBuilding } from "./shrink-wrap.mjs";
 import * as ScheduleParser from "./schedule-parser.mjs";
 import * as ProjectStore from "./project-store.mjs";
 import * as IDBStore from "./shared/indexed-db-store.mjs";
@@ -2064,82 +2065,87 @@ function autoDetect() {
   if (!Loader.isLoaded()) return;
   if (!_requireDrawingSheet(_currentPage, "Auto-Detect")) return;
 
-  // If we already scanned this page, cycle through candidates or bail
-  if (_detectCandidates._page === _currentPage) {
-    if (_detectCandidates.length > 0) {
-      _detectIndex = (_detectIndex + 1) % _detectCandidates.length;
-      _placeDetectedOutline(_detectCandidates[_detectIndex], _detectIndex, _detectCandidates.length);
-    } else {
+  setStatus("Finding building outline...", "busy");
+  var pageNum = _currentPage;
+
+  Promise.all([
+    Loader.getTextContent(pageNum),
+    VectorSnap.extractGeometry(pageNum),
+    Loader.getPageSize(pageNum)
+  ]).then(function (results) {
+    var textItems = results[0];
+    var geo = results[1];
+    var size = results[2];
+
+    // Raster PDF with no vector geometry — bail early.
+    if (geo.segments.length === 0) {
       setStatus(
-        "No vector geometry on this page. This may be a scanned/raster PDF — use manual measurement (M/R).",
+        "No vector data found — this appears to be a scanned/raster PDF. Use manual measurement (M or R).",
         "error"
       );
+      console.log("[Auto-detect] Page has zero vector geometry. Raster/scanned PDF.");
+      return;
     }
-    return;
-  }
 
-  setStatus("Scanning vector geometry...", "busy");
+    // Layer-peel (C4): separate sheet-border chaff from drawing geometry.
+    var layers = classifyLayers(geo.segments, textItems, size.width, size.height);
 
-  VectorSnap.extractGeometry(_currentPage).then(function (geo) {
-    return Loader.getPageSize(_currentPage).then(function (size) {
-      var candidates = VectorSnap.getClosedPathsByArea(_currentPage, size.width, size.height);
-      candidates._page = _currentPage;
-      _detectCandidates = candidates;
-      _detectIndex = 0;
+    // Shrink-wrap (C5): find the building outline via parallel-pair wall
+    // detection + 5-95 percentile trimming of wall positions.
+    var wrap = shrinkWrapBuilding(layers.drawingSegments, layers.drawingAreaBbox);
 
-      // Log diagnostics
-      console.log(
-        "[Auto-detect] Page " +
-          _currentPage +
-          ": " +
-          geo.segments.length +
-          " line segments, " +
-          geo.endpoints.length +
-          " endpoints, " +
-          geo.closedPaths.length +
-          " closed paths total, " +
-          candidates.length +
-          " candidates (filtered by area)"
+    console.log(
+      "[Auto-detect] Page " +
+        pageNum +
+        ": " +
+        geo.segments.length +
+        " segments, layer-peel → " +
+        layers.summary.drawing +
+        " drawing / " +
+        layers.summary.pageBorder +
+        " pageBorder, shrink-wrap → " +
+        (wrap && wrap.polygon
+          ? wrap.wallHorizCount + "H + " + wrap.wallVertCount + "V walls, 4-vertex polygon"
+          : "FAILED (" + (wrap ? wrap.reason : "null") + ")")
+    );
+
+    if (wrap && wrap.polygon) {
+      var polyArea = _polygonArea(wrap.polygon);
+      _placeDetectedOutline({ path: wrap.polygon, area: polyArea }, 0, 1);
+      return;
+    }
+
+    // Fallback — legacy closed-polygon detector (kept until shrink-wrap
+    // proves itself in real use; then retire per MAGIC.md C5 discussion).
+    var candidates = VectorSnap.getClosedPathsByArea(pageNum, size.width, size.height);
+    if (candidates.length > 0) {
+      _placeDetectedOutline(candidates[0], 0, 1);
+      setStatus(
+        "Shrink-wrap did not find wall pairs (" +
+          (wrap ? wrap.reason : "no drawing segments") +
+          "). Fell back to first closed-polygon candidate.",
+        "ready"
       );
+      return;
+    }
 
-      if (candidates.length > 0) {
-        for (var i = 0; i < Math.min(candidates.length, 5); i++) {
-          var areaM2 = ScaleManager.pdfAreaToM2(_currentPage, candidates[i].area);
-          console.log(
-            "  Candidate " +
-              (i + 1) +
-              ": " +
-              candidates[i].path.length +
-              " vertices, " +
-              (areaM2 ? areaM2.toFixed(1) + " m²" : "uncalibrated")
-          );
-        }
-        _placeDetectedOutline(candidates[0], 0, candidates.length);
-      } else if (geo.segments.length === 0) {
-        // No vector geometry at all — likely a scanned/raster PDF
-        setStatus(
-          "No vector data found — this appears to be a scanned/raster PDF. Use manual measurement (M or R).",
-          "error"
-        );
-        console.log("[Auto-detect] Page has zero vector geometry. This is a raster/scanned PDF.");
-      } else {
-        setStatus(
-          "No closed outlines found (" +
-            geo.segments.length +
-            " line segments, but no closed shapes). Use manual measurement (M or R).",
-          "error"
-        );
-        console.log(
-          "[Auto-detect] " +
-            geo.segments.length +
-            " segments, " +
-            geo.closedPaths.length +
-            " closed paths (likely hatching/fills). " +
-            "Building walls drawn as individual segments, not closed polylines."
-        );
-      }
-    });
+    setStatus(
+      "No building outline detected on this page. " +
+        (wrap && wrap.reason ? "Shrink-wrap: " + wrap.reason + ". " : "") +
+        "Use manual measurement (M or R).",
+      "error"
+    );
   });
+}
+
+function _polygonArea(pts) {
+  var a = 0;
+  for (var i = 0; i < pts.length; i++) {
+    var p0 = pts[i];
+    var p1 = pts[(i + 1) % pts.length];
+    a += p0.x * p1.y - p1.x * p0.y;
+  }
+  return Math.abs(a) / 2;
 }
 
 function _placeDetectedOutline(candidate, idx, total) {
