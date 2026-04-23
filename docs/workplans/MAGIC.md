@@ -6,6 +6,23 @@
 
 ## 0. Cold-start handoff
 
+### Status as of 2026-04-23 (session 2 AM — PR #12 opened; cleanup pass)
+
+- **[PR #12](https://github.com/arossti/OpenBuilding/pull/12)** — `PDF-Parser: Auto-Calibrate + shrink-wrap Auto-Detect (MAGIC C1-C5)` — branch `Magic-Wand-Polish` → `main`. Tip `e0b5ae9`. 19 commits since `3360f42`.
+- **Session-2 AM commits** (on top of session-1 EOD at `6257323`):
+  - `62a4659` — Regression fix: `sheet-classifier._spatialJoin` via `_finalizeRow` for per-glyph text. First ArchiCad autoCalibrate/autoDetect hard-fail caught by Andy EOD session 1.
+  - `b456674` — Regression fix: spatial-join ±2pt dead zone. Calgary bogus-width overlap (-14pt) + ArchiCad sub-pixel kerning overlap (-0.02pt) share sign but are distinct signals; single "gap < 0" rule conflated them.
+  - `5621a85` — Classifier fix: sheetId extraction for per-glyph PDFs + ANSI A-series prefix mapping. ArchiCad A2.44 "CD Main Level" (no "plan" keyword in title) was misclassifying as "other" via two compounding bugs: (1) per-glyph text breaks whole-string sheetId regex; (2) prefix stripping of "A2.44" yielded "A" not "A2". Fix adds row-scan fallback (pick largest-fontSize sheetId candidate, beating the callout references scattered across the drawing) + rewrites prefix extraction via `^([A-Z]+)(\d*)`.
+  - `fab1974` — Pre-merge cleanup: `npm run lint` + `npm run format` pass. Added `indexedDB` + `crypto` to eslint browser globals (3 errors → 0). Prettier auto-formatted 12 files (whitespace / multi-line-expression layout only, no behavior changes). Test state: dim-extract + layer-peel fixtures ALL PASS; Playwright p9 Calgary + ArchiCad metric smoke clean.
+  - `e0b5ae9` — Matrix: removed stray `</body>` tag at line 508 that was closing the body BEFORE the 3,850-line script block. Pre-existing structural bug that prettier's HTML parser rejected (browsers silently tolerated). 2-line deletion, zero behavior change. Full prettier reformat of matrix.html produces an 11k-line diff — deferred to a dedicated commit post-merge.
+- **Verification sweep (ArchiCad metric + Calgary imperial) after all fixes:**
+  - Calgary p9 FOUNDATION PLAN: PLAN, Auto-Cal 19 callouts (1:64, 100% agreement), Auto-Detect 151.6 m²
+  - ArchiCad p4 A2.43: PLAN, Auto-Cal 35 callouts (1:48), Auto-Detect 458.3 m²
+  - ArchiCad p5 A2.44 CD Main Level: PLAN (was "other" — fixed in `5621a85`), Auto-Cal 53 callouts (1:50), Auto-Detect 612.8 m²
+  - ArchiCad p6 A2.45 Main Floor Plan: PLAN, Auto-Cal 21 callouts (1:50), Auto-Detect 613.6 m²
+  - Site / section / other sheets correctly bail with the C4 scope-gate status message.
+- **Pick up post-merge** with C7 edge-scrub UI. Wall-candidate positions are computed by `shrinkWrapBuilding` in [`js/shrink-wrap.mjs`](../../js/shrink-wrap.mjs); need to: (a) expose them on the returned polygon record, (b) add per-edge drag handles that snap through them, (c) add an oculus "tighten-all" control. Andy's ArchiCad popup screenshots (2026-04-23 morning chat) set the UX template — distinguishing edge-click (drag edge / insert vertex) from vertex-click (drag point / delete). Existing polygon-edit paths in [`js/polygon-tool.mjs`](../../js/polygon-tool.mjs) cover most of the plumbing.
+
 ### Status as of 2026-04-23 (session 1 EOD — C1–C5 shipped; C7 redesigned)
 
 - **Active branch**: `Magic-Wand-Polish`. Nine commits since `main` at `3360f42`:
@@ -260,8 +277,13 @@ Same layer-peel + shrink-wrap on elevation sheets, but always return the outermo
 | C3 | auto-calibrate button + scale cross-check | ✅ shipped 2026-04-22 | `8dc534d` + `5bd02b4` (v4 consolidation fix) |
 | C4 | scope filter + layer-peel classifier | ✅ shipped 2026-04-22 | `d323e1f` |
 | C5 | orthogonal shrink-wrap wired to wand | ✅ shipped 2026-04-22 | `d9ed664` |
+| — | Regression: sheet-classifier spatial-join (per-glyph fix round 1) | ✅ shipped 2026-04-22 | `62a4659` |
+| — | Regression: spatial-join ±2pt dead zone (Calgary + ArchiCad both) | ✅ shipped 2026-04-23 | `b456674` |
+| — | Classifier: sheetId row-scan + ANSI A-series prefix mapping | ✅ shipped 2026-04-23 | `5621a85` |
+| — | Pre-merge cleanup: eslint globals + prettier sweep | ✅ shipped 2026-04-23 | `fab1974` |
+| — | Matrix: stray `</body>` tag fix (prettier parse error) | ✅ shipped 2026-04-23 | `e0b5ae9` |
 | C6 | non-orthogonal refinement | 🅿️ on hold — see §0 C7 redesign (edge-scrub likely covers gables) |
-| C7 | ~~inner/middle/outer snap buttons~~ → **edge-scrub drag handles + oculus** | 🔜 next session | — |
+| C7 | ~~inner/middle/outer snap buttons~~ → **edge-scrub drag handles + oculus** | 🔜 next session (post-PR-#12 merge) | — |
 | C8 | elevation outermost + eave-crop | ⏳ deferred until C7 lands; p5 shrink-wrap already performs well without outermost-only tweak |
 
 Each commit: end-to-end assertion before push, per the "tests before commits" rule. Push to both remotes (`openbuilding`, `origin`) after every commit.
