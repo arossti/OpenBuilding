@@ -6,6 +6,37 @@
 
 ## 0. Cold-start handoff
 
+### Status as of 2026-04-23 (session 1 EOD — C1–C5 shipped; C7 redesigned)
+
+- **Active branch**: `Magic-Wand-Polish`. Nine commits since `main` at `3360f42`:
+  - `9ff2d02`  — workplan (this doc)
+  - `77e713f`  — C1 `npm run serve` no-cache
+  - `088d6ad`  — C2a fixture builder + imperial + metric fixtures
+  - `2ab1a69`  — C2b dim-extract primitive + `npm run test:dim-extract`
+  - `115da64`  — `js/geometry-walk.mjs` shared module (pdfjs 4.x/5.x agnostic)
+  - `8dc534d`  — C3 Auto-Calibrate button + scale cross-check
+  - `5bd02b4`  — C3-fix `consolidateTextItems` (pdfjs v4 per-glyph text)
+  - `d323e1f`  — C4 layer-peel classifier + sheet-scope filter + `npm run test:layer-peel`
+  - `d9ed664`  — C5 orthogonal shrink-wrap wired into Auto-Detect
+- **Shipped tasks:** C1 dev-loop, C2 primitive + tests, C3 auto-calibrate + cross-check, C4 layer-peel + scope gate, C5 shrink-wrap MVP.
+- **Playwright-verified** on `docs/sample.pdf` (imperial Calgary DP/BP) and `docs/pdf-samples/sample-metric.pdf` (ArchiCad metric):
+  - Auto-Calibrate confirms 1:64 scale on p9 foundation plan (21 dim callouts, 100% agreement vs declared).
+  - Auto-Calibrate confirms 1:48 on ArchiCad p4 (35 callouts, 100% agreement).
+  - Auto-Calibrate confirms 1:50 on ArchiCad p6 (53 callouts, 100% agreement).
+  - Auto-Detect produces a 4-vertex polygon on plan + elevation sheets; bails cleanly on site / section / other.
+- **Real-world feedback (Andy 2026-04-22 EOD, on docs/sample.pdf p5, p10, p11):** "Good start, we often get at least one line correct." Polygon consistently contains the building but is ~20–40% loose on average. East Elevation (p5) reads cleanest — close fit. Floor plans (p10, p11) are looser: porches get wrapped in, and dim-extension strips still bleed into the wall-candidate list despite the 5-95 percentile trim.
+
+#### Andy's design pivot — interactive edge scrub (C7 redesign)
+
+Rather than keep tuning auto-detection thresholds toward a perfect polygon, offer **OSX-style `<|>` drag handles on each polygon edge** that scrub through the wall-candidate positions C5's `shrinkWrapBuilding()` already computes. Candidates exist in the `wallVert` / `wallHoriz` arrays; the UI is the new work. Two modes sketched:
+
+- **Per-edge handles** — drag one edge inward/outward; snaps to the next wall-candidate position in that direction. Individual edges tuned independently.
+- **Oculus mode** — one control that closes all four edges inward simultaneously (iris diaphragm metaphor) for users who want to pull tight uniformly.
+
+This collapses the earlier C7 spec (inner/middle/outer buttons — see §3e below) into a more flexible direct-manipulation UX, and sidesteps the need for **C6 non-orthogonal refinement** until a concrete failure case surfaces that edge-scrub can't handle (e.g. gables). Both C6 and the button-based C7 are on hold.
+
+**Pick up 2026-04-23 AM** with edge-scrub UI design + implementation. Keep the current shrink-wrap output as the initial polygon; drag handles refine. Existing polygon-edit paths in `js/polygon-tool.mjs` likely cover most of the plumbing.
+
 ### Status as of 2026-04-22 (session 1 — planning)
 
 - **Branch**: `Magic-Wand-Polish`, off `main` at `3360f42` (post-PR-#11 handoff commit). No code yet — this doc is the plan; commits land from C1 onward.
@@ -178,16 +209,17 @@ Same layer-peel + shrink-wrap on elevation sheets, but always return the outermo
 
 ## 4. Commit plan
 
-| Commit | Scope | Verification |
-|---|---|---|
-| C1 | `npm run serve` no-cache | `curl -I` header check |
-| C2 | dim-extract primitive + fixture test | CLI test against `test/fixtures/dim-extract/p9-foundation.json` |
-| C3 | auto-calibrate button + scale cross-check | Playwright: load p9, click auto-cal, assert `pdfUnitsPerMetre` within 2% of declared |
-| C4 | scope filter + layer-peel classifier | CLI test + Playwright: wand disabled on `site` sheets, enabled on `plan` |
-| C5 | orthogonal shrink-wrap wired to wand | Playwright: load p9, click wand, assert polygon vertices near expected |
-| C6 | non-orthogonal refinement | CLI test on a gable-containing fixture |
-| C7 | inner/middle/outer snap | Playwright: three buttons render, clicking changes polygon geometry |
-| C8 | elevation outermost + eave-crop | Playwright: load p5 (east elevation), wand produces outer polygon, eave-crop button clips correctly |
+| Commit | Scope | Status | SHA |
+|---|---|---|---|
+| C1 | `npm run serve` no-cache | ✅ shipped 2026-04-22 | `77e713f` |
+| C2 | dim-extract primitive + fixture test | ✅ shipped 2026-04-22 | `088d6ad` + `2ab1a69` |
+| — | `js/geometry-walk.mjs` pdfjs v4/v5 dispatch (supports C2+) | ✅ shipped 2026-04-22 | `115da64` |
+| C3 | auto-calibrate button + scale cross-check | ✅ shipped 2026-04-22 | `8dc534d` + `5bd02b4` (v4 consolidation fix) |
+| C4 | scope filter + layer-peel classifier | ✅ shipped 2026-04-22 | `d323e1f` |
+| C5 | orthogonal shrink-wrap wired to wand | ✅ shipped 2026-04-22 | `d9ed664` |
+| C6 | non-orthogonal refinement | 🅿️ on hold — see §0 C7 redesign (edge-scrub likely covers gables) |
+| C7 | ~~inner/middle/outer snap buttons~~ → **edge-scrub drag handles + oculus** | 🔜 next session | — |
+| C8 | elevation outermost + eave-crop | ⏳ deferred until C7 lands; p5 shrink-wrap already performs well without outermost-only tweak |
 
 Each commit: end-to-end assertion before push, per the "tests before commits" rule. Push to both remotes (`openbuilding`, `origin`) after every commit.
 
@@ -209,6 +241,10 @@ Each commit: end-to-end assertion before push, per the "tests before commits" ru
 - **Symbol recognition** (doors, windows, stairs as CAD blocks) — explicitly out of scope, per handoff.
 - **Polyline wall-run reconstruction** (stroked double-line wall → centerline polyline) — the shrink-wrap's parallel-stroke detection surfaces the data; rendering it as a separate polyline is a Phase 4b.5 item gated on BEAMweb assembly-tab consumers.
 - **Mixed imperial-metric dim strings** in dim-extract — flagged in 2a as v2 work.
+- **Scale disagreement three-way modal** — C3's disagreement path currently uses `window.confirm` for OK=detected / Cancel=declared. A dedicated panel with inline reference-dim preview would read better; add when a real ANSI D → 11×17 rescaled fixture surfaces.
+- **Shrink-wrap threshold tuning** — the 5-95 percentile trim + 50 pt / 3-25 pt / 40 pt thresholds were tuned on p9 + p4. Edge-scrub (new C7) reduces the need for perfect auto-detection, but the underlying thresholds may still want tightening based on real-world feedback. Tune when the scrub UI surfaces specific failure modes.
+- **Legacy closed-polygon detector retirement** — `VectorSnap.getClosedPathsByArea` still runs as a silent fallback when shrink-wrap returns null. Per Andy 2026-04-22 "decide if it has a place or we retire it." Retire when shrink-wrap has proven reliable across a wider PDF sample set.
+- **v4-simulated fixture for dim-extract** — would regression-test the `consolidateTextItems` path landed in `5bd02b4`. Generate by post-processing the v5 fixture to shatter each text item into per-character fragments. Not blocking; Playwright + real ArchiCad PDF cover it today.
 
 ---
 
