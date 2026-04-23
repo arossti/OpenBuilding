@@ -2034,8 +2034,35 @@ function setStatus(msg, type) {
 var _detectCandidates = []; // cached candidates from last detect
 var _detectIndex = 0; // which candidate we're showing
 
+// MAGIC.md C4 — sheet-scope filter. Wand (autoDetect) and
+// auto-calibrate only run on sheets classified as plan or elevation.
+// Sections use the ruler tool for F2F / F2C heights (no fill capture).
+// Sites / details / title sheets: manual measurement only.
+function _requireDrawingSheet(pageNum, actionLabel) {
+  var page = ProjectStore.getPage(pageNum);
+  var cls = page && page.classification;
+  if (cls === "plan" || cls === "elevation") return true;
+  var msg;
+  if (cls === "section") {
+    msg =
+      actionLabel +
+      " is disabled on section sheets — use the ruler (L) for F2F / F2C heights, or draw polygons manually (M).";
+  } else if (cls === "site") {
+    msg = actionLabel + " is disabled on site plans — use manual measurement (M or R).";
+  } else {
+    msg =
+      actionLabel +
+      " runs on plan or elevation sheets only (this sheet is classified as \"" +
+      (cls || "other") +
+      '"). Use manual measurement (M or R) instead.';
+  }
+  setStatus(msg, "error");
+  return false;
+}
+
 function autoDetect() {
   if (!Loader.isLoaded()) return;
+  if (!_requireDrawingSheet(_currentPage, "Auto-Detect")) return;
 
   // If we already scanned this page, cycle through candidates or bail
   if (_detectCandidates._page === _currentPage) {
@@ -2165,6 +2192,7 @@ var _SCALE_AGREEMENT_TOLERANCE = 0.03;
 
 function autoCalibrate() {
   if (!Loader.isLoaded()) return;
+  if (!_requireDrawingSheet(_currentPage, "Auto-Calibrate")) return;
   var pageNum = _currentPage;
   setStatus("Scanning text + geometry for dimension callouts...", "busy");
 
