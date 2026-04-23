@@ -182,8 +182,14 @@ function _spatialJoin(textItems) {
       var prevRight = prev.x + (prev.width || 0);
       var gap = curr.x - prevRight;
       var charWidth = prev.fontSize ? prev.fontSize * 0.5 : 4;
-      // Only add space if gap is more than ~half a character width
-      if (gap > charWidth) {
+      // Insert a space when items are visibly separated (gap >
+      // half-char-width) OR when they overlap by more than 2pt (real
+      // overlap = prev.width is bogus or items are distinct — pdfjs v4
+      // TJ-advanced text on Calgary emits "FOUNDATION PLAN" with
+      // width=179 that visually overlaps the next dim). Sub-pixel
+      // overlaps (~-0.02pt ArchiCad kerning) are same-word kerning
+      // precision — keep as continuous so per-glyph runs coalesce.
+      if (gap > charWidth || gap < -2) {
         parts.push(" ");
       }
     }
