@@ -37,10 +37,19 @@
         <button class="tool-btn" data-tool="polyline" data-tip="Polyline [P] — linear feature (interior wall, footing)">
           <i class="bi bi-bezier2"></i>
         </button>
-        <select id="component-tag" title="Component tag — classifies polygons for BEAMweb" onchange="PP.setComponentTag(this.value)">
+        <select
+          id="component-tag"
+          title="Component tag — classifies polygons for BEAMweb"
+          onchange="PP.setComponentTag(this.value)"
+        >
           <option value="">(no tag)</option>
         </select>
-        <select id="assembly-preset" title="Assembly preset — seeds BEAMweb assembly tabs" onchange="PP.setAssemblyPreset(this.value)" style="display:none">
+        <select
+          id="assembly-preset"
+          title="Assembly preset — seeds BEAMweb assembly tabs"
+          onchange="PP.setAssemblyPreset(this.value)"
+          style="display: none"
+        >
           <option value="">(no preset)</option>
           <option value="wood_2x4">Wood 2x4</option>
           <option value="wood_2x6">Wood 2x6</option>
@@ -60,7 +69,11 @@
         <button class="tool-btn" data-tool="calibrate" data-tip="Calibrate [C] — two-point scale verification">
           <i class="bi bi-crosshair2"></i>
         </button>
-        <button class="tool-btn" onclick="PP.autoCalibrate()" data-tip="Auto-Calibrate [A] — detect scale from dimension strings">
+        <button
+          class="tool-btn"
+          onclick="PP.autoCalibrate()"
+          data-tip="Auto-Calibrate [A] — detect scale from dimension strings"
+        >
           <i class="bi bi-stars"></i>
         </button>
         <button class="tool-btn" onclick="PP.autoDetect()" data-tip="Auto-Detect [D] — detect building outline">
@@ -110,8 +123,22 @@
         <div class="toolbar-sep"></div>
         <a href="index.html" class="nav-btn" target="_blank" rel="noopener" title="App directory / home">Home</a>
         <a href="matrix.html" class="nav-btn" target="_blank" rel="noopener" title="EC Compliance Matrix">Matrix</a>
-        <a href="database.html" class="nav-btn" target="_blank" rel="noopener" title="BfCA Material Database — embodied carbon catalogue">Database</a>
-        <a href="beamweb.html" class="nav-btn" target="_blank" rel="noopener" title="BEAM — Embodied Carbon Calculator (BfCA)">BEAM</a>
+        <a
+          href="database.html"
+          class="nav-btn"
+          target="_blank"
+          rel="noopener"
+          title="BfCA Material Database — embodied carbon catalogue"
+          >Database</a
+        >
+        <a
+          href="beamweb.html"
+          class="nav-btn"
+          target="_blank"
+          rel="noopener"
+          title="BEAM — Embodied Carbon Calculator (BfCA)"
+          >BEAM</a
+        >
       </div>
 
       <!-- ── Main Area ────────────────────────────────── -->
@@ -144,9 +171,9 @@
             <div class="drop-hint" style="margin-top: 24px">
               <span class="key-hint">S</span> Scale &nbsp; <span class="key-hint">M</span> Measure &nbsp;
               <span class="key-hint">W</span> Window &nbsp; <span class="key-hint">P</span> Polyline &nbsp;
-              <span class="key-hint">C</span> Calibrate &nbsp;
-              <span class="key-hint">F</span> Fit &nbsp; <span class="key-hint">Scroll</span> Zoom at cursor &nbsp;
-              <span class="key-hint">Mid-click</span> Pan &nbsp; <span class="key-hint">&larr;&rarr;</span> Pages
+              <span class="key-hint">C</span> Calibrate &nbsp; <span class="key-hint">F</span> Fit &nbsp;
+              <span class="key-hint">Scroll</span> Zoom at cursor &nbsp; <span class="key-hint">Mid-click</span> Pan
+              &nbsp; <span class="key-hint">&larr;&rarr;</span> Pages
             </div>
           </div>
 

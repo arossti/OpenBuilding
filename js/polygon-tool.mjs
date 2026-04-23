@@ -4,7 +4,16 @@
 
 import * as Viewer from "./canvas-viewer.mjs";
 import * as ScaleManager from "./scale-manager.mjs";
-import { POLY_COLORS, DEFAULT_DPI, M2_TO_FT2, AREA_EDGE, AREA_FILL, WIN_EDGE, WIN_FILL, POLYLINE_EDGE } from "./config.mjs";
+import {
+  POLY_COLORS,
+  DEFAULT_DPI,
+  M2_TO_FT2,
+  AREA_EDGE,
+  AREA_FILL,
+  WIN_EDGE,
+  WIN_FILL,
+  POLYLINE_EDGE
+} from "./config.mjs";
 
 var _polygons = {};
 var _activePolyId = null,
@@ -463,7 +472,11 @@ function _drawPoly(ctx, poly) {
 
     // Line 3: imperial measurement — lighter variant.
     if (line3) {
-      ctx.fillStyle = isPolyline ? "rgba(230, 57, 70, 0.65)" : isWindow ? "rgba(255, 215, 0, 0.65)" : "rgba(0, 229, 255, 0.65)";
+      ctx.fillStyle = isPolyline
+        ? "rgba(230, 57, 70, 0.65)"
+        : isWindow
+          ? "rgba(255, 215, 0, 0.65)"
+          : "rgba(0, 229, 255, 0.65)";
       var y3 = y2 + 22;
       ctx.fillText(line3, center.x, y3);
     }

@@ -233,8 +233,7 @@ function _filterWithParallel(segs, axisVal, rangeStart, rangeEnd, pMin, pMax, ov
       var o = segs[j];
       var off = Math.abs(o[axisVal] - s[axisVal]);
       if (off < pMin || off > pMax) continue;
-      var overlap =
-        Math.min(s[rangeEnd], o[rangeEnd]) - Math.max(s[rangeStart], o[rangeStart]);
+      var overlap = Math.min(s[rangeEnd], o[rangeEnd]) - Math.max(s[rangeStart], o[rangeStart]);
       if (overlap >= overlapMin) {
         kept.push(s);
         break;

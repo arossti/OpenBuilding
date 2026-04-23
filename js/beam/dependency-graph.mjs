@@ -29,8 +29,7 @@
 
 import { StateManager } from "../shared/state-manager.mjs";
 
-const DEFAULT_CONTAINER =
-  "#bw-depgraph .bw-depgraph-container";
+const DEFAULT_CONTAINER = "#bw-depgraph .bw-depgraph-container";
 
 export class DependencyGraph {
   constructor(containerSelector) {
@@ -82,8 +81,7 @@ export class DependencyGraph {
 
     const note = document.createElement("span");
     note.className = "bw-depgraph-note";
-    note.textContent =
-      "Stub renderer — see BEAMweb.md §8 for the full D3/dagre port trigger.";
+    note.textContent = "Stub renderer — see BEAMweb.md §8 for the full D3/dagre port trigger.";
 
     wrap.appendChild(activate);
     wrap.appendChild(note);
@@ -144,10 +142,10 @@ export class DependencyGraph {
   // ── internals ─────────────────────────────────────────
 
   _renderSnapshotHtml(nodes, links, meta) {
-    const archNodes = nodes.filter(n => n.type === "module");
-    const fieldNodes = nodes.filter(n => n.type === "field");
-    const archLinks = links.filter(l => l.dependencyMode === "architectural");
-    const fieldLinks = links.filter(l => l.dependencyMode !== "architectural");
+    const archNodes = nodes.filter((n) => n.type === "module");
+    const fieldNodes = nodes.filter((n) => n.type === "field");
+    const archLinks = links.filter((l) => l.dependencyMode === "architectural");
+    const fieldLinks = links.filter((l) => l.dependencyMode !== "architectural");
 
     const archByLayer = {};
     for (const node of archNodes) {
@@ -158,11 +156,11 @@ export class DependencyGraph {
 
     const layerOrder = ["Foundation", "Coordination", "Application"];
     const layerBlocks = layerOrder
-      .filter(layer => archByLayer[layer])
-      .map(layer => {
+      .filter((layer) => archByLayer[layer])
+      .map((layer) => {
         const items = archByLayer[layer]
           .map(
-            node =>
+            (node) =>
               `<li><strong>${escapeHtml(node.label || node.id)}</strong>${
                 node.description ? ` — <span class="bw-depgraph-desc">${escapeHtml(node.description)}</span>` : ""
               }</li>`
@@ -188,9 +186,11 @@ export class DependencyGraph {
           <div><span class="bw-depgraph-stat-label">Snapshot</span><strong>${escapeHtml(generatedAt)}</strong></div>
         </div>
         <div class="bw-depgraph-layers">${layerBlocks}</div>
-        ${fieldLinks.length === 0
-          ? `<p class="bw-depgraph-empty">No field-level dependencies registered yet. They light up when <code>auto-fill.mjs</code>'s PROJECT→F&amp;S listeners get rewritten as <code>StateManager.registerDependency()</code> edges (BEAMweb.md §8 migration).</p>`
-          : `<p class="bw-depgraph-empty">${fieldLinks.length} field edges registered. Full graph port will render them via d3 + dagre.</p>`}
+        ${
+          fieldLinks.length === 0
+            ? `<p class="bw-depgraph-empty">No field-level dependencies registered yet. They light up when <code>auto-fill.mjs</code>'s PROJECT→F&amp;S listeners get rewritten as <code>StateManager.registerDependency()</code> edges (BEAMweb.md §8 migration).</p>`
+            : `<p class="bw-depgraph-empty">${fieldLinks.length} field edges registered. Full graph port will render them via d3 + dagre.</p>`
+        }
       </div>`;
   }
 

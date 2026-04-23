@@ -273,7 +273,13 @@ function loadPdf(buffer, fileName, opts) {
 
             if (restored) {
               setStatus(
-                "Session restored — " + restored.areas + " areas, " + restored.windows + " windows, " + restored.rulers + " rulers",
+                "Session restored — " +
+                  restored.areas +
+                  " areas, " +
+                  restored.windows +
+                  " windows, " +
+                  restored.rulers +
+                  " rulers",
                 "ready"
               );
             } else {
@@ -674,8 +680,7 @@ function _handleOverlayClick(e) {
   // polygon edge's hit zone plants the endpoint instead of mutating the
   // polygon. Calibrate for the same reason — a user who calibrates after
   // areas have been drawn (rare but real) shouldn't modify geometry.
-  var skipsPolygonEdit =
-    _currentTool === "polyline" || _currentTool === "ruler" || _currentTool === "calibrate";
+  var skipsPolygonEdit = _currentTool === "polyline" || _currentTool === "ruler" || _currentTool === "calibrate";
 
   // Priority 1: Click near an existing vertex — start drag
   var hit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
@@ -824,7 +829,8 @@ var GEOMETRY_PARAMS = [
 function _renderParamsPanel() {
   if (!els.paramsPanel) return;
   var html = '<div class="pdf-params-header">Geometry Parameters</div>';
-  html += '<div class="pdf-params-hint">Fed to BEAMweb on import \u2014 lifts perimeters \u2192 areas + areas \u2192 volumes.</div>';
+  html +=
+    '<div class="pdf-params-hint">Fed to BEAMweb on import \u2014 lifts perimeters \u2192 areas + areas \u2192 volumes.</div>';
   html += '<div class="pdf-params-rows">';
   for (var i = 0; i < GEOMETRY_PARAMS.length; i++) {
     var p = GEOMETRY_PARAMS[i];
@@ -2053,7 +2059,7 @@ function _requireDrawingSheet(pageNum, actionLabel) {
   } else {
     msg =
       actionLabel +
-      " runs on plan or elevation sheets only (this sheet is classified as \"" +
+      ' runs on plan or elevation sheets only (this sheet is classified as "' +
       (cls || "other") +
       '"). Use manual measurement (M or R) instead.';
   }
@@ -2068,74 +2074,72 @@ function autoDetect() {
   setStatus("Finding building outline...", "busy");
   var pageNum = _currentPage;
 
-  Promise.all([
-    Loader.getTextContent(pageNum),
-    VectorSnap.extractGeometry(pageNum),
-    Loader.getPageSize(pageNum)
-  ]).then(function (results) {
-    var textItems = results[0];
-    var geo = results[1];
-    var size = results[2];
+  Promise.all([Loader.getTextContent(pageNum), VectorSnap.extractGeometry(pageNum), Loader.getPageSize(pageNum)]).then(
+    function (results) {
+      var textItems = results[0];
+      var geo = results[1];
+      var size = results[2];
 
-    // Raster PDF with no vector geometry — bail early.
-    if (geo.segments.length === 0) {
+      // Raster PDF with no vector geometry — bail early.
+      if (geo.segments.length === 0) {
+        setStatus(
+          "No vector data found — this appears to be a scanned/raster PDF. Use manual measurement (M or R).",
+          "error"
+        );
+        console.log("[Auto-detect] Page has zero vector geometry. Raster/scanned PDF.");
+        return;
+      }
+
+      // Layer-peel (C4): separate sheet-border chaff from drawing geometry.
+      var layers = classifyLayers(geo.segments, textItems, size.width, size.height);
+
+      // Shrink-wrap (C5): find the building outline via parallel-pair wall
+      // detection + 5-95 percentile trimming of wall positions.
+      var wrap = shrinkWrapBuilding(layers.drawingSegments, layers.drawingAreaBbox);
+
+      console.log(
+        "[Auto-detect] Page " +
+          pageNum +
+          ": " +
+          geo.segments.length +
+          " segments, layer-peel → " +
+          layers.summary.drawing +
+          " drawing / " +
+          layers.summary.pageBorder +
+          " pageBorder, shrink-wrap → " +
+          (wrap && wrap.polygon
+            ? wrap.wallHorizCount + "H + " + wrap.wallVertCount + "V walls, 4-vertex polygon"
+            : "FAILED (" + (wrap ? wrap.reason : "null") + ")")
+      );
+
+      if (wrap && wrap.polygon) {
+        var polyArea = _polygonArea(wrap.polygon);
+        _placeDetectedOutline({ path: wrap.polygon, area: polyArea }, 0, 1);
+        return;
+      }
+
+      // Fallback — legacy closed-polygon detector (kept until shrink-wrap
+      // proves itself in real use; then retire per MAGIC.md C5 discussion).
+      var candidates = VectorSnap.getClosedPathsByArea(pageNum, size.width, size.height);
+      if (candidates.length > 0) {
+        _placeDetectedOutline(candidates[0], 0, 1);
+        setStatus(
+          "Shrink-wrap did not find wall pairs (" +
+            (wrap ? wrap.reason : "no drawing segments") +
+            "). Fell back to first closed-polygon candidate.",
+          "ready"
+        );
+        return;
+      }
+
       setStatus(
-        "No vector data found — this appears to be a scanned/raster PDF. Use manual measurement (M or R).",
+        "No building outline detected on this page. " +
+          (wrap && wrap.reason ? "Shrink-wrap: " + wrap.reason + ". " : "") +
+          "Use manual measurement (M or R).",
         "error"
       );
-      console.log("[Auto-detect] Page has zero vector geometry. Raster/scanned PDF.");
-      return;
     }
-
-    // Layer-peel (C4): separate sheet-border chaff from drawing geometry.
-    var layers = classifyLayers(geo.segments, textItems, size.width, size.height);
-
-    // Shrink-wrap (C5): find the building outline via parallel-pair wall
-    // detection + 5-95 percentile trimming of wall positions.
-    var wrap = shrinkWrapBuilding(layers.drawingSegments, layers.drawingAreaBbox);
-
-    console.log(
-      "[Auto-detect] Page " +
-        pageNum +
-        ": " +
-        geo.segments.length +
-        " segments, layer-peel → " +
-        layers.summary.drawing +
-        " drawing / " +
-        layers.summary.pageBorder +
-        " pageBorder, shrink-wrap → " +
-        (wrap && wrap.polygon
-          ? wrap.wallHorizCount + "H + " + wrap.wallVertCount + "V walls, 4-vertex polygon"
-          : "FAILED (" + (wrap ? wrap.reason : "null") + ")")
-    );
-
-    if (wrap && wrap.polygon) {
-      var polyArea = _polygonArea(wrap.polygon);
-      _placeDetectedOutline({ path: wrap.polygon, area: polyArea }, 0, 1);
-      return;
-    }
-
-    // Fallback — legacy closed-polygon detector (kept until shrink-wrap
-    // proves itself in real use; then retire per MAGIC.md C5 discussion).
-    var candidates = VectorSnap.getClosedPathsByArea(pageNum, size.width, size.height);
-    if (candidates.length > 0) {
-      _placeDetectedOutline(candidates[0], 0, 1);
-      setStatus(
-        "Shrink-wrap did not find wall pairs (" +
-          (wrap ? wrap.reason : "no drawing segments") +
-          "). Fell back to first closed-polygon candidate.",
-        "ready"
-      );
-      return;
-    }
-
-    setStatus(
-      "No building outline detected on this page. " +
-        (wrap && wrap.reason ? "Shrink-wrap: " + wrap.reason + ". " : "") +
-        "Use manual measurement (M or R).",
-      "error"
-    );
-  });
+  );
 }
 
 function _polygonArea(pts) {
@@ -2361,10 +2365,7 @@ function autoCalibrate() {
     _updateScaleLabel();
     _refreshMeasurements();
     Viewer.requestRedraw();
-    setStatus(
-      "Auto-calibrated: " + detectedLabel + " from " + result.callouts.length + " dim callouts",
-      "ready"
-    );
+    setStatus("Auto-calibrated: " + detectedLabel + " from " + result.callouts.length + " dim callouts", "ready");
     _showScaleFeedback(
       "✨",
       "Auto-Calibrated",
@@ -2444,11 +2445,7 @@ function _showScaleDisagreement(pageNum, info) {
     );
   } else {
     setStatus(
-      "Keeping declared scale " +
-        info.declaredLabel +
-        " (auto-detect suggested " +
-        info.detectedLabel +
-        ")",
+      "Keeping declared scale " + info.declaredLabel + " (auto-detect suggested " + info.detectedLabel + ")",
       "ready"
     );
   }
@@ -2489,7 +2486,8 @@ function _buildSheetTail(page) {
   // 80-char cap leaves headroom for multi-line stacks like
   // "FOUNDATION PLAN — Continuous Footings Layout". Sentence-prefix filter
   // still rejects prose that slips under the length limit.
-  var looksLikeBodyText = title.length > 80 || /^(this|the following|all\s|general\s+notes|notes?:|drawings?\s)/i.test(title);
+  var looksLikeBodyText =
+    title.length > 80 || /^(this|the following|all\s|general\s+notes|notes?:|drawings?\s)/i.test(title);
   if (title && !looksLikeBodyText) return " \u2014 " + title;
   if (classification) return " \u2014 " + classification;
   return "";
@@ -2524,7 +2522,12 @@ function _renderTagSelect(polyType, polyIdx, pageNum, currentValue, small) {
   var toolKey = polyType === "polyline" ? "polyline" : "measure";
   var opts = COMPONENT_OPTIONS[toolKey] || [];
   var html = "<td class='tag-cell'" + (small ? " style='font-size:10px;'" : "") + ">";
-  html += "<select class='summary-tag-select bw-inline-select' data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "'>";
+  html +=
+    "<select class='summary-tag-select bw-inline-select' data-poly-idx='" +
+    polyIdx +
+    "' data-page-num='" +
+    pageNum +
+    "'>";
   for (var i = 0; i < opts.length; i++) {
     var sel = opts[i].value === (currentValue || "") ? " selected" : "";
     html += "<option value='" + opts[i].value + "'" + sel + ">" + opts[i].label + "</option>";
@@ -2540,7 +2543,12 @@ function _renderTagSelect(polyType, polyIdx, pageNum, currentValue, small) {
 function _renderScopeSelect(polyIdx, pageNum, currentScope, small) {
   var sizeAttr = small ? " style='font-size:10px;'" : "";
   var html = "<td class='scope-cell'" + sizeAttr + ">";
-  html += "<select class='summary-scope-select bw-inline-select' data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "'>";
+  html +=
+    "<select class='summary-scope-select bw-inline-select' data-poly-idx='" +
+    polyIdx +
+    "' data-page-num='" +
+    pageNum +
+    "'>";
   var scope = currentScope === "garage" ? "garage" : "building";
   html += "<option value='building'" + (scope === "building" ? " selected" : "") + ">Building</option>";
   html += "<option value='garage'" + (scope === "garage" ? " selected" : "") + ">Garage</option>";
@@ -2560,8 +2568,14 @@ function _renderDepthInput(component, polyIdx, pageNum, currentDepth, small) {
   var html = "<td class='depth-cell'" + sizeAttr + ">";
   html +=
     "<input type='number' step='0.01' min='0' class='summary-depth-input bw-inline-input' " +
-    "data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "' " +
-    "value='" + val + "' placeholder='m' />";
+    "data-poly-idx='" +
+    polyIdx +
+    "' data-page-num='" +
+    pageNum +
+    "' " +
+    "value='" +
+    val +
+    "' placeholder='m' />";
   html += "</td>";
   return html;
 }
@@ -2572,10 +2586,22 @@ function _renderPresetSelect(component, polyIdx, pageNum, currentPreset, small) 
     return "<td class='preset-cell'" + sizeAttr + ">\u2014</td>";
   }
   var html = "<td class='preset-cell'" + sizeAttr + ">";
-  html += "<select class='summary-preset-select bw-inline-select' data-poly-idx='" + polyIdx + "' data-page-num='" + pageNum + "'>";
+  html +=
+    "<select class='summary-preset-select bw-inline-select' data-poly-idx='" +
+    polyIdx +
+    "' data-page-num='" +
+    pageNum +
+    "'>";
   for (var i = 0; i < ASSEMBLY_PRESET_OPTIONS.length; i++) {
     var sel = ASSEMBLY_PRESET_OPTIONS[i].value === (currentPreset || "") ? " selected" : "";
-    html += "<option value='" + ASSEMBLY_PRESET_OPTIONS[i].value + "'" + sel + ">" + ASSEMBLY_PRESET_OPTIONS[i].label + "</option>";
+    html +=
+      "<option value='" +
+      ASSEMBLY_PRESET_OPTIONS[i].value +
+      "'" +
+      sel +
+      ">" +
+      ASSEMBLY_PRESET_OPTIONS[i].label +
+      "</option>";
   }
   html += "</select></td>";
   return html;

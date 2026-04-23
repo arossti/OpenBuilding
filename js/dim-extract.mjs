@@ -26,8 +26,7 @@ var FOOT_CHARS = "'′";
 var INCH_CHARS = '"″';
 
 var IMPERIAL_RX = new RegExp(
-  "^(?:(\\d+)\\s*[" + FOOT_CHARS + "])?\\s*-?\\s*" +
-    "(?:(\\d+)(?:\\s+(\\d+)/(\\d+))?\\s*[" + INCH_CHARS + "]?)?\\s*$"
+  "^(?:(\\d+)\\s*[" + FOOT_CHARS + "])?\\s*-?\\s*" + "(?:(\\d+)(?:\\s+(\\d+)/(\\d+))?\\s*[" + INCH_CHARS + "]?)?\\s*$"
 );
 
 var METRIC_RX = /^(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)\s*(mm|m)?$/i;
@@ -471,8 +470,7 @@ export function extractDimensions(textItems, segments, opts) {
     unpaired: unpaired,
     declaredPdfUnitsPerMetre: declaredPpm,
     impliedPdfUnitsPerMetreMedian: impliedMedian,
-    scaleAgreement:
-      declaredPpm && impliedMedian ? 1 - Math.abs(declaredPpm - impliedMedian) / declaredPpm : null,
+    scaleAgreement: declaredPpm && impliedMedian ? 1 - Math.abs(declaredPpm - impliedMedian) / declaredPpm : null,
     textItemsMerged: merged.length,
     textItemsRaw: textItems.length
   };

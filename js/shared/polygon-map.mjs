@@ -417,7 +417,9 @@ export function aggregateOne({ flatPolygons, params, component, scope }) {
   const required = spec.requiredSheetClass || [];
   for (const poly of polygons) {
     if (required.length && poly.sheet_class && !required.includes(poly.sheet_class)) {
-      warnings.push(`${component} on ${poly.sheet_class} sheet ${poly.sheet_id || ""} — expected ${required.join("/")}`);
+      warnings.push(
+        `${component} on ${poly.sheet_class} sheet ${poly.sheet_id || ""} — expected ${required.join("/")}`
+      );
     }
   }
 
@@ -540,7 +542,8 @@ export function computeAllDimensions({ projectJson, params }) {
           });
         }
         if (agg.warnings && agg.warnings.length) result[dimId].warnings.push(...agg.warnings);
-        if (contribution.warnings && contribution.warnings.length) result[dimId].warnings.push(...contribution.warnings);
+        if (contribution.warnings && contribution.warnings.length)
+          result[dimId].warnings.push(...contribution.warnings);
       }
     }
   }
