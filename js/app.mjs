@@ -693,9 +693,33 @@ function _handleOverlayClick(e) {
     return;
   }
 
-  // Priority 2: Click near an edge — insert vertex and start dragging it
+  // Priority 2: Click near an edge.
+  //  - If the polygon carries shrink-wrap candidates AND the edge is
+  //    orthogonal AND the user is NOT holding Option/Alt, drag the whole
+  //    edge perpendicular to itself; release snaps to the nearest wall-
+  //    candidate detent (C7b).
+  //  - Option/Alt-click is the explicit opt-out: falls through to the
+  //    legacy insert-vertex path. Needed when the user wants to capture
+  //    a jog in the wall rather than nudge the whole edge. C7c will
+  //    surface this via an ArchiCad-style popup instead of a modifier.
+  //  - Non-orthogonal edges and hand-drawn polygons always use the
+  //    insert-vertex path.
   var edgeHit = PolygonTool.hitTestEdge(_currentPage, pt, hitRadius);
   if (edgeHit && !PolygonTool.isDrawing() && !skipsPolygonEdit) {
+    var polysForEdge = PolygonTool.getPolygons(_currentPage);
+    var edgePoly = polysForEdge[edgeHit.polyIdx];
+    var orient = PolygonTool.edgeOrientation(edgePoly, edgeHit.edgeIdx);
+    var hasCandidates = !!(edgePoly && edgePoly._shrinkCandidates);
+    if (orient && hasCandidates && !e.altKey) {
+      if (PolygonTool.startEdgeDrag(_currentPage, edgeHit.polyIdx, edgeHit.edgeIdx)) {
+        Viewer.onOverlayMouseMove(_handleDragMove);
+        _bindDragEnd();
+        Viewer.requestRedraw();
+        var wrap3 = document.getElementById("viewer-wrap");
+        if (wrap3) wrap3.style.cursor = orient === "horizontal" ? "ns-resize" : "ew-resize";
+        return;
+      }
+    }
     var newIdx = PolygonTool.insertVertex(_currentPage, edgeHit.polyIdx, edgeHit.edgeIdx, edgeHit.point);
     if (newIdx >= 0) {
       PolygonTool.startDrag(_currentPage, edgeHit.polyIdx, newIdx);
@@ -721,8 +745,17 @@ function _handleOverlayClick(e) {
 }
 
 function _handleDragMove(e) {
-  if (!PolygonTool.isDragging()) return;
   var pt = Viewer.eventToPdfCoords(e);
+
+  if (PolygonTool.isEdgeDragging()) {
+    // Edge drag has no vector-snap overlay — it follows the pointer
+    // freely and snaps to wall-candidate detents on release only.
+    PolygonTool.moveEdgeDrag(pt);
+    Viewer.requestRedraw();
+    return;
+  }
+
+  if (!PolygonTool.isDragging()) return;
   // Snap during vertex drag
   var snapRadius = 12 / (Viewer.getZoom() * (150 / 72));
   var snap = VectorSnap.findSnap(_currentPage, pt, snapRadius);
@@ -735,20 +768,33 @@ function _handleDragMove(e) {
 function _bindDragEnd() {
   function onUp() {
     window.removeEventListener("mouseup", onUp);
+    var wrap = document.getElementById("viewer-wrap");
+    var cursorMap = {
+      measure: "crosshair",
+      window: "crosshair",
+      calibrate: "crosshair",
+      ruler: "crosshair",
+      navigate: "default"
+    };
+
+    if (PolygonTool.isEdgeDragging()) {
+      var snap = PolygonTool.endEdgeDrag();
+      setStatus(snap.snapped ? "Edge snapped to wall candidate." : "Edge moved.", "ready");
+      _snapTarget = null;
+      Viewer.onOverlayMouseMove(_handleOverlayMouseMove);
+      if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
+      _refreshMeasurements();
+      ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
+      Viewer.requestRedraw();
+      return;
+    }
+
     if (PolygonTool.isDragging()) {
       var mergeRadius = 10 / (Viewer.getZoom() * (150 / 72));
       var merged = PolygonTool.endDrag(mergeRadius);
       if (merged) setStatus("Vertices merged", "ready");
       _snapTarget = null; // clear snap indicator
       Viewer.onOverlayMouseMove(_handleOverlayMouseMove);
-      var wrap = document.getElementById("viewer-wrap");
-      var cursorMap = {
-        measure: "crosshair",
-        window: "crosshair",
-        calibrate: "crosshair",
-        ruler: "crosshair",
-        navigate: "default"
-      };
       if (wrap) wrap.style.cursor = cursorMap[_currentTool] || "default";
       // Update measurements and save
       _refreshMeasurements();
@@ -1193,6 +1239,14 @@ function _handleOverlayMouseMove(e) {
   // while the polyline tool is active, since that tool ignores drag-edit
   // hit-tests (see _handleOverlayClick). Showing the move/cell cursor there
   // would mislead the user.
+  //
+  // Cursor vocabulary (C7a):
+  //   move      — over a vertex (drag vertex)
+  //   ew-resize — over a vertical orthogonal edge of a shrink-wrap polygon (edge-drag, x-axis)
+  //   ns-resize — over a horizontal orthogonal edge of a shrink-wrap polygon (edge-drag, y-axis)
+  //   cell      — over any edge without an edge-drag affordance, or when
+  //               Option/Alt is held (explicit opt-out into insert-vertex mode)
+  var altHeld = !!(e && e.altKey);
   var wrap = document.getElementById("viewer-wrap");
   if (!PolygonTool.isDrawing() && !_rectStart && _currentTool !== "polyline") {
     var vertHit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
@@ -1202,7 +1256,15 @@ function _handleOverlayMouseMove(e) {
     }
     var edgeHit = PolygonTool.hitTestEdge(_currentPage, pt, hitRadius);
     if (edgeHit) {
-      if (wrap) wrap.style.cursor = "cell";
+      var polysForHover = PolygonTool.getPolygons(_currentPage);
+      var hoverPoly = polysForHover[edgeHit.polyIdx];
+      var hoverOrient = PolygonTool.edgeOrientation(hoverPoly, edgeHit.edgeIdx);
+      var hoverHasCands = !!(hoverPoly && hoverPoly._shrinkCandidates);
+      if (hoverOrient && hoverHasCands && !altHeld) {
+        if (wrap) wrap.style.cursor = hoverOrient === "horizontal" ? "ns-resize" : "ew-resize";
+      } else if (wrap) {
+        wrap.style.cursor = "cell";
+      }
       return;
     }
   }
@@ -2114,7 +2176,16 @@ function autoDetect() {
 
       if (wrap && wrap.polygon) {
         var polyArea = _polygonArea(wrap.polygon);
-        _placeDetectedOutline({ path: wrap.polygon, area: polyArea }, 0, 1);
+        var shrinkCandidates = {
+          vert: wrap.wallVertPositions || [],
+          horiz: wrap.wallHorizPositions || []
+        };
+        _placeDetectedOutline(
+          { path: wrap.polygon, area: polyArea, shrinkCandidates: shrinkCandidates },
+          0,
+          1,
+          textItems
+        );
         return;
       }
 
@@ -2122,7 +2193,7 @@ function autoDetect() {
       // proves itself in real use; then retire per MAGIC.md C5 discussion).
       var candidates = VectorSnap.getClosedPathsByArea(pageNum, size.width, size.height);
       if (candidates.length > 0) {
-        _placeDetectedOutline(candidates[0], 0, 1);
+        _placeDetectedOutline(candidates[0], 0, 1, textItems);
         setStatus(
           "Shrink-wrap did not find wall pairs (" +
             (wrap ? wrap.reason : "no drawing segments") +
@@ -2152,7 +2223,7 @@ function _polygonArea(pts) {
   return Math.abs(a) / 2;
 }
 
-function _placeDetectedOutline(candidate, idx, total) {
+function _placeDetectedOutline(candidate, idx, total, textItems) {
   // Remove the previous detected polygon if cycling
   var polys = PolygonTool.getPolygons(_currentPage);
   for (var i = polys.length - 1; i >= 0; i--) {
@@ -2183,14 +2254,107 @@ function _placeDetectedOutline(candidate, idx, total) {
   }
   PolygonTool.closePolygon();
 
+  // AT-2 / AT-3: auto-tag the placed polygon from the sheet's classification
+  // + title keywords. Slab / roof / wall component tag + building/garage
+  // scope + a wood-2x6 default preset for exterior walls. Fills in what
+  // Andy calls "automated polygon data" so a user can click Auto-Detect
+  // and immediately hand the result to the BEAMweb bridge without
+  // additional manual tagging.
+  var polysNow = PolygonTool.getPolygons(_currentPage);
+  var newPolyIdx = polysNow.length - 1;
+  var autoTag = _autoTagFromPage(_currentPage, textItems);
+  if (newPolyIdx >= 0 && autoTag.component) {
+    PolygonTool.setComponent(_currentPage, newPolyIdx, autoTag.component);
+    if (autoTag.scope === "garage") {
+      PolygonTool.setScope(_currentPage, newPolyIdx, "garage");
+    }
+    if (autoTag.preset) {
+      PolygonTool.setAssemblyPreset(_currentPage, newPolyIdx, autoTag.preset);
+    }
+  }
+
+  // C7 — attach wall-candidate arrays so subsequent edge-drag interactions
+  // can snap through the shrink-wrap detents. Only present when the
+  // polygon came from the shrink-wrap path (not the closed-polygon
+  // fallback), so hand-edited polygons keep their legacy click-to-insert
+  // behavior.
+  if (newPolyIdx >= 0 && candidate.shrinkCandidates) {
+    PolygonTool.setShrinkCandidates(_currentPage, newPolyIdx, candidate.shrinkCandidates);
+  }
+
   _refreshMeasurements();
   ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
   Viewer.requestRedraw();
 
+  // AT-1: switch to polygon-edit ("measure") mode so the user is in the
+  // right context to refine the polygon — drag vertices today, drag edges
+  // once C7 ships. Avoids the "D pressed, polygon appeared, now what?"
+  // disorientation.
+  setTool("measure");
+
   var areaM2 = ScaleManager.pdfAreaToM2(_currentPage, candidate.area);
   var areaStr = areaM2 !== null ? areaM2.toFixed(1) + " m\u00B2" : "(uncalibrated)";
   var hint = total > 1 ? " Press D again to cycle (" + (idx + 1) + "/" + total + ")." : "";
-  setStatus("Outline: " + areaStr + ", " + verts.length + " vertices." + hint, "ready");
+  var tagStr = "";
+  if (autoTag && autoTag.component) {
+    tagStr = " tagged " + autoTag.component;
+    if (autoTag.scope === "garage") tagStr += " (garage)";
+    if (autoTag.preset) tagStr += " · " + autoTag.preset;
+    tagStr += ".";
+  }
+  setStatus("Outline: " + areaStr + ", " + verts.length + " vertices." + tagStr + hint, "ready");
+}
+
+/**
+ * AT-2: derive the polygon's component tag + scope + assembly preset
+ * from the page's sheet classification and title + page-text keywords.
+ * Returns a `{component, scope, preset}` triple; any field may be null /
+ * "building" default when classification doesn't resolve a specific value.
+ *
+ * Mapping table (MAGIC.md §0 AT prerequisites):
+ *   plan + foundation       → slab_foundation,    building|garage, no preset
+ *   plan + roof             → roof_plan,          building|garage, no preset
+ *   plan + main/upper/...   → slab_above_grade,   building|garage, no preset
+ *   elevation               → wall_exterior,      building|garage, wood_2x6
+ *   "garage" text on page   → scope = "garage" regardless of classification
+ *   anything else           → no auto-tag; user picks manually.
+ *
+ * Garage detection scans the FULL page text (not just the truncated
+ * title) because title-blocks on garage sheets are frequently blank in
+ * Calgary-style sample sets — the garage keyword only shows up as a
+ * drawing caption ("GARAGE FLOOR PLAN") or callout ("GARAGE SLAB").
+ * Trade-off: attached-garage PDFs (where the main-floor plan has a
+ * "GARAGE" room label INSIDE the drawing) will also flip scope to
+ * garage, which is wrong for the house polygon — user can manually
+ * override via the Summary Table scope dropdown. Opt for auto-correct-
+ * most-cases over miss-all-garages.
+ */
+function _autoTagFromPage(pageNum, textItems) {
+  var page = ProjectStore.getPage(pageNum);
+  if (!page) return { component: null, scope: "building", preset: null };
+  var cls = page.classification;
+  var title = (page.sheetTitle || "").toLowerCase();
+  var isGarage = /\bgarage\b/.test(title) || _pageTextContainsGarage(textItems);
+  var scope = isGarage ? "garage" : "building";
+
+  if (cls === "plan") {
+    if (/\bfoundation\b/.test(title)) return { component: "slab_foundation", scope: scope, preset: null };
+    if (/\broof\b/.test(title)) return { component: "roof_plan", scope: scope, preset: null };
+    if (/\b(main|upper|lower|basement|ground|floor)\b/.test(title) || isGarage) {
+      return { component: "slab_above_grade", scope: scope, preset: null };
+    }
+  } else if (cls === "elevation") {
+    return { component: "wall_exterior", scope: scope, preset: "wood_2x6" };
+  }
+  return { component: null, scope: scope, preset: null };
+}
+
+function _pageTextContainsGarage(textItems) {
+  if (!textItems || !textItems.length) return false;
+  for (var i = 0; i < textItems.length; i++) {
+    if (/\bgarage\b/i.test(textItems[i].str || "")) return true;
+  }
+  return false;
 }
 
 /* ── Auto-calibrate from dimension strings (MAGIC C3) ───── */

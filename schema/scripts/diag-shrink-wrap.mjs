@@ -34,7 +34,9 @@ async function runFixture(fixturePath) {
   console.log(`  layer-peel:     ${layers.summary.drawing} drawing segs`);
   if (!wrap || !wrap.polygon) {
     console.log(`  shrink-wrap:    FAILED — ${wrap ? wrap.reason : "null result"}`);
-    console.log(`                  wall candidates: H=${wrap ? wrap.wallHorizCount : 0}, V=${wrap ? wrap.wallVertCount : 0}`);
+    console.log(
+      `                  wall candidates: H=${wrap ? wrap.wallHorizCount : 0}, V=${wrap ? wrap.wallVertCount : 0}`
+    );
     return;
   }
 
@@ -50,6 +52,14 @@ async function runFixture(fixturePath) {
   for (const v of wrap.polygon) {
     console.log(`                     (${v.x.toFixed(1)}, ${v.y.toFixed(1)})`);
   }
+  console.log(
+    `                  wallVertPositions (${wrap.wallVertPositions.length} detents, clustered 5pt):  ` +
+      wrap.wallVertPositions.map((v) => v.toFixed(1)).join(", ")
+  );
+  console.log(
+    `                  wallHorizPositions (${wrap.wallHorizPositions.length} detents, clustered 5pt): ` +
+      wrap.wallHorizPositions.map((v) => v.toFixed(1)).join(", ")
+  );
 
   // Compare to the prior drawing-area bbox to show how much the
   // shrink-wrap tightened.

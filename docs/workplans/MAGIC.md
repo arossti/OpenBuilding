@@ -1,10 +1,183 @@
 # PDF-Parser Magic-Wand Polish — workplan (MAGIC.md)
 
-> Polish pass on the PDF-Parser magic-wand (auto-detect) path. Adds dimension-string calibration with declared-vs-detected scale cross-check and a shrink-wrap building-outline detector that replaces the current "closed-polygon only" heuristic. Branch: `Magic-Wand-Polish`. Started 2026-04-22.
+> Polish pass on the PDF-Parser magic-wand (auto-detect) path. Adds dimension-string calibration with declared-vs-detected scale cross-check and a shrink-wrap building-outline detector that replaces the current "closed-polygon only" heuristic. Branch: `Magic-Wand-Polish-2` (successor to merged `Magic-Wand-Polish` → PR #12). Started 2026-04-22.
 
 ---
 
 ## 0. Cold-start handoff
+
+### Status as of 2026-04-23 (session 3 — C7a+b + Alt opt-out shipped; paused before C7c/d for BfCA demo)
+
+**Successor agent: read this block first.** Andy is presenting this state to BfCA, so the branch is parked here intentionally. Resume with C7c (popup) or C7d (oculus) — see bottom of this block. §0 sub-sections below are historical detail.
+
+- **Active branch**: `Magic-Wand-Polish-2`, tip **`5d6f8db`**. Three code commits since `main` at `85fa550` (PR #12):
+  - `81d3358` — AT-1/2/3 auto-tag (session 2 PM)
+  - `bafaaa7` — C7a + C7b edge-scrub (per-edge drag + snap to wall-candidate detents)
+  - `5d6f8db` — C7 Alt-click opt-out (Option/Alt bypasses edge-drag → legacy insert-vertex)
+- **Dev server**: `npm run serve` on port 8000 (no-cache).
+
+#### C7a + C7b — shipped at `bafaaa7`
+
+**What works now.** On an Auto-Detected polygon:
+
+- Hover a vertical orthogonal edge → cursor is `ew-resize` (↔). Drag it → both endpoints of that edge slide in x together; release snaps to the nearest `wallVertPositions` detent.
+- Hover a horizontal orthogonal edge → cursor is `ns-resize` (↕). Same behavior on y.
+- Hover a vertex → `move` cursor, classic vertex drag still works.
+- Hover anywhere the edge-drag affordance doesn't apply (hand-drawn polygon, non-orthogonal edge, or Alt held) → `cell` cursor → click inserts a vertex.
+- Snap is **unconditional** — the edge always settles on the nearest detent when you release. Matches Andy's "scrub through candidates" language. Between-detent placement is explicitly an insert-vertex operation.
+
+**Implementation landmarks:**
+
+- `shrinkWrapBuilding` in [`js/shrink-wrap.mjs`](../../js/shrink-wrap.mjs) now returns `wallVertPositions` (x-coords) + `wallHorizPositions` (y-coords), clustered within 5pt. Clustering collapses partner-stroke duplicates (inner + outer face of the same wall) but preserves distinct walls ≥10pt apart.
+- [`js/polygon-tool.mjs`](../../js/polygon-tool.mjs) polygon record gains `_shrinkCandidates: {vert, horiz}`. New API: `edgeOrientation`, `setShrinkCandidates`, `getShrinkCandidates`, `startEdgeDrag / moveEdgeDrag / endEdgeDrag`, `isEdgeDragging`. Undo captures edge drags.
+- [`js/app.mjs`](../../js/app.mjs) `_placeDetectedOutline` threads the arrays onto the polygon via `setShrinkCandidates`. `_handleOverlayClick` picks edge-drag vs insert-vertex based on orientation × candidates × `altKey`. `_handleOverlayMouseMove` mirrors the decision in the hover cursor.
+- Also fixed a latent bug in `loadPolygons` where `scope` wasn't round-tripping through save/load (garage polygons came back as "building").
+
+**Verified via Playwright on docs/sample.pdf:**
+
+| Sheet | Candidates attached | Edge-drag behavior |
+|---|---|---|
+| p9 FOUNDATION PLAN | 15V / 34H detents | Left edge x=120.5 drag to 135 → snap to 141.2; top edge y=19.5 drag to 55 → snap to 65.4; undo returns to origin |
+| p5 EAST ELEVATION | 21V / 48H detents | Polygon placed with `wall_exterior` + `wood_2x6` preset, candidates attached |
+| hand-drawn polygon | null (graceful) | Edge-drag API no-ops gracefully; click router correctly falls through to insert-vertex |
+
+Zero console errors across the session.
+
+#### Alt-click opt-out — shipped at `5d6f8db`
+
+Edge-drag with unconditional snap left no path to insert a vertex on an orthogonal edge of a detected polygon — Andy hit this on a floor plan where the wall has a small jog (garage-door recess) that needed a new vertex, not a whole-edge nudge.
+
+Fix: holding Option/Alt during edge-click bypasses the edge-drag branch and falls through to `insertVertex` + vertex-drag. Hover cursor mirrors the modifier — `cell` when Alt is held over an otherwise edge-drag-capable edge, so the mode is visible before clicking.
+
+Stopgap until **C7c** surfaces both actions via a popup. Documenting as shipped because the modifier is usable in the interim; revisit when the popup lands.
+
+#### C7c + C7d — parked for next session
+
+Remaining C7 surface (not blocking the BfCA demo):
+
+- **C7c — ArchiCad-style popup** (~1–1.5 hr). On edge-click → "Drag edge" (default) + "Insert vertex". On vertex-click → "Drag point" (default) + "Delete vertex". Replaces the Alt-modifier with something discoverable; also closes the one real functional gap (no way to *delete* a vertex today — user has to drag-merge onto a neighbor).
+- **C7d — Oculus "tighten one step inward" button** (~30 min). Single control that snaps all 4 edges to the next inner detent simultaneously. Scope: button, not slider (Andy's default). Positioned near the polygon centroid label. Self-contained, no existing UI to modify.
+
+C6 (non-orthogonal refinement) and C8 (elevation outermost + eave-crop) remain on hold/deferred — edge-scrub + insert-vertex covers the common cases; revisit if real failures surface.
+
+#### Post-session branch state reference
+
+```
+main                                   85fa550   PR #12 merged
+└── Magic-Wand-Polish-2  (active)
+    ├── a0c81b4  MAGIC.md AT prereq notes
+    ├── 81d3358  AT-1/2/3 auto-tag
+    ├── f491e5a  MAGIC.md session-2 PM handoff
+    ├── bafaaa7  C7a+b edge-scrub
+    └── 5d6f8db  C7 Alt-click opt-out  (← tip)
+```
+
+### Status as of 2026-04-23 (session 2 PM EOD — AT-1/2/3 shipped; paused before C7)
+
+**Historical:** kept for context on AT-1/2/3 design + verification. Superseded by the session-3 block above for current branch state.
+
+- **Active branch**: `Magic-Wand-Polish-2`, tip **`81d3358`**. Two commits since `main` at `85fa550` (merged PR #12):
+  - `a0c81b4` — MAGIC.md: AT-1/2/3 prerequisites documented
+  - `81d3358` — AT-1/2/3 shipped (auto-tag on successful Auto-Detect)
+- **`main`** is at `85fa550` — PR #12 merged. `origin/main` mirrored.
+- **Dev server** is expected to be running on port 8000 (Andy asked to leave it up for the session). If not: `npm run serve` in the repo root.
+
+#### AT-1 / AT-2 / AT-3 — shipped 2026-04-23 PM at `81d3358`
+
+One cohesive commit to [`js/app.mjs`](../../js/app.mjs). Behavior changes to `_placeDetectedOutline()`:
+
+- **AT-1**: After polygon placement, `setTool("measure")` switches the active tool from navigate → polygon-edit mode so the user lands in the right context to refine.
+- **AT-2**: New `_autoTagFromPage(pageNum, textItems)` helper maps classification + title + page-text to `{component, scope, preset}`:
+  - `plan` + foundation title → `slab_foundation`
+  - `plan` + roof title → `roof_plan`
+  - `plan` + main/upper/lower/basement/ground/floor title → `slab_above_grade`
+  - `elevation` → `wall_exterior` + AT-3 preset
+  - `/\bgarage\b/i` in title OR anywhere in page-text → `scope = "garage"`
+- **AT-3**: `wall_exterior` polygons get `assembly_preset = "wood_2x6"` by default.
+- Status bar now appends the applied tag: `"Outline: 108.2 m², 4 vertices. tagged wall_exterior · wood_2x6."`
+
+**Signature change**: `_placeDetectedOutline(candidate, idx, total, textItems)` — the `textItems` arg is threaded through from `autoDetect()`'s `Promise.all` results. Two call sites (shrink-wrap success path + closed-polygon fallback) both pass it.
+
+**Verified via Playwright** on both fixtures. All classifications below work as expected unless noted:
+
+| Sheet | Classification | Component | Scope | Preset |
+|---|---|---|---|---|
+| Calgary p9 FOUNDATION | plan | slab_foundation | building | — |
+| Calgary p10 MAIN FLOOR | plan | slab_above_grade | building | — |
+| Calgary p12 ROOF | plan | roof_plan | building | — |
+| Calgary p5 EAST ELEV | elevation | wall_exterior | building | wood_2x6 |
+| Calgary p25 garage elev | elevation | wall_exterior | **building** ← LIMITATION | wood_2x6 |
+| Calgary p26 garage plan+section | section | — (C4 gate blocks) | — | — |
+| ArchiCad p4 A2.43 | plan | slab_foundation | building | — |
+| ArchiCad p5 A2.44 CD Main | plan | **— (title noise)** | building | — |
+| ArchiCad p6 A2.45 | plan | slab_above_grade | building | — |
+| ArchiCad p8 Elevation | elevation | wall_exterior | building | wood_2x6 |
+
+#### Known limitations (not bugs — design)
+
+1. **Calgary p25 garage-elevation sheet.** Blank title block + zero "garage" text anywhere on the page. Auto-tag outputs `wall_exterior` but scope stays `building`. User manually sets scope=garage via Summary Table scope dropdown. Confirmed by Andy 2026-04-23 PM — no realistic text signal to detect this.
+2. **ArchiCad A2.44 CD Main Level** has noisy title text (regex captures "Site Ad" from unrelated title-block labels). Component stays null — user picks from dropdown. Correct behavior; better than guessing wrong.
+3. **Attached-garage PDFs** where the main-floor plan has a "GARAGE" room label would trigger scope=garage via page-text scan. Acceptable false-positive: user overrides via Summary Table. pdfjs v4's per-glyph fragmentation coincidentally masks this on ArchiCad so the false-positive isn't observed today — but a word-level-text-emitting attached-garage PDF would see it.
+
+#### C7 planning snapshot (historical — C7a+b shipped in session 3; see top block)
+
+C7 was redesigned per Andy 2026-04-22 away from the original "inner/middle/outer buttons" spec (§3e). Replaced with per-edge drag handles + ArchiCad-style popup + oculus button, sliced into C7a / C7b / C7c / C7d. C7a+b shipped in session 3 with the following decisions locked in:
+
+- **Snap cluster radius** — cluster within 5pt.
+- **Oculus shape** — button (discrete one-step).
+- **Handle glyph** — OS-native resize cursors (`ew-resize` on vertical edges, `ns-resize` on horizontal) per Andy 2026-04-23 refinement; skips drawn handle-glyphs in favor of cursor affordance.
+
+#### Post-merge branch state reference
+
+```
+main                                   85fa550   PR #12 merged
+└── Magic-Wand-Polish-2  (active)
+    ├── a0c81b4  MAGIC.md AT prereq notes
+    └── 81d3358  AT-1/2/3 auto-tag (← tip)
+```
+
+### Status as of 2026-04-23 (session 2 PM — PR #12 merged; on Magic-Wand-Polish-2)
+
+- **[PR #12 merged](https://github.com/arossti/OpenBuilding/pull/12)** as commit `85fa550` on `main`. 21 commits from `3360f42` ancestor. Branch `Magic-Wand-Polish` deleted on both remotes + locally.
+- **Active branch**: `Magic-Wand-Polish-2`, off `main` at `85fa550`. No commits yet — next code lands from AT-1/2/3 onward (auto-tag prerequisites for C7).
+
+#### Auto-tag prerequisites (Andy 2026-04-23 PM) — AT-1 / AT-2 / AT-3
+
+Auto-Detect currently places a polygon but leaves it untagged — user has to manually set component-tag, assembly-preset, and scope before the BEAMweb bridge can use it. **Before C7's edge-scrub refinement lands**, auto-populate these from what the classifier already knows so the user gets a polygon that's "ready to import" on first click. Keeps the loop between Auto-Detect and BEAMweb bridge tight; C7 becomes optional refinement polish, not mandatory prep.
+
+**AT-1 — Tool-mode switch on successful detect.**
+After `autoDetect()` places the polygon, switch the active tool from "navigate" to polygon-edit mode so the user lands in the right context to refine (once C7 drag handles ship) or to click-adjust vertices today. Avoids the "I pressed D, something happened, now what?" disorientation. One `setTool("measure")` or similar call at the tail of `_placeDetectedOutline()`.
+
+**AT-2 — Auto-tag from sheet classification + title keywords.**
+`classifySheet()` + the title text already determine what the polygon represents on the current page. Wire the mapping in [`js/app.mjs`](../../js/app.mjs) after `_placeDetectedOutline()` places the polygon:
+
+| Sheet classification | Title keyword match | Component tag | Scope |
+|---|---|---|---|
+| `plan` | `/\bfoundation\b/i` | `slab_foundation` | building (default) |
+| `plan` | `/\broof\b/i` | `roof_plan` | building |
+| `plan` | `/\bmain\|upper\|lower\|basement\b/i` | `slab_above_grade` | building |
+| `plan` | `/\bgarage\b/i` | `slab_above_grade` | **garage** |
+| `elevation` | (any) | `wall_exterior` | building (default) |
+| `elevation` | `/\bgarage\b/i` | `wall_exterior` | **garage** |
+
+Garage detection extends both the plan + elevation paths — the scope flag (`building` | `garage`) differentiates, not a separate tag. Matches the Q23 per-polygon scope field shipped in PR #11 (`944c720`).
+
+If no keyword matches (e.g. generic "floor plan" with no qualifier), leave the tag unset and surface the usual dropdown for manual tagging. Don't guess with low confidence.
+
+**AT-3 — Default assembly preset = Wood 2×6 for exterior-wall polygons.**
+On elevation sheets where `wall_exterior` fires, set `assembly_preset: "wood_2x6"` by default. Matches the BfCA target user (single-family wood-framed new construction); user can swap via the existing `#assembly-preset` dropdown (values: wood_2x4, wood_2x6, wood_2x8, wood_2x10, steel_stud, icf, concrete_block, other). Plan-view tags get no preset by default — presets are a wall-assembly concept, not a slab/roof concept.
+
+**Why do this before C7.** Once AT-1/2/3 are in, a user's workflow is: (a) load PDF, (b) Auto-Calibrate on a plan sheet, (c) Auto-Detect → polygon appears tagged + scoped + presetted, ready for BEAMweb bridge import. That's the "something close they can adjust" line Andy drew 2026-04-22 — we're completing it before adding more UI surface. C7's edge-scrub then refines the polygon's SHAPE, but the polygon's SEMANTICS are already correct by default.
+
+**Commit plan for AT:**
+
+| Commit | Scope |
+|---|---|
+| AT-1 | Tool-mode switch post-detect (1-line fix + Playwright verify) |
+| AT-2 | Classification → tag + scope mapping in autoDetect; extend sheet-classifier garage-title detection if needed |
+| AT-3 | Wood-2×6 default for elevation-derived polygons; verify Summary Table inline Tag + Preset selects reflect the auto-set values |
+
+Stitch all three into one cohesive commit if the diff stays small; split if any of them surfaces ambiguity.
 
 ### Status as of 2026-04-23 (session 2 AM — PR #12 opened; cleanup pass)
 
@@ -282,9 +455,14 @@ Same layer-peel + shrink-wrap on elevation sheets, but always return the outermo
 | — | Classifier: sheetId row-scan + ANSI A-series prefix mapping | ✅ shipped 2026-04-23 | `5621a85` |
 | — | Pre-merge cleanup: eslint globals + prettier sweep | ✅ shipped 2026-04-23 | `fab1974` |
 | — | Matrix: stray `</body>` tag fix (prettier parse error) | ✅ shipped 2026-04-23 | `e0b5ae9` |
-| C6 | non-orthogonal refinement | 🅿️ on hold — see §0 C7 redesign (edge-scrub likely covers gables) |
-| C7 | ~~inner/middle/outer snap buttons~~ → **edge-scrub drag handles + oculus** | 🔜 next session (post-PR-#12 merge) | — |
-| C8 | elevation outermost + eave-crop | ⏳ deferred until C7 lands; p5 shrink-wrap already performs well without outermost-only tweak |
+| — | **PR #12 merged to `main`** | ✅ 2026-04-23 PM | `85fa550` |
+| AT-1/2/3 | Auto-tag polygon: tool-mode switch + classification → tag/scope + wood_2x6 default | ✅ shipped 2026-04-23 PM | `81d3358` |
+| C7a + C7b | Edge-scrub drag handles: expose wall-candidate arrays + per-edge drag + unconditional snap to detent; ew-resize / ns-resize cursor vocab | ✅ shipped 2026-04-23 | `bafaaa7` |
+| — | Alt-click opt-out: Option/Alt bypasses edge-drag into legacy insert-vertex (stopgap until C7c popup lands) | ✅ shipped 2026-04-23 | `5d6f8db` |
+| C6 | non-orthogonal refinement | 🅿️ on hold — edge-scrub + insert-vertex likely covers common cases |
+| C7c | ArchiCad-style popup: "Drag edge / Insert vertex" on edge, "Drag point / Delete vertex" on vertex — replaces Alt stopgap, adds delete-vertex (only real functional gap today) | 🔜 next session | — |
+| C7d | Oculus "tighten one step inward" button — single control closes all 4 edges to next inner detent | 🔜 next session | — |
+| C8 | elevation outermost + eave-crop | ⏳ deferred — p5 shrink-wrap already performs well |
 
 Each commit: end-to-end assertion before push, per the "tests before commits" rule. Push to both remotes (`openbuilding`, `origin`) after every commit.
 
