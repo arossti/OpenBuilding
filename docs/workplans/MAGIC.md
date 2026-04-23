@@ -1,10 +1,53 @@
 # PDF-Parser Magic-Wand Polish — workplan (MAGIC.md)
 
-> Polish pass on the PDF-Parser magic-wand (auto-detect) path. Adds dimension-string calibration with declared-vs-detected scale cross-check and a shrink-wrap building-outline detector that replaces the current "closed-polygon only" heuristic. Branch: `Magic-Wand-Polish`. Started 2026-04-22.
+> Polish pass on the PDF-Parser magic-wand (auto-detect) path. Adds dimension-string calibration with declared-vs-detected scale cross-check and a shrink-wrap building-outline detector that replaces the current "closed-polygon only" heuristic. Branch: `Magic-Wand-Polish-2` (successor to merged `Magic-Wand-Polish` → PR #12). Started 2026-04-22.
 
 ---
 
 ## 0. Cold-start handoff
+
+### Status as of 2026-04-23 (session 2 PM — PR #12 merged; on Magic-Wand-Polish-2)
+
+- **[PR #12 merged](https://github.com/arossti/OpenBuilding/pull/12)** as commit `85fa550` on `main`. 21 commits from `3360f42` ancestor. Branch `Magic-Wand-Polish` deleted on both remotes + locally.
+- **Active branch**: `Magic-Wand-Polish-2`, off `main` at `85fa550`. No commits yet — next code lands from AT-1/2/3 onward (auto-tag prerequisites for C7).
+
+#### Auto-tag prerequisites (Andy 2026-04-23 PM) — AT-1 / AT-2 / AT-3
+
+Auto-Detect currently places a polygon but leaves it untagged — user has to manually set component-tag, assembly-preset, and scope before the BEAMweb bridge can use it. **Before C7's edge-scrub refinement lands**, auto-populate these from what the classifier already knows so the user gets a polygon that's "ready to import" on first click. Keeps the loop between Auto-Detect and BEAMweb bridge tight; C7 becomes optional refinement polish, not mandatory prep.
+
+**AT-1 — Tool-mode switch on successful detect.**
+After `autoDetect()` places the polygon, switch the active tool from "navigate" to polygon-edit mode so the user lands in the right context to refine (once C7 drag handles ship) or to click-adjust vertices today. Avoids the "I pressed D, something happened, now what?" disorientation. One `setTool("measure")` or similar call at the tail of `_placeDetectedOutline()`.
+
+**AT-2 — Auto-tag from sheet classification + title keywords.**
+`classifySheet()` + the title text already determine what the polygon represents on the current page. Wire the mapping in [`js/app.mjs`](../../js/app.mjs) after `_placeDetectedOutline()` places the polygon:
+
+| Sheet classification | Title keyword match | Component tag | Scope |
+|---|---|---|---|
+| `plan` | `/\bfoundation\b/i` | `slab_foundation` | building (default) |
+| `plan` | `/\broof\b/i` | `roof_plan` | building |
+| `plan` | `/\bmain\|upper\|lower\|basement\b/i` | `slab_above_grade` | building |
+| `plan` | `/\bgarage\b/i` | `slab_above_grade` | **garage** |
+| `elevation` | (any) | `wall_exterior` | building (default) |
+| `elevation` | `/\bgarage\b/i` | `wall_exterior` | **garage** |
+
+Garage detection extends both the plan + elevation paths — the scope flag (`building` | `garage`) differentiates, not a separate tag. Matches the Q23 per-polygon scope field shipped in PR #11 (`944c720`).
+
+If no keyword matches (e.g. generic "floor plan" with no qualifier), leave the tag unset and surface the usual dropdown for manual tagging. Don't guess with low confidence.
+
+**AT-3 — Default assembly preset = Wood 2×6 for exterior-wall polygons.**
+On elevation sheets where `wall_exterior` fires, set `assembly_preset: "wood_2x6"` by default. Matches the BfCA target user (single-family wood-framed new construction); user can swap via the existing `#assembly-preset` dropdown (values: wood_2x4, wood_2x6, wood_2x8, wood_2x10, steel_stud, icf, concrete_block, other). Plan-view tags get no preset by default — presets are a wall-assembly concept, not a slab/roof concept.
+
+**Why do this before C7.** Once AT-1/2/3 are in, a user's workflow is: (a) load PDF, (b) Auto-Calibrate on a plan sheet, (c) Auto-Detect → polygon appears tagged + scoped + presetted, ready for BEAMweb bridge import. That's the "something close they can adjust" line Andy drew 2026-04-22 — we're completing it before adding more UI surface. C7's edge-scrub then refines the polygon's SHAPE, but the polygon's SEMANTICS are already correct by default.
+
+**Commit plan for AT:**
+
+| Commit | Scope |
+|---|---|
+| AT-1 | Tool-mode switch post-detect (1-line fix + Playwright verify) |
+| AT-2 | Classification → tag + scope mapping in autoDetect; extend sheet-classifier garage-title detection if needed |
+| AT-3 | Wood-2×6 default for elevation-derived polygons; verify Summary Table inline Tag + Preset selects reflect the auto-set values |
+
+Stitch all three into one cohesive commit if the diff stays small; split if any of them surfaces ambiguity.
 
 ### Status as of 2026-04-23 (session 2 AM — PR #12 opened; cleanup pass)
 
