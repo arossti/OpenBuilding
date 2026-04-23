@@ -22,12 +22,41 @@ export function parseTitleBlock(textItems, pageWidth, pageHeight) {
   // more robust than guessing which corner the title block lives in.
   var result = { sheetId: null, sheetTitle: null, scale: null, raw: textItems };
 
+  // First try raw-item match — works on Calgary-style CAD exports that
+  // emit the sheet id as a single text item.
   var sheetIdPattern = /^[A-Z]\d+\.\d+$/;
   for (var i = 0; i < textItems.length; i++) {
     var s = textItems[i].str.trim();
     if (sheetIdPattern.test(s)) {
       result.sheetId = s;
       break;
+    }
+  }
+  // Fallback — scan spatial-joined rows for the sheetId pattern embedded
+  // in longer strings. Catches per-glyph text (pdfjs v4 on ArchiCad-
+  // style CID-font PDFs) where "A2.44" arrives as five separate items
+  // "A" + "2" + "." + "4" + "4" and the raw-item loop misses it.
+  //
+  // Pages often contain multiple sheet-id-shaped strings — section and
+  // elevation callouts ("A4.01", "A5.05", etc.) scattered across the
+  // drawing. The SHEET'S OWN id is conventionally the largest-font one,
+  // sitting alone in the title block. Collect all candidates, then pick
+  // the largest fontSize (tie-break on lowest-on-page, since title
+  // blocks conventionally live at the bottom-right).
+  if (!result.sheetId) {
+    var idInRow = /\b([A-Z]\d+\.\d+)\b/;
+    var rows = _clusterRows(textItems);
+    var candidates = [];
+    for (var r = 0; r < rows.length; r++) {
+      var m = rows[r].text.match(idInRow);
+      if (m) candidates.push({ id: m[1], fontSize: rows[r].fontSize || 0, y: rows[r].y });
+    }
+    if (candidates.length > 0) {
+      candidates.sort(function (a, b) {
+        if (Math.abs(a.fontSize - b.fontSize) > 0.5) return b.fontSize - a.fontSize;
+        return b.y - a.y;
+      });
+      result.sheetId = candidates[0].id;
     }
   }
 
@@ -261,9 +290,18 @@ export function classifySheet(sheetId, sheetTitle) {
   if (/\b3d\b|\bview/.test(title)) return CLASS.OTHER;
 
   if (sheetId) {
-    var prefix = sheetId.replace(/[\d.]+$/, "");
-    if (SHEET_PREFIXES[prefix.substring(0, 2)]) return SHEET_PREFIXES[prefix.substring(0, 2)];
-    if (SHEET_PREFIXES[prefix.substring(0, 1)]) return SHEET_PREFIXES[prefix.substring(0, 1)];
+    // ANSI A-series convention (Andy 2026-04-23): A0/A1 general/site,
+    // A2/A3 plans, A4 elevations, A5 sections, etc. Extract leading
+    // letter + first digit block (e.g. "A2.44" → "A2") and look up
+    // 2-char prefix first, 1-char fallback. The old regex
+    // `/[\d.]+$/` stripped ALL trailing digits/dots and left just "A",
+    // which SHEET_PREFIXES doesn't key on → everything misclassified.
+    var prefixMatch = sheetId.match(/^([A-Z]+)(\d*)/);
+    var letters = prefixMatch ? prefixMatch[1] : "";
+    var firstDigit = prefixMatch && prefixMatch[2] ? prefixMatch[2].charAt(0) : "";
+    var twoChar = letters.charAt(0) + firstDigit;
+    if (twoChar.length === 2 && SHEET_PREFIXES[twoChar]) return SHEET_PREFIXES[twoChar];
+    if (letters && SHEET_PREFIXES[letters.charAt(0)]) return SHEET_PREFIXES[letters.charAt(0)];
   }
 
   return CLASS.OTHER;
