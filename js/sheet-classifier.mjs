@@ -127,13 +127,13 @@ function _finalizeRow(items) {
   items.sort(function (a, b) {
     return a.x - b.x;
   });
-  var text = items
-    .map(function (i) {
-      return i.str;
-    })
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
+  // Spatial join — insert a space only when the gap between adjacent
+  // items exceeds half a character width. Naive " ".join() produces
+  // "F O U N D A T I O N P L A N" on pdfjs v4 per-glyph output
+  // (ArchiCad exports) and breaks the downstream \bplan\b regex;
+  // spatial join preserves real word boundaries while collapsing
+  // per-glyph runs back into "FOUNDATION PLAN".
+  var text = _spatialJoin(items).replace(/\s+/g, " ").trim();
   var fontSize = items.reduce(function (m, i) {
     return Math.max(m, i.fontSize || 0);
   }, 0);
