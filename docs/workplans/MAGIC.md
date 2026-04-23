@@ -6,9 +6,75 @@
 
 ## 0. Cold-start handoff
 
+### Status as of 2026-04-23 (session 3 — C7a+b + Alt opt-out shipped; paused before C7c/d for BfCA demo)
+
+**Successor agent: read this block first.** Andy is presenting this state to BfCA, so the branch is parked here intentionally. Resume with C7c (popup) or C7d (oculus) — see bottom of this block. §0 sub-sections below are historical detail.
+
+- **Active branch**: `Magic-Wand-Polish-2`, tip **`5d6f8db`**. Three code commits since `main` at `85fa550` (PR #12):
+  - `81d3358` — AT-1/2/3 auto-tag (session 2 PM)
+  - `bafaaa7` — C7a + C7b edge-scrub (per-edge drag + snap to wall-candidate detents)
+  - `5d6f8db` — C7 Alt-click opt-out (Option/Alt bypasses edge-drag → legacy insert-vertex)
+- **Dev server**: `npm run serve` on port 8000 (no-cache).
+
+#### C7a + C7b — shipped at `bafaaa7`
+
+**What works now.** On an Auto-Detected polygon:
+
+- Hover a vertical orthogonal edge → cursor is `ew-resize` (↔). Drag it → both endpoints of that edge slide in x together; release snaps to the nearest `wallVertPositions` detent.
+- Hover a horizontal orthogonal edge → cursor is `ns-resize` (↕). Same behavior on y.
+- Hover a vertex → `move` cursor, classic vertex drag still works.
+- Hover anywhere the edge-drag affordance doesn't apply (hand-drawn polygon, non-orthogonal edge, or Alt held) → `cell` cursor → click inserts a vertex.
+- Snap is **unconditional** — the edge always settles on the nearest detent when you release. Matches Andy's "scrub through candidates" language. Between-detent placement is explicitly an insert-vertex operation.
+
+**Implementation landmarks:**
+
+- `shrinkWrapBuilding` in [`js/shrink-wrap.mjs`](../../js/shrink-wrap.mjs) now returns `wallVertPositions` (x-coords) + `wallHorizPositions` (y-coords), clustered within 5pt. Clustering collapses partner-stroke duplicates (inner + outer face of the same wall) but preserves distinct walls ≥10pt apart.
+- [`js/polygon-tool.mjs`](../../js/polygon-tool.mjs) polygon record gains `_shrinkCandidates: {vert, horiz}`. New API: `edgeOrientation`, `setShrinkCandidates`, `getShrinkCandidates`, `startEdgeDrag / moveEdgeDrag / endEdgeDrag`, `isEdgeDragging`. Undo captures edge drags.
+- [`js/app.mjs`](../../js/app.mjs) `_placeDetectedOutline` threads the arrays onto the polygon via `setShrinkCandidates`. `_handleOverlayClick` picks edge-drag vs insert-vertex based on orientation × candidates × `altKey`. `_handleOverlayMouseMove` mirrors the decision in the hover cursor.
+- Also fixed a latent bug in `loadPolygons` where `scope` wasn't round-tripping through save/load (garage polygons came back as "building").
+
+**Verified via Playwright on docs/sample.pdf:**
+
+| Sheet | Candidates attached | Edge-drag behavior |
+|---|---|---|
+| p9 FOUNDATION PLAN | 15V / 34H detents | Left edge x=120.5 drag to 135 → snap to 141.2; top edge y=19.5 drag to 55 → snap to 65.4; undo returns to origin |
+| p5 EAST ELEVATION | 21V / 48H detents | Polygon placed with `wall_exterior` + `wood_2x6` preset, candidates attached |
+| hand-drawn polygon | null (graceful) | Edge-drag API no-ops gracefully; click router correctly falls through to insert-vertex |
+
+Zero console errors across the session.
+
+#### Alt-click opt-out — shipped at `5d6f8db`
+
+Edge-drag with unconditional snap left no path to insert a vertex on an orthogonal edge of a detected polygon — Andy hit this on a floor plan where the wall has a small jog (garage-door recess) that needed a new vertex, not a whole-edge nudge.
+
+Fix: holding Option/Alt during edge-click bypasses the edge-drag branch and falls through to `insertVertex` + vertex-drag. Hover cursor mirrors the modifier — `cell` when Alt is held over an otherwise edge-drag-capable edge, so the mode is visible before clicking.
+
+Stopgap until **C7c** surfaces both actions via a popup. Documenting as shipped because the modifier is usable in the interim; revisit when the popup lands.
+
+#### C7c + C7d — parked for next session
+
+Remaining C7 surface (not blocking the BfCA demo):
+
+- **C7c — ArchiCad-style popup** (~1–1.5 hr). On edge-click → "Drag edge" (default) + "Insert vertex". On vertex-click → "Drag point" (default) + "Delete vertex". Replaces the Alt-modifier with something discoverable; also closes the one real functional gap (no way to *delete* a vertex today — user has to drag-merge onto a neighbor).
+- **C7d — Oculus "tighten one step inward" button** (~30 min). Single control that snaps all 4 edges to the next inner detent simultaneously. Scope: button, not slider (Andy's default). Positioned near the polygon centroid label. Self-contained, no existing UI to modify.
+
+C6 (non-orthogonal refinement) and C8 (elevation outermost + eave-crop) remain on hold/deferred — edge-scrub + insert-vertex covers the common cases; revisit if real failures surface.
+
+#### Post-session branch state reference
+
+```
+main                                   85fa550   PR #12 merged
+└── Magic-Wand-Polish-2  (active)
+    ├── a0c81b4  MAGIC.md AT prereq notes
+    ├── 81d3358  AT-1/2/3 auto-tag
+    ├── f491e5a  MAGIC.md session-2 PM handoff
+    ├── bafaaa7  C7a+b edge-scrub
+    └── 5d6f8db  C7 Alt-click opt-out  (← tip)
+```
+
 ### Status as of 2026-04-23 (session 2 PM EOD — AT-1/2/3 shipped; paused before C7)
 
-**Successor agent: read this block first.** Andy paused the session after AT-1/2/3 landed. Context window was maxed — this block is the complete handoff; §0 sub-sections below are historical detail.
+**Historical:** kept for context on AT-1/2/3 design + verification. Superseded by the session-3 block above for current branch state.
 
 - **Active branch**: `Magic-Wand-Polish-2`, tip **`81d3358`**. Two commits since `main` at `85fa550` (merged PR #12):
   - `a0c81b4` — MAGIC.md: AT-1/2/3 prerequisites documented
@@ -53,26 +119,13 @@ One cohesive commit to [`js/app.mjs`](../../js/app.mjs). Behavior changes to `_p
 2. **ArchiCad A2.44 CD Main Level** has noisy title text (regex captures "Site Ad" from unrelated title-block labels). Component stays null — user picks from dropdown. Correct behavior; better than guessing wrong.
 3. **Attached-garage PDFs** where the main-floor plan has a "GARAGE" room label would trigger scope=garage via page-text scan. Acceptable false-positive: user overrides via Summary Table. pdfjs v4's per-glyph fragmentation coincidentally masks this on ArchiCad so the false-positive isn't observed today — but a word-level-text-emitting attached-garage PDF would see it.
 
-#### C7 is next — edge-scrub drag handles + oculus (decisions pending)
+#### C7 planning snapshot (historical — C7a+b shipped in session 3; see top block)
 
-C7 is redesigned per Andy 2026-04-22 — the original "inner/middle/outer buttons" spec in §3e is abandoned. Replace with:
+C7 was redesigned per Andy 2026-04-22 away from the original "inner/middle/outer buttons" spec (§3e). Replaced with per-edge drag handles + ArchiCad-style popup + oculus button, sliced into C7a / C7b / C7c / C7d. C7a+b shipped in session 3 with the following decisions locked in:
 
-- **Per-edge drag handles** on the detected polygon that snap through `wallVertPositions` / `wallHorizPositions` (arrays of candidate x/y values computed inside `shrinkWrapBuilding` in [`js/shrink-wrap.mjs`](../../js/shrink-wrap.mjs) — need to expose on the returned polygon record).
-- **ArchiCad-style popup** distinguishing edge-click from vertex-click: on edge → "Drag edge" (default) + "Insert vertex"; on vertex → "Drag point" (default) + "Delete vertex". Andy showed screenshots 2026-04-23 AM.
-- **Oculus control** — single "tighten inward one step" button that closes all 4 edges to next inner candidate.
-
-**Proposed slicing** (my last message to Andy before pause):
-- **C7a** hit-test distinguishes vertex vs edge + cursor feedback (~30 min)
-- **C7b** expose wall-candidate arrays + edge-drag snap (~1 hr)
-- **C7c** ArchiCad-style popup toolbar (~1.5 hr)
-- **C7d** oculus "tighten one step" button (~30 min)
-
-**Three outstanding decisions from Andy** before C7 starts (I said "my defaults if you just say go":
-- **Snap cluster radius** — cluster candidates within 5pt, or every candidate individually? *Default: cluster within 5pt.*
-- **Oculus shape** — button ("tighten one step", discrete) or slider (0–100%, continuous)? *Default: button.*
-- **Handle glyph** — small circle with arrow, OSX `<|>` chevron, or colored tick? *Default: small circle with directional arrow hint.*
-
-Ask Andy on resume; if he says "just go", ship C7a+b as one commit with defaults above.
+- **Snap cluster radius** — cluster within 5pt.
+- **Oculus shape** — button (discrete one-step).
+- **Handle glyph** — OS-native resize cursors (`ew-resize` on vertical edges, `ns-resize` on horizontal) per Andy 2026-04-23 refinement; skips drawn handle-glyphs in favor of cursor affordance.
 
 #### Post-merge branch state reference
 
@@ -404,9 +457,12 @@ Same layer-peel + shrink-wrap on elevation sheets, but always return the outermo
 | — | Matrix: stray `</body>` tag fix (prettier parse error) | ✅ shipped 2026-04-23 | `e0b5ae9` |
 | — | **PR #12 merged to `main`** | ✅ 2026-04-23 PM | `85fa550` |
 | AT-1/2/3 | Auto-tag polygon: tool-mode switch + classification → tag/scope + wood_2x6 default | ✅ shipped 2026-04-23 PM | `81d3358` |
-| C6 | non-orthogonal refinement | 🅿️ on hold — see §0 C7 redesign (edge-scrub likely covers gables) |
-| C7 | ~~inner/middle/outer snap buttons~~ → **edge-scrub drag handles + oculus** | 🔜 next session (decisions pending; see §0 EOD block) | — |
-| C8 | elevation outermost + eave-crop | ⏳ deferred until C7 lands; p5 shrink-wrap already performs well without outermost-only tweak |
+| C7a + C7b | Edge-scrub drag handles: expose wall-candidate arrays + per-edge drag + unconditional snap to detent; ew-resize / ns-resize cursor vocab | ✅ shipped 2026-04-23 | `bafaaa7` |
+| — | Alt-click opt-out: Option/Alt bypasses edge-drag into legacy insert-vertex (stopgap until C7c popup lands) | ✅ shipped 2026-04-23 | `5d6f8db` |
+| C6 | non-orthogonal refinement | 🅿️ on hold — edge-scrub + insert-vertex likely covers common cases |
+| C7c | ArchiCad-style popup: "Drag edge / Insert vertex" on edge, "Drag point / Delete vertex" on vertex — replaces Alt stopgap, adds delete-vertex (only real functional gap today) | 🔜 next session | — |
+| C7d | Oculus "tighten one step inward" button — single control closes all 4 edges to next inner detent | 🔜 next session | — |
+| C8 | elevation outermost + eave-crop | ⏳ deferred — p5 shrink-wrap already performs well |
 
 Each commit: end-to-end assertion before push, per the "tests before commits" rule. Push to both remotes (`openbuilding`, `origin`) after every commit.
 
