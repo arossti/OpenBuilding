@@ -37,6 +37,49 @@ This collapses the earlier C7 spec (inner/middle/outer buttons — see §3e belo
 
 **Pick up 2026-04-23 AM** with edge-scrub UI design + implementation. Keep the current shrink-wrap output as the initial polygon; drag handles refine. Existing polygon-edit paths in `js/polygon-tool.mjs` likely cover most of the plumbing.
 
+#### Lessons for the successor agent (2026-04-22)
+
+The landmines hit this session and the patterns that worked — read before touching C7.
+
+**pdfjs version handling is the #1 trap.** The browser vendors `lib/pdf.min.mjs` @ **4.9.155**; npm `pdfjs-dist` @ **5.6.205** is used by node scripts. Two observable differences:
+
+1. **`constructPath` encoding.** v4: `args[0]=subOps array`, `args[1]=flat coords`. v5: `args[0]=trailing paint op`, `args[1]=[coord buffer with inline DrawOPS codes]`. Handled in [`js/geometry-walk.mjs`](../../js/geometry-walk.mjs) with runtime `Array.isArray(args[0])` dispatch. Don't break this — both sides depend on it.
+2. **Text-item granularity.** v4 emits **per-character** text items on many CAD PDFs (ArchiCad with CID fonts is the canonical offender — 3939 items on p4 vs 316 on v5). v5 coalesces into words. **Every textItems consumer needs spatial-join consolidation.** Patched twice this session: `5bd02b4` added `consolidateTextItems` to `dim-extract`, `62a4659` swapped `_finalizeRow`'s `" ".join()` for `_spatialJoin()` in `sheet-classifier`. **Any future textItems consumer will hit this.** Fix-forward candidate: factor consolidation into `pdf-loader.getTextContent()` so it's free for all downstream code.
+
+**Test fixtures are v5-based and hide v4-specific bugs.** `schema/scripts/build-dim-fixture.mjs` runs on npm pdfjs (v5), produces word-level text. `npm run test:dim-extract` and `npm run test:layer-peel` passed all green while the browser was hard-failing on ArchiCad. **Playwright MCP against real PDFs is the only safety net for the v4 fragmentation class of bugs.** Smoke-test BOTH `docs/sample.pdf` AND `docs/pdf-samples/sample-metric.pdf` after any textItems-touching change.
+
+**Shrink-wrap tuning history** (so C7 doesn't re-fight ghosts):
+- Loose thresholds (30pt min / 3-35pt offset / 15pt overlap / min-max bbox) → bboxes 60–90% of page. Too loose.
+- Chain-rejection via component BFS on parallel-partner graph → **catastrophically aggressive** on p9 (bbox collapsed to 2.5%). Legitimate walls connect through shared overlap with dim-strip parallels; rejecting chains kills walls too.
+- Winner: **50pt min / 3-25pt offset / 40pt overlap + 5-95 percentile trim of wall positions**, clipped to drawingAreaBbox. Still 20–40% loose on floor plans (porches + dim-extension strips bleed in). Edge-scrub (C7) is the design answer — stop tuning thresholds, let the user drag.
+
+**Layer-peel kept deliberately minimal.** Original spec had 5 classes (pageBorder / titleblock / dimensionGroup / textBlock / drawing). The titleblock-corner detection was too fragile — dim callouts extending into the TR quadrant confounded the corner-cluster signal on p4. Shipped **2 classes (pageBorder / drawing)** via position-based classification (not topology). ArchiCad's 3D-flatten exports connect everything into one mega-component, so topology-first classification is a trap. **Position-first cuts cleanly.**
+
+**CAD conventions that informed the tuning** (so future tweaks have the mental model):
+- Walls 0.3–0.5 m thick, drawn as 2 parallel strokes (per Andy 2026-04-22).
+- Dim-extension strips are 3+ parallel strokes spaced ~18–25 pt on p9. Look like walls to naive filters.
+- ArchiCad 3D-flatten: sheet border + titleblock + drawing are one connected graph.
+- Title blocks vary by office convention — TR (ArchiCad default), but Calgary DP/BP sample has title text in TL. Don't hardcode corner.
+- Section sheets: **ruler-only**, no fill capture (F2F / F2C heights). Wand disabled per C4 scope gate.
+- Plan sheets: **inner face default** (BEAM takeoff convention). Elevation sheets: **outermost default**.
+
+**Verification discipline that paid off.** Every commit passed at minimum `npm run test:dim-extract` + `npm run test:layer-peel` + a Playwright smoke on one real PDF before push. The ArchiCad regression that landed after C4 was caught at commit time by a Playwright run against the metric sample — would have been invisible to fixture tests alone.
+
+**Loose assertions beat over-tuned ones.** `test:layer-peel` asserts `drawingAreaBbox inside page`, `drawing segs ≥ 500`, not exact coordinates. Catches real breakage without locking in threshold values that change when rules tune. Extend this pattern for shrink-wrap-polygon assertions if/when they land.
+
+**File-encoding gotchas when editing .mjs source:**
+- `m²` in the source is literally `m²` (6 ASCII chars forming an escape sequence), not the Unicode glyph. Edit tool's `old_string` must match the escape form, not the rendered char.
+- Box-drawing `─` in comment headers IS raw UTF-8 (3 bytes U+2500). So `/* ── ... */` literal char matches.
+- Rule of thumb: `od -c <file>` or `grep` to verify byte-level content before crafting `old_string` with any non-ASCII character.
+
+**Git / commit discipline locked in:**
+- Two remotes, both pushed after every meaningful change: `openbuilding` (arossti/OpenBuilding — PRs land here), `origin` (bfca-labs/at — mirror).
+- Never push to `main`, never force-push, never `--no-verify`.
+- Commit messages via `git commit -F /tmp/msg.txt` — the heredoc-quoting gremlin bites on em-dashes and similar.
+- Every commit: Playwright smoke + relevant fixture tests BEFORE push, per the "tests before commits" rule.
+
+**When algo-perfection is hard, pivot to direct manipulation.** The C7 redesign (scrub handles + oculus replacing inner/middle/outer buttons) is the design pattern here. Shrink-wrap's `wallVert` / `wallHoriz` position arrays are already the candidate set — UI to let the user sweep through them is less work than more threshold tuning, and more predictable for the user.
+
 ### Status as of 2026-04-22 (session 1 — planning)
 
 - **Branch**: `Magic-Wand-Polish`, off `main` at `3360f42` (post-PR-#11 handoff commit). No code yet — this doc is the plan; commits land from C1 onward.
