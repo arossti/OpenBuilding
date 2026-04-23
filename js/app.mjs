@@ -2114,7 +2114,7 @@ function autoDetect() {
 
       if (wrap && wrap.polygon) {
         var polyArea = _polygonArea(wrap.polygon);
-        _placeDetectedOutline({ path: wrap.polygon, area: polyArea }, 0, 1);
+        _placeDetectedOutline({ path: wrap.polygon, area: polyArea }, 0, 1, textItems);
         return;
       }
 
@@ -2122,7 +2122,7 @@ function autoDetect() {
       // proves itself in real use; then retire per MAGIC.md C5 discussion).
       var candidates = VectorSnap.getClosedPathsByArea(pageNum, size.width, size.height);
       if (candidates.length > 0) {
-        _placeDetectedOutline(candidates[0], 0, 1);
+        _placeDetectedOutline(candidates[0], 0, 1, textItems);
         setStatus(
           "Shrink-wrap did not find wall pairs (" +
             (wrap ? wrap.reason : "no drawing segments") +
@@ -2152,7 +2152,7 @@ function _polygonArea(pts) {
   return Math.abs(a) / 2;
 }
 
-function _placeDetectedOutline(candidate, idx, total) {
+function _placeDetectedOutline(candidate, idx, total, textItems) {
   // Remove the previous detected polygon if cycling
   var polys = PolygonTool.getPolygons(_currentPage);
   for (var i = polys.length - 1; i >= 0; i--) {
@@ -2183,14 +2183,98 @@ function _placeDetectedOutline(candidate, idx, total) {
   }
   PolygonTool.closePolygon();
 
+  // AT-2 / AT-3: auto-tag the placed polygon from the sheet's classification
+  // + title keywords. Slab / roof / wall component tag + building/garage
+  // scope + a wood-2x6 default preset for exterior walls. Fills in what
+  // Andy calls "automated polygon data" so a user can click Auto-Detect
+  // and immediately hand the result to the BEAMweb bridge without
+  // additional manual tagging.
+  var polysNow = PolygonTool.getPolygons(_currentPage);
+  var newPolyIdx = polysNow.length - 1;
+  var autoTag = _autoTagFromPage(_currentPage, textItems);
+  if (newPolyIdx >= 0 && autoTag.component) {
+    PolygonTool.setComponent(_currentPage, newPolyIdx, autoTag.component);
+    if (autoTag.scope === "garage") {
+      PolygonTool.setScope(_currentPage, newPolyIdx, "garage");
+    }
+    if (autoTag.preset) {
+      PolygonTool.setAssemblyPreset(_currentPage, newPolyIdx, autoTag.preset);
+    }
+  }
+
   _refreshMeasurements();
   ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
   Viewer.requestRedraw();
 
+  // AT-1: switch to polygon-edit ("measure") mode so the user is in the
+  // right context to refine the polygon — drag vertices today, drag edges
+  // once C7 ships. Avoids the "D pressed, polygon appeared, now what?"
+  // disorientation.
+  setTool("measure");
+
   var areaM2 = ScaleManager.pdfAreaToM2(_currentPage, candidate.area);
   var areaStr = areaM2 !== null ? areaM2.toFixed(1) + " m\u00B2" : "(uncalibrated)";
   var hint = total > 1 ? " Press D again to cycle (" + (idx + 1) + "/" + total + ")." : "";
-  setStatus("Outline: " + areaStr + ", " + verts.length + " vertices." + hint, "ready");
+  var tagStr = "";
+  if (autoTag && autoTag.component) {
+    tagStr = " tagged " + autoTag.component;
+    if (autoTag.scope === "garage") tagStr += " (garage)";
+    if (autoTag.preset) tagStr += " · " + autoTag.preset;
+    tagStr += ".";
+  }
+  setStatus("Outline: " + areaStr + ", " + verts.length + " vertices." + tagStr + hint, "ready");
+}
+
+/**
+ * AT-2: derive the polygon's component tag + scope + assembly preset
+ * from the page's sheet classification and title + page-text keywords.
+ * Returns a `{component, scope, preset}` triple; any field may be null /
+ * "building" default when classification doesn't resolve a specific value.
+ *
+ * Mapping table (MAGIC.md §0 AT prerequisites):
+ *   plan + foundation       → slab_foundation,    building|garage, no preset
+ *   plan + roof             → roof_plan,          building|garage, no preset
+ *   plan + main/upper/...   → slab_above_grade,   building|garage, no preset
+ *   elevation               → wall_exterior,      building|garage, wood_2x6
+ *   "garage" text on page   → scope = "garage" regardless of classification
+ *   anything else           → no auto-tag; user picks manually.
+ *
+ * Garage detection scans the FULL page text (not just the truncated
+ * title) because title-blocks on garage sheets are frequently blank in
+ * Calgary-style sample sets — the garage keyword only shows up as a
+ * drawing caption ("GARAGE FLOOR PLAN") or callout ("GARAGE SLAB").
+ * Trade-off: attached-garage PDFs (where the main-floor plan has a
+ * "GARAGE" room label INSIDE the drawing) will also flip scope to
+ * garage, which is wrong for the house polygon — user can manually
+ * override via the Summary Table scope dropdown. Opt for auto-correct-
+ * most-cases over miss-all-garages.
+ */
+function _autoTagFromPage(pageNum, textItems) {
+  var page = ProjectStore.getPage(pageNum);
+  if (!page) return { component: null, scope: "building", preset: null };
+  var cls = page.classification;
+  var title = (page.sheetTitle || "").toLowerCase();
+  var isGarage = /\bgarage\b/.test(title) || _pageTextContainsGarage(textItems);
+  var scope = isGarage ? "garage" : "building";
+
+  if (cls === "plan") {
+    if (/\bfoundation\b/.test(title)) return { component: "slab_foundation", scope: scope, preset: null };
+    if (/\broof\b/.test(title)) return { component: "roof_plan", scope: scope, preset: null };
+    if (/\b(main|upper|lower|basement|ground|floor)\b/.test(title) || isGarage) {
+      return { component: "slab_above_grade", scope: scope, preset: null };
+    }
+  } else if (cls === "elevation") {
+    return { component: "wall_exterior", scope: scope, preset: "wood_2x6" };
+  }
+  return { component: null, scope: scope, preset: null };
+}
+
+function _pageTextContainsGarage(textItems) {
+  if (!textItems || !textItems.length) return false;
+  for (var i = 0; i < textItems.length; i++) {
+    if (/\bgarage\b/i.test(textItems[i].str || "")) return true;
+  }
+  return false;
 }
 
 /* ── Auto-calibrate from dimension strings (MAGIC C3) ───── */
