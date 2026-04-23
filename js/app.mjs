@@ -695,17 +695,22 @@ function _handleOverlayClick(e) {
 
   // Priority 2: Click near an edge.
   //  - If the polygon carries shrink-wrap candidates AND the edge is
-  //    orthogonal, drag the whole edge perpendicular to itself; release
-  //    snaps to the nearest wall-candidate detent (C7b).
-  //  - Otherwise fall back to the legacy behavior: insert a new vertex
-  //    at the closest point and drag it.
+  //    orthogonal AND the user is NOT holding Option/Alt, drag the whole
+  //    edge perpendicular to itself; release snaps to the nearest wall-
+  //    candidate detent (C7b).
+  //  - Option/Alt-click is the explicit opt-out: falls through to the
+  //    legacy insert-vertex path. Needed when the user wants to capture
+  //    a jog in the wall rather than nudge the whole edge. C7c will
+  //    surface this via an ArchiCad-style popup instead of a modifier.
+  //  - Non-orthogonal edges and hand-drawn polygons always use the
+  //    insert-vertex path.
   var edgeHit = PolygonTool.hitTestEdge(_currentPage, pt, hitRadius);
   if (edgeHit && !PolygonTool.isDrawing() && !skipsPolygonEdit) {
     var polysForEdge = PolygonTool.getPolygons(_currentPage);
     var edgePoly = polysForEdge[edgeHit.polyIdx];
     var orient = PolygonTool.edgeOrientation(edgePoly, edgeHit.edgeIdx);
     var hasCandidates = !!(edgePoly && edgePoly._shrinkCandidates);
-    if (orient && hasCandidates) {
+    if (orient && hasCandidates && !e.altKey) {
       if (PolygonTool.startEdgeDrag(_currentPage, edgeHit.polyIdx, edgeHit.edgeIdx)) {
         Viewer.onOverlayMouseMove(_handleDragMove);
         _bindDragEnd();
@@ -1239,7 +1244,9 @@ function _handleOverlayMouseMove(e) {
   //   move      — over a vertex (drag vertex)
   //   ew-resize — over a vertical orthogonal edge of a shrink-wrap polygon (edge-drag, x-axis)
   //   ns-resize — over a horizontal orthogonal edge of a shrink-wrap polygon (edge-drag, y-axis)
-  //   cell      — over any edge without an edge-drag affordance (insert-vertex fallback)
+  //   cell      — over any edge without an edge-drag affordance, or when
+  //               Option/Alt is held (explicit opt-out into insert-vertex mode)
+  var altHeld = !!(e && e.altKey);
   var wrap = document.getElementById("viewer-wrap");
   if (!PolygonTool.isDrawing() && !_rectStart && _currentTool !== "polyline") {
     var vertHit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
@@ -1253,7 +1260,7 @@ function _handleOverlayMouseMove(e) {
       var hoverPoly = polysForHover[edgeHit.polyIdx];
       var hoverOrient = PolygonTool.edgeOrientation(hoverPoly, edgeHit.edgeIdx);
       var hoverHasCands = !!(hoverPoly && hoverPoly._shrinkCandidates);
-      if (hoverOrient && hoverHasCands) {
+      if (hoverOrient && hoverHasCands && !altHeld) {
         if (wrap) wrap.style.cursor = hoverOrient === "horizontal" ? "ns-resize" : "ew-resize";
       } else if (wrap) {
         wrap.style.cursor = "cell";
