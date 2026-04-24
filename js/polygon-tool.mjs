@@ -484,89 +484,9 @@ function _drawPoly(ctx, poly) {
       var y3 = y2 + 22;
       ctx.fillText(line3, center.x, y3);
     }
-
-    // C7d — Oculus button anchored to the pill's top-right corner.
-    // Drawn only on polygons that still carry shrink-wrap candidates;
-    // hand-drawn polygons (and polygons whose candidates were stripped)
-    // get nothing here. Clicking the glyph runs tightenOneStep.
-    if (poly._shrinkCandidates) {
-      var ocR = 12;
-      var ocX = center.x + pillW / 2 + ocR + 4;
-      var ocY = pillTop + ocR + 2;
-      _drawOculusGlyph(ctx, ocX, ocY, ocR);
-      // Cache in canvas coords for hit-testing (redrawn every frame,
-      // so pan / zoom updates stay in sync).
-      poly._oculusCanvasXY = { x: ocX, y: ocY, r: ocR };
-    } else {
-      poly._oculusCanvasXY = null;
-    }
-  } else {
-    poly._oculusCanvasXY = null;
   }
 
   ctx.restore();
-}
-
-/**
- * C7d — iris-aperture icon suggesting "walls closing in." Drawn at
- * canvas coords (cx, cy) with outer radius r. Uses the shared AREA_EDGE
- * cyan so it visually ties to the polygon it annotates.
- */
-function _drawOculusGlyph(ctx, cx, cy, r) {
-  ctx.save();
-  // Filled dark backdrop so the icon reads against any page content.
-  ctx.fillStyle = "rgba(0,0,0,0.75)";
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.fill();
-  // Outer ring.
-  ctx.strokeStyle = AREA_EDGE;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(cx, cy, r - 1, 0, Math.PI * 2);
-  ctx.stroke();
-  // Four inward-pointing tick marks at N/E/S/W — the "closing walls."
-  ctx.lineWidth = 2;
-  var tickOuter = r - 3;
-  var tickInner = r - 7;
-  var dirs = [
-    [0, -1],
-    [1, 0],
-    [0, 1],
-    [-1, 0]
-  ];
-  for (var i = 0; i < dirs.length; i++) {
-    var dx = dirs[i][0];
-    var dy = dirs[i][1];
-    ctx.beginPath();
-    ctx.moveTo(cx + dx * tickOuter, cy + dy * tickOuter);
-    ctx.lineTo(cx + dx * tickInner, cy + dy * tickInner);
-    ctx.stroke();
-  }
-  // Center dot.
-  ctx.fillStyle = AREA_EDGE;
-  ctx.beginPath();
-  ctx.arc(cx, cy, 2, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
-
-/**
- * Hit-test the oculus glyph on any closed polygon on the page. Returns
- * the polygon index whose glyph contains the canvas point, or -1.
- * Accepts canvas-space coords (NOT PDF coords) because the glyph itself
- * is sized in canvas px, not page units.
- */
-export function hitTestOculus(pageNum, canvasPt) {
-  var polys = _polygons[pageNum] || [];
-  for (var i = 0; i < polys.length; i++) {
-    var o = polys[i]._oculusCanvasXY;
-    if (!o) continue;
-    var dx = canvasPt.x - o.x;
-    var dy = canvasPt.y - o.y;
-    if (Math.sqrt(dx * dx + dy * dy) <= o.r) return i;
-  }
-  return -1;
 }
 
 export function deletePolygon(pageNum, polyIdx) {
