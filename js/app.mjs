@@ -682,6 +682,32 @@ function _handleOverlayClick(e) {
   // areas have been drawn (rare but real) shouldn't modify geometry.
   var skipsPolygonEdit = _currentTool === "polyline" || _currentTool === "ruler" || _currentTool === "calibrate";
 
+  // Priority 0: C7d Oculus glyph click — "tighten one step inward".
+  // Checked before vertex / edge because the glyph lives outside the
+  // polygon's bounding box (anchored to the pill's top-right corner)
+  // but users may click it while a polygon edge is also in range.
+  if (!PolygonTool.isDrawing() && !skipsPolygonEdit) {
+    var canvasPt0 = Viewer.pdfToCanvas(pt);
+    var ocIdx = PolygonTool.hitTestOculus(_currentPage, canvasPt0);
+    if (ocIdx >= 0) {
+      var tighten = PolygonTool.tightenOneStep(_currentPage, ocIdx);
+      if (tighten.edgesMoved > 0) {
+        _refreshMeasurements();
+        ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
+        Viewer.requestRedraw();
+        var ocNoun = tighten.edgesMoved === 1 ? "edge" : "edges";
+        var ocTail = tighten.edgesSkipped > 0 ? " (" + tighten.edgesSkipped + " already at innermost)" : "";
+        setStatus(
+          "Oculus: tightened " + tighten.edgesMoved + " " + ocNoun + " inward one detent" + ocTail + ".",
+          "ready"
+        );
+      } else {
+        setStatus("Oculus: nothing to tighten" + (tighten.reason ? " — " + tighten.reason : "") + ".", "ready");
+      }
+      return;
+    }
+  }
+
   // Priority 1: Click near an existing vertex — start drag
   var hit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
   if (hit && !PolygonTool.isDrawing() && !skipsPolygonEdit) {
@@ -1249,6 +1275,13 @@ function _handleOverlayMouseMove(e) {
   var altHeld = !!(e && e.altKey);
   var wrap = document.getElementById("viewer-wrap");
   if (!PolygonTool.isDrawing() && !_rectStart && _currentTool !== "polyline") {
+    // Oculus glyph takes priority over vertex/edge — it sits outside the
+    // polygon's bounding box but overlaps nothing else.
+    var ocHit = PolygonTool.hitTestOculus(_currentPage, Viewer.pdfToCanvas(pt));
+    if (ocHit >= 0) {
+      if (wrap) wrap.style.cursor = "pointer";
+      return;
+    }
     var vertHit = PolygonTool.hitTestVertex(_currentPage, pt, hitRadius);
     if (vertHit) {
       if (wrap) wrap.style.cursor = "move";
@@ -1663,6 +1696,9 @@ function _bindKeyboard() {
         break;
       case "a":
         autoCalibrate();
+        break;
+      case "o":
+        tightenOculus();
         break;
       case "l":
         setTool("ruler");
@@ -2211,6 +2247,33 @@ function autoDetect() {
       );
     }
   );
+}
+
+/**
+ * C7d — Oculus: tighten the detected polygon on the current page one
+ * step inward. Each orthogonal edge moves to its next candidate detent
+ * toward the centroid; non-orthogonal edges and already-innermost edges
+ * stay put. Runs on the first polygon that carries shrink-wrap
+ * candidates (i.e. the Auto-Detect polygon).
+ */
+function tightenOculus() {
+  if (!Loader.isLoaded()) return;
+  var idx = PolygonTool.findDetectedPolyIdx(_currentPage);
+  if (idx < 0) {
+    setStatus("No Auto-Detect polygon on this page — press D to detect first.", "error");
+    return;
+  }
+  var result = PolygonTool.tightenOneStep(_currentPage, idx);
+  if (result.edgesMoved === 0) {
+    setStatus("Oculus: nothing to tighten" + (result.reason ? " — " + result.reason : "") + ".", "ready");
+    return;
+  }
+  _refreshMeasurements();
+  ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
+  Viewer.requestRedraw();
+  var noun = result.edgesMoved === 1 ? "edge" : "edges";
+  var tail = result.edgesSkipped > 0 ? " (" + result.edgesSkipped + " already at innermost)" : "";
+  setStatus("Oculus: tightened " + result.edgesMoved + " " + noun + " inward one detent" + tail + ".", "ready");
 }
 
 function _polygonArea(pts) {

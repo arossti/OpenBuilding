@@ -484,9 +484,89 @@ function _drawPoly(ctx, poly) {
       var y3 = y2 + 22;
       ctx.fillText(line3, center.x, y3);
     }
+
+    // C7d — Oculus button anchored to the pill's top-right corner.
+    // Drawn only on polygons that still carry shrink-wrap candidates;
+    // hand-drawn polygons (and polygons whose candidates were stripped)
+    // get nothing here. Clicking the glyph runs tightenOneStep.
+    if (poly._shrinkCandidates) {
+      var ocR = 12;
+      var ocX = center.x + pillW / 2 + ocR + 4;
+      var ocY = pillTop + ocR + 2;
+      _drawOculusGlyph(ctx, ocX, ocY, ocR);
+      // Cache in canvas coords for hit-testing (redrawn every frame,
+      // so pan / zoom updates stay in sync).
+      poly._oculusCanvasXY = { x: ocX, y: ocY, r: ocR };
+    } else {
+      poly._oculusCanvasXY = null;
+    }
+  } else {
+    poly._oculusCanvasXY = null;
   }
 
   ctx.restore();
+}
+
+/**
+ * C7d — iris-aperture icon suggesting "walls closing in." Drawn at
+ * canvas coords (cx, cy) with outer radius r. Uses the shared AREA_EDGE
+ * cyan so it visually ties to the polygon it annotates.
+ */
+function _drawOculusGlyph(ctx, cx, cy, r) {
+  ctx.save();
+  // Filled dark backdrop so the icon reads against any page content.
+  ctx.fillStyle = "rgba(0,0,0,0.75)";
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+  // Outer ring.
+  ctx.strokeStyle = AREA_EDGE;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r - 1, 0, Math.PI * 2);
+  ctx.stroke();
+  // Four inward-pointing tick marks at N/E/S/W — the "closing walls."
+  ctx.lineWidth = 2;
+  var tickOuter = r - 3;
+  var tickInner = r - 7;
+  var dirs = [
+    [0, -1],
+    [1, 0],
+    [0, 1],
+    [-1, 0]
+  ];
+  for (var i = 0; i < dirs.length; i++) {
+    var dx = dirs[i][0];
+    var dy = dirs[i][1];
+    ctx.beginPath();
+    ctx.moveTo(cx + dx * tickOuter, cy + dy * tickOuter);
+    ctx.lineTo(cx + dx * tickInner, cy + dy * tickInner);
+    ctx.stroke();
+  }
+  // Center dot.
+  ctx.fillStyle = AREA_EDGE;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/**
+ * Hit-test the oculus glyph on any closed polygon on the page. Returns
+ * the polygon index whose glyph contains the canvas point, or -1.
+ * Accepts canvas-space coords (NOT PDF coords) because the glyph itself
+ * is sized in canvas px, not page units.
+ */
+export function hitTestOculus(pageNum, canvasPt) {
+  var polys = _polygons[pageNum] || [];
+  for (var i = 0; i < polys.length; i++) {
+    var o = polys[i]._oculusCanvasXY;
+    if (!o) continue;
+    var dx = canvasPt.x - o.x;
+    var dy = canvasPt.y - o.y;
+    if (Math.sqrt(dx * dx + dy * dy) <= o.r) return i;
+  }
+  return -1;
 }
 
 export function deletePolygon(pageNum, polyIdx) {
@@ -876,6 +956,124 @@ export function endEdgeDrag() {
 
 export function isEdgeDragging() {
   return _edgeDragState !== null;
+}
+
+/* ── C7d oculus: tighten all edges one step inward ────── */
+
+/**
+ * For a polygon with shrink-wrap candidates, move every orthogonal edge
+ * one detent inward (toward the centroid). Non-orthogonal edges and
+ * polygons without candidates are skipped. The polygon record updates
+ * in-place; undo captures the whole tighten as one step.
+ *
+ * "Inward" is defined per-edge by the sign of (centroid - edge) on the
+ * relevant axis — works for arbitrary orthogonal polygons, not just the
+ * shrink-wrap rectangle. If an edge already sits at or past the
+ * innermost candidate on its side, that edge stays put.
+ *
+ * @returns {{edgesMoved: number, edgesSkipped: number, reason: string|null}}
+ */
+export function tightenOneStep(pageNum, polyIdx) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) {
+    return { edgesMoved: 0, edgesSkipped: 0, reason: "no polygon" };
+  }
+  var poly = polys[polyIdx];
+  if (!poly.closed) {
+    return { edgesMoved: 0, edgesSkipped: 0, reason: "polygon not closed" };
+  }
+  if (!poly._shrinkCandidates) {
+    return { edgesMoved: 0, edgesSkipped: 0, reason: "no candidates on polygon" };
+  }
+
+  var verts = poly.vertices;
+  var n = verts.length;
+  var cx = 0,
+    cy = 0;
+  for (var c = 0; c < n; c++) {
+    cx += verts[c].x;
+    cy += verts[c].y;
+  }
+  cx /= n;
+  cy /= n;
+
+  // Compute each edge's target (x or y) BEFORE mutating, so adjacent
+  // edges don't see a partially-tightened polygon when reading their
+  // endpoints. Then apply all updates in one pass.
+  var updates = []; // {vIdx, axis: "x"|"y", value}
+  var moved = 0;
+  var skipped = 0;
+
+  for (var e = 0; e < n; e++) {
+    var orient = edgeOrientation(poly, e);
+    if (!orient) {
+      skipped += 1;
+      continue;
+    }
+    var v1Idx = e;
+    var v2Idx = (e + 1) % n;
+    var axisKey = orient === "horizontal" ? "y" : "x";
+    var cur = verts[v1Idx][axisKey];
+    var centroidOnAxis = axisKey === "y" ? cy : cx;
+    var inwardSign = centroidOnAxis > cur ? 1 : centroidOnAxis < cur ? -1 : 0;
+    if (inwardSign === 0) {
+      skipped += 1;
+      continue;
+    }
+    var cands = orient === "horizontal" ? poly._shrinkCandidates.horiz : poly._shrinkCandidates.vert;
+    if (!cands || cands.length === 0) {
+      skipped += 1;
+      continue;
+    }
+    // Next candidate strictly inward of cur, closest to cur. Candidates
+    // are sorted ascending from shrink-wrap's _clusterPositions.
+    var target = null;
+    if (inwardSign > 0) {
+      for (var i = 0; i < cands.length; i++) {
+        if (cands[i] > cur + 0.5) {
+          target = cands[i];
+          break;
+        }
+      }
+    } else {
+      for (var j = cands.length - 1; j >= 0; j--) {
+        if (cands[j] < cur - 0.5) {
+          target = cands[j];
+          break;
+        }
+      }
+    }
+    if (target == null) {
+      skipped += 1;
+      continue;
+    }
+    updates.push({ vIdx: v1Idx, axis: axisKey, value: target });
+    updates.push({ vIdx: v2Idx, axis: axisKey, value: target });
+    moved += 1;
+  }
+
+  if (moved === 0) {
+    return { edgesMoved: 0, edgesSkipped: skipped, reason: "no edge had an inner detent to advance to" };
+  }
+
+  _pushUndo(pageNum);
+  for (var u = 0; u < updates.length; u++) {
+    verts[updates[u].vIdx][updates[u].axis] = updates[u].value;
+  }
+  return { edgesMoved: moved, edgesSkipped: skipped, reason: null };
+}
+
+/**
+ * Find the index of the first polygon on `pageNum` that has shrink-wrap
+ * candidates (i.e. was placed by Auto-Detect). Used by UI shortcuts
+ * that target "the detected polygon" without an explicit selection.
+ */
+export function findDetectedPolyIdx(pageNum) {
+  var polys = _polygons[pageNum] || [];
+  for (var i = 0; i < polys.length; i++) {
+    if (polys[i]._shrinkCandidates) return i;
+  }
+  return -1;
 }
 
 function _getActivePoly() {
