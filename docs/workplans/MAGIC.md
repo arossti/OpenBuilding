@@ -1,10 +1,62 @@
 # PDF-Parser Magic-Wand Polish — workplan (MAGIC.md)
 
-> Polish pass on the PDF-Parser magic-wand (auto-detect) path. Adds dimension-string calibration with declared-vs-detected scale cross-check and a shrink-wrap building-outline detector that replaces the current "closed-polygon only" heuristic. Branch: `Magic-Wand-Polish-2` (successor to merged `Magic-Wand-Polish` → PR #12). Started 2026-04-22.
+> Polish pass on the PDF-Parser magic-wand (auto-detect) path. Adds dimension-string calibration with declared-vs-detected scale cross-check and a shrink-wrap building-outline detector that replaces the current "closed-polygon only" heuristic. Branch: `Magic-Wand-Oculus` (successor to merged PRs #12 + #13). Started 2026-04-22.
 
 ---
 
 ## 0. Cold-start handoff
+
+### Status as of 2026-04-24 (session 4 — Oculus shipped + relocated; C7c retired; C7e is what's actually next)
+
+**Successor agent: read this block first.** Active branch: `Magic-Wand-Oculus`, tip **`6f134b3`**. Three commits since `main` at `cf28d11` (PR #13):
+
+- `21fb77d` — C7d Oculus core (tightenOneStep API + canvas-drawn glyph + "O" keybind + click hit-test)
+- `0f6f207` — Refactor: Oculus moved from canvas-floating glyph to top toolbar button. Andy feedback: floating glyph collided with vertex handles when polygon shrank, and broke the toolbar pattern set by Auto-Calibrate / Auto-Detect.
+- `6f134b3` — Icon fix: `bi-aperture` was blank in bootstrap-icons 1.11.3 (not in that release); swapped to `bi-arrows-angle-contract` — the universal "shrink/contract" glyph.
+
+#### What's shipped on the Oculus path (C7d)
+
+- **`tightenOneStep(pageNum, polyIdx)`** in [`js/polygon-tool.mjs`](../../js/polygon-tool.mjs). For each orthogonal edge: find next candidate inward from centroid, apply as one undo-captured batch. Returns `{edgesMoved, edgesSkipped, reason}`. Skips diagonals + already-innermost edges + polygons without `_shrinkCandidates`.
+- **`findDetectedPolyIdx(pageNum)`** locates the page's first auto-detected polygon (the one with candidates) for keyboard-shortcut targeting.
+- **`tightenOculus()`** wrapper in [`js/app.mjs`](../../js/app.mjs) drives both the toolbar button (`PP.tightenOculus()`) and the `O` keybind, with status-bar feedback.
+- **Toolbar button** in [`pdfparser.html`](../../pdfparser.html) sits right after Auto-Detect (D) using `bi-arrows-angle-contract`. Static location, no canvas overlap.
+
+Verified on docs/sample.pdf p9 FOUNDATION: polygon (120.5, 19.5)–(638, 594.3) tightens to (141.2, 40.1)–(560, 582.4) on first press, (188, 65.4)–(542.9, 570.9) on second, exact match to predicted candidate detents. Cmd+Z reverses each step. Zero console errors.
+
+#### Design pivot: C7c retired (Andy 2026-04-24)
+
+Original C7c spec was the ArchiCad-style popup distinguishing edge-click ("Drag edge / Insert vertex") from vertex-click ("Drag point / Delete vertex"). After C7d landed, Andy reviewed and decided to drop C7c entirely:
+
+- **Delete-vertex is not needed.** Dragging a vertex onto its neighbor already merges them via the existing `endDrag` merge logic — fully covers the "remove this vertex" use case.
+- **Insert-vertex via Alt-click is sufficient** (`5d6f8db` stopgap is now permanent UX). The popup adds discovery overhead without delivering new capability.
+
+The Alt-click + drag-merge combo is the agreed permanent edge-edit vocabulary. No popup work needed.
+
+#### What's actually next: C7e — expand mirror (sibling of Oculus)
+
+Andy's real ask behind the original C7c brief was **bidirectional offset**: tighten OR loosen the detected polygon by one detent. C7d covers "tighten." The mirror is missing:
+
+- **C7e — `loosenOneStep`** mirror in `polygon-tool.mjs`: for each orthogonal edge, find next candidate **outward** from centroid; apply as one undo-captured batch. Exact mirror of `tightenOneStep`, ~10 LOC.
+- **Toolbar button** right after the Oculus, using `bi-arrows-angle-expand` (the mirror "fullscreen / expand" glyph; verified present in bootstrap-icons 1.11.3). No keybind needed — adjacent toolbar buttons read as paired controls (contract / expand, like media-player rewind / fast-forward).
+- **Why not Cmd+Z**: undo only reverses the most recent action. C7e covers the case where Auto-Detect placed the polygon slightly inside the real outline and the user wants to expand from current state without undoing prior tag / preset / scope assignments.
+
+Estimate: ~10 minutes. Self-contained, no UI surface beyond the new toolbar button. Pickup point on this branch.
+
+#### Remaining items after C7e
+
+- **C6** non-orthogonal refinement (gables / 45°): still parked. Edge-drag + Alt-click insert-vertex covers known cases.
+- **C8** elevation outermost + eave-crop: still parked. p5 already performs well without outermost-only tweak.
+- **C7c popup**: retired (above).
+
+#### Branch state reference
+
+```
+main                            cf28d11   PR #13 merged
+└── Magic-Wand-Oculus  (active)
+    ├── 21fb77d  C7d Oculus core (canvas glyph + keybind)
+    ├── 0f6f207  Oculus → toolbar
+    └── 6f134b3  Icon fix (← tip)
+```
 
 ### Status as of 2026-04-23 (session 3 — C7a+b + Alt opt-out shipped; paused before C7c/d for BfCA demo)
 
@@ -458,10 +510,14 @@ Same layer-peel + shrink-wrap on elevation sheets, but always return the outermo
 | — | **PR #12 merged to `main`** | ✅ 2026-04-23 PM | `85fa550` |
 | AT-1/2/3 | Auto-tag polygon: tool-mode switch + classification → tag/scope + wood_2x6 default | ✅ shipped 2026-04-23 PM | `81d3358` |
 | C7a + C7b | Edge-scrub drag handles: expose wall-candidate arrays + per-edge drag + unconditional snap to detent; ew-resize / ns-resize cursor vocab | ✅ shipped 2026-04-23 | `bafaaa7` |
-| — | Alt-click opt-out: Option/Alt bypasses edge-drag into legacy insert-vertex (stopgap until C7c popup lands) | ✅ shipped 2026-04-23 | `5d6f8db` |
-| C6 | non-orthogonal refinement | 🅿️ on hold — edge-scrub + insert-vertex likely covers common cases |
-| C7c | ArchiCad-style popup: "Drag edge / Insert vertex" on edge, "Drag point / Delete vertex" on vertex — replaces Alt stopgap, adds delete-vertex (only real functional gap today) | 🔜 next session | — |
-| C7d | Oculus "tighten one step inward" button — single control closes all 4 edges to next inner detent | 🔜 next session | — |
+| — | Alt-click opt-out: Option/Alt bypasses edge-drag into legacy insert-vertex (now permanent UX, not a stopgap) | ✅ shipped 2026-04-23 | `5d6f8db` |
+| — | **PR #13 merged to `main`** | ✅ 2026-04-23 | `cf28d11` |
+| C7d | Oculus "tighten one step inward" — `tightenOneStep` API + "O" keybind + canvas glyph (later relocated) | ✅ shipped 2026-04-24 | `21fb77d` |
+| — | Oculus → toolbar button (drop floating glyph; Andy feedback: glyph collided with vertex handles on small polygons) | ✅ shipped 2026-04-24 | `0f6f207` |
+| — | Icon fix: `bi-aperture` → `bi-arrows-angle-contract` (former missing in bootstrap-icons 1.11.3) | ✅ shipped 2026-04-24 | `6f134b3` |
+| C7c | ~~ArchiCad-style popup: edge-click + vertex-click action menus~~ | ❌ retired 2026-04-24 — drag-merge + Alt-click cover the gaps; no popup needed |
+| C7e | Loosen-one-step mirror of Oculus: `loosenOneStep` API + sibling toolbar button (`bi-arrows-angle-expand`) for one-detent outward offset | 🔜 next session — ~10 min, self-contained |
+| C6 | non-orthogonal refinement | 🅿️ on hold — edge-scrub + Alt-click insert-vertex covers known cases |
 | C8 | elevation outermost + eave-crop | ⏳ deferred — p5 shrink-wrap already performs well |
 
 Each commit: end-to-end assertion before push, per the "tests before commits" rule. Push to both remotes (`openbuilding`, `origin`) after every commit.
