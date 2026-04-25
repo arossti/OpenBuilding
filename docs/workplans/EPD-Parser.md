@@ -114,9 +114,10 @@ Source: [`schema/material.schema.json`](../../schema/material.schema.json). Refe
 | LCA results table — per-stage values (A1, A2, A3, A1–A3, A4, A5, B1–B7, C1–C4, D) | `impacts.<indicator>.by_stage.<stage>.{value, source}` — emit all 17 stage slots even if null |
 | Other indicators (ODP, AP, EP, POCP, ADP, WDP, primary energy NR + R) | `impacts.{ozone_depletion, acidification, eutrophication, smog, abiotic_depletion_fossil, water_consumption, primary_energy_nonrenewable, primary_energy_renewable}.*` |
 | Methodology / standards | `methodology.standards[]`, `methodology.lca_method` |
+| **PCR (Product Category Rules) reference** | `methodology.pcr_guidelines` — free-text string (e.g. "ULE Structural and architectural wood products, v1.1"). Treated as a **first-class match key** in §6. Two EPDs published under different PCRs (or different PCR versions) are not directly comparable and cannot refresh each other. |
 | LCA software | `methodology.lca_software` |
 | LCI database (e.g. ecoinvent 3.x) | `methodology.lci_database` |
-| Geographic scope / markets | `provenance.countries_of_manufacture[]`, `provenance.markets_of_applicability[]` |
+| Geographic scope / markets | `provenance.countries_of_manufacture[]`, `provenance.markets_of_applicability[]` — also a match key in §6. CA-scope and US-scope EPDs of the same product are **separate records**, never merged. |
 | (Derived) group classification | `classification.group_prefix`, `classification.category_slug`, `classification.material_type`, `classification.typical_elements[]` |
 
 **Group classification is inferred, not extracted.** Run `inferGroupPrefix(material_type, display_name)` against [`material-type-to-group.json`](../../schema/lookups/material-type-to-group.json) first, falling back to [`display-name-keywords.json`](../../schema/lookups/display-name-keywords.json). If both miss, the field stays null and the review UI flags it for manual selection.
@@ -125,27 +126,45 @@ Source: [`schema/material.schema.json`](../../schema/material.schema.json). Refe
 
 ## 6. Match-existing logic
 
-The whole point of the second commit pathway is making refresh-of-existing-record safe.
+**Default to new entry. Only refresh an existing record when every high-fidelity match key agrees.** EPDs published under different PCRs, different geographic scopes, or by different program operators describe distinct products from the database's perspective, even when the underlying material is "the same" in casual language. The cost of a false-positive merge (silently overwriting a US-scope record with CA-scope numbers) is much higher than the cost of a false-negative (one extra database row).
 
-**Match algorithm (in priority order):**
+### Match keys, all required for a refresh
 
-1. **Strong key.** Normalised `manufacturer.name` + `epd.id`. If both EPDs are CSA-issued and quote the same EPD number, it's the same product line. Done.
-2. **Brand match.** Normalised `manufacturer.name` + `naming.product_brand_name` Levenshtein distance ≤ 3. Catches re-issued EPDs where the program operator changed the EPD-id format.
-3. **Display-name fuzzy.** `naming.display_name` token Jaccard similarity ≥ 0.7 within the same `classification.group_prefix`. Last-resort; surfaces as "possible match — please confirm" in the UI.
-4. **No match.** Treat as a new record.
+A candidate refresh fires only when **all** of the following match between the incoming EPD and an existing record:
 
-**Review UI (when match found):**
+| Key | Source field | Match rule |
+|---|---|---|
+| Manufacturer | `manufacturer.name` | Normalised exact match (case-fold, strip punctuation, collapse whitespace). |
+| EPD identifier | `epd.id` | Exact string match — EPDs are uniquely numbered per program. |
+| PCR reference | `methodology.pcr_guidelines` | Exact match including version suffix. **A PCR version bump (v1.1 → v2.0) is treated as a different PCR, hence a different record.** |
+| EPD registration URI | `epd.registration_url` (proposed — see §8) | Exact match when both records have one. URI is the strongest single signal; if it matches, everything else has to too or the data is corrupt. |
+| Geographic scope | `provenance.markets_of_applicability[]` | Set equality. CA ≠ USA ≠ NA-aggregate. Different scope = different record. |
+| Program operator | `epd.program_operator` | Exact match. ULE-issued ≠ CSA-issued even when the manufacturer is the same. |
 
-- Two columns side-by-side. Left: existing record (loaded from `schema/materials/<group>.json`). Right: incoming parsed record.
+**Anything less than full agreement on every key → new entry.** The review UI does not offer a "force-merge" override; if the user genuinely wants to merge two near-matches, they edit the records by hand outside the parser.
+
+### Algorithm
+
+1. Compute the candidate's match-key tuple `(manufacturer, epd_id, pcr, uri, scope, program)`.
+2. Scan the corresponding `schema/materials/<group>.json` for any record whose tuple matches **all six** keys.
+3. **Hit** → flag as refresh candidate, route to the side-by-side review UI.
+4. **Miss** → flag as new entry, route to the new-entry review UI. (Optional: surface near-matches — same manufacturer + same PCR but different scope, for example — as informational links in the new-entry UI: "this looks related to existing record `lam011` (US-scope); confirm this CA-scope EPD is meant to be a separate record.")
+
+### Review UI — refresh-candidate path
+
+- Two columns side-by-side. Left: existing record. Right: incoming parsed record.
 - Each scalar field has a three-way toggle: `keep existing` / `take incoming` / `merge` (where merge is meaningful, e.g. arrays).
 - Numeric fields show the delta — e.g. `gwp_kgco2e.total.value: 6.22 → 5.81 (-6.6%)` so the user can sanity-check.
-- The `epd.publication_date` field auto-defaults to "take incoming" since refreshing the EPD is the whole point.
+- The `epd.publication_date` and `epd.expiry_date` fields auto-default to "take incoming" since refreshing the EPD is the whole point.
 - The `provenance` block records the source EPD filename and parse timestamp regardless of which other fields were taken — audit trail.
 - Final commit produces (a) a JSON download of the merged record, and (b) a small audit-log JSON describing every field decision (for a future regression test or trace-back).
 
-**Review UI (when no match):**
+### Review UI — new-entry path (the default)
 
-- Single column. All extracted fields shown editable. Group classification flagged if `inferGroupPrefix` returned null. User confirms → JSON download → done.
+- Single column. All extracted fields shown editable.
+- Group classification flagged if `inferGroupPrefix` returned null.
+- A "related records" panel surfaces any partial-match records (same manufacturer + same PCR, or same EPD-id with different scope) as read-only links, so the user can spot a configuration error (e.g. they were trying to refresh an existing record but a key didn't match) before committing a duplicate.
+- User confirms → fresh `id` minted via `makeId()` → JSON download → done.
 
 ## 7. Phases
 
@@ -168,7 +187,8 @@ Decisions deferred until the user shares sample EPDs:
 - **EPD-internal vs external verification.** Programmes label this differently ("verified by", "third-party verification statement", "Type III declaration verified per ISO 14025"). Need samples to land on a robust anchor set.
 - **Industry-average treatment.** When `epd.type` parses as `industry_average`, is `manufacturer.name` blank, the trade association name (e.g. "Concrete BC"), or omitted entirely from the schema? Schema allows it nullable; the convention isn't documented yet.
 - **Density inference.** EPDs sometimes state mass per declared unit (e.g. "1 m³ of CLT, 456 kg") instead of density directly. Parser needs to compute density when only mass-per-unit is published. Trivial when the unit is m³; less so for "1 m² of XPS at 25 mm thick" — depends on having thickness in scope.
-- **Existing-record match threshold.** Levenshtein ≤ 3 is a starting guess; tune against known cases (e.g. a Nordic CLT refresh — should match `lam011`).
+- **EPD registration URI as a schema field.** §6 treats the EPD's public registration URL as a primary match key, but the schema today doesn't have an `epd.registration_url` slot — `material.schema.json` `epd` block only carries `id`, `program_operator`, `publication_date`, `expiry_date`, `type`, `validation`. Adding a nullable `registration_url` string field (and back-filling existing records where the URL is recoverable) is a small schema bump worth doing before P4. Until then, §6 falls back to the other five match keys (manufacturer + epd.id + pcr + scope + program) — still conservative, just one signal weaker.
+- **PCR-version handling on a refresh.** §6 says a PCR version bump is a new record. That's correct in the strict-LCA sense (different boundaries, possibly different allocation) but may be more conservative than the user wants for minor-version updates (v1.1 → v1.1a errata). Open: do we want a soft-match flag for same-PCR-base, different-revision pairs, surfaced as "candidate refresh — confirm PCR revision is a minor update"?
 
 ## 9. IP guardrails
 
