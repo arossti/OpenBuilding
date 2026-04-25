@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="graphics/BFCA-LOGO-sm.png" />
     <meta
       name="description"
-      content="BfCA OpenBuilding — Canadian embodied carbon assessment tools. PDF area takeoff, EC compliance matrix, BEAM material database, and the BEAMweb calculator."
+      content="BfCA OpenBuilding — Canadian embodied carbon assessment tools. PDF area takeoff, EC compliance matrix, BEAM material database, BEAMweb calculator, and EPD parser."
     />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="bfcastyles.css" />
@@ -28,7 +28,7 @@
     <main class="landing-main">
       <section class="landing-intro">
         <p>
-          Four browser apps sharing the same design system, the same material database, and one
+          Five browser apps sharing the same design system, the same material database, and one
           <a href="dependencies.html" class="landing-link">dependency manifest</a>. Pick your starting point:
         </p>
       </section>
@@ -73,6 +73,17 @@
           </p>
           <div class="landing-card-meta">phase 0 shell · calc engine lands Phase 3</div>
         </a>
+
+        <a href="epdparser.html" class="landing-card" target="_blank" rel="noopener">
+          <div class="landing-card-icon"><i class="bi bi-clipboard-data"></i></div>
+          <h2 class="landing-card-title">EPD-Parser <span class="landing-card-badge">Planning</span></h2>
+          <p class="landing-card-desc">
+            Read Environmental Product Declarations and extract structured EN 15804+A2 data into the BfCA materials
+            schema. Two pathways: add a new entry, or refresh an existing one — both with side-by-side review before
+            commit.
+          </p>
+          <div class="landing-card-meta">planning · text-layer extraction · maps to materials schema</div>
+        </a>
       </section>
 
       <section class="landing-footnote">
@@ -84,6 +95,10 @@
         <span class="landing-sep">·</span>
         <a href="https://github.com/arossti/OpenBuilding/blob/main/schema/schema.md" class="landing-link">
           <i class="bi bi-file-earmark-code"></i> Schema workplan
+        </a>
+        <span class="landing-sep">·</span>
+        <a href="https://github.com/arossti/OpenBuilding/blob/main/docs/workplans/EPD-Parser.md" class="landing-link">
+          <i class="bi bi-clipboard-data"></i> EPD-Parser workplan
         </a>
       </section>
     </main>
