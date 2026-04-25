@@ -2217,30 +2217,46 @@ function autoDetect() {
 }
 
 /**
- * C7d — Oculus: tighten the detected polygon on the current page one
- * step inward. Each orthogonal edge moves to its next candidate detent
- * toward the centroid; non-orthogonal edges and already-innermost edges
- * stay put. Runs on the first polygon that carries shrink-wrap
- * candidates (i.e. the Auto-Detect polygon).
+ * C7d / C7e — Oculus: step the detected polygon on the current page one
+ * detent inward ("tighten") or outward ("loosen"). Each orthogonal edge
+ * moves to its next candidate detent in the chosen direction; non-
+ * orthogonal edges and already-at-limit edges stay put. Runs on the
+ * first polygon that carries shrink-wrap candidates.
  */
-function tightenOculus() {
+function _offsetOculus(direction) {
   if (!Loader.isLoaded()) return;
   var idx = PolygonTool.findDetectedPolyIdx(_currentPage);
   if (idx < 0) {
     setStatus("No Auto-Detect polygon on this page — press D to detect first.", "error");
     return;
   }
-  var result = PolygonTool.tightenOneStep(_currentPage, idx);
+  var inward = direction === "inward";
+  var verb = inward ? "tighten" : "loosen";
+  var verbPast = inward ? "tightened" : "loosened";
+  var dirWord = inward ? "inward" : "outward";
+  var limitWord = inward ? "innermost" : "outermost";
+  var result = inward ? PolygonTool.tightenOneStep(_currentPage, idx) : PolygonTool.loosenOneStep(_currentPage, idx);
   if (result.edgesMoved === 0) {
-    setStatus("Oculus: nothing to tighten" + (result.reason ? " — " + result.reason : "") + ".", "ready");
+    setStatus("Oculus: nothing to " + verb + (result.reason ? " — " + result.reason : "") + ".", "ready");
     return;
   }
   _refreshMeasurements();
   ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
   Viewer.requestRedraw();
   var noun = result.edgesMoved === 1 ? "edge" : "edges";
-  var tail = result.edgesSkipped > 0 ? " (" + result.edgesSkipped + " already at innermost)" : "";
-  setStatus("Oculus: tightened " + result.edgesMoved + " " + noun + " inward one detent" + tail + ".", "ready");
+  var tail = result.edgesSkipped > 0 ? " (" + result.edgesSkipped + " already at " + limitWord + ")" : "";
+  setStatus(
+    "Oculus: " + verbPast + " " + result.edgesMoved + " " + noun + " " + dirWord + " one detent" + tail + ".",
+    "ready"
+  );
+}
+
+function tightenOculus() {
+  _offsetOculus("inward");
+}
+
+function loosenOculus() {
+  _offsetOculus("outward");
 }
 
 function _polygonArea(pts) {
@@ -3364,8 +3380,9 @@ window.PP = {
   autoDetect: autoDetect,
   // Auto-calibrate (MAGIC C3)
   autoCalibrate: autoCalibrate,
-  // C7d oculus — tighten all edges one step inward
+  // C7d / C7e oculus — offset all edges one detent inward / outward
   tightenOculus: tightenOculus,
+  loosenOculus: loosenOculus,
   // Summary table
   openSummaryTable: openSummaryTable,
   closeSummaryTable: closeSummaryTable,

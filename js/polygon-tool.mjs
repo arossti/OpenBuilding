@@ -878,22 +878,23 @@ export function isEdgeDragging() {
   return _edgeDragState !== null;
 }
 
-/* ── C7d oculus: tighten all edges one step inward ────── */
+/* ── C7d / C7e oculus: offset all edges one step inward or outward ── */
 
 /**
  * For a polygon with shrink-wrap candidates, move every orthogonal edge
- * one detent inward (toward the centroid). Non-orthogonal edges and
- * polygons without candidates are skipped. The polygon record updates
- * in-place; undo captures the whole tighten as one step.
+ * one detent in the given direction ("inward" toward centroid, or
+ * "outward" away). Non-orthogonal edges and polygons without candidates
+ * are skipped. The polygon record updates in-place; undo captures the
+ * whole offset as one step.
  *
- * "Inward" is defined per-edge by the sign of (centroid - edge) on the
- * relevant axis — works for arbitrary orthogonal polygons, not just the
- * shrink-wrap rectangle. If an edge already sits at or past the
- * innermost candidate on its side, that edge stays put.
+ * Direction is defined per-edge by the sign of (centroid − edge) on the
+ * relevant axis — "inward" snaps to the next candidate on the centroid
+ * side; "outward" snaps to the next candidate on the far side. Works
+ * for arbitrary orthogonal polygons, not just the shrink-wrap rectangle.
  *
  * @returns {{edgesMoved: number, edgesSkipped: number, reason: string|null}}
  */
-export function tightenOneStep(pageNum, polyIdx) {
+function _offsetOneStep(pageNum, polyIdx, direction) {
   var polys = _polygons[pageNum];
   if (!polys || !polys[polyIdx]) {
     return { edgesMoved: 0, edgesSkipped: 0, reason: "no polygon" };
@@ -905,6 +906,7 @@ export function tightenOneStep(pageNum, polyIdx) {
   if (!poly._shrinkCandidates) {
     return { edgesMoved: 0, edgesSkipped: 0, reason: "no candidates on polygon" };
   }
+  var inward = direction === "inward";
 
   var verts = poly.vertices;
   var n = verts.length;
@@ -918,7 +920,7 @@ export function tightenOneStep(pageNum, polyIdx) {
   cy /= n;
 
   // Compute each edge's target (x or y) BEFORE mutating, so adjacent
-  // edges don't see a partially-tightened polygon when reading their
+  // edges don't see a partially-offset polygon when reading their
   // endpoints. Then apply all updates in one pass.
   var updates = []; // {vIdx, axis: "x"|"y", value}
   var moved = 0;
@@ -935,20 +937,24 @@ export function tightenOneStep(pageNum, polyIdx) {
     var axisKey = orient === "horizontal" ? "y" : "x";
     var cur = verts[v1Idx][axisKey];
     var centroidOnAxis = axisKey === "y" ? cy : cx;
-    var inwardSign = centroidOnAxis > cur ? 1 : centroidOnAxis < cur ? -1 : 0;
-    if (inwardSign === 0) {
+    // centroidSign is +1 when centroid is at a larger coord than the
+    // edge, −1 when smaller, 0 when on-axis. "Inward" follows this
+    // sign; "outward" flips it.
+    var centroidSign = centroidOnAxis > cur ? 1 : centroidOnAxis < cur ? -1 : 0;
+    if (centroidSign === 0) {
       skipped += 1;
       continue;
     }
+    var stepSign = inward ? centroidSign : -centroidSign;
     var cands = orient === "horizontal" ? poly._shrinkCandidates.horiz : poly._shrinkCandidates.vert;
     if (!cands || cands.length === 0) {
       skipped += 1;
       continue;
     }
-    // Next candidate strictly inward of cur, closest to cur. Candidates
-    // are sorted ascending from shrink-wrap's _clusterPositions.
+    // Next candidate strictly in step direction, closest to cur.
+    // Candidates are sorted ascending from shrink-wrap's _clusterPositions.
     var target = null;
-    if (inwardSign > 0) {
+    if (stepSign > 0) {
       for (var i = 0; i < cands.length; i++) {
         if (cands[i] > cur + 0.5) {
           target = cands[i];
@@ -973,7 +979,8 @@ export function tightenOneStep(pageNum, polyIdx) {
   }
 
   if (moved === 0) {
-    return { edgesMoved: 0, edgesSkipped: skipped, reason: "no edge had an inner detent to advance to" };
+    var noun = inward ? "inner" : "outer";
+    return { edgesMoved: 0, edgesSkipped: skipped, reason: "no edge had an " + noun + " detent to advance to" };
   }
 
   _pushUndo(pageNum);
@@ -981,6 +988,16 @@ export function tightenOneStep(pageNum, polyIdx) {
     verts[updates[u].vIdx][updates[u].axis] = updates[u].value;
   }
   return { edgesMoved: moved, edgesSkipped: skipped, reason: null };
+}
+
+/** C7d — tighten all orthogonal edges one detent inward. */
+export function tightenOneStep(pageNum, polyIdx) {
+  return _offsetOneStep(pageNum, polyIdx, "inward");
+}
+
+/** C7e — loosen all orthogonal edges one detent outward. */
+export function loosenOneStep(pageNum, polyIdx) {
+  return _offsetOneStep(pageNum, polyIdx, "outward");
 }
 
 /**
