@@ -39,34 +39,57 @@ The parser is **text-only** — EPD PDFs are generally published with selectable
 4. **Two commit pathways, both human-gated.**
    - **Create new** — no DB match → review UI shows the parsed record alone → user confirms → write a fresh entry.
    - **Update existing** — DB match found → side-by-side diff (current vs incoming) → user picks per-field (overwrite / keep / merge-into-array) → commit.
-5. **Defer database write-back.** v1 emits a JSON download of the merged record; the user merges into `schema/materials/*.json` via a separate script (or by hand) on disk. Direct browser-side writes to source-of-truth files isn't safe in a Pages-deployed context, so v1 stays read-only against the schema.
+5. **No browser-side write to `schema/materials/*.json`.** Pages serves source data read-only. EPD-Parser produces a candidate record + audit metadata and **hands off** to the database viewer, which is the single point of commit (see [`Database.md`](Database.md)). The DB viewer collects pending changes from any source (EPD-Parser, future manual edits, future bulk-imports) into one queue, applies user decisions, and emits patch JSON the team applies via a Node script + git in the normal way.
+6. **Single source of truth for state.** Both EPD-Parser and the database viewer read/write through the same shared IndexedDB store ([`js/shared/indexed-db-store.mjs`](../../js/shared/indexed-db-store.mjs)). One `pending_changes` table, one `committed_patches` table — never two implementations of the same state. (Andy's standing rule: SST beats redundant intermediates.)
 
 ## 3. Architecture
 
-Same shell language as PDF-Parser — toolbar + sidebar + main area — but slimmed down for a text-extraction workflow.
+Two-pane shell — PDF on the left, full schema-shape edit form on the right. Lays the canvas viewer next to a 60-row form so every field of `material.schema.json` is visible and editable as the parser populates it.
 
 ```
-┌─ toolbar ───────────────────────────────────────────────────────────────┐
-│ [Drop EPD] [Extract] [Match]   page 1/N   zoom  ◇      [Export JSON]    │
-├─ sidebar ──────────────────────┬─ viewer ───────────────────────────────┤
-│ ┌ Extracted fields ─────────┐ │                                         │
-│ │ Manufacturer: Nordic      │ │                                         │
-│ │ Product: NorXLam CLT      │ │           rendered EPD page             │
-│ │ EPD #: 5960-4998 (CSA)    │ │                                         │
-│ │ Valid: 2023-01 → 2028-12  │ │           (read-only, scrollable)       │
-│ │ Density: 456 kg/m³        │ │                                         │
-│ │ ─────                     │ │                                         │
-│ │ GWP-A1A3: 6.22 kgCO₂e/m³  │ │                                         │
-│ │   (table, all stages)     │ │                                         │
-│ └───────────────────────────┘ │                                         │
-│ ┌ Match status ─────────────┐ │                                         │
-│ │ ⚠ Match found: lam011     │ │                                         │
-│ │   [Review diff]           │ │                                         │
-│ └───────────────────────────┘ │                                         │
-└────────────────────────────────┴─────────────────────────────────────────┘
+┌─ toolbar ─────────────────────────────────────────────────────────────────────────────┐
+│ [Drop EPD]  [Extract]  page 1/N  zoom ◇            [Hand off to Database ↗]   [Home]  │
+├──────────────────────────────────────────────┬────────────────────────────────────────┤
+│                                              │ ┌ Match status ────────────────────┐  │
+│                                              │ │ ⚠ Match found: lam011             │  │
+│                                              │ │   PCR ✓  URI ✓  scope ✓  → REFRESH │  │
+│         rendered EPD page (canvas)           │ └───────────────────────────────────┘  │
+│         pdf-loader + canvas-viewer           │ ┌ Schema record (editable) ────────┐  │
+│         zoom/pan/page-nav same as            │ │ id .................. lam011      │  │
+│         PDF-Parser                           │ │ manufacturer.name ... Nordic      │  │
+│                                              │ │ manufacturer.country_code . CAN   │  │
+│                                              │ │ naming.display_name . Cross-Lam…  │  │
+│                                              │ │ naming.product_brand_name . X-Lam │  │
+│                                              │ │ classification.group_prefix . 06  │  │
+│                                              │ │ classification.material_type … CLT│  │
+│                                              │ │ epd.id ............. 5960-4998    │  │
+│                                              │ │ epd.program_operator . CSA        │  │
+│                                              │ │ epd.source_document_url . https…  │  │
+│                                              │ │ epd.publication_date . 2023-01-15 │  │
+│                                              │ │ epd.expiry_date .... 2028-12-31   │  │
+│                                              │ │ methodology.pcr_guidelines …      │  │
+│                                              │ │ physical.density.value_kg_m3 . 456│  │
+│                                              │ │ impacts.gwp_kgco2e.total.value …  │  │
+│                                              │ │ impacts.gwp_kgco2e.by_stage.A1 .  │  │
+│                                              │ │ … (all 65+ fields, scrollable) …  │  │
+│                                              │ │ ─── audit ───                     │  │
+│                                              │ │ provenance.review_audit[]         │  │
+│                                              │ │   editor: andy@bfca               │  │
+│                                              │ │   date:   2026-04-25T19:42Z       │  │
+│                                              │ │   action: epd-parser-extract      │  │
+│                                              │ │   source: 2023 BC Wood CLT EPD…   │  │
+│                                              │ └───────────────────────────────────┘  │
+│                                              │ ┌ Hand off ────────────────────────┐  │
+│                                              │ │ [Send to Database review queue ↗]│  │
+│                                              │ └───────────────────────────────────┘  │
+└──────────────────────────────────────────────┴────────────────────────────────────────┘
 ```
 
-Sidebar fields are editable — the user can correct any extraction error before commit. Edits propagate live into the candidate JSON shown in the export panel.
+Layout target: roughly 50/50 split (PDF pane / form pane), with the form pane scrollable. PDF pane stays fixed-position so the user can scroll the form while keeping the document visible for cross-reference.
+
+Form fields are editable — the user can correct any extraction error before hand-off. The reviewer-stamp row at the bottom of the form (an entry appended to `provenance.review_audit[]`) is auto-populated with `editor` (configured per-team-member, persisted in `localStorage`), `date` (ISO timestamp at hand-off), `action` (`epd-parser-extract`, `manual-edit`, etc.), and `source` (the EPD PDF filename). The user can edit these before committing.
+
+The "Hand off" action does **not** write to `schema/materials/*.json`. It pushes the candidate record + audit metadata onto the shared `pending_changes` IndexedDB table; the user then opens the database viewer to review and commit the queued change. See [`Database.md`](Database.md) for the receiving end.
 
 ## 4. Reusable plumbing
 
@@ -122,6 +145,8 @@ Source: [`schema/material.schema.json`](../../schema/material.schema.json). Refe
 | LCI database (e.g. ecoinvent 3.x) | `methodology.lci_database` |
 | Geographic scope / markets | `provenance.countries_of_manufacture[]`, `provenance.markets_of_applicability[]` — also a match key in §6. CA-scope and US-scope EPDs of the same product are **separate records**, never merged. |
 | (Derived) group classification | `classification.group_prefix`, `classification.category_slug`, `classification.material_type`, `classification.typical_elements[]` |
+| **Lifecycle / soft-delete state** | `status.{listed, do_not_list, is_industry_average, is_beam_average, visibility}` — already in the schema and already in production use (43 of 821 records carry the soft-hide combo). Existing `visibility` enum is `public \| hidden \| deprecated`; **a small extension adds `flagged_for_deletion` plus a sibling `status.deletion_note: string` field** (proposed in [`Database.md`](Database.md) §3). EPD-Parser sets `status.visibility = "public"` on new records; refreshes preserve the existing `status` block unless the user explicitly re-flags. **Hard delete is forbidden.** |
+| **Reviewer / editor audit** | `provenance.review_audit[]` (proposed — append-only array of `{editor, date, action, source}` entries, one per edit). Auto-populated at hand-off with the team-member name (from `localStorage`), ISO timestamp, action verb (`epd-parser-extract`, `manual-edit`, `flag-for-deletion`, `restore`), and EPD source filename. Existing `provenance.data_added_or_modified` (free-text date string) and `provenance.import_metadata.{imported_from, import_date}` stay populated where they are; the new array is the structured trail going forward. Schema bump scoped in [`Database.md`](Database.md) §3. |
 
 **Group classification is inferred, not extracted.** Run `inferGroupPrefix(material_type, display_name)` against [`material-type-to-group.json`](../../schema/lookups/material-type-to-group.json) first, falling back to [`display-name-keywords.json`](../../schema/lookups/display-name-keywords.json). If both miss, the field stays null and the review UI flags it for manual selection.
 
@@ -153,21 +178,33 @@ A candidate refresh fires only when **all** of the following match between the i
 3. **Hit** → flag as refresh candidate, route to the side-by-side review UI.
 4. **Miss** → flag as new entry, route to the new-entry review UI. (Optional: surface near-matches — same manufacturer + same PCR but different scope, for example — as informational links in the new-entry UI: "this looks related to existing record `lam011` (US-scope); confirm this CA-scope EPD is meant to be a separate record.")
 
-### Review UI — refresh-candidate path
+### Hand-off, not commit
 
-- Two columns side-by-side. Left: existing record. Right: incoming parsed record.
-- Each scalar field has a three-way toggle: `keep existing` / `take incoming` / `merge` (where merge is meaningful, e.g. arrays).
-- Numeric fields show the delta — e.g. `gwp_kgco2e.total.value: 6.22 → 5.81 (-6.6%)` so the user can sanity-check.
-- The `epd.publication_date` and `epd.expiry_date` fields auto-default to "take incoming" since refreshing the EPD is the whole point.
-- The `provenance` block records the source EPD filename and parse timestamp regardless of which other fields were taken — audit trail.
-- Final commit produces (a) a JSON download of the merged record, and (b) a small audit-log JSON describing every field decision (for a future regression test or trace-back).
+EPD-Parser does **not** commit to `schema/materials/*.json`. The match outcome (refresh-candidate or new-entry) and the parsed record are pushed onto a shared `pending_changes` queue (IndexedDB, via [`js/shared/indexed-db-store.mjs`](../../js/shared/indexed-db-store.mjs)). The database viewer is the commit point — it reads the queue, surfaces the side-by-side diff (for refresh candidates) or the new-entry confirmation, captures per-field commit decisions, appends a `provenance.review_audit[]` entry, and emits a patch JSON the team applies via the Node patch script. See [`Database.md`](Database.md) §4–§7.
 
-### Review UI — new-entry path (the default)
+The single-source-of-truth rule applies: there's one `pending_changes` table, one `committed_patches` table, both consumed by both apps. EPD-Parser writes; DB viewer reads + decides + writes back. No redundant intermediate state in either app.
 
-- Single column. All extracted fields shown editable.
-- Group classification flagged if `inferGroupPrefix` returned null.
-- A "related records" panel surfaces any partial-match records (same manufacturer + same PCR, or same EPD-id with different scope) as read-only links, so the user can spot a configuration error (e.g. they were trying to refresh an existing record but a key didn't match) before committing a duplicate.
-- User confirms → fresh `id` minted via `makeId()` → JSON download → done.
+### What gets handed off
+
+For both pathways (refresh + new entry), the queued payload is:
+
+```
+{
+  source: "epd-parser",
+  target_record_id: "lam011" | null,    // null for new entries
+  candidate_record: { …full schema-shape JSON… },
+  match_outcome: "refresh" | "new" | "near-match-rejected",
+  match_keys_compared: { manufacturer, epd_id, pcr, uri, scope, program },
+  audit_meta: {
+    editor:        "andy@bfca",          // from localStorage; user-editable in the form
+    date:          "2026-04-25T19:42Z",
+    action:        "epd-parser-extract",
+    source:        "2023 BC Wood CLT EPD ASTM.pdf"
+  }
+}
+```
+
+The user then opens the database viewer (toolbar "Hand off to Database ↗" link), sees the candidate in the pending-queue panel, runs the side-by-side diff (for refresh) or the new-entry form, commits or rejects.
 
 ## 7. Phases
 
@@ -177,10 +214,10 @@ A candidate refresh fires only when **all** of the following match between the i
 | **P1 — Text extraction** | Wire `getTextContent()` per page, render a flat-text panel in the sidebar. | User can confirm against 3+ sample EPDs that the text-layer assumption holds (no scanned-only PDFs in the v1 sample set). |
 | **P2 — Field extraction (heuristic v1)** | Anchor-based regex passes against the field groups in §5. Calibrate against the user's sample EPDs, one program operator at a time (CSA first if any of the samples are Canadian; IBU / EPD International / UL Environment as available). Sidebar fields populate as they're extracted. | At least 80% field coverage on the calibration set, with confidence chips for low-certainty extractions. |
 | **P3 — Schema mapping + validation** | Pipe extracted fields through the shared normalize module + the browser validator. Show schema errors live. Emit a candidate JSON record. | A complete-shape JSON record validates clean against `material.schema.json` for every calibration sample. |
-| **P4 — Match + review UI** | Implement §6 — DB match algorithm + side-by-side diff UI + per-field commit decisions. | Both pathways (new + update) produce a downloadable JSON record + audit log. |
-| **P5 — Persist** | JSON download wired up. (No browser-side write to `schema/materials/*` — that's a separate non-browser concern.) | User can ingest a new EPD end-to-end and produce a record they could merge into the database via a separate Node script. |
+| **P4 — Match + form pane** | Render the editable schema-shape form on the right pane (per §3 mockup). Run the §6 six-key match against the DB. Surface match outcome in the form's status banner. Auto-stamp a `provenance.review_audit[]` entry. **Side-by-side diff lives in the database viewer**, not here — see [`Database.md`](Database.md) §5. | Form populated, match outcome surfaced, audit entry stamped. |
+| **P5 — Hand-off** | "Hand off to Database ↗" button writes the payload from §6 into the shared `pending_changes` IndexedDB table and routes the user to `database.html`. JSON download stays available as a fallback for cases where the DB viewer isn't the destination (e.g. external review). | Drop an EPD → click hand-off → it shows up in the DB viewer's pending queue ready for commit/replace/reject. |
 | **P6 — Refresh queue (DB-driven entry point)** | Second entry point next to drag-drop: a "Refresh queue" view that loads `schema/materials/*.json`, sorts by `epd.expiry_date` (expired records first, expiring-within-12-months next), and for each row offers a "Find refresh" action. The action displays a templated search query (`<manufacturer> <product_brand_name> EPD <expiry_year + 1>`) and direct links to the originating program-operator registries when known (CSA, ULE, EPD International, IBU). The team member runs the actual web search externally — likely with Claude Code's WebSearch / WebFetch tools in a parallel session, since this is an internal-only tool — and pastes the candidate PDF URL back into the parser. The parser fetches and runs the existing P1–P5 pipeline, with the expired record pre-loaded as the candidate refresh target. The §6 strict match still applies: if the new EPD's PCR / scope / program differs, the user is shown the "looks like a new entry, not a refresh" path and the old expired record stays untouched. | Team can clear the expired-record backlog systematically: open the queue, walk down the list, find candidate URLs, parse, review, commit a refresh or a new entry per record. |
-| **P7 — Coverage hardening** | OCR fallback (Tesseract.js) for scanned EPDs. Bulk multi-EPD upload. Cross-reference to program-operator online registries (CSA, ULE, EPD International) where public APIs exist — could partially automate the URL-finding step in P6. Optional: in-browser Anthropic API call to auto-suggest refresh URLs (back-office only, never shipped on the public Pages build). | Nice-to-have; gated on real demand once P6 is in regular use. |
+| **P7 — Coverage hardening** | OCR fallback (Tesseract.js) for scanned EPDs. Bulk multi-EPD upload. Where program operators publish *public* registry APIs (CSA, ULE, EPD International), wrap them as direct lookups to partially automate the URL-finding step in P6. **No browser-side Anthropic API integration** — see §8. | Nice-to-have; gated on real demand once P6 is in regular use. |
 
 ## 8. Open questions / pending samples
 
@@ -192,7 +229,7 @@ Decisions deferred until the user shares sample EPDs:
 - **Industry-average treatment.** When `epd.type` parses as `industry_average`, is `manufacturer.name` blank, the trade association name (e.g. "Concrete BC"), or omitted entirely from the schema? Schema allows it nullable; the convention isn't documented yet.
 - **Density inference.** EPDs sometimes state mass per declared unit (e.g. "1 m³ of CLT, 456 kg") instead of density directly. Parser needs to compute density when only mass-per-unit is published. Trivial when the unit is m³; less so for "1 m² of XPS at 25 mm thick" — depends on having thickness in scope.
 - **PCR-version handling on a refresh.** §6 says a PCR version bump is a new record. That's correct in the strict-LCA sense (different boundaries, possibly different allocation) but may be more conservative than the user wants for minor-version updates (v1.1 → v1.1a errata). Open: do we want a soft-match flag for same-PCR-base, different-revision pairs, surfaced as "candidate refresh — confirm PCR revision is a minor update"?
-- **Refresh-queue websearch integration (P6).** Three plausible designs, decision deferred to when P6 is being built. (a) **External, recommended for v1**: parser surfaces a templated search query and registry links; staff runs Claude Code in a parallel session to do the actual search, pastes the candidate URL back. Lowest friction, no API plumbing, fits "this is done internally by the team using Claude." (b) **In-browser API**: parser calls the Anthropic API directly with a tool-use loop to find and short-list candidate URLs; API key supplied at runtime via `localStorage`, never shipped to public Pages. Heavier; only worth it if the workflow gets repeated dozens of times per session. (c) **Hybrid**: parser auto-formulates queries and opens program-operator registry pages in new tabs; user reviews, pastes URLs back. Middle ground.
+- **Refresh-queue websearch integration (P6).** Two viable designs. (a) **External (recommended)**: parser surfaces a templated search query and registry links; the team member runs Claude Code in a parallel session to do the actual search, pastes the candidate URL back. Lowest friction, no API plumbing, no key-handling surface. Fits "this is done internally by the team using Claude." (b) **Hybrid**: parser auto-formulates queries and opens program-operator registry pages in new tabs; user reviews, pastes URLs back. Middle ground; useful only if specific registries get hit constantly. **Direct in-browser Anthropic API calls are explicitly out — storing or pasting an API key into a browser context exposes it via dev tools, even on an internal tool, and an attacker with momentary local access could exfiltrate it. Andy ruled this out 2026-04-25.** Copy-paste-URL workflow is the standing pattern.
 - **Production deployment of back-office tools.** EPD-Parser, the database viewer, and possibly the dependency manifest are internal maintenance tools that public users shouldn't see. Options when production deployment becomes a concern: (a) GitHub Pages auth-gate via Cloudflare Access or similar; (b) a separate staging Pages build that includes the back-office cards, and a production build that omits them; (c) keep one build but hide the cards behind a query-string flag (e.g. `?dev=1`). Out of scope for v1; flagged so the choice doesn't sneak up on us.
 
 ## 9. IP guardrails
@@ -205,11 +242,13 @@ Decisions deferred until the user shares sample EPDs:
 
 ## 10. Out of scope (v1)
 
-- OCR (Tesseract.js fallback) — P6 phase, gated on real demand.
-- Direct browser-side writes to `schema/materials/*.json`. Pages is read-only; the commit pathway is JSON download + manual merge or a small Node merge script.
-- Scraping EPD-program registries (CSA, IBU, EPD International). Future enhancement; rights vary by program.
-- Generating BfCA-internal `beam_id` values for new entries. New IDs come from `makeId(slug)` (random alphanumeric per the existing convention); no semantic meaning baked in.
-- Regression test fixtures for the parser. Defer until at least one real EPD sample is in repo (likely under `docs/pdf-samples/epd/` once the user shares).
+- **OCR** (Tesseract.js fallback) — P7 phase, gated on real demand.
+- **Hard delete of database records.** Forever. Soft-delete via `status.visibility = "flagged_for_deletion"` is the only deletion path; flagged records stay in `schema/materials/*.json` for back-office manual review (see [`Database.md`](Database.md) §6).
+- **Direct browser-side writes to `schema/materials/*.json`.** Pages serves source data read-only. Commits flow EPD-Parser → shared IndexedDB → DB viewer → patch JSON download → Node patch script → git.
+- **In-browser Anthropic API integration.** Ruled out for security (§8).
+- **Scraping EPD-program registries** (CSA, ULE, IBU, EPD International). Where they expose public APIs, P7 may wrap them; without an API, the team uses the copy-paste-URL workflow (§8).
+- **Generating BfCA-internal `beam_id` values for new entries.** New IDs come from `makeId(slug)` (random alphanumeric per the existing convention); no semantic meaning baked in.
+- **Regression test fixtures for the parser.** Defer until calibration samples stabilize. Wood EPDs are now in `docs/PDF References/EPD SAMPLES/`; fixture extraction is a P3 follow-up.
 
 ---
 
