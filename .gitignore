@@ -9,6 +9,8 @@ logs/
 
 # Playwright verification screenshots at repo root (one-off, not documentation)
 /epd-*.png
+# EPD-Parser calibration JSON dumps (ad-hoc analysis from Playwright eval)
+/epd-*.json
 
 # Local working notes
 BfCA Server Commands.txt

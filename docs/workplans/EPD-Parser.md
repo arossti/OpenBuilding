@@ -245,6 +245,107 @@ Decisions deferred until the user shares sample EPDs:
 - **No positioning as a port of MCE² or any NRCan tool.** EPD-Parser is a BfCA original. Schema citations to standards documents (ISO 14025, EN 15804+A2) are factual and stay.
 - **Concern is spider-trolls scraping the deployed Pages site.** Anything served (`epdparser.html`, `js/epdparser*.mjs`, JSON it fetches, this workplan once published) is in scope for the rule.
 
+## 9.5. Calibration findings (P1, 2026-04-25)
+
+P1 shipped with `getTextContent()` wired into the sidebar's raw-text dump. To inform P2 anchor design, we walked **7 representative samples** from `docs/PDF References/EPD SAMPLES/` spanning wood + insulation, multiple program operators, multiple eras. Findings below drive P2's regex strategy.
+
+### Coverage matrix
+
+| Sample | Format | Pages | Items / p | PCR | DECL # | DUNIT | PROG | ISO 14025 | ISO 21930 | EN 15804 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2013 BC Wood LVL EPD | UL Env, NA industry-avg | 16 | 84 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | · |
+| 2017 BC Wood WRC AWC EPD | UL Env, NA industry-avg | 17 | 195 | ✓ | · (per-glyph "D ECLARATION") | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 2022 BC Wood CLT Kalesnikoff | UL Env, manufacturer-specific | 12 | 172 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | · |
+| 2023 BC Wood GLT EPD ASTM | ASTM, manufacturer-specific | 11 | 178 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| EPD Sopra-XPS | ASTM, manufacturer-specific (EU mfr.) | 33 | 145 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| EPD Wood Fibre Insulating Boards | IBU, EU manufacturer | 10 | 201 | ✓ | ✓ | ✓ | · ("Programme holder") | ✓ | · | ✓ (`+A1`) |
+| Boreal Nature Elite TDS | **NOT an EPD** | 2 | 234 | · | · | · | · | · | · | · |
+
+Boreal TDS is the rejection-test floor: zero EPD anchors hit. P2 can use a "must hit ≥4 of {PCR, DECLARATION_NUMBER, DECLARED_UNIT, ISO 14025, EN 15804, PROGRAM_OPERATOR}" threshold to reject non-EPD documents.
+
+### Anchor-vocabulary families
+
+Three formats observed; P2 needs regex variants for each (NA family is overwhelmingly the most common in the BfCA database).
+
+**A. UL Environment / ASTM (North American)** — SCREAMING_CAPS labels, key-value tables. Examples (verbatim from the dumps):
+```
+DECLARATION HOLDER          American Wood Council
+DECLARATION NUMBER          4788424634.107.1
+PROGRAM OPERATOR            UL Environment   https://www.ul.com/
+DECLARED PRODUCT            US Redwood Lumber
+FUNCTIONAL UNIT             1 m³ of …
+DATE OF ISSUE               16 December 2021
+PERIOD OF VALIDITY          16 December 2021 – 15 December 2026
+EPD TYPE                    Product-specific
+EPD SCOPE                   Cradle to grave
+PRODUCT CATEGORY RULES (PCR)  Part A: UL Environment Building Related Products and Services. v3.1. May 2018
+```
+Validation block uses checkbox layout: `□ INTERNAL  x EXTERNAL`. Verifier names appear separately ("Dr. Thomas Gloria, Industrial Ecology Consultants" — Sopra uses "Marie Bellemare").
+
+**B. IBU / EU** — Sentence-case labels with German + English mix. Examples:
+```
+Owner of the Declaration    GUTEX Holzfaserplattenwerk H. Henselmann GmbH + Co KG
+Programme holder            Institut Bauen und Umwelt e.V. (IBU)
+Publisher                   Institut Bauen und Umwelt e.V. (IBU)
+Declaration number          EPD-GTX-20200178-IBC1-EN
+Issue date                  30/10/2020
+Valid to                    08/10/2025
+This declaration is based on the product category rules:
+  Wood based panels, 12.2018 (PCR checked and approved by the SVR)
+```
+Dates are DD/MM/YYYY (European). The `EN-FINAL` suffix in some filenames indicates a translated-from-French original.
+
+**C. Technical Data Sheet (rejection)** — none of the above. Boreal TDS has product-marketing prose, physical-property tables (density, R-value), and `CCMC` certification refs only.
+
+### Per-glyph splits — load-bearing for P2 regex
+
+Same MAGIC.md §6.1 lesson applies. pdfjs v4 (the browser bundle) emits per-glyph items on some PDFs. Observed splits:
+- Leading drop-cap separates: `D ECLARATION`, `E nvironmental`, `PC R`, `re sults`, `p roduct`
+- Mid-word splits on hyphens: `compos - ite lumber`
+- Number splits: `Page 2 of 1 6`, `14 025:2006`
+
+**P2 anchors must use `\s*` bridges between expected adjacent characters.** Examples that work across the calibration set:
+```
+/D\s*ECLARATION\s+NUMBER\s+([A-Z0-9.\-]+)/i
+/PROGRAMME?\s*(?:OPERATOR|HOLDER)/i
+/(?:DECLARED|FUNCTIONAL)\s+UNIT/i
+/EN\s*15804(?:\s*\+\s*A[12])?/i
+/ISO\s*1[34]025/i   /ISO\s*21930/i
+```
+
+### Date format variations
+
+| Source | Format | Example |
+|---|---|---|
+| UL Env / ASTM (modern) | `DD Month YYYY` | `16 December 2021` |
+| UL Env / ASTM (period) | `Mon YYYY – Mon YYYY` | `December 2021 – December 2026` |
+| IBU / EU | `DD/MM/YYYY` | `30/10/2020`, `08/10/2025` |
+| BC Wood older (2013) | `YYYY-MM-DD` | `Issued: 2013-MM-DD` |
+
+P2 date parsing needs a multi-format walker. ISO normalization is the §5 schema target.
+
+### Declared-unit hints (informs the §8 density-inference question)
+
+| Material class | Unit pattern | Density resolution |
+|---|---|---|
+| Solid wood (CLT, GLT, LVL, SPF, Plywood) | `1 m³` | density direct |
+| Wood-fibre insulating boards | `1 m³ … average weighted density of 167 kg/m³` | density stated explicitly |
+| XPS / polyiso / mineral wool | `1 m² … RSI = 1 m²·K/W` (m² + thickness + R-value) | **needs separate density extraction**, often elsewhere in the doc |
+
+The Sopra-XPS m²-with-thickness pattern is the §8 open question becoming concrete. P2 should: (1) detect the unit pattern, (2) if m² + thickness, scan for explicit `<N> kg/m³` density elsewhere on the cover or general-information page, (3) if not findable, leave `physical.density.value_kg_m3` null and flag in the form pane.
+
+### Concrete P2 strategy
+
+Build P2 as a sequence of anchor passes:
+
+1. **Format detection** — search page 1+2 for either family-A keywords (`PROGRAM OPERATOR`, `DECLARATION HOLDER`) or family-B keywords (`Programme holder`, `Owner of the Declaration`). Set `format = "NA"` or `format = "EU"`.
+2. **Anchor-and-capture per field**, using format-specific regex. Each anchor returns `{value, page, confidence}`.
+3. **Threshold check** — if fewer than 4 of {PCR, DECLARATION_NUMBER, DECLARED_UNIT, ISO 14025, EN 15804, PROGRAM_OPERATOR} hit, the document is flagged as not-an-EPD and the form pane shows a warning banner ("This doesn't look like a standard EPD — review fields before commit").
+4. **Date normalization** — multi-format walker normalizes to ISO 8601 for `epd.publication_date` and `epd.expiry_date`.
+5. **Unit + density resolution** — m³ direct vs m²+thickness lookup vs null + flag.
+
+Per-EPD wood + insulation regression fixtures land as P3 work, drawing the seven calibration JSON dumps as ground truth.
+
 ## 10. Out of scope (v1)
 
 - **OCR** (Tesseract.js fallback) — P7 phase, gated on real demand.
