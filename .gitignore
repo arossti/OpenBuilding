@@ -7,6 +7,9 @@ logs/
 # Playwright MCP working dir (console logs + snapshot YAMLs from agent-driven tests)
 .playwright-mcp/
 
+# Playwright verification screenshots at repo root (one-off, not documentation)
+/epd-*.png
+
 # Local working notes
 BfCA Server Commands.txt
 
