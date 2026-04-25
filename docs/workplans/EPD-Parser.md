@@ -247,7 +247,7 @@ Decisions deferred until the user shares sample EPDs:
 
 ## 9.5. Calibration findings (P1, 2026-04-25)
 
-P1 shipped with `getTextContent()` wired into the sidebar's raw-text dump. To inform P2 anchor design, we walked **7 representative samples** from `docs/PDF References/EPD SAMPLES/` spanning wood + insulation, multiple program operators, multiple eras. Findings below drive P2's regex strategy.
+P1 shipped with `getTextContent()` wired into the sidebar's raw-text dump. To inform P2 anchor design, we walked **10 representative samples** from `docs/PDF References/EPD SAMPLES/` spanning wood + insulation, multiple program operators, multiple eras. Findings below drive P2's regex strategy.
 
 ### Coverage matrix
 
@@ -259,9 +259,36 @@ P1 shipped with `getTextContent()` wired into the sidebar's raw-text dump. To in
 | 2023 BC Wood GLT EPD ASTM | ASTM, manufacturer-specific | 11 | 178 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | EPD Sopra-XPS | ASTM, manufacturer-specific (EU mfr.) | 33 | 145 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | EPD Wood Fibre Insulating Boards | IBU, EU manufacturer | 10 | 201 | ✓ | ✓ | ✓ | · ("Programme holder") | ✓ | · | ✓ (`+A1`) |
-| Boreal Nature Elite TDS | **NOT an EPD** | 2 | 234 | · | · | · | · | · | · | · |
+| EPD Genyk SPF (multi-product) | ASTM, manufacturer-specific | 40 | 250 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 2015 LSL Summary (condensed EPD) | AWC/CWC, "Transparency Summary" | 2 | 230 | ✓ | · | ✓ | · | ✓ | · | · |
+| Boreal Nature Elite TDS | **NOT an EPD** (data sheet) | 2 | 234 | · | · | · | · | · | · | · |
+| EPD Polyiso walls | **No text layer** (scanned PDF) | 23 | 0 | · | · | · | · | · | · | · |
 
-Boreal TDS is the rejection-test floor: zero EPD anchors hit. P2 can use a "must hit ≥4 of {PCR, DECLARATION_NUMBER, DECLARED_UNIT, ISO 14025, EN 15804, PROGRAM_OPERATOR}" threshold to reject non-EPD documents.
+Boreal TDS and Polyiso walls are both rejection cases but for **different reasons** — Boreal has text but no EPD anchors; Polyiso has zero items per page (image-only PDF). The parser must distinguish: "no anchors" → not an EPD (or wrong file type), vs. "no items at all" → text-layer empty, OCR needed.
+
+### Edge cases discovered in this calibration round
+
+**Multi-product EPDs (Genyk).** A single PDF can declare multiple products. The Genyk omnibus EPD covers three SPF products on one declaration: `Boreal Nature Elite`, `Duraseal`, `Floraseal 50`. Verbatim from page 1: *"Genyk is pleased to present the environmental product declaration (EPD) of three spray polyurethane foams (SPFs)…"* P2 must detect this case (look for plural "products" in the declared-product field, or multiple product-brand-name candidates) and either:
+- Surface a "multi-product EPD detected — pick which product this record represents" disambiguation in the form pane, or
+- Split into N separate `pending_changes` queue entries (one per product), each pre-filled with the same shared fields (manufacturer, dates, PCR, methodology).
+
+The shared fields are: declaration holder, dates, PCR, program operator, methodology. Different per-product: `naming.product_brand_name`, `physical.density.value_kg_m3` (per-product densities are listed separately), and the impact values (each product gets its own GWP / EP / ODP table).
+
+Side-note: this is also why **Boreal Nature Elite** has both a Genyk-omnibus EPD (this file) and a Boreal-branded TDS (the rejection-test sample). The TDS isn't the wrong file — there *is no* product-specific EPD for Boreal; its EPD lives inside Genyk's omnibus. P2 needs to know that a TDS with no anchors isn't necessarily "the wrong document"; it might just be "this product's EPD is bundled elsewhere."
+
+**Empty text-layer / scanned PDFs (Polyiso walls).** Confirmed first OCR-needed sample in the calibration set: 23 pages, 0 text items, 0 chars. The `getTextContent()` API returned empty arrays for every page. **This invalidates the "text-layer only is sufficient for v1" framing in §1 and §8.** P2 must:
+- Detect the empty-text case (`items.length === 0` on every page), and
+- Surface a clear "no text layer detected — this PDF needs OCR (P7) or manual data entry" banner in the form pane, instead of silently producing an empty record.
+
+P7 (OCR fallback via Tesseract.js) moves from "nice-to-have, gated on real demand" to "needed before the parser is considered done." Out of scope for v1 still, but the timeline shortens — at least one PDF in the BfCA team's actual set requires it.
+
+**Summary-form EPDs (2015 LSL Summary).** A condensed-format document branded as "EPD Transparency Summary" (AWC + CWC). It IS a real EPD — provides PCR, declared unit (1 m³ LSL), density (570.22 kg/m³), cradle-to-gate scope — but in a 2-page abbreviated format that misses some anchors normally present in full EPDs (no separate Declaration Number block, no Program Operator key-value, no EN 15804 reference). Hits 3 of 6 threshold anchors instead of the proposed ≥4.
+
+P2 anchor strategy needs revision: the threshold ≥4-of-6 rule rejects valid summary-form EPDs. Recommended alternative:
+- **≥4 anchors** → "full EPD" — proceed normally
+- **2–3 anchors** → "EPD-like (possibly a summary form) — proceed with caution; flag fields that didn't extract"
+- **0–1 anchors with non-empty text** → "doesn't look like an EPD" — show the rejection banner with a "force-extract anyway" override
+- **0 items at all** → "scanned PDF, OCR required" — different banner
 
 ### Anchor-vocabulary families
 
@@ -348,7 +375,7 @@ Per-EPD wood + insulation regression fixtures land as P3 work, drawing the seven
 
 ## 10. Out of scope (v1)
 
-- **OCR** (Tesseract.js fallback) — P7 phase, gated on real demand.
+- **OCR** (Tesseract.js fallback) — P7 phase. **Real demand confirmed in P1 calibration** (`EPD_Polyiso walls.pdf` is image-only, zero text-layer items). v1 detects this case and surfaces a "needs OCR" banner; the actual OCR pass lands in P7.
 - **Hard delete of database records.** Forever. Soft-delete via `status.visibility = "flagged_for_deletion"` is the only deletion path; flagged records stay in `schema/materials/*.json` for back-office manual review (see [`Database.md`](Database.md) §6).
 - **Direct browser-side writes to `schema/materials/*.json`.** Pages serves source data read-only. Commits flow EPD-Parser → shared IndexedDB → DB viewer → patch JSON download → Node patch script → git.
 - **In-browser Anthropic API integration.** Ruled out for security (§8).
