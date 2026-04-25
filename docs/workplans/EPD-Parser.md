@@ -48,7 +48,7 @@ Two-pane shell — PDF on the left, full schema-shape edit form on the right. La
 
 ```
 ┌─ toolbar ─────────────────────────────────────────────────────────────────────────────┐
-│ [Drop EPD]  [Extract]  page 1/N  zoom ◇            [Hand off to Database ↗]   [Home]  │
+│ [Drop EPD]  [Extract]  page 1/N  zoom ◇   ↗ Open Database to commit          [Home]   │
 ├──────────────────────────────────────────────┬────────────────────────────────────────┤
 │                                              │ ┌ Match status ────────────────────┐  │
 │                                              │ │ ⚠ Match found: lam011             │  │
@@ -79,17 +79,16 @@ Two-pane shell — PDF on the left, full schema-shape edit form on the right. La
 │                                              │ │   action: epd-parser-extract      │  │
 │                                              │ │   source: 2023 BC Wood CLT EPD…   │  │
 │                                              │ └───────────────────────────────────┘  │
-│                                              │ ┌ Hand off ────────────────────────┐  │
-│                                              │ │ [Send to Database review queue ↗]│  │
-│                                              │ └───────────────────────────────────┘  │
+│                                              │ Auto-saved to pending queue · ↗ Open  │
+│                                              │ Database viewer for Trust / Verify     │
 └──────────────────────────────────────────────┴────────────────────────────────────────┘
 ```
 
 Layout target: roughly 50/50 split (PDF pane / form pane), with the form pane scrollable. PDF pane stays fixed-position so the user can scroll the form while keeping the document visible for cross-reference.
 
-Form fields are editable — the user can correct any extraction error before hand-off. The reviewer-stamp row at the bottom of the form (an entry appended to `provenance.review_audit[]`) is auto-populated with `editor` (configured per-team-member, persisted in `localStorage`), `date` (ISO timestamp at hand-off), `action` (`epd-parser-extract`, `manual-edit`, etc.), and `source` (the EPD PDF filename). The user can edit these before committing.
+Form fields are editable — the user can correct any extraction error before commit. The reviewer-stamp row at the bottom of the form (an entry appended to `provenance.review_audit[]`) is auto-populated with `editor` (configured per-team-member, persisted in `localStorage`), `date` (ISO timestamp), `action` (`epd-parser-extract`, `manual-edit`, etc.), and `source` (the EPD PDF filename). The user can edit these.
 
-The "Hand off" action does **not** write to `schema/materials/*.json`. It pushes the candidate record + audit metadata onto the shared `pending_changes` IndexedDB table; the user then opens the database viewer to review and commit the queued change. See [`Database.md`](Database.md) for the receiving end.
+**EPD-Parser is a pure data producer** — same shape as the existing PDF-Parser → BEAM bridge ([`js/beamweb.mjs:519`](../../js/beamweb.mjs#L519), [`beamweb.html:90-103`](../../beamweb.html#L90-L103)). PDF-Parser saves project state to IndexedDB during normal use; BEAMweb has the **Trust** / **Trust + Verify** buttons that pull from it. EPD-Parser does the same: as the user edits fields in the form pane, the candidate record + audit metadata auto-save (debounced) to the shared `pending_changes` IndexedDB table. **No "send" or "commit" button lives on this side.** The user opens the Database viewer (toolbar link "↗ Open Database to commit") where the Trust / Trust + Verify buttons act on the queued entry. See [`Database.md`](Database.md) §4 + §5.
 
 ## 4. Reusable plumbing
 
@@ -178,33 +177,39 @@ A candidate refresh fires only when **all** of the following match between the i
 3. **Hit** → flag as refresh candidate, route to the side-by-side review UI.
 4. **Miss** → flag as new entry, route to the new-entry review UI. (Optional: surface near-matches — same manufacturer + same PCR but different scope, for example — as informational links in the new-entry UI: "this looks related to existing record `lam011` (US-scope); confirm this CA-scope EPD is meant to be a separate record.")
 
-### Hand-off, not commit
+### Producer-only — no commit logic in this app
 
-EPD-Parser does **not** commit to `schema/materials/*.json`. The match outcome (refresh-candidate or new-entry) and the parsed record are pushed onto a shared `pending_changes` queue (IndexedDB, via [`js/shared/indexed-db-store.mjs`](../../js/shared/indexed-db-store.mjs)). The database viewer is the commit point — it reads the queue, surfaces the side-by-side diff (for refresh candidates) or the new-entry confirmation, captures per-field commit decisions, appends a `provenance.review_audit[]` entry, and emits a patch JSON the team applies via the Node patch script. See [`Database.md`](Database.md) §4–§7.
+EPD-Parser is a pure data producer, mirroring how PDF-Parser feeds BEAMweb today ([`js/beamweb.mjs:519`](../../js/beamweb.mjs#L519) `handleTrustPdfParser`). The match outcome (refresh-candidate / new / near-match-rejected) and the parsed record auto-save (debounced) to the shared `pending_changes` queue (IndexedDB, via [`js/shared/indexed-db-store.mjs`](../../js/shared/indexed-db-store.mjs)) on every edit in the form pane. **There are no "send", "commit", "hand-off", or "apply" buttons on the EPD-Parser side.** The Database viewer is the commit point and owns the Trust / Trust + Verify buttons (§4 + §5 of [`Database.md`](Database.md)).
 
-The single-source-of-truth rule applies: there's one `pending_changes` table, one `committed_patches` table, both consumed by both apps. EPD-Parser writes; DB viewer reads + decides + writes back. No redundant intermediate state in either app.
+The single-source-of-truth rule applies: one `pending_changes` table, one `committed_patches` table, both shared. EPD-Parser writes; DB viewer reads + decides + writes back. No redundant intermediate state in either app.
 
-### What gets handed off
+### What lands in the queue
 
-For both pathways (refresh + new entry), the queued payload is:
+Each auto-save updates one `pending_changes` row keyed by EPD source filename. Schema:
 
 ```
 {
   source: "epd-parser",
-  target_record_id: "lam011" | null,    // null for new entries
+  source_file: "2023 BC Wood CLT EPD ASTM.pdf",      // queue key
+  target_record_id: "lam011" | null,                  // null for new entries
   candidate_record: { …full schema-shape JSON… },
   match_outcome: "refresh" | "new" | "near-match-rejected",
   match_keys_compared: { manufacturer, epd_id, pcr, uri, scope, program },
   audit_meta: {
-    editor:        "andy@bfca",          // from localStorage; user-editable in the form
-    date:          "2026-04-25T19:42Z",
-    action:        "epd-parser-extract",
-    source:        "2023 BC Wood CLT EPD ASTM.pdf"
+    editor:       "andy@bfca",                        // from localStorage; user-editable in the form
+    last_edit_at: "2026-04-25T19:42Z",                // updated on every edit
+    action:       "epd-parser-extract",
+    source:       "2023 BC Wood CLT EPD ASTM.pdf"
   }
 }
 ```
 
-The user then opens the database viewer (toolbar "Hand off to Database ↗" link), sees the candidate in the pending-queue panel, runs the side-by-side diff (for refresh) or the new-entry form, commits or rejects.
+The user opens the Database viewer (toolbar link "↗ Open Database to commit" — opens `database.html` in a new tab); the queued candidate appears in the pending-changes panel with two buttons:
+
+- **Trust** (`bi-lightning-charge`) — one-click commit. New entries: writes record + appends audit row + mints `id` via `makeId()`. Refresh candidates: takes incoming record fully, no per-field diff. Status echoes BEAM: *"Trust: committed lam011 from 2023 BC Wood CLT EPD ASTM.pdf · click Trust + Verify to audit"*.
+- **Trust + Verify** (`bi-file-earmark-ruled`) — opens the side-by-side diff (refresh) or the new-entry confirmation form (new). Per-field three-way toggle, audit trail. Always available; user can re-audit even after a Trust commit.
+
+UX wording mirrors the existing PDF-Parser → BEAM bridge so muscle-memory transfers from the validated flow.
 
 ## 7. Phases
 
@@ -215,7 +220,7 @@ The user then opens the database viewer (toolbar "Hand off to Database ↗" link
 | **P2 — Field extraction (heuristic v1)** | Anchor-based regex passes against the field groups in §5. Calibrate against the user's sample EPDs, one program operator at a time (CSA first if any of the samples are Canadian; IBU / EPD International / UL Environment as available). Sidebar fields populate as they're extracted. | At least 80% field coverage on the calibration set, with confidence chips for low-certainty extractions. |
 | **P3 — Schema mapping + validation** | Pipe extracted fields through the shared normalize module + the browser validator. Show schema errors live. Emit a candidate JSON record. | A complete-shape JSON record validates clean against `material.schema.json` for every calibration sample. |
 | **P4 — Match + form pane** | Render the editable schema-shape form on the right pane (per §3 mockup). Run the §6 six-key match against the DB. Surface match outcome in the form's status banner. Auto-stamp a `provenance.review_audit[]` entry. **Side-by-side diff lives in the database viewer**, not here — see [`Database.md`](Database.md) §5. | Form populated, match outcome surfaced, audit entry stamped. |
-| **P5 — Hand-off** | "Hand off to Database ↗" button writes the payload from §6 into the shared `pending_changes` IndexedDB table and routes the user to `database.html`. JSON download stays available as a fallback for cases where the DB viewer isn't the destination (e.g. external review). | Drop an EPD → click hand-off → it shows up in the DB viewer's pending queue ready for commit/replace/reject. |
+| **P5 — Auto-save to pending queue** | Form-pane edits debounce-write the candidate record + audit metadata to the shared `pending_changes` IndexedDB table. Toolbar gets an "↗ Open Database to commit" navigation link that opens `database.html` (where the Trust / Trust + Verify buttons live). No commit/send button on this side — same shape as PDF-Parser → BEAM. JSON download stays available as a fallback for external-review cases. | Drop an EPD → edit form → open Database → entry shows up in the pending-changes panel ready for Trust / Trust + Verify. |
 | **P6 — Refresh queue (DB-driven entry point)** | Second entry point next to drag-drop: a "Refresh queue" view that loads `schema/materials/*.json`, sorts by `epd.expiry_date` (expired records first, expiring-within-12-months next), and for each row offers a "Find refresh" action. The action displays a templated search query (`<manufacturer> <product_brand_name> EPD <expiry_year + 1>`) and direct links to the originating program-operator registries when known (CSA, ULE, EPD International, IBU). The team member runs the actual web search externally — likely with Claude Code's WebSearch / WebFetch tools in a parallel session, since this is an internal-only tool — and pastes the candidate PDF URL back into the parser. The parser fetches and runs the existing P1–P5 pipeline, with the expired record pre-loaded as the candidate refresh target. The §6 strict match still applies: if the new EPD's PCR / scope / program differs, the user is shown the "looks like a new entry, not a refresh" path and the old expired record stays untouched. | Team can clear the expired-record backlog systematically: open the queue, walk down the list, find candidate URLs, parse, review, commit a refresh or a new entry per record. |
 | **P7 — Coverage hardening** | OCR fallback (Tesseract.js) for scanned EPDs. Bulk multi-EPD upload. Where program operators publish *public* registry APIs (CSA, ULE, EPD International), wrap them as direct lookups to partially automate the URL-finding step in P6. **No browser-side Anthropic API integration** — see §8. | Nice-to-have; gated on real demand once P6 is in regular use. |
 

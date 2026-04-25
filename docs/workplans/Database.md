@@ -104,10 +104,13 @@ After the schema bump, run `node schema/scripts/validate.mjs --all` against the 
 
 ## 4. UI changes in `database.html`
 
+The two-button **Trust** / **Trust + Verify** pattern from the existing PDF-Parser → BEAM bridge ([`js/beamweb.mjs:519`](../../js/beamweb.mjs#L519), [`beamweb.html:90-103`](../../beamweb.html#L90-L103)) carries over directly. Same UX shape, same status-message wording, same affordances. Users coming from BEAMweb's PDF-Parser import see an identical flow on the database side.
+
 | Component | Behavior |
 |---|---|
-| **Per-row actions menu** (kebab `⋯` on each row) | Edit · Replace from EPD · Flag for deletion · Restore (when flagged) · View audit log |
-| **Pending changes panel** (top of viewer, collapsible) | Lists every entry from the `pending_changes` IndexedDB table. Click → enters the side-by-side review (§5) for refresh candidates, or the new-entry confirmation form for new entries. Counter badge in the toolbar shows pending count. |
+| **Toolbar Trust / Trust + Verify pair** (mirrors BEAMweb's pair) | **Trust** (`bi-lightning-charge`) — bulk-commit every entry currently in `pending_changes`, no review modal. Status: *"Trust: committed N records · click Trust + Verify to audit"*. **Trust + Verify** (`bi-file-earmark-ruled`) — open the pending-changes panel and walk each entry through review one by one. Both stay enabled after a Trust apply. |
+| **Pending changes panel** (top of viewer, collapsible) | Lists every entry from the `pending_changes` IndexedDB table. Each row gets per-row Trust / Trust + Verify buttons (the toolbar pair acts on the whole queue). Counter badge in the toolbar shows pending count. Clicking Trust + Verify on a refresh row opens the side-by-side diff (§5); on a new-entry row opens the new-entry confirmation form (§6). |
+| **Per-row actions menu** (kebab `⋯` on each existing record) | Edit · Replace from EPD · Flag for deletion · Restore (when flagged) · View audit log. Edits route through the same `pending_changes` queue — no direct mutation of the in-memory record list — so the audit trail and patch-export pipeline stay uniform. |
 | **Filter chips** (extending current filters) | "Visibility: public / hidden / deprecated / flagged-for-deletion / all" toggle. "Expiry: active / expiring (< 12 mo) / expired / all". |
 | **Flagged-for-deletion review tab** | Dedicated view showing only records where `visibility == "flagged_for_deletion"`. Surfaces `status.deletion_note` and the most recent `provenance.review_audit[]` entry. Per-row: Restore · View source-document URL (if any). |
 | **Audit log drawer** | Per-record detail view gets a new "Audit log" expansion showing every entry in `provenance.review_audit[]` chronologically — confirms who-did-what-when without needing to grep the JSON files. |
@@ -115,21 +118,42 @@ After the schema bump, run `node schema/scripts/validate.mjs --all` against the 
 
 No new color palette or component primitives — reuse the existing chip / status-bar / table styles from [`bfcastyles.css`](../../bfcastyles.css) §7 (Database app).
 
-## 5. Side-by-side review UI (refresh candidates)
+## 5. Trust / Trust + Verify — the two button paths
 
-This is the review UI that was scoped in `EPD-Parser.md` §6. **It lives here, not in EPD-Parser.** EPD-Parser hands off the candidate; the DB viewer renders the diff.
+Modeled directly on the BEAM flow ([`js/beamweb.mjs:519`](../../js/beamweb.mjs#L519) `handleTrustPdfParser`).
 
-- **Two columns side-by-side.** Left: existing record (loaded from `schema/materials/<group>.json`). Right: incoming candidate (from `pending_changes`).
-- **Per-field three-way toggle:** `keep existing` / `take incoming` / `merge` (where merge is meaningful — primarily arrays).
-- **Numeric delta annotation:** `gwp_kgco2e.total.value: 6.22 → 5.81 (-6.6%)` so the user can sanity-check magnitude shifts.
-- **Auto-defaults:** `epd.publication_date` and `epd.expiry_date` default to "take incoming" since refreshing the EPD is the whole point. `provenance.review_audit[]` always appends a new entry regardless of other field decisions.
-- **Match-key reminder banner:** displays the six-key match summary from [`EPD-Parser.md`](EPD-Parser.md) §6 — confirms the user that all keys agreed before letting them commit a refresh.
-- **Commit:** writes the merged record to `committed_patches`, removes the entry from `pending_changes`, optimistically updates the in-memory record list. Patch is exported via §7's pipeline.
-- **Reject:** removes the entry from `pending_changes`. The original EPD PDF stays in `docs/PDF References/EPD SAMPLES/` (or wherever it came from); the team member can re-process it later.
+### Trust — one-click commit, no review modal
 
-## 6. New-entry confirmation UI
+For a queued entry:
+- **New entry** (no DB match): write the record to `committed_patches`, mint `id` via `makeId()`, append a `provenance.review_audit[]` row, remove the entry from `pending_changes`, optimistically update the in-memory record list.
+- **Refresh candidate** (DB match on all six §6 keys): take the incoming record fully, replace the existing record, append a `provenance.review_audit[]` row, remove from `pending_changes`.
+- **Bulk-Trust toolbar action**: same as above, looped across every entry currently in `pending_changes`. Status echoes BEAM exactly: *"Trust: committed N records from M files · click Trust + Verify to audit"*.
 
-Single-column form, all extracted fields editable. Group classification flagged if `inferGroupPrefix` returned null. **Related-records panel** surfaces partial matches (same manufacturer + same PCR but different scope, etc.) as read-only links so the user can spot a misconfigured refresh that should have been a refresh. Commit mints a fresh `id` via `makeId()`, writes to `committed_patches`, removes from `pending_changes`.
+Trust skips the diff modal entirely. Since the §6 strict match algorithm already gates refresh candidates (PCR / URI / scope / program all matched), Trust on a refresh candidate is a deliberate "I trust the parser's extraction wholesale" action — appropriate for the team batch-clearing the expired-record backlog.
+
+### Trust + Verify — open the review modal
+
+For a queued entry:
+- **New entry**: opens the new-entry confirmation form (§6 below). Single-column, all extracted fields editable. Group classification flagged if `inferGroupPrefix` returned null. Related-records panel surfaces near-matches as read-only links. Commit on user confirm.
+- **Refresh candidate**: opens the side-by-side diff. Two columns. Left: existing record from `schema/materials/<group>.json`. Right: incoming candidate from `pending_changes`. Per-field three-way toggle: `keep existing` / `take incoming` / `merge` (arrays only). Numeric delta annotation (`gwp_kgco2e.total.value: 6.22 → 5.81 (-6.6%)`). Match-key reminder banner shows the six-key match summary. Auto-defaults: `epd.publication_date` and `epd.expiry_date` default to "take incoming" since refreshing the EPD is the whole point. Commit on user confirm.
+
+Trust + Verify always appends a fresh `provenance.review_audit[]` row regardless of which fields were taken. Reject removes the entry from `pending_changes` without committing — the EPD PDF stays where it is, the team member can re-process it later.
+
+### Why both buttons stay enabled after a Trust commit
+
+After Trust runs, the entry has moved from `pending_changes` to `committed_patches`. Trust + Verify on the same record (now via the per-row `⋯` menu on the committed record) opens the audit drawer — the user can see exactly what landed and re-edit if anything looks wrong. Same affordance as BEAMweb, where Trust + Verify stays clickable even after a Trust apply.
+
+## 6. Queue lifecycle
+
+`pending_changes` is durable, not session-scoped — entries survive browser refresh and tab close (it's IndexedDB). Lifecycle:
+
+- **Created** by EPD-Parser auto-save on every form-pane edit, or by a manual edit in the Database viewer. Keyed by EPD `source_file` (one row per source PDF; subsequent edits update in place rather than creating duplicates).
+- **Updated** as the user continues editing the form pane. The `audit_meta.last_edit_at` timestamp updates on every keystroke (debounced).
+- **Committed** when the user clicks Trust or finishes Trust + Verify. Entry moves to `committed_patches`; original row removed from `pending_changes`.
+- **Rejected** when the user clicks Reject in the Trust + Verify modal. Entry removed from `pending_changes` without committing — the EPD PDF stays where it is, the team member can drop it back into EPD-Parser later to re-queue.
+- **Stale** entries that haven't been committed or rejected after N days could surface a "Pending changes inactive for X days" reminder. Out of scope for v1; flagged.
+
+Both EPD-Parser and the DB viewer subscribe to the IndexedDB store so changes from one app surface in the other within ≤1s without a tab refresh.
 
 ## 7. Patch-emit pipeline
 
@@ -184,7 +208,7 @@ The audit produces a one-paragraph finding + the smallest patch that gets the fi
 | **D2 — Index.json builder audit** | Audit + fix per §9. | `index.json` excludes hidden / deprecated / flagged-for-deletion records. |
 | **D3 — Per-row action UI** | Kebab menu + Edit / Replace from EPD / Flag for deletion / Restore actions on each row in `database.html`. Manual edits route through `pending_changes`. | Click any action → entry appears in the pending queue with the right shape. |
 | **D4 — Pending-changes queue panel** | Toolbar counter + collapsible top-of-viewer panel listing pending entries. Reads the shared `pending_changes` IndexedDB table written by EPD-Parser. | EPD-Parser hand-off → entry visible in DB-viewer pending panel within ≤1 s. |
-| **D5 — Side-by-side review + new-entry confirmation** | The §5 + §6 UIs. Per-field three-way toggle for refresh; full-form-edit for new entry. Commit writes to `committed_patches`. | Both pathways produce a valid `committed_patches` row. |
+| **D5 — Trust / Trust + Verify** | The §5 UIs. Toolbar Trust + per-row Trust for one-click commit (mirrors BEAMweb's `handleTrustPdfParser`). Trust + Verify opens side-by-side diff (refresh) or new-entry form (new). Commit writes to `committed_patches`. | Both pathways produce a valid `committed_patches` row; UX status messages match BEAMweb's wording. |
 | **D6 — Flagged-for-deletion review tab** | Dedicated view per §4. Restore action wires through. | Team can review every flagged record and selectively restore. |
 | **D7 — Patch export + apply-patch script** | Toolbar "Export patch" downloads `patch-{ISO-date}.json`; new `schema/scripts/apply-patch.mjs` Node script ingests it, applies to `schema/materials/<group>.json`, regenerates `index.json`, validates. | End-to-end: drop EPD → hand off → DB review → commit → export → apply → git commit → records updated. |
 
