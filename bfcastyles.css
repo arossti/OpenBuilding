@@ -21,6 +21,7 @@
      §8  APP: BEAMweb (embodied carbon calculator)
      §9  APP: Landing (app directory)
      §10 APP: Deps (dev dependency manifest)
+     §11 APP: EPD-Parser (Environmental Product Declaration ingest)
 
    ## Roadmap — "one file" goal
    Phase 0 (today): consolidate four app CSS files into this one, grouped by
@@ -5485,4 +5486,47 @@ details.dep-details pre {
 }
 .dep-drift li.ok {
   color: #4ade80;
+}
+
+/* ═════════════════════════════════════════════════════════════
+   §11  APP: EPD-Parser — Environmental Product Declaration ingest
+   ═════════════════════════════════════════════════════════════ */
+
+/* P1 — raw text dump panel (sidebar). Scoped to .app-epdparser so the
+   PDF-Parser sidebar stays untouched. */
+
+.app-epdparser .epd-text-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.app-epdparser .epd-text-header span:last-child {
+  color: var(--accent-lit);
+  font-family: "Courier New", monospace;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.app-epdparser .epd-text-dump {
+  margin: 0;
+  padding: 8px 10px;
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--text);
+  background: transparent;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+.app-epdparser .epd-text-dump:empty::before {
+  content: "(no text on this page)";
+  color: var(--text-dim);
+  font-style: italic;
 }

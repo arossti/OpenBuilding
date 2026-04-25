@@ -105,6 +105,7 @@ function loadFile(file) {
         _state.pageNum = 1;
         _hideDropZone();
         _showViewer();
+        _showTextPanel();
         return Viewer.showPage(1);
       })
       .then(function () {
@@ -113,6 +114,7 @@ function loadFile(file) {
       })
       .then(function () {
         _updateStatus();
+        return _loadPageText(_state.pageNum);
       })
       .catch(function (err) {
         console.error("EPD-Parser: PDF load failed —", err);
@@ -131,13 +133,76 @@ function loadFile(file) {
 function prevPage() {
   if (!Loader.isLoaded() || _state.pageNum <= 1) return;
   _state.pageNum--;
-  Viewer.showPage(_state.pageNum).then(_updateStatus);
+  Viewer.showPage(_state.pageNum).then(function () {
+    _updateStatus();
+    _loadPageText(_state.pageNum);
+  });
 }
 
 function nextPage() {
   if (!Loader.isLoaded() || _state.pageNum >= _state.pageCount) return;
   _state.pageNum++;
-  Viewer.showPage(_state.pageNum).then(_updateStatus);
+  Viewer.showPage(_state.pageNum).then(function () {
+    _updateStatus();
+    _loadPageText(_state.pageNum);
+  });
+}
+
+/* ── P1: text extraction ──────────────────────────────── */
+
+// Spatial-join the per-glyph or per-word text items into readable lines.
+// Y-tolerance of 3pt groups items into rows; within each row, sort by X.
+// Mirrors the consolidateTextItems pattern from PDF-Parser's dim-extract,
+// since pdfjs v4 emits per-character items on some CAD/EPD PDFs.
+function _itemsToLines(items) {
+  if (!items || items.length === 0) return "";
+  var sorted = items.slice().sort(function (a, b) {
+    return a.y - b.y;
+  });
+  var lines = [];
+  var currentLine = [];
+  var currentY = null;
+  for (var i = 0; i < sorted.length; i++) {
+    var item = sorted[i];
+    if (currentY === null || item.y - currentY > 3) {
+      if (currentLine.length) lines.push(_flushLine(currentLine));
+      currentLine = [item];
+      currentY = item.y;
+    } else {
+      currentLine.push(item);
+    }
+  }
+  if (currentLine.length) lines.push(_flushLine(currentLine));
+  return lines.join("\n");
+}
+
+function _flushLine(line) {
+  line.sort(function (a, b) {
+    return a.x - b.x;
+  });
+  // Insert a single space between adjacent items unless the previous item
+  // already ends in whitespace, to avoid double-spacing on already-tokenised PDFs.
+  var out = "";
+  for (var i = 0; i < line.length; i++) {
+    var s = line[i].str;
+    if (out.length && !/\s$/.test(out) && !/^\s/.test(s)) out += " ";
+    out += s;
+  }
+  return out;
+}
+
+function _loadPageText(pageNum) {
+  if (!Loader.isLoaded()) return Promise.resolve();
+  return Loader.getTextContent(pageNum)
+    .then(function (items) {
+      var dump = document.getElementById("epd-text-dump");
+      var stats = document.getElementById("epd-text-stats");
+      if (dump) dump.textContent = _itemsToLines(items);
+      if (stats) stats.textContent = "p" + pageNum + " · " + items.length + " items";
+    })
+    .catch(function (err) {
+      console.error("EPD-Parser: text extraction failed —", err);
+    });
 }
 
 /* ── Zoom (delegates to canvas-viewer) ────────────────── */
@@ -176,6 +241,13 @@ function _hideDropZone() {
 function _showViewer() {
   var wrap = document.getElementById("viewer-wrap");
   if (wrap) wrap.style.display = "";
+}
+
+function _showTextPanel() {
+  var emptyState = document.getElementById("epd-empty-state");
+  var textPanel = document.getElementById("epd-text-panel");
+  if (emptyState) emptyState.style.display = "none";
+  if (textPanel) textPanel.style.display = "";
 }
 
 function _updateStatus() {
