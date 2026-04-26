@@ -5748,11 +5748,19 @@ details.dep-details pre {
 .app-epdparser #main {
   flex-direction: row-reverse;
 }
+/* PDF gets 60%, form pane gets 40% — both flex from 0, so they
+   redistribute cleanly at any viewport width. Override the
+   PDF-Parser #sidebar fixed-width and #viewer-area flex:1 base. */
 .app-epdparser #sidebar {
-  width: clamp(440px, 45vw, 640px);
+  flex: 4 1 0;
+  width: auto;
+  min-width: 380px;
   border-right: none;
   border-left: 1px solid var(--border);
   overflow-y: auto;
+}
+.app-epdparser #viewer-area {
+  flex: 6 1 0;
 }
 
 /* P1 — raw text dump panel (sidebar). Scoped to .app-epdparser so the
@@ -5815,25 +5823,27 @@ details.dep-details pre {
 .app-epdparser .epd-form-section {
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 8px 10px 10px 10px;
+  padding: 6px 12px 12px 12px;
   margin: 0;
   background: var(--bg-surface);
 }
 .app-epdparser .epd-form-section legend {
   padding: 0 6px;
+  margin-left: 4px;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   color: var(--accent-lit);
+  line-height: 1;
 }
 .app-epdparser .epd-form-row {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 .app-epdparser .epd-form-row:first-of-type {
-  margin-top: 4px;
+  margin-top: 12px;
 }
 .app-epdparser .epd-form-row label {
   font-size: 10px;

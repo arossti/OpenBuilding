@@ -143,6 +143,29 @@ Trust + Verify always appends a fresh `provenance.review_audit[]` row regardless
 
 After Trust runs, the entry has moved from `pending_changes` to `committed_patches`. Trust + Verify on the same record (now via the per-row `⋯` menu on the committed record) opens the audit drawer — the user can see exactly what landed and re-edit if anything looks wrong. Same affordance as BEAMweb, where Trust + Verify stays clickable even after a Trust apply.
 
+## 5.5. P2 review follow-ups (2026-04-26, post-end-to-end-demo)
+
+Three gaps surfaced when Andy tested the P2 stub end-to-end. Before P3 ships, these are required, not optional.
+
+### (a) Match-status visibility before Trust
+
+Today's stub Trust + Verify modal shows the candidate JSON but **does not surface whether this is a refresh-candidate or a new entry**. Trust could silently overwrite an existing record without the user knowing. Required UX:
+
+- **Pending panel row** — show a `NEW` or `REFRESH → <existing-id>` badge next to the display name. Compute via the §6 six-key strict-match algorithm at panel-render time, against the loaded catalogue.
+- **Trust + Verify modal banner** — top of the modal shows match outcome explicitly, listing which of the six match keys agreed (manufacturer, epd.id, PCR, URI, scope, program). For refresh candidates, show the existing record's `id` and `display_name` for unmistakable association.
+- **Trust button on a refresh row** — different visual treatment from new-entry Trust (e.g. amber border or "Trust + replace lam011" wording) so the user can't miss it. A confirm-overwrite micro-prompt before commit is acceptable; do not require it for new entries.
+
+### (c) List / Hide flag UX in the Database viewer
+
+`status.do_not_list`, `status.listed`, and `status.visibility` already exist in the schema and **are already in production use** (43 of 821 records carry `do_not_list: true / listed: false / visibility: hidden`). The Database viewer needs a deliberate UX so the team can manage these:
+
+- **Per-row inline toggles** (not buried in a kebab menu): "Listed" ON/OFF, "Hide" ON/OFF, plus the §3 `flagged_for_deletion` chip. Clicking either flips the boolean and emits a `manual-edit` patch through the same `pending_changes` queue.
+- **Hidden / flagged rows STAY VISIBLE in the Database viewer** — the back-office team needs to see and review them. Render with an obvious visual indicator: dimmed row, struck-through display name, and a chip in the row meta (`HIDDEN` / `FLAGGED FOR DELETION`).
+- **BEAMweb's material picker EXCLUDES them** — filter logic: include only rows where `status.visibility === "public"` AND `status.do_not_list !== true`. `index.json` builder uses the same filter (D2 phase audit + fix).
+- **Defaults stay `listed: true / do_not_list: false / visibility: "public"`** for new EPD-Parser captures. Soft-hide is an explicit team action.
+
+These items land alongside the §5 Trust / Trust + Verify implementation, since the user is choosing whether to commit a candidate to a published vs hidden state at the same moment they're choosing Trust vs Trust + Verify.
+
 ## 6. Queue lifecycle
 
 `pending_changes` is durable, not session-scoped — entries survive browser refresh and tab close (it's IndexedDB). Lifecycle:
