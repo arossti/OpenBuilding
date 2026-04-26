@@ -50,19 +50,38 @@
 
       <!-- ── Main Area ────────────────────────────────── -->
       <div id="main">
-        <!-- Sidebar -->
+        <!-- Sidebar (form pane on the right at 50/50 — see §11 of bfcastyles.css) -->
         <div id="sidebar">
-          <div id="sidebar-header">EPD</div>
-          <div id="epd-fields-panel" class="pdf-params-panel">
-            <p class="empty" id="epd-empty-state">Drop an EPD PDF to begin. Field extraction lands in P2.</p>
+          <div id="sidebar-header">
+            <span>EPD record</span>
+            <span id="epd-match-status" class="epd-match-status"></span>
           </div>
-          <div id="epd-text-panel" class="pdf-params-panel" style="display: none">
-            <div class="epd-text-header">
+          <div id="epd-fields-panel" class="pdf-params-panel">
+            <p class="empty" id="epd-empty-state">Drop an EPD PDF to begin. Field auto-fill lands in P3.</p>
+          </div>
+
+          <!-- Schema-driven form, rendered by epdparser.mjs from FORM_FIELDS config -->
+          <form id="epd-form" class="epd-form" style="display: none" autocomplete="off"></form>
+
+          <!-- Capture button area — promotes draft → captured for the DB viewer -->
+          <div id="epd-form-actions" class="epd-form-actions" style="display: none">
+            <span id="epd-form-status" class="epd-form-status">Draft auto-saved · ready to capture</span>
+            <button type="button" id="epd-capture-btn" class="epd-capture-btn">
+              <i class="bi bi-box-arrow-in-down-right"></i> Capture
+            </button>
+            <a href="database.html" target="_blank" rel="noopener" class="epd-open-db-link" id="epd-open-db-link" style="display: none">
+              <i class="bi bi-arrow-up-right"></i> Open Database to commit
+            </a>
+          </div>
+
+          <!-- Raw page-text dump (P1, kept as a debug drawer) -->
+          <details id="epd-text-panel" class="pdf-params-panel" style="display: none">
+            <summary class="epd-text-header">
               <span>Page text · raw extract</span>
               <span id="epd-text-stats"></span>
-            </div>
+            </summary>
             <pre id="epd-text-dump" class="epd-text-dump"></pre>
-          </div>
+          </details>
         </div>
 
         <!-- Viewer -->
