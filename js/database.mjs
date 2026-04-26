@@ -11,6 +11,7 @@
 /* eslint-disable no-undef */
 
 import { esc as escapeHtml } from "./shared/html-utils.mjs";
+import * as Store from "./shared/indexed-db-store.mjs";
 
 const DATA_BASE = "data/schema";
 const INDEX_URL = `${DATA_BASE}/materials/index.json`;
@@ -103,6 +104,10 @@ async function boot() {
     wireControls();
     applyFilters();
     setStatus("Ready.", "ready");
+    // EPD-Parser pending-changes queue (workplan Database.md §4–§5).
+    // Non-blocking — failure here doesn't break catalogue browsing.
+    refreshPendingPanel().catch((err) => console.warn("[DB] pending-panel skipped:", err));
+    wireVerifyModal();
   } catch (err) {
     console.error(err);
     setStatus(`Failed to load catalogue: ${err.message}`, "error");
@@ -854,6 +859,136 @@ function short(sha) {
 }
 function escapeAttr(s) {
   return escapeHtml(s);
+}
+
+// ────────────────────────────────────────────────────────────
+// EPD-Parser pending-changes panel (Database.md §4–§5)
+// ────────────────────────────────────────────────────────────
+async function refreshPendingPanel() {
+  const panel = document.getElementById("db-pending-panel");
+  const rows = document.getElementById("db-pending-rows");
+  const count = document.getElementById("db-pending-count");
+  if (!panel || !rows) return;
+  const captured = await Store.listCapturedPending();
+  if (captured.length === 0) {
+    panel.style.display = "none";
+    return;
+  }
+  panel.style.display = "";
+  count.textContent = String(captured.length);
+  rows.innerHTML = captured.map(renderPendingRow).join("");
+  // Wire per-row buttons
+  rows.querySelectorAll(".db-pending-trust").forEach((btn) => {
+    btn.addEventListener("click", () => handleTrust(btn.dataset.sourceFile));
+  });
+  rows.querySelectorAll(".db-pending-verify").forEach((btn) => {
+    btn.addEventListener("click", () => openVerifyModal(btn.dataset.sourceFile));
+  });
+  rows.querySelectorAll(".db-pending-discard").forEach((btn) => {
+    btn.addEventListener("click", () => handleDiscard(btn.dataset.sourceFile));
+  });
+}
+
+function renderPendingRow(rec) {
+  const cand = rec.candidate_record || {};
+  const display = (cand.naming && cand.naming.display_name) || "(unnamed)";
+  const mfr = (cand.manufacturer && cand.manufacturer.name) || "—";
+  const epdId = (cand.epd && cand.epd.id) || "—";
+  const grp = (cand.classification && cand.classification.group_prefix) || "—";
+  const editor = (rec.audit_meta && rec.audit_meta.editor) || "—";
+  const captured = (rec.audit_meta && rec.audit_meta.captured_at) || "";
+  return `
+    <div class="db-pending-row">
+      <div class="db-pending-row-meta">
+        <div class="db-pending-row-name">${escapeHtml(display)}</div>
+        <div class="db-pending-row-sub">
+          <span class="db-pending-grp">grp ${escapeHtml(grp)}</span>
+          <span>·</span>
+          <span>${escapeHtml(mfr)}</span>
+          <span>·</span>
+          <span>EPD: ${escapeHtml(epdId)}</span>
+        </div>
+        <div class="db-pending-row-source">
+          <i class="bi bi-file-earmark-pdf"></i> ${escapeHtml(rec.source_file)}
+          · ${escapeHtml(editor)} · ${escapeHtml(captured ? captured.slice(0, 16).replace("T", " ") : "")}
+        </div>
+      </div>
+      <div class="db-pending-row-actions">
+        <button type="button" class="db-pending-trust" data-source-file="${escapeAttr(rec.source_file)}" title="Trust: one-click commit, no review modal">
+          <i class="bi bi-lightning-charge"></i> Trust
+        </button>
+        <button type="button" class="db-pending-verify" data-source-file="${escapeAttr(rec.source_file)}" title="Trust + Verify: open the review modal">
+          <i class="bi bi-file-earmark-ruled"></i> Trust + Verify
+        </button>
+        <button type="button" class="db-pending-discard" data-source-file="${escapeAttr(rec.source_file)}" title="Discard this captured row">
+          <i class="bi bi-trash3"></i>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+async function handleTrust(sourceFile) {
+  const rec = await Store.getPending(sourceFile);
+  if (!rec) {
+    setStatus(`Trust: no pending row for ${sourceFile}`, "error");
+    return;
+  }
+  // Stub: the actual commit (write to committed_patches + emit patch JSON)
+  // lands in D7. For now this just removes the row from the queue and logs
+  // the candidate so the workflow is demonstrable end-to-end.
+  console.log("[DB] Trust would commit:", rec);
+  await Store.deletePending(sourceFile);
+  await refreshPendingPanel();
+  const display = (rec.candidate_record && rec.candidate_record.naming && rec.candidate_record.naming.display_name) || sourceFile;
+  setStatus(`Trust: committed ${display} from ${sourceFile} (stub) · click Trust + Verify to audit`, "ready");
+}
+
+async function handleDiscard(sourceFile) {
+  await Store.deletePending(sourceFile);
+  await refreshPendingPanel();
+  setStatus(`Discarded pending row for ${sourceFile}`, "ready");
+}
+
+// ────────────────────────────────────────────────────────────
+// Trust + Verify modal (stub — shows candidate JSON; P3 replaces with diff)
+// ────────────────────────────────────────────────────────────
+let _verifyActiveSource = null;
+
+function wireVerifyModal() {
+  const close = document.getElementById("db-verify-close");
+  const cancel = document.getElementById("db-verify-cancel");
+  const commit = document.getElementById("db-verify-commit");
+  const backdrop = document.getElementById("db-verify-backdrop");
+  if (close) close.addEventListener("click", closeVerifyModal);
+  if (cancel) cancel.addEventListener("click", closeVerifyModal);
+  if (backdrop) backdrop.addEventListener("click", closeVerifyModal);
+  if (commit) commit.addEventListener("click", () => {
+    if (!_verifyActiveSource) return;
+    handleTrust(_verifyActiveSource).then(closeVerifyModal);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && _verifyActiveSource) closeVerifyModal();
+  });
+}
+
+async function openVerifyModal(sourceFile) {
+  const rec = await Store.getPending(sourceFile);
+  if (!rec) return;
+  _verifyActiveSource = sourceFile;
+  document.getElementById("db-verify-source").textContent = sourceFile;
+  document.getElementById("db-verify-outcome").textContent = rec.match_outcome || "new";
+  document.getElementById("db-verify-editor").textContent = (rec.audit_meta && rec.audit_meta.editor) || "—";
+  document.getElementById("db-verify-captured").textContent = (rec.audit_meta && rec.audit_meta.captured_at) || "—";
+  document.getElementById("db-verify-json").textContent = JSON.stringify(rec.candidate_record, null, 2);
+  document.getElementById("db-verify-backdrop").style.display = "";
+  document.getElementById("db-verify-modal").style.display = "";
+}
+
+function closeVerifyModal() {
+  _verifyActiveSource = null;
+  document.getElementById("db-verify-backdrop").style.display = "none";
+  document.getElementById("db-verify-modal").style.display = "none";
 }
 
 // ────────────────────────────────────────────────────────────
