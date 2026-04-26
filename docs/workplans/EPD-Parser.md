@@ -361,6 +361,30 @@ P2 date parsing needs a multi-format walker. ISO normalization is the §5 schema
 
 The Sopra-XPS m²-with-thickness pattern is the §8 open question becoming concrete. P2 should: (1) detect the unit pattern, (2) if m² + thickness, scan for explicit `<N> kg/m³` density elsewhere on the cover or general-information page, (3) if not findable, leave `physical.density.value_kg_m3` null and flag in the form pane.
 
+### Steel + concrete spot-check (2026-04-25 night)
+
+Triaged via `pdftotext` (faster than the Playwright pipeline for design-time intel; final P2 regex still gets verified against `pdf-loader.getTextContent()`). Three new samples, four new findings worth baking in.
+
+**1. New format family — EPD International registry (`S-P-XXXXX`).** `EPD_document_S-P-10278_en.pdf` — official Dofasco deck registration via The International EPD® System. Distinctive features:
+- Programme operator: `EPD International AB` (Stockholm)
+- `EPD registration number: S-P-10278` — the canonical EPD International ID format, regex `S-P-\d{5,6}`
+- Standards: `ISO 14025:2006 and EN 15804:2012+A2:2019/AC:2021` (newer A2 amendment than IBU's `+A1`)
+- Dates in ISO format: `Publication date: 2023-09-25 / Valid until: 2028-09-24`
+- PCR: `EPD International Product Category Rules for construction products (PCR 2019:14 v1.2.5)`
+- UN CPC product code present (here: `412` for steel deck)
+
+**Andy's note: this `S-P-XXXXX` format matches Melanie's BEAM internal-ID convention.** Confirmed by spot-checking the existing 06-wood records — Bamboo / Lamboo / Heat-Treated Wood Cladding entries already use it (e.g. `S-P-01928`, `S-P-08118`, `S-P-01543`, `S-P-07182`). When P2 captures an `S-P-XXXXX` from an EPD International registration, that maps directly to `epd.id`.
+
+**2. Same product, multiple registrations.** Dofasco's steel deck appears as `EPD #3688-5839` (CSA Group registration, the Dofasco-direct PDF) AND as `S-P-10278` (EPD International registration). Different program operator, different PCR (UL Environment Part A/B vs PCR 2019:14), different `epd.id`. Per the §6 strict-match rules these are **two separate records**, which is correct — the underlying LCA boundaries differ slightly between programs. Cross-linking ("these reference the same product line") is a future enhancement, not v1.
+
+**3. Steel uses mass declared units (`1 metric ton`).** Third unit family on top of m³ (solid wood) and m² + thickness (rigid insulation). Density-resolution rules (§9.5 declared-unit table) need a third row: when the unit is mass-based, density may be stated separately in the declaration product line (Dofasco-CSA: `1 metric ton of steel deck with a density of 7,800 kg/m³ or 487 lb/ft³`) — easy regex anchor on the unit-line itself.
+
+**4. NSF International is a fourth program operator.** Lafarge Exshaw uses NSF as the program operator (PCR for Portland / Blended / Masonry / Mortar / Plastic Cements, v3.2 Sept 2021). Adds to the program-operator enum: UL Environment, ASTM, CSA Group, IBU, EPD International AB, NSF International, AWC/CWC.
+
+**5. Multi-product EPDs are common across groups, not just SPF.** Lafarge Exshaw covers 6 cement types in one EPD (GU, HS, GUL, HSL, HE, OWG). Genyk covered 3 SPF products. AWC/CWC industry-avg covers multiple wood categories. P2's multi-product disambiguation is required across all material groups, not edge-case.
+
+**6. Multi-PCR references.** Dofasco-CSA and Sopra-XPS both reference *two* PCR documents (Part A + Part B). Lafarge references NSF + ISO 21930 (core). The schema's `methodology.pcr_guidelines` is a single string today — P2 should populate it with the *primary* (Part B / sub-category) PCR for the most precise match-key value, with the Part A / core PCR captured in `methodology.standards[]` as a sibling entry.
+
 ### Concrete P2 strategy
 
 Build P2 as a sequence of anchor passes:
