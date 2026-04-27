@@ -402,6 +402,38 @@ Triaged via `pdftotext` (faster than the Playwright pipeline for design-time int
 
 **6. Multi-PCR references.** Dofasco-CSA and Sopra-XPS both reference *two* PCR documents (Part A + Part B). Lafarge references NSF + ISO 21930 (core). The schema's `methodology.pcr_guidelines` is a single string today — P2 should populate it with the *primary* (Part B / sub-category) PCR for the most precise match-key value, with the Part A / core PCR captured in `methodology.standards[]` as a sibling entry.
 
+### P3 regression baseline (2026-04-27, harness-driven)
+
+`schema/scripts/test-epd-extract.mjs` walks all 30 sample EPDs and reports per-sample coverage. After the post-meeting impact-table extractor + `DATA_ROW_TAIL` lookahead fix:
+
+- **30/30 samples processed**, no errors.
+- **Metadata coverage: 166/330 = 50.3%** (11 fields × 30 samples; populated where the EPD has a labeled value).
+- **Impact coverage: 92/300 = 30.7%** (10 schema indicator slots × 30 samples).
+- **Format detection: na=18, unknown=8, eu_ibu=2, nsf=1, epd_international=1.**
+
+Top-line takeaways:
+
+| Cohort | Metadata | Impacts | Notes |
+|---|---|---|---|
+| 2023 BC Wood ASTM (CLT, GLT, SPF, SPF-Plywood) | 9/11 | 8–9/10 | Strongest cohort; the regex pass is calibrated against this layout. |
+| Dofasco XCarb (deck, HSS, cold-formed) | **11/11** | 6/10 | Brackets-aware unit pattern unlocked 5 indicators; PE-NR / PE-R / WDP still missed (different label form). |
+| AWC/CWC industry-avg (2017 WRC, 2020 OSB) | 4–5/11 | 5–6/10 | Was all-2.1 false-positive pre-fix; now real values across GWP/ODP/AP/EP/SFP/ADPf. |
+| EPD International (S-P-10278) | 8/11 | 6/10 | Format-specific extractor for `epd_international`; impact regex picks up via `extractCommon`. Sibling `EPD_document_EPD-IES-…` file has the IES code in the filename and detected as unknown — see fix-list below. |
+| EU/IBU (Wood Fibre 2020, Lafarge as eu_ibu) | 2–3/11 | 2–5/10 | EU stub only; per-format extractor not yet written. |
+| Older BC Wood (2013 LVL, 2016 LSL, 2016 WRC) | 2–6/11 | 0/10 | Different impact-table layout from 2017+; needs separate calibration. |
+| Sopra family (XPS, Cellulose, ISO) | 0–9/11 | 0/10 | XPS detected as `na` but impact rows differ structurally; Cellulose + ISO fall through as `unknown`. |
+| Rejection (Boreal TDS, density-only docs, Polyiso scanned) | 0/11 | 0/10 | Correctly reject (TDS / no-EPD / no-text-layer). |
+
+Concrete fix-list ranked by leverage (each iteration re-runs the harness to confirm coverage moves up):
+
+1. **Older BC Wood format** (3 samples, 0/10 impacts each) — different per-stage table; likely a single regex variant captures all three.
+2. **Sopra format detection + impact rows** (3 samples currently 0/10) — XPS already gets metadata, just needs impact-row anchor.
+3. **`EPD_document_EPD-IES-…` filename variant** (1 sample) — format detector currently misses; tighten the EPD International detector.
+4. **EU/IBU per-format extractor** (Wood-Fibre + Lafarge as eu_ibu) — currently stub-only.
+5. **PE-NR / PE-R / WDP across NA family** — Dofasco + Kalesnikoff samples have these in the data but my regex labels (PENR/NRPE/PE-NR) don't match the actual codes those EPDs use.
+6. **Per-stage breakdown** (A1, A2, A3, A1-A3, A4, …, D) — once totals coverage is high; needs column-header parsing.
+7. **Multi-product EPD disambiguation** (Genyk 3 SPFs, Lafarge 6 cements, AWC/CWC) — UI work in the form pane.
+
 ### Concrete P2 strategy
 
 Build P2 as a sequence of anchor passes:

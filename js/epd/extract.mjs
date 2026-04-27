@@ -164,68 +164,107 @@ function extractCommon(text, rec) {
 //   PENR, NRPE, PE-NR                   (MJ)
 //   PER, RPE, PE-R                      (MJ)
 
+// Trailing-context lookahead: after the captured number, require either
+// (a) another numeric token (the per-stage breakdown that always follows
+// the total in a real data row), or (b) end-of-line. This rejects
+// methodology rows like "GWP TRACI kg CO2 eq TRACI 2.1 V1.02" where the
+// value 2.1 is followed by "V1.02" rather than another number — the
+// false-positive bug surfaced on 2017 WRC + 2020 OSB by the regression
+// harness 2026-04-27.
+var DATA_ROW_TAIL = "(?=\\s+-?\\s*\\d|\\s*[\\]\\)]|\\s*$)";
+
 var IMPACT_INDICATORS = [
   // GWP fossil / total — comes BEFORE the biogenic regex so the more
   // specific "BIO" alternation doesn't grab the fossil row.
   {
     schemaKey: "gwp_kgco2e",
     label: "GWP-fossil/total",
-    regex:
-      /(?:^|\n|\s)GWP(?:TRACI|100|gwp100|fossil|[-\s–]+(?:fossil|total))?(?!BIO|[-\s–]*bio)[^\n\r]{0,18}?\s+kg\s*CO\s*2?\s*e(?:q|qv)?\b[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+    regex: new RegExp(
+      "(?:^|\\n|\\s)GWP(?:TRACI|100|gwp100|fossil|[-\\s–]+(?:fossil|total))?(?!BIO|[-\\s–]*bio)[^\\n\\r]{0,18}?\\s+\\[?\\s*kg\\s*CO\\s*2?\\s*e(?:q|qv)?\\b[^\\n\\r]{0,12}?\\s+(-?\\s*\\d{1,5}(?:[.,]\\d+)?(?:E\\s*[-+]?\\s*\\d+)?)" +
+        DATA_ROW_TAIL,
+      "i"
+    )
   },
   {
     schemaKey: "gwp_bio_kgco2e",
     label: "GWP-biogenic",
-    regex:
-      /(?:^|\n|\s)GWP(?:BIO|[-\s–]+bio(?:genic)?)[^\n\r]{0,12}?\s+kg\s*CO\s*2?\s*e(?:q|qv)?\b[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+    regex: new RegExp(
+      "(?:^|\\n|\\s)GWP(?:BIO|[-\\s–]+bio(?:genic)?)[^\\n\\r]{0,12}?\\s+\\[?\\s*kg\\s*CO\\s*2?\\s*e(?:q|qv)?\\b[^\\n\\r]{0,12}?\\s+(-?\\s*\\d{1,5}(?:[.,]\\d+)?(?:E\\s*[-+]?\\s*\\d+)?)" +
+        DATA_ROW_TAIL,
+      "i"
+    )
   },
   {
     schemaKey: "ozone_depletion_kgcfc11eq",
     label: "ODP",
-    regex:
-      /(?:^|\n|\s)ODP[A-Z]{0,8}\s+kg\s*CFC[-\s]*11\s*e(?:q|qv)?[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+    regex: new RegExp(
+      "(?:^|\\n|\\s)ODP[A-Z]{0,8}\\b[^\\n\\r]{0,18}?\\s+\\[?\\s*kg\\s*CFC[-\\s]*11\\s*e(?:q|qv)?[^\\n\\r]{0,12}?\\s+(-?\\s*\\d{1,5}(?:[.,]\\d+)?(?:E\\s*[-+]?\\s*\\d+)?)" +
+        DATA_ROW_TAIL,
+      "i"
+    )
   },
   {
     schemaKey: "acidification_kgso2eq",
     label: "AP",
-    regex:
-      /(?:^|\n|\s)AP[A-Z]{0,8}\s+kg\s*SO\s*2?\s*e(?:q|qv)?[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+    regex: new RegExp(
+      "(?:^|\\n|\\s)AP[A-Z]{0,8}\\b[^\\n\\r]{0,18}?\\s+\\[?\\s*kg\\s*SO\\s*2?\\s*e(?:q|qv)?[^\\n\\r]{0,12}?\\s+(-?\\s*\\d{1,5}(?:[.,]\\d+)?(?:E\\s*[-+]?\\s*\\d+)?)" +
+        DATA_ROW_TAIL,
+      "i"
+    )
   },
   {
     schemaKey: "eutrophication_kgneq",
     label: "EP",
-    regex:
-      /(?:^|\n|\s)EP[A-Z]{0,8}\s+kg\s*N\s*e(?:q|qv)?[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+    regex: new RegExp(
+      "(?:^|\\n|\\s)EP[A-Z]{0,8}\\b[^\\n\\r]{0,18}?\\s+\\[?\\s*kg\\s*N\\s*e(?:q|qv)?[^\\n\\r]{0,12}?\\s+(-?\\s*\\d{1,5}(?:[.,]\\d+)?(?:E\\s*[-+]?\\s*\\d+)?)" +
+        DATA_ROW_TAIL,
+      "i"
+    )
   },
   {
     schemaKey: "smog_kgo3eq",
     label: "POCP/SFP",
-    regex:
-      /(?:^|\n|\s)(?:SFP|POCP)[A-Z]{0,8}\s+kg\s*O\s*3?\s*e(?:q|qv)?[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+    regex: new RegExp(
+      "(?:^|\\n|\\s)(?:SFP|POCP)[A-Z]{0,8}\\b[^\\n\\r]{0,18}?\\s+\\[?\\s*kg\\s*O\\s*3?\\s*e(?:q|qv)?[^\\n\\r]{0,12}?\\s+(-?\\s*\\d{1,5}(?:[.,]\\d+)?(?:E\\s*[-+]?\\s*\\d+)?)" +
+        DATA_ROW_TAIL,
+      "i"
+    )
   },
   {
     schemaKey: "abiotic_depletion_fossil_mj",
     label: "ADP-fossil",
-    regex:
-      /(?:^|\n|\s)(?:ADPf|ADP[\s-]*fossil|ADP[\s-]*NRf|FFD)\b[^\n\r]{0,40}?MJ\b[^\n\r]{0,12}?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+    regex: new RegExp(
+      "(?:^|\\n|\\s)(?:ADPf|ADP[\\s-]*fossil|ADP[\\s-]*NRf|FFD)\\b[^\\n\\r]{0,40}?\\[?\\s*MJ\\b[^\\n\\r]{0,12}?\\s+(-?\\s*\\d{1,7}(?:[.,]\\d+)?(?:E\\s*[-+]?\\s*\\d+)?)" +
+        DATA_ROW_TAIL,
+      "i"
+    )
   },
   {
     schemaKey: "water_consumption_m3",
     label: "WDP",
-    regex:
-      /(?:^|\n|\s)(?:WDP|Water[\s-]*DP)\b[^\n\r]{0,30}?(?:m\s*3?|m³|kg)\b[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+    regex: new RegExp(
+      "(?:^|\\n|\\s)(?:WDP|Water[\\s-]*DP)\\b[^\\n\\r]{0,30}?\\[?\\s*(?:m\\s*3?|m³|kg)\\b[^\\n\\r]{0,12}?\\s+(-?\\s*\\d{1,5}(?:[.,]\\d+)?(?:E\\s*[-+]?\\s*\\d+)?)" +
+        DATA_ROW_TAIL,
+      "i"
+    )
   },
   {
     schemaKey: "primary_energy_nonrenewable_mj",
     label: "PE-NR",
-    regex:
-      /(?:^|\n|\s)(?:PENR\b|NRPE\b|PE[\s-]?NR\b|Non[\s-]?renewable\s+primary\s+energy)\b[^\n\r]{0,40}?MJ\b[^\n\r]{0,12}?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+    regex: new RegExp(
+      "(?:^|\\n|\\s)(?:PENR\\b|NRPE\\b|PE[\\s-]?NR\\b|Non[\\s-]?renewable\\s+primary\\s+energy)\\b[^\\n\\r]{0,40}?\\[?\\s*MJ\\b[^\\n\\r]{0,12}?\\s+(-?\\s*\\d{1,7}(?:[.,]\\d+)?)" +
+        DATA_ROW_TAIL,
+      "i"
+    )
   },
   {
     schemaKey: "primary_energy_renewable_mj",
     label: "PE-R",
-    regex:
-      /(?:^|\n|\s)(?:PER\b|RPE\b|PE[\s-]?R\b(?!T)|Renewable\s+primary\s+energy)\b[^\n\r]{0,40}?MJ\b[^\n\r]{0,12}?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+    regex: new RegExp(
+      "(?:^|\\n|\\s)(?:PER\\b|RPE\\b|PE[\\s-]?R\\b(?!T)|Renewable\\s+primary\\s+energy)\\b[^\\n\\r]{0,40}?\\[?\\s*MJ\\b[^\\n\\r]{0,12}?\\s+(-?\\s*\\d{1,7}(?:[.,]\\d+)?)" +
+        DATA_ROW_TAIL,
+      "i"
+    )
   }
 ];
 
