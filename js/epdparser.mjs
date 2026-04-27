@@ -9,6 +9,7 @@
 import * as Loader from "./pdf-loader.mjs";
 import * as Viewer from "./canvas-viewer.mjs";
 import * as Store from "./shared/indexed-db-store.mjs";
+import * as Extract from "./epd/extract.mjs";
 
 var _state = {
   fileName: "",
@@ -588,6 +589,7 @@ function _loadDraftOrSeed(sourceFile) {
   return Store.getPending(sourceFile)
     .then(function (rec) {
       if (rec && rec.candidate_record) {
+        // Existing draft — respect it. User edits always win over re-extraction.
         _state.candidate = rec.candidate_record;
         _populateFormFromCandidate(_state.candidate);
         var status = rec.state === "captured" ? "✓ Already captured · re-edits will revert to draft" : "Draft restored · auto-save active";
@@ -596,15 +598,43 @@ function _loadDraftOrSeed(sourceFile) {
           var link = document.getElementById("epd-open-db-link");
           if (link) link.style.display = "";
         }
-      } else {
-        // Fresh candidate — seed group prefix from folder if visible in the path
-        // (browser File API doesn't expose paths, so this is a P3+ enhancement)
-        _state.candidate = {};
-        _setFormStatus("Fresh draft · edits auto-save");
+        return;
       }
+      // Fresh — run P3 auto-extraction.
+      return _runExtraction(sourceFile);
     })
     .catch(function (err) {
       console.warn("EPD-Parser: draft restore skipped —", err);
+      _state.candidate = {};
+    });
+}
+
+/* ── P3: regex auto-fill from PDF text ────────────────────────────── */
+
+function _runExtraction(sourceFile) {
+  _setFormStatus("Extracting fields from " + sourceFile + " …");
+  var count = Loader.getPageCount();
+  var promises = [];
+  for (var i = 1; i <= count; i++) promises.push(Loader.getTextContent(i));
+  return Promise.all(promises)
+    .then(function (perPageItems) {
+      var pageTexts = perPageItems.map(_itemsToLines);
+      var result = Extract.extract(pageTexts);
+      _state.candidate = result.record || {};
+      _state.extractFormat = result.format;
+      _populateFormFromCandidate(_state.candidate);
+      _setFormStatus(
+        "Auto-filled " +
+          result.anchorsHit +
+          "/9 anchors · format: " +
+          result.format +
+          " · review + edit"
+      );
+      return _saveDraft();
+    })
+    .catch(function (err) {
+      console.error("EPD-Parser: extraction failed —", err);
+      _setFormStatus("⚠ extraction failed — see console; manual entry still works");
       _state.candidate = {};
     });
 }
