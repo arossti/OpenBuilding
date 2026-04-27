@@ -28,9 +28,27 @@ export var FORMATS = {
 };
 
 export function detectFormat(text) {
+  // Priority order matters — narrowest match first to avoid false positives.
+  // EPD International registry is most specific (S-P-XXXXX is canonical).
   if (/S-P-\d{5,6}/.test(text) && /Programme\s+operator/i.test(text)) return FORMATS.EPD_INTL;
-  if (/Programme\s+holder/i.test(text) || /Owner\s+of\s+the\s+Declaration/i.test(text)) return FORMATS.EU_IBU;
+
+  // NSF before EU_IBU because Lafarge cement EPDs contain the prose phrase
+  // "the owner of the declaration is liable for the underlying information"
+  // which the loose EU_IBU regex used to match → wrong format → no per-format
+  // extraction. Surfaced 2026-04-27.
   if (/NSF\s+International/i.test(text)) return FORMATS.NSF;
+
+  // EU_IBU now requires the LABEL form (start-of-line "Owner of the
+  // Declaration" or "Programme holder" followed by whitespace + value)
+  // rather than the prose phrase, so it doesn't false-positive on
+  // disclaimers / commitment statements.
+  if (
+    /(?:^|\n)\s*Programme\s+holder\b/i.test(text) ||
+    /(?:^|\n)\s*Owner\s+of\s+the\s+Declaration\b/i.test(text)
+  ) {
+    return FORMATS.EU_IBU;
+  }
+
   if (/P\s*ROGRAM\s+O\s*PERATOR/i.test(text) || /Program\s+operator/i.test(text)) return FORMATS.NA;
   return FORMATS.UNKNOWN;
 }
