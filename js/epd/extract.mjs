@@ -139,20 +139,107 @@ function extractCommon(text, rec) {
     if (po) _setPath(rec, "epd.program_operator", po);
   }
 
-  // GWP total (kg CO2e per declared unit) — capture the first numeric
-  // value following a "GWP*" indicator code on an impact-table row.
-  // Examples we want to match:
-  //   "GWPTRACI   kg CO 2 e   100.57   ..."   (CLT: GWP-fossil = 100.57)
-  //   "GWP – fossil    kg CO2e    52.4 ..."
-  //   "GWP-total       kg CO2 eq   430.2 ..."
-  // The numeric capture allows leading "-" (biogenic GWP is often negative)
-  // and exponent notation (e.g. "2.52E-06"), but here we want non-exp
-  // values for GWP. Keep it tight to {1,5} digits before the decimal.
-  if (_get(rec, "impacts.gwp_kgco2e.total.value") == null) {
-    var gwp = text.match(
-      /GWP[\sA-Za-z\-–\d]{0,12}?\s+kg\s*CO\s*2?\s*e(?:\s*q)?\s+(-?\d{1,5}(?:[.,]\d+)?)/i
-    );
-    if (gwp) _setPath(rec, "impacts.gwp_kgco2e.total.value", _toNum(gwp[1]));
+  // Impact-table totals — populate impacts.<indicator>.total.{value, source}
+  // for every indicator in the schema we can find on the impact table.
+  _extractIndicatorTotals(text, rec);
+}
+
+/* ── Impact-table parsing — per-indicator totals ──────────────────── */
+//
+// Each EPD has one or more impact-table rows of the shape:
+//   <INDICATOR_CODE>  <UNIT>  <total or A1-A3>  <A1>  <A2>  <A3>  ...
+// The first numeric token after the unit is the total (cradle-to-gate
+// EPDs) or A1 (cradle-to-grave; we'll handle column-header parsing in
+// the per-stage P3.2 work). For now: capture the first number → total.
+//
+// Indicator-code synonyms vary by program operator and LCIA method:
+//   GWP, GWPTRACI, GWP100, GWPgwp100, GWPfossil, GWP-fossil, GWP-total
+//   GWPBIO, GWP-bio, GWP-biogenic
+//   ODP, ODPTRACI                       (kg CFC-11 eq)
+//   AP, APTRACI, AP-AE                  (kg SO2 eq, mol H+ eq)
+//   EP, EPTRACI, EP-AE                  (kg N eq, kg PO4-3 eq)
+//   POCP, SFP, SFPTRACI                 (kg O3 eq, kg NMVOC eq)
+//   ADPf, ADPfossil, ADP-NRf, FFD       (MJ NCV)
+//   WDP, WaterDP                        (m³ or kg)
+//   PENR, NRPE, PE-NR                   (MJ)
+//   PER, RPE, PE-R                      (MJ)
+
+var IMPACT_INDICATORS = [
+  // GWP fossil / total — comes BEFORE the biogenic regex so the more
+  // specific "BIO" alternation doesn't grab the fossil row.
+  {
+    schemaKey: "gwp_kgco2e",
+    label: "GWP-fossil/total",
+    regex:
+      /(?:^|\n|\s)GWP(?:TRACI|100|gwp100|fossil|[-\s–]+(?:fossil|total))?(?!BIO|[-\s–]*bio)[^\n\r]{0,18}?\s+kg\s*CO\s*2?\s*e(?:q|qv)?\b[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "gwp_bio_kgco2e",
+    label: "GWP-biogenic",
+    regex:
+      /(?:^|\n|\s)GWP(?:BIO|[-\s–]+bio(?:genic)?)[^\n\r]{0,12}?\s+kg\s*CO\s*2?\s*e(?:q|qv)?\b[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "ozone_depletion_kgcfc11eq",
+    label: "ODP",
+    regex:
+      /(?:^|\n|\s)ODP[A-Z]{0,8}\s+kg\s*CFC[-\s]*11\s*e(?:q|qv)?[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "acidification_kgso2eq",
+    label: "AP",
+    regex:
+      /(?:^|\n|\s)AP[A-Z]{0,8}\s+kg\s*SO\s*2?\s*e(?:q|qv)?[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "eutrophication_kgneq",
+    label: "EP",
+    regex:
+      /(?:^|\n|\s)EP[A-Z]{0,8}\s+kg\s*N\s*e(?:q|qv)?[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "smog_kgo3eq",
+    label: "POCP/SFP",
+    regex:
+      /(?:^|\n|\s)(?:SFP|POCP)[A-Z]{0,8}\s+kg\s*O\s*3?\s*e(?:q|qv)?[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "abiotic_depletion_fossil_mj",
+    label: "ADP-fossil",
+    regex:
+      /(?:^|\n|\s)(?:ADPf|ADP[\s-]*fossil|ADP[\s-]*NRf|FFD)\b[^\n\r]{0,40}?MJ\b[^\n\r]{0,12}?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "water_consumption_m3",
+    label: "WDP",
+    regex:
+      /(?:^|\n|\s)(?:WDP|Water[\s-]*DP)\b[^\n\r]{0,30}?(?:m\s*3?|m³|kg)\b[^\n\r]{0,12}?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "primary_energy_nonrenewable_mj",
+    label: "PE-NR",
+    regex:
+      /(?:^|\n|\s)(?:PENR\b|NRPE\b|PE[\s-]?NR\b|Non[\s-]?renewable\s+primary\s+energy)\b[^\n\r]{0,40}?MJ\b[^\n\r]{0,12}?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+  },
+  {
+    schemaKey: "primary_energy_renewable_mj",
+    label: "PE-R",
+    regex:
+      /(?:^|\n|\s)(?:PER\b|RPE\b|PE[\s-]?R\b(?!T)|Renewable\s+primary\s+energy)\b[^\n\r]{0,40}?MJ\b[^\n\r]{0,12}?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+  }
+];
+
+function _extractIndicatorTotals(text, rec) {
+  for (var i = 0; i < IMPACT_INDICATORS.length; i++) {
+    var ind = IMPACT_INDICATORS[i];
+    if (_get(rec, "impacts." + ind.schemaKey + ".total.value") != null) continue;
+    var m = text.match(ind.regex);
+    if (!m) continue;
+    var raw = m[1].replace(/\s+/g, "");
+    var num = parseFloat(raw.replace(",", "."));
+    if (isNaN(num)) continue;
+    _setPath(rec, "impacts." + ind.schemaKey + ".total.value", num);
+    _setPath(rec, "impacts." + ind.schemaKey + ".total.source", "epd_direct");
   }
 }
 
