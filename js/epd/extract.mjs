@@ -138,6 +138,22 @@ function extractCommon(text, rec) {
     var po = _detectProgramOperator(text);
     if (po) _setPath(rec, "epd.program_operator", po);
   }
+
+  // GWP total (kg CO2e per declared unit) — capture the first numeric
+  // value following a "GWP*" indicator code on an impact-table row.
+  // Examples we want to match:
+  //   "GWPTRACI   kg CO 2 e   100.57   ..."   (CLT: GWP-fossil = 100.57)
+  //   "GWP – fossil    kg CO2e    52.4 ..."
+  //   "GWP-total       kg CO2 eq   430.2 ..."
+  // The numeric capture allows leading "-" (biogenic GWP is often negative)
+  // and exponent notation (e.g. "2.52E-06"), but here we want non-exp
+  // values for GWP. Keep it tight to {1,5} digits before the decimal.
+  if (_get(rec, "impacts.gwp_kgco2e.total.value") == null) {
+    var gwp = text.match(
+      /GWP[\sA-Za-z\-–\d]{0,12}?\s+kg\s*CO\s*2?\s*e(?:\s*q)?\s+(-?\d{1,5}(?:[.,]\d+)?)/i
+    );
+    if (gwp) _setPath(rec, "impacts.gwp_kgco2e.total.value", _toNum(gwp[1]));
+  }
 }
 
 /* ── NA family: UL Environment / ASTM / CSA Group ──────────────────── */

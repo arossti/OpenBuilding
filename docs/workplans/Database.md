@@ -166,6 +166,43 @@ Today's stub Trust + Verify modal shows the candidate JSON but **does not surfac
 
 These items land alongside the §5 Trust / Trust + Verify implementation, since the user is choosing whether to commit a candidate to a published vs hidden state at the same moment they're choosing Trust vs Trust + Verify.
 
+### (d) Yellow-highlight freshly-committed rows in the catalogue
+
+Andy 2026-04-27: *"can we highlight these new additions with a yellow field so we can see the DB has been updated? … otherwise it makes it hard to 'see' newly added vs existing fields since we do not have a sort by date field."*
+
+Required behavior:
+
+- When the user clicks **Trust** (or commits via Trust + Verify), the Database viewer **optimistically inserts the new record** into the in-memory catalogue list (currently the stub only removes the pending row — the new record exists nowhere).
+- The newly-inserted row carries a UI-only `_fresh: true` flag and renders with a **yellow background** (`background: var(--gold-soft)` or similar) plus a `NEW` chip in the row meta.
+- The yellow highlight persists for the **session** (or until the user explicitly dismisses it via a "mark as reviewed" toggle on the row, or until the patch-export step (e) commits the change to durable storage).
+- **REFRESH**-type commits get a different highlight (e.g. amber + `UPDATED` chip) so the team can distinguish replacements from net-new entries at a glance.
+- Sort-by-date is the alternative UX, but the schema's `provenance.data_added_or_modified` and `provenance.review_audit[]` aren't surfaced in the table view today; the highlight is the lower-friction fix.
+
+### (e) Persistence reality — committed records are LOST on browser reboot today
+
+Andy 2026-04-27: *"obviously if the DB is not hard rewritten, such entries will be lost when the browser reboots, so we need a think on that"*
+
+Confirmed gap. Today's stub Trust handler at [`js/database.mjs`](../../js/database.mjs) `handleTrust()`:
+1. Reads the pending row from IndexedDB
+2. Logs it to console
+3. **Deletes it from IndexedDB** (so it doesn't re-show on reload)
+4. Calls `setStatus(...)`
+
+The committed record is written **nowhere persistent**. On browser reboot:
+- `pending_changes` is empty (the Trust handler deleted the row)
+- `schema/materials/*.json` is unchanged (Pages is read-only at runtime; we never write to it)
+- `committed_patches` table doesn't exist yet
+- The team's commit decision is gone
+
+§7 documents the intended pipeline (commit → `committed_patches` → "Export patch" download → Node `apply-patch.mjs` script → `schema/materials/*.json` → git). What needs to land for reboot-safety:
+
+1. **Don't delete on Trust.** Move the row from `pending_changes` (state: captured) to a new `committed_patches` IndexedDB store, with the merged record + audit trail. The optimistic in-memory insert (item d) reads from this on next page load to keep the yellow-highlighted rows visible.
+2. **"Export patch" toolbar action** — downloads `patch-<ISO-date>.json` containing every uncommitted entry from `committed_patches`.
+3. **Node `apply-patch.mjs` script** — reads the patch file, applies to the appropriate `schema/materials/<group>.json`, regenerates `index.json`, validates against the schema. Team commits the resulting JSON files via git.
+4. **Clear `committed_patches`** only after the team has run `apply-patch.mjs` and merged the result. UX: "✓ N patches applied — clear from queue?" prompt.
+
+This is roughly D7 from §10 phases. Item (d) and (e) are tightly coupled: yellow-highlight makes new rows visible; durable `committed_patches` keeps them visible across reboots until export+apply lands them in the source-of-truth files.
+
 ## 6. Queue lifecycle
 
 `pending_changes` is durable, not session-scoped — entries survive browser refresh and tab close (it's IndexedDB). Lifecycle:
