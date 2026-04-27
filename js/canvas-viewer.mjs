@@ -243,6 +243,20 @@ function _bindEvents() {
   _wrap.addEventListener("auxclick", function (e) {
     if (e.button === 1) e.preventDefault();
   });
+
+  // ── Window resize: re-fit current page to the new viewport ──
+  // Debounced so dragging a window edge doesn't thrash zoomFit.
+  // Only fires when a page is currently displayed (_currentPage > 0).
+  // Picked up by EPD-Parser too since it shares this module.
+  var _resizeTimer = null;
+  window.addEventListener("resize", function () {
+    if (!_currentPage) return;
+    if (_resizeTimer) clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(function () {
+      _resizeTimer = null;
+      zoomFit();
+    }, 150);
+  });
 }
 
 function _startPan(e) {
