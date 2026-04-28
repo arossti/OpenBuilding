@@ -10,16 +10,19 @@
  *   - format detected
  *
  * Usage:
- *   node schema/scripts/test-epd-extract.mjs                    # all samples
- *   node schema/scripts/test-epd-extract.mjs --json out.json    # also dump full candidates
- *   node schema/scripts/test-epd-extract.mjs --md out.md        # markdown coverage table
+ *   node schema/scripts/test-epd-extract.mjs                       # writes a timestamped snapshot
+ *                                                                   # to docs/workplans/EPD-coverage-history/
+ *   node schema/scripts/test-epd-extract.mjs --md out.md            # explicit md path
+ *   node schema/scripts/test-epd-extract.mjs --json out.json        # full-candidate JSON dump
+ *   node schema/scripts/test-epd-extract.mjs --only Lafarge         # substring-filter samples
  *
- * Output goes to stdout by default. --md / --json land alongside the
- * stdout summary so the workplan §9.5 can be updated with concrete
- * numbers from the most recent harness run.
+ * The default-path behavior writes to a tracked directory so every
+ * regex change can be git-diff'd against prior runs — Andy 2026-04-27
+ * wants the harness output committed alongside code so coverage
+ * progress (or regressions) are auditable.
  */
 
-import { readdir, readFile, writeFile, stat } from "node:fs/promises";
+import { readdir, readFile, writeFile, stat, mkdir } from "node:fs/promises";
 import { resolve, dirname, join, basename, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -27,6 +30,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..", "..");
 const SAMPLES_ROOT = join(REPO_ROOT, "docs", "PDF References", "EPD SAMPLES");
 const EXTRACT_MJS = join(REPO_ROOT, "js", "epd", "extract.mjs");
+const COVERAGE_HISTORY_DIR = join(REPO_ROOT, "docs", "workplans", "EPD-coverage-history");
 
 const METADATA_FIELDS = [
   "manufacturer.name",
@@ -246,6 +250,14 @@ async function main() {
   console.log(`Formats: ${Object.entries(formatCounts).map(([k, v]) => `${k}=${v}`).join(", ")}`);
 
   // ── Markdown coverage table ─────────────────────────
+  // Default behavior: if no --md path was given, write a timestamped
+  // snapshot to the tracked coverage-history dir so every harness run
+  // is auditable via git diff (Andy 2026-04-27).
+  if (!args.md && !args.json && !args.only) {
+    await mkdir(COVERAGE_HISTORY_DIR, { recursive: true });
+    const stamp = new Date().toISOString().replace(/:/g, "-").replace(/\..*/, "Z");
+    args.md = join(COVERAGE_HISTORY_DIR, stamp + ".md");
+  }
   if (args.md) {
     const lines = [];
     lines.push("# EPD-Parser regression coverage matrix");
