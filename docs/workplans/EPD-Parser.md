@@ -4,6 +4,51 @@
 
 ---
 
+## Agent handoff (read this first)
+
+**You are picking up an in-flight P3 regex-extraction iteration.** The EPD-Parser app and the Database viewer scaffolding are shipped and working end-to-end against a manual-entry path; auto-fill from PDF text is partially working (50.3% metadata, 30.7% impact totals across 30 sample EPDs). Your job is to push coverage higher *without* regressing what already works, and to fix one architectural gap that blocks usable smoke-testing.
+
+**Branch + state:**
+- Branch: `Magic-Wand-Oculus` on remotes `openbuilding` (arossti/OpenBuilding) and `origin` (bfca-labs/at). Both pushed.
+- Tip at handoff: `64af1b9` — "EPD-Parser: bake harness coverage-history into the workflow"
+- Latest harness snapshot: [`docs/workplans/EPD-coverage-history/2026-04-28T01-47-51Z.md`](EPD-coverage-history/) — measured AFTER the Lafarge format-detection fix (commit `0bb1969`).
+
+**Read this order:**
+1. §0 — current state (what's shipped, what's pending, latest measured coverage)
+2. **§5.6 — Taxonomy + coarse-to-granular extraction order** (Andy's preferred mental model — the trunk-of-tree principle)
+3. **§7.7 — Persistence blocker** (Trust-committed records don't appear in the catalogue search — must fix first to unblock testing)
+4. §7.6 — Harness contract (the "no regex change ships unless coverage moves up" rule)
+5. §9.5 — calibration findings + ranked fix-list for per-format iteration
+
+**Tomorrow's recommended sequence:**
+1. **First (60–90 min): §7.7 persistence fix** — Trust currently deletes the captured row and writes the committed record nowhere durable. Search of the catalogue can't find newly-Trusted records. Fix this before any more regex work or the testing loop stays broken.
+2. **Then: hierarchical extraction refactor (§5.6)** — add `material-type` extraction + `inferGroupPrefix` lookup so `classification.group_prefix` auto-fills. Reorder form-pane sections to match the taxonomy. Pure structural change, harness should not regress.
+3. **Then: §9.5 fix-list item #1** (older BC Wood format, 3 samples × 0/10 impacts) — write the regex against ALL three at once to confirm generality. Re-run harness. Snapshot to coverage-history.
+4. **Continue down the §9.5 fix-list** in order, harness-snapshot per fix.
+
+**Hard rules — do not violate:**
+- **§7.6 harness contract:** every commit that touches `js/epd/extract.mjs` re-runs `node schema/scripts/test-epd-extract.mjs` and commits a fresh snapshot to `docs/workplans/EPD-coverage-history/`. Aggregate coverage must move up; no individual sample may regress. If a "fix" only helps one sample and doesn't lift the aggregate, it's idiosyncratic — broaden it or drop it.
+- **§5.5 BEAM ID convention:** `beam_id` is BfCA-internal and never extracted from a PDF. P3's `extract.mjs` produces `beam_id: null`. Minting happens on the Database side at commit. Don't conflate `beam_id` with `epd.id` or `methodology.pcr_guidelines` — three different fields, three different sources.
+- **§8 security:** no in-browser Anthropic API integration, ever. Andy ruled this out 2026-04-25.
+- **§9 IP guardrails:** no `CSI` / `MasterFormat` / `Division` / `MCE²` / `NRCan` / Crown-copyright tool names in code, UI strings, or the workplan. Numeric `group_prefix` (`03`/`06`/`07`/etc.) is the only classification convention.
+- **Soft-delete only.** Hard-delete forbidden forever ([`Database.md`](Database.md) §6).
+
+**Daily-driver commands:**
+```
+node schema/scripts/test-epd-extract.mjs                          # run harness, auto-snapshot
+node schema/scripts/test-epd-extract.mjs --only Lafarge           # filter to one sample (no snapshot)
+node schema/scripts/test-epd-extract.mjs --json /tmp/full.json    # full per-candidate dump
+npm run serve                                                     # local dev server (port 8000)
+```
+
+**Cross-references:**
+- [`Database.md`](Database.md) — sibling workplan for the Database viewer (commit point, list/hide UX, persistence pipeline).
+- [`docs/PDF References/EPD SAMPLES/`](../PDF%20References/EPD%20SAMPLES/) — 30 calibration PDFs across `03 Concrete / 05 Metals / 06 Wood / 07 Thermal`.
+- [`schema/material.schema.json`](../../schema/material.schema.json) — target shape for emitted records.
+- [`schema/lookups/`](../../schema/lookups/) — `material-type-to-group.json`, `display-name-keywords.json`, `country-codes.json`, `lifecycle-stages.json`, `typical-elements.json`, `material-groups.json`.
+
+---
+
 ## 0. Current state (2026-04-27 EOD)
 
 **Phases shipped** (chronological):
@@ -178,6 +223,53 @@ These three fields look superficially similar (all are short identifiers tied to
 
 **No IP-restricted terminology** — `CSI`, `MasterFormat`, `Division`, `MCE²`, `NRCan`, Crown-copyright tool names — appears in the parser, the UI strings, the emitted JSON, or this workplan. Numeric `group_prefix` (`03`, `06`, `09`, `31`, …) is the only classification convention used.
 
+### 5.6. Taxonomy + extraction order — coarse-to-granular ("trunk of tree first")
+
+Andy 2026-04-27: *"It makes sense from a human perspective to sort by the 'game of categories' to determine the material properties as a tree, starting with Group, then type, then manufacturer, then provenance, then finally properties, GWP being among them."* And: *"the taxonomy is important because many of the properties may differ or not be available in all EPDs, but general information, trunk-of-tree level info should be available on ALL EPDs, which is why we should fill out the coarse, and move to granular."*
+
+The current `js/epd/extract.mjs` is **flat**: probes are independent regexes that run in arbitrary source-order and don't depend on each other's outputs. This is correct for runtime (probes are independent) but wrong for the user-facing mental model and for prioritising which fields *must* succeed across the full sample set.
+
+**The taxonomy below defines BOTH** the form-pane section order in `epdparser.html` (so the user reads top-down: classify → identify → locate → measure) **AND** the extraction-pass order in `extract.mjs` (so coarse fields fill before granular ones; later passes can use earlier-extracted values as inputs).
+
+| Tier | Tree level | Schema fields | Extraction approach | Generality |
+|---|---|---|---|---|
+| **1** | **Group** | `classification.group_prefix` | **Inferred** from material_type + display_name via [`schema/lookups/material-type-to-group.json`](../../schema/lookups/material-type-to-group.json) and [`schema/lookups/display-name-keywords.json`](../../schema/lookups/display-name-keywords.json). Never regex-extracted. **Today: not wired** — always `null`. **TODO: hook `inferGroupPrefix(material_type, display_name)` after Tier 2 extracts those values.** | Trunk-of-tree. Should populate on EVERY EPD once Tier 2 succeeds. |
+| **2** | **Type / display name** | `classification.material_type`, `naming.display_name`, `naming.product_brand_name` | Regex against the cover-page product description ("Cross-Laminated Timber", "Cement", "Spray Polyurethane Foam Insulation"). Today: `naming.display_name` not extracted explicitly. **TODO: extract from page-1 title block + map known phrases via a small keyword vocabulary.** | Trunk. Every EPD has a product description. |
+| **3** | **Manufacturer + country** | `manufacturer.name`, `manufacturer.country_code` | Regex against `Declaration Holder` / `EPD Commissioner and Owner` / `Owner of the Declaration` / `Manufacturer name and address`. Country via [`schema/lookups/country-codes.json`](../../schema/lookups/country-codes.json) lookup on the address line. Today: name extracts on most NA + NSF samples; country rarely extracted. | Coarse. Industry-average EPDs may have a trade-association name instead of a manufacturer — see §8 open question. |
+| **4** | **Provenance / scope** | `provenance.markets_of_applicability[]`, `provenance.countries_of_manufacture[]` | Regex against `Markets of Applicability` / `Region covered`. ISO-code normalisation via the country-codes lookup. Today: thin coverage. | Coarse. Most EPDs declare a market scope; some imply it from the manufacturer's address. |
+| **5** | **Identification** (EPD ID, dates, program operator, type, validation, source URL) | `epd.{id, program_operator, publication_date, expiry_date, type, validation.type, source_document_url}` | Format-specific regex per family (`extractNA` / `extractEpdIntl` / `extractNSF`). Program operator via `_detectProgramOperator()` name match across formats. | Granular. EPD ID is mandatory by ISO 14025 but the *format* of the ID varies wildly (`S-P-XXXXX`, `EPD 395`, `4788424634.107.1`, `EPD-GTX-…`). |
+| **6** | **Methodology** | `methodology.{pcr_guidelines, standards[], lca_method, lca_software, lci_database}` | PCR via Part B / sub-category anchor. Standards via cross-format ISO/EN regex. Software / database via labelled-row anchors. Today: PCR + standards work; software + database thin. | Granular. PCR is mandatory; software / database vary by LCA practitioner. |
+| **7** | **Physical** | `physical.density.value_kg_m3`, `carbon.stated.per_unit` | Density on the declared-unit line for solid materials, separate "Density" cell for tabular EPDs. Declared unit via labelled regex. Today: works on NA family; misses on m²-with-thickness insulation EPDs (see §9.5 declared-unit table). | Granular. Density may be absent (XPS / mineral wool with m² + thickness + R-value declared unit). |
+| **8** | **Carbon + impacts** | `impacts.{gwp_kgco2e, gwp_bio_kgco2e, ozone_depletion_kgcfc11eq, acidification_kgso2eq, eutrophication_kgneq, smog_kgo3eq, abiotic_depletion_fossil_mj, water_consumption_m3, primary_energy_nonrenewable_mj, primary_energy_renewable_mj}.{total, by_stage}` | `_extractIndicatorTotals()` cross-format loop with the `DATA_ROW_TAIL` lookahead. Per-stage breakdown (A1..D) deferred to P3.3 — needs column-header parsing. | Granular. Indicator codes (`GWPTRACI` / `GWPfossil` / `GWP100`) and column layouts (cradle-to-gate vs cradle-to-grave) vary by program / LCA software. |
+| **9** | **Audit + status** | `provenance.review_audit[]`, `status.{visibility, listed, do_not_list}` | Auto-stamped at Capture / Trust time, not extracted. `status.visibility = "public"` default for new entries. | Process metadata, not document content. |
+
+**Generality principle**: Tiers 1–4 (Group, Type, Manufacturer, Provenance) are **trunk** — they should populate on virtually every EPD because they're high-level identifiers any document calls itself by. Tiers 5–8 are **granular** — they may be absent (industry-average EPDs sometimes omit a single product brand; older EPDs lack EN 15804+A2 indicator panels; insulation EPDs lack density). The harness coverage matrix (§9.5 + `EPD-coverage-history/`) measures both — failing trunk fields on any sample is a worse signal than failing granular fields on a few samples, because it suggests the format-detection or label vocabulary missed the document entirely.
+
+**Form-pane refactor (TODO, not yet shipped):** today's form sections in `js/epdparser.mjs` are `Identity / EPD identification / Methodology / Physical + carbon / Provenance + scope / Audit`. Reorder to match this taxonomy: `1. Group → 2. Type → 3. Manufacturer → 4. Provenance → 5. Identification → 6. Methodology → 7. Physical → 8. Impacts → 9. Audit`. Pure structural change; the schema-path bindings on each input stay the same.
+
+**Extraction-pass refactor (TODO, not yet shipped):** today's `extract()` runs format detection then dispatches to one per-family extractor and one cross-format `extractCommon`. Refactor to run tier-by-tier:
+
+```js
+extract(pageTexts) {
+  const text = pageTexts.join("\n\n");
+  const format = detectFormat(text);
+  const rec = {};
+  // Tier 2 first (display name + material type), so Tier 1 can infer Group
+  extractType(text, rec);
+  extractGroup(rec);                                     // uses rec.classification.material_type
+  extractManufacturer(text, rec, format);
+  extractProvenance(text, rec, format);
+  extractIdentification(text, rec, format);              // dispatches to NA / EPD-Intl / NSF
+  extractMethodology(text, rec, format);
+  extractPhysical(text, rec);
+  extractImpactTotals(text, rec);                        // existing _extractIndicatorTotals
+  extractImpactByStage(text, rec);                       // P3.3
+  return { format, record: rec, anchorsHit: _countAnchors(rec) };
+}
+```
+
+This makes the extraction *narratively readable* and lets later tiers consume earlier ones (e.g. Tier 1 group inference depends on Tier 2 material_type). Currently no probe consumes another's output, so reordering changes nothing for runtime — but it makes the code match the human mental model and surfaces gaps when a tier extractor returns nothing (e.g. "Tier 3 Manufacturer extractor returned null on this NA-format sample → bug").
+
 ## 6. Match-existing logic
 
 **Default to new entry. Only refresh an existing record when every high-fidelity match key agrees.** EPDs published under different PCRs, different geographic scopes, or by different program operators describe distinct products from the database's perspective, even when the underlying material is "the same" in casual language. The cost of a false-positive merge (silently overwriting a US-scope record with CA-scope numbers) is much higher than the cost of a false-negative (one extra database row).
@@ -256,6 +348,63 @@ UX wording mirrors the existing PDF-Parser → BEAM bridge so muscle-memory tran
 - ✅ **Window resize doesn't reflow the canvas viewer** — RESOLVED 2026-04-27 (commit `f2d50f1`). Added a debounced 150ms `resize` listener inside `canvas-viewer.mjs._bindEvents()` that re-runs `zoomFit()` if `_currentPage > 0`. PDF-Parser inherits the fix for free since they share the module.
 - ⏳ **Per-glyph splits leave residue in extracted free-text values.** `carbon.stated.per_unit` on the CLT EPD captures `"O ne cubic met re (1 m ) of cross - laminated timber..."` — semantically correct but visually noisy. P3.2 should add a post-process pass that compacts known per-glyph patterns (`\bO ne\b` → `One`, `met re` → `metre`, `cross - laminated` → `cross-laminated`, `1 m ` → `1 m³` where pdf.js dropped the superscript). Not load-bearing for downstream processing; cosmetic only.
 - ⏳ **Indicator-code synonym misses** — Dofasco XCarb steel EPDs use indicator codes that the current regex doesn't catch for PE-NR / PE-R / WDP. Surfaced by the 2026-04-27 harness run; specific codes need investigating per the §9.5 fix-list item 5.
+
+## 7.6. Generality contract — the harness is the test
+
+Concern raised by Andy 2026-04-27: *"Can we be sure whatever code we develop works generally and is not completely specific/idiosyncratic to one PDF/EPD?"*
+
+The answer is procedural, not architectural. **Every regex change is measured.**
+
+`schema/scripts/test-epd-extract.mjs` walks all 30 sample EPDs and reports per-sample coverage (metadata + impact totals, plus format-detection + per-indicator extracted values). The harness writes a timestamped snapshot to [`docs/workplans/EPD-coverage-history/`](EPD-coverage-history/) by default (no `--md` flag needed). Every commit that touches `js/epd/extract.mjs` commits a fresh snapshot alongside the code change.
+
+**The contract:**
+
+1. **No regex change ships unless the harness aggregate moves up AND no individual sample regresses.** A change that helps Lafarge but breaks any other sample is rolled back.
+2. **Format-family-specific regex is appropriate** because EPD programs genuinely use different vocabularies (SCREAMING_CAPS vs sentence-case, English vs German). The format-detection split (`detectFormat()` → NA / EPD-Intl / NSF / EU-IBU / unknown) is the right architectural lever for cross-format generality.
+3. **Within a format family, the regex must work on multiple samples to claim generality.** A pattern that fits one EPD's idiosyncrasies (e.g. one specific PCR string) is rolled back unless extended to cover the format family.
+4. **When iterating per-format (e.g. older BC Wood, 3 samples: 2013 LVL + 2016 LSL + 2016 WRC), write the regex against ALL samples in the family at once.** If it only fits one, it's idiosyncratic.
+5. **Format-detection signals stay explicit** — `S-P-XXXXX` / `NSF International` / line-anchored `Programme holder` are *unambiguous* markers, not loose matches against prose.
+6. **Coverage-history snapshots are git-tracked.** A future regex change with hidden regressions can be caught by `git diff` of the latest snapshot against an older one.
+
+The `EPD-coverage-history/README.md` documents this workflow for any agent picking up the work.
+
+## 7.7. Persistence blocker — Trust-committed records don't appear in catalogue search
+
+Andy hit this 2026-04-27 night during smoke-testing. After clicking **Trust** on a Lafarge cement candidate in the Database viewer's pending panel, searching the full 821-record catalogue did not find the committed record. **This is the documented `Database.md §5.5(e)` gap, and it blocks the testing loop.**
+
+### Current behavior (the bug)
+
+[`js/database.mjs`](../../js/database.mjs) `handleTrust()` does:
+
+1. Read the captured row from `pending_changes` IndexedDB
+2. `console.log` the candidate record
+3. **DELETE the row** from `pending_changes` (so it doesn't re-show on reload)
+4. `setStatus("Trust: committed … · click Trust + Verify to audit")`
+5. `refreshPendingPanel()`
+
+The committed record is written **nowhere durable**:
+- ❌ NOT added to `state.indexEntries` (the in-memory list the search filters)
+- ❌ NOT written to a `committed_patches` IndexedDB store (the table doesn't exist yet)
+- ❌ NOT written to `schema/materials/*.json` (Pages is read-only at runtime)
+
+So searching the catalogue still shows the original 821 records — committed entries are invisible. The status banner says "committed" but the data is gone.
+
+This was deliberate as a **v1 stub** (the workplan calls Trust "stub today" in several places) but the UX problem is real: a stub that visually pretends to commit is worse than a stub that's clearly an export-to-disk-only flow.
+
+### The fix (Database.md §5.5(d)+(e), implementing tomorrow)
+
+Tightly couple the **yellow-highlight optimistic insert** (TODO d) with the **committed_patches durable store** (TODO e):
+
+1. **Move (don't delete) the row.** Trust transitions the row from `pending_changes` (state: captured) into a new `committed_patches` IndexedDB store, with the merged record + `committed_at` timestamp + audit metadata.
+2. **Optimistic in-memory insert.** Push the committed record into `state.indexEntries` with a UI-only `_fresh: true` flag, then `applyFilters()` to re-render. Search + group filtering will now find it.
+3. **Yellow highlight + chip.** `.db-row-fresh` CSS class with yellow background + `NEW` chip in row meta (refresh-type commits get `UPDATED` chip in amber). Persists for the session OR until the user clicks an "Export patch" toolbar action.
+4. **On page reload**, `boot()` reads `committed_patches` and merges the rows into `state.indexEntries` with the same fresh-flag, so the highlights survive reboot.
+5. **Patch-export pipeline** (Database.md §7) — toolbar button "Export patch" downloads `patch-<ISO-date>.json` from `committed_patches`. A new `schema/scripts/apply-patch.mjs` Node script applies the patch to the right `schema/materials/<group>.json`, regenerates `index.json`, validates. Team commits the result via git in the normal way.
+6. **Clear `committed_patches`** only after the team has run `apply-patch.mjs` and confirmed the merge — UX: "✓ N patches applied — clear from queue?" prompt.
+
+### Why this is the FIRST action tomorrow
+
+Without this fix, every smoke-test Andy does to validate per-format regex improvements has the same dead-end: he can't see whether his Trust commits actually landed in the catalogue. Fixing persistence first makes every subsequent regex iteration testable end-to-end. Estimated 60–90 min of work; references the existing `Database.md §5.5(d)+(e)` design.
 
 ## 8. Open questions / pending samples
 
