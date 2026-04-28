@@ -26,14 +26,14 @@ var SAVE_DEBOUNCE_MS = 300;
    Each entry binds an input to a dotted schema path. P3 (regex auto-fill)
    populates the same paths from EPD text. Sections render as fieldsets. */
 
+// Section order follows the §5.6 trunk-of-tree taxonomy: classify
+// (Group → Type) before identifying (Manufacturer → Provenance) before
+// measuring (Identification → Methodology → Physical → Impacts). The
+// schema-path bindings on each input are unchanged from the prior order.
 var FORM_SECTIONS = [
   {
-    title: "Identity",
+    title: "1. Group + Type (classify)",
     fields: [
-      { path: "manufacturer.name", label: "Manufacturer name", type: "text" },
-      { path: "manufacturer.country_code", label: "Country (ISO 3166-1 alpha-3)", type: "text", placeholder: "CAN" },
-      { path: "naming.display_name", label: "Display name", type: "text" },
-      { path: "naming.product_brand_name", label: "Product brand name", type: "text" },
       {
         path: "classification.group_prefix",
         label: "Group",
@@ -50,11 +50,44 @@ var FORM_SECTIONS = [
           ["31", "31 — Earthwork"]
         ]
       },
-      { path: "classification.material_type", label: "Material type", type: "text" }
+      { path: "classification.material_type", label: "Material type", type: "text" },
+      { path: "naming.display_name", label: "Display name", type: "text" },
+      { path: "naming.product_brand_name", label: "Product brand name", type: "text" }
     ]
   },
   {
-    title: "EPD identification",
+    title: "2. Manufacturer (identify)",
+    fields: [
+      { path: "manufacturer.name", label: "Manufacturer name", type: "text" },
+      { path: "manufacturer.country_code", label: "Country (ISO 3166-1 alpha-3)", type: "text", placeholder: "CAN" }
+    ]
+  },
+  {
+    title: "3. Provenance + scope",
+    fields: [
+      {
+        path: "provenance.markets_of_applicability",
+        label: "Markets (ISO codes, comma-separated)",
+        type: "text",
+        placeholder: "CAN, USA",
+        asArray: true
+      },
+      {
+        path: "status.visibility",
+        label: "Visibility",
+        type: "select",
+        options: [
+          ["public", "Public (default)"],
+          ["hidden", "Hidden"],
+          ["deprecated", "Deprecated"],
+          ["flagged_for_deletion", "Flagged for deletion (soft-delete)"]
+        ],
+        default: "public"
+      }
+    ]
+  },
+  {
+    title: "4. EPD identification",
     fields: [
       { path: "epd.id", label: "EPD identifier", type: "text", placeholder: "S-P-10278 or EPD-NIBE-…" },
       {
@@ -101,45 +134,41 @@ var FORM_SECTIONS = [
     ]
   },
   {
-    title: "Methodology",
+    title: "5. Methodology",
     fields: [
       { path: "methodology.pcr_guidelines", label: "PCR (sub-category / Part B)", type: "text" },
-      { path: "methodology.standards", label: "Standards (comma-separated)", type: "text", placeholder: "ISO 14025, ISO 21930, EN 15804+A2", asArray: true },
+      {
+        path: "methodology.standards",
+        label: "Standards (comma-separated)",
+        type: "text",
+        placeholder: "ISO 14025, ISO 21930, EN 15804+A2",
+        asArray: true
+      },
       { path: "methodology.lca_software", label: "LCA software", type: "text" },
       { path: "methodology.lci_database", label: "LCI database", type: "text" }
     ]
   },
   {
-    title: "Physical + carbon",
+    title: "6. Physical + impacts",
     fields: [
       { path: "physical.density.value_kg_m3", label: "Density (kg/m³)", type: "number", step: "0.01" },
-      { path: "carbon.stated.per_unit", label: "Declared / functional unit", type: "text", placeholder: "1 m³ | 1 m² + thickness | 1 metric ton" },
-      { path: "impacts.gwp_kgco2e.total.value", label: "GWP total (kg CO₂e per declared unit)", type: "number", step: "0.0001" }
-    ]
-  },
-  {
-    title: "Provenance + scope",
-    fields: [
-      { path: "provenance.markets_of_applicability", label: "Markets (ISO codes, comma-separated)", type: "text", placeholder: "CAN, USA", asArray: true },
       {
-        path: "status.visibility",
-        label: "Visibility",
-        type: "select",
-        options: [
-          ["public", "Public (default)"],
-          ["hidden", "Hidden"],
-          ["deprecated", "Deprecated"],
-          ["flagged_for_deletion", "Flagged for deletion (soft-delete)"]
-        ],
-        default: "public"
+        path: "carbon.stated.per_unit",
+        label: "Declared / functional unit",
+        type: "text",
+        placeholder: "1 m³ | 1 m² + thickness | 1 metric ton"
+      },
+      {
+        path: "impacts.gwp_kgco2e.total.value",
+        label: "GWP total (kg CO₂e per declared unit)",
+        type: "number",
+        step: "0.0001"
       }
     ]
   },
   {
-    title: "Audit (auto-stamped on Capture)",
-    fields: [
-      { path: "_audit.editor", label: "Editor (you)", type: "text", placeholder: "andy@bfca", persisted: true }
-    ]
+    title: "7. Audit (auto-stamped on Capture)",
+    fields: [{ path: "_audit.editor", label: "Editor (you)", type: "text", placeholder: "andy@bfca", persisted: true }]
   }
 ];
 
@@ -156,6 +185,30 @@ function init() {
   _bindDragDrop();
   _bindKeyboard();
   _updateStatus();
+
+  // Prime the lookups for Tier 1 group inference (workplan §5.6). Falls
+  // back gracefully if the staged data dir doesn't include the lookups
+  // (e.g. running pre-stage:data) — extract() just leaves group_prefix
+  // null in that case.
+  _primeLookups().catch(function (err) {
+    console.warn("[EPD-Parser] lookup prime skipped:", err.message);
+  });
+}
+
+function _primeLookups() {
+  return Promise.all([
+    fetch("data/schema/lookups/material-type-to-group.json").then(function (r) {
+      return r.ok ? r.json() : { map: {} };
+    }),
+    fetch("data/schema/lookups/display-name-keywords.json").then(function (r) {
+      return r.ok ? r.json() : { patterns: [] };
+    })
+  ]).then(function (results) {
+    Extract.setLookups({
+      mtMap: (results[0] && results[0].map) || {},
+      kwPatterns: (results[1] && results[1].patterns) || []
+    });
+  });
 }
 
 function _bindFileInput() {
@@ -414,7 +467,7 @@ function _renderForm() {
     for (var f = 0; f < sec.fields.length; f++) {
       var fld = sec.fields[f];
       var inputId = "f-" + fld.path.replace(/[^a-z0-9]/gi, "-");
-      var defaultVal = fld.path === "_audit.editor" ? savedEditor : (fld.default || "");
+      var defaultVal = fld.path === "_audit.editor" ? savedEditor : fld.default || "";
       html += '<div class="epd-form-row">';
       html += '<label for="' + inputId + '">' + _escapeHtml(fld.label) + "</label>";
       if (fld.type === "select") {
@@ -431,17 +484,7 @@ function _renderForm() {
         if (fld.step) attrs += ' step="' + fld.step + '"';
         if (fld.asArray) attrs += ' data-as-array="1"';
         var v = defaultVal ? ' value="' + _escapeHtml(String(defaultVal)) + '"' : "";
-        html +=
-          '<input type="' +
-          fld.type +
-          '" id="' +
-          inputId +
-          '" data-path="' +
-          fld.path +
-          '"' +
-          attrs +
-          v +
-          " />";
+        html += '<input type="' + fld.type + '" id="' + inputId + '" data-path="' + fld.path + '"' + attrs + v + " />";
       }
       html += "</div>";
     }
@@ -592,7 +635,10 @@ function _loadDraftOrSeed(sourceFile) {
         // Existing draft — respect it. User edits always win over re-extraction.
         _state.candidate = rec.candidate_record;
         _populateFormFromCandidate(_state.candidate);
-        var status = rec.state === "captured" ? "✓ Already captured · re-edits will revert to draft" : "Draft restored · auto-save active";
+        var status =
+          rec.state === "captured"
+            ? "✓ Already captured · re-edits will revert to draft"
+            : "Draft restored · auto-save active";
         _setFormStatus(status);
         if (rec.state === "captured") {
           var link = document.getElementById("epd-open-db-link");
@@ -623,13 +669,7 @@ function _runExtraction(sourceFile) {
       _state.candidate = result.record || {};
       _state.extractFormat = result.format;
       _populateFormFromCandidate(_state.candidate);
-      _setFormStatus(
-        "Auto-filled " +
-          result.anchorsHit +
-          "/9 anchors · format: " +
-          result.format +
-          " · review + edit"
-      );
+      _setFormStatus("Auto-filled " + result.anchorsHit + "/9 anchors · format: " + result.format + " · review + edit");
       return _saveDraft();
     })
     .catch(function (err) {

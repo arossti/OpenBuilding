@@ -27,6 +27,31 @@ export var FORMATS = {
   UNKNOWN: "unknown"
 };
 
+/* ── Lookup injection ──────────────────────────────────────────────── */
+//
+// extract() needs the material-type → group_prefix map and the display-
+// name keyword fallback to populate Tier 1 (classification.group_prefix).
+// Both are sourced from schema/lookups/*.json — the same files the CSV
+// importer at schema/scripts/beam-csv-to-json.mjs reads. To stay in sync
+// without duplicating data, callers prime the cache once at boot:
+//
+//   browser:  await fetch("data/schema/lookups/material-type-to-group.json")
+//             then setLookups({ mtMap, kwPatterns })
+//   harness:  read the JSON files from schema/lookups/ and call setLookups
+//
+// extract() runs synchronously regardless of whether lookups were primed —
+// when absent, Tier 1 group inference is skipped (group_prefix stays null).
+
+var _lookups = null;
+
+export function setLookups(lookups) {
+  _lookups = lookups || null;
+}
+
+export function getLookups() {
+  return _lookups;
+}
+
 export function detectFormat(text) {
   // Priority order matters — narrowest match first to avoid false positives.
   // EPD International registry is most specific (S-P-XXXXX is canonical).
@@ -42,10 +67,7 @@ export function detectFormat(text) {
   // Declaration" or "Programme holder" followed by whitespace + value)
   // rather than the prose phrase, so it doesn't false-positive on
   // disclaimers / commitment statements.
-  if (
-    /(?:^|\n)\s*Programme\s+holder\b/i.test(text) ||
-    /(?:^|\n)\s*Owner\s+of\s+the\s+Declaration\b/i.test(text)
-  ) {
+  if (/(?:^|\n)\s*Programme\s+holder\b/i.test(text) || /(?:^|\n)\s*Owner\s+of\s+the\s+Declaration\b/i.test(text)) {
     return FORMATS.EU_IBU;
   }
 
@@ -54,6 +76,22 @@ export function detectFormat(text) {
 }
 
 /**
+ * Coarse-to-granular tier extraction (workplan §5.6 "trunk of tree first"):
+ *
+ *   Tier 2 — Type / display name        (extractType)
+ *   Tier 1 — Group prefix               (inferGroupPrefix; consumes Tier 2)
+ *   Tier 3 — Manufacturer + country     (per-format extractor)
+ *   Tier 4 — Provenance / scope         (per-format extractor)
+ *   Tier 5 — Identification             (per-format extractor)
+ *   Tier 6 — Methodology                (extractCommon)
+ *   Tier 7 — Physical                   (per-format extractor + extractCommon)
+ *   Tier 8 — Impact totals              (extractCommon → _extractIndicatorTotals)
+ *
+ * Tier 2 runs before Tier 1 because Group is *inferred from* material_type
+ * and display_name (the only tier with a downstream dependency in this
+ * pipeline). Tiers 3–8 are independent of each other today; the ordering
+ * matches the human mental model and keeps gaps narratively findable.
+ *
  * @param {string[]} pageTexts — spatially-joined per-page text from PDF.
  * @returns {{format: string, record: object, anchorsHit: number}}
  */
@@ -61,12 +99,127 @@ export function extract(pageTexts) {
   var allText = (pageTexts || []).join("\n\n");
   var format = detectFormat(allText);
   var rec = {};
+
+  // Tier 2 + Tier 1 — trunk of tree (display_name → material_type → group_prefix)
+  extractType(allText, rec);
+  inferGroupPrefix(rec);
+
+  // Tiers 3–7 — per-format extractor handles manufacturer / provenance /
+  // identification / per-family methodology / physical anchors.
   if (format === FORMATS.EPD_INTL) extractEpdIntl(allText, rec);
   else if (format === FORMATS.NA) extractNA(allText, rec);
   else if (format === FORMATS.NSF) extractNSF(allText, rec);
-  // EU_IBU + UNKNOWN: fall through to common-only for now
+  // EU_IBU + UNKNOWN: fall through to common-only for now.
+
+  // Tiers 6 + 8 — cross-format methodology + impact totals (always last).
   extractCommon(allText, rec);
+
   return { format: format, record: rec, anchorsHit: _countAnchors(rec) };
+}
+
+/* ── Tier 2 — display name + material type ────────────────────────── */
+//
+// First non-trivial line of page 1 is almost always the product or EPD
+// title (for industry-average EPDs) — that becomes display_name. Then a
+// keyword match against the material-type-to-group lookup vocabulary
+// finds the canonical material_type label. Both feed Tier 1.
+
+var _MATERIAL_TYPE_DISPLAY_KEYWORDS = [
+  // Wood
+  { rx: /\bcross[- ]?laminated\s+timber\b|\bCLT\b/i, type: "Engineered wood" },
+  { rx: /\bglulam\b|\bglue[- ]?laminated\b/i, type: "Glulam" },
+  { rx: /\blaminated\s+veneer\s+lumber\b|\bLVL\b/i, type: "LVL" },
+  { rx: /\bwood\s+i[- ]?joist\b/i, type: "Wood I-joist" },
+  { rx: /\bplywood\b/i, type: "Plywood" },
+  { rx: /\bsoft\s*wood\s+lumber\b|\bdimension\s+lumber\b|\bframing\s+lumber\b/i, type: "Framing" },
+  { rx: /\bhardwood\b/i, type: "Hardwood" },
+  // Concrete + masonry
+  { rx: /\bportland(?:[- ]limestone)?\s+cement\b|\bGUL\b/i, type: "Portland Cement" },
+  { rx: /\bready[- ]?mix(?:ed)?\s+concrete\b|\bconcrete\s+mix(?:es)?\b/i, type: "Concrete" },
+  { rx: /\bconcrete\s+block\b|\bCMU\b/i, type: "Concrete" },
+  { rx: /\bclay\s+brick\b/i, type: "Clay Brick" },
+  { rx: /\bbrick\b/i, type: "Brick" },
+  // Metals
+  {
+    rx: /\bhot[- ]?rolled\s+steel\b|\bstructural\s+steel\b|\bsteel\s+(?:bar|coil|sheet|plate|sections?)\b|\brebar\b/i,
+    type: "Steel"
+  },
+  { rx: /\baluminum\b|\baluminium\b/i, type: "Aluminum" },
+  // Thermal
+  { rx: /\bspray\s+polyurethane\s+foam\b|\bSPF\b/i, type: "Spray polyurethane foam" },
+  { rx: /\bpolyisocyanurate\b|\bpolyiso\b/i, type: "Polyisocyanurate" },
+  { rx: /\bextruded\s+polystyrene\b|\bXPS\b/i, type: "XPS Foam" },
+  { rx: /\bexpanded\s+polystyrene\b|\bEPS\b/i, type: "EPS Foam" },
+  { rx: /\bmineral\s+(?:wool|fib(?:re|er))\b|\bstone\s+wool\b|\bglass\s+wool\b|\brockwool\b/i, type: "Mineral wool" },
+  { rx: /\bcellulose\b/i, type: "Cellulose" },
+  { rx: /\bfiberglass\b|\bfibreglass\b/i, type: "Fiberglass" },
+  // Finishes
+  { rx: /\bgypsum\b|\bdrywall\b/i, type: "Gypsum" },
+  { rx: /\bvinyl\s+(?:floor|tile|sheet)\b|\bLVT\b/i, type: "Luxury vinyl tile" }
+];
+
+function extractType(text, rec) {
+  // Page-1 head is the first ~1500 chars; product titles live there.
+  var head = text.substring(0, 1500);
+  var lines = head.split("\n");
+
+  // Skip generic/registry lines + short fragments. The first surviving
+  // line is the product title in the overwhelming majority of EPDs.
+  var skip =
+    /^(?:type\s+iii|environmental\s+product\s+declaration|epd|in\s+accordance|programme|program|page\s+\d|\d+\s*\/\s*\d+|—|–|-{2,})/i;
+  var displayName = null;
+  for (var i = 0; i < lines.length; i++) {
+    var raw = lines[i].trim();
+    if (raw.length < 4 || raw.length > 160) continue;
+    if (skip.test(raw)) continue;
+    // "Acme Co" alone is more likely a manufacturer header — keep scanning
+    // unless the line reads as a product description (≥ 2 words OR has a
+    // material-type keyword in it).
+    if (raw.split(/\s+/).length < 2) continue;
+    displayName = _cleanLine(raw);
+    break;
+  }
+  if (displayName && !_get(rec, "naming.display_name")) {
+    _setPath(rec, "naming.display_name", displayName);
+  }
+
+  // Material-type keyword scan — runs across the whole document body so
+  // the title page doesn't have to mention the canonical type label.
+  if (!_get(rec, "classification.material_type")) {
+    for (var k = 0; k < _MATERIAL_TYPE_DISPLAY_KEYWORDS.length; k++) {
+      if (_MATERIAL_TYPE_DISPLAY_KEYWORDS[k].rx.test(text)) {
+        _setPath(rec, "classification.material_type", _MATERIAL_TYPE_DISPLAY_KEYWORDS[k].type);
+        break;
+      }
+    }
+  }
+}
+
+/* ── Tier 1 — group prefix inference ──────────────────────────────── */
+//
+// Mirrors schema/scripts/beam-csv-to-json.mjs's inferGroupPrefix(): try
+// the material-type-to-group map first, then fall back to display-name
+// keyword patterns. No-ops gracefully when lookups haven't been primed.
+
+function inferGroupPrefix(rec) {
+  if (_get(rec, "classification.group_prefix")) return;
+  if (!_lookups) return;
+  var materialType = _get(rec, "classification.material_type");
+  var displayName = _get(rec, "naming.display_name");
+  var prefix = null;
+  if (materialType && _lookups.mtMap && _lookups.mtMap[materialType]) {
+    prefix = _lookups.mtMap[materialType];
+  } else if (displayName && _lookups.kwPatterns) {
+    var lc = displayName.toLowerCase();
+    for (var i = 0; i < _lookups.kwPatterns.length; i++) {
+      var p = _lookups.kwPatterns[i];
+      if (lc.indexOf(p.pattern) !== -1) {
+        prefix = p.group;
+        break;
+      }
+    }
+  }
+  if (prefix) _setPath(rec, "classification.group_prefix", prefix);
 }
 
 /* ── Cross-format anchors (always run last; first-set wins) ────────── */
@@ -441,7 +594,10 @@ function extractNSF(text, rec) {
 
 function _normaliseProgramOperator(s) {
   // Strip URL fragments & addresses that the regex tail catches
-  return s.replace(/\s+https?:\/\/.*$/, "").replace(/\s+\d{2,}.*$/, "").trim();
+  return s
+    .replace(/\s+https?:\/\/.*$/, "")
+    .replace(/\s+\d{2,}.*$/, "")
+    .trim();
 }
 
 function _setPath(obj, path, value) {
@@ -481,10 +637,12 @@ function _splitToCodes(s) {
   if (/europe/i.test(raw) && !/eastern|western/i.test(raw)) return ["EUR"];
   // Try comma-split, keep tokens that look like ISO-3 codes
   var parts = raw.split(/[,;]+/).map(_cleanLine).filter(Boolean);
-  var iso3 = parts.filter(function (p) { return /^[A-Z]{3}$/.test(p); });
+  var iso3 = parts.filter(function (p) {
+    return /^[A-Z]{3}$/.test(p);
+  });
   if (iso3.length) return iso3;
   // Common name → ISO3 mini-map
-  var map = { canada: "CAN", "united states": "USA", "us": "USA", usa: "USA" };
+  var map = { canada: "CAN", "united states": "USA", us: "USA", usa: "USA" };
   var mapped = [];
   for (var i = 0; i < parts.length; i++) {
     var k = parts[i].toLowerCase();
@@ -494,8 +652,18 @@ function _splitToCodes(s) {
 }
 
 var MONTHS = {
-  jan: "01", feb: "02", mar: "03", apr: "04", may: "05", jun: "06",
-  jul: "07", aug: "08", sep: "09", oct: "10", nov: "11", dec: "12"
+  jan: "01",
+  feb: "02",
+  mar: "03",
+  apr: "04",
+  may: "05",
+  jun: "06",
+  jul: "07",
+  aug: "08",
+  sep: "09",
+  oct: "10",
+  nov: "11",
+  dec: "12"
 };
 
 function _parseDate(s) {

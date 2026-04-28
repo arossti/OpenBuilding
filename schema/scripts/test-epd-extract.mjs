@@ -30,9 +30,15 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..", "..");
 const SAMPLES_ROOT = join(REPO_ROOT, "docs", "PDF References", "EPD SAMPLES");
 const EXTRACT_MJS = join(REPO_ROOT, "js", "epd", "extract.mjs");
+const LOOKUPS_DIR = join(REPO_ROOT, "schema", "lookups");
 const COVERAGE_HISTORY_DIR = join(REPO_ROOT, "docs", "workplans", "EPD-coverage-history");
 
+// Trunk-of-tree fields (workplan §5.6) front-load so per-format
+// regressions on Tier 1/2 surface as a single drop in the aggregate %.
 const METADATA_FIELDS = [
+  "classification.group_prefix",
+  "classification.material_type",
+  "naming.display_name",
   "manufacturer.name",
   "epd.id",
   "epd.program_operator",
@@ -184,6 +190,12 @@ async function main() {
   const pdfjs = await loadPdfjs();
   const Extract = await import(EXTRACT_MJS);
 
+  // Prime the lookups so Tier 1 group inference can run. Source-of-truth
+  // is schema/lookups/ — same files the CSV importer reads.
+  const mt = JSON.parse(await readFile(join(LOOKUPS_DIR, "material-type-to-group.json"), "utf8"));
+  const kw = JSON.parse(await readFile(join(LOOKUPS_DIR, "display-name-keywords.json"), "utf8"));
+  Extract.setLookups({ mtMap: mt.map || {}, kwPatterns: kw.patterns || [] });
+
   const pdfs = await walkPdfs(SAMPLES_ROOT);
   if (pdfs.length === 0) {
     console.error("No PDFs found under:", SAMPLES_ROOT);
@@ -245,9 +257,17 @@ async function main() {
   console.log("");
   console.log("─".repeat(80));
   console.log(`Samples processed: ${ok.length} / ${results.length}`);
-  console.log(`Metadata coverage: ${totalMeta} / ${totalMetaPossible}  (${((100 * totalMeta) / totalMetaPossible).toFixed(1)}%)`);
-  console.log(`Impact coverage:   ${totalImpact} / ${totalImpactPossible}  (${((100 * totalImpact) / totalImpactPossible).toFixed(1)}%)`);
-  console.log(`Formats: ${Object.entries(formatCounts).map(([k, v]) => `${k}=${v}`).join(", ")}`);
+  console.log(
+    `Metadata coverage: ${totalMeta} / ${totalMetaPossible}  (${((100 * totalMeta) / totalMetaPossible).toFixed(1)}%)`
+  );
+  console.log(
+    `Impact coverage:   ${totalImpact} / ${totalImpactPossible}  (${((100 * totalImpact) / totalImpactPossible).toFixed(1)}%)`
+  );
+  console.log(
+    `Formats: ${Object.entries(formatCounts)
+      .map(([k, v]) => `${k}=${v}`)
+      .join(", ")}`
+  );
 
   // ── Markdown coverage table ─────────────────────────
   // Default behavior: if no --md path was given, write a timestamped
@@ -277,7 +297,14 @@ async function main() {
         continue;
       }
       const i = r.impacts;
-      const cell = (v) => (v == null ? "·" : v.toExponential ? (Math.abs(v) < 0.01 || Math.abs(v) > 99999 ? v.toExponential(2) : String(v)) : "·");
+      const cell = (v) =>
+        v == null
+          ? "·"
+          : v.toExponential
+            ? Math.abs(v) < 0.01 || Math.abs(v) > 99999
+              ? v.toExponential(2)
+              : String(v)
+            : "·";
       lines.push(
         `| ${r.group}/${r.file} | ${r.format} | ${r.pages} | ${r.metaHit}/${METADATA_FIELDS.length} | ${r.impactHit}/${IMPACT_KEYS.length} | ${cell(i.gwp_kgco2e)} | ${cell(i.ozone_depletion_kgcfc11eq)} | ${cell(i.acidification_kgso2eq)} | ${cell(i.eutrophication_kgneq)} | ${cell(i.smog_kgo3eq)} | ${cell(i.abiotic_depletion_fossil_mj)} | ${cell(i.water_consumption_m3)} | ${cell(i.primary_energy_nonrenewable_mj)} | ${cell(i.primary_energy_renewable_mj)} |`
       );
