@@ -3304,6 +3304,41 @@ html.app-matrix body {
   border-bottom-color: var(--accent);
 }
 
+/* Trust-committed rows surfaced via EPD-Parser (Database.md §5.5(d)+(e)).
+   Yellow tint distinguishes "this entry isn't in schema/materials/*.json
+   yet — it's a pending patch that survives in IndexedDB until the team
+   runs apply-patch.mjs". Persists across reloads. Hover + expanded states
+   layer over the same yellow bed so the cue stays visible. */
+#db-table tbody tr.db-row-main.db-row-fresh {
+  background: rgba(250, 204, 21, 0.16);
+}
+#db-table tbody tr.db-row-main.db-row-fresh:hover {
+  background: rgba(250, 204, 21, 0.24);
+}
+#db-table tbody tr.db-row-main.db-row-fresh.expanded {
+  background: rgba(250, 204, 21, 0.3);
+  border-bottom-color: rgb(250, 204, 21);
+}
+.db-fresh-chip {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: "Helvetica Neue", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+.db-fresh-chip-new {
+  background: rgba(250, 204, 21, 0.32);
+  color: rgb(254, 240, 138);
+}
+.db-fresh-chip-refresh {
+  background: rgba(245, 158, 11, 0.32);
+  color: rgb(254, 215, 170);
+}
+
 /* Group-header rows in the database viewer. Styled to echo the BEAMweb
    assembly-tab group headers: rounded container, padded away from the
    page edge, hover affordance, expanded-state contrast. The banner lives

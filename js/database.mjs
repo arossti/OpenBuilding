@@ -98,6 +98,13 @@ async function boot() {
     if (!res.ok) throw new Error(`index.json: ${res.status}`);
     const idx = await res.json();
     state.indexEntries = idx.entries || [];
+
+    // Merge any Trust-committed patches from prior sessions back into the
+    // in-memory catalogue. They survive reloads as fresh-highlighted rows
+    // until the team runs apply-patch.mjs (Database.md §7) and clears the
+    // committed-patches store.
+    await _mergeCommittedPatchesOnBoot();
+
     document.getElementById("db-source-note").textContent =
       `source: ${idx.count} records · sha ${short(idx.generated_from_csv_sha256)}`;
     renderGroupChips();
@@ -353,9 +360,14 @@ function renderMainRow(e) {
   tr.className = "db-row-main";
   tr.dataset.id = e.id;
   if (state.expanded.has(e.id)) tr.classList.add("expanded");
+  if (e._fresh) tr.classList.add("db-row-fresh");
+
+  const freshChip = e._fresh
+    ? ` <span class="db-fresh-chip db-fresh-chip-${e._commit_type === "refresh" ? "refresh" : "new"}">${e._commit_type === "refresh" ? "UPDATED" : "NEW"}</span>`
+    : "";
 
   tr.innerHTML = `
-    <td title="${escapeAttr(e.beam_id || "")}"><code>${escapeHtml(e.beam_id || "—")}</code></td>
+    <td title="${escapeAttr(e.beam_id || "")}"><code>${escapeHtml(e.beam_id || "—")}</code>${freshChip}</td>
     <td title="${escapeAttr(e.display_name || "")}">${escapeHtml(e.display_name || "—")}</td>
     <td><span class="db-div-tag">${escapeHtml(e.group_prefix || "—")}</span></td>
     <td>${escapeHtml(prettyCategory(e.category))}</td>
@@ -934,14 +946,157 @@ async function handleTrust(sourceFile) {
     setStatus(`Trust: no pending row for ${sourceFile}`, "error");
     return;
   }
-  // Stub: the actual commit (write to committed_patches + emit patch JSON)
-  // lands in D7. For now this just removes the row from the queue and logs
-  // the candidate so the workflow is demonstrable end-to-end.
-  console.log("[DB] Trust would commit:", rec);
+
+  const candidate = rec.candidate_record || {};
+
+  // Decide commit type by checking whether the candidate's id matches an
+  // existing index entry. New EPDs without an id assigned by the parser
+  // get a fresh 6-char hex id minted here (matches the existing catalogue
+  // convention; team can rename via patch later if needed).
+  let mergedRecord = candidate;
+  let commitType = "new";
+  if (candidate.id) {
+    const existing = state.indexEntries.find((e) => e.id === candidate.id);
+    if (existing) {
+      const existingFull = state.recordCache.get(candidate.id) || null;
+      mergedRecord = _mergeRefresh(existingFull, candidate);
+      commitType = "refresh";
+    }
+  }
+  if (!mergedRecord.id) mergedRecord.id = _mintId6();
+  if (!mergedRecord.beam_id) mergedRecord.beam_id = mergedRecord.id;
+
+  const indexEntry = _indexEntryFromRecord(mergedRecord);
+  if (!indexEntry.id) {
+    setStatus(`Trust: cannot commit — record is missing required fields`, "error");
+    return;
+  }
+
+  await Store.putCommittedPatch({
+    id: indexEntry.id,
+    record: mergedRecord,
+    index_entry: indexEntry,
+    commit_type: commitType,
+    source_file: sourceFile,
+    audit_meta: rec.audit_meta || null,
+    committed_at: new Date().toISOString()
+  });
+
+  // Optimistic in-memory insert so the new record appears in search /
+  // group filters without a reload. The _fresh flag drives the yellow
+  // highlight in the row renderer.
+  _mergeIndexEntryIntoState(indexEntry, commitType);
+  state.recordCache.set(indexEntry.id, mergedRecord);
+
   await Store.deletePending(sourceFile);
+  applyFilters();
   await refreshPendingPanel();
-  const display = (rec.candidate_record && rec.candidate_record.naming && rec.candidate_record.naming.display_name) || sourceFile;
-  setStatus(`Trust: committed ${display} from ${sourceFile} (stub) · click Trust + Verify to audit`, "ready");
+
+  const display = indexEntry.display_name || sourceFile;
+  const verb = commitType === "refresh" ? "refreshed" : "committed";
+  setStatus(
+    `Trust: ${verb} ${display} (${indexEntry.beam_id}) · find it in the catalogue · click Trust + Verify to audit`,
+    "ready"
+  );
+}
+
+/**
+ * Build an index-shape entry from a full material record. Mirrors the
+ * field set produced by schema/scripts/beam-csv-to-json.mjs's index step.
+ */
+function _indexEntryFromRecord(rec) {
+  const r = rec || {};
+  const cls = r.classification || {};
+  const naming = r.naming || {};
+  const impacts = r.impacts || {};
+  const physical = r.physical || {};
+  const gwp = impacts.gwp_kgco2e || {};
+  const prefix = cls.group_prefix || null;
+  const groupMeta = prefix && GROUPS[prefix] ? GROUPS[prefix] : null;
+  return {
+    id: r.id || null,
+    beam_id: r.beam_id || r.id || null,
+    display_name: naming.display_name || naming.product_brand_name || "—",
+    category: cls.category || (groupMeta ? `${prefix}_${groupMeta.label.toLowerCase()}` : null),
+    group_prefix: prefix,
+    typical_elements: cls.typical_elements || [],
+    gwp_kgco2e: gwp.total != null ? Number(gwp.total) : null,
+    functional_unit: physical.declared_unit || physical.functional_unit || null
+  };
+}
+
+/**
+ * Merge a fresh candidate over an existing record for a refresh commit.
+ * Candidate values overwrite when set; null/undefined candidate values
+ * preserve the prior record's content. Arrays in the candidate replace
+ * arrays in the prior record (no element-wise merge — the EPD is the
+ * source of truth for its own scope/elements/etc.).
+ */
+function _mergeRefresh(prior, candidate) {
+  if (!prior) return candidate;
+  const out = JSON.parse(JSON.stringify(prior));
+  for (const k of Object.keys(candidate || {})) {
+    const v = candidate[k];
+    if (v == null) continue;
+    if (typeof v === "object" && !Array.isArray(v) && typeof out[k] === "object" && out[k] && !Array.isArray(out[k])) {
+      out[k] = _mergeRefresh(out[k], v);
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+/**
+ * Insert or replace an index entry in state.indexEntries, marking it
+ * fresh for the highlight CSS + chip. Refresh commits replace the
+ * existing entry in place (so order doesn't churn); new commits append.
+ */
+function _mergeIndexEntryIntoState(indexEntry, commitType) {
+  const idx = state.indexEntries.findIndex((e) => e.id === indexEntry.id);
+  const annotated = Object.assign({}, indexEntry, { _fresh: true, _commit_type: commitType });
+  if (idx >= 0) {
+    state.indexEntries[idx] = annotated;
+  } else {
+    state.indexEntries.push(annotated);
+  }
+}
+
+/**
+ * Boot-time hook: pull any persisted committed_patches from IndexedDB
+ * and merge them into state.indexEntries + state.recordCache. Runs once
+ * during boot, after the JSON-fetched catalogue loads. Soft-fails if the
+ * IndexedDB store isn't available so catalogue browsing always works.
+ */
+async function _mergeCommittedPatchesOnBoot() {
+  let patches = [];
+  try {
+    patches = await Store.listCommittedPatches();
+  } catch (err) {
+    console.warn("[DB] committed_patches read skipped:", err);
+    return;
+  }
+  for (const p of patches) {
+    if (!p || !p.id || !p.index_entry) continue;
+    state.recordCache.set(p.id, p.record || null);
+    _mergeIndexEntryIntoState(p.index_entry, p.commit_type || "new");
+  }
+}
+
+/**
+ * Mint a 6-char lowercase hex id matching the existing catalogue
+ * convention (e.g. "6ab68b"). Collision-checks against the in-memory
+ * index — collisions are vanishingly rare at 24 bits but cheap to skip.
+ */
+function _mintId6() {
+  for (let attempt = 0; attempt < 16; attempt++) {
+    const id = Math.floor(Math.random() * 0xffffff)
+      .toString(16)
+      .padStart(6, "0");
+    if (!state.indexEntries.some((e) => e.id === id)) return id;
+  }
+  // Fall back to timestamp-derived id if 16 random tries collided.
+  return Date.now().toString(16).slice(-6);
 }
 
 async function handleDiscard(sourceFile) {
@@ -963,10 +1118,11 @@ function wireVerifyModal() {
   if (close) close.addEventListener("click", closeVerifyModal);
   if (cancel) cancel.addEventListener("click", closeVerifyModal);
   if (backdrop) backdrop.addEventListener("click", closeVerifyModal);
-  if (commit) commit.addEventListener("click", () => {
-    if (!_verifyActiveSource) return;
-    handleTrust(_verifyActiveSource).then(closeVerifyModal);
-  });
+  if (commit)
+    commit.addEventListener("click", () => {
+      if (!_verifyActiveSource) return;
+      handleTrust(_verifyActiveSource).then(closeVerifyModal);
+    });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && _verifyActiveSource) closeVerifyModal();
   });
