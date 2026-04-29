@@ -836,7 +836,30 @@ var _BYSTAGE_LABELS = [
   {
     rx: /Renewable\s+primary\s+energy\s+used\s+as\s+energy\b/i,
     key: "primary_energy_renewable_mj"
-  }
+  },
+
+  // xcarb / IPCC AR5 / TRACI 2.1 — bracketed-unit short-code labels
+  // (xcarb-epd-for-cold-formed-sections.pdf, etc.). Anchored with
+  // ^\s* to avoid body-text matches like "the AP impact category..."
+  // in prose. Indicator code immediately followed by a unit cell
+  // bracket distinguishes from prose mentions.
+  {
+    rx: /^\s*GWP\s*(?:100|TRACI|AR5|AR6)?(?:\s*[–—-]\s*(?:total|fossil)?)?\s*\[\s*kg\s*CO/i,
+    key: "gwp_kgco2e"
+  },
+  {
+    rx: /^\s*GWP[\s-]?(?:bio|biogenic)\s*\[\s*kg\s*CO/i,
+    key: "gwp_bio_kgco2e"
+  },
+  { rx: /^\s*AP\s*\[\s*kg\s*SO/i, key: "acidification_kgso2eq" },
+  { rx: /^\s*EP\s*\[\s*kg\s*N\b/i, key: "eutrophication_kgneq" },
+  { rx: /^\s*ODP\s*\[\s*kg\s*CFC/i, key: "ozone_depletion_kgcfc11eq" },
+  { rx: /^\s*(?:SFP|POCP|SOG)\s*\[\s*kg\s*O/i, key: "smog_kgo3eq" },
+  // ADPfossil — bracket follows directly, OR after a separator like _ / -
+  { rx: /^\s*ADP[\s_-]?(?:fossil|f)\b\s*\[\s*MJ/i, key: "abiotic_depletion_fossil_mj" },
+  { rx: /^\s*(?:WDP|FW)\s*\[\s*m\b/i, key: "water_consumption_m3" },
+  { rx: /^\s*(?:PENRT|PE-?NRT|NRPE|PENR)\s*\[\s*MJ/i, key: "primary_energy_nonrenewable_mj" },
+  { rx: /^\s*(?:PERT|PE-?RT|PER|RPE)\s*\[\s*MJ/i, key: "primary_energy_renewable_mj" }
 ];
 
 // Stage-header detector. Returns ALL candidate header lines (any line
@@ -903,7 +926,15 @@ function _extractByStage(text, rec) {
     for (var j = 0; j < _BYSTAGE_LABELS.length; j++) {
       var lm = _BYSTAGE_LABELS[j];
       if (!lm.rx.test(line)) continue;
-      var nums = _tokenizeImpactNumbers(line);
+      // If the label includes a bracketed unit cell ("GWP 100 [kg CO2 eq]"),
+      // tokenise values only AFTER the closing bracket. Otherwise the "100"
+      // (methodology version embedded in the label) is mis-counted as the
+      // first stage value, shifting all subsequent values by one column.
+      // Long-English labels like "Global warming potential – Total" don't
+      // have an embedded bracket → tokenise from start (legacy behaviour).
+      var unitCloseIdx = line.indexOf("]");
+      var valueText = unitCloseIdx >= 0 ? line.substring(unitCloseIdx + 1) : line;
+      var nums = _tokenizeImpactNumbers(valueText);
       if (nums.length === 0) break;
 
       // Pick the nearest preceding header. Prefer a header whose
@@ -1009,12 +1040,19 @@ function extractNA(text, rec) {
     // database viewer's index entry surfaces it (Database.md
     // _indexEntryFromRecord reads impacts.functional_unit first).
     if (cleanUnit) _setPath(rec, "impacts.functional_unit", cleanUnit);
-    var dInLine = unit[1].match(/(\d{2,5}(?:[.,]\d+)?)\s*kg\/m\s*[³^]?3?/);
-    if (dInLine) _setPath(rec, "physical.density.value_kg_m3", _toNum(dInLine[1]));
+    // Number pattern allows US thousand-comma form ("7,800" for steel)
+    // OR plain integer with ≥2 digits, with optional decimal. The
+    // alternation is needed because `\d{2,5}` alone would skip past the
+    // "7," prefix in "7,800" and capture only "800" — the documented
+    // xcarb density-stripping bug. The first alternative requires a
+    // comma-thousand group; the second requires ≥2 plain digits so we
+    // still match "500" / "7800" without commas.
+    var dInLine = unit[1].match(/((?:\d{1,3}(?:,\d{3})+|\d{2,})(?:\.\d+)?)\s*kg\/m\s*[³^]?3?/);
+    if (dInLine) _setPath(rec, "physical.density.value_kg_m3", _toNum(dInLine[1].replace(/,/g, "")));
   }
   if (_get(rec, "physical.density.value_kg_m3") == null) {
-    var d = text.match(/density\s*(?:of\s+)?(\d{2,5}(?:[.,]\d+)?)\s*kg\/m\s*[³^]?3?/i);
-    if (d) _setPath(rec, "physical.density.value_kg_m3", _toNum(d[1]));
+    var d = text.match(/density\s*(?:of\s+)?((?:\d{1,3}(?:,\d{3})+|\d{2,})(?:\.\d+)?)\s*kg\/m\s*[³^]?3?/i);
+    if (d) _setPath(rec, "physical.density.value_kg_m3", _toNum(d[1].replace(/,/g, "")));
   }
   // Wood EPD product-properties table form: "Mass (including moisture)
   // kg <N>" where <N> is mass per the declared unit. For declared unit
@@ -1167,8 +1205,8 @@ function extractEuIbu(text, rec) {
     if (unitM) _setPath(rec, "carbon.stated.per_unit", _cleanLine(unitM[1]));
   }
   if (_get(rec, "physical.density.value_kg_m3") == null) {
-    var densM = text.match(/(?:average\s+weighted\s+)?density\s+of\s+(\d{2,5}(?:[.,]\d+)?)\s*kg\/m\s*[³^]?3?/i);
-    if (densM) _setPath(rec, "physical.density.value_kg_m3", _toNum(densM[1]));
+    var densM = text.match(/(?:average\s+weighted\s+)?density\s+of\s+((?:\d{1,3}(?:,\d{3})+|\d{2,})(?:\.\d+)?)\s*kg\/m\s*[³^]?3?/i);
+    if (densM) _setPath(rec, "physical.density.value_kg_m3", _toNum(densM[1].replace(/,/g, "")));
   }
 }
 

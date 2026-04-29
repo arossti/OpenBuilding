@@ -259,6 +259,10 @@ async function walkPdfs(root) {
   return out.sort();
 }
 
+// EN 15804+A2 lifecycle stages — schema slots for impacts.<key>.by_stage.<stage>
+// (NOT including the A1-A3 composite, which is impacts.<key>.total.value).
+const ALL_STAGES = ["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "C1", "C2", "C3", "C4", "D"];
+
 function summarizeRecord(rec) {
   const meta = {};
   let metaHit = 0;
@@ -269,12 +273,34 @@ function summarizeRecord(rec) {
   }
   const impacts = {};
   let impactHit = 0;
+  let byStageHit = 0;
+  // Per-indicator by_stage population — counts non-null cells across the
+  // 17 EN 15804+A2 stages. Surfaces P3.3 coverage as a separate dimension
+  // from impact totals (a sample with all 10 totals + zero by_stage cells
+  // is a real gap; e.g. a per-format extractor that only catches the A1-A3
+  // total column and leaves the rest unparsed).
+  const byStagePerIndicator = {};
   for (const k of IMPACT_KEYS) {
     const v = getPath(rec, "impacts." + k + ".total.value");
     impacts[k] = v != null ? v : null;
     if (v != null) impactHit++;
+    let perIndCount = 0;
+    for (const s of ALL_STAGES) {
+      const sv = getPath(rec, "impacts." + k + ".by_stage." + s + ".value");
+      if (sv != null) {
+        byStageHit++;
+        perIndCount++;
+      }
+    }
+    byStagePerIndicator[k] = perIndCount;
   }
-  return { metaHit, metaTotal: METADATA_FIELDS.length, impactHit, impactTotal: IMPACT_KEYS.length, meta, impacts };
+  return {
+    metaHit, metaTotal: METADATA_FIELDS.length,
+    impactHit, impactTotal: IMPACT_KEYS.length,
+    byStageHit, byStageTotal: IMPACT_KEYS.length * ALL_STAGES.length,
+    byStagePerIndicator,
+    meta, impacts
+  };
 }
 
 function fmtPct(n, d) {
@@ -345,6 +371,9 @@ async function main() {
       impacts: summary.impacts,
       metaHit: summary.metaHit,
       impactHit: summary.impactHit,
+      byStageHit: summary.byStageHit,
+      byStageTotal: summary.byStageTotal,
+      byStagePerIndicator: summary.byStagePerIndicator,
       record: result.record,
       expected,
       groundTruth: gt
@@ -355,7 +384,7 @@ async function main() {
         : `  GT=✗ ext:${gt.extractionFailures.length} silent:${gt.silentOverrides.length} dflt:${gt.defaultsAppliedFailures.length}`
       : "";
     console.log(
-      `✓ ${group}/${file.padEnd(60)}  fmt=${result.format.padEnd(20)}  meta=${fmtPct(summary.metaHit, summary.metaTotal)}  impacts=${fmtPct(summary.impactHit, summary.impactTotal)}  pages=${extracted.pageCount}${gtTag}`
+      `✓ ${group}/${file.padEnd(60)}  fmt=${result.format.padEnd(20)}  meta=${fmtPct(summary.metaHit, summary.metaTotal)}  impacts=${fmtPct(summary.impactHit, summary.impactTotal)}  by_stage=${fmtPct(summary.byStageHit, summary.byStageTotal)}  pages=${extracted.pageCount}${gtTag}`
     );
   }
 
@@ -365,6 +394,8 @@ async function main() {
   const totalMetaPossible = ok.length * METADATA_FIELDS.length;
   const totalImpact = ok.reduce((a, r) => a + r.impactHit, 0);
   const totalImpactPossible = ok.length * IMPACT_KEYS.length;
+  const totalByStage = ok.reduce((a, r) => a + (r.byStageHit || 0), 0);
+  const totalByStagePossible = ok.length * IMPACT_KEYS.length * ALL_STAGES.length;
   const formatCounts = {};
   for (const r of ok) formatCounts[r.format] = (formatCounts[r.format] || 0) + 1;
 
@@ -376,6 +407,9 @@ async function main() {
   );
   console.log(
     `Impact coverage:   ${totalImpact} / ${totalImpactPossible}  (${((100 * totalImpact) / totalImpactPossible).toFixed(1)}%)`
+  );
+  console.log(
+    `By-stage coverage: ${totalByStage} / ${totalByStagePossible}  (${((100 * totalByStage) / totalByStagePossible).toFixed(1)}%) — 10 indicators × ${ALL_STAGES.length} stages × ${ok.length} samples`
   );
   console.log(
     `Formats: ${Object.entries(formatCounts)
@@ -423,16 +457,16 @@ async function main() {
     lines.push("");
     lines.push(`Run: ${new Date().toISOString()}`);
     lines.push(
-      `Samples: ${ok.length} · metadata: ${totalMeta}/${totalMetaPossible} (${((100 * totalMeta) / totalMetaPossible).toFixed(1)}%) · impacts: ${totalImpact}/${totalImpactPossible} (${((100 * totalImpact) / totalImpactPossible).toFixed(1)}%)`
+      `Samples: ${ok.length} · metadata: ${totalMeta}/${totalMetaPossible} (${((100 * totalMeta) / totalMetaPossible).toFixed(1)}%) · impacts: ${totalImpact}/${totalImpactPossible} (${((100 * totalImpact) / totalImpactPossible).toFixed(1)}%) · by_stage: ${totalByStage}/${totalByStagePossible} (${((100 * totalByStage) / totalByStagePossible).toFixed(1)}%)`
     );
     lines.push("");
     lines.push("## Per-sample coverage");
     lines.push("");
-    lines.push("| Sample | Format | Pages | Meta | Impacts | GWP | ODP | AP | EP | SFP | ADPf | WDP | PE-NR | PE-R |");
-    lines.push("|---|---|---:|---:|---:|---|---|---|---|---|---|---|---|---|");
+    lines.push("| Sample | Format | Pages | Meta | Impacts | by_stage | GWP | ODP | AP | EP | SFP | ADPf | WDP | PE-NR | PE-R |");
+    lines.push("|---|---|---:|---:|---:|---:|---|---|---|---|---|---|---|---|---|");
     for (const r of results) {
       if (r.error) {
-        lines.push(`| ${r.group}/${r.file} | (error: ${r.error}) | — | — | — | | | | | | | | | |`);
+        lines.push(`| ${r.group}/${r.file} | (error: ${r.error}) | — | — | — | — | | | | | | | | | |`);
         continue;
       }
       const i = r.impacts;
@@ -444,8 +478,27 @@ async function main() {
               ? v.toExponential(2)
               : String(v)
             : "·";
+      const bsTotal = IMPACT_KEYS.length * ALL_STAGES.length;
       lines.push(
-        `| ${r.group}/${r.file} | ${r.format} | ${r.pages} | ${r.metaHit}/${METADATA_FIELDS.length} | ${r.impactHit}/${IMPACT_KEYS.length} | ${cell(i.gwp_kgco2e)} | ${cell(i.ozone_depletion_kgcfc11eq)} | ${cell(i.acidification_kgso2eq)} | ${cell(i.eutrophication_kgneq)} | ${cell(i.smog_kgo3eq)} | ${cell(i.abiotic_depletion_fossil_mj)} | ${cell(i.water_consumption_m3)} | ${cell(i.primary_energy_nonrenewable_mj)} | ${cell(i.primary_energy_renewable_mj)} |`
+        `| ${r.group}/${r.file} | ${r.format} | ${r.pages} | ${r.metaHit}/${METADATA_FIELDS.length} | ${r.impactHit}/${IMPACT_KEYS.length} | ${r.byStageHit || 0}/${bsTotal} | ${cell(i.gwp_kgco2e)} | ${cell(i.ozone_depletion_kgcfc11eq)} | ${cell(i.acidification_kgso2eq)} | ${cell(i.eutrophication_kgneq)} | ${cell(i.smog_kgo3eq)} | ${cell(i.abiotic_depletion_fossil_mj)} | ${cell(i.water_consumption_m3)} | ${cell(i.primary_energy_nonrenewable_mj)} | ${cell(i.primary_energy_renewable_mj)} |`
+      );
+    }
+    // Per-indicator by_stage coverage breakdown — exposes WHICH indicator
+    // rows are missing per-stage data for each sample. Drives the per-format
+    // gap fixing in §11.4 and beyond.
+    lines.push("");
+    lines.push("## Per-stage matrix population (by indicator × sample)");
+    lines.push("");
+    lines.push("Each cell = number of populated stage cells out of 17 (A1, A2, A3, A4, A5, B1..B7, C1..C4, D).");
+    lines.push("");
+    lines.push("| Sample | GWP | GWP-bio | ODP | AP | EP | SFP | ADPf | WDP | PE-NR | PE-R |");
+    lines.push("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
+    for (const r of results) {
+      if (r.error || !r.byStagePerIndicator) continue;
+      const bs = r.byStagePerIndicator;
+      const bsCell = (n) => (n > 0 ? `${n}` : "·");
+      lines.push(
+        `| ${r.group}/${r.file} | ${bsCell(bs.gwp_kgco2e)} | ${bsCell(bs.gwp_bio_kgco2e)} | ${bsCell(bs.ozone_depletion_kgcfc11eq)} | ${bsCell(bs.acidification_kgso2eq)} | ${bsCell(bs.eutrophication_kgneq)} | ${bsCell(bs.smog_kgo3eq)} | ${bsCell(bs.abiotic_depletion_fossil_mj)} | ${bsCell(bs.water_consumption_m3)} | ${bsCell(bs.primary_energy_nonrenewable_mj)} | ${bsCell(bs.primary_energy_renewable_mj)} |`
       );
     }
     // Ground-truth section appended only when at least one sample is
