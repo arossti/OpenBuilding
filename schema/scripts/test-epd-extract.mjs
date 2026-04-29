@@ -190,11 +190,17 @@ async function main() {
   const pdfjs = await loadPdfjs();
   const Extract = await import(EXTRACT_MJS);
 
-  // Prime the lookups so Tier 1 group inference can run. Source-of-truth
-  // is schema/lookups/ — same files the CSV importer reads.
+  // Prime the lookups so Tier 1 group inference + Tier 9 material-default
+  // fallback can run. Source-of-truth is schema/lookups/ — same files the
+  // CSV importer reads.
   const mt = JSON.parse(await readFile(join(LOOKUPS_DIR, "material-type-to-group.json"), "utf8"));
   const kw = JSON.parse(await readFile(join(LOOKUPS_DIR, "display-name-keywords.json"), "utf8"));
-  Extract.setLookups({ mtMap: mt.map || {}, kwPatterns: kw.patterns || [] });
+  const md = JSON.parse(await readFile(join(LOOKUPS_DIR, "db-fallbacks.json"), "utf8"));
+  Extract.setLookups({
+    mtMap: mt.map || {},
+    kwPatterns: kw.patterns || [],
+    materialDefaults: md
+  });
 
   const pdfs = await walkPdfs(SAMPLES_ROOT);
   if (pdfs.length === 0) {

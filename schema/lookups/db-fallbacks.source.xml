@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MaterialCatalog>
+  <MaterialGroup Name="AERATED CONCRETE">
+    <Material Name="AERATED CONCRETE BLOCK 1" ThermalConduct="0.13" Density="500" HeatCapacity="1290" EmbodiedEnergy="0.59" EmbodiedCarbon="0.063"/>
+    <Material Name="AERATED CONCRETE BLOCK 2" ThermalConduct="0.16" Density="600" HeatCapacity="1240" EmbodiedEnergy="0.67" EmbodiedCarbon="0.078"/>
+    <Material Name="AERATED CONCRETE BLOCK 3" ThermalConduct="0.18" Density="700" HeatCapacity="1210" EmbodiedEnergy="0.72" EmbodiedCarbon="0.088"/>
+    <Material Name="AERATED CONCRETE BLOCK INTERLOCKING 1" ThermalConduct="0.11" Density="400" HeatCapacity="1350" EmbodiedEnergy="0.55" EmbodiedCarbon="0.059"/>
+    <Material Name="AERATED CONCRETE BLOCK INTERLOCKING 2" ThermalConduct="0.16" Density="500" HeatCapacity="1240" EmbodiedEnergy="0.59" EmbodiedCarbon="0.063"/>
+    <Material Name="AIR-ENT CONCRETE 1" ThermalConduct="0.1" Density="400" HeatCapacity="1050" EmbodiedEnergy="0.55" EmbodiedCarbon="0.059"/>
+    <Material Name="AIR-ENT CONCRETE 2" ThermalConduct="0.12" Density="450" HeatCapacity="1050" EmbodiedEnergy="0.57" EmbodiedCarbon="0.061"/>
+    <Material Name="AIR-ENT CONCRETE 3" ThermalConduct="0.13" Density="450" HeatCapacity="1050" EmbodiedEnergy="0.57" EmbodiedCarbon="0.061"/>
+    <Material Name="AIR-ENT CONCRETE 4" ThermalConduct="0.14" Density="500" HeatCapacity="1050" EmbodiedEnergy="0.59" EmbodiedCarbon="0.063"/>
+    <Material Name="AIR-ENT CONCRETE 5" ThermalConduct="0.16" Density="600" HeatCapacity="1050" EmbodiedEnergy="0.67" EmbodiedCarbon="0.078"/>
+    <Material Name="GASCONCRETE 1" ThermalConduct="0.13" Density="550" HeatCapacity="920" EmbodiedEnergy="0.63" EmbodiedCarbon="0.070"/>
+    <Material Name="GASCONCRETE 2" ThermalConduct="0.15" Density="510" HeatCapacity="1050" EmbodiedEnergy="0.61" EmbodiedCarbon="0.064"/>
+  </MaterialGroup>
+  <MaterialGroup Name="AIR GAPS">
+    <Material Name="10MM DOWNWARD CURRENT" ThermalConduct="0.15" Density="1.2" HeatCapacity="1008" EmbodiedEnergy="0" EmbodiedCarbon="0"/>
+    <Material Name="10MM HORIZONTAL CURRENT" ThermalConduct="0.15" Density="1.2" HeatCapacity="1008" EmbodiedEnergy="0" EmbodiedCarbon="0"/>
+    <Material Name="10MM UPWARD CURRENT" ThermalConduct="0.15" Density="1.2" HeatCapacity="1008" EmbodiedEnergy="0" EmbodiedCarbon="0"/>
+    <Material Name="50MM DOWNWARD CURRENT" ThermalConduct="0.18" Density="1.2" HeatCapacity="1008" EmbodiedEnergy="0" EmbodiedCarbon="0"/>
+    <Material Name="50MM HORIZONTAL CURRENT" ThermalConduct="0.16" Density="1.2" HeatCapacity="1008" EmbodiedEnergy="0" EmbodiedCarbon="0"/>
+    <Material Name="50MM UPWARD CURRENT" ThermalConduct="0.15" Density="1.2" HeatCapacity="1008" EmbodiedEnergy="0" EmbodiedCarbon="0"/>
+    <Material Name="100MM DOWNWARD CURRENT" ThermalConduct="0.22" Density="1.2" HeatCapacity="1008" EmbodiedEnergy="0" EmbodiedCarbon="0"/>
+    <Material Name="100MM HORIZONTAL CURRENT" ThermalConduct="0.18" Density="1.2" HeatCapacity="1008" EmbodiedEnergy="0" EmbodiedCarbon="0"/>
+    <Material Name="100MM UPWARD CURRENT" ThermalConduct="0.16" Density="1.2" HeatCapacity="1008" EmbodiedEnergy="0" EmbodiedCarbon="0"/>
+    <Material Name="300MM DOWNWARD CURRENT" ThermalConduct="0.23" Density="1.2" HeatCapacity="1008" EmbodiedEnergy="0" EmbodiedCarbon="0"/>
+    <Material Name="300MM HORIZONTAL CURRENT" ThermalConduct="0.18" Density="1.2" HeatCapacity="1008" EmbodiedEnergy="0" EmbodiedCarbon="0"/>
+    <Material Name="300MM UPWARD CURRENT" ThermalConduct="0.16" Density="1.2" HeatCapacity="1008" EmbodiedEnergy="0" EmbodiedCarbon="0"/>
+  </MaterialGroup>
+  <MaterialGroup Name="ASPHALT">
+    <Material Name="ASPHALT" ThermalConduct="0.7" Density="2100" HeatCapacity="1000" EmbodiedEnergy="3.93" EmbodiedCarbon="0.076"/>
+  </MaterialGroup>
+  <MaterialGroup Name="BITUMEN">
+    <Material Name="BITUMEN PURE" ThermalConduct="0.17" Density="1050" HeatCapacity="1000" EmbodiedEnergy="42" EmbodiedCarbon="0.55"/>
+    <Material Name="BITUMINOUS FELT" ThermalConduct="0.23" Density="1100" HeatCapacity="1000" EmbodiedEnergy="2.66" EmbodiedCarbon="0.056"/>
+    <Material Name="BITUMINOUS SHEET" ThermalConduct="0.23" Density="1100" HeatCapacity="1000" EmbodiedEnergy="2.86" EmbodiedCarbon="0.066"/>
+  </MaterialGroup>
+  <MaterialGroup Name="BURNT CLAY">
+    <Material Name="SOLID BRICK 1" ThermalConduct="0.58" Density="1500" HeatCapacity="840" EmbodiedEnergy="3" EmbodiedCarbon="0.24"/>
+    <Material Name="SOLID BRICK 2" ThermalConduct="0.60" Density="1500" HeatCapacity="840" EmbodiedEnergy="3" EmbodiedCarbon="0.24"/>
+    <Material Name="BURNT CLAY BLOCK LIMITED STRENGTH 1" ThermalConduct="0.109" Density="600" HeatCapacity="920" EmbodiedEnergy="6" EmbodiedCarbon="0.48"/>
+    <Material Name="BURNT CLAY BLOCK LIMITED STRENGTH 2" ThermalConduct="0.121" Density="648" HeatCapacity="920" EmbodiedEnergy="6" EmbodiedCarbon="0.48"/>
+    <Material Name="BURNT CLAY BLOCK MEDIUM STRENGTH 1" ThermalConduct="0.125" Density="742" HeatCapacity="920" EmbodiedEnergy="6" EmbodiedCarbon="0.48"/>
+    <Material Name="BURNT CLAY BLOCK MEDIUM STRENGTH 2" ThermalConduct="0.148" Density="694" HeatCapacity="920" EmbodiedEnergy="6" EmbodiedCarbon="0.48"/>
+    <Material Name="BURNT CLAY BLOCK TO BE INSULATED MEDIUM STRENGTH 1" ThermalConduct="0.216" Density="960" HeatCapacity="920" EmbodiedEnergy="4.5" EmbodiedCarbon="0.36"/>
+    <Material Name="BURNT CLAY BLOCK TO BE INSULATED MEDIUM STRENGTH 2" ThermalConduct="0.272" Density="840" HeatCapacity="920" EmbodiedEnergy="4.5" EmbodiedCarbon="0.36"/>
+    <Material Name="BURNT CLAY BLOCK TO BE INSULATED STRONG" ThermalConduct="0.324" Density="940" HeatCapacity="920" EmbodiedEnergy="4.5" EmbodiedCarbon="0.36"/>
+  </MaterialGroup>
+  <MaterialGroup Name="CONCRETE">
+    <Material Name="CONCRETE LOW CONDUCTIVITY" ThermalConduct="0.8" Density="2300" HeatCapacity="800" EmbodiedEnergy="0.92" EmbodiedCarbon="0.15"/>
+    <Material Name="CONCRETE 1" ThermalConduct="1.15" Density="1800" HeatCapacity="1000" EmbodiedEnergy="0.74" EmbodiedCarbon="0.107"/>
+    <Material Name="CONCRETE 2" ThermalConduct="1.35" Density="2000" HeatCapacity="1000" EmbodiedEnergy="0.78" EmbodiedCarbon="0.113"/>
+    <Material Name="CONCRETE 3" ThermalConduct="1.65" Density="2200" HeatCapacity="1000" EmbodiedEnergy="0.82" EmbodiedCarbon="0.12"/>
+    <Material Name="CONCRETE 4" ThermalConduct="1.7" Density="2300" HeatCapacity="800" EmbodiedEnergy="0.88" EmbodiedCarbon="0.132"/>
+    <Material Name="CONCRETE BLOCK" ThermalConduct="0.6" Density="1400" HeatCapacity="880" EmbodiedEnergy="0.72" EmbodiedCarbon="0.088"/>
+    <Material Name="CORK-CONCRETE" ThermalConduct="0.44" Density="1300" HeatCapacity="1000" EmbodiedEnergy="0.45" EmbodiedCarbon="0.05"/>
+    <Material Name="REINFORCED CONCRETE W/ 1% STEEL" ThermalConduct="2.3" Density="2300" HeatCapacity="1000" EmbodiedEnergy="1.92" EmbodiedCarbon="0.198"/>
+    <Material Name="REINFORCED CONCRETE W/ 2% STEEL" ThermalConduct="2.5" Density="2400" HeatCapacity="1000" EmbodiedEnergy="2.33" EmbodiedCarbon="0.242"/>
+  </MaterialGroup>
+  <MaterialGroup Name="ENVIRONMENT">
+    <Material Name="CLAY" ThermalConduct="0.5" Density="1800" HeatCapacity="1000" EmbodiedEnergy="0.45" EmbodiedCarbon="0.024"/>
+    <Material Name="SILT" ThermalConduct="2.3" Density="2200" HeatCapacity="1900" EmbodiedEnergy="0.56" EmbodiedCarbon="0.041"/>
+    <Material Name="SAND" ThermalConduct="2.3" Density="2200" HeatCapacity="1900" EmbodiedEnergy="0.081" EmbodiedCarbon="0.005"/>
+    <Material Name="GRAVEL" ThermalConduct="1.4" Density="2200" HeatCapacity="1900" EmbodiedEnergy="0.083" EmbodiedCarbon="0.005"/>
+    <Material Name="ROCK" ThermalConduct="3.5" Density="2700" HeatCapacity="750" EmbodiedEnergy="0.085" EmbodiedCarbon="0.005"/>
+    <Material Name="BLAST ROCK" ThermalConduct="3.5" Density="2300" HeatCapacity="750" EmbodiedEnergy="0.086" EmbodiedCarbon="0.005"/>
+    <Material Name="SOIL" ThermalConduct="1.7" Density="900" HeatCapacity="1850" EmbodiedEnergy="0.42" EmbodiedCarbon="0.022"/>
+    <Material Name="SANDY SOIL" ThermalConduct="1.8" Density="1800" HeatCapacity="1200" EmbodiedEnergy="0.3" EmbodiedCarbon="0.01"/>
+    <Material Name="CLAY SOIL" ThermalConduct="1.4" Density="1900" HeatCapacity="1400" EmbodiedEnergy="0.43" EmbodiedCarbon="0.023"/>
+    <Material Name="PEAT SOIL" ThermalConduct="0.4" Density="900" HeatCapacity="2400" EmbodiedEnergy="0.42" EmbodiedCarbon="0.022"/>
+    <Material Name="WATER" ThermalConduct="0.6" Density="1000" HeatCapacity="4200" EmbodiedEnergy="0.01" EmbodiedCarbon="0.001"/>
+  </MaterialGroup>
+  <MaterialGroup Name="EXPANDED CLAY">
+    <Material Name="EXPANDED CLAY-CONCRETE BLOCK" ThermalConduct="0.12" Density="450" HeatCapacity="800" EmbodiedEnergy="6.2" EmbodiedCarbon="0.46"/>
+    <Material Name="EXPANDED CLAY BLOCK" ThermalConduct="0.13" Density="330" HeatCapacity="880" EmbodiedEnergy="6.5" EmbodiedCarbon="0.48"/>
+    <Material Name="EXPANDED CLAY WALL PANEL" ThermalConduct="0.21" Density="960" HeatCapacity="1050" EmbodiedEnergy="7" EmbodiedCarbon="0.5"/>
+  </MaterialGroup>
+  <MaterialGroup Name="FLOOR COVERINGS">
+    <Material Name="CARPET" ThermalConduct="0.06" Density="200" HeatCapacity="1300" EmbodiedEnergy="74" EmbodiedCarbon="3.9"/>
+    <Material Name="LINOLEUM" ThermalConduct="0.17" Density="1200" HeatCapacity="1400" EmbodiedEnergy="25" EmbodiedCarbon="1.21"/>
+    <Material Name="PLASTIC FLOOR" ThermalConduct="0.25" Density="1700" HeatCapacity="1400" EmbodiedEnergy="95.4" EmbodiedCarbon="4.98"/>
+    <Material Name="RUBBER FLOOR" ThermalConduct="0.17" Density="1200" HeatCapacity="1400" EmbodiedEnergy="91" EmbodiedCarbon="2.85"/>
+    <Material Name="TEXTILE FLOOR" ThermalConduct="0.06" Density="200" HeatCapacity="1300" EmbodiedEnergy="120" EmbodiedCarbon="9.14"/>
+    <Material Name="CORK FLOOR" ThermalConduct="0.065" Density="400" HeatCapacity="1500" EmbodiedEnergy="4" EmbodiedCarbon="0.19"/>
+    <Material Name="CELLULAR RUBBER UNDERLAY" ThermalConduct="0.1" Density="270" HeatCapacity="1400" EmbodiedEnergy="91" EmbodiedCarbon="2.85"/>
+    <Material Name="CORK UNDERLAY" ThermalConduct="0.05" Density="200" HeatCapacity="1500" EmbodiedEnergy="4" EmbodiedCarbon="0.19"/>
+    <Material Name="FELT UNDERLAY" ThermalConduct="0.05" Density="120" HeatCapacity="1300" EmbodiedEnergy="19" EmbodiedCarbon="0.97"/>
+    <Material Name="PLASTIC UNDERLAY" ThermalConduct="0.1" Density="270" HeatCapacity="1400" EmbodiedEnergy="72.1" EmbodiedCarbon="3.76"/>
+    <Material Name="WOOL UNDERLAY" ThermalConduct="0.06" Density="200" HeatCapacity="1300" EmbodiedEnergy="106" EmbodiedCarbon="5.53"/>
+    <Material Name="CLAY FLOOR TILE" ThermalConduct="1.5" Density="2000" HeatCapacity="900" EmbodiedEnergy="6.5" EmbodiedCarbon="0.48"/>
+  </MaterialGroup>
+  <MaterialGroup Name="GLASS">
+    <Material Name="CELLGLASS" ThermalConduct="0.039" Density="130" HeatCapacity="800" EmbodiedEnergy="28" EmbodiedCarbon="1.54"/>
+    <Material Name="GLASS MOSAIC" ThermalConduct="1.2" Density="2000" HeatCapacity="750" EmbodiedEnergy="11.5" EmbodiedCarbon="0.59"/>
+    <Material Name="QUARTZ" ThermalConduct="1.4" Density="2200" HeatCapacity="750" EmbodiedEnergy="0.85" EmbodiedCarbon="0.02"/>
+    <Material Name="SODA LIME" ThermalConduct="1" Density="2500" HeatCapacity="750" EmbodiedEnergy="15" EmbodiedCarbon="0.91"/>
+  </MaterialGroup>
+  <MaterialGroup Name="GYPSUM">
+    <Material Name="GYPSUM 1" ThermalConduct="0.18" Density="600" HeatCapacity="1000" EmbodiedEnergy="1.4" EmbodiedCarbon="0.1"/>
+    <Material Name="GYPSUM 2" ThermalConduct="0.3" Density="900" HeatCapacity="1000" EmbodiedEnergy="1.6" EmbodiedCarbon="0.12"/>
+    <Material Name="GYPSUM 3" ThermalConduct="0.43" Density="1200" HeatCapacity="1000" EmbodiedEnergy="1.8" EmbodiedCarbon="0.13"/>
+    <Material Name="GYPSUM 4" ThermalConduct="0.56" Density="1500" HeatCapacity="1000" EmbodiedEnergy="2.3" EmbodiedCarbon="0.16"/>
+    <Material Name="GYPSUM PLASTERBOARD" ThermalConduct="0.25" Density="900" HeatCapacity="1000" EmbodiedEnergy="6.75" EmbodiedCarbon="0.39"/>
+    <Material Name="GYPSUMBOARD" ThermalConduct="0.22" Density="900" HeatCapacity="1100" EmbodiedEnergy="6.75" EmbodiedCarbon="0.39"/>
+  </MaterialGroup>
+  <MaterialGroup Name="METALS">
+    <Material Name="ALUMINUM" ThermalConduct="160" Density="2800" HeatCapacity="880" EmbodiedEnergy="155" EmbodiedCarbon="9.16"/>
+    <Material Name="BRASS" ThermalConduct="120" Density="8400" HeatCapacity="380" EmbodiedEnergy="44" EmbodiedCarbon="2.64"/>
+    <Material Name="BRONZE" ThermalConduct="65" Density="8700" HeatCapacity="380" EmbodiedEnergy="69" EmbodiedCarbon="4"/>
+    <Material Name="COPPER" ThermalConduct="380" Density="8900" HeatCapacity="380" EmbodiedEnergy="42" EmbodiedCarbon="2.71"/>
+    <Material Name="CAST IRON" ThermalConduct="50" Density="7500" HeatCapacity="450" EmbodiedEnergy="25" EmbodiedCarbon="1.21"/>
+    <Material Name="LEAD" ThermalConduct="35" Density="11300" HeatCapacity="130" EmbodiedEnergy="25.21" EmbodiedCarbon="1.67"/>
+    <Material Name="STAINLESS STEEL" ThermalConduct="17" Density="7900" HeatCapacity="460" EmbodiedEnergy="56.7" EmbodiedCarbon="6.15"/>
+    <Material Name="STEEL 1" ThermalConduct="50" Density="7800" HeatCapacity="450" EmbodiedEnergy="20.1" EmbodiedCarbon="1.46"/>
+    <Material Name="STEEL 2" ThermalConduct="60" Density="7800" HeatCapacity="460" EmbodiedEnergy="25.1" EmbodiedCarbon="1.66"/>
+    <Material Name="ZINC" ThermalConduct="110" Density="7200" HeatCapacity="380" EmbodiedEnergy="53.1" EmbodiedCarbon="3.09"/>
+  </MaterialGroup>
+  <MaterialGroup Name="PLASTERS AND RENDERINGS">
+    <Material Name="CEMENT W/ SAND" ThermalConduct="1" Density="1800" HeatCapacity="1000" EmbodiedEnergy="1.34" EmbodiedCarbon="0.213"/>
+    <Material Name="GYPSUM INSULATING PLASTER" ThermalConduct="0.18" Density="600" HeatCapacity="1000" EmbodiedEnergy="8" EmbodiedCarbon="1.2"/>
+    <Material Name="GYPSUM PLASTER 1" ThermalConduct="0.4" Density="1000" HeatCapacity="1000" EmbodiedEnergy="1.6" EmbodiedCarbon="0.11"/>
+    <Material Name="GYPSUM PLASTER 2" ThermalConduct="0.57" Density="1300" HeatCapacity="1000" EmbodiedEnergy="1.8" EmbodiedCarbon="0.13"/>
+    <Material Name="GYPSUM W/ SAND" ThermalConduct="0.8" Density="1600" HeatCapacity="1000" EmbodiedEnergy="1.4" EmbodiedCarbon="0.09"/>
+    <Material Name="SLOW SET PLASTER" ThermalConduct="1" Density="1800" HeatCapacity="800" EmbodiedEnergy="2.2" EmbodiedCarbon="0.4"/>
+    <Material Name="LIME W/ SAND" ThermalConduct="0.8" Density="1600" HeatCapacity="1000" EmbodiedEnergy="1.45" EmbodiedCarbon="0.22"/>
+  </MaterialGroup>
+  <MaterialGroup Name="ROOF TILES">
+    <Material Name="PLASTIC ROOF TILES" ThermalConduct="0.2" Density="1000" HeatCapacity="1000" EmbodiedEnergy="80.5" EmbodiedCarbon="3.31"/>
+    <Material Name="CLAY ROOF TILES" ThermalConduct="1" Density="2000" HeatCapacity="800" EmbodiedEnergy="3" EmbodiedCarbon="0.24"/>
+    <Material Name="CERAMIC ROOF TILES" ThermalConduct="1.3" Density="2300" HeatCapacity="840" EmbodiedEnergy="10" EmbodiedCarbon="0.7"/>
+    <Material Name="CONCRETE ROOF TILES" ThermalConduct="1.5" Density="2100" HeatCapacity="1000" EmbodiedEnergy="0.75" EmbodiedCarbon="0.107"/>
+  </MaterialGroup>
+  <MaterialGroup Name="RUBBERS">
+    <Material Name="BUTADIENE" ThermalConduct="0.25" Density="980" HeatCapacity="1000" EmbodiedEnergy="85" EmbodiedCarbon="2.8"/>
+    <Material Name="BUTYL" ThermalConduct="0.24" Density="1200" HeatCapacity="1400" EmbodiedEnergy="91" EmbodiedCarbon="2.85"/>
+    <Material Name="EPDM" ThermalConduct="0.25" Density="1150" HeatCapacity="1000" EmbodiedEnergy="90" EmbodiedCarbon="2.8"/>
+    <Material Name="FOAM RUBBER" ThermalConduct="0.06" Density="60" HeatCapacity="1500" EmbodiedEnergy="91" EmbodiedCarbon="2.85"/>
+    <Material Name="HARD RUBBER" ThermalConduct="0.17" Density="1200" HeatCapacity="1400" EmbodiedEnergy="110" EmbodiedCarbon="3.8"/>
+    <Material Name="NATURAL RUBBER" ThermalConduct="0.13" Density="910" HeatCapacity="1100" EmbodiedEnergy="75" EmbodiedCarbon="2.4"/>
+    <Material Name="NEOPRENE" ThermalConduct="0.23" Density="1240" HeatCapacity="2.14" EmbodiedEnergy="115" EmbodiedCarbon="4"/>
+    <Material Name="POLYISOBUTYLENE" ThermalConduct="0.2" Density="930" HeatCapacity="1100" EmbodiedEnergy="80" EmbodiedCarbon="2.6"/>
+    <Material Name="POLYSULFIDE" ThermalConduct="0.4" Density="1700" HeatCapacity="1000" EmbodiedEnergy="135" EmbodiedCarbon="5"/>
+  </MaterialGroup>
+  <MaterialGroup Name="SEALANTS">
+    <Material Name="ELASTOMERIC FOAM" ThermalConduct="0.05" Density="70" HeatCapacity="1500" EmbodiedEnergy="95.3" EmbodiedCarbon="3.76"/>
+    <Material Name="POLYETHYLENE FOAM" ThermalConduct="0.05" Density="70" HeatCapacity="2300" EmbodiedEnergy="83.1" EmbodiedCarbon="2.54"/>
+    <Material Name="POLYURETANE FOAM 1" ThermalConduct="0.028" Density="30" HeatCapacity="1000" EmbodiedEnergy="102.1" EmbodiedCarbon="4.84"/>
+    <Material Name="POLYURETANE FOAM 2" ThermalConduct="0.05" Density="70" HeatCapacity="1500" EmbodiedEnergy="101.5" EmbodiedCarbon="37.07"/>
+    <Material Name="FLEXIBLE PVC" ThermalConduct="0.14" Density="1200" HeatCapacity="1000" EmbodiedEnergy="77.2" EmbodiedCarbon="3.1"/>
+    <Material Name="SILICA GEL" ThermalConduct="0.13" Density="720" HeatCapacity="1000" EmbodiedEnergy="70" EmbodiedCarbon="2.76"/>
+    <Material Name="SILICONE FOAM" ThermalConduct="0.12" Density="750" HeatCapacity="1000" EmbodiedEnergy="88" EmbodiedCarbon="2.96"/>
+    <Material Name="FILLED SILICONE" ThermalConduct="0.5" Density="1450" HeatCapacity="1000" EmbodiedEnergy="97" EmbodiedCarbon="4.19"/>
+    <Material Name="PURE SILICONE" ThermalConduct="0.35" Density="1200" HeatCapacity="1000" EmbodiedEnergy="92" EmbodiedCarbon="3.76"/>
+  </MaterialGroup>
+  <MaterialGroup Name="SOLID PLASTICS">
+    <Material Name="ACRYLIC" ThermalConduct="0.2" Density="1050" HeatCapacity="1500" EmbodiedEnergy="90.67" EmbodiedCarbon="4.09"/>
+    <Material Name="EPOXY RESIN" ThermalConduct="0.2" Density="1200" HeatCapacity="1400" EmbodiedEnergy="137" EmbodiedCarbon="5.7"/>
+    <Material Name="PHENOLIC RESIN" ThermalConduct="0.3" Density="1300" HeatCapacity="1700" EmbodiedEnergy="88" EmbodiedCarbon="2.98"/>
+    <Material Name="POLYACETATE" ThermalConduct="0.3" Density="1410" HeatCapacity="1400" EmbodiedEnergy="95" EmbodiedCarbon="3.5"/>
+    <Material Name="POLYAMIDE" ThermalConduct="0.25" Density="1150" HeatCapacity="1600" EmbodiedEnergy="120.5" EmbodiedCarbon="9.14"/>
+    <Material Name="POLYAMIDE W/ 25% GLASS FIBRE" ThermalConduct="0.3" Density="1450" HeatCapacity="1600" EmbodiedEnergy="138.6" EmbodiedCarbon="7.92"/>
+    <Material Name="POLYCARBONATE" ThermalConduct="0.2" Density="1200" HeatCapacity="1200" EmbodiedEnergy="112.9" EmbodiedCarbon="7.62"/>
+    <Material Name="POLYESTER RESIN" ThermalConduct="0.19" Density="1400" HeatCapacity="1200" EmbodiedEnergy="103.83" EmbodiedCarbon="7.5"/>
+    <Material Name="HIGH DENSITY POLYETHYLENE" ThermalConduct="0.5" Density="980" HeatCapacity="1800" EmbodiedEnergy="76.7" EmbodiedCarbon="1.93"/>
+    <Material Name="LOW DENSITY POLYETHYLENE" ThermalConduct="0.33" Density="920" HeatCapacity="2200" EmbodiedEnergy="78.1" EmbodiedCarbon="2.06"/>
+    <Material Name="PMMA" ThermalConduct="0.18" Density="1180" HeatCapacity="1500" EmbodiedEnergy="87.4" EmbodiedCarbon="3.42"/>
+    <Material Name="POLYPROPYLENE" ThermalConduct="0.22" Density="910" HeatCapacity="1800" EmbodiedEnergy="99.2" EmbodiedCarbon="3.43"/>
+    <Material Name="POLYPROPYLENE W/ 25% GLASS FIBRE" ThermalConduct="0.25" Density="1200" HeatCapacity="1800" EmbodiedEnergy="115.1" EmbodiedCarbon="4.49"/>
+    <Material Name="POLYSTYRENE" ThermalConduct="0.16" Density="1050" HeatCapacity="1300" EmbodiedEnergy="87.4" EmbodiedCarbon="3.42"/>
+    <Material Name="PTFE" ThermalConduct="0.25" Density="2200" HeatCapacity="1000" EmbodiedEnergy="86.4" EmbodiedCarbon="3.43"/>
+    <Material Name="PU" ThermalConduct="0.25" Density="1200" HeatCapacity="1800" EmbodiedEnergy="101.5" EmbodiedCarbon="4.26"/>
+    <Material Name="PVC" ThermalConduct="0.17" Density="1390" HeatCapacity="900" EmbodiedEnergy="77.2" EmbodiedCarbon="3.1"/>
+  </MaterialGroup>
+  <MaterialGroup Name="STONES">
+    <Material Name="ARTIFICIAL STONE" ThermalConduct="1.3" Density="1750" HeatCapacity="1000" EmbodiedEnergy="1.5" EmbodiedCarbon="0.18"/>
+    <Material Name="BASALT" ThermalConduct="3.5" Density="2850" HeatCapacity="1000" EmbodiedEnergy="11" EmbodiedCarbon="0.7"/>
+    <Material Name="DRAINED GRAVEL" ThermalConduct="1.4" Density="1800" HeatCapacity="1000" EmbodiedEnergy="0.063" EmbodiedCarbon="0.004"/>
+    <Material Name="DRAINED SAND" ThermalConduct="1.4" Density="1800" HeatCapacity="1000" EmbodiedEnergy="0.083" EmbodiedCarbon="0.005"/>
+    <Material Name="GNEISS" ThermalConduct="3.5" Density="2550" HeatCapacity="1000" EmbodiedEnergy="10.5" EmbodiedCarbon="0.65"/>
+    <Material Name="GRANITE 1" ThermalConduct="2.8" Density="2600" HeatCapacity="1000" EmbodiedEnergy="10.2" EmbodiedCarbon="0.63"/>
+    <Material Name="GRANITE 2" ThermalConduct="3.4" Density="2700" HeatCapacity="800" EmbodiedEnergy="14" EmbodiedCarbon="0.75"/>
+    <Material Name="COKE ASH" ThermalConduct="0.25" Density="700" HeatCapacity="800" EmbodiedEnergy="0.1" EmbodiedCarbon="0.008"/>
+    <Material Name="LIMESTONE HARD" ThermalConduct="2.3" Density="2600" HeatCapacity="1000" EmbodiedEnergy="1.7" EmbodiedCarbon="0.095"/>
+    <Material Name="LIMESTONE MEDIUM" ThermalConduct="1.7" Density="2200" HeatCapacity="1000" EmbodiedEnergy="1.5" EmbodiedCarbon="0.09"/>
+    <Material Name="LIMESTONE SOFT" ThermalConduct="1.1" Density="1800" HeatCapacity="1000" EmbodiedEnergy="1.4" EmbodiedCarbon="0.085"/>
+    <Material Name="LIMESANDSTONE" ThermalConduct="0.93" Density="1800" HeatCapacity="840" EmbodiedEnergy="1.2" EmbodiedCarbon="0.07"/>
+    <Material Name="MARBLE" ThermalConduct="3.5" Density="2800" HeatCapacity="1000" EmbodiedEnergy="2" EmbodiedCarbon="0.13"/>
+    <Material Name="NATURAL PUMICE" ThermalConduct="0.12" Density="400" HeatCapacity="1000" EmbodiedEnergy="0.09" EmbodiedCarbon="0.007"/>
+    <Material Name="CRYSTALLINE ROCK" ThermalConduct="3.5" Density="2800" HeatCapacity="1000" EmbodiedEnergy="2.4" EmbodiedCarbon="0.16"/>
+    <Material Name="POROUS ROCK" ThermalConduct="0.55" Density="1600" HeatCapacity="1000" EmbodiedEnergy="1" EmbodiedCarbon="0.06"/>
+    <Material Name="SEDIMENTARY ROCK HEAVY" ThermalConduct="2.3" Density="2600" HeatCapacity="1000" EmbodiedEnergy="1.2" EmbodiedCarbon="0.08"/>
+    <Material Name="SEDIMENTARY ROCK LIGHT" ThermalConduct="0.85" Density="1500" HeatCapacity="1000" EmbodiedEnergy="0.8" EmbodiedCarbon="0.04"/>
+    <Material Name="SANDSTONE" ThermalConduct="2.3" Density="2600" HeatCapacity="1000" EmbodiedEnergy="1" EmbodiedCarbon="0.06"/>
+    <Material Name="SLATE" ThermalConduct="2.2" Density="2400" HeatCapacity="1000" EmbodiedEnergy="5.5" EmbodiedCarbon="0.035"/>
+    <Material Name="UNDRAINED SAND" ThermalConduct="2.3" Density="1100" HeatCapacity="1200" EmbodiedEnergy="0.008" EmbodiedCarbon="0.005"/>
+  </MaterialGroup>
+  <MaterialGroup Name="THERMAL INSULATION-GLASS WOOL">
+    <Material Name="ELEVATION GLASS WOOL 1" ThermalConduct="0.04" Density="14" HeatCapacity="1030" EmbodiedEnergy="26" EmbodiedCarbon="1.3"/>
+    <Material Name="ELEVATION GLASS WOOL 2" ThermalConduct="0.033" Density="23" HeatCapacity="1030" EmbodiedEnergy="28" EmbodiedCarbon="1.35"/>
+    <Material Name="ELEVATION GLASS WOOL 3" ThermalConduct="0.033" Density="50" HeatCapacity="1030" EmbodiedEnergy="35" EmbodiedCarbon="1.45"/>
+    <Material Name="ROOF GLASS WOOL" ThermalConduct="0.038" Density="14.5" HeatCapacity="1030" EmbodiedEnergy="25" EmbodiedCarbon="1.25"/>
+    <Material Name="INACCESSIBLE FLOOR GLASS WOOL 1" ThermalConduct="0.035" Density="13" HeatCapacity="1450" EmbodiedEnergy="24" EmbodiedCarbon="1.23"/>
+    <Material Name="INACCESSIBLE FLOOR GLASS WOOL 2" ThermalConduct="0.038" Density="14.5" HeatCapacity="1030" EmbodiedEnergy="26.5" EmbodiedCarbon="1.32"/>
+    <Material Name="ACCESSIBLE FLOOR GLASS WOOL 1" ThermalConduct="0.033" Density="64" HeatCapacity="1030" EmbodiedEnergy="37" EmbodiedCarbon="1.48"/>
+    <Material Name="ACCESSIBLE FLOOR GLASS WOOL 2" ThermalConduct="0.033" Density="115" HeatCapacity="1030" EmbodiedEnergy="47" EmbodiedCarbon="1.9"/>
+  </MaterialGroup>
+  <MaterialGroup Name="THERMAL INSULATION-MINERAL WOOL">
+    <Material Name="ECOFIBER" ThermalConduct="0.04" Density="27" HeatCapacity="2500" EmbodiedEnergy="14.7" EmbodiedCarbon="1.12"/>
+    <Material Name="ISODRAIN" ThermalConduct="0.039" Density="19" HeatCapacity="1400" EmbodiedEnergy="14.1" EmbodiedCarbon="1.08"/>
+    <Material Name="LOSULL 1" ThermalConduct="0.06" Density="15" HeatCapacity="750" EmbodiedEnergy="12.5" EmbodiedCarbon="0.98"/>
+    <Material Name="LOSULL 2" ThermalConduct="0.042" Density="50" HeatCapacity="750" EmbodiedEnergy="14.9" EmbodiedCarbon="1.2"/>
+    <Material Name="MINERAL WOOL 1" ThermalConduct="0.033" Density="50" HeatCapacity="840" EmbodiedEnergy="14.6" EmbodiedCarbon="1.15"/>
+    <Material Name="MINERAL WOOL 2" ThermalConduct="0.036" Density="50" HeatCapacity="840" EmbodiedEnergy="15.7" EmbodiedCarbon="1.23"/>
+    <Material Name="MINERAL WOOL 3" ThermalConduct="0.04" Density="50" HeatCapacity="840" EmbodiedEnergy="16.6" EmbodiedCarbon="1.28"/>
+    <Material Name="MINERAL WOOL 4" ThermalConduct="0.05" Density="50" HeatCapacity="840" EmbodiedEnergy="18.1" EmbodiedCarbon="1.34"/>
+    <Material Name="MINERAL WOOL SOFT" ThermalConduct="0.037" Density="40" HeatCapacity="840" EmbodiedEnergy="14.3" EmbodiedCarbon="1.08"/>
+    <Material Name="MINERAL WOOL HARD" ThermalConduct="0.036" Density="115" HeatCapacity="840" EmbodiedEnergy="21.2" EmbodiedCarbon="1.65"/>
+    <Material Name="PLASTERABLE MINERAL WOOL" ThermalConduct="0.036" Density="115" HeatCapacity="840" EmbodiedEnergy="21.4" EmbodiedCarbon="1.69"/>
+    <Material Name="WATERPROOF MINERAL WOOL" ThermalConduct="0.04" Density="160" HeatCapacity="840" EmbodiedEnergy="23.4" EmbodiedCarbon="1.73"/>
+  </MaterialGroup>
+  <MaterialGroup Name="THERMAL INSULATION-MULTILAYER">
+    <Material Name="WOOD WOOL/PS/WOOD WOOL THIN" ThermalConduct="0.056" Density="300" HeatCapacity="1500" EmbodiedEnergy="60.3" EmbodiedCarbon="3.1"/>
+    <Material Name="WOOD WOOL/PS/WOOD WOOL MEDIUM" ThermalConduct="0.045" Density="160" HeatCapacity="1500" EmbodiedEnergy="40.1" EmbodiedCarbon="1.6"/>
+    <Material Name="WOOD WOOL/PS/WOOD WOOL THICK" ThermalConduct="0.041" Density="90" HeatCapacity="1500" EmbodiedEnergy="25.2" EmbodiedCarbon="1.2"/>
+    <Material Name="WOOD WOOL/MINERAL WOOL/WOOD WOOL THICK" ThermalConduct="0.05" Density="230" HeatCapacity="900" EmbodiedEnergy="16.1" EmbodiedCarbon="1.3"/>
+    <Material Name="WOOD WOOL/MINERAL WOOL/WOOD WOOL MEDIUM" ThermalConduct="0.046" Density="151.33" HeatCapacity="900" EmbodiedEnergy="13.5" EmbodiedCarbon="0.9"/>
+    <Material Name="WOOD WOOL/MINERAL WOOL/WOOD WOOL THIN" ThermalConduct="0.045" Density="138.5" HeatCapacity="900" EmbodiedEnergy="11.2" EmbodiedCarbon="0.67"/>
+  </MaterialGroup>
+  <MaterialGroup Name="THERMAL INSULATION-PLASTIC FOAM">
+    <Material Name="EPS 1" ThermalConduct="0.042" Density="15" HeatCapacity="1450" EmbodiedEnergy="76" EmbodiedCarbon="3.18"/>
+    <Material Name="EPS 2" ThermalConduct="0.036" Density="25" HeatCapacity="1450" EmbodiedEnergy="86.6" EmbodiedCarbon="3.29"/>
+    <Material Name="EXP.PLASTICS 1" ThermalConduct="0.033" Density="25" HeatCapacity="1400" EmbodiedEnergy="83.4" EmbodiedCarbon="3.29"/>
+    <Material Name="EXP.PLASTICS 2" ThermalConduct="0.036" Density="25" HeatCapacity="1400" EmbodiedEnergy="86.4" EmbodiedCarbon="3.43"/>
+    <Material Name="EXP.PLASTICS 3" ThermalConduct="0.04" Density="25" HeatCapacity="1400" EmbodiedEnergy="88.7" EmbodiedCarbon="3.53"/>
+    <Material Name="POLYFOAM" ThermalConduct="0.035" Density="30" HeatCapacity="1450" EmbodiedEnergy="102.1" EmbodiedCarbon="4.84"/>
+    <Material Name="XPS" ThermalConduct="0.032" Density="28" HeatCapacity="1450" EmbodiedEnergy="87.4" EmbodiedCarbon="3.42"/>
+  </MaterialGroup>
+  <MaterialGroup Name="THERMAL INSULATION-WOOD WOOL">
+    <Material Name="WOODFIBER" ThermalConduct="0.052" Density="300" HeatCapacity="1350" EmbodiedEnergy="12.4" EmbodiedCarbon="0.09"/>
+    <Material Name="WOOD WOOL 1" ThermalConduct="0.075" Density="200" HeatCapacity="1510" EmbodiedEnergy="10.8" EmbodiedCarbon="0.12"/>
+    <Material Name="WOOD WOOL 2" ThermalConduct="0.077" Density="350" HeatCapacity="2000" EmbodiedEnergy="15.1" EmbodiedCarbon="0.18"/>
+    <Material Name="WOOD WOOL 3" ThermalConduct="0.1" Density="440" HeatCapacity="2000" EmbodiedEnergy="15.4" EmbodiedCarbon="0.2"/>
+    <Material Name="WOOD WOOL 4" ThermalConduct="0.167" Density="680" HeatCapacity="2000" EmbodiedEnergy="17.7" EmbodiedCarbon="0.42"/>
+  </MaterialGroup>
+  <MaterialGroup Name="WOOD AND WOOD BASED PANELS">
+    <Material Name="TIMBER 1" ThermalConduct="0.13" Density="500" HeatCapacity="1600" EmbodiedEnergy="6.95" EmbodiedCarbon="0.29"/>
+    <Material Name="TIMBER 2" ThermalConduct="0.13" Density="500" HeatCapacity="2500" EmbodiedEnergy="7.11" EmbodiedCarbon="0.32"/>
+    <Material Name="TIMBER 3" ThermalConduct="0.14" Density="500" HeatCapacity="2300" EmbodiedEnergy="10" EmbodiedCarbon="0.36"/>
+    <Material Name="TIMBER 4" ThermalConduct="0.18" Density="700" HeatCapacity="1600" EmbodiedEnergy="12.1" EmbodiedCarbon="0.39"/>
+    <Material Name="ASPHABOARD" ThermalConduct="0.065" Density="400" HeatCapacity="1170" EmbodiedEnergy="14.5" EmbodiedCarbon="0.71"/>
+    <Material Name="CEMENT BONDED PARTICLEBOARD" ThermalConduct="0.23" Density="1200" HeatCapacity="1500" EmbodiedEnergy="12.1" EmbodiedCarbon="0.65"/>
+    <Material Name="CHIPBOARD" ThermalConduct="0.14" Density="600" HeatCapacity="2300" EmbodiedEnergy="14.7" EmbodiedCarbon="0.81"/>
+    <Material Name="CORK" ThermalConduct="0.08" Density="175" HeatCapacity="1800" EmbodiedEnergy="4" EmbodiedCarbon="0.19"/>
+    <Material Name="CORKBOARD" ThermalConduct="0.04" Density="140" HeatCapacity="1900" EmbodiedEnergy="7.1" EmbodiedCarbon="0.39"/>
+    <Material Name="FIBREBOARD 1" ThermalConduct="0.07" Density="250" HeatCapacity="1700" EmbodiedEnergy="10.1" EmbodiedCarbon="0.69"/>
+    <Material Name="FIBREBOARD 2" ThermalConduct="0.1" Density="400" HeatCapacity="1700" EmbodiedEnergy="11" EmbodiedCarbon="0.74"/>
+    <Material Name="FIBREBOARD 3" ThermalConduct="0.14" Density="600" HeatCapacity="1700" EmbodiedEnergy="12.1" EmbodiedCarbon="0.79"/>
+    <Material Name="FIBREBOARD 4" ThermalConduct="0.18" Density="800" HeatCapacity="1700" EmbodiedEnergy="13.8" EmbodiedCarbon="0.92"/>
+    <Material Name="IMPREGNATED BOARD" ThermalConduct="0.065" Density="400" HeatCapacity="1350" EmbodiedEnergy="15" EmbodiedCarbon="1.3"/>
+    <Material Name="MASONITE 1" ThermalConduct="0.79" Density="1600" HeatCapacity="1000" EmbodiedEnergy="16.9" EmbodiedCarbon="1.44"/>
+    <Material Name="MASONITE 2" ThermalConduct="0.5" Density="1000" HeatCapacity="1000" EmbodiedEnergy="15" EmbodiedCarbon="1.3"/>
+    <Material Name="MASONITE 3" ThermalConduct="1.1" Density="2000" HeatCapacity="1000" EmbodiedEnergy="18.2" EmbodiedCarbon="1.61"/>
+    <Material Name="MDF BOARD 1" ThermalConduct="0.07" Density="250" HeatCapacity="1700" EmbodiedEnergy="9.2" EmbodiedCarbon="0.64"/>
+    <Material Name="MDF BOARD 2" ThermalConduct="0.1" Density="400" HeatCapacity="1700" EmbodiedEnergy="10" EmbodiedCarbon="0.68"/>
+    <Material Name="MDF BOARD 3" ThermalConduct="0.14" Density="600" HeatCapacity="1700" EmbodiedEnergy="11" EmbodiedCarbon="0.74"/>
+    <Material Name="MDF BOARD 4" ThermalConduct="0.18" Density="800" HeatCapacity="1700" EmbodiedEnergy="11.9" EmbodiedCarbon="0.82"/>
+    <Material Name="OSB" ThermalConduct="0.13" Density="650" HeatCapacity="1700" EmbodiedEnergy="15" EmbodiedCarbon="0.9"/>
+    <Material Name="PARTICLEBOARD 1" ThermalConduct="0.1" Density="300" HeatCapacity="1700" EmbodiedEnergy="14.2" EmbodiedCarbon="0.58"/>
+    <Material Name="PARTICLEBOARD 2" ThermalConduct="0.14" Density="600" HeatCapacity="1700" EmbodiedEnergy="14.5" EmbodiedCarbon="0.7"/>
+    <Material Name="PARTICLEBOARD 3" ThermalConduct="0.18" Density="900" HeatCapacity="1700" EmbodiedEnergy="14.9" EmbodiedCarbon="0.83"/>
+    <Material Name="PLYWOOD 1" ThermalConduct="0.09" Density="300" HeatCapacity="1600" EmbodiedEnergy="11.9" EmbodiedCarbon="0.52"/>
+    <Material Name="PLYWOOD 2" ThermalConduct="0.13" Density="500" HeatCapacity="1600" EmbodiedEnergy="13.1" EmbodiedCarbon="0.64"/>
+    <Material Name="PLYWOOD 3" ThermalConduct="0.17" Density="700" HeatCapacity="1600" EmbodiedEnergy="15" EmbodiedCarbon="0.77"/>
+    <Material Name="PLYWOOD 4" ThermalConduct="0.24" Density="1000" HeatCapacity="1600" EmbodiedEnergy="16.8" EmbodiedCarbon="0.87"/>
+    <Material Name="SAWDUST" ThermalConduct="0.1" Density="100" HeatCapacity="2500" EmbodiedEnergy="7.4" EmbodiedCarbon="0.29"/>
+    <Material Name="WOODFIBER H" ThermalConduct="0.13" Density="1000" HeatCapacity="1350" EmbodiedEnergy="11.98" EmbodiedCarbon="0.51"/>
+    <Material Name="WOODFIBER HH" ThermalConduct="0.08" Density="600" HeatCapacity="1350" EmbodiedEnergy="10.7" EmbodiedCarbon="0.48"/>
+  </MaterialGroup>
+</MaterialCatalog>

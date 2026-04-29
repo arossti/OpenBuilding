@@ -3339,6 +3339,50 @@ html.app-matrix body {
   color: rgb(254, 215, 170);
 }
 
+/* §10.1 provenance chips — shown both as a static legend in the
+   toolbar (so users land on the page knowing what each color means)
+   and inline next to per-field values in the expanded detail panel.
+   The legend (.db-source-legend) groups four chips horizontally;
+   inline chips get the same per-source variants. */
+.db-source-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.db-source-legend > span,
+.db-chip-source-epd,
+.db-chip-source-default,
+.db-chip-source-calc,
+.db-chip-source-edit {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: "Helvetica Neue", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+.db-chip-source-epd {
+  background: rgba(34, 197, 94, 0.2);
+  color: rgb(187, 247, 208);
+}
+.db-chip-source-default {
+  /* Magenta — deliberately distinct from the yellow .db-fresh-chip-new
+     used on Trust-committed rows, so the user can't confuse "this row is
+     a new commit" with "this field came from the catalogue not the EPD". */
+  background: rgba(232, 121, 249, 0.32);
+  color: rgb(245, 208, 254);
+}
+.db-chip-source-calc {
+  background: rgba(34, 211, 238, 0.32);
+  color: rgb(165, 243, 252);
+}
+.db-chip-source-edit {
+  background: rgba(132, 204, 22, 0.32);
+  color: rgb(217, 249, 157);
+}
+
 /* Group-header rows in the database viewer. Styled to echo the BEAMweb
    assembly-tab group headers: rounded container, padded away from the
    page edge, hover affordance, expanded-state contrast. The banner lives
@@ -5903,6 +5947,34 @@ details.dep-details pre {
 }
 .app-epdparser .epd-form-row input[type="number"] {
   font-family: "Courier New", monospace;
+}
+
+/* §10.1 provenance source classes — color-coded so the user always sees
+   which fields came from the EPD itself vs the db-fallbacks catalogue
+   vs a calculated derivation vs their own typed override. Default (no
+   class) means epd_direct or unset — rendered with the standard form-
+   input chrome above. The three non-default classes layer a soft tint
+   + a left border accent + a corner badge so the cue is visible at a
+   glance without crowding the input. */
+.app-epdparser .epd-form-row input.epd-source-default,
+.app-epdparser .epd-form-row select.epd-source-default {
+  /* Magenta — matches the .db-chip-source-default color in the database
+     viewer, kept distinct from the yellow .db-row-fresh tint used on
+     Trust-committed rows. */
+  background: rgba(232, 121, 249, 0.1);
+  border-left: 3px solid rgb(232, 121, 249);
+}
+.app-epdparser .epd-form-row input.epd-source-calc,
+.app-epdparser .epd-form-row select.epd-source-calc {
+  background: rgba(34, 211, 238, 0.1); /* soft cyan */
+  border-left: 3px solid rgb(34, 211, 238);
+}
+.app-epdparser .epd-form-row input.epd-source-edit,
+.app-epdparser .epd-form-row select.epd-source-edit {
+  /* User overrode an auto-fill — render as authoritative (no tint) but
+     keep a subtle green accent so the user knows the field has been
+     touched since the last auto-fill pass. */
+  border-left: 3px solid rgb(132, 204, 22);
 }
 
 /* P2 — Capture button + status bar at the bottom of the form pane. */

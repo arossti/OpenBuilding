@@ -50,7 +50,7 @@ jobs:
 
           # Runtime data (staged from authoritative sources)
           cp -r schema/materials _site/data/schema/
-          cp -r schema/lookups/. _site/data/schema/lookups/
+          cp schema/lookups/*.json _site/data/schema/lookups/
           cp schema/material.schema.json _site/data/schema/
           cp schema/sample.json _site/data/schema/
           cp "docs/csv files from BEAM/Footings & Slabs.csv" _site/data/beam/footings-slabs.csv

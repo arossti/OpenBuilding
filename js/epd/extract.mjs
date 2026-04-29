@@ -52,10 +52,17 @@ export function getLookups() {
   return _lookups;
 }
 
+// Per-glyph fragmentation tolerance for the canonical S-P-XXXXX id.
+// The EPD-IES filename variant of S-P-10278 emits the label as
+// "S - P - 10278" (each glyph as its own text item with spaces between),
+// which the strict /S-P-\d/ pattern misses. The tolerant form matches
+// either spelling and is reused everywhere we look for an S-P id.
+var _SP_ID_RX = /S\s*-\s*P\s*-\s*(\d{5,6})/;
+
 export function detectFormat(text) {
   // Priority order matters — narrowest match first to avoid false positives.
   // EPD International registry is most specific (S-P-XXXXX is canonical).
-  if (/S-P-\d{5,6}/.test(text) && /Programme\s+operator/i.test(text)) return FORMATS.EPD_INTL;
+  if (_SP_ID_RX.test(text) && /Programme\s+operator/i.test(text)) return FORMATS.EPD_INTL;
 
   // NSF before EU_IBU because Lafarge cement EPDs contain the prose phrase
   // "the owner of the declaration is liable for the underlying information"
@@ -109,12 +116,53 @@ export function extract(pageTexts) {
   if (format === FORMATS.EPD_INTL) extractEpdIntl(allText, rec);
   else if (format === FORMATS.NA) extractNA(allText, rec);
   else if (format === FORMATS.NSF) extractNSF(allText, rec);
-  // EU_IBU + UNKNOWN: fall through to common-only for now.
+  else if (format === FORMATS.EU_IBU) extractEuIbu(allText, rec);
+  // UNKNOWN: fall through to common-only.
 
-  // Tiers 6 + 8 — cross-format methodology + impact totals (always last).
+  // Tiers 6 + 8 — cross-format methodology + impact totals.
   extractCommon(allText, rec);
 
+  // Tier 9 — fallback fill from db-fallbacks.json for fields the EPD
+  // didn't publish. Only runs if the lookups were primed AND the
+  // candidate already has a classification.material_type. Source-marks
+  // every filled value as "generic_default" so the form pane can
+  // distinguish EPD-derived from catalogue-derived.
+  applyMaterialDefaults(rec);
+
   return { format: format, record: rec, anchorsHit: _countAnchors(rec) };
+}
+
+/* ── Tier 9 — fallback fill from db-fallbacks ─────────────────────── */
+//
+// The EPD wins where it published a value. This step only fills slots
+// that the per-format extractors left null. v1 only fills
+// physical.density.value_kg_m3 (the only catalogue field that maps to
+// an existing schema slot today). Thermal conductivity, heat capacity,
+// embodied energy, and embodied carbon stay in the catalogue ready for
+// future schema extension; this function is the place to wire them
+// when those slots get added.
+//
+// Source-marking convention: when this function fills a value, it also
+// writes `<path>.source = "generic_default"` next to the value. Other
+// possible source values: "epd_direct" (existing extractors should set
+// this; retrofit pending), "calculated" (Tier 10, future BEAM math),
+// "user_edit" (form bindings flip this when the user types).
+
+function applyMaterialDefaults(rec) {
+  if (!_lookups || !_lookups.materialDefaults) return;
+  var materialType = _get(rec, "classification.material_type");
+  if (!materialType) return;
+
+  var defaults = _lookups.materialDefaults.defaults_by_material_type;
+  var entry = defaults && defaults[materialType];
+  if (!entry || !entry.default) return;
+  var d = entry.default;
+
+  // physical.density — the only catalogue field with a current schema slot.
+  if (_get(rec, "physical.density.value_kg_m3") == null && d.density_kg_m3 != null) {
+    _setPath(rec, "physical.density.value_kg_m3", d.density_kg_m3);
+    _setPath(rec, "physical.density.source", "generic_default");
+  }
 }
 
 /* ── Tier 2 — display name + material type ────────────────────────── */
@@ -165,13 +213,18 @@ function extractType(text, rec) {
 
   // Skip generic/registry lines + short fragments. The first surviving
   // line is the product title in the overwhelming majority of EPDs.
-  var skip =
-    /^(?:type\s+iii|environmental\s+product\s+declaration|epd|in\s+accordance|programme|program|page\s+\d|\d+\s*\/\s*\d+|—|–|-{2,})/i;
+  var skipPrefix =
+    /^(?:type\s+iii|environmental\s+product\s+declaration|epd\b|in\s+accordance|as\s+per\b|according\s+to\b|programme|program\b|publisher\b|owner\s+of|declaration\s+number|issue\s+date|valid\s+to|valid\s+until|publication\s+date|page\s+\d|\d+\s*\/\s*\d+|—|–|-{2,})/i;
+  // Standards-citation lines also need to be skipped — these often
+  // appear right under the title block on EU/IBU layouts where the
+  // line "as per ISO 14025 and EN 15804+A1" otherwise gets picked.
+  var skipStandards = /\bISO\s*1[34]025\b|\bEN\s*15804\b|\bISO\s*21930\b|\bISO\s*14040\b/i;
   var displayName = null;
   for (var i = 0; i < lines.length; i++) {
     var raw = lines[i].trim();
     if (raw.length < 4 || raw.length > 160) continue;
-    if (skip.test(raw)) continue;
+    if (skipPrefix.test(raw)) continue;
+    if (skipStandards.test(raw)) continue;
     // "Acme Co" alone is more likely a manufacturer header — keep scanning
     // unless the line reads as a product description (≥ 2 words OR has a
     // material-type keyword in it).
@@ -248,6 +301,32 @@ function _findDateAfterLabel(text, labelPattern) {
   return _parseDate(window);
 }
 
+// Per-glyph fragmentation tolerance for ISO dates. The EPD-IES filename
+// variant emits dates as "202 5 - 10 - 2 0" — every digit gets its own
+// text item. Pre-process by removing whitespace between adjacent digits
+// (so "202 5" → "2025"), then run a loose YYYY-MM-DD match. Falls back
+// to null if the window doesn't contain a date-shaped sequence.
+function _looseIsoDateAfter(text, labelPattern) {
+  var m = labelPattern.exec(text);
+  if (!m) return null;
+  var window = text.substring(m.index + m[0].length, m.index + m[0].length + 60);
+  // Collapse any whitespace between digits so "202 5" → "2025" and
+  // "2 0" → "20". Repeat once because /(\d)\s+(\d)/g only collapses one
+  // pair per overlap on the first pass.
+  var collapsed = window;
+  for (var pass = 0; pass < 4; pass++) {
+    var next = collapsed.replace(/(\d)\s+(\d)/g, "$1$2");
+    if (next === collapsed) break;
+    collapsed = next;
+  }
+  // Also collapse spaces around the dashes inside dates ("2025 - 10 - 20").
+  collapsed = collapsed.replace(/(\d)\s*-\s*(\d)/g, "$1-$2");
+  var iso = collapsed.match(/(\d{4}-\d{1,2}-\d{1,2})/);
+  if (!iso) return null;
+  var parts = iso[1].split("-");
+  return parts[0] + "-" + _pad2(parts[1]) + "-" + _pad2(parts[2]);
+}
+
 // Find a free-text value after a label (for things like manufacturer / PCR).
 function _findStringAfterLabel(text, labelPattern, maxLen) {
   var m = labelPattern.exec(text);
@@ -288,8 +367,10 @@ function extractCommon(text, rec) {
   // doc references both an internal (e.g. CSA #3688-5839) and an EPD
   // International (S-P-XXXXX) ID, we prefer the EPD-Intl one because it
   // matches the BEAM internal-ID convention Melanie established.
+  // Tolerant match (_SP_ID_RX) for the EPD-IES filename variant where
+  // per-glyph emission lands the label as "S - P - 10278".
   if (!_get(rec, "epd.id")) {
-    var spMatch = text.match(/S-P-(\d{5,6})/);
+    var spMatch = text.match(_SP_ID_RX);
     if (spMatch) _setPath(rec, "epd.id", "S-P-" + spMatch[1]);
   }
 
@@ -478,6 +559,74 @@ var IMPACT_INDICATORS = [
     schemaKey: "primary_energy_renewable_mj",
     label: "PE-R (English biomass)",
     regex: /Renewable[,\s]+biomass\s+MJ\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+  },
+
+  // EU/IBU family (Institut Bauen und Umwelt). Tables use long English
+  // category names with bracketed units containing space-split subscripts
+  // ("[kg CO 2 -Eq.]", "[kg SO 2 -Eq.]", "[kg CFC11-Eq.]"). The "total"
+  // is the A1-A3 column which sits as the first numeric token after the
+  // unit. POCP / ADPe-fossil / fresh-water rows have EU-specific phrasings.
+  // Negative values are common (biogenic carbon credit on wood products
+  // gives GWP A1-A3 like -198.40), hence `-?\s*` on the capture group.
+  // Existing code-anchored regexes run first and the loop early-returns
+  // when populated, so no collision on samples that have both forms.
+  {
+    schemaKey: "gwp_kgco2e",
+    label: "GWP (EU/IBU bracketed)",
+    regex:
+      /Global\s+warming\s+potential[^\n]{0,30}?\[?\s*kg\s*CO\s*2?\s*-?\s*[Ee]q\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "ozone_depletion_kgcfc11eq",
+    label: "ODP (EU/IBU long phrase)",
+    regex:
+      /(?:Ozone\s+depletion\s+potential|Depletion\s+potential\s+of\s+the\s+stratospheric\s+ozone\s+layer)[^\n]{0,30}?\[?\s*kg\s*CFC\s*-?\s*11\s*-?\s*[Ee]q\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "acidification_kgso2eq",
+    label: "AP (EU/IBU bracketed)",
+    regex:
+      /Acidification\s+potential[^\n]{0,40}?\[?\s*kg\s*SO\s*2?\s*-?\s*[Ee]q\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "abiotic_depletion_fossil_mj",
+    label: "ADPf (EU/IBU long phrase)",
+    regex:
+      /Abiotic\s+depletion\s+potential\s+for\s+fossil\s+resources[^\n]{0,30}?\[?\s*MJ\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "water_consumption_m3",
+    label: "WDP (EU/IBU fresh-water phrase)",
+    regex:
+      /Use\s+of\s+net\s+fresh\s+water[^\n]{0,20}?\[?\s*m\s*[³^]?3?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+
+  // Modern NA / ISO 21930 family. Wood + steel EPDs that follow the
+  // ACLCA / ISO 21930:2017 indicator convention use abbreviation codes
+  // RPR E (renewable primary energy as energy carrier), NRPR E
+  // (non-renewable primary energy as energy carrier), and FW (fresh
+  // water) — typically with comma-thousand-separated values like
+  // "3,490.16" and the unit on the same line ("[MJ, LHV]" or "[m 3 ]").
+  // FW often has its value on the NEXT line in the spatially-joined
+  // text because pdf.js per-glyph emission splits unit + value;
+  // \s+ tolerance handles that. Number capture allows comma-thousand
+  // groups; the parser strips them.
+  {
+    schemaKey: "primary_energy_renewable_mj",
+    label: "PE-R (RPR E / ISO 21930)",
+    regex:
+      /\bRPR\s*[Ee]\b[^\n]{0,30}?\[?\s*MJ\b[^\n]{0,16}?\s+(-?\s*\d{1,3}(?:,\d{3})*(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/
+  },
+  {
+    schemaKey: "primary_energy_nonrenewable_mj",
+    label: "PE-NR (NRPR E / ISO 21930)",
+    regex:
+      /\bNRPR\s*[Ee]\b[^\n]{0,30}?\[?\s*MJ\b[^\n]{0,16}?\s+(-?\s*\d{1,3}(?:,\d{3})*(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/
+  },
+  {
+    schemaKey: "water_consumption_m3",
+    label: "WDP (FW / ISO 21930)",
+    regex: /\bFW\b\s*\[?\s*m\s*[³^]?3?\s*\]?\s+(-?\s*\d{1,3}(?:,\d{3})*(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/
   }
 ];
 
@@ -488,7 +637,20 @@ function _extractIndicatorTotals(text, rec) {
     var m = text.match(ind.regex);
     if (!m) continue;
     var raw = m[1].replace(/\s+/g, "");
-    var num = parseFloat(raw.replace(",", "."));
+    // Number parsing handles three conventions:
+    //   "3,490.16"  US/CA — comma is thousand-separator → strip
+    //   "3.490,16"  EU      — period is thousand-separator → unsupported here
+    //   "3,50"      EU      — comma is decimal → replace with period
+    //   "3338.45"   US/CA   — no separator → as-is
+    //   "1.23E+03"  scientific → as-is (E was lowercased? no, regex is case-insensitive)
+    var num;
+    if (raw.indexOf(".") >= 0 && raw.indexOf(",") >= 0) {
+      // Both present — comma is thousand-separator (US/CA wood + steel EPDs)
+      num = parseFloat(raw.replace(/,/g, ""));
+    } else {
+      // Only one or neither — single comma → decimal
+      num = parseFloat(raw.replace(",", "."));
+    }
     if (isNaN(num)) continue;
     _setPath(rec, "impacts." + ind.schemaKey + ".total.value", num);
     _setPath(rec, "impacts." + ind.schemaKey + ".total.source", "epd_direct");
@@ -581,18 +743,122 @@ function extractNA(text, rec) {
 
 /* ── EPD International registry format (S-P-XXXXX) ─────────────────── */
 
+/* ── EU/IBU format (Institut Bauen und Umwelt) ─────────────────────── */
+//
+// Cover-page anchors are line-leading labels with the value on the same
+// line: "Owner of the Declaration   <name>", "Declaration number   <id>",
+// "Issue date   <date>", "Valid to   <date>". Programme operator is set
+// by extractCommon's _detectProgramOperator; we set it here too as a
+// safety net for layouts where the IBU name appears elsewhere.
+//
+// PCR lives under "This declaration is based on the product category
+// rules:" — the next non-empty line is the canonical PCR title (e.g.
+// "Wood based panels, 12.2018"). PCR-validation marker is a
+// "internally   x   externally" form where the "x" sits next to the
+// chosen option.
+//
+// Declared unit + density both live in the "This Declaration refers to
+// 1 m³ ... average weighted density of 167 kg/m³" sentence on page 2.
+
+function extractEuIbu(text, rec) {
+  _setPath(rec, "epd.program_operator", "IBU");
+
+  // Owner of the Declaration → manufacturer name. The label sits on its
+  // own line on some layouts (page 2), so we capture forward across one
+  // possible newline before settling on a single-line value.
+  if (!_get(rec, "manufacturer.name")) {
+    var mfr =
+      text.match(/Owner\s+of\s+the\s+Declaration\s+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
+      text.match(/Owner\s+of\s+the\s+(?:declaration|Declaration)\s*\n+\s*([A-Z][A-Za-z0-9 &.,'\-]{2,80})/);
+    if (mfr) _setPath(rec, "manufacturer.name", _cleanLine(mfr[1]));
+  }
+
+  // Declaration number → epd.id. IBU pattern is "EPD-XXX-YYYYYYY-..."
+  if (!_get(rec, "epd.id")) {
+    var idM = text.match(/Declaration\s+number\s+(EPD-[A-Z0-9.\-]{4,40})/i);
+    if (idM) _setPath(rec, "epd.id", idM[1]);
+  }
+
+  // Dates: IBU uses dd/mm/yyyy. _parseDate normalises to ISO YYYY-MM-DD.
+  if (!_get(rec, "epd.publication_date")) {
+    var pubM = text.match(/Issue\s+date\s+([0-9./\-]{8,12})/i);
+    if (pubM) {
+      var pubIso = _parseDate(pubM[1]);
+      if (pubIso) _setPath(rec, "epd.publication_date", pubIso);
+    }
+  }
+  if (!_get(rec, "epd.expiry_date")) {
+    var expM = text.match(/Valid\s+to\s+([0-9./\-]{8,12})/i);
+    if (expM) {
+      var expIso = _parseDate(expM[1]);
+      if (expIso) _setPath(rec, "epd.expiry_date", expIso);
+    }
+  }
+
+  // Validation: "internally   x   externally" with the marker next to
+  // the chosen mode. _detectProgramOperator-adjacent heuristic in
+  // extractCommon already handles this, but we double-tap here.
+  if (!_get(rec, "epd.validation.type")) {
+    if (/internally\s*x\s*externally/i.test(text)) {
+      // marker before "internally" → internal; before "externally" → external
+      // The IBU sample reads "internally   x   externally" with the x
+      // between them — convention is x marks the SELECTED column, and
+      // since IBU declarations are always externally verified, default
+      // to external when both labels are present.
+      _setPath(rec, "epd.validation.type", "external");
+    } else if (/[x✓X]\s*externally/i.test(text)) {
+      _setPath(rec, "epd.validation.type", "external");
+    } else if (/[x✓X]\s*internally/i.test(text)) {
+      _setPath(rec, "epd.validation.type", "internal");
+    }
+  }
+
+  // PCR — "This declaration is based on the product category rules:"
+  // followed (after one or two newlines) by the PCR title. Tolerant
+  // capture pulls everything up to "(PCR" or end-of-line.
+  if (!_get(rec, "methodology.pcr_guidelines")) {
+    var pcrM =
+      text.match(/product\s+category\s+rules\s*:\s*\n+\s*([^\n]{6,160})/i) ||
+      text.match(/category\s+rules\s*:\s*([^\n]{6,160})/i);
+    if (pcrM) {
+      var pcrVal = _cleanLine(pcrM[1]).replace(/\s*\(PCR.*$/i, "");
+      _setPath(rec, "methodology.pcr_guidelines", pcrVal);
+    }
+  }
+
+  // Declared unit + density on the "This Declaration refers to 1 m³ X
+  // ... average weighted density of 167 kg/m³" sentence.
+  if (!_get(rec, "carbon.stated.per_unit")) {
+    var unitM = text.match(/This\s+Declaration\s+refers\s+to\s+([^\n]{4,160})/i);
+    if (unitM) _setPath(rec, "carbon.stated.per_unit", _cleanLine(unitM[1]));
+  }
+  if (_get(rec, "physical.density.value_kg_m3") == null) {
+    var densM = text.match(/(?:average\s+weighted\s+)?density\s+of\s+(\d{2,5}(?:[.,]\d+)?)\s*kg\/m\s*[³^]?3?/i);
+    if (densM) _setPath(rec, "physical.density.value_kg_m3", _toNum(densM[1]));
+  }
+}
+
 function extractEpdIntl(text, rec) {
-  // S-P-XXXXX is the canonical ID
-  var sp = text.match(/S-P-(\d{5,6})/);
+  // S-P-XXXXX is the canonical ID; tolerant match handles the EPD-IES
+  // filename variant where per-glyph emission produces "S - P - 10278".
+  var sp = text.match(_SP_ID_RX);
   if (sp) _setPath(rec, "epd.id", "S-P-" + sp[1]);
 
   _setPath(rec, "epd.program_operator", "EPD International AB");
 
-  // Dates in ISO format (typical for this registry)
-  var pub = text.match(/Publication\s+date\s*:\s*(\d{4}-\d{2}-\d{2})/i);
-  if (pub) _setPath(rec, "epd.publication_date", pub[1]);
-  var exp = text.match(/Valid\s+until\s*:\s*(\d{4}-\d{2}-\d{2})/i);
-  if (exp) _setPath(rec, "epd.expiry_date", exp[1]);
+  // Dates in ISO format. The EPD-IES variant per-glyph-fragments the
+  // date itself ("202 5 - 10 - 2 0"), so we capture a 60-char window
+  // after each label, collapse digit-space-digit pairs, then run a
+  // loose date pattern. Falls back to the strict pattern for the
+  // typical EPD International layout.
+  if (!_get(rec, "epd.publication_date")) {
+    var pubLoose = _looseIsoDateAfter(text, /Publication\s+date\s*:?/i);
+    if (pubLoose) _setPath(rec, "epd.publication_date", pubLoose);
+  }
+  if (!_get(rec, "epd.expiry_date")) {
+    var expLoose = _looseIsoDateAfter(text, /Valid\s+until\s*:?/i);
+    if (expLoose) _setPath(rec, "epd.expiry_date", expLoose);
+  }
 
   // Manufacturer ("from <MFR>" or "Owner of the Declaration: <MFR>")
   var mfr =
