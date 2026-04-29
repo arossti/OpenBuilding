@@ -1,0 +1,1666 @@
+{
+  "_note": "BfCA db-fallbacks: reference-grade material defaults for fields that aren't typically published in EPDs (density, thermal conductivity, heat capacity, embodied energy, embodied carbon). Used as fallback only when the EPD itself is silent. Every value applied at runtime carries source: 'generic_default' so users see what came from the EPD vs the catalogue. Generated from db-fallbacks.source.xml — re-run schema/scripts/build-db-fallbacks.mjs after editing.",
+  "_schema_version": 1,
+  "_source_xml_sha256": "f27cf6a342f4d9d076a87ea7ee247e31dec9f475df740ad9c6fd82254be2bcfe",
+  "_generated_at": "2026-04-29T11:58:15.603Z",
+  "_attribution": "Compiled from a thermal + embodied-properties reference catalogue (XML import). Values are physical material constants; data is reference-grade not product-specific. Per-product accuracy requires an EPD.",
+  "defaults_by_material_type": {
+    "Concrete": {
+      "default": {
+        "density_kg_m3": 2200,
+        "thermal_conductivity_w_mk": 1.65,
+        "heat_capacity_j_kgk": 1000,
+        "embodied_energy_mj_kg": 0.82,
+        "embodied_carbon_kgco2e_kg": 0.12,
+        "_source_variant": "CONCRETE 3",
+        "_selection": "hand-picked override"
+      },
+      "variants": [
+        {
+          "name": "AERATED CONCRETE BLOCK 1",
+          "density_kg_m3": 500,
+          "thermal_conductivity_w_mk": 0.13,
+          "heat_capacity_j_kgk": 1290,
+          "embodied_energy_mj_kg": 0.59,
+          "embodied_carbon_kgco2e_kg": 0.063
+        },
+        {
+          "name": "AERATED CONCRETE BLOCK 2",
+          "density_kg_m3": 600,
+          "thermal_conductivity_w_mk": 0.16,
+          "heat_capacity_j_kgk": 1240,
+          "embodied_energy_mj_kg": 0.67,
+          "embodied_carbon_kgco2e_kg": 0.078
+        },
+        {
+          "name": "AERATED CONCRETE BLOCK 3",
+          "density_kg_m3": 700,
+          "thermal_conductivity_w_mk": 0.18,
+          "heat_capacity_j_kgk": 1210,
+          "embodied_energy_mj_kg": 0.72,
+          "embodied_carbon_kgco2e_kg": 0.088
+        },
+        {
+          "name": "AERATED CONCRETE BLOCK INTERLOCKING 1",
+          "density_kg_m3": 400,
+          "thermal_conductivity_w_mk": 0.11,
+          "heat_capacity_j_kgk": 1350,
+          "embodied_energy_mj_kg": 0.55,
+          "embodied_carbon_kgco2e_kg": 0.059
+        },
+        {
+          "name": "AERATED CONCRETE BLOCK INTERLOCKING 2",
+          "density_kg_m3": 500,
+          "thermal_conductivity_w_mk": 0.16,
+          "heat_capacity_j_kgk": 1240,
+          "embodied_energy_mj_kg": 0.59,
+          "embodied_carbon_kgco2e_kg": 0.063
+        },
+        {
+          "name": "AIR-ENT CONCRETE 1",
+          "density_kg_m3": 400,
+          "thermal_conductivity_w_mk": 0.1,
+          "heat_capacity_j_kgk": 1050,
+          "embodied_energy_mj_kg": 0.55,
+          "embodied_carbon_kgco2e_kg": 0.059
+        },
+        {
+          "name": "AIR-ENT CONCRETE 2",
+          "density_kg_m3": 450,
+          "thermal_conductivity_w_mk": 0.12,
+          "heat_capacity_j_kgk": 1050,
+          "embodied_energy_mj_kg": 0.57,
+          "embodied_carbon_kgco2e_kg": 0.061
+        },
+        {
+          "name": "AIR-ENT CONCRETE 3",
+          "density_kg_m3": 450,
+          "thermal_conductivity_w_mk": 0.13,
+          "heat_capacity_j_kgk": 1050,
+          "embodied_energy_mj_kg": 0.57,
+          "embodied_carbon_kgco2e_kg": 0.061
+        },
+        {
+          "name": "AIR-ENT CONCRETE 4",
+          "density_kg_m3": 500,
+          "thermal_conductivity_w_mk": 0.14,
+          "heat_capacity_j_kgk": 1050,
+          "embodied_energy_mj_kg": 0.59,
+          "embodied_carbon_kgco2e_kg": 0.063
+        },
+        {
+          "name": "AIR-ENT CONCRETE 5",
+          "density_kg_m3": 600,
+          "thermal_conductivity_w_mk": 0.16,
+          "heat_capacity_j_kgk": 1050,
+          "embodied_energy_mj_kg": 0.67,
+          "embodied_carbon_kgco2e_kg": 0.078
+        },
+        {
+          "name": "GASCONCRETE 1",
+          "density_kg_m3": 550,
+          "thermal_conductivity_w_mk": 0.13,
+          "heat_capacity_j_kgk": 920,
+          "embodied_energy_mj_kg": 0.63,
+          "embodied_carbon_kgco2e_kg": 0.07
+        },
+        {
+          "name": "GASCONCRETE 2",
+          "density_kg_m3": 510,
+          "thermal_conductivity_w_mk": 0.15,
+          "heat_capacity_j_kgk": 1050,
+          "embodied_energy_mj_kg": 0.61,
+          "embodied_carbon_kgco2e_kg": 0.064
+        },
+        {
+          "name": "CONCRETE LOW CONDUCTIVITY",
+          "density_kg_m3": 2300,
+          "thermal_conductivity_w_mk": 0.8,
+          "heat_capacity_j_kgk": 800,
+          "embodied_energy_mj_kg": 0.92,
+          "embodied_carbon_kgco2e_kg": 0.15
+        },
+        {
+          "name": "CONCRETE 1",
+          "density_kg_m3": 1800,
+          "thermal_conductivity_w_mk": 1.15,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 0.74,
+          "embodied_carbon_kgco2e_kg": 0.107
+        },
+        {
+          "name": "CONCRETE 2",
+          "density_kg_m3": 2000,
+          "thermal_conductivity_w_mk": 1.35,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 0.78,
+          "embodied_carbon_kgco2e_kg": 0.113
+        },
+        {
+          "name": "CONCRETE 3",
+          "density_kg_m3": 2200,
+          "thermal_conductivity_w_mk": 1.65,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 0.82,
+          "embodied_carbon_kgco2e_kg": 0.12
+        },
+        {
+          "name": "CONCRETE 4",
+          "density_kg_m3": 2300,
+          "thermal_conductivity_w_mk": 1.7,
+          "heat_capacity_j_kgk": 800,
+          "embodied_energy_mj_kg": 0.88,
+          "embodied_carbon_kgco2e_kg": 0.132
+        },
+        {
+          "name": "CONCRETE BLOCK",
+          "density_kg_m3": 1400,
+          "thermal_conductivity_w_mk": 0.6,
+          "heat_capacity_j_kgk": 880,
+          "embodied_energy_mj_kg": 0.72,
+          "embodied_carbon_kgco2e_kg": 0.088
+        },
+        {
+          "name": "EXPANDED CLAY-CONCRETE BLOCK",
+          "density_kg_m3": 450,
+          "thermal_conductivity_w_mk": 0.12,
+          "heat_capacity_j_kgk": 800,
+          "embodied_energy_mj_kg": 6.2,
+          "embodied_carbon_kgco2e_kg": 0.46
+        },
+        {
+          "name": "CONCRETE ROOF TILES",
+          "density_kg_m3": 2100,
+          "thermal_conductivity_w_mk": 1.5,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 0.75,
+          "embodied_carbon_kgco2e_kg": 0.107
+        }
+      ]
+    },
+    "Asphalt Shingle": {
+      "default": {
+        "density_kg_m3": 2100,
+        "thermal_conductivity_w_mk": 0.7,
+        "heat_capacity_j_kgk": 1000,
+        "embodied_energy_mj_kg": 3.93,
+        "embodied_carbon_kgco2e_kg": 0.076,
+        "_source_variant": "ASPHALT",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "ASPHALT",
+          "density_kg_m3": 2100,
+          "thermal_conductivity_w_mk": 0.7,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 3.93,
+          "embodied_carbon_kgco2e_kg": 0.076
+        }
+      ]
+    },
+    "TPO": {
+      "default": {
+        "density_kg_m3": 1100,
+        "thermal_conductivity_w_mk": 0.23,
+        "heat_capacity_j_kgk": 1000,
+        "embodied_energy_mj_kg": 2.66,
+        "embodied_carbon_kgco2e_kg": 0.056,
+        "_source_variant": "BITUMINOUS FELT",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "BITUMEN PURE",
+          "density_kg_m3": 1050,
+          "thermal_conductivity_w_mk": 0.17,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 42,
+          "embodied_carbon_kgco2e_kg": 0.55
+        },
+        {
+          "name": "BITUMINOUS FELT",
+          "density_kg_m3": 1100,
+          "thermal_conductivity_w_mk": 0.23,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 2.66,
+          "embodied_carbon_kgco2e_kg": 0.056
+        },
+        {
+          "name": "BITUMINOUS SHEET",
+          "density_kg_m3": 1100,
+          "thermal_conductivity_w_mk": 0.23,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 2.86,
+          "embodied_carbon_kgco2e_kg": 0.066
+        }
+      ]
+    },
+    "Brick": {
+      "default": {
+        "density_kg_m3": 1500,
+        "thermal_conductivity_w_mk": 0.58,
+        "heat_capacity_j_kgk": 840,
+        "embodied_energy_mj_kg": 3,
+        "embodied_carbon_kgco2e_kg": 0.24,
+        "_source_variant": "SOLID BRICK 1",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "SOLID BRICK 1",
+          "density_kg_m3": 1500,
+          "thermal_conductivity_w_mk": 0.58,
+          "heat_capacity_j_kgk": 840,
+          "embodied_energy_mj_kg": 3,
+          "embodied_carbon_kgco2e_kg": 0.24
+        },
+        {
+          "name": "SOLID BRICK 2",
+          "density_kg_m3": 1500,
+          "thermal_conductivity_w_mk": 0.6,
+          "heat_capacity_j_kgk": 840,
+          "embodied_energy_mj_kg": 3,
+          "embodied_carbon_kgco2e_kg": 0.24
+        }
+      ]
+    },
+    "Clay Brick": {
+      "default": {
+        "density_kg_m3": 960,
+        "thermal_conductivity_w_mk": 0.216,
+        "heat_capacity_j_kgk": 920,
+        "embodied_energy_mj_kg": 4.5,
+        "embodied_carbon_kgco2e_kg": 0.36,
+        "_source_variant": "BURNT CLAY BLOCK TO BE INSULATED MEDIUM STRENGTH 1",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "BURNT CLAY BLOCK LIMITED STRENGTH 1",
+          "density_kg_m3": 600,
+          "thermal_conductivity_w_mk": 0.109,
+          "heat_capacity_j_kgk": 920,
+          "embodied_energy_mj_kg": 6,
+          "embodied_carbon_kgco2e_kg": 0.48
+        },
+        {
+          "name": "BURNT CLAY BLOCK LIMITED STRENGTH 2",
+          "density_kg_m3": 648,
+          "thermal_conductivity_w_mk": 0.121,
+          "heat_capacity_j_kgk": 920,
+          "embodied_energy_mj_kg": 6,
+          "embodied_carbon_kgco2e_kg": 0.48
+        },
+        {
+          "name": "BURNT CLAY BLOCK MEDIUM STRENGTH 1",
+          "density_kg_m3": 742,
+          "thermal_conductivity_w_mk": 0.125,
+          "heat_capacity_j_kgk": 920,
+          "embodied_energy_mj_kg": 6,
+          "embodied_carbon_kgco2e_kg": 0.48
+        },
+        {
+          "name": "BURNT CLAY BLOCK MEDIUM STRENGTH 2",
+          "density_kg_m3": 694,
+          "thermal_conductivity_w_mk": 0.148,
+          "heat_capacity_j_kgk": 920,
+          "embodied_energy_mj_kg": 6,
+          "embodied_carbon_kgco2e_kg": 0.48
+        },
+        {
+          "name": "BURNT CLAY BLOCK TO BE INSULATED MEDIUM STRENGTH 1",
+          "density_kg_m3": 960,
+          "thermal_conductivity_w_mk": 0.216,
+          "heat_capacity_j_kgk": 920,
+          "embodied_energy_mj_kg": 4.5,
+          "embodied_carbon_kgco2e_kg": 0.36
+        },
+        {
+          "name": "BURNT CLAY BLOCK TO BE INSULATED MEDIUM STRENGTH 2",
+          "density_kg_m3": 840,
+          "thermal_conductivity_w_mk": 0.272,
+          "heat_capacity_j_kgk": 920,
+          "embodied_energy_mj_kg": 4.5,
+          "embodied_carbon_kgco2e_kg": 0.36
+        },
+        {
+          "name": "BURNT CLAY BLOCK TO BE INSULATED STRONG",
+          "density_kg_m3": 940,
+          "thermal_conductivity_w_mk": 0.324,
+          "heat_capacity_j_kgk": 920,
+          "embodied_energy_mj_kg": 4.5,
+          "embodied_carbon_kgco2e_kg": 0.36
+        },
+        {
+          "name": "CLAY FLOOR TILE",
+          "density_kg_m3": 2000,
+          "thermal_conductivity_w_mk": 1.5,
+          "heat_capacity_j_kgk": 900,
+          "embodied_energy_mj_kg": 6.5,
+          "embodied_carbon_kgco2e_kg": 0.48
+        },
+        {
+          "name": "CLAY ROOF TILES",
+          "density_kg_m3": 2000,
+          "thermal_conductivity_w_mk": 1,
+          "heat_capacity_j_kgk": 800,
+          "embodied_energy_mj_kg": 3,
+          "embodied_carbon_kgco2e_kg": 0.24
+        }
+      ]
+    },
+    "Cork": {
+      "default": {
+        "density_kg_m3": 175,
+        "thermal_conductivity_w_mk": 0.08,
+        "heat_capacity_j_kgk": 1800,
+        "embodied_energy_mj_kg": 4,
+        "embodied_carbon_kgco2e_kg": 0.19,
+        "_source_variant": "CORK",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "CORK-CONCRETE",
+          "density_kg_m3": 1300,
+          "thermal_conductivity_w_mk": 0.44,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 0.45,
+          "embodied_carbon_kgco2e_kg": 0.05
+        },
+        {
+          "name": "CORK",
+          "density_kg_m3": 175,
+          "thermal_conductivity_w_mk": 0.08,
+          "heat_capacity_j_kgk": 1800,
+          "embodied_energy_mj_kg": 4,
+          "embodied_carbon_kgco2e_kg": 0.19
+        },
+        {
+          "name": "CORKBOARD",
+          "density_kg_m3": 140,
+          "thermal_conductivity_w_mk": 0.04,
+          "heat_capacity_j_kgk": 1900,
+          "embodied_energy_mj_kg": 7.1,
+          "embodied_carbon_kgco2e_kg": 0.39
+        }
+      ]
+    },
+    "Leca": {
+      "default": {
+        "density_kg_m3": 330,
+        "thermal_conductivity_w_mk": 0.13,
+        "heat_capacity_j_kgk": 880,
+        "embodied_energy_mj_kg": 6.5,
+        "embodied_carbon_kgco2e_kg": 0.48,
+        "_source_variant": "EXPANDED CLAY BLOCK",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "EXPANDED CLAY BLOCK",
+          "density_kg_m3": 330,
+          "thermal_conductivity_w_mk": 0.13,
+          "heat_capacity_j_kgk": 880,
+          "embodied_energy_mj_kg": 6.5,
+          "embodied_carbon_kgco2e_kg": 0.48
+        },
+        {
+          "name": "EXPANDED CLAY WALL PANEL",
+          "density_kg_m3": 960,
+          "thermal_conductivity_w_mk": 0.21,
+          "heat_capacity_j_kgk": 1050,
+          "embodied_energy_mj_kg": 7,
+          "embodied_carbon_kgco2e_kg": 0.5
+        }
+      ]
+    },
+    "Carpet": {
+      "default": {
+        "density_kg_m3": 200,
+        "thermal_conductivity_w_mk": 0.06,
+        "heat_capacity_j_kgk": 1300,
+        "embodied_energy_mj_kg": 74,
+        "embodied_carbon_kgco2e_kg": 3.9,
+        "_source_variant": "CARPET",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "CARPET",
+          "density_kg_m3": 200,
+          "thermal_conductivity_w_mk": 0.06,
+          "heat_capacity_j_kgk": 1300,
+          "embodied_energy_mj_kg": 74,
+          "embodied_carbon_kgco2e_kg": 3.9
+        },
+        {
+          "name": "TEXTILE FLOOR",
+          "density_kg_m3": 200,
+          "thermal_conductivity_w_mk": 0.06,
+          "heat_capacity_j_kgk": 1300,
+          "embodied_energy_mj_kg": 120,
+          "embodied_carbon_kgco2e_kg": 9.14
+        }
+      ]
+    },
+    "Linoleum": {
+      "default": {
+        "density_kg_m3": 1200,
+        "thermal_conductivity_w_mk": 0.17,
+        "heat_capacity_j_kgk": 1400,
+        "embodied_energy_mj_kg": 25,
+        "embodied_carbon_kgco2e_kg": 1.21,
+        "_source_variant": "LINOLEUM",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "LINOLEUM",
+          "density_kg_m3": 1200,
+          "thermal_conductivity_w_mk": 0.17,
+          "heat_capacity_j_kgk": 1400,
+          "embodied_energy_mj_kg": 25,
+          "embodied_carbon_kgco2e_kg": 1.21
+        }
+      ]
+    },
+    "Luxury vinyl tile": {
+      "default": {
+        "density_kg_m3": 1700,
+        "thermal_conductivity_w_mk": 0.25,
+        "heat_capacity_j_kgk": 1400,
+        "embodied_energy_mj_kg": 95.4,
+        "embodied_carbon_kgco2e_kg": 4.98,
+        "_source_variant": "PLASTIC FLOOR",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "PLASTIC FLOOR",
+          "density_kg_m3": 1700,
+          "thermal_conductivity_w_mk": 0.25,
+          "heat_capacity_j_kgk": 1400,
+          "embodied_energy_mj_kg": 95.4,
+          "embodied_carbon_kgco2e_kg": 4.98
+        }
+      ]
+    },
+    "Gypsum": {
+      "default": {
+        "density_kg_m3": 900,
+        "thermal_conductivity_w_mk": 0.25,
+        "heat_capacity_j_kgk": 1000,
+        "embodied_energy_mj_kg": 6.75,
+        "embodied_carbon_kgco2e_kg": 0.39,
+        "_source_variant": "GYPSUM PLASTERBOARD",
+        "_selection": "hand-picked override"
+      },
+      "variants": [
+        {
+          "name": "GYPSUM 1",
+          "density_kg_m3": 600,
+          "thermal_conductivity_w_mk": 0.18,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 1.4,
+          "embodied_carbon_kgco2e_kg": 0.1
+        },
+        {
+          "name": "GYPSUM 2",
+          "density_kg_m3": 900,
+          "thermal_conductivity_w_mk": 0.3,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 1.6,
+          "embodied_carbon_kgco2e_kg": 0.12
+        },
+        {
+          "name": "GYPSUM 3",
+          "density_kg_m3": 1200,
+          "thermal_conductivity_w_mk": 0.43,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 1.8,
+          "embodied_carbon_kgco2e_kg": 0.13
+        },
+        {
+          "name": "GYPSUM 4",
+          "density_kg_m3": 1500,
+          "thermal_conductivity_w_mk": 0.56,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 2.3,
+          "embodied_carbon_kgco2e_kg": 0.16
+        },
+        {
+          "name": "GYPSUM PLASTERBOARD",
+          "density_kg_m3": 900,
+          "thermal_conductivity_w_mk": 0.25,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 6.75,
+          "embodied_carbon_kgco2e_kg": 0.39
+        },
+        {
+          "name": "GYPSUMBOARD",
+          "density_kg_m3": 900,
+          "thermal_conductivity_w_mk": 0.22,
+          "heat_capacity_j_kgk": 1100,
+          "embodied_energy_mj_kg": 6.75,
+          "embodied_carbon_kgco2e_kg": 0.39
+        },
+        {
+          "name": "GYPSUM INSULATING PLASTER",
+          "density_kg_m3": 600,
+          "thermal_conductivity_w_mk": 0.18,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 8,
+          "embodied_carbon_kgco2e_kg": 1.2
+        },
+        {
+          "name": "GYPSUM PLASTER 1",
+          "density_kg_m3": 1000,
+          "thermal_conductivity_w_mk": 0.4,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 1.6,
+          "embodied_carbon_kgco2e_kg": 0.11
+        },
+        {
+          "name": "GYPSUM PLASTER 2",
+          "density_kg_m3": 1300,
+          "thermal_conductivity_w_mk": 0.57,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 1.8,
+          "embodied_carbon_kgco2e_kg": 0.13
+        }
+      ]
+    },
+    "Aluminum": {
+      "default": {
+        "density_kg_m3": 2800,
+        "thermal_conductivity_w_mk": 160,
+        "heat_capacity_j_kgk": 880,
+        "embodied_energy_mj_kg": 155,
+        "embodied_carbon_kgco2e_kg": 9.16,
+        "_source_variant": "ALUMINUM",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "ALUMINUM",
+          "density_kg_m3": 2800,
+          "thermal_conductivity_w_mk": 160,
+          "heat_capacity_j_kgk": 880,
+          "embodied_energy_mj_kg": 155,
+          "embodied_carbon_kgco2e_kg": 9.16
+        }
+      ]
+    },
+    "Steel": {
+      "default": {
+        "density_kg_m3": 7800,
+        "thermal_conductivity_w_mk": 50,
+        "heat_capacity_j_kgk": 450,
+        "embodied_energy_mj_kg": 20.1,
+        "embodied_carbon_kgco2e_kg": 1.46,
+        "_source_variant": "STEEL 1",
+        "_selection": "hand-picked override"
+      },
+      "variants": [
+        {
+          "name": "CAST IRON",
+          "density_kg_m3": 7500,
+          "thermal_conductivity_w_mk": 50,
+          "heat_capacity_j_kgk": 450,
+          "embodied_energy_mj_kg": 25,
+          "embodied_carbon_kgco2e_kg": 1.21
+        },
+        {
+          "name": "STAINLESS STEEL",
+          "density_kg_m3": 7900,
+          "thermal_conductivity_w_mk": 17,
+          "heat_capacity_j_kgk": 460,
+          "embodied_energy_mj_kg": 56.7,
+          "embodied_carbon_kgco2e_kg": 6.15
+        },
+        {
+          "name": "STEEL 1",
+          "density_kg_m3": 7800,
+          "thermal_conductivity_w_mk": 50,
+          "heat_capacity_j_kgk": 450,
+          "embodied_energy_mj_kg": 20.1,
+          "embodied_carbon_kgco2e_kg": 1.46
+        },
+        {
+          "name": "STEEL 2",
+          "density_kg_m3": 7800,
+          "thermal_conductivity_w_mk": 60,
+          "heat_capacity_j_kgk": 460,
+          "embodied_energy_mj_kg": 25.1,
+          "embodied_carbon_kgco2e_kg": 1.66
+        }
+      ]
+    },
+    "Ceramic": {
+      "default": {
+        "density_kg_m3": 2300,
+        "thermal_conductivity_w_mk": 1.3,
+        "heat_capacity_j_kgk": 840,
+        "embodied_energy_mj_kg": 10,
+        "embodied_carbon_kgco2e_kg": 0.7,
+        "_source_variant": "CERAMIC ROOF TILES",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "CERAMIC ROOF TILES",
+          "density_kg_m3": 2300,
+          "thermal_conductivity_w_mk": 1.3,
+          "heat_capacity_j_kgk": 840,
+          "embodied_energy_mj_kg": 10,
+          "embodied_carbon_kgco2e_kg": 0.7
+        }
+      ]
+    },
+    "Acrylic": {
+      "default": {
+        "density_kg_m3": 1050,
+        "thermal_conductivity_w_mk": 0.2,
+        "heat_capacity_j_kgk": 1500,
+        "embodied_energy_mj_kg": 90.67,
+        "embodied_carbon_kgco2e_kg": 4.09,
+        "_source_variant": "ACRYLIC",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "ACRYLIC",
+          "density_kg_m3": 1050,
+          "thermal_conductivity_w_mk": 0.2,
+          "heat_capacity_j_kgk": 1500,
+          "embodied_energy_mj_kg": 90.67,
+          "embodied_carbon_kgco2e_kg": 4.09
+        }
+      ]
+    },
+    "Nylon": {
+      "default": {
+        "density_kg_m3": 1150,
+        "thermal_conductivity_w_mk": 0.25,
+        "heat_capacity_j_kgk": 1600,
+        "embodied_energy_mj_kg": 120.5,
+        "embodied_carbon_kgco2e_kg": 9.14,
+        "_source_variant": "POLYAMIDE",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "POLYAMIDE",
+          "density_kg_m3": 1150,
+          "thermal_conductivity_w_mk": 0.25,
+          "heat_capacity_j_kgk": 1600,
+          "embodied_energy_mj_kg": 120.5,
+          "embodied_carbon_kgco2e_kg": 9.14
+        }
+      ]
+    },
+    "HDPE": {
+      "default": {
+        "density_kg_m3": 980,
+        "thermal_conductivity_w_mk": 0.5,
+        "heat_capacity_j_kgk": 1800,
+        "embodied_energy_mj_kg": 76.7,
+        "embodied_carbon_kgco2e_kg": 1.93,
+        "_source_variant": "HIGH DENSITY POLYETHYLENE",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "HIGH DENSITY POLYETHYLENE",
+          "density_kg_m3": 980,
+          "thermal_conductivity_w_mk": 0.5,
+          "heat_capacity_j_kgk": 1800,
+          "embodied_energy_mj_kg": 76.7,
+          "embodied_carbon_kgco2e_kg": 1.93
+        }
+      ]
+    },
+    "Polypropylene": {
+      "default": {
+        "density_kg_m3": 910,
+        "thermal_conductivity_w_mk": 0.22,
+        "heat_capacity_j_kgk": 1800,
+        "embodied_energy_mj_kg": 99.2,
+        "embodied_carbon_kgco2e_kg": 3.43,
+        "_source_variant": "POLYPROPYLENE",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "POLYPROPYLENE",
+          "density_kg_m3": 910,
+          "thermal_conductivity_w_mk": 0.22,
+          "heat_capacity_j_kgk": 1800,
+          "embodied_energy_mj_kg": 99.2,
+          "embodied_carbon_kgco2e_kg": 3.43
+        }
+      ]
+    },
+    "Vinyl": {
+      "default": {
+        "density_kg_m3": 1390,
+        "thermal_conductivity_w_mk": 0.17,
+        "heat_capacity_j_kgk": 900,
+        "embodied_energy_mj_kg": 77.2,
+        "embodied_carbon_kgco2e_kg": 3.1,
+        "_source_variant": "PVC",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "PVC",
+          "density_kg_m3": 1390,
+          "thermal_conductivity_w_mk": 0.17,
+          "heat_capacity_j_kgk": 900,
+          "embodied_energy_mj_kg": 77.2,
+          "embodied_carbon_kgco2e_kg": 3.1
+        }
+      ]
+    },
+    "Stone": {
+      "default": {
+        "density_kg_m3": 1800,
+        "thermal_conductivity_w_mk": 0.93,
+        "heat_capacity_j_kgk": 840,
+        "embodied_energy_mj_kg": 1.2,
+        "embodied_carbon_kgco2e_kg": 0.07,
+        "_source_variant": "LIMESANDSTONE",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "ARTIFICIAL STONE",
+          "density_kg_m3": 1750,
+          "thermal_conductivity_w_mk": 1.3,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 1.5,
+          "embodied_carbon_kgco2e_kg": 0.18
+        },
+        {
+          "name": "BASALT",
+          "density_kg_m3": 2850,
+          "thermal_conductivity_w_mk": 3.5,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 11,
+          "embodied_carbon_kgco2e_kg": 0.7
+        },
+        {
+          "name": "GNEISS",
+          "density_kg_m3": 2550,
+          "thermal_conductivity_w_mk": 3.5,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 10.5,
+          "embodied_carbon_kgco2e_kg": 0.65
+        },
+        {
+          "name": "GRANITE 1",
+          "density_kg_m3": 2600,
+          "thermal_conductivity_w_mk": 2.8,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 10.2,
+          "embodied_carbon_kgco2e_kg": 0.63
+        },
+        {
+          "name": "GRANITE 2",
+          "density_kg_m3": 2700,
+          "thermal_conductivity_w_mk": 3.4,
+          "heat_capacity_j_kgk": 800,
+          "embodied_energy_mj_kg": 14,
+          "embodied_carbon_kgco2e_kg": 0.75
+        },
+        {
+          "name": "LIMESTONE HARD",
+          "density_kg_m3": 2600,
+          "thermal_conductivity_w_mk": 2.3,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 1.7,
+          "embodied_carbon_kgco2e_kg": 0.095
+        },
+        {
+          "name": "LIMESTONE MEDIUM",
+          "density_kg_m3": 2200,
+          "thermal_conductivity_w_mk": 1.7,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 1.5,
+          "embodied_carbon_kgco2e_kg": 0.09
+        },
+        {
+          "name": "LIMESTONE SOFT",
+          "density_kg_m3": 1800,
+          "thermal_conductivity_w_mk": 1.1,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 1.4,
+          "embodied_carbon_kgco2e_kg": 0.085
+        },
+        {
+          "name": "LIMESANDSTONE",
+          "density_kg_m3": 1800,
+          "thermal_conductivity_w_mk": 0.93,
+          "heat_capacity_j_kgk": 840,
+          "embodied_energy_mj_kg": 1.2,
+          "embodied_carbon_kgco2e_kg": 0.07
+        },
+        {
+          "name": "MARBLE",
+          "density_kg_m3": 2800,
+          "thermal_conductivity_w_mk": 3.5,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 2,
+          "embodied_carbon_kgco2e_kg": 0.13
+        },
+        {
+          "name": "NATURAL PUMICE",
+          "density_kg_m3": 400,
+          "thermal_conductivity_w_mk": 0.12,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 0.09,
+          "embodied_carbon_kgco2e_kg": 0.007
+        },
+        {
+          "name": "CRYSTALLINE ROCK",
+          "density_kg_m3": 2800,
+          "thermal_conductivity_w_mk": 3.5,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 2.4,
+          "embodied_carbon_kgco2e_kg": 0.16
+        },
+        {
+          "name": "POROUS ROCK",
+          "density_kg_m3": 1600,
+          "thermal_conductivity_w_mk": 0.55,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 1,
+          "embodied_carbon_kgco2e_kg": 0.06
+        },
+        {
+          "name": "SEDIMENTARY ROCK HEAVY",
+          "density_kg_m3": 2600,
+          "thermal_conductivity_w_mk": 2.3,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 1.2,
+          "embodied_carbon_kgco2e_kg": 0.08
+        },
+        {
+          "name": "SEDIMENTARY ROCK LIGHT",
+          "density_kg_m3": 1500,
+          "thermal_conductivity_w_mk": 0.85,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 0.8,
+          "embodied_carbon_kgco2e_kg": 0.04
+        },
+        {
+          "name": "SANDSTONE",
+          "density_kg_m3": 2600,
+          "thermal_conductivity_w_mk": 2.3,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 1,
+          "embodied_carbon_kgco2e_kg": 0.06
+        },
+        {
+          "name": "SLATE",
+          "density_kg_m3": 2400,
+          "thermal_conductivity_w_mk": 2.2,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 5.5,
+          "embodied_carbon_kgco2e_kg": 0.035
+        }
+      ]
+    },
+    "Fiberglass": {
+      "default": {
+        "density_kg_m3": 23,
+        "thermal_conductivity_w_mk": 0.033,
+        "heat_capacity_j_kgk": 1030,
+        "embodied_energy_mj_kg": 28,
+        "embodied_carbon_kgco2e_kg": 1.35,
+        "_source_variant": "ELEVATION GLASS WOOL 2",
+        "_selection": "hand-picked override"
+      },
+      "variants": [
+        {
+          "name": "ELEVATION GLASS WOOL 1",
+          "density_kg_m3": 14,
+          "thermal_conductivity_w_mk": 0.04,
+          "heat_capacity_j_kgk": 1030,
+          "embodied_energy_mj_kg": 26,
+          "embodied_carbon_kgco2e_kg": 1.3
+        },
+        {
+          "name": "ELEVATION GLASS WOOL 2",
+          "density_kg_m3": 23,
+          "thermal_conductivity_w_mk": 0.033,
+          "heat_capacity_j_kgk": 1030,
+          "embodied_energy_mj_kg": 28,
+          "embodied_carbon_kgco2e_kg": 1.35
+        },
+        {
+          "name": "ELEVATION GLASS WOOL 3",
+          "density_kg_m3": 50,
+          "thermal_conductivity_w_mk": 0.033,
+          "heat_capacity_j_kgk": 1030,
+          "embodied_energy_mj_kg": 35,
+          "embodied_carbon_kgco2e_kg": 1.45
+        },
+        {
+          "name": "ROOF GLASS WOOL",
+          "density_kg_m3": 14.5,
+          "thermal_conductivity_w_mk": 0.038,
+          "heat_capacity_j_kgk": 1030,
+          "embodied_energy_mj_kg": 25,
+          "embodied_carbon_kgco2e_kg": 1.25
+        },
+        {
+          "name": "INACCESSIBLE FLOOR GLASS WOOL 1",
+          "density_kg_m3": 13,
+          "thermal_conductivity_w_mk": 0.035,
+          "heat_capacity_j_kgk": 1450,
+          "embodied_energy_mj_kg": 24,
+          "embodied_carbon_kgco2e_kg": 1.23
+        },
+        {
+          "name": "INACCESSIBLE FLOOR GLASS WOOL 2",
+          "density_kg_m3": 14.5,
+          "thermal_conductivity_w_mk": 0.038,
+          "heat_capacity_j_kgk": 1030,
+          "embodied_energy_mj_kg": 26.5,
+          "embodied_carbon_kgco2e_kg": 1.32
+        },
+        {
+          "name": "ACCESSIBLE FLOOR GLASS WOOL 1",
+          "density_kg_m3": 64,
+          "thermal_conductivity_w_mk": 0.033,
+          "heat_capacity_j_kgk": 1030,
+          "embodied_energy_mj_kg": 37,
+          "embodied_carbon_kgco2e_kg": 1.48
+        },
+        {
+          "name": "ACCESSIBLE FLOOR GLASS WOOL 2",
+          "density_kg_m3": 115,
+          "thermal_conductivity_w_mk": 0.033,
+          "heat_capacity_j_kgk": 1030,
+          "embodied_energy_mj_kg": 47,
+          "embodied_carbon_kgco2e_kg": 1.9
+        }
+      ]
+    },
+    "Mineral wool": {
+      "default": {
+        "density_kg_m3": 50,
+        "thermal_conductivity_w_mk": 0.036,
+        "heat_capacity_j_kgk": 840,
+        "embodied_energy_mj_kg": 15.7,
+        "embodied_carbon_kgco2e_kg": 1.23,
+        "_source_variant": "MINERAL WOOL 2",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "ECOFIBER",
+          "density_kg_m3": 27,
+          "thermal_conductivity_w_mk": 0.04,
+          "heat_capacity_j_kgk": 2500,
+          "embodied_energy_mj_kg": 14.7,
+          "embodied_carbon_kgco2e_kg": 1.12
+        },
+        {
+          "name": "ISODRAIN",
+          "density_kg_m3": 19,
+          "thermal_conductivity_w_mk": 0.039,
+          "heat_capacity_j_kgk": 1400,
+          "embodied_energy_mj_kg": 14.1,
+          "embodied_carbon_kgco2e_kg": 1.08
+        },
+        {
+          "name": "LOSULL 1",
+          "density_kg_m3": 15,
+          "thermal_conductivity_w_mk": 0.06,
+          "heat_capacity_j_kgk": 750,
+          "embodied_energy_mj_kg": 12.5,
+          "embodied_carbon_kgco2e_kg": 0.98
+        },
+        {
+          "name": "LOSULL 2",
+          "density_kg_m3": 50,
+          "thermal_conductivity_w_mk": 0.042,
+          "heat_capacity_j_kgk": 750,
+          "embodied_energy_mj_kg": 14.9,
+          "embodied_carbon_kgco2e_kg": 1.2
+        },
+        {
+          "name": "MINERAL WOOL 1",
+          "density_kg_m3": 50,
+          "thermal_conductivity_w_mk": 0.033,
+          "heat_capacity_j_kgk": 840,
+          "embodied_energy_mj_kg": 14.6,
+          "embodied_carbon_kgco2e_kg": 1.15
+        },
+        {
+          "name": "MINERAL WOOL 2",
+          "density_kg_m3": 50,
+          "thermal_conductivity_w_mk": 0.036,
+          "heat_capacity_j_kgk": 840,
+          "embodied_energy_mj_kg": 15.7,
+          "embodied_carbon_kgco2e_kg": 1.23
+        },
+        {
+          "name": "MINERAL WOOL 3",
+          "density_kg_m3": 50,
+          "thermal_conductivity_w_mk": 0.04,
+          "heat_capacity_j_kgk": 840,
+          "embodied_energy_mj_kg": 16.6,
+          "embodied_carbon_kgco2e_kg": 1.28
+        },
+        {
+          "name": "MINERAL WOOL 4",
+          "density_kg_m3": 50,
+          "thermal_conductivity_w_mk": 0.05,
+          "heat_capacity_j_kgk": 840,
+          "embodied_energy_mj_kg": 18.1,
+          "embodied_carbon_kgco2e_kg": 1.34
+        },
+        {
+          "name": "MINERAL WOOL SOFT",
+          "density_kg_m3": 40,
+          "thermal_conductivity_w_mk": 0.037,
+          "heat_capacity_j_kgk": 840,
+          "embodied_energy_mj_kg": 14.3,
+          "embodied_carbon_kgco2e_kg": 1.08
+        },
+        {
+          "name": "MINERAL WOOL HARD",
+          "density_kg_m3": 115,
+          "thermal_conductivity_w_mk": 0.036,
+          "heat_capacity_j_kgk": 840,
+          "embodied_energy_mj_kg": 21.2,
+          "embodied_carbon_kgco2e_kg": 1.65
+        },
+        {
+          "name": "PLASTERABLE MINERAL WOOL",
+          "density_kg_m3": 115,
+          "thermal_conductivity_w_mk": 0.036,
+          "heat_capacity_j_kgk": 840,
+          "embodied_energy_mj_kg": 21.4,
+          "embodied_carbon_kgco2e_kg": 1.69
+        },
+        {
+          "name": "WATERPROOF MINERAL WOOL",
+          "density_kg_m3": 160,
+          "thermal_conductivity_w_mk": 0.04,
+          "heat_capacity_j_kgk": 840,
+          "embodied_energy_mj_kg": 23.4,
+          "embodied_carbon_kgco2e_kg": 1.73
+        }
+      ]
+    },
+    "EPS Foam": {
+      "default": {
+        "density_kg_m3": 25,
+        "thermal_conductivity_w_mk": 0.033,
+        "heat_capacity_j_kgk": 1400,
+        "embodied_energy_mj_kg": 83.4,
+        "embodied_carbon_kgco2e_kg": 3.29,
+        "_source_variant": "EXP.PLASTICS 1",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "EPS 1",
+          "density_kg_m3": 15,
+          "thermal_conductivity_w_mk": 0.042,
+          "heat_capacity_j_kgk": 1450,
+          "embodied_energy_mj_kg": 76,
+          "embodied_carbon_kgco2e_kg": 3.18
+        },
+        {
+          "name": "EPS 2",
+          "density_kg_m3": 25,
+          "thermal_conductivity_w_mk": 0.036,
+          "heat_capacity_j_kgk": 1450,
+          "embodied_energy_mj_kg": 86.6,
+          "embodied_carbon_kgco2e_kg": 3.29
+        },
+        {
+          "name": "EXP.PLASTICS 1",
+          "density_kg_m3": 25,
+          "thermal_conductivity_w_mk": 0.033,
+          "heat_capacity_j_kgk": 1400,
+          "embodied_energy_mj_kg": 83.4,
+          "embodied_carbon_kgco2e_kg": 3.29
+        },
+        {
+          "name": "EXP.PLASTICS 2",
+          "density_kg_m3": 25,
+          "thermal_conductivity_w_mk": 0.036,
+          "heat_capacity_j_kgk": 1400,
+          "embodied_energy_mj_kg": 86.4,
+          "embodied_carbon_kgco2e_kg": 3.43
+        },
+        {
+          "name": "EXP.PLASTICS 3",
+          "density_kg_m3": 25,
+          "thermal_conductivity_w_mk": 0.04,
+          "heat_capacity_j_kgk": 1400,
+          "embodied_energy_mj_kg": 88.7,
+          "embodied_carbon_kgco2e_kg": 3.53
+        }
+      ]
+    },
+    "Spray polyurethane foam": {
+      "default": {
+        "density_kg_m3": 30,
+        "thermal_conductivity_w_mk": 0.035,
+        "heat_capacity_j_kgk": 1450,
+        "embodied_energy_mj_kg": 102.1,
+        "embodied_carbon_kgco2e_kg": 4.84,
+        "_source_variant": "POLYFOAM",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "POLYFOAM",
+          "density_kg_m3": 30,
+          "thermal_conductivity_w_mk": 0.035,
+          "heat_capacity_j_kgk": 1450,
+          "embodied_energy_mj_kg": 102.1,
+          "embodied_carbon_kgco2e_kg": 4.84
+        }
+      ]
+    },
+    "XPS Foam": {
+      "default": {
+        "density_kg_m3": 28,
+        "thermal_conductivity_w_mk": 0.032,
+        "heat_capacity_j_kgk": 1450,
+        "embodied_energy_mj_kg": 87.4,
+        "embodied_carbon_kgco2e_kg": 3.42,
+        "_source_variant": "XPS",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "XPS",
+          "density_kg_m3": 28,
+          "thermal_conductivity_w_mk": 0.032,
+          "heat_capacity_j_kgk": 1450,
+          "embodied_energy_mj_kg": 87.4,
+          "embodied_carbon_kgco2e_kg": 3.42
+        }
+      ]
+    },
+    "Wood fibre": {
+      "default": {
+        "density_kg_m3": 1000,
+        "thermal_conductivity_w_mk": 0.13,
+        "heat_capacity_j_kgk": 1350,
+        "embodied_energy_mj_kg": 11.98,
+        "embodied_carbon_kgco2e_kg": 0.51,
+        "_source_variant": "WOODFIBER H",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "WOODFIBER",
+          "density_kg_m3": 300,
+          "thermal_conductivity_w_mk": 0.052,
+          "heat_capacity_j_kgk": 1350,
+          "embodied_energy_mj_kg": 12.4,
+          "embodied_carbon_kgco2e_kg": 0.09
+        },
+        {
+          "name": "WOODFIBER H",
+          "density_kg_m3": 1000,
+          "thermal_conductivity_w_mk": 0.13,
+          "heat_capacity_j_kgk": 1350,
+          "embodied_energy_mj_kg": 11.98,
+          "embodied_carbon_kgco2e_kg": 0.51
+        },
+        {
+          "name": "WOODFIBER HH",
+          "density_kg_m3": 600,
+          "thermal_conductivity_w_mk": 0.08,
+          "heat_capacity_j_kgk": 1350,
+          "embodied_energy_mj_kg": 10.7,
+          "embodied_carbon_kgco2e_kg": 0.48
+        }
+      ]
+    },
+    "Wood wool board": {
+      "default": {
+        "density_kg_m3": 350,
+        "thermal_conductivity_w_mk": 0.077,
+        "heat_capacity_j_kgk": 2000,
+        "embodied_energy_mj_kg": 15.1,
+        "embodied_carbon_kgco2e_kg": 0.18,
+        "_source_variant": "WOOD WOOL 2",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "WOOD WOOL 1",
+          "density_kg_m3": 200,
+          "thermal_conductivity_w_mk": 0.075,
+          "heat_capacity_j_kgk": 1510,
+          "embodied_energy_mj_kg": 10.8,
+          "embodied_carbon_kgco2e_kg": 0.12
+        },
+        {
+          "name": "WOOD WOOL 2",
+          "density_kg_m3": 350,
+          "thermal_conductivity_w_mk": 0.077,
+          "heat_capacity_j_kgk": 2000,
+          "embodied_energy_mj_kg": 15.1,
+          "embodied_carbon_kgco2e_kg": 0.18
+        },
+        {
+          "name": "WOOD WOOL 3",
+          "density_kg_m3": 440,
+          "thermal_conductivity_w_mk": 0.1,
+          "heat_capacity_j_kgk": 2000,
+          "embodied_energy_mj_kg": 15.4,
+          "embodied_carbon_kgco2e_kg": 0.2
+        },
+        {
+          "name": "WOOD WOOL 4",
+          "density_kg_m3": 680,
+          "thermal_conductivity_w_mk": 0.167,
+          "heat_capacity_j_kgk": 2000,
+          "embodied_energy_mj_kg": 17.7,
+          "embodied_carbon_kgco2e_kg": 0.42
+        }
+      ]
+    },
+    "Framing": {
+      "default": {
+        "density_kg_m3": 500,
+        "thermal_conductivity_w_mk": 0.13,
+        "heat_capacity_j_kgk": 2500,
+        "embodied_energy_mj_kg": 7.11,
+        "embodied_carbon_kgco2e_kg": 0.32,
+        "_source_variant": "TIMBER 2",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "TIMBER 1",
+          "density_kg_m3": 500,
+          "thermal_conductivity_w_mk": 0.13,
+          "heat_capacity_j_kgk": 1600,
+          "embodied_energy_mj_kg": 6.95,
+          "embodied_carbon_kgco2e_kg": 0.29
+        },
+        {
+          "name": "TIMBER 2",
+          "density_kg_m3": 500,
+          "thermal_conductivity_w_mk": 0.13,
+          "heat_capacity_j_kgk": 2500,
+          "embodied_energy_mj_kg": 7.11,
+          "embodied_carbon_kgco2e_kg": 0.32
+        },
+        {
+          "name": "TIMBER 3",
+          "density_kg_m3": 500,
+          "thermal_conductivity_w_mk": 0.14,
+          "heat_capacity_j_kgk": 2300,
+          "embodied_energy_mj_kg": 10,
+          "embodied_carbon_kgco2e_kg": 0.36
+        },
+        {
+          "name": "TIMBER 4",
+          "density_kg_m3": 700,
+          "thermal_conductivity_w_mk": 0.18,
+          "heat_capacity_j_kgk": 1600,
+          "embodied_energy_mj_kg": 12.1,
+          "embodied_carbon_kgco2e_kg": 0.39
+        }
+      ]
+    },
+    "Sheathing": {
+      "default": {
+        "density_kg_m3": 650,
+        "thermal_conductivity_w_mk": 0.13,
+        "heat_capacity_j_kgk": 1700,
+        "embodied_energy_mj_kg": 15,
+        "embodied_carbon_kgco2e_kg": 0.9,
+        "_source_variant": "OSB",
+        "_selection": "hand-picked override"
+      },
+      "variants": [
+        {
+          "name": "ASPHABOARD",
+          "density_kg_m3": 400,
+          "thermal_conductivity_w_mk": 0.065,
+          "heat_capacity_j_kgk": 1170,
+          "embodied_energy_mj_kg": 14.5,
+          "embodied_carbon_kgco2e_kg": 0.71
+        },
+        {
+          "name": "CEMENT BONDED PARTICLEBOARD",
+          "density_kg_m3": 1200,
+          "thermal_conductivity_w_mk": 0.23,
+          "heat_capacity_j_kgk": 1500,
+          "embodied_energy_mj_kg": 12.1,
+          "embodied_carbon_kgco2e_kg": 0.65
+        },
+        {
+          "name": "CHIPBOARD",
+          "density_kg_m3": 600,
+          "thermal_conductivity_w_mk": 0.14,
+          "heat_capacity_j_kgk": 2300,
+          "embodied_energy_mj_kg": 14.7,
+          "embodied_carbon_kgco2e_kg": 0.81
+        },
+        {
+          "name": "IMPREGNATED BOARD",
+          "density_kg_m3": 400,
+          "thermal_conductivity_w_mk": 0.065,
+          "heat_capacity_j_kgk": 1350,
+          "embodied_energy_mj_kg": 15,
+          "embodied_carbon_kgco2e_kg": 1.3
+        },
+        {
+          "name": "OSB",
+          "density_kg_m3": 650,
+          "thermal_conductivity_w_mk": 0.13,
+          "heat_capacity_j_kgk": 1700,
+          "embodied_energy_mj_kg": 15,
+          "embodied_carbon_kgco2e_kg": 0.9
+        },
+        {
+          "name": "PARTICLEBOARD 1",
+          "density_kg_m3": 300,
+          "thermal_conductivity_w_mk": 0.1,
+          "heat_capacity_j_kgk": 1700,
+          "embodied_energy_mj_kg": 14.2,
+          "embodied_carbon_kgco2e_kg": 0.58
+        },
+        {
+          "name": "PARTICLEBOARD 2",
+          "density_kg_m3": 600,
+          "thermal_conductivity_w_mk": 0.14,
+          "heat_capacity_j_kgk": 1700,
+          "embodied_energy_mj_kg": 14.5,
+          "embodied_carbon_kgco2e_kg": 0.7
+        },
+        {
+          "name": "PARTICLEBOARD 3",
+          "density_kg_m3": 900,
+          "thermal_conductivity_w_mk": 0.18,
+          "heat_capacity_j_kgk": 1700,
+          "embodied_energy_mj_kg": 14.9,
+          "embodied_carbon_kgco2e_kg": 0.83
+        }
+      ]
+    },
+    "Wood fiberboard": {
+      "default": {
+        "density_kg_m3": 600,
+        "thermal_conductivity_w_mk": 0.14,
+        "heat_capacity_j_kgk": 1700,
+        "embodied_energy_mj_kg": 12.1,
+        "embodied_carbon_kgco2e_kg": 0.79,
+        "_source_variant": "FIBREBOARD 3",
+        "_selection": "hand-picked override"
+      },
+      "variants": [
+        {
+          "name": "FIBREBOARD 1",
+          "density_kg_m3": 250,
+          "thermal_conductivity_w_mk": 0.07,
+          "heat_capacity_j_kgk": 1700,
+          "embodied_energy_mj_kg": 10.1,
+          "embodied_carbon_kgco2e_kg": 0.69
+        },
+        {
+          "name": "FIBREBOARD 2",
+          "density_kg_m3": 400,
+          "thermal_conductivity_w_mk": 0.1,
+          "heat_capacity_j_kgk": 1700,
+          "embodied_energy_mj_kg": 11,
+          "embodied_carbon_kgco2e_kg": 0.74
+        },
+        {
+          "name": "FIBREBOARD 3",
+          "density_kg_m3": 600,
+          "thermal_conductivity_w_mk": 0.14,
+          "heat_capacity_j_kgk": 1700,
+          "embodied_energy_mj_kg": 12.1,
+          "embodied_carbon_kgco2e_kg": 0.79
+        },
+        {
+          "name": "FIBREBOARD 4",
+          "density_kg_m3": 800,
+          "thermal_conductivity_w_mk": 0.18,
+          "heat_capacity_j_kgk": 1700,
+          "embodied_energy_mj_kg": 13.8,
+          "embodied_carbon_kgco2e_kg": 0.92
+        },
+        {
+          "name": "MASONITE 1",
+          "density_kg_m3": 1600,
+          "thermal_conductivity_w_mk": 0.79,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 16.9,
+          "embodied_carbon_kgco2e_kg": 1.44
+        },
+        {
+          "name": "MASONITE 2",
+          "density_kg_m3": 1000,
+          "thermal_conductivity_w_mk": 0.5,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 15,
+          "embodied_carbon_kgco2e_kg": 1.3
+        },
+        {
+          "name": "MASONITE 3",
+          "density_kg_m3": 2000,
+          "thermal_conductivity_w_mk": 1.1,
+          "heat_capacity_j_kgk": 1000,
+          "embodied_energy_mj_kg": 18.2,
+          "embodied_carbon_kgco2e_kg": 1.61
+        },
+        {
+          "name": "MDF BOARD 1",
+          "density_kg_m3": 250,
+          "thermal_conductivity_w_mk": 0.07,
+          "heat_capacity_j_kgk": 1700,
+          "embodied_energy_mj_kg": 9.2,
+          "embodied_carbon_kgco2e_kg": 0.64
+        },
+        {
+          "name": "MDF BOARD 2",
+          "density_kg_m3": 400,
+          "thermal_conductivity_w_mk": 0.1,
+          "heat_capacity_j_kgk": 1700,
+          "embodied_energy_mj_kg": 10,
+          "embodied_carbon_kgco2e_kg": 0.68
+        },
+        {
+          "name": "MDF BOARD 3",
+          "density_kg_m3": 600,
+          "thermal_conductivity_w_mk": 0.14,
+          "heat_capacity_j_kgk": 1700,
+          "embodied_energy_mj_kg": 11,
+          "embodied_carbon_kgco2e_kg": 0.74
+        },
+        {
+          "name": "MDF BOARD 4",
+          "density_kg_m3": 800,
+          "thermal_conductivity_w_mk": 0.18,
+          "heat_capacity_j_kgk": 1700,
+          "embodied_energy_mj_kg": 11.9,
+          "embodied_carbon_kgco2e_kg": 0.82
+        }
+      ]
+    },
+    "Plywood": {
+      "default": {
+        "density_kg_m3": 500,
+        "thermal_conductivity_w_mk": 0.13,
+        "heat_capacity_j_kgk": 1600,
+        "embodied_energy_mj_kg": 13.1,
+        "embodied_carbon_kgco2e_kg": 0.64,
+        "_source_variant": "PLYWOOD 2",
+        "_selection": "median by density"
+      },
+      "variants": [
+        {
+          "name": "PLYWOOD 1",
+          "density_kg_m3": 300,
+          "thermal_conductivity_w_mk": 0.09,
+          "heat_capacity_j_kgk": 1600,
+          "embodied_energy_mj_kg": 11.9,
+          "embodied_carbon_kgco2e_kg": 0.52
+        },
+        {
+          "name": "PLYWOOD 2",
+          "density_kg_m3": 500,
+          "thermal_conductivity_w_mk": 0.13,
+          "heat_capacity_j_kgk": 1600,
+          "embodied_energy_mj_kg": 13.1,
+          "embodied_carbon_kgco2e_kg": 0.64
+        },
+        {
+          "name": "PLYWOOD 3",
+          "density_kg_m3": 700,
+          "thermal_conductivity_w_mk": 0.17,
+          "heat_capacity_j_kgk": 1600,
+          "embodied_energy_mj_kg": 15,
+          "embodied_carbon_kgco2e_kg": 0.77
+        },
+        {
+          "name": "PLYWOOD 4",
+          "density_kg_m3": 1000,
+          "thermal_conductivity_w_mk": 0.24,
+          "heat_capacity_j_kgk": 1600,
+          "embodied_energy_mj_kg": 16.8,
+          "embodied_carbon_kgco2e_kg": 0.87
+        }
+      ]
+    }
+  },
+  "_unmapped": [
+    {
+      "group": "FLOOR COVERINGS",
+      "name": "RUBBER FLOOR"
+    },
+    {
+      "group": "FLOOR COVERINGS",
+      "name": "CORK FLOOR"
+    },
+    {
+      "group": "FLOOR COVERINGS",
+      "name": "CELLULAR RUBBER UNDERLAY"
+    },
+    {
+      "group": "FLOOR COVERINGS",
+      "name": "CORK UNDERLAY"
+    },
+    {
+      "group": "FLOOR COVERINGS",
+      "name": "FELT UNDERLAY"
+    },
+    {
+      "group": "FLOOR COVERINGS",
+      "name": "PLASTIC UNDERLAY"
+    },
+    {
+      "group": "FLOOR COVERINGS",
+      "name": "WOOL UNDERLAY"
+    },
+    {
+      "group": "METALS",
+      "name": "BRASS"
+    },
+    {
+      "group": "METALS",
+      "name": "BRONZE"
+    },
+    {
+      "group": "METALS",
+      "name": "COPPER"
+    },
+    {
+      "group": "METALS",
+      "name": "LEAD"
+    },
+    {
+      "group": "METALS",
+      "name": "ZINC"
+    },
+    {
+      "group": "PLASTERS AND RENDERINGS",
+      "name": "SLOW SET PLASTER"
+    },
+    {
+      "group": "ROOF TILES",
+      "name": "PLASTIC ROOF TILES"
+    },
+    {
+      "group": "SOLID PLASTICS",
+      "name": "EPOXY RESIN"
+    },
+    {
+      "group": "SOLID PLASTICS",
+      "name": "PHENOLIC RESIN"
+    },
+    {
+      "group": "SOLID PLASTICS",
+      "name": "POLYACETATE"
+    },
+    {
+      "group": "SOLID PLASTICS",
+      "name": "POLYCARBONATE"
+    },
+    {
+      "group": "SOLID PLASTICS",
+      "name": "POLYESTER RESIN"
+    },
+    {
+      "group": "SOLID PLASTICS",
+      "name": "LOW DENSITY POLYETHYLENE"
+    },
+    {
+      "group": "SOLID PLASTICS",
+      "name": "PMMA"
+    },
+    {
+      "group": "SOLID PLASTICS",
+      "name": "POLYSTYRENE"
+    },
+    {
+      "group": "SOLID PLASTICS",
+      "name": "PTFE"
+    },
+    {
+      "group": "SOLID PLASTICS",
+      "name": "PU"
+    },
+    {
+      "group": "STONES",
+      "name": "DRAINED GRAVEL"
+    },
+    {
+      "group": "STONES",
+      "name": "DRAINED SAND"
+    },
+    {
+      "group": "STONES",
+      "name": "COKE ASH"
+    },
+    {
+      "group": "STONES",
+      "name": "UNDRAINED SAND"
+    },
+    {
+      "group": "WOOD AND WOOD BASED PANELS",
+      "name": "SAWDUST"
+    }
+  ]
+}
