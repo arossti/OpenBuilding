@@ -154,7 +154,11 @@ function applyMaterialDefaults(rec) {
   if (!materialType) return;
 
   var defaults = _lookups.materialDefaults.defaults_by_material_type;
-  var entry = defaults && defaults[materialType];
+  var aliases = _lookups.materialDefaults.aliases || {};
+  // Resolve via alias table when the material_type doesn't key directly.
+  // Glulam / CLT / LVL / Engineered wood etc. all alias to "Wood".
+  var key = defaults && defaults[materialType] ? materialType : aliases[materialType];
+  var entry = key && defaults ? defaults[key] : null;
   if (!entry || !entry.default) return;
   var d = entry.default;
 

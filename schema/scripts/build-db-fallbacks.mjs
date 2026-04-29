@@ -52,7 +52,9 @@ const OUTPUT_JSON = resolve(REPO_ROOT, "schema", "lookups", "db-fallbacks.json")
 //   - GLASS (glazing assemblies; covered separately by group 08)
 const MATERIAL_TYPE_MAPPING = [
   // Wood + wood-based panels
-  { match: /^TIMBER\b/, type: "Framing" },
+  // TIMBER 1-4 → "Wood" (canonical); aliases below resolve "Framing",
+  // "Glulam", "CLT", "LVL" etc. into this same entry.
+  { match: /^TIMBER\b/, type: "Wood" },
   { match: /^PLYWOOD\b/, type: "Plywood" },
   { match: /^OSB\b/, type: "Sheathing" }, // OSB is a sheathing-grade material in BEAM's taxonomy
   { match: /^MDF BOARD\b/, type: "Wood fiberboard" },
@@ -143,6 +145,32 @@ const DEFAULT_OVERRIDES = {
   "Wood fiberboard": "FIBREBOARD 3", // 600 kg/m³ — typical interior MDF density
   Gypsum: "GYPSUM PLASTERBOARD", // 900 kg/m³ — ½" board
   Fiberglass: "ELEVATION GLASS WOOL 2" // 23 kg/m³ — typical wall batt
+};
+
+// Aliases: when an EPD's classification.material_type doesn't match a
+// canonical key directly, the consumer (applyMaterialDefaults in
+// extract.mjs) falls back to this map to find a related entry.
+//
+// Wood-family aliases all resolve to the "Wood" entry sourced from
+// TIMBER 1-4 (median density 500 kg/m³, k 0.13, Cp 2500, EE 7.11,
+// EC 0.32) — close enough for Glulam / CLT / GLT / LVL / LSL / SPF
+// dimension lumber. Hardwood is deliberately omitted: density spread
+// (700-1000 kg/m³) is too wide for one default.
+const MATERIAL_TYPE_ALIASES = {
+  // Wood family → "Wood"
+  Framing: "Wood",
+  "Engineered wood": "Wood",
+  Glulam: "Wood",
+  CLT: "Wood",
+  "Cross-laminated timber": "Wood",
+  GLT: "Wood",
+  LVL: "Wood",
+  LSL: "Wood",
+  PSL: "Wood",
+  "Solid wood": "Wood",
+  Lumber: "Wood",
+  SPF: "Wood",
+  "Wood I-joist": "Wood"
 };
 
 // Heuristic: which row from a group is the "default" — a mid-range
@@ -277,6 +305,7 @@ async function main() {
     _attribution:
       "Compiled from a thermal + embodied-properties reference catalogue (XML import). Values are physical material constants; data is reference-grade not product-specific. Per-product accuracy requires an EPD.",
     defaults_by_material_type: defaultsByMaterialType,
+    aliases: MATERIAL_TYPE_ALIASES,
     _unmapped: unmapped
   };
 

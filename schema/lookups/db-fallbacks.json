@@ -2,7 +2,7 @@
   "_note": "BfCA db-fallbacks: reference-grade material defaults for fields that aren't typically published in EPDs (density, thermal conductivity, heat capacity, embodied energy, embodied carbon). Used as fallback only when the EPD itself is silent. Every value applied at runtime carries source: 'generic_default' so users see what came from the EPD vs the catalogue. Generated from db-fallbacks.source.xml — re-run schema/scripts/build-db-fallbacks.mjs after editing.",
   "_schema_version": 1,
   "_source_xml_sha256": "f27cf6a342f4d9d076a87ea7ee247e31dec9f475df740ad9c6fd82254be2bcfe",
-  "_generated_at": "2026-04-29T11:58:15.603Z",
+  "_generated_at": "2026-04-29T13:54:43.636Z",
   "_attribution": "Compiled from a thermal + embodied-properties reference catalogue (XML import). Values are physical material constants; data is reference-grade not product-specific. Per-product accuracy requires an EPD.",
   "defaults_by_material_type": {
     "Concrete": {
@@ -1276,7 +1276,7 @@
         }
       ]
     },
-    "Framing": {
+    "Wood": {
       "default": {
         "density_kg_m3": 500,
         "thermal_conductivity_w_mk": 0.13,
@@ -1544,6 +1544,21 @@
         }
       ]
     }
+  },
+  "aliases": {
+    "Framing": "Wood",
+    "Engineered wood": "Wood",
+    "Glulam": "Wood",
+    "CLT": "Wood",
+    "Cross-laminated timber": "Wood",
+    "GLT": "Wood",
+    "LVL": "Wood",
+    "LSL": "Wood",
+    "PSL": "Wood",
+    "Solid wood": "Wood",
+    "Lumber": "Wood",
+    "SPF": "Wood",
+    "Wood I-joist": "Wood"
   },
   "_unmapped": [
     {
