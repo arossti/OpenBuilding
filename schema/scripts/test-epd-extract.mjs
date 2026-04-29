@@ -196,10 +196,12 @@ async function main() {
   const mt = JSON.parse(await readFile(join(LOOKUPS_DIR, "material-type-to-group.json"), "utf8"));
   const kw = JSON.parse(await readFile(join(LOOKUPS_DIR, "display-name-keywords.json"), "utf8"));
   const md = JSON.parse(await readFile(join(LOOKUPS_DIR, "db-fallbacks.json"), "utf8"));
+  const mg = JSON.parse(await readFile(join(LOOKUPS_DIR, "material-groups.json"), "utf8"));
   Extract.setLookups({
     mtMap: mt.map || {},
     kwPatterns: kw.patterns || [],
-    materialDefaults: md
+    materialDefaults: md,
+    materialGroups: mg
   });
 
   const pdfs = await walkPdfs(SAMPLES_ROOT);

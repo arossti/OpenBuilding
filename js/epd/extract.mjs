@@ -110,6 +110,10 @@ export function extract(pageTexts) {
   // Tier 2 + Tier 1 — trunk of tree (display_name → material_type → group_prefix)
   extractType(allText, rec);
   inferGroupPrefix(rec);
+  // Override display_name with `${groupLabel} | ${materialType}` once Tier 1
+  // settles. Cover-page picker output is preserved on samples where group +
+  // type can't both be inferred (no regression on unknown-format docs).
+  deriveDisplayName(rec);
 
   // Tiers 3–7 — per-format extractor handles manufacturer / provenance /
   // identification / per-family methodology / physical anchors.
@@ -217,8 +221,13 @@ function extractType(text, rec) {
 
   // Skip generic/registry lines + short fragments. The first surviving
   // line is the product title in the overwhelming majority of EPDs.
+  // Per-glyph drop-cap fragments ("E nvironmental", "P roduct",
+  // "D eclaration") need explicit alternations because pdf.js often
+  // splits "Environmental Product Declaration" cover-page headers into
+  // three separate one-letter-then-rest lines, each of which would
+  // otherwise pass the picker as a 2-word title candidate.
   var skipPrefix =
-    /^(?:type\s+iii|environmental\s+product\s+declaration|epd\b|in\s+accordance|as\s+per\b|according\s+to\b|programme|program\b|publisher\b|owner\s+of|declaration\s+number|issue\s+date|valid\s+to|valid\s+until|publication\s+date|page\s+\d|\d+\s*\/\s*\d+|—|–|-{2,})/i;
+    /^(?:type\s+iii|e\s*nvironmental(?:\s+p\s*roduct\s+d\s*eclaration)?|p\s*roduct\s*$|d\s*eclaration\s*$|environmental\s+product\s+declaration|epd\b|in\s+accordance|as\s+per\b|according\s+to\b|programme|program\b|publisher\b|owner\s+of|declaration\s+number|issue\s+date|valid\s+to|valid\s+until|publication\s+date|page\s+\d|\d+\s*\/\s*\d+|—|–|-{2,})/i;
   // Standards-citation lines also need to be skipped — these often
   // appear right under the title block on EU/IBU layouts where the
   // line "as per ISO 14025 and EN 15804+A1" otherwise gets picked.
@@ -240,13 +249,31 @@ function extractType(text, rec) {
     _setPath(rec, "naming.display_name", displayName);
   }
 
-  // Material-type keyword scan — runs across the whole document body so
-  // the title page doesn't have to mention the canonical type label.
+  // Material-type keyword scan — prefer matches in the cover-page title
+  // (display_name) first, since titles say what the EPD is about; the
+  // body often references related materials in comparison text (e.g. a
+  // Glulam EPD's intro comparing to CLT). Without this, first-match-wins
+  // against the body would mis-label GLT as "Engineered wood" because
+  // CLT happens to come first in the keyword list. Fall through to the
+  // full body when no title keyword hits, preserving today's behavior
+  // for samples with generic / non-product cover-page lines.
   if (!_get(rec, "classification.material_type")) {
-    for (var k = 0; k < _MATERIAL_TYPE_DISPLAY_KEYWORDS.length; k++) {
-      if (_MATERIAL_TYPE_DISPLAY_KEYWORDS[k].rx.test(text)) {
-        _setPath(rec, "classification.material_type", _MATERIAL_TYPE_DISPLAY_KEYWORDS[k].type);
-        break;
+    var titleMatched = false;
+    if (displayName) {
+      for (var k = 0; k < _MATERIAL_TYPE_DISPLAY_KEYWORDS.length; k++) {
+        if (_MATERIAL_TYPE_DISPLAY_KEYWORDS[k].rx.test(displayName)) {
+          _setPath(rec, "classification.material_type", _MATERIAL_TYPE_DISPLAY_KEYWORDS[k].type);
+          titleMatched = true;
+          break;
+        }
+      }
+    }
+    if (!titleMatched) {
+      for (var b = 0; b < _MATERIAL_TYPE_DISPLAY_KEYWORDS.length; b++) {
+        if (_MATERIAL_TYPE_DISPLAY_KEYWORDS[b].rx.test(text)) {
+          _setPath(rec, "classification.material_type", _MATERIAL_TYPE_DISPLAY_KEYWORDS[b].type);
+          break;
+        }
       }
     }
   }
@@ -277,6 +304,30 @@ function inferGroupPrefix(rec) {
     }
   }
   if (prefix) _setPath(rec, "classification.group_prefix", prefix);
+}
+
+/* ── Display name derivation — taxonomy-driven ────────────────────── */
+//
+// Cover-page picker (extractType) often grabs boilerplate ("Environmental
+// Product Declaration", per-glyph "E nvironmental") because EPD title
+// blocks are inconsistent. Once Tier 1 settles a group_prefix and Tier 2
+// settles a material_type, we have enough structured info to compose a
+// clean display name like "Wood | Glulam" or "Concrete | Portland Cement".
+//
+// Override only fires when both inputs are present AND material-groups
+// lookup is primed; otherwise the cover-page output is left in place so
+// unknown-format samples don't regress on coverage.
+
+function deriveDisplayName(rec) {
+  if (!_lookups || !_lookups.materialGroups) return;
+  var prefix = _get(rec, "classification.group_prefix");
+  var materialType = _get(rec, "classification.material_type");
+  if (!prefix || !materialType) return;
+  var groups = _lookups.materialGroups.groups || _lookups.materialGroups;
+  var entry = groups && groups[prefix];
+  var label = entry && entry.label;
+  if (!label) return;
+  _setPath(rec, "naming.display_name", label + " | " + materialType);
 }
 
 /* ── Cross-format anchors (always run last; first-set wins) ────────── */
@@ -537,22 +588,79 @@ var IMPACT_INDICATORS = [
   {
     schemaKey: "gwp_kgco2e",
     label: "GWP (English)",
-    regex: /Global\s+warming\s+potential\s+kg\s+CO\s*2?\s*eq[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+    // Tolerates optional "– Total" / "- Total" em-dash/hyphen subtitle
+    // (Kalesnikoff format) and excludes Fossil/Biogenic rows via
+    // negative lookahead so they don't match the gwp_kgco2e (total) slot.
+    // q optional because Kalesnikoff uses "kg CO2e" without `q`.
+    regex:
+      /Global\s+warming\s+potential(?!\s*[–—-]\s*(?:Fossil|Biogenic))(?:\s*[–—-]\s*Total)?\s+kg\s+CO\s*2?\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "gwp_bio_kgco2e",
+    label: "GWP-Biogenic (English em-dash)",
+    // Kalesnikoff biogenic-row variant. Total = 0 by construction
+    // (sequestration A1 + emission A3 net to zero) but capturing the
+    // total preserves intent. Per-stage A1 = -1045.63 lands in P3.3.
+    regex:
+      /Global\s+warming\s+potential\s*[–—-]\s*Bio(?:genic)?\s+kg\s+CO\s*2?\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
   },
   {
     schemaKey: "ozone_depletion_kgcfc11eq",
     label: "ODP (English)",
-    regex: /Ozone\s+depletion\s+potential\s+kg\s+CFC[-\s]*11\s*eq[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+    regex: /Ozone\s+depletion\s+potential\s+kg\s+CFC[-\s]*11\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "ozone_depletion_kgcfc11eq",
+    label: "ODP (English label-only — wrapped unit)",
+    // Kalesnikoff format puts the "kg" / "CFC11e" unit fragments on
+    // separate text-extraction lines from the data row. Drop the
+    // unit-cell anchor; capture the next sci-not number after the
+    // label. Schema slot name encodes the unit, so no semantic loss.
+    // [\s\S] used (not [^\n]) so the regex can cross the wrapped-unit
+    // line. Window capped at 200 chars to avoid grabbing values from
+    // a different indicator's row.
+    regex:
+      /Depletion\s+potential\s+of\s+the\s+stratospheric\s+ozone\s+layer[\s\S]{0,200}?(\d+(?:\.\d+)?[Ee][-+]?\d+)/i
   },
   {
     schemaKey: "eutrophication_kgneq",
     label: "EP (English)",
-    regex: /Eutrophication\s+potential\s+kg\s+N\s+eq[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+    // \s* between N and Eq tolerates Kalesnikoff "kg Ne" (no space
+    // between N and e) AND older "kg N eq" (single space).
+    regex: /Eutrophication\s+potential\s+kg\s+N\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "water_consumption_m3",
+    label: "WDP (English Consumption of freshwater)",
+    // Kalesnikoff "Consumption of freshwater resources m3 0.37".
+    regex:
+      /Consumption\s+of\s+(?:freshwater|fresh\s+water)\s+resources\s+m\s*[³^]?3?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "acidification_kgso2eq",
+    label: "AP (English long phrase)",
+    // Kalesnikoff "Acidification potential of soil and water sources".
+    regex:
+      /Acidification\s+potential(?:\s+of\s+soil\s+and\s+water\s+sources)?\s+kg\s+SO\s*2?\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
   },
   {
     schemaKey: "smog_kgo3eq",
-    label: "SFP (English)",
-    regex: /Smog\s+potential\s+kg\s+O\s*3?\s*eq[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+    label: "SFP (English Smog potential)",
+    regex: /Smog\s+potential\s+kg\s+O\s*3?\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "smog_kgo3eq",
+    label: "SFP (English Formation potential)",
+    // Kalesnikoff "Formation potential of tropospheric ozone".
+    regex:
+      /Formation\s+potential\s+of\s+tropospheric\s+ozone\s+kg\s+O\s*3?\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "abiotic_depletion_fossil_mj",
+    label: "ADPf (English parenthetical)",
+    // Kalesnikoff "Abiotic depletion potential (ADPfossil) MJ, NCV".
+    regex:
+      /Abiotic\s+depletion\s+potential\s*\(\s*ADP[\s_]?fossil\s*\)\s+MJ[^\n]{0,12}?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
   },
   {
     schemaKey: "primary_energy_nonrenewable_mj",
@@ -578,19 +686,19 @@ var IMPACT_INDICATORS = [
     schemaKey: "gwp_kgco2e",
     label: "GWP (EU/IBU bracketed)",
     regex:
-      /Global\s+warming\s+potential[^\n]{0,30}?\[?\s*kg\s*CO\s*2?\s*-?\s*[Ee]q\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+      /Global\s+warming\s+potential[^\n]{0,30}?\[?\s*kg\s*CO\s*2?\s*-?\s*[Ee]q?\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
   },
   {
     schemaKey: "ozone_depletion_kgcfc11eq",
     label: "ODP (EU/IBU long phrase)",
     regex:
-      /(?:Ozone\s+depletion\s+potential|Depletion\s+potential\s+of\s+the\s+stratospheric\s+ozone\s+layer)[^\n]{0,30}?\[?\s*kg\s*CFC\s*-?\s*11\s*-?\s*[Ee]q\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+      /(?:Ozone\s+depletion\s+potential|Depletion\s+potential\s+of\s+the\s+stratospheric\s+ozone\s+layer)[^\n]{0,30}?\[?\s*kg\s*CFC\s*-?\s*11\s*-?\s*[Ee]q?\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
   },
   {
     schemaKey: "acidification_kgso2eq",
     label: "AP (EU/IBU bracketed)",
     regex:
-      /Acidification\s+potential[^\n]{0,40}?\[?\s*kg\s*SO\s*2?\s*-?\s*[Ee]q\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+      /Acidification\s+potential[^\n]{0,40}?\[?\s*kg\s*SO\s*2?\s*-?\s*[Ee]q?\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
   },
   {
     schemaKey: "abiotic_depletion_fossil_mj",

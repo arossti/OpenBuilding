@@ -205,12 +205,16 @@ function _primeLookups() {
     }),
     fetch("data/schema/lookups/db-fallbacks.json").then(function (r) {
       return r.ok ? r.json() : null;
+    }),
+    fetch("data/schema/lookups/material-groups.json").then(function (r) {
+      return r.ok ? r.json() : null;
     })
   ]).then(function (results) {
     Extract.setLookups({
       mtMap: (results[0] && results[0].map) || {},
       kwPatterns: (results[1] && results[1].patterns) || [],
-      materialDefaults: results[2] || null
+      materialDefaults: results[2] || null,
+      materialGroups: results[3] || null
     });
   });
 }
