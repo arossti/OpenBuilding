@@ -436,6 +436,48 @@ var IMPACT_INDICATORS = [
         DATA_ROW_TAIL,
       "i"
     )
+  },
+
+  // Older BC Wood family (2013-2016 LVL / WRC / LSL EPDs published under
+  // ASTM / AWC). Tables use English impact-category names instead of
+  // EN 15804+A2 indicator codes, and a "<label>  <unit>  <total>  <sub-cols>"
+  // layout where the total is the first numeric token. Subscripts on
+  // unit text ("kg CO 2 eq", "kg O 3 eq") get split across lines by
+  // pdf.js per-glyph emission, so the regex tolerates "CO\s*2?" and
+  // "O\s*3?". AP uses "H+ moles eq" (TRACI 1 unit) on these older docs;
+  // we deliberately don't match it because the schema target is kg SO2eq
+  // and the unit conversion is non-trivial. Per-format regression
+  // confirmed not to collide with the newer code-anchored regexes
+  // because those run first and the loop early-returns when populated.
+  {
+    schemaKey: "gwp_kgco2e",
+    label: "GWP (English)",
+    regex: /Global\s+warming\s+potential\s+kg\s+CO\s*2?\s*eq[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+  },
+  {
+    schemaKey: "ozone_depletion_kgcfc11eq",
+    label: "ODP (English)",
+    regex: /Ozone\s+depletion\s+potential\s+kg\s+CFC[-\s]*11\s*eq[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+  },
+  {
+    schemaKey: "eutrophication_kgneq",
+    label: "EP (English)",
+    regex: /Eutrophication\s+potential\s+kg\s+N\s+eq[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+  },
+  {
+    schemaKey: "smog_kgo3eq",
+    label: "SFP (English)",
+    regex: /Smog\s+potential\s+kg\s+O\s*3?\s*eq[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+  },
+  {
+    schemaKey: "primary_energy_nonrenewable_mj",
+    label: "PE-NR (English fossil)",
+    regex: /Non[\s-]?renewable[,\s]+fossil\s+MJ\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+  },
+  {
+    schemaKey: "primary_energy_renewable_mj",
+    label: "PE-R (English biomass)",
+    regex: /Renewable[,\s]+biomass\s+MJ\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
   }
 ];
 
