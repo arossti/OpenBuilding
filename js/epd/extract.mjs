@@ -119,10 +119,50 @@ export function extract(pageTexts) {
   else if (format === FORMATS.EU_IBU) extractEuIbu(allText, rec);
   // UNKNOWN: fall through to common-only.
 
-  // Tiers 6 + 8 — cross-format methodology + impact totals (always last).
+  // Tiers 6 + 8 — cross-format methodology + impact totals.
   extractCommon(allText, rec);
 
+  // Tier 9 — fallback fill from db-fallbacks.json for fields the EPD
+  // didn't publish. Only runs if the lookups were primed AND the
+  // candidate already has a classification.material_type. Source-marks
+  // every filled value as "generic_default" so the form pane can
+  // distinguish EPD-derived from catalogue-derived.
+  applyMaterialDefaults(rec);
+
   return { format: format, record: rec, anchorsHit: _countAnchors(rec) };
+}
+
+/* ── Tier 9 — fallback fill from db-fallbacks ─────────────────────── */
+//
+// The EPD wins where it published a value. This step only fills slots
+// that the per-format extractors left null. v1 only fills
+// physical.density.value_kg_m3 (the only catalogue field that maps to
+// an existing schema slot today). Thermal conductivity, heat capacity,
+// embodied energy, and embodied carbon stay in the catalogue ready for
+// future schema extension; this function is the place to wire them
+// when those slots get added.
+//
+// Source-marking convention: when this function fills a value, it also
+// writes `<path>.source = "generic_default"` next to the value. Other
+// possible source values: "epd_direct" (existing extractors should set
+// this; retrofit pending), "calculated" (Tier 10, future BEAM math),
+// "user_edit" (form bindings flip this when the user types).
+
+function applyMaterialDefaults(rec) {
+  if (!_lookups || !_lookups.materialDefaults) return;
+  var materialType = _get(rec, "classification.material_type");
+  if (!materialType) return;
+
+  var defaults = _lookups.materialDefaults.defaults_by_material_type;
+  var entry = defaults && defaults[materialType];
+  if (!entry || !entry.default) return;
+  var d = entry.default;
+
+  // physical.density — the only catalogue field with a current schema slot.
+  if (_get(rec, "physical.density.value_kg_m3") == null && d.density_kg_m3 != null) {
+    _setPath(rec, "physical.density.value_kg_m3", d.density_kg_m3);
+    _setPath(rec, "physical.density.source", "generic_default");
+  }
 }
 
 /* ── Tier 2 — display name + material type ────────────────────────── */

@@ -202,11 +202,15 @@ function _primeLookups() {
     }),
     fetch("data/schema/lookups/display-name-keywords.json").then(function (r) {
       return r.ok ? r.json() : { patterns: [] };
+    }),
+    fetch("data/schema/lookups/db-fallbacks.json").then(function (r) {
+      return r.ok ? r.json() : null;
     })
   ]).then(function (results) {
     Extract.setLookups({
       mtMap: (results[0] && results[0].map) || {},
-      kwPatterns: (results[1] && results[1].patterns) || []
+      kwPatterns: (results[1] && results[1].patterns) || [],
+      materialDefaults: results[2] || null
     });
   });
 }
