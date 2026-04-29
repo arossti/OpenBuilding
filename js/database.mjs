@@ -1003,6 +1003,13 @@ async function handleTrust(sourceFile) {
 /**
  * Build an index-shape entry from a full material record. Mirrors the
  * field set produced by schema/scripts/beam-csv-to-json.mjs's index step.
+ *
+ * Schema shapes that bit us:
+ *   impacts.gwp_kgco2e.total = { value, source }   (NOT a scalar)
+ *   impacts.functional_unit                        (NOT physical.declared_unit)
+ * EPD-Parser writes physical.declared_unit but the catalogue index
+ * historically reads impacts.functional_unit; preserve both in the form
+ * (Phase 4 form-pane refactor) but read either path here.
  */
 function _indexEntryFromRecord(rec) {
   const r = rec || {};
@@ -1010,7 +1017,8 @@ function _indexEntryFromRecord(rec) {
   const naming = r.naming || {};
   const impacts = r.impacts || {};
   const physical = r.physical || {};
-  const gwp = impacts.gwp_kgco2e || {};
+  const gwpTotal = (impacts.gwp_kgco2e && impacts.gwp_kgco2e.total) || {};
+  const gwpVal = gwpTotal && typeof gwpTotal.value === "number" ? gwpTotal.value : null;
   const prefix = cls.group_prefix || null;
   const groupMeta = prefix && GROUPS[prefix] ? GROUPS[prefix] : null;
   return {
@@ -1020,8 +1028,8 @@ function _indexEntryFromRecord(rec) {
     category: cls.category || (groupMeta ? `${prefix}_${groupMeta.label.toLowerCase()}` : null),
     group_prefix: prefix,
     typical_elements: cls.typical_elements || [],
-    gwp_kgco2e: gwp.total != null ? Number(gwp.total) : null,
-    functional_unit: physical.declared_unit || physical.functional_unit || null
+    gwp_kgco2e: gwpVal,
+    functional_unit: impacts.functional_unit || physical.declared_unit || physical.functional_unit || null
   };
 }
 
