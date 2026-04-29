@@ -449,6 +449,14 @@ function extractCommon(text, rec) {
   // Impact-table totals — populate impacts.<indicator>.total.{value, source}
   // for every indicator in the schema we can find on the impact table.
   _extractIndicatorTotals(text, rec);
+
+  // P3.3 — per-stage breakdown. Detects the stage-header column sequence
+  // (cradle-to-gate "A1-A3 A1 A2 A3" or cradle-to-grave "A1-A3 A1 A2 A3
+  // A4 A5 B1..D"), finds each indicator row by long-form English label,
+  // tokenises numeric values, and maps them into impacts.<key>.by_stage.
+  // Independent of total extraction — a row whose total is captured but
+  // whose by_stage cells are unfilled is a partial pass, not a regression.
+  _extractByStage(text, rec);
 }
 
 /* ── Impact-table parsing — per-indicator totals ──────────────────── */
@@ -766,6 +774,174 @@ function _extractIndicatorTotals(text, rec) {
     if (isNaN(num)) continue;
     _setPath(rec, "impacts." + ind.schemaKey + ".total.value", num);
     _setPath(rec, "impacts." + ind.schemaKey + ".total.source", "epd_direct");
+  }
+}
+
+/* ── P3.3 — per-stage breakdown ────────────────────────────────────── */
+//
+// Detects the stage-header column sequence in the impact table (typically
+// "Unit | A1-A3 | A1 | A2 | A3" for cradle-to-gate or the full
+// "A1-A3 | A1..A3 | A4 | A5 | B1..B7 | C1..C4 | D" for cradle-to-grave),
+// then for each indicator row finds the line, tokenises numeric values
+// (filtering out subscript digits like the `2` in `kg CO2e`), and maps
+// them positionally into impacts.<key>.by_stage.<stage>.{value, source}.
+//
+// Independent of total extraction (Tier 8). A row whose total is captured
+// but whose by_stage cells are unfilled is a partial pass. The schema's
+// by_stage stages are A1 / A2 / A3 / A4 / A5 / B1..B7 / C1..C4 / D —
+// 17 individual stages, NOT including A1-A3 (that's the total slot).
+
+// Long-form English label patterns per indicator schema key. These are
+// the labels EPDs actually use in tabular impact rows; reuses the same
+// vocabulary as the IMPACT_INDICATORS regexes for English forms but
+// strips the unit + value parts so the regex matches the row prefix.
+var _BYSTAGE_LABELS = [
+  // GWP fossil/total — guards against matching the Fossil/Biogenic
+  // sub-rows by negative lookahead, same pattern as fix #5.
+  {
+    rx: /Global\s+warming\s+potential(?!\s*[–—-]\s*(?:Fossil|Biogenic))(?:\s*[–—-]\s*Total)?\b/i,
+    key: "gwp_kgco2e"
+  },
+  {
+    rx: /Global\s+warming\s+potential\s*[–—-]\s*Bio(?:genic)?\b/i,
+    key: "gwp_bio_kgco2e"
+  },
+  {
+    rx: /(?:Depletion\s+potential\s+of\s+the\s+stratospheric\s+ozone\s+layer|Ozone\s+depletion\s+potential)\b/i,
+    key: "ozone_depletion_kgcfc11eq"
+  },
+  {
+    rx: /Acidification\s+potential(?:\s+of\s+soil\s+and\s+water\s+sources)?\b/i,
+    key: "acidification_kgso2eq"
+  },
+  { rx: /Eutrophication\s+potential\b/i, key: "eutrophication_kgneq" },
+  {
+    rx: /(?:Formation\s+potential\s+of\s+tropospheric\s+ozone|Smog\s+potential|Photochemical\s+ozone\s+formation)\b/i,
+    key: "smog_kgo3eq"
+  },
+  {
+    // No trailing \b — first alternative ends with ")" which is a
+    // non-word char, so \b at that position would never match.
+    rx: /Abiotic\s+depletion\s+potential\s*(?:\(\s*ADP[\s_]?fossil\s*\)|for\s+fossil\s+resources\b)/i,
+    key: "abiotic_depletion_fossil_mj"
+  },
+  {
+    rx: /(?:Consumption\s+of\s+(?:freshwater|fresh\s+water)\s+resources|Use\s+of\s+net\s+fresh\s+water)\b/i,
+    key: "water_consumption_m3"
+  },
+  {
+    rx: /Non[\s-]?renewable\s+primary\s+energy\s+used\s+as\s+energy\b/i,
+    key: "primary_energy_nonrenewable_mj"
+  },
+  {
+    rx: /Renewable\s+primary\s+energy\s+used\s+as\s+energy\b/i,
+    key: "primary_energy_renewable_mj"
+  }
+];
+
+// Stage-header detector. Returns ALL candidate header lines (any line
+// with ≥3 stage codes), with their line indices. The per-row extractor
+// then picks the nearest preceding header for each indicator row,
+// preferring one whose stage-count matches the row's value-count. This
+// distinguishes Table 3 (main impacts, 4 cols "A1-A3 A1 A2 A3") from
+// Table 2 (biogenic inventory, 6 cols "A1 A2 A3 A5 C3 C4") AND from
+// the generic life-cycle-stages list ("A1 A2 A3 A4 A5 B1..D") that
+// appears earlier in the methodology section but isn't a column
+// header.
+function _detectStageHeaders(text) {
+  var lines = text.split("\n");
+  var stageRx = /\b(?:A1\s*[–—-]?\s*A3|A[1-5]|B[1-7]|C[1-4]|D)\b/g;
+  var headers = [];
+  for (var i = 0; i < lines.length; i++) {
+    var matches = lines[i].match(stageRx);
+    if (!matches || matches.length < 3) continue;
+    var cleaned = [];
+    for (var j = 0; j < matches.length; j++) {
+      var s = matches[j].replace(/\s+/g, "").toUpperCase();
+      if (s === "A1A3") s = "A1-A3";
+      cleaned.push(s);
+    }
+    headers.push({ lineIdx: i, stages: cleaned });
+  }
+  return headers;
+}
+
+// Number-token tokeniser that rejects single-digit integers (likely
+// subscripts like the 2 in CO2 or the 3 in O3). Accepts:
+//   - decimal-bearing values: 124.50, -1045.63, 0.93, 0.07
+//   - scientific notation:    2.27E-06
+//   - 3+ digit integers:      1230, 18200
+//   - thousand-comma values:  3,490.16
+// Reject:
+//   - bare 1-2 digit integers: 2, 11, 96 (subscripts and column widths)
+function _tokenizeImpactNumbers(line) {
+  var rx = /-?\d+\.\d+(?:[eE][-+]?\d+)?|-?\d{3,}(?:,\d{3})*(?:\.\d+)?(?:[eE][-+]?\d+)?|-?\d+[eE][-+]?\d+/g;
+  var out = [];
+  var m;
+  while ((m = rx.exec(line)) !== null) {
+    var raw = m[0];
+    var n;
+    if (raw.indexOf(".") >= 0 && raw.indexOf(",") >= 0) n = parseFloat(raw.replace(/,/g, ""));
+    else n = parseFloat(raw.replace(",", "."));
+    if (!isNaN(n)) out.push(n);
+  }
+  return out;
+}
+
+function _extractByStage(text, rec) {
+  var headers = _detectStageHeaders(text);
+  if (headers.length === 0) return;
+  var lines = text.split("\n");
+  // Build a quick index of header line numbers so we can skip the
+  // header rows themselves when scanning for indicator rows.
+  var headerLineSet = {};
+  for (var h = 0; h < headers.length; h++) headerLineSet[headers[h].lineIdx] = true;
+
+  for (var i = 0; i < lines.length; i++) {
+    if (headerLineSet[i]) continue;
+    var line = lines[i];
+    for (var j = 0; j < _BYSTAGE_LABELS.length; j++) {
+      var lm = _BYSTAGE_LABELS[j];
+      if (!lm.rx.test(line)) continue;
+      var nums = _tokenizeImpactNumbers(line);
+      if (nums.length === 0) break;
+
+      // Pick the nearest preceding header. Prefer a header whose
+      // stage-count matches the row's value-count exactly (best signal
+      // it's the right table for this row); fall back to the most
+      // recent preceding header otherwise. This handles the Kalesnikoff
+      // case where a generic 17-stage life-cycle list appears in the
+      // methodology section (line ~126) but the actual Table 3 header
+      // (line ~260) sits much closer to the data rows.
+      var stages = null;
+      for (var p = headers.length - 1; p >= 0; p--) {
+        if (headers[p].lineIdx > i) continue;
+        if (headers[p].stages.length === nums.length) {
+          stages = headers[p].stages;
+          break;
+        }
+      }
+      if (!stages) {
+        for (var q = headers.length - 1; q >= 0; q--) {
+          if (headers[q].lineIdx > i) continue;
+          stages = headers[q].stages;
+          break;
+        }
+      }
+      if (!stages) break;
+
+      // Map numbers to stages by position. "A1-A3" is the total slot
+      // (already populated by Tier 8) — skip; the rest map to individual
+      // by_stage entries. Stages with no positional value stay null.
+      for (var k = 0; k < stages.length && k < nums.length; k++) {
+        var st = stages[k];
+        if (st === "A1-A3") continue;
+        if (_get(rec, "impacts." + lm.key + ".by_stage." + st + ".value") != null) continue;
+        _setPath(rec, "impacts." + lm.key + ".by_stage." + st + ".value", nums[k]);
+        _setPath(rec, "impacts." + lm.key + ".by_stage." + st + ".source", "epd_direct");
+      }
+      break; // line matched one indicator; don't try the rest
+    }
   }
 }
 
