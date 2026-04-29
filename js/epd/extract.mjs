@@ -998,7 +998,17 @@ function extractNA(text, rec) {
     text.match(/(?:DECLARED|FUNCTIONAL)\s+(?:PRODUCT\s*&\s*)?UNIT\s*[:\s]+([^\n\r]{6,200})/i) ||
     text.match(/Declared\s+unit\s*[:\s]+([^\n\r]{6,200})/i);
   if (unit) {
-    _setPath(rec, "carbon.stated.per_unit", _cleanLine(unit[1]));
+    var rawUnitLine = _cleanLine(unit[1]);
+    // Normalise to "<number> <unit>" — strip descriptive prose ("of glulam
+    // produced at..."). Use full doc context to disambiguate "1 m" (pdf.js
+    // strips superscripts on some EPDs) → "1 m³" / "1 m²" by scanning for
+    // the same unit elsewhere in the doc.
+    var cleanUnit = _normalizeDeclaredUnit(rawUnitLine, text);
+    _setPath(rec, "carbon.stated.per_unit", cleanUnit || rawUnitLine);
+    // Plumb the cleaned unit into impacts.functional_unit so the
+    // database viewer's index entry surfaces it (Database.md
+    // _indexEntryFromRecord reads impacts.functional_unit first).
+    if (cleanUnit) _setPath(rec, "impacts.functional_unit", cleanUnit);
     var dInLine = unit[1].match(/(\d{2,5}(?:[.,]\d+)?)\s*kg\/m\s*[³^]?3?/);
     if (dInLine) _setPath(rec, "physical.density.value_kg_m3", _toNum(dInLine[1]));
   }
@@ -1256,6 +1266,43 @@ function _cleanLine(s) {
   return String(s == null ? "" : s)
     .replace(/\s+/g, " ")
     .trim();
+}
+
+// Normalise a declared-unit phrase to a short canonical token like
+// "1 m³", "1 m²", "1 metric ton", or "1 kg". Drops descriptive prose
+// ("1 m of glulam produced at Kalesnikoff's facility..." → "1 m³").
+//
+// pdf.js strips superscripts on some EPDs, so "1 m" with no ³/² is
+// ambiguous between cubic and square meters. Disambiguate by scanning
+// the full doc for "m3" / "m^3" / "m³" or "m2" / "m^2" / "m²" patterns
+// that appear near declared-unit context (Table captions, density
+// expressions). Falls back to "1 m" when neither pattern is found.
+//
+// Returns null if the input has no leading "<number> <unit>" token to
+// extract — caller should keep the raw value in that case.
+function _normalizeDeclaredUnit(raw, fullText) {
+  if (!raw) return null;
+  // Match leading "<number> <unit>" — accept m / m² / m³ / metric ton /
+  // tonne / kg / kilogram / liter / litre. \b after the unit token so
+  // "metric tons" matches as a whole, not "metric ton" + "s".
+  var m = raw.match(
+    /^(\d+(?:[.,]\d+)?)\s*(m³|m²|m\^?3|m\^?2|m|metric\s+tons?|tonnes?|kgs?|kilograms?|liters?|litres?)\b/i
+  );
+  if (!m) return null;
+  var num = m[1].replace(",", ".");
+  var unit = m[2].toLowerCase().replace(/\s+/g, " ").replace(/\^/g, "");
+  // Disambiguate bare "m" via doc context.
+  if (unit === "m") {
+    if (/\bm³|\bm\s*\^?\s*3\b|\b1\s*m3\b|cubic\s+m(?:eter|etre)/i.test(fullText)) unit = "m³";
+    else if (/\bm²|\bm\s*\^?\s*2\b|\b1\s*m2\b|square\s+m(?:eter|etre)/i.test(fullText)) unit = "m²";
+    // else stay as "m" — ambiguous
+  } else if (unit === "m3") unit = "m³";
+  else if (unit === "m2") unit = "m²";
+  else if (/^metric\s+tons?$|^tonnes?$/.test(unit)) unit = "metric ton";
+  else if (/^kgs?$/.test(unit)) unit = "kg";
+  else if (/^kilograms?$/.test(unit)) unit = "kg";
+  else if (/^liters?$|^litres?$/.test(unit)) unit = "L";
+  return num + " " + unit;
 }
 
 function _toNum(s) {

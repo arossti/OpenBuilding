@@ -3263,7 +3263,7 @@ html.app-matrix body {
 }
 
 .db-th-id {
-  width: 140px;
+  width: 200px;
   white-space: nowrap;
 }
 .db-th-name {
@@ -3495,6 +3495,14 @@ html.app-matrix body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* BEAM ID column — first cell of every body row. Override the generic
+   td overflow:hidden + ellipsis so the chip + remove button (rendered
+   alongside the ID for fresh rows) stay visible. The 200px column width
+   accommodates id (43px) + chip (34px) + × (21px) + paddings + gaps. */
+#db-table tbody tr.db-row-main td:first-child {
+  overflow: visible;
+  text-overflow: clip;
 }
 #db-table td.num {
   text-align: right;
