@@ -3368,8 +3368,11 @@ html.app-matrix body {
   color: rgb(187, 247, 208);
 }
 .db-chip-source-default {
-  background: rgba(250, 204, 21, 0.32);
-  color: rgb(254, 240, 138);
+  /* Magenta — deliberately distinct from the yellow .db-fresh-chip-new
+     used on Trust-committed rows, so the user can't confuse "this row is
+     a new commit" with "this field came from the catalogue not the EPD". */
+  background: rgba(232, 121, 249, 0.32);
+  color: rgb(245, 208, 254);
 }
 .db-chip-source-calc {
   background: rgba(34, 211, 238, 0.32);
@@ -5955,8 +5958,11 @@ details.dep-details pre {
    glance without crowding the input. */
 .app-epdparser .epd-form-row input.epd-source-default,
 .app-epdparser .epd-form-row select.epd-source-default {
-  background: rgba(250, 204, 21, 0.1); /* soft amber */
-  border-left: 3px solid rgb(250, 204, 21);
+  /* Magenta — matches the .db-chip-source-default color in the database
+     viewer, kept distinct from the yellow .db-row-fresh tint used on
+     Trust-committed rows. */
+  background: rgba(232, 121, 249, 0.1);
+  border-left: 3px solid rgb(232, 121, 249);
 }
 .app-epdparser .epd-form-row input.epd-source-calc,
 .app-epdparser .epd-form-row select.epd-source-calc {
