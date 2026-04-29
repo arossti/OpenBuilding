@@ -597,8 +597,7 @@ function physicalBlock(r) {
   const box = document.createElement("div");
   box.appendChild(
     kv([
-      ["density", fmtDualDensity(d)],
-      ["density.source", d.source],
+      ["density", _valueWithSourceChip(fmtDualDensity(d), d.source)],
       ["thermal.conductivity (W/mK)", th.conductivity_w_mk],
       ["thermal.r_value/inch (imp)", th.r_value_per_inch_imperial],
       ["thermal.heat_capacity (J/kgK)", th.heat_capacity_j_kgk],
@@ -613,6 +612,41 @@ function physicalBlock(r) {
     ])
   );
   return box;
+}
+
+/* §10.1 provenance helpers ──────────────────────────────────────────
+   _sourceChip(source) builds a small inline span with the per-source
+   class. Returns null for unknown / null source so callers can opt out.
+   _valueWithSourceChip(text, source) returns either:
+     - the text alone (when source is null / unknown / "epd_direct")
+     - a Node containing the text + a trailing chip (otherwise)
+   The kv() helper handles either return type — strings render as-is,
+   Nodes get appended via dd.appendChild(value). */
+function _sourceChip(source) {
+  if (!source || source === "epd_direct") return null;
+  const cls =
+    source === "generic_default"
+      ? "db-chip-source-default"
+      : source === "calculated"
+        ? "db-chip-source-calc"
+        : source === "user_edit"
+          ? "db-chip-source-edit"
+          : null;
+  if (!cls) return null;
+  const chip = document.createElement("span");
+  chip.className = cls;
+  chip.textContent = source === "generic_default" ? "DEFAULT" : source === "calculated" ? "CALC" : "EDIT";
+  chip.style.marginLeft = "6px";
+  return chip;
+}
+function _valueWithSourceChip(text, source) {
+  const chip = _sourceChip(source);
+  if (text == null || text === "") return null;
+  if (!chip) return text;
+  const wrap = document.createElement("span");
+  wrap.appendChild(document.createTextNode(String(text)));
+  wrap.appendChild(chip);
+  return wrap;
 }
 
 function fmtDualDensity(d) {

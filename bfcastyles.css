@@ -3339,6 +3339,47 @@ html.app-matrix body {
   color: rgb(254, 215, 170);
 }
 
+/* §10.1 provenance chips — shown both as a static legend in the
+   toolbar (so users land on the page knowing what each color means)
+   and inline next to per-field values in the expanded detail panel.
+   The legend (.db-source-legend) groups four chips horizontally;
+   inline chips get the same per-source variants. */
+.db-source-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.db-source-legend > span,
+.db-chip-source-epd,
+.db-chip-source-default,
+.db-chip-source-calc,
+.db-chip-source-edit {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: "Helvetica Neue", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+.db-chip-source-epd {
+  background: rgba(34, 197, 94, 0.2);
+  color: rgb(187, 247, 208);
+}
+.db-chip-source-default {
+  background: rgba(250, 204, 21, 0.32);
+  color: rgb(254, 240, 138);
+}
+.db-chip-source-calc {
+  background: rgba(34, 211, 238, 0.32);
+  color: rgb(165, 243, 252);
+}
+.db-chip-source-edit {
+  background: rgba(132, 204, 22, 0.32);
+  color: rgb(217, 249, 157);
+}
+
 /* Group-header rows in the database viewer. Styled to echo the BEAMweb
    assembly-tab group headers: rounded container, padded away from the
    page edge, hover affordance, expanded-state contrast. The banner lives

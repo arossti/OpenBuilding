@@ -91,6 +91,16 @@
         <div class="db-result-bar">
           <span id="db-result-count" class="db-result-count">—</span>
           <span class="db-spacer"></span>
+          <span
+            class="db-source-legend"
+            title="Provenance markers shown on field values in the expanded detail panel. Per-source fields filled by EPD-Parser via the §10 fallback layer carry these chips."
+          >
+            <span class="db-chip-source-epd">EPD</span>
+            <span class="db-chip-source-default">DEFAULT</span>
+            <span class="db-chip-source-calc">CALC</span>
+            <span class="db-chip-source-edit">EDIT</span>
+          </span>
+          <span class="db-spacer"></span>
           <span class="db-hint">
             Click a row to expand full record · <span class="db-hint-kbd">scroll horizontally</span> within the
             per-stage matrix
@@ -132,7 +142,8 @@
             <div><b>Captured at:</b> <span id="db-verify-captured"></span></div>
           </div>
           <div class="db-verify-hint">
-            Stub: shows the candidate JSON the parser captured. P3 will replace this with the side-by-side per-field diff (existing record vs incoming) per workplan Database.md §5.
+            Stub: shows the candidate JSON the parser captured. P3 will replace this with the side-by-side per-field
+            diff (existing record vs incoming) per workplan Database.md §5.
           </div>
           <pre id="db-verify-json" class="db-verify-json"></pre>
         </div>
