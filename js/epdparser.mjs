@@ -205,12 +205,16 @@ function _primeLookups() {
     }),
     fetch("data/schema/lookups/db-fallbacks.json").then(function (r) {
       return r.ok ? r.json() : null;
+    }),
+    fetch("data/schema/lookups/material-groups.json").then(function (r) {
+      return r.ok ? r.json() : null;
     })
   ]).then(function (results) {
     Extract.setLookups({
       mtMap: (results[0] && results[0].map) || {},
       kwPatterns: (results[1] && results[1].patterns) || [],
-      materialDefaults: results[2] || null
+      materialDefaults: results[2] || null,
+      materialGroups: results[3] || null
     });
   });
 }
@@ -373,13 +377,28 @@ function _flushLine(line) {
   line.sort(function (a, b) {
     return a.x - b.x;
   });
-  // Insert a single space between adjacent items unless the previous item
-  // already ends in whitespace, to avoid double-spacing on already-tokenised PDFs.
+  // Use the x-gap between adjacent items to decide whether to insert an
+  // implicit space. Browser pdf.js fragments composite tokens like
+  // "-953.23" → ["-", "953.23"] and "2.27E-06" → ["2.27E", "-", "06"]
+  // with TIGHT positioning (gap < 1px) — these must stay glued or the
+  // negative sign / sci-not exponent gets lost. Word-separated items
+  // either carry their own explicit space item OR have a visible x-gap
+  // (≥ 1.5px). Threshold of 1.5px is conservative — pdf.js emits explicit
+  // space items whenever there's a real visible space, so this implicit-
+  // space insertion is mostly defensive for non-standard typography.
   var out = "";
+  var prev = null;
   for (var i = 0; i < line.length; i++) {
-    var s = line[i].str;
-    if (out.length && !/\s$/.test(out) && !/^\s/.test(s)) out += " ";
+    var item = line[i];
+    var s = item.str;
+    if (out.length && prev) {
+      var prevRight = prev.x + (prev.width || 0);
+      var gap = item.x - prevRight;
+      var hasOwnWs = /\s$/.test(out) || /^\s/.test(s);
+      if (!hasOwnWs && gap > 1.5) out += " ";
+    }
     out += s;
+    prev = item;
   }
   return out;
 }

@@ -1,74 +1,55 @@
 # EPD-Parser — workplan (EPD-Parser.md)
 
-> Browser-native parser for Environmental Product Declaration PDFs. Drops an EPD, extracts the EN 15804+A2 fields that populate the BfCA materials schema, and routes the result into a human-reviewed commit flow — either a fresh database entry or a side-by-side update of an existing one. Sibling app to PDF-Parser. Branch: `Magic-Wand-Oculus`.
+> Browser-native parser for Environmental Product Declaration PDFs. Drops an EPD, extracts the EN 15804+A2 fields that populate the BfCA materials schema, and routes the result into a human-reviewed commit flow — either a fresh database entry or a side-by-side update of an existing one. Sibling app to PDF-Parser. Active branch: `EPD-PARSER-SPRINT-2`.
 
 ---
 
 ## Agent handoff (read this first)
 
-**You are picking up at 2026-04-29 EOD with C-fb1 through C-fb4 (plus a magenta-tweak follow-up) shipped. §10 fallback layer is wired and visualised end-to-end; only C-fb5 (harness upgrade) and C-fb6 (BEAM-math calc tier, gated) remain.** Andy paused for context-window reasons. Branch is parked at `e563f04` on `EPD-PARSER-SPRINT`, both remotes pushed.
+**You are picking up at 2026-04-29 PM with the four Kalesnikoff bugs fixed end-to-end (display name, density-from-Mass, full impact-table extraction, db-fallbacks coverage), the three database-viewer bugs fixed (duplicate-EPD detection on Trust, × remove button on fresh rows, BEAM ID column widened), C-fb5 harness ground-truth verification shipped, and P3.3 per-stage breakdown extraction shipped.** Branch is parked at `ae20837` on `EPD-PARSER-SPRINT-2`, both remotes pushed. Only C-fb6 (BEAM-math calc tier, gated on Andy's formulas) remains from the original §10 plan.
 
-**Today's coverage state**: metadata 256/420 (61.0%) → 267/420 (63.6%) after C-fb2 fallback fills. Impacts unchanged at 147/300 (49.0%) — the fallback layer doesn't touch impacts.
+**Today's coverage state**: metadata 267/420 (63.6%) → 275/420 (65.5%); impacts 147/300 (49.0%) → 163/300 (54.3%). Both Kalesnikoff samples now 14/14 metadata + 10/10 impacts (perfect score). Per-stage A1/A2/A3 cells now populate for cradle-to-gate EPDs (10 indicators × 3 stages = 30 cells per Kalesnikoff sample, all verified against published Table 3).
 
-**What shipped this session** (chronological, all on `EPD-PARSER-SPRINT`):
+**Ground-truth checks (C-fb5)**: 1 sample annotated (Kalesnikoff GLT) with 52 expected keys (22 totals + 30 per-stage). All passing. 0 extraction failures, 0 silent-override violations.
 
-| SHA       | Scope                                                                                                  |
-| --------- | ------------------------------------------------------------------------------------------------------ |
-| `370ffc8` | §9.5 fix #2 — EU/IBU per-format extractor + bracketed-unit impact patterns                             |
-| `39cbb97` | §9.5 fix #3 — ISO 21930 indicator codes (RPR E / NRPR E / FW) + comma-thousand parser fix              |
-| `666de0e` | §9.5 fix #4 — EPD-IES per-glyph tolerance (`_SP_ID_RX`, `_looseIsoDateAfter`)                          |
-| `f35d60d` | gitignore: `/db-*.png` + `/c7d-*.png` for transient screenshots                                        |
-| `6bef852` | §10 chapter (db-fallbacks architecture) added to this workplan                                         |
-| `557ea31` | **C-fb1** — db-fallbacks reference catalogue + XML→JSON builder + stage:data wiring                    |
-| `e1ff163` | **C-fb2** — Tier-9 `applyMaterialDefaults()` + `setLookups()` extension + harness/browser priming      |
-| `c0fe802` | **C-fb3** — form-pane provenance UI (color-coded source classes + `_bindFormChange` flip-to-user_edit) |
-| `9d7a048` | **C-fb4** — Database viewer chips + toolbar legend                                                     |
-| `e563f04` | C-fb4 follow-up — DEFAULT chip → magenta (was clashing with yellow `.db-fresh-chip-new`)               |
+**What shipped this session** (chronological, all on `EPD-PARSER-SPRINT-2`):
 
-### Pickup — what you're doing first
+| SHA       | Scope                                                                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `6347183` | **C-fb1.1** — Wood alias resolution in db-fallbacks (TIMBER → "Wood" canonical + 13 aliases for Glulam / CLT / GLT / LVL / LSL / etc.)      |
+| `44fc4f1` | **§9.5 fix #5** — Kalesnikoff long-English impact extraction + display_name from `Group \| Type` taxonomy + per-glyph header skip + q-optional unit |
+| `28f48d3` | **§9.5 fix #6** — Mass-per-declared-unit density + "produced by/at" manufacturer prose fallback + EPD-ID truncation post-process            |
+| `7176915` | **C-fb5** — harness ground-truth verification (extraction fidelity / defaults applied / no silent overrides; first annotated: Kalesnikoff GLT) |
+| `ca025ee` | archive interim coverage snapshot                                                                                                            |
+| `43f0cf3` | **DB viewer** — duplicate-EPD detection on Trust (over-write prompt) + × remove button on `_fresh` rows (catalogue-immutable) + BEAM ID col 96px → 140px |
+| `ae20837` | **P3.3** — per-stage breakdown extraction (A1/A2/A3/.../D) with nearest-header-by-count selection; 30 by_stage ground-truth keys added       |
 
-**1. C-fb5 — Harness upgrade with verification before fallback** (~45–60 min). The fallback layer is currently a _silent_ feature: if a regex bug fails to extract a value the EPD actually publishes, the catalogue fills it with `generic_default` and the user sees the magenta chip without realising the EPD had the value. §10.3 of this workplan documents the design — read that section in full. Concrete deliverables:
+### Pickup — what you're doing next
 
-- Create directory `docs/PDF References/EPD SAMPLES/expected/` — initially empty; the harness must skip its three new checks gracefully when the ground-truth file is absent.
-- Schema for each ground-truth file (one per sample EPD):
-  ```json
-  {
-    "source_file": "2023 BC Wood CLT EPD ASTM.pdf",
-    "epd_publishes": {
-      "physical.density.value_kg_m3": 470,
-      "carbon.stated.per_unit": "1 m³ of cross-laminated timber",
-      "epd.expiry_date": "2028-02-19"
-    },
-    "epd_omits": ["physical.thermal.conductivity_w_mk"],
-    "notes": "Density stated on cover page in declared-unit description."
-  }
-  ```
-- Extend `schema/scripts/test-epd-extract.mjs` to:
-  1. **Extraction fidelity check** — for each `epd_publishes` key, did we extract it? For numeric fields, within ±1% tolerance? Failing case = regex bug, surface as `✗` line in the harness output.
-  2. **Defaults applied check** — for each `epd_omits` key, did the catalogue fill it AND mark `source: "generic_default"`?
-  3. **No silent overrides check** — for any key in `epd_publishes`, the post-fallback `source` must be `epd_direct` or unset (NOT `generic_default`). This is the key rule.
-- Add a top-line summary to the harness output: `Ground-truth checks: N samples annotated, K extraction failures, M silent-override violations.`
-- Snapshot to `EPD-coverage-history/` as usual; the new dimensions get tabulated.
+**1. C-fb6 (still gated)**. `applyCalculations(rec)` Tier 10 is blocked on Andy supplying BEAM math formulas for biogenic carbon stored per unit + similar derivations. Andy committed to providing these by EOD 2026-04-29. Don't start without the formulas.
 
-**2. Bug to flag during C-fb5 — `xcarb` steel density=800**. The 3 xcarb steel samples (cold-formed, hollow, deck) currently extract `density=800` (unmarked source), which is wrong. Real steel density is 7800. The number 800 is being grabbed by an existing density regex from somewhere irrelevant in the doc. Once you build the C-fb5 verification harness, annotate one of the xcarb samples' `expected/` file with `epd_omits: ["physical.density.value_kg_m3"]` (steel EPDs in this family don't publish density on the cover) and watch the "no silent overrides" check fail because the wrong-value extraction is masking the omission. Fix: tighten the density regex in `extractNA()` (probably a missing `\b` or character-class constraint). This is the canonical example of the bug class C-fb5 is designed to catch.
+**2. Per-stage extraction → cradle-to-grave EPDs**. P3.3 verified for cradle-to-gate (Kalesnikoff, 4-column header). Cradle-to-grave EPDs (xcarb steel, EU/IBU Wood Fibre, etc.) have full A1-D headers (~17 columns). The same nearest-header-by-count logic should Just Work, but no ground-truth file annotated yet. Pick a cradle-to-grave sample, annotate per-stage values, run harness, verify. Expand `_BYSTAGE_LABELS` if any indicator labels need broadening for new format families.
 
-**3. C-fb6 (gated)**. `applyCalculations(rec)` Tier 10 is blocked on Andy supplying BEAM math formulas for biogenic carbon stored per unit. Don't start it without the formulas.
+**3. Per-sample ground-truth backlog (C-fb5 expansion)**. Only 1/30 samples annotated so far. Each new annotated sample tightens the no-silent-override guarantee. Priority order:
+- xcarb steel cold-formed (3 samples, density=800 false-positive bug to surface — see §0 known issues)
+- 2023 BC Wood ASTM family (CLT, GLT, SPF, SPF-Plywood — same format as Kalesnikoff, all at 13/14 + 10/10, low risk)
+- EU/IBU Wood Fibre (different format, exercises the EU/IBU regex paths)
+- Lafarge Exshaw cement (NSF format)
+
+**4. xcarb steel density=800 bug**. The 3 xcarb steel samples currently extract `density=800` (wrong; real steel is 7800). Use C-fb5 ground truth: annotate one xcarb sample with `epd_omits: ["physical.density.value_kg_m3"]` AND `epd_publishes: { ... no density ... }`, run harness, watch the silent-override check fail, then tighten the density regex in `extractNA()` to fix.
 
 ### Branch state
 
 ```
-main                        cf28d11   PR #14 merged
-└── EPD-PARSER-SPRINT  (active, 11 commits since main)
-    ├── 370ffc8  §9.5 fix #2 EU/IBU
-    ├── 39cbb97  §9.5 fix #3 ISO 21930 + comma parser
-    ├── 666de0e  §9.5 fix #4 EPD-IES
-    ├── f35d60d  gitignore tightening
-    ├── 6bef852  workplan §10 chapter
-    ├── 557ea31  C-fb1 db-fallbacks catalogue
-    ├── e1ff163  C-fb2 Tier-9 fallback layer
-    ├── c0fe802  C-fb3 form-pane provenance UI
-    ├── 9d7a048  C-fb4 database viewer chips + legend
-    └── e563f04  C-fb4 follow-up — DEFAULT → magenta  (← tip)
+main                            cda8102   PR #15 merged
+└── EPD-PARSER-SPRINT-2  (active, 7 commits since main)
+    ├── 6347183  C-fb1.1 db-fallbacks Wood alias
+    ├── 44fc4f1  §9.5 fix #5 Kalesnikoff impacts + display_name from taxonomy
+    ├── 28f48d3  §9.5 fix #6 Mass density + produced-by mfr + EPD-ID truncation
+    ├── 7176915  C-fb5 harness ground-truth verification
+    ├── ca025ee  archive interim snapshot
+    ├── 43f0cf3  DB viewer: duplicate detection + remove button + col width
+    └── ae20837  P3.3 per-stage breakdown (← tip)
 ```
 
 ### Read this order
@@ -113,7 +94,7 @@ npm run serve                                                     # local dev se
 
 ---
 
-## 0. Current state (2026-04-29 mid-day)
+## 0. Current state (2026-04-29 PM)
 
 **Phases shipped** (chronological):
 
@@ -135,25 +116,34 @@ npm run serve                                                     # local dev se
 - ✅ **C-fb4 — Database viewer chips + toolbar legend** _(shipped 2026-04-29, `9d7a048`)_. Static four-chip legend in `database.html` `.db-result-bar` (`EPD ● DEFAULT ● CALC ● EDIT`) so users land on the page already knowing what each color means. Per-field inline chips via new `_sourceChip(source)` + `_valueWithSourceChip(text, source)` helpers in `database.mjs`. Currently rendered on the `density` row of the Physical Properties block (the only Tier-9-fillable field).
 - ✅ **C-fb4 follow-up — DEFAULT chip → magenta** _(shipped 2026-04-29, `e563f04`)_. Andy feedback: amber DEFAULT clashed visually with the yellow `.db-fresh-chip-new` on Trust-committed rows. Both `.db-chip-source-default` (database viewer) and `.app-epdparser .epd-form-row .epd-source-default` (form pane) swapped to magenta `rgba(232, 121, 249, ...)`. Maximum visual distinction across the five chip types now in play.
 - ✅ **BEAM ID convention** locked in §5 + §5.5 (6-char hex matching the existing catalogue, never overwrite with PCR or EPD-id).
+- ✅ **C-fb1.1 — Wood alias resolution in db-fallbacks** _(shipped 2026-04-29 PM, `6347183`)_. Build-converter renames TIMBER-sourced canonical from "Framing" → "Wood" + emits an `aliases` block resolving Framing / Engineered wood / Glulam / CLT / Cross-laminated timber / GLT / LVL / LSL / PSL / Solid wood / Lumber / SPF / Wood I-joist → "Wood". `applyMaterialDefaults` consults aliases when direct lookup misses. Hardwood deliberately omitted (density spread too wide for a single default). Coverage +5 metadata (5 wood samples picked up density via the alias).
+- ✅ **§9.5 fix #5 — Kalesnikoff long-English impact extraction + display_name from taxonomy** _(shipped 2026-04-29 PM, `44fc4f1`)_. Three sub-patches: (5a) `deriveDisplayName(rec)` overrides `naming.display_name` with `${groupLabel} | ${materialType}` once Tier 1+2 settle (e.g. "Wood | Glulam"); cover-page picker preserved on samples without group+type. `setLookups` extended with `materialGroups`. `extractType` skipPrefix extended to skip per-glyph EPD-header artifacts ("E nvironmental", "P roduct", "D eclaration"). Material-type keyword scan now prefers matches in the title (display_name) before falling through to body. (5b) q-optional in 7 IMPACT_INDICATORS regexes (`[Ee]q\.?` → `[Ee]q?\.?`) — Kalesnikoff and modern NA EPDs use "kg CO2e" / "kg SO2e" / "kg O3e" without trailing q. (5c) Six new English-variant entries: GWP em-dash + Total subtitle (with negative lookahead on Fossil/Biogenic), GWP-Biogenic em-dash, ODP label-only (drops unit-cell anchor for wrapped-unit case), AP "of soil and water sources", SFP "Formation potential of tropospheric ozone", ADPf parenthetical "(ADPfossil)"; EP regex made `\s*` between N and Eq for "kg Ne" tolerance; WDP "Consumption of freshwater resources" English variant. Coverage +16 impacts (147 → 163, 49.0% → 54.3%); both Kalesnikoff samples 2/10 → 10/10.
+- ✅ **§9.5 fix #6 — Mass-per-declared-unit density + manufacturer prose fallback + EPD-ID truncation** _(shipped 2026-04-29 PM, `28f48d3`)_. (i) "Mass (including moisture) kg \<N\>" pattern in `extractPhysical` — N kg per declared 1 m³ = density. Skips Oven Dry Mass. Fires only when existing direct-density patterns return null. (ii) "produced by/at <CompanyName>" prose fallback in `extractNA` for layouts where label-then-value spatial join fails (Kalesnikoff "Declaration Owner" sits at y-midpoint of multi-line address cell, so label ends up between value rows — produces "South Slocan, BC V0G 2G0" instead of "Kalesnikoff Lumber Co."). The "produced by/at" pattern grabs the title-prose CompanyName up to the next lowercase word. (iii) EPD-ID post-process: split capture on next-label keywords (Declared / Date / Period / Owner / Holder / Type / Scope / Reference / Markets / Description / Year / EPD\\s+(?:Type|Scope) / Programme / Program / Issue / Valid / Publisher) so "EPD 296 Declared Product Glulam 3" cleanly truncates to "EPD 296". Coverage +3 metadata (Kalesnikoff CLT/GLT 13 → 14, Fabricated Steel Plates 11 → 12).
+- ✅ **C-fb5 — harness ground-truth verification** _(shipped 2026-04-29 PM, `7176915`)_. `docs/PDF References/EPD SAMPLES/expected/<sample>.json` files annotate each sample's `epd_publishes` and `epd_omits`. Harness gains three checks per workplan §10.3: (1) extraction fidelity — every published key must extract within ±1% numeric tolerance / substring match; (2) defaults applied — every omitted key must be filled via catalogue with `source: "generic_default"`; (3) no silent overrides — every published key's post-fallback source must NOT be `generic_default`. Per-sample line gets `GT=✓` tag, aggregate summary adds one line, markdown snapshot grows a "Ground-truth checks" section with per-failure detail. First annotated: 2022 BC Wood GLT Kalesnikoff EPD.
+- ✅ **DB viewer — duplicate detection + remove button + BEAM ID column width** _(shipped 2026-04-29 PM, `43f0cf3`)_. (i) `_findDuplicate(candidate)` looks for likely matches among in-session committed records via two-tier match (manufacturer + epd.id, then display_name + group_prefix). When found, `handleTrust` prompts `confirm()` "OK = overwrite, Cancel = create separate". Restricted to `_fresh` entries — original 821 BEAM records can never be implicitly over-written. (ii) `.db-row-remove` × button on `_fresh` rows; `handleRemoveFresh(id)` confirm-then-delete from IndexedDB + state. Hard guard: button only renders on `_fresh`, AND handler re-checks the flag at click time (catalogue records are immutable through this path, even with forged DOM markup). (iii) `.db-th-id` width 96px → 140px + `white-space: nowrap` so full 6-char hex + NEW/UPDATED chip + × button all fit on one line. End-to-end verified via Playwright.
+- ✅ **P3.3 — per-stage breakdown extraction** _(shipped 2026-04-29 PM, `ae20837`)_. New `_extractByStage(text, rec)` populates `impacts.<key>.by_stage.<stage>.{value, source}` for individual stages A1, A2, A3, A4, A5, B1..B7, C1..C4, D. `_detectStageHeaders(text)` returns ALL candidate header lines (deliberately not just the first — Kalesnikoff has a generic 17-stage life-cycle list at line 126 that isn't a column header; the actual Table 3 header is at line 260). Per-row extractor picks the nearest preceding header whose stage-count matches the row's value-count exactly. `_tokenizeImpactNumbers` filters subscript digits (the `2` in CO2e, `3` in O3) by accepting only decimals / sci-not / 3+ digit integers / thousand-comma values. Idempotent — never overwrites existing by_stage. C-fb5 ground truth extended with 30 per-stage keys for Kalesnikoff GLT (A1/A2/A3 for all 10 indicators, including `gwp_bio.by_stage.A1 = -1045.63` — the carbon-stored value). All 52 keys pass.
 
-**Latest measured coverage** (`node schema/scripts/test-epd-extract.mjs`, 2026-04-29 12:06Z, snapshot at `EPD-coverage-history/2026-04-29T12-06-59Z.md`):
+**Latest measured coverage** (`node schema/scripts/test-epd-extract.mjs`, 2026-04-29 16:07Z, snapshot at `EPD-coverage-history/2026-04-29T16-07-22Z.md`):
 
 - 30/30 samples processed, no errors
-- **Metadata: 267/420 = 63.6%** (14 fields × 30 samples — including 11 generic_default density fills from C-fb2)
-- **Impact totals: 147/300 = 49.0%** (10 indicators × 30 samples)
+- **Metadata: 275/420 = 65.5%** (14 fields × 30 samples)
+- **Impact totals: 163/300 = 54.3%** (10 indicators × 30 samples)
+- **Per-stage by_stage cells: now extracted** for cradle-to-gate samples (Kalesnikoff family fills A1/A2/A3 across all 10 indicators); harness aggregate doesn't currently tabulate by_stage coverage as a separate dimension (deferred — present per-sample in record.impacts).
+- **Ground-truth checks**: 1 sample annotated (Kalesnikoff GLT) with 52 expected keys (22 totals + 30 per-stage). All passing.
 - Format detection: na=18, epd_international=2, nsf=2, eu_ibu=1, unknown=7
 
-**Coverage delta this session** (vs 2026-04-28 23:15Z post-fix-#1 baseline):
+**Coverage delta this session (afternoon)** (vs 2026-04-29 12:06Z baseline):
 
-- Metadata: 57.6% → 63.6% (EU/IBU 4→12, EPD-IES variant 5→11, plus 11 generic_default density fills)
-- Impacts: 36.0% → 49.0% (4 BC Wood 2023 samples at 10/10; xcarb 6→9; misc bonus matches)
+- Metadata: 63.6% → 65.5% (+5 from Wood alias fallback, +1 from Kalesnikoff CLT density via Mass, +1 from GLT density via Mass, +1 Steel Plates from produced-by mfr fallback)
+- Impacts: 49.0% → 54.3% (+8 Kalesnikoff CLT impacts, +8 Kalesnikoff GLT impacts via fix #5)
+- Per-stage cells: 0 → fully populated for cradle-to-gate Kalesnikoff family (P3.3)
 
-**Phases pending** (ranked by leverage post-2026-04-29 EOD):
+**Phases pending** (ranked by leverage post-2026-04-29 PM):
 
-- 🔜 **C-fb5 — Harness verification (`expected/` ground-truth + three checks)** _(next session — see top-of-doc handoff)_. Stops the catalogue from silently overriding regex bugs; surfaces the xcarb steel density=800 false-positive flagged in C-fb2.
-- 🅿️ **C-fb6 — `applyCalculations()` Tier 10** — gated on Andy supplying BEAM math for biogenic carbon stored per unit + similar derivations.
-- ⏳ **P3.3 — Per-stage breakdown** (A1, A2, A3, A1-A3, A4, …, D) — needs column-header parsing for cradle-to-gate vs cradle-to-grave layouts. Sized similar to the §10 work; can run in parallel.
-- ⏳ **P4 — Match-status surfacing** (`NEW` vs `REFRESH → <id>`) on the EPD-Parser form banner; Database-side `NEW` / `UPDATED` chips already shipped 2026-04-28 in §7.7.
+- 🅿️ **C-fb6 — `applyCalculations()` Tier 10** — gated on Andy supplying BEAM math for biogenic carbon stored per unit. Andy committed to providing formulas EOD 2026-04-29.
+- 🔜 **P3.3 cradle-to-grave verification** — per-stage extraction works structurally for any header; needs ground-truth annotation for at least one cradle-to-grave sample (xcarb steel, EU/IBU Wood Fibre) to lock in the full A1-D path.
+- 🔜 **C-fb5 ground-truth backlog** — only 1/30 samples annotated. Priority: xcarb (surface the density=800 silent-override bug), 2023 BC Wood ASTM family (low-risk), EU/IBU Wood Fibre, Lafarge cement.
+- ⏳ **P4 — Match-status surfacing** (`NEW` vs `REFRESH → <id>`) on the EPD-Parser form banner — Database-side dupe detection now does this server-side via the over-write prompt; form-side preview is a UX enhancement.
 - ⏳ **Multi-product EPD disambiguation** (Genyk 3 SPFs, Lafarge 6 cement types, AWC/CWC industry-avg). UI work in the form pane.
 - ⏳ **P6 — Refresh queue** (DB-driven entry point for expired-record backlog).
 - ⏳ **P7 — Coverage hardening** (OCR fallback for 3 Sopra family scanned EPDs + Polyiso + Hemlock no-EPD docs in the calibration set, multi-EPD bulk upload).

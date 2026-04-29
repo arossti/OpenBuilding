@@ -29,9 +29,16 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..", "..");
 const SAMPLES_ROOT = join(REPO_ROOT, "docs", "PDF References", "EPD SAMPLES");
+const EXPECTED_ROOT = join(SAMPLES_ROOT, "expected");
 const EXTRACT_MJS = join(REPO_ROOT, "js", "epd", "extract.mjs");
 const LOOKUPS_DIR = join(REPO_ROOT, "schema", "lookups");
 const COVERAGE_HISTORY_DIR = join(REPO_ROOT, "docs", "workplans", "EPD-coverage-history");
+
+// Numeric tolerance for ground-truth extraction-fidelity check
+// (workplan §10.3). 1% relative + 1e-12 absolute (latter handles
+// near-zero values like net biogenic GWP = 0).
+const GT_NUMERIC_TOLERANCE = 0.01;
+const GT_NUMERIC_ABS_FLOOR = 1e-12;
 
 // Trunk-of-tree fields (workplan §5.6) front-load so per-format
 // regressions on Tier 1/2 surface as a single drop in the aggregate %.
@@ -144,6 +151,111 @@ function isPopulated(v) {
   return true;
 }
 
+// Map a value-path (e.g. "physical.density.value_kg_m3" or
+// "impacts.gwp_kgco2e.total.value") to its parallel source-path by
+// replacing the last segment with "source". Mirrors
+// _resolveSourcePath() in js/epdparser.mjs.
+function sourcePathForValue(valuePath) {
+  const idx = valuePath.lastIndexOf(".");
+  if (idx < 0) return "source";
+  return valuePath.substring(0, idx) + ".source";
+}
+
+// Numeric ±tolerance comparison. Numbers within 1% relative OR
+// 1e-12 absolute (the latter catches near-zero published values
+// like Net Biogenic GWP = 0.00).
+function numericMatch(extracted, expected) {
+  if (typeof extracted !== "number" || typeof expected !== "number") return false;
+  if (!isFinite(extracted) || !isFinite(expected)) return false;
+  const absDiff = Math.abs(extracted - expected);
+  if (absDiff <= GT_NUMERIC_ABS_FLOOR) return true;
+  const denom = Math.max(Math.abs(expected), GT_NUMERIC_ABS_FLOOR);
+  return absDiff / denom <= GT_NUMERIC_TOLERANCE;
+}
+
+// String-match for ground truth. Substring (case-insensitive) so
+// minor whitespace / per-glyph residue doesn't trip the check.
+function stringMatch(extracted, expected) {
+  if (typeof extracted !== "string" || typeof expected !== "string") return false;
+  return extracted.toLowerCase().includes(expected.toLowerCase());
+}
+
+// Three ground-truth checks per workplan §10.3:
+//   1. extraction fidelity — every key the EPD publishes must extract
+//   2. defaults applied   — every key the EPD omits must be filled from
+//                            the catalogue with source: "generic_default"
+//   3. no silent overrides — every key the EPD publishes must NOT carry
+//                             source: "generic_default" after fallback
+function evaluateGroundTruth(record, expected) {
+  const result = {
+    extractionFailures: [],
+    silentOverrides: [],
+    defaultsAppliedFailures: [],
+    publishedCount: 0,
+    omittedCount: 0
+  };
+  if (!expected) return result;
+
+  const publishes = expected.epd_publishes || {};
+  const omits = expected.epd_omits || [];
+
+  // Check 1 — extraction fidelity
+  for (const path of Object.keys(publishes)) {
+    result.publishedCount++;
+    const expectedVal = publishes[path];
+    const extractedVal = getPath(record, path);
+    let ok = false;
+    if (extractedVal == null) ok = false;
+    else if (typeof expectedVal === "number") ok = numericMatch(extractedVal, expectedVal);
+    else if (typeof expectedVal === "string") ok = stringMatch(String(extractedVal), expectedVal);
+    else ok = extractedVal === expectedVal;
+    if (!ok) {
+      result.extractionFailures.push({
+        path,
+        expected: expectedVal,
+        extracted: extractedVal == null ? null : extractedVal
+      });
+    }
+  }
+
+  // Check 2 — defaults applied (only meaningful for catalogue-fillable
+  // fields; today that's just physical.density.value_kg_m3 plus
+  // anything else applyMaterialDefaults grows to handle).
+  for (const path of omits) {
+    result.omittedCount++;
+    const filled = getPath(record, path);
+    const sourceP = sourcePathForValue(path);
+    const source = getPath(record, sourceP);
+    if (filled == null || source !== "generic_default") {
+      result.defaultsAppliedFailures.push({ path, filled, source });
+    }
+  }
+
+  // Check 3 — no silent overrides. For any key the EPD publishes, the
+  // post-fallback source must NOT be "generic_default" — i.e. the
+  // catalogue must not be papering over a regex bug.
+  for (const path of Object.keys(publishes)) {
+    const sourceP = sourcePathForValue(path);
+    const source = getPath(record, sourceP);
+    if (source === "generic_default") {
+      result.silentOverrides.push({ path, expected: publishes[path], extracted: getPath(record, path) });
+    }
+  }
+
+  return result;
+}
+
+async function loadExpected(samplePdfFile) {
+  const expectedPath = join(EXPECTED_ROOT, samplePdfFile.replace(/\.pdf$/i, ".json"));
+  try {
+    const raw = await readFile(expectedPath, "utf8");
+    return JSON.parse(raw);
+  } catch (err) {
+    if (err.code === "ENOENT") return null; // unannotated samples skip gracefully
+    throw err;
+  }
+}
+
 async function walkPdfs(root) {
   const out = [];
   async function rec(dir) {
@@ -196,10 +308,12 @@ async function main() {
   const mt = JSON.parse(await readFile(join(LOOKUPS_DIR, "material-type-to-group.json"), "utf8"));
   const kw = JSON.parse(await readFile(join(LOOKUPS_DIR, "display-name-keywords.json"), "utf8"));
   const md = JSON.parse(await readFile(join(LOOKUPS_DIR, "db-fallbacks.json"), "utf8"));
+  const mg = JSON.parse(await readFile(join(LOOKUPS_DIR, "material-groups.json"), "utf8"));
   Extract.setLookups({
     mtMap: mt.map || {},
     kwPatterns: kw.patterns || [],
-    materialDefaults: md
+    materialDefaults: md,
+    materialGroups: mg
   });
 
   const pdfs = await walkPdfs(SAMPLES_ROOT);
@@ -234,6 +348,8 @@ async function main() {
     }
 
     const summary = summarizeRecord(result.record);
+    const expected = await loadExpected(file);
+    const gt = evaluateGroundTruth(result.record, expected);
     results.push({
       group,
       file,
@@ -244,10 +360,17 @@ async function main() {
       impacts: summary.impacts,
       metaHit: summary.metaHit,
       impactHit: summary.impactHit,
-      record: result.record
+      record: result.record,
+      expected,
+      groundTruth: gt
     });
+    const gtTag = expected
+      ? gt.extractionFailures.length === 0 && gt.silentOverrides.length === 0 && gt.defaultsAppliedFailures.length === 0
+        ? "  GT=✓"
+        : `  GT=✗ ext:${gt.extractionFailures.length} silent:${gt.silentOverrides.length} dflt:${gt.defaultsAppliedFailures.length}`
+      : "";
     console.log(
-      `✓ ${group}/${file.padEnd(60)}  fmt=${result.format.padEnd(20)}  meta=${fmtPct(summary.metaHit, summary.metaTotal)}  impacts=${fmtPct(summary.impactHit, summary.impactTotal)}  pages=${extracted.pageCount}`
+      `✓ ${group}/${file.padEnd(60)}  fmt=${result.format.padEnd(20)}  meta=${fmtPct(summary.metaHit, summary.metaTotal)}  impacts=${fmtPct(summary.impactHit, summary.impactTotal)}  pages=${extracted.pageCount}${gtTag}`
     );
   }
 
@@ -274,6 +397,31 @@ async function main() {
       .map(([k, v]) => `${k}=${v}`)
       .join(", ")}`
   );
+
+  // ── Ground-truth aggregate (workplan §10.3) ─────────
+  const annotated = ok.filter((r) => r.expected);
+  const totalExtractFailures = annotated.reduce((a, r) => a + r.groundTruth.extractionFailures.length, 0);
+  const totalSilentOverrides = annotated.reduce((a, r) => a + r.groundTruth.silentOverrides.length, 0);
+  const totalDefaultsFailures = annotated.reduce((a, r) => a + r.groundTruth.defaultsAppliedFailures.length, 0);
+  console.log(
+    `Ground-truth checks: ${annotated.length} sample${annotated.length === 1 ? "" : "s"} annotated, ${totalExtractFailures} extraction failures, ${totalSilentOverrides} silent-override violations, ${totalDefaultsFailures} defaults-applied failures`
+  );
+  // Print individual failures so they're actionable when CI surfaces them
+  for (const r of annotated) {
+    const gt = r.groundTruth;
+    if (gt.extractionFailures.length || gt.silentOverrides.length || gt.defaultsAppliedFailures.length) {
+      console.log(`  ${r.group}/${r.file}:`);
+      for (const f of gt.extractionFailures) {
+        console.log(`    ✗ extraction: ${f.path}  expected=${JSON.stringify(f.expected)}  extracted=${JSON.stringify(f.extracted)}`);
+      }
+      for (const f of gt.silentOverrides) {
+        console.log(`    ✗ silent override: ${f.path}  EPD publishes ${JSON.stringify(f.expected)} but record source=generic_default (regex bug masked by catalogue)`);
+      }
+      for (const f of gt.defaultsAppliedFailures) {
+        console.log(`    ✗ defaults applied: ${f.path}  expected catalogue fill, got value=${JSON.stringify(f.filled)} source=${JSON.stringify(f.source)}`);
+      }
+    }
+  }
 
   // ── Markdown coverage table ─────────────────────────
   // Default behavior: if no --md path was given, write a timestamped
@@ -314,6 +462,45 @@ async function main() {
       lines.push(
         `| ${r.group}/${r.file} | ${r.format} | ${r.pages} | ${r.metaHit}/${METADATA_FIELDS.length} | ${r.impactHit}/${IMPACT_KEYS.length} | ${cell(i.gwp_kgco2e)} | ${cell(i.ozone_depletion_kgcfc11eq)} | ${cell(i.acidification_kgso2eq)} | ${cell(i.eutrophication_kgneq)} | ${cell(i.smog_kgo3eq)} | ${cell(i.abiotic_depletion_fossil_mj)} | ${cell(i.water_consumption_m3)} | ${cell(i.primary_energy_nonrenewable_mj)} | ${cell(i.primary_energy_renewable_mj)} |`
       );
+    }
+    // Ground-truth section appended only when at least one sample is
+    // annotated. Empty expected/ dir = no section, no clutter.
+    if (annotated.length) {
+      lines.push("");
+      lines.push("## Ground-truth checks (workplan §10.3)");
+      lines.push("");
+      lines.push(
+        `${annotated.length} sample${annotated.length === 1 ? "" : "s"} annotated · ${totalExtractFailures} extraction failures · ${totalSilentOverrides} silent-override violations · ${totalDefaultsFailures} defaults-applied failures`
+      );
+      lines.push("");
+      lines.push("| Sample | Published keys | Omitted keys | Extraction ✗ | Silent overrides ✗ | Defaults applied ✗ |");
+      lines.push("|---|---:|---:|---:|---:|---:|");
+      for (const r of annotated) {
+        const gt = r.groundTruth;
+        lines.push(
+          `| ${r.group}/${r.file} | ${gt.publishedCount} | ${gt.omittedCount} | ${gt.extractionFailures.length} | ${gt.silentOverrides.length} | ${gt.defaultsAppliedFailures.length} |`
+        );
+      }
+      // Per-failure detail block, so coverage-history snapshots are
+      // actionable as standalone diffs (no need to re-run harness to see
+      // what failed at a given SHA).
+      for (const r of annotated) {
+        const gt = r.groundTruth;
+        if (gt.extractionFailures.length || gt.silentOverrides.length || gt.defaultsAppliedFailures.length) {
+          lines.push("");
+          lines.push(`### Failures — ${r.group}/${r.file}`);
+          lines.push("");
+          for (const f of gt.extractionFailures) {
+            lines.push(`- **extraction**: \`${f.path}\` expected \`${JSON.stringify(f.expected)}\`, extracted \`${JSON.stringify(f.extracted)}\``);
+          }
+          for (const f of gt.silentOverrides) {
+            lines.push(`- **silent override**: \`${f.path}\` EPD publishes \`${JSON.stringify(f.expected)}\` but record source=\`generic_default\` (catalogue masking a regex bug)`);
+          }
+          for (const f of gt.defaultsAppliedFailures) {
+            lines.push(`- **defaults applied**: \`${f.path}\` expected catalogue fill, got value=\`${JSON.stringify(f.filled)}\` source=\`${JSON.stringify(f.source)}\``);
+          }
+        }
+      }
     }
     await writeFile(args.md, lines.join("\n") + "\n");
     console.log(`Markdown coverage written to ${args.md}`);

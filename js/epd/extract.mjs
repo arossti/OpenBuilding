@@ -110,6 +110,10 @@ export function extract(pageTexts) {
   // Tier 2 + Tier 1 — trunk of tree (display_name → material_type → group_prefix)
   extractType(allText, rec);
   inferGroupPrefix(rec);
+  // Override display_name with `${groupLabel} | ${materialType}` once Tier 1
+  // settles. Cover-page picker output is preserved on samples where group +
+  // type can't both be inferred (no regression on unknown-format docs).
+  deriveDisplayName(rec);
 
   // Tiers 3–7 — per-format extractor handles manufacturer / provenance /
   // identification / per-family methodology / physical anchors.
@@ -154,7 +158,11 @@ function applyMaterialDefaults(rec) {
   if (!materialType) return;
 
   var defaults = _lookups.materialDefaults.defaults_by_material_type;
-  var entry = defaults && defaults[materialType];
+  var aliases = _lookups.materialDefaults.aliases || {};
+  // Resolve via alias table when the material_type doesn't key directly.
+  // Glulam / CLT / LVL / Engineered wood etc. all alias to "Wood".
+  var key = defaults && defaults[materialType] ? materialType : aliases[materialType];
+  var entry = key && defaults ? defaults[key] : null;
   if (!entry || !entry.default) return;
   var d = entry.default;
 
@@ -213,8 +221,13 @@ function extractType(text, rec) {
 
   // Skip generic/registry lines + short fragments. The first surviving
   // line is the product title in the overwhelming majority of EPDs.
+  // Per-glyph drop-cap fragments ("E nvironmental", "P roduct",
+  // "D eclaration") need explicit alternations because pdf.js often
+  // splits "Environmental Product Declaration" cover-page headers into
+  // three separate one-letter-then-rest lines, each of which would
+  // otherwise pass the picker as a 2-word title candidate.
   var skipPrefix =
-    /^(?:type\s+iii|environmental\s+product\s+declaration|epd\b|in\s+accordance|as\s+per\b|according\s+to\b|programme|program\b|publisher\b|owner\s+of|declaration\s+number|issue\s+date|valid\s+to|valid\s+until|publication\s+date|page\s+\d|\d+\s*\/\s*\d+|—|–|-{2,})/i;
+    /^(?:type\s+iii|e\s*nvironmental(?:\s+p\s*roduct\s+d\s*eclaration)?|p\s*roduct\s*$|d\s*eclaration\s*$|environmental\s+product\s+declaration|epd\b|in\s+accordance|as\s+per\b|according\s+to\b|programme|program\b|publisher\b|owner\s+of|declaration\s+number|issue\s+date|valid\s+to|valid\s+until|publication\s+date|page\s+\d|\d+\s*\/\s*\d+|—|–|-{2,})/i;
   // Standards-citation lines also need to be skipped — these often
   // appear right under the title block on EU/IBU layouts where the
   // line "as per ISO 14025 and EN 15804+A1" otherwise gets picked.
@@ -236,13 +249,31 @@ function extractType(text, rec) {
     _setPath(rec, "naming.display_name", displayName);
   }
 
-  // Material-type keyword scan — runs across the whole document body so
-  // the title page doesn't have to mention the canonical type label.
+  // Material-type keyword scan — prefer matches in the cover-page title
+  // (display_name) first, since titles say what the EPD is about; the
+  // body often references related materials in comparison text (e.g. a
+  // Glulam EPD's intro comparing to CLT). Without this, first-match-wins
+  // against the body would mis-label GLT as "Engineered wood" because
+  // CLT happens to come first in the keyword list. Fall through to the
+  // full body when no title keyword hits, preserving today's behavior
+  // for samples with generic / non-product cover-page lines.
   if (!_get(rec, "classification.material_type")) {
-    for (var k = 0; k < _MATERIAL_TYPE_DISPLAY_KEYWORDS.length; k++) {
-      if (_MATERIAL_TYPE_DISPLAY_KEYWORDS[k].rx.test(text)) {
-        _setPath(rec, "classification.material_type", _MATERIAL_TYPE_DISPLAY_KEYWORDS[k].type);
-        break;
+    var titleMatched = false;
+    if (displayName) {
+      for (var k = 0; k < _MATERIAL_TYPE_DISPLAY_KEYWORDS.length; k++) {
+        if (_MATERIAL_TYPE_DISPLAY_KEYWORDS[k].rx.test(displayName)) {
+          _setPath(rec, "classification.material_type", _MATERIAL_TYPE_DISPLAY_KEYWORDS[k].type);
+          titleMatched = true;
+          break;
+        }
+      }
+    }
+    if (!titleMatched) {
+      for (var b = 0; b < _MATERIAL_TYPE_DISPLAY_KEYWORDS.length; b++) {
+        if (_MATERIAL_TYPE_DISPLAY_KEYWORDS[b].rx.test(text)) {
+          _setPath(rec, "classification.material_type", _MATERIAL_TYPE_DISPLAY_KEYWORDS[b].type);
+          break;
+        }
       }
     }
   }
@@ -273,6 +304,30 @@ function inferGroupPrefix(rec) {
     }
   }
   if (prefix) _setPath(rec, "classification.group_prefix", prefix);
+}
+
+/* ── Display name derivation — taxonomy-driven ────────────────────── */
+//
+// Cover-page picker (extractType) often grabs boilerplate ("Environmental
+// Product Declaration", per-glyph "E nvironmental") because EPD title
+// blocks are inconsistent. Once Tier 1 settles a group_prefix and Tier 2
+// settles a material_type, we have enough structured info to compose a
+// clean display name like "Wood | Glulam" or "Concrete | Portland Cement".
+//
+// Override only fires when both inputs are present AND material-groups
+// lookup is primed; otherwise the cover-page output is left in place so
+// unknown-format samples don't regress on coverage.
+
+function deriveDisplayName(rec) {
+  if (!_lookups || !_lookups.materialGroups) return;
+  var prefix = _get(rec, "classification.group_prefix");
+  var materialType = _get(rec, "classification.material_type");
+  if (!prefix || !materialType) return;
+  var groups = _lookups.materialGroups.groups || _lookups.materialGroups;
+  var entry = groups && groups[prefix];
+  var label = entry && entry.label;
+  if (!label) return;
+  _setPath(rec, "naming.display_name", label + " | " + materialType);
 }
 
 /* ── Cross-format anchors (always run last; first-set wins) ────────── */
@@ -394,6 +449,14 @@ function extractCommon(text, rec) {
   // Impact-table totals — populate impacts.<indicator>.total.{value, source}
   // for every indicator in the schema we can find on the impact table.
   _extractIndicatorTotals(text, rec);
+
+  // P3.3 — per-stage breakdown. Detects the stage-header column sequence
+  // (cradle-to-gate "A1-A3 A1 A2 A3" or cradle-to-grave "A1-A3 A1 A2 A3
+  // A4 A5 B1..D"), finds each indicator row by long-form English label,
+  // tokenises numeric values, and maps them into impacts.<key>.by_stage.
+  // Independent of total extraction — a row whose total is captured but
+  // whose by_stage cells are unfilled is a partial pass, not a regression.
+  _extractByStage(text, rec);
 }
 
 /* ── Impact-table parsing — per-indicator totals ──────────────────── */
@@ -533,22 +596,79 @@ var IMPACT_INDICATORS = [
   {
     schemaKey: "gwp_kgco2e",
     label: "GWP (English)",
-    regex: /Global\s+warming\s+potential\s+kg\s+CO\s*2?\s*eq[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+    // Tolerates optional "– Total" / "- Total" em-dash/hyphen subtitle
+    // (Kalesnikoff format) and excludes Fossil/Biogenic rows via
+    // negative lookahead so they don't match the gwp_kgco2e (total) slot.
+    // q optional because Kalesnikoff uses "kg CO2e" without `q`.
+    regex:
+      /Global\s+warming\s+potential(?!\s*[–—-]\s*(?:Fossil|Biogenic))(?:\s*[–—-]\s*Total)?\s+kg\s+CO\s*2?\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "gwp_bio_kgco2e",
+    label: "GWP-Biogenic (English em-dash)",
+    // Kalesnikoff biogenic-row variant. Total = 0 by construction
+    // (sequestration A1 + emission A3 net to zero) but capturing the
+    // total preserves intent. Per-stage A1 = -1045.63 lands in P3.3.
+    regex:
+      /Global\s+warming\s+potential\s*[–—-]\s*Bio(?:genic)?\s+kg\s+CO\s*2?\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
   },
   {
     schemaKey: "ozone_depletion_kgcfc11eq",
     label: "ODP (English)",
-    regex: /Ozone\s+depletion\s+potential\s+kg\s+CFC[-\s]*11\s*eq[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+    regex: /Ozone\s+depletion\s+potential\s+kg\s+CFC[-\s]*11\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "ozone_depletion_kgcfc11eq",
+    label: "ODP (English label-only — wrapped unit)",
+    // Kalesnikoff format puts the "kg" / "CFC11e" unit fragments on
+    // separate text-extraction lines from the data row. Drop the
+    // unit-cell anchor; capture the next sci-not number after the
+    // label. Schema slot name encodes the unit, so no semantic loss.
+    // [\s\S] used (not [^\n]) so the regex can cross the wrapped-unit
+    // line. Window capped at 200 chars to avoid grabbing values from
+    // a different indicator's row.
+    regex:
+      /Depletion\s+potential\s+of\s+the\s+stratospheric\s+ozone\s+layer[\s\S]{0,200}?(\d+(?:\.\d+)?[Ee][-+]?\d+)/i
   },
   {
     schemaKey: "eutrophication_kgneq",
     label: "EP (English)",
-    regex: /Eutrophication\s+potential\s+kg\s+N\s+eq[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+    // \s* between N and Eq tolerates Kalesnikoff "kg Ne" (no space
+    // between N and e) AND older "kg N eq" (single space).
+    regex: /Eutrophication\s+potential\s+kg\s+N\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "water_consumption_m3",
+    label: "WDP (English Consumption of freshwater)",
+    // Kalesnikoff "Consumption of freshwater resources m3 0.37".
+    regex:
+      /Consumption\s+of\s+(?:freshwater|fresh\s+water)\s+resources\s+m\s*[³^]?3?\s+(-?\s*\d{1,5}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "acidification_kgso2eq",
+    label: "AP (English long phrase)",
+    // Kalesnikoff "Acidification potential of soil and water sources".
+    regex:
+      /Acidification\s+potential(?:\s+of\s+soil\s+and\s+water\s+sources)?\s+kg\s+SO\s*2?\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
   },
   {
     schemaKey: "smog_kgo3eq",
-    label: "SFP (English)",
-    regex: /Smog\s+potential\s+kg\s+O\s*3?\s*eq[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
+    label: "SFP (English Smog potential)",
+    regex: /Smog\s+potential\s+kg\s+O\s*3?\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "smog_kgo3eq",
+    label: "SFP (English Formation potential)",
+    // Kalesnikoff "Formation potential of tropospheric ozone".
+    regex:
+      /Formation\s+potential\s+of\s+tropospheric\s+ozone\s+kg\s+O\s*3?\s*[Ee]q?\.?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+  {
+    schemaKey: "abiotic_depletion_fossil_mj",
+    label: "ADPf (English parenthetical)",
+    // Kalesnikoff "Abiotic depletion potential (ADPfossil) MJ, NCV".
+    regex:
+      /Abiotic\s+depletion\s+potential\s*\(\s*ADP[\s_]?fossil\s*\)\s+MJ[^\n]{0,12}?\s+(-?\s*\d{1,7}(?:[.,]\d+)?)/i
   },
   {
     schemaKey: "primary_energy_nonrenewable_mj",
@@ -574,19 +694,19 @@ var IMPACT_INDICATORS = [
     schemaKey: "gwp_kgco2e",
     label: "GWP (EU/IBU bracketed)",
     regex:
-      /Global\s+warming\s+potential[^\n]{0,30}?\[?\s*kg\s*CO\s*2?\s*-?\s*[Ee]q\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+      /Global\s+warming\s+potential[^\n]{0,30}?\[?\s*kg\s*CO\s*2?\s*-?\s*[Ee]q?\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
   },
   {
     schemaKey: "ozone_depletion_kgcfc11eq",
     label: "ODP (EU/IBU long phrase)",
     regex:
-      /(?:Ozone\s+depletion\s+potential|Depletion\s+potential\s+of\s+the\s+stratospheric\s+ozone\s+layer)[^\n]{0,30}?\[?\s*kg\s*CFC\s*-?\s*11\s*-?\s*[Ee]q\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+      /(?:Ozone\s+depletion\s+potential|Depletion\s+potential\s+of\s+the\s+stratospheric\s+ozone\s+layer)[^\n]{0,30}?\[?\s*kg\s*CFC\s*-?\s*11\s*-?\s*[Ee]q?\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
   },
   {
     schemaKey: "acidification_kgso2eq",
     label: "AP (EU/IBU bracketed)",
     regex:
-      /Acidification\s+potential[^\n]{0,40}?\[?\s*kg\s*SO\s*2?\s*-?\s*[Ee]q\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+      /Acidification\s+potential[^\n]{0,40}?\[?\s*kg\s*SO\s*2?\s*-?\s*[Ee]q?\.?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
   },
   {
     schemaKey: "abiotic_depletion_fossil_mj",
@@ -657,10 +777,184 @@ function _extractIndicatorTotals(text, rec) {
   }
 }
 
+/* ── P3.3 — per-stage breakdown ────────────────────────────────────── */
+//
+// Detects the stage-header column sequence in the impact table (typically
+// "Unit | A1-A3 | A1 | A2 | A3" for cradle-to-gate or the full
+// "A1-A3 | A1..A3 | A4 | A5 | B1..B7 | C1..C4 | D" for cradle-to-grave),
+// then for each indicator row finds the line, tokenises numeric values
+// (filtering out subscript digits like the `2` in `kg CO2e`), and maps
+// them positionally into impacts.<key>.by_stage.<stage>.{value, source}.
+//
+// Independent of total extraction (Tier 8). A row whose total is captured
+// but whose by_stage cells are unfilled is a partial pass. The schema's
+// by_stage stages are A1 / A2 / A3 / A4 / A5 / B1..B7 / C1..C4 / D —
+// 17 individual stages, NOT including A1-A3 (that's the total slot).
+
+// Long-form English label patterns per indicator schema key. These are
+// the labels EPDs actually use in tabular impact rows; reuses the same
+// vocabulary as the IMPACT_INDICATORS regexes for English forms but
+// strips the unit + value parts so the regex matches the row prefix.
+var _BYSTAGE_LABELS = [
+  // GWP fossil/total — guards against matching the Fossil/Biogenic
+  // sub-rows by negative lookahead, same pattern as fix #5.
+  {
+    rx: /Global\s+warming\s+potential(?!\s*[–—-]\s*(?:Fossil|Biogenic))(?:\s*[–—-]\s*Total)?\b/i,
+    key: "gwp_kgco2e"
+  },
+  {
+    rx: /Global\s+warming\s+potential\s*[–—-]\s*Bio(?:genic)?\b/i,
+    key: "gwp_bio_kgco2e"
+  },
+  {
+    rx: /(?:Depletion\s+potential\s+of\s+the\s+stratospheric\s+ozone\s+layer|Ozone\s+depletion\s+potential)\b/i,
+    key: "ozone_depletion_kgcfc11eq"
+  },
+  {
+    rx: /Acidification\s+potential(?:\s+of\s+soil\s+and\s+water\s+sources)?\b/i,
+    key: "acidification_kgso2eq"
+  },
+  { rx: /Eutrophication\s+potential\b/i, key: "eutrophication_kgneq" },
+  {
+    rx: /(?:Formation\s+potential\s+of\s+tropospheric\s+ozone|Smog\s+potential|Photochemical\s+ozone\s+formation)\b/i,
+    key: "smog_kgo3eq"
+  },
+  {
+    // No trailing \b — first alternative ends with ")" which is a
+    // non-word char, so \b at that position would never match.
+    rx: /Abiotic\s+depletion\s+potential\s*(?:\(\s*ADP[\s_]?fossil\s*\)|for\s+fossil\s+resources\b)/i,
+    key: "abiotic_depletion_fossil_mj"
+  },
+  {
+    rx: /(?:Consumption\s+of\s+(?:freshwater|fresh\s+water)\s+resources|Use\s+of\s+net\s+fresh\s+water)\b/i,
+    key: "water_consumption_m3"
+  },
+  {
+    rx: /Non[\s-]?renewable\s+primary\s+energy\s+used\s+as\s+energy\b/i,
+    key: "primary_energy_nonrenewable_mj"
+  },
+  {
+    rx: /Renewable\s+primary\s+energy\s+used\s+as\s+energy\b/i,
+    key: "primary_energy_renewable_mj"
+  }
+];
+
+// Stage-header detector. Returns ALL candidate header lines (any line
+// with ≥3 stage codes), with their line indices. The per-row extractor
+// then picks the nearest preceding header for each indicator row,
+// preferring one whose stage-count matches the row's value-count. This
+// distinguishes Table 3 (main impacts, 4 cols "A1-A3 A1 A2 A3") from
+// Table 2 (biogenic inventory, 6 cols "A1 A2 A3 A5 C3 C4") AND from
+// the generic life-cycle-stages list ("A1 A2 A3 A4 A5 B1..D") that
+// appears earlier in the methodology section but isn't a column
+// header.
+function _detectStageHeaders(text) {
+  var lines = text.split("\n");
+  var stageRx = /\b(?:A1\s*[–—-]?\s*A3|A[1-5]|B[1-7]|C[1-4]|D)\b/g;
+  var headers = [];
+  for (var i = 0; i < lines.length; i++) {
+    var matches = lines[i].match(stageRx);
+    if (!matches || matches.length < 3) continue;
+    var cleaned = [];
+    for (var j = 0; j < matches.length; j++) {
+      var s = matches[j].replace(/\s+/g, "").toUpperCase();
+      if (s === "A1A3") s = "A1-A3";
+      cleaned.push(s);
+    }
+    headers.push({ lineIdx: i, stages: cleaned });
+  }
+  return headers;
+}
+
+// Number-token tokeniser that rejects single-digit integers (likely
+// subscripts like the 2 in CO2 or the 3 in O3). Accepts:
+//   - decimal-bearing values: 124.50, -1045.63, 0.93, 0.07
+//   - scientific notation:    2.27E-06
+//   - 3+ digit integers:      1230, 18200
+//   - thousand-comma values:  3,490.16
+// Reject:
+//   - bare 1-2 digit integers: 2, 11, 96 (subscripts and column widths)
+function _tokenizeImpactNumbers(line) {
+  var rx = /-?\d+\.\d+(?:[eE][-+]?\d+)?|-?\d{3,}(?:,\d{3})*(?:\.\d+)?(?:[eE][-+]?\d+)?|-?\d+[eE][-+]?\d+/g;
+  var out = [];
+  var m;
+  while ((m = rx.exec(line)) !== null) {
+    var raw = m[0];
+    var n;
+    if (raw.indexOf(".") >= 0 && raw.indexOf(",") >= 0) n = parseFloat(raw.replace(/,/g, ""));
+    else n = parseFloat(raw.replace(",", "."));
+    if (!isNaN(n)) out.push(n);
+  }
+  return out;
+}
+
+function _extractByStage(text, rec) {
+  var headers = _detectStageHeaders(text);
+  if (headers.length === 0) return;
+  var lines = text.split("\n");
+  // Build a quick index of header line numbers so we can skip the
+  // header rows themselves when scanning for indicator rows.
+  var headerLineSet = {};
+  for (var h = 0; h < headers.length; h++) headerLineSet[headers[h].lineIdx] = true;
+
+  for (var i = 0; i < lines.length; i++) {
+    if (headerLineSet[i]) continue;
+    var line = lines[i];
+    for (var j = 0; j < _BYSTAGE_LABELS.length; j++) {
+      var lm = _BYSTAGE_LABELS[j];
+      if (!lm.rx.test(line)) continue;
+      var nums = _tokenizeImpactNumbers(line);
+      if (nums.length === 0) break;
+
+      // Pick the nearest preceding header. Prefer a header whose
+      // stage-count matches the row's value-count exactly (best signal
+      // it's the right table for this row); fall back to the most
+      // recent preceding header otherwise. This handles the Kalesnikoff
+      // case where a generic 17-stage life-cycle list appears in the
+      // methodology section (line ~126) but the actual Table 3 header
+      // (line ~260) sits much closer to the data rows.
+      var stages = null;
+      for (var p = headers.length - 1; p >= 0; p--) {
+        if (headers[p].lineIdx > i) continue;
+        if (headers[p].stages.length === nums.length) {
+          stages = headers[p].stages;
+          break;
+        }
+      }
+      if (!stages) {
+        for (var q = headers.length - 1; q >= 0; q--) {
+          if (headers[q].lineIdx > i) continue;
+          stages = headers[q].stages;
+          break;
+        }
+      }
+      if (!stages) break;
+
+      // Map numbers to stages by position. "A1-A3" is the total slot
+      // (already populated by Tier 8) — skip; the rest map to individual
+      // by_stage entries. Stages with no positional value stay null.
+      for (var k = 0; k < stages.length && k < nums.length; k++) {
+        var st = stages[k];
+        if (st === "A1-A3") continue;
+        if (_get(rec, "impacts." + lm.key + ".by_stage." + st + ".value") != null) continue;
+        _setPath(rec, "impacts." + lm.key + ".by_stage." + st + ".value", nums[k]);
+        _setPath(rec, "impacts." + lm.key + ".by_stage." + st + ".source", "epd_direct");
+      }
+      break; // line matched one indicator; don't try the rest
+    }
+  }
+}
+
 /* ── NA family: UL Environment / ASTM / CSA Group ──────────────────── */
 
 function extractNA(text, rec) {
   // Manufacturer / Declaration Holder.
+  // NB on Kalesnikoff: their "Declaration Owner" cell uses a multi-line
+  // value (Co. / street / city / tagline) with the label visually
+  // y-centered between rows. After spatial join, the label ends up
+  // BETWEEN value rows, so any label-then-value regex against this
+  // layout captures the city/postal line instead of the company name.
+  // The "produced (?:by|at)" prose fallback below handles this case.
   var mfr =
     text.match(/D\s*ECLARATION\s+H\s*OLDER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
     text.match(/Manufacturer\s+name(?:\s+and\s+address)?\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
@@ -668,12 +962,31 @@ function extractNA(text, rec) {
     text.match(/Declaration\s+holder\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i);
   if (mfr) _setPath(rec, "manufacturer.name", _cleanLine(mfr[1]));
 
+  // Title-prose fallback for layouts where spatial join breaks the
+  // label-then-value relationship. Cover-page titles commonly read
+  // "EPD for X produced by/at <CompanyName>", and the company name is
+  // followed by lowercase words ("in", "for", "'s facility") which the
+  // capital-letter chain naturally stops on.
+  if (!_get(rec, "manufacturer.name")) {
+    var prodBy = text.match(/produced\s+(?:by|at)\s+([A-Z][A-Za-z]+(?:'\w+)?(?:\s+[A-Z][A-Za-z]+){0,2})/);
+    if (prodBy) _setPath(rec, "manufacturer.name", _cleanLine(prodBy[1]));
+  }
+
   // EPD ID / Declaration Number — allow embedded spaces in the value
   // (e.g. "EPD 395") and per-glyph drop-cap split on the label.
+  // Post-process strips trailing label-like content that pdf.js may
+  // have joined into the same line (e.g. "EPD 296 Declared Product
+  // Glulam 3" → "EPD 296"). EPD IDs are 1-2 tokens of alphanumeric +
+  // dashes/dots; anything after a known next-label word is column-bleed.
   var epdId =
     text.match(/D\s*eclaration\s+N\s*umber\s*[#:\s]+([A-Z][A-Z0-9.\-#\s]{2,38}\d[A-Z0-9.\-#]{0,10})/i) ||
     text.match(/EPD\s+(?:Registration\s+)?Number\s*[#:\s]+([A-Z0-9][A-Z0-9.\-#\s]{2,38}\d[A-Z0-9.\-#]{0,10})/i);
-  if (epdId) _setPath(rec, "epd.id", epdId[1].replace(/^#/, "").replace(/\s+/g, " ").trim());
+  if (epdId) {
+    var idRaw = epdId[1].split(
+      /\s+(?=(?:Declared|Date|Period|Unit|Owner|Holder|Type|Scope|Reference|Markets|Description|Year|EPD\s+Type|EPD\s+Scope|Programme|Program|Issue|Valid|Publisher))/i
+    )[0];
+    _setPath(rec, "epd.id", idRaw.replace(/^#/, "").replace(/\s+/g, " ").trim());
+  }
 
   // Program operator — detect by known name (more robust than label-anchored
   // for tabular layouts where "Program Operator" appears on its own line).
@@ -685,13 +998,34 @@ function extractNA(text, rec) {
     text.match(/(?:DECLARED|FUNCTIONAL)\s+(?:PRODUCT\s*&\s*)?UNIT\s*[:\s]+([^\n\r]{6,200})/i) ||
     text.match(/Declared\s+unit\s*[:\s]+([^\n\r]{6,200})/i);
   if (unit) {
-    _setPath(rec, "carbon.stated.per_unit", _cleanLine(unit[1]));
+    var rawUnitLine = _cleanLine(unit[1]);
+    // Normalise to "<number> <unit>" — strip descriptive prose ("of glulam
+    // produced at..."). Use full doc context to disambiguate "1 m" (pdf.js
+    // strips superscripts on some EPDs) → "1 m³" / "1 m²" by scanning for
+    // the same unit elsewhere in the doc.
+    var cleanUnit = _normalizeDeclaredUnit(rawUnitLine, text);
+    _setPath(rec, "carbon.stated.per_unit", cleanUnit || rawUnitLine);
+    // Plumb the cleaned unit into impacts.functional_unit so the
+    // database viewer's index entry surfaces it (Database.md
+    // _indexEntryFromRecord reads impacts.functional_unit first).
+    if (cleanUnit) _setPath(rec, "impacts.functional_unit", cleanUnit);
     var dInLine = unit[1].match(/(\d{2,5}(?:[.,]\d+)?)\s*kg\/m\s*[³^]?3?/);
     if (dInLine) _setPath(rec, "physical.density.value_kg_m3", _toNum(dInLine[1]));
   }
   if (_get(rec, "physical.density.value_kg_m3") == null) {
     var d = text.match(/density\s*(?:of\s+)?(\d{2,5}(?:[.,]\d+)?)\s*kg\/m\s*[³^]?3?/i);
     if (d) _setPath(rec, "physical.density.value_kg_m3", _toNum(d[1]));
+  }
+  // Wood EPD product-properties table form: "Mass (including moisture)
+  // kg <N>" where <N> is mass per the declared unit. For declared unit
+  // = 1 m³ (the dominant solid-wood case), N kg per m³ = density.
+  // Skip "Oven Dry Mass" — special-case for biogenic-carbon math, not
+  // the construction-as-installed density practitioners need. Only
+  // fires when no density extracted yet, so the existing direct-density
+  // patterns still win where present.
+  if (_get(rec, "physical.density.value_kg_m3") == null) {
+    var massPerUnit = text.match(/Mass\s*\(\s*including\s+moisture\s*\)\s+kg\s+(\d{2,5}(?:[.,]\d+)?)/i);
+    if (massPerUnit) _setPath(rec, "physical.density.value_kg_m3", _toNum(massPerUnit[1]));
   }
 
   // PCR — target the Part B (sub-category) reference specifically, with
@@ -932,6 +1266,43 @@ function _cleanLine(s) {
   return String(s == null ? "" : s)
     .replace(/\s+/g, " ")
     .trim();
+}
+
+// Normalise a declared-unit phrase to a short canonical token like
+// "1 m³", "1 m²", "1 metric ton", or "1 kg". Drops descriptive prose
+// ("1 m of glulam produced at Kalesnikoff's facility..." → "1 m³").
+//
+// pdf.js strips superscripts on some EPDs, so "1 m" with no ³/² is
+// ambiguous between cubic and square meters. Disambiguate by scanning
+// the full doc for "m3" / "m^3" / "m³" or "m2" / "m^2" / "m²" patterns
+// that appear near declared-unit context (Table captions, density
+// expressions). Falls back to "1 m" when neither pattern is found.
+//
+// Returns null if the input has no leading "<number> <unit>" token to
+// extract — caller should keep the raw value in that case.
+function _normalizeDeclaredUnit(raw, fullText) {
+  if (!raw) return null;
+  // Match leading "<number> <unit>" — accept m / m² / m³ / metric ton /
+  // tonne / kg / kilogram / liter / litre. \b after the unit token so
+  // "metric tons" matches as a whole, not "metric ton" + "s".
+  var m = raw.match(
+    /^(\d+(?:[.,]\d+)?)\s*(m³|m²|m\^?3|m\^?2|m|metric\s+tons?|tonnes?|kgs?|kilograms?|liters?|litres?)\b/i
+  );
+  if (!m) return null;
+  var num = m[1].replace(",", ".");
+  var unit = m[2].toLowerCase().replace(/\s+/g, " ").replace(/\^/g, "");
+  // Disambiguate bare "m" via doc context.
+  if (unit === "m") {
+    if (/\bm³|\bm\s*\^?\s*3\b|\b1\s*m3\b|cubic\s+m(?:eter|etre)/i.test(fullText)) unit = "m³";
+    else if (/\bm²|\bm\s*\^?\s*2\b|\b1\s*m2\b|square\s+m(?:eter|etre)/i.test(fullText)) unit = "m²";
+    // else stay as "m" — ambiguous
+  } else if (unit === "m3") unit = "m³";
+  else if (unit === "m2") unit = "m²";
+  else if (/^metric\s+tons?$|^tonnes?$/.test(unit)) unit = "metric ton";
+  else if (/^kgs?$/.test(unit)) unit = "kg";
+  else if (/^kilograms?$/.test(unit)) unit = "kg";
+  else if (/^liters?$|^litres?$/.test(unit)) unit = "L";
+  return num + " " + unit;
 }
 
 function _toNum(s) {
