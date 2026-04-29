@@ -187,6 +187,14 @@ function wireControls() {
       toggleGroup(groupHeader.dataset.group);
       return;
     }
+    // Per-row remove (×) button — only renders on _fresh rows. Handled
+    // before the row click so it doesn't also toggle expand.
+    const removeBtn = e.target.closest(".db-row-remove");
+    if (removeBtn) {
+      e.stopPropagation();
+      handleRemoveFresh(removeBtn.dataset.id);
+      return;
+    }
     const row = e.target.closest(".db-row-main");
     if (!row) return;
     toggleExpand(row.dataset.id);
@@ -365,9 +373,16 @@ function renderMainRow(e) {
   const freshChip = e._fresh
     ? ` <span class="db-fresh-chip db-fresh-chip-${e._commit_type === "refresh" ? "refresh" : "new"}">${e._commit_type === "refresh" ? "UPDATED" : "NEW"}</span>`
     : "";
+  // Remove button is gated on _fresh — the original 821 BEAM-imported
+  // records never get the button (and handleRemoveFresh re-checks the
+  // flag at click time, so removal of catalogue records is impossible
+  // even if someone forges DOM markup).
+  const removeBtn = e._fresh
+    ? ` <button class="db-row-remove" data-id="${escapeAttr(e.id)}" title="Remove this in-session EPD-Parser entry. The original BEAM catalogue is never touched." aria-label="Remove">×</button>`
+    : "";
 
   tr.innerHTML = `
-    <td title="${escapeAttr(e.beam_id || "")}"><code>${escapeHtml(e.beam_id || "—")}</code>${freshChip}</td>
+    <td title="${escapeAttr(e.beam_id || "")}"><code>${escapeHtml(e.beam_id || "—")}</code>${freshChip}${removeBtn}</td>
     <td title="${escapeAttr(e.display_name || "")}">${escapeHtml(e.display_name || "—")}</td>
     <td><span class="db-div-tag">${escapeHtml(e.group_prefix || "—")}</span></td>
     <td>${escapeHtml(prettyCategory(e.category))}</td>
@@ -997,6 +1012,37 @@ async function handleTrust(sourceFile) {
       commitType = "refresh";
     }
   }
+
+  // Duplicate detection — workplan db-side bug. EPD-Parser candidates
+  // arrive with id=null (beam_id is BfCA-internal per §5.5), so prior
+  // logic minted a fresh id every Trust click and re-importing the same
+  // EPD created a duplicate row. Now we look for a likely-match against
+  // in-session committed records (full-record match on manufacturer +
+  // epd.id) and prompt the user before minting. Restricted to in-session
+  // entries (_fresh flag) so the original 821 BEAM-imported records
+  // never trigger an over-write prompt.
+  if (commitType === "new" && !mergedRecord.id) {
+    const dup = _findDuplicate(candidate);
+    if (dup) {
+      const proceed = window.confirm(
+        "An existing record looks like the same EPD:\n\n" +
+          "  " + (dup.indexEntry.display_name || dup.id) + "\n" +
+          "  BEAM ID: " + dup.id + "\n" +
+          "  Match: " + dup.matchType + "\n\n" +
+          "Click OK to OVERWRITE the existing record with this EPD.\n" +
+          "Click Cancel to commit this as a NEW separate entry."
+      );
+      if (proceed) {
+        mergedRecord = _mergeRefresh(dup.fullRecord, candidate);
+        mergedRecord.id = dup.id;
+        mergedRecord.beam_id = dup.id;
+        commitType = "refresh";
+      }
+      // else: fall through to mint a fresh id (user explicitly chose
+      // "create separate entry" — e.g. same product, different scope)
+    }
+  }
+
   if (!mergedRecord.id) mergedRecord.id = _mintId6();
   if (!mergedRecord.beam_id) mergedRecord.beam_id = mergedRecord.id;
 
@@ -1065,6 +1111,63 @@ function _indexEntryFromRecord(rec) {
     gwp_kgco2e: gwpVal,
     functional_unit: impacts.functional_unit || physical.declared_unit || physical.functional_unit || null
   };
+}
+
+/**
+ * Find a likely-duplicate of the candidate among in-session committed
+ * records. Two-tier match:
+ *   1. (manufacturer.name + epd.id) tuple — strongest signal; full-record
+ *      match against state.recordCache. Catches re-imports of the exact
+ *      same EPD even before display_name has been derived.
+ *   2. (display_name + group_prefix) — weaker fallback for when
+ *      manufacturer or epd.id is unset on the candidate.
+ *
+ * Restricted to in-session entries (_fresh flag) so the original 821
+ * BEAM-imported records cannot be implicitly over-written by EPD-Parser
+ * commits — they stay strictly read-only at this layer. Returns null
+ * when no duplicate is found, otherwise an object with the existing
+ * id + indexEntry + fullRecord + matchType for the prompt.
+ */
+function _findDuplicate(candidate) {
+  const candMfr = ((candidate.manufacturer || {}).name || "").toLowerCase().trim();
+  const candEpdId = ((candidate.epd || {}).id || "").toLowerCase().trim();
+  const candDisplay = ((candidate.naming || {}).display_name || "").toLowerCase().trim();
+  const candGroup = ((candidate.classification || {}).group_prefix || "").toLowerCase().trim();
+
+  // Tier 1 — (manufacturer + epd.id) match against in-session records.
+  if (candMfr && candEpdId) {
+    for (const e of state.indexEntries) {
+      if (!e._fresh) continue; // only in-session entries
+      const rec = state.recordCache.get(e.id);
+      if (!rec) continue;
+      const recMfr = ((rec.manufacturer || {}).name || "").toLowerCase().trim();
+      const recEpdId = ((rec.epd || {}).id || "").toLowerCase().trim();
+      if (recMfr && recMfr === candMfr && recEpdId && recEpdId === candEpdId) {
+        return { id: e.id, indexEntry: e, fullRecord: rec, matchType: "manufacturer + epd.id" };
+      }
+    }
+  }
+
+  // Tier 2 — display_name + group_prefix match. Looser; only fires when
+  // Tier 1 inputs are missing. Skip catalogue-default display_name "—".
+  if (candDisplay && candDisplay !== "—" && candGroup) {
+    for (const e of state.indexEntries) {
+      if (!e._fresh) continue;
+      const eDisplay = (e.display_name || "").toLowerCase().trim();
+      const eGroup = (e.group_prefix || "").toLowerCase().trim();
+      if (eDisplay !== candDisplay) continue;
+      if (eGroup !== candGroup) continue;
+      // If both sides have a manufacturer and they DIFFER, treat as
+      // different products (e.g. Vaagen Glulam vs Western Archrib Glulam
+      // both display as "Wood | Glulam" but are separate records).
+      const rec = state.recordCache.get(e.id);
+      const recMfr = rec ? ((rec.manufacturer || {}).name || "").toLowerCase().trim() : "";
+      if (candMfr && recMfr && candMfr !== recMfr) continue;
+      return { id: e.id, indexEntry: e, fullRecord: rec || null, matchType: "display_name + group_prefix" };
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -1139,6 +1242,57 @@ function _mintId6() {
   }
   // Fall back to timestamp-derived id if 16 random tries collided.
   return Date.now().toString(16).slice(-6);
+}
+
+/**
+ * Remove an in-session committed entry made via EPD-Parser.
+ *
+ * HARD SAFETY GUARD: only acts on entries flagged _fresh in
+ * state.indexEntries (i.e. records that came from this session's
+ * EPD-Parser → Trust pipeline AND survived as a row in the
+ * `epd-committed-patches` IndexedDB store). The original 821
+ * BEAM-imported catalogue records never carry _fresh and therefore
+ * cannot be removed through this path. The DB viewer never has the
+ * authority to delete catalogue source data — that's enforced both
+ * by hiding the × button on non-fresh rows AND by re-checking the
+ * flag here at click time.
+ */
+async function handleRemoveFresh(id) {
+  if (!id) return;
+  const entry = state.indexEntries.find((e) => e.id === id);
+  if (!entry) {
+    setStatus(`Remove: id ${id} not found`, "error");
+    return;
+  }
+  if (!entry._fresh) {
+    setStatus(`Remove: ${id} is a catalogue record and cannot be removed`, "error");
+    return;
+  }
+  const proceed = window.confirm(
+    "Remove this in-session entry?\n\n" +
+      "  " + (entry.display_name || id) + "\n" +
+      "  BEAM ID: " + id + "\n\n" +
+      "This deletes the EPD-Parser commit from your local browser cache only.\n" +
+      "The original BEAM catalogue records are never touched."
+  );
+  if (!proceed) return;
+
+  try {
+    await Store.deleteCommittedPatch(id);
+  } catch (err) {
+    console.error("[DB] deleteCommittedPatch failed:", err);
+    setStatus(`Remove failed: ${err.message}`, "error");
+    return;
+  }
+
+  // Drop from in-memory state and re-render. recordCache delete keeps
+  // cache consistent with the persisted store.
+  const idx = state.indexEntries.findIndex((e) => e.id === id);
+  if (idx >= 0) state.indexEntries.splice(idx, 1);
+  state.recordCache.delete(id);
+  state.expanded.delete(id);
+  applyFilters();
+  setStatus(`Removed ${entry.display_name || id} (${id}) from in-session catalogue`, "ready");
 }
 
 async function handleDiscard(sourceFile) {
