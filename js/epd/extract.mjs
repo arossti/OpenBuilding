@@ -773,6 +773,12 @@ function _extractIndicatorTotals(text, rec) {
 
 function extractNA(text, rec) {
   // Manufacturer / Declaration Holder.
+  // NB on Kalesnikoff: their "Declaration Owner" cell uses a multi-line
+  // value (Co. / street / city / tagline) with the label visually
+  // y-centered between rows. After spatial join, the label ends up
+  // BETWEEN value rows, so any label-then-value regex against this
+  // layout captures the city/postal line instead of the company name.
+  // The "produced (?:by|at)" prose fallback below handles this case.
   var mfr =
     text.match(/D\s*ECLARATION\s+H\s*OLDER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
     text.match(/Manufacturer\s+name(?:\s+and\s+address)?\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
@@ -780,12 +786,31 @@ function extractNA(text, rec) {
     text.match(/Declaration\s+holder\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i);
   if (mfr) _setPath(rec, "manufacturer.name", _cleanLine(mfr[1]));
 
+  // Title-prose fallback for layouts where spatial join breaks the
+  // label-then-value relationship. Cover-page titles commonly read
+  // "EPD for X produced by/at <CompanyName>", and the company name is
+  // followed by lowercase words ("in", "for", "'s facility") which the
+  // capital-letter chain naturally stops on.
+  if (!_get(rec, "manufacturer.name")) {
+    var prodBy = text.match(/produced\s+(?:by|at)\s+([A-Z][A-Za-z]+(?:'\w+)?(?:\s+[A-Z][A-Za-z]+){0,2})/);
+    if (prodBy) _setPath(rec, "manufacturer.name", _cleanLine(prodBy[1]));
+  }
+
   // EPD ID / Declaration Number — allow embedded spaces in the value
   // (e.g. "EPD 395") and per-glyph drop-cap split on the label.
+  // Post-process strips trailing label-like content that pdf.js may
+  // have joined into the same line (e.g. "EPD 296 Declared Product
+  // Glulam 3" → "EPD 296"). EPD IDs are 1-2 tokens of alphanumeric +
+  // dashes/dots; anything after a known next-label word is column-bleed.
   var epdId =
     text.match(/D\s*eclaration\s+N\s*umber\s*[#:\s]+([A-Z][A-Z0-9.\-#\s]{2,38}\d[A-Z0-9.\-#]{0,10})/i) ||
     text.match(/EPD\s+(?:Registration\s+)?Number\s*[#:\s]+([A-Z0-9][A-Z0-9.\-#\s]{2,38}\d[A-Z0-9.\-#]{0,10})/i);
-  if (epdId) _setPath(rec, "epd.id", epdId[1].replace(/^#/, "").replace(/\s+/g, " ").trim());
+  if (epdId) {
+    var idRaw = epdId[1].split(
+      /\s+(?=(?:Declared|Date|Period|Unit|Owner|Holder|Type|Scope|Reference|Markets|Description|Year|EPD\s+Type|EPD\s+Scope|Programme|Program|Issue|Valid|Publisher))/i
+    )[0];
+    _setPath(rec, "epd.id", idRaw.replace(/^#/, "").replace(/\s+/g, " ").trim());
+  }
 
   // Program operator — detect by known name (more robust than label-anchored
   // for tabular layouts where "Program Operator" appears on its own line).
@@ -804,6 +829,17 @@ function extractNA(text, rec) {
   if (_get(rec, "physical.density.value_kg_m3") == null) {
     var d = text.match(/density\s*(?:of\s+)?(\d{2,5}(?:[.,]\d+)?)\s*kg\/m\s*[³^]?3?/i);
     if (d) _setPath(rec, "physical.density.value_kg_m3", _toNum(d[1]));
+  }
+  // Wood EPD product-properties table form: "Mass (including moisture)
+  // kg <N>" where <N> is mass per the declared unit. For declared unit
+  // = 1 m³ (the dominant solid-wood case), N kg per m³ = density.
+  // Skip "Oven Dry Mass" — special-case for biogenic-carbon math, not
+  // the construction-as-installed density practitioners need. Only
+  // fires when no density extracted yet, so the existing direct-density
+  // patterns still win where present.
+  if (_get(rec, "physical.density.value_kg_m3") == null) {
+    var massPerUnit = text.match(/Mass\s*\(\s*including\s+moisture\s*\)\s+kg\s+(\d{2,5}(?:[.,]\d+)?)/i);
+    if (massPerUnit) _setPath(rec, "physical.density.value_kg_m3", _toNum(massPerUnit[1]));
   }
 
   // PCR — target the Part B (sub-category) reference specifically, with
