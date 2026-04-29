@@ -9,6 +9,7 @@
 import * as Loader from "./pdf-loader.mjs";
 import * as Viewer from "./canvas-viewer.mjs";
 import * as Store from "./shared/indexed-db-store.mjs";
+import * as TextJoin from "./shared/text-join.mjs";
 import * as Extract from "./epd/extract.mjs";
 
 var _state = {
@@ -351,57 +352,11 @@ function nextPage() {
 // Y-tolerance of 3pt groups items into rows; within each row, sort by X.
 // Mirrors the consolidateTextItems pattern from PDF-Parser's dim-extract,
 // since pdfjs v4 emits per-character items on some CAD/EPD PDFs.
-function _itemsToLines(items) {
-  if (!items || items.length === 0) return "";
-  var sorted = items.slice().sort(function (a, b) {
-    return a.y - b.y;
-  });
-  var lines = [];
-  var currentLine = [];
-  var currentY = null;
-  for (var i = 0; i < sorted.length; i++) {
-    var item = sorted[i];
-    if (currentY === null || item.y - currentY > 3) {
-      if (currentLine.length) lines.push(_flushLine(currentLine));
-      currentLine = [item];
-      currentY = item.y;
-    } else {
-      currentLine.push(item);
-    }
-  }
-  if (currentLine.length) lines.push(_flushLine(currentLine));
-  return lines.join("\n");
-}
-
-function _flushLine(line) {
-  line.sort(function (a, b) {
-    return a.x - b.x;
-  });
-  // Use the x-gap between adjacent items to decide whether to insert an
-  // implicit space. Browser pdf.js fragments composite tokens like
-  // "-953.23" → ["-", "953.23"] and "2.27E-06" → ["2.27E", "-", "06"]
-  // with TIGHT positioning (gap < 1px) — these must stay glued or the
-  // negative sign / sci-not exponent gets lost. Word-separated items
-  // either carry their own explicit space item OR have a visible x-gap
-  // (≥ 1.5px). Threshold of 1.5px is conservative — pdf.js emits explicit
-  // space items whenever there's a real visible space, so this implicit-
-  // space insertion is mostly defensive for non-standard typography.
-  var out = "";
-  var prev = null;
-  for (var i = 0; i < line.length; i++) {
-    var item = line[i];
-    var s = item.str;
-    if (out.length && prev) {
-      var prevRight = prev.x + (prev.width || 0);
-      var gap = item.x - prevRight;
-      var hasOwnWs = /\s$/.test(out) || /^\s/.test(s);
-      if (!hasOwnWs && gap > 1.5) out += " ";
-    }
-    out += s;
-    prev = item;
-  }
-  return out;
-}
+// Spatial join + implicit-space heuristic moved to js/shared/text-join.mjs
+// so the Node harness uses the same logic as the browser. Without that,
+// browser-specific pdf.js fragmentation (e.g. "-953.23" → ["-", "953.23"])
+// would silently behave differently between the two test surfaces.
+var _itemsToLines = TextJoin.itemsToLines;
 
 function _loadPageText(pageNum) {
   if (!Loader.isLoaded()) return Promise.resolve();

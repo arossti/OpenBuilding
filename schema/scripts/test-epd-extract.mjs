@@ -87,30 +87,14 @@ async function loadPdfjs() {
   return await import("pdfjs-dist/legacy/build/pdf.mjs");
 }
 
-function spatialJoinLines(items) {
-  if (!items || items.length === 0) return "";
-  const sorted = items.slice().sort((a, b) => a.y - b.y);
-  const lines = [];
-  let curr = [];
-  let cy = null;
-  for (const it of sorted) {
-    if (cy === null || it.y - cy > 3) {
-      if (curr.length) {
-        curr.sort((a, b) => a.x - b.x);
-        lines.push(curr.map((c) => c.str).join(" "));
-      }
-      curr = [it];
-      cy = it.y;
-    } else {
-      curr.push(it);
-    }
-  }
-  if (curr.length) {
-    curr.sort((a, b) => a.x - b.x);
-    lines.push(curr.map((c) => c.str).join(" "));
-  }
-  return lines.join("\n");
-}
+// Spatial join + implicit-space heuristic shared with the browser
+// (js/shared/text-join.mjs). Same logic in both surfaces means any
+// regex bug that depends on browser-specific pdf.js fragmentation
+// (rev-3's sign-stripping was exactly that) gets caught by this
+// harness immediately, instead of staying falsely green until a
+// human notices.
+const TextJoin = await import("../../js/shared/text-join.mjs");
+const spatialJoinLines = TextJoin.itemsToLines;
 
 async function extractFromPdf(pdfjs, pdfPath) {
   const data = new Uint8Array(await readFile(pdfPath));
@@ -125,7 +109,8 @@ async function extractFromPdf(pdfjs, pdfPath) {
       return {
         str: it.str,
         x: tx[4],
-        y: viewport.height - tx[5]
+        y: viewport.height - tx[5],
+        width: it.width
       };
     });
     pageTexts.push(spatialJoinLines(items));
