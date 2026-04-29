@@ -524,6 +524,34 @@ var IMPACT_INDICATORS = [
     label: "WDP (EU/IBU fresh-water phrase)",
     regex:
       /Use\s+of\s+net\s+fresh\s+water[^\n]{0,20}?\[?\s*m\s*[³^]?3?\s*\]?[^\n]*?\s+(-?\s*\d{1,7}(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/i
+  },
+
+  // Modern NA / ISO 21930 family. Wood + steel EPDs that follow the
+  // ACLCA / ISO 21930:2017 indicator convention use abbreviation codes
+  // RPR E (renewable primary energy as energy carrier), NRPR E
+  // (non-renewable primary energy as energy carrier), and FW (fresh
+  // water) — typically with comma-thousand-separated values like
+  // "3,490.16" and the unit on the same line ("[MJ, LHV]" or "[m 3 ]").
+  // FW often has its value on the NEXT line in the spatially-joined
+  // text because pdf.js per-glyph emission splits unit + value;
+  // \s+ tolerance handles that. Number capture allows comma-thousand
+  // groups; the parser strips them.
+  {
+    schemaKey: "primary_energy_renewable_mj",
+    label: "PE-R (RPR E / ISO 21930)",
+    regex:
+      /\bRPR\s*[Ee]\b[^\n]{0,30}?\[?\s*MJ\b[^\n]{0,16}?\s+(-?\s*\d{1,3}(?:,\d{3})*(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/
+  },
+  {
+    schemaKey: "primary_energy_nonrenewable_mj",
+    label: "PE-NR (NRPR E / ISO 21930)",
+    regex:
+      /\bNRPR\s*[Ee]\b[^\n]{0,30}?\[?\s*MJ\b[^\n]{0,16}?\s+(-?\s*\d{1,3}(?:,\d{3})*(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/
+  },
+  {
+    schemaKey: "water_consumption_m3",
+    label: "WDP (FW / ISO 21930)",
+    regex: /\bFW\b\s*\[?\s*m\s*[³^]?3?\s*\]?\s+(-?\s*\d{1,3}(?:,\d{3})*(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/
   }
 ];
 
@@ -534,7 +562,20 @@ function _extractIndicatorTotals(text, rec) {
     var m = text.match(ind.regex);
     if (!m) continue;
     var raw = m[1].replace(/\s+/g, "");
-    var num = parseFloat(raw.replace(",", "."));
+    // Number parsing handles three conventions:
+    //   "3,490.16"  US/CA — comma is thousand-separator → strip
+    //   "3.490,16"  EU      — period is thousand-separator → unsupported here
+    //   "3,50"      EU      — comma is decimal → replace with period
+    //   "3338.45"   US/CA   — no separator → as-is
+    //   "1.23E+03"  scientific → as-is (E was lowercased? no, regex is case-insensitive)
+    var num;
+    if (raw.indexOf(".") >= 0 && raw.indexOf(",") >= 0) {
+      // Both present — comma is thousand-separator (US/CA wood + steel EPDs)
+      num = parseFloat(raw.replace(/,/g, ""));
+    } else {
+      // Only one or neither — single comma → decimal
+      num = parseFloat(raw.replace(",", "."));
+    }
     if (isNaN(num)) continue;
     _setPath(rec, "impacts." + ind.schemaKey + ".total.value", num);
     _setPath(rec, "impacts." + ind.schemaKey + ".total.source", "epd_direct");
