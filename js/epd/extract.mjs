@@ -52,10 +52,17 @@ export function getLookups() {
   return _lookups;
 }
 
+// Per-glyph fragmentation tolerance for the canonical S-P-XXXXX id.
+// The EPD-IES filename variant of S-P-10278 emits the label as
+// "S - P - 10278" (each glyph as its own text item with spaces between),
+// which the strict /S-P-\d/ pattern misses. The tolerant form matches
+// either spelling and is reused everywhere we look for an S-P id.
+var _SP_ID_RX = /S\s*-\s*P\s*-\s*(\d{5,6})/;
+
 export function detectFormat(text) {
   // Priority order matters — narrowest match first to avoid false positives.
   // EPD International registry is most specific (S-P-XXXXX is canonical).
-  if (/S-P-\d{5,6}/.test(text) && /Programme\s+operator/i.test(text)) return FORMATS.EPD_INTL;
+  if (_SP_ID_RX.test(text) && /Programme\s+operator/i.test(text)) return FORMATS.EPD_INTL;
 
   // NSF before EU_IBU because Lafarge cement EPDs contain the prose phrase
   // "the owner of the declaration is liable for the underlying information"
@@ -254,6 +261,32 @@ function _findDateAfterLabel(text, labelPattern) {
   return _parseDate(window);
 }
 
+// Per-glyph fragmentation tolerance for ISO dates. The EPD-IES filename
+// variant emits dates as "202 5 - 10 - 2 0" — every digit gets its own
+// text item. Pre-process by removing whitespace between adjacent digits
+// (so "202 5" → "2025"), then run a loose YYYY-MM-DD match. Falls back
+// to null if the window doesn't contain a date-shaped sequence.
+function _looseIsoDateAfter(text, labelPattern) {
+  var m = labelPattern.exec(text);
+  if (!m) return null;
+  var window = text.substring(m.index + m[0].length, m.index + m[0].length + 60);
+  // Collapse any whitespace between digits so "202 5" → "2025" and
+  // "2 0" → "20". Repeat once because /(\d)\s+(\d)/g only collapses one
+  // pair per overlap on the first pass.
+  var collapsed = window;
+  for (var pass = 0; pass < 4; pass++) {
+    var next = collapsed.replace(/(\d)\s+(\d)/g, "$1$2");
+    if (next === collapsed) break;
+    collapsed = next;
+  }
+  // Also collapse spaces around the dashes inside dates ("2025 - 10 - 20").
+  collapsed = collapsed.replace(/(\d)\s*-\s*(\d)/g, "$1-$2");
+  var iso = collapsed.match(/(\d{4}-\d{1,2}-\d{1,2})/);
+  if (!iso) return null;
+  var parts = iso[1].split("-");
+  return parts[0] + "-" + _pad2(parts[1]) + "-" + _pad2(parts[2]);
+}
+
 // Find a free-text value after a label (for things like manufacturer / PCR).
 function _findStringAfterLabel(text, labelPattern, maxLen) {
   var m = labelPattern.exec(text);
@@ -294,8 +327,10 @@ function extractCommon(text, rec) {
   // doc references both an internal (e.g. CSA #3688-5839) and an EPD
   // International (S-P-XXXXX) ID, we prefer the EPD-Intl one because it
   // matches the BEAM internal-ID convention Melanie established.
+  // Tolerant match (_SP_ID_RX) for the EPD-IES filename variant where
+  // per-glyph emission lands the label as "S - P - 10278".
   if (!_get(rec, "epd.id")) {
-    var spMatch = text.match(/S-P-(\d{5,6})/);
+    var spMatch = text.match(_SP_ID_RX);
     if (spMatch) _setPath(rec, "epd.id", "S-P-" + spMatch[1]);
   }
 
@@ -764,17 +799,26 @@ function extractEuIbu(text, rec) {
 }
 
 function extractEpdIntl(text, rec) {
-  // S-P-XXXXX is the canonical ID
-  var sp = text.match(/S-P-(\d{5,6})/);
+  // S-P-XXXXX is the canonical ID; tolerant match handles the EPD-IES
+  // filename variant where per-glyph emission produces "S - P - 10278".
+  var sp = text.match(_SP_ID_RX);
   if (sp) _setPath(rec, "epd.id", "S-P-" + sp[1]);
 
   _setPath(rec, "epd.program_operator", "EPD International AB");
 
-  // Dates in ISO format (typical for this registry)
-  var pub = text.match(/Publication\s+date\s*:\s*(\d{4}-\d{2}-\d{2})/i);
-  if (pub) _setPath(rec, "epd.publication_date", pub[1]);
-  var exp = text.match(/Valid\s+until\s*:\s*(\d{4}-\d{2}-\d{2})/i);
-  if (exp) _setPath(rec, "epd.expiry_date", exp[1]);
+  // Dates in ISO format. The EPD-IES variant per-glyph-fragments the
+  // date itself ("202 5 - 10 - 2 0"), so we capture a 60-char window
+  // after each label, collapse digit-space-digit pairs, then run a
+  // loose date pattern. Falls back to the strict pattern for the
+  // typical EPD International layout.
+  if (!_get(rec, "epd.publication_date")) {
+    var pubLoose = _looseIsoDateAfter(text, /Publication\s+date\s*:?/i);
+    if (pubLoose) _setPath(rec, "epd.publication_date", pubLoose);
+  }
+  if (!_get(rec, "epd.expiry_date")) {
+    var expLoose = _looseIsoDateAfter(text, /Valid\s+until\s*:?/i);
+    if (expLoose) _setPath(rec, "epd.expiry_date", expLoose);
+  }
 
   // Manufacturer ("from <MFR>" or "Owner of the Declaration: <MFR>")
   var mfr =
