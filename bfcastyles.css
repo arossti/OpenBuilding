@@ -5905,6 +5905,31 @@ details.dep-details pre {
   font-family: "Courier New", monospace;
 }
 
+/* §10.1 provenance source classes — color-coded so the user always sees
+   which fields came from the EPD itself vs the db-fallbacks catalogue
+   vs a calculated derivation vs their own typed override. Default (no
+   class) means epd_direct or unset — rendered with the standard form-
+   input chrome above. The three non-default classes layer a soft tint
+   + a left border accent + a corner badge so the cue is visible at a
+   glance without crowding the input. */
+.app-epdparser .epd-form-row input.epd-source-default,
+.app-epdparser .epd-form-row select.epd-source-default {
+  background: rgba(250, 204, 21, 0.1); /* soft amber */
+  border-left: 3px solid rgb(250, 204, 21);
+}
+.app-epdparser .epd-form-row input.epd-source-calc,
+.app-epdparser .epd-form-row select.epd-source-calc {
+  background: rgba(34, 211, 238, 0.1); /* soft cyan */
+  border-left: 3px solid rgb(34, 211, 238);
+}
+.app-epdparser .epd-form-row input.epd-source-edit,
+.app-epdparser .epd-form-row select.epd-source-edit {
+  /* User overrode an auto-fill — render as authoritative (no tint) but
+     keep a subtle green accent so the user knows the field has been
+     touched since the last auto-fill pass. */
+  border-left: 3px solid rgb(132, 204, 22);
+}
+
 /* P2 — Capture button + status bar at the bottom of the form pane. */
 .app-epdparser .epd-form-actions {
   display: flex;

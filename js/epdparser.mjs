@@ -552,6 +552,14 @@ function _bindFormChange() {
 
     if (!_state.candidate) _state.candidate = {};
     _setPath(_state.candidate, el.dataset.path, value);
+    // Provenance: a user typing on a field overrides whatever auto-fill
+    // path produced the prior value. Flip the source to user_edit and
+    // re-apply the class so the visual cue updates immediately.
+    var sourcePath = _resolveSourcePath(el.dataset.path);
+    if (sourcePath) {
+      _setPath(_state.candidate, sourcePath, "user_edit");
+      _applySourceClass(el, _state.candidate);
+    }
     _scheduleSave();
   });
 }
@@ -699,7 +707,35 @@ function _populateFormFromCandidate(candidate) {
     } else {
       el.value = String(v);
     }
+    _applySourceClass(el, candidate);
   }
+}
+
+/* ── §10.1 provenance source-class application ───────────────────────
+   Source enum values:
+     epd_direct       — extracted from the EPD's text
+     generic_default  — filled from db-fallbacks.json (Tier-9 fallback)
+     calculated       — derived from BEAM math (future, Tier 10)
+     user_edit        — user typed over the auto-filled value
+   Each value lives at a sibling path: replace the last segment of the
+   value path with "source" (e.g. physical.density.value_kg_m3 →
+   physical.density.source). Falls back gracefully when no source field
+   exists — the input renders default / no class. */
+function _resolveSourcePath(valuePath) {
+  var parts = valuePath.split(".");
+  if (parts.length < 2) return null;
+  parts[parts.length - 1] = "source";
+  return parts.join(".");
+}
+
+function _applySourceClass(el, candidate) {
+  var sourcePath = _resolveSourcePath(el.dataset.path);
+  if (!sourcePath) return;
+  var source = candidate ? _getPath(candidate, sourcePath) : null;
+  el.classList.remove("epd-source-default", "epd-source-calc", "epd-source-edit");
+  if (source === "generic_default") el.classList.add("epd-source-default");
+  else if (source === "calculated") el.classList.add("epd-source-calc");
+  else if (source === "user_edit") el.classList.add("epd-source-edit");
 }
 
 function _setFormStatus(text) {
