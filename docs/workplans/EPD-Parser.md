@@ -26,7 +26,7 @@
 
 ### Pickup — what you're doing next
 
-**1. C-fb6 (still gated)**. `applyCalculations(rec)` Tier 10 is blocked on Andy supplying BEAM math formulas for biogenic carbon stored per unit + similar derivations. Andy committed to providing these by EOD 2026-04-29. Don't start without the formulas.
+**1. C-fb6 (review-pending, not strictly gated)**. `applyCalculations(rec)` Tier 10. Per the BEAM-CSV inventory done 2026-04-29 PM, the formula + all inputs are present in `docs/csv files from BEAM/` (see §11 for the full reasoning + draft chapter). The remaining ask is **review by Mélanie** of the principle (§11.1: EPD as single source of truth, BEAM as normalization-only) and the six concrete questions in §11.8 — schema-field naming, storage_factor source, defaults location, validation tolerance. Once those are answered, ~3 hrs of mechanical implementation.
 
 **2. Per-stage extraction → cradle-to-grave EPDs**. P3.3 verified for cradle-to-gate (Kalesnikoff, 4-column header). Cradle-to-grave EPDs (xcarb steel, EU/IBU Wood Fibre, etc.) have full A1-D headers (~17 columns). The same nearest-header-by-count logic should Just Work, but no ground-truth file annotated yet. Pick a cradle-to-grave sample, annotate per-stage values, run harness, verify. Expand `_BYSTAGE_LABELS` if any indicator labels need broadening for new format families.
 
@@ -55,10 +55,11 @@ main                            cda8102   PR #15 merged
 ### Read this order
 
 1. §0 — current state (full SHA log + coverage trail)
-2. **§10 — Fallback database (db-fallbacks.json)** — read in full before C-fb5; especially §10.3 (verification before fallback)
-3. §7.6 — Harness contract (the "no regex change ships unless coverage moves up" rule; C-fb5 extends it)
-4. §5.6 — Hierarchical extraction (shipped 2026-04-28; reference)
-5. §9.5 — calibration findings + remaining fix-list (mostly cleared)
+2. **§11 — Biogenic calculations (review-pending)** — read in full before C-fb6; especially §11.1 (EPD as single source of truth) and §11.8 (the six questions for Mélanie's review). The BEAM CSV math is documented; only the schema-field naming + storage-factor convention need sign-off.
+3. **§10 — Fallback database (db-fallbacks.json)** — read in full before C-fb5; especially §10.3 (verification before fallback)
+4. §7.6 — Harness contract (the "no regex change ships unless coverage moves up" rule; C-fb5 extends it)
+5. §5.6 — Hierarchical extraction (shipped 2026-04-28; reference)
+6. §9.5 — calibration findings + remaining fix-list (mostly cleared)
 
 ### File map for C-fb5
 
@@ -140,7 +141,7 @@ npm run serve                                                     # local dev se
 
 **Phases pending** (ranked by leverage post-2026-04-29 PM):
 
-- 🅿️ **C-fb6 — `applyCalculations()` Tier 10** — gated on Andy supplying BEAM math for biogenic carbon stored per unit. Andy committed to providing formulas EOD 2026-04-29.
+- 🟨 **C-fb6 — `applyCalculations()` Tier 10** — review-pending (was: gated). The BEAM-CSV inventory done 2026-04-29 PM confirmed all formula inputs are present in `docs/csv files from BEAM/BEAM Database-DUMP.csv`; the formula itself is in `Glossary.csv:20-26`. New §11 of this workplan drafts the principle (EPD as single source of truth + BEAM normalization layer for BEAMweb assemblies, not a parallel methodology) for Mélanie's review. Six concrete questions in §11.8 need sign-off; once answered, ~3 hrs of mechanical implementation.
 - 🔜 **P3.3 cradle-to-grave verification** — per-stage extraction works structurally for any header; needs ground-truth annotation for at least one cradle-to-grave sample (xcarb steel, EU/IBU Wood Fibre) to lock in the full A1-D path.
 - 🔜 **C-fb5 ground-truth backlog** — only 1/30 samples annotated. Priority: xcarb (surface the density=800 silent-override bug), 2023 BC Wood ASTM family (low-risk), EU/IBU Wood Fibre, Lafarge cement.
 - ⏳ **P4 — Match-status surfacing** (`NEW` vs `REFRESH → <id>`) on the EPD-Parser form banner — Database-side dupe detection now does this server-side via the over-write prompt; form-side preview is a UX enhancement.
@@ -754,9 +755,9 @@ Some XML entries carry meaningful spread (e.g., concrete densities 1800 / 2000 /
 - An optional `variants[]` array per material_type with per-variant overrides (`name`, density, conductivity, etc.) the form can offer as alternatives in a dropdown when the user wants a tighter match.
 - An optional `range` object (`min` / `max`) for fields where the spread is documented and useful as helper text on the form input.
 
-### 10.5. What's coming after Andy's BEAM math arrives
+### 10.5. Tier 10 (`applyCalculations`) — moved to §11
 
-`applyCalculations(rec)` Tier 10 in `extract.mjs` runs after the fallback step. For each computable field (e.g., biogenic carbon stored per m² for a wall assembly at thickness X), apply the BEAM formula using inputs from `rec` (some `epd_direct`, some `generic_default`, some user-edited), mark the output `source: "calculated"`, and record the input chain in a sibling field for the tooltip ("computed from `physical.density.value_kg_m3` (epd_direct) × thickness × biogenic factor"). Catches: a calc layer that accidentally consumes a `generic_default` density is still legitimate, but the user should see it; the chip + tooltip make that visible.
+The "what's coming after the BEAM math arrives" framing is outdated as of 2026-04-29 PM: the BEAM-CSV inventory found all formula inputs already present in `docs/csv files from BEAM/BEAM Database-DUMP.csv` (cols 24, 25, 28, 29, 31, 33) and the formula itself documented in `Glossary.csv:20-26`. **See §11 for the full architecture chapter** — strict EPD-as-single-source-of-truth principle, BEAM normalization layer's role for BEAMweb hybrid components, formula decomposition, schema-field naming proposals, and the six review questions for Mélanie. C-fb6 implementation lands once §11 is signed off.
 
 ### 10.6. Commit plan
 
@@ -773,7 +774,146 @@ C-fb1 → C-fb5 is ~3 hours of work spread across 5 small commits. C-fb6 is gate
 
 ---
 
-## 11. Out of scope (v1)
+## 11. Biogenic carbon — strict EPD reading + BEAM normalization (review-pending)
+
+> **Status:** Drafted 2026-04-29 PM, pending review by Mélanie (BfCA database originator) before C-fb6 implementation. This chapter exists so the principle is unambiguous before code is written.
+
+### 11.1. Principle — the EPD is the single source of truth
+
+When an EPD publishes biogenic-carbon values (`gwp_bio_kgco2e.total`, `gwp_bio_kgco2e.by_stage.A1` for carbon stored, etc.), **those values are authoritative and never recomputed**. Strict reading means:
+
+- If Kalesnikoff's Table 3 says `A1 = -1045.63 kgCO₂e per 1 m³ glulam`, that's what `impacts.gwp_bio_kgco2e.by_stage.A1.value` holds. With `source: "epd_direct"`. Forever.
+- We do not estimate biogenic carbon from density × carbon-content × 3.67 when the EPD already declared it.
+- We do not adjust the EPD's value to match a different methodology, allocation, or system boundary. The EPD is the document.
+- We do not extrapolate to other lifecycle stages the EPD didn't declare (e.g. don't fabricate B1–B7 from A1–A3).
+
+This is the same rule that drives Tier-9 catalogue defaults (§10): **EPD-published values always win.** Tier-10 (BEAM normalization) extends the rule rather than relaxing it.
+
+### 11.2. Why a normalization layer is needed at all
+
+The materials database is consumed by two distinct surfaces:
+
+1. **The database viewer** (this app's sibling) — surfaces records as the EPD authored them. Per-declared-unit values, per-stage breakdown, EPD-source URL alongside. No transformation needed.
+2. **BEAMweb** (separate repo, future link) — composes materials into **hybrid components** (e.g. a 2×4 framed wall at 16″ o.c. with batt insulation between studs, gypsum on both faces). For BEAMweb to compute the wall's per-m² embodied carbon, it needs each material's contribution **normalized to a per-component-area basis** — not the EPD's native declared unit.
+
+A 1 m³ slab of glulam isn't directly comparable to 1 m² of wall sheathing. BEAMweb's job is to do the geometry math (studs/m², thickness, density × thickness = kg/m², etc.) and roll up. **EPD-Parser's role here is just to make the per-material inputs available** — not to do the assembly math itself. That math is BEAMweb's responsibility.
+
+The "BEAM normalization" Tier 10 produces (per the existing audit-trail UI scaffolding in `js/database.mjs`) is the **per-material derivative values BEAMweb consumes**, not an alternative carbon-storage methodology. It's unit conversion + per-functional-unit projection, computed once at commit time and cached so BEAMweb doesn't recompute on every assembly call.
+
+> Said differently: if a wood EPD reports `–1045.63 kgCO₂e per m³` for biogenic A1, the BEAM-normalized value is the **same number**, expressed per assembly unit (e.g. `–7.32 kgCO₂e per m² of 38mm CLT panel`, where the m² coverage and panel thickness are the BEAM normalization inputs). It is NOT a different value, NOT a different method, NOT an alternative interpretation. Just unit conversion.
+
+### 11.3. The formula (from `docs/csv files from BEAM/Glossary.csv:20-26`)
+
+The BEAM Excel formula stack is documented in the BEAM glossary. CSV export stripped the formula syntax but preserved the worked example (line 26):
+
+```
+Carbon storage = (kg of product per m²)
+               × (kg of biomass per kg of product)        ← biogenic_factor
+               × (kg of carbon per kg of biomass)          ← carbon_content
+               × (44 / 12)                                  ← CO₂/C molar ratio = 3.67
+             = kgCO₂e per m²
+```
+
+The 44/12 multiplier is the universal CO₂-to-carbon conversion: every kg of carbon stored in a product represents 44/12 (≈ 3.67) kg of CO₂ removed from the atmosphere (Glossary.csv:20). This is a stoichiometric constant — not a methodology choice — and is identical across every biogenic-carbon framework (IPCC, ISO 21930, EN 15804+A2).
+
+Decomposed into the audit-trail UI variables already in `js/database.mjs`:
+
+```
+density           [kg/m³]            ← from EPD or db-fallbacks
+thickness         [m]                ← BEAMweb-supplied per-assembly (NOT from EPD)
+biogenic_factor   [kg-bio / kg-prod] ← from EPD methodology if stated, else BEAM CSV col 24
+carbon_content    [kgC / kg-bio]     ← from EPD methodology if stated, else BEAM CSV col 25
+3.67              [kgCO₂ / kgC]      ← stoichiometric constant
+```
+
+`full_C = density × thickness × biogenic_factor × carbon_content × 3.67   [kgCO₂e per m²]`
+
+`stored = full_C × storage_factor                                          [kgCO₂e per m²]`
+
+where `storage_factor` is the WWF-published 0.9 long-term-storage multiplier (BEAM CSV col 28, "WWF Storage Factor kgCO₂e/kgC") that discounts for end-of-life release. **This factor is BfCA convention, not an EPD-published value** — flag for Mélanie review whether `0.9` should be the default or whether it should always come from the EPD's biogenic methodology section.
+
+### 11.4. Inputs catalogue
+
+All inputs are already present in `docs/csv files from BEAM/BEAM Database-DUMP.csv` for the existing 821 records:
+
+| Variable | BEAM CSV column | EPD slot we extract into | Notes |
+|---|---|---|---|
+| `density` | Col 33 (`Density`, kg/m³) | `physical.density.value_kg_m3` | Tier 1: EPD's Mass / oven-dry. Tier 9: db-fallbacks Wood→500 kg/m³ alias. |
+| `biogenic_factor` | Col 24 (`Biogenic carbon factor`) | `methodology.biogenic_factor`* | *new schema field. Default 1.0 (whole product is biomass) for solid wood; <1 for engineered products with non-biomass binders. |
+| `carbon_content` | Col 25 (`% Carbon content (kgC/kg)`) | `methodology.carbon_content_kgc_kg`* | *new schema field. Wood typically 0.5; bamboo 0.524. |
+| `storage_factor` | Col 28 (`WWF Storage Factor`) | (constant 0.9 unless EPD overrides) | Mélanie review: is this always 0.9, or per-program-operator? |
+| `3.67` | Glossary.csv:20 | (stoichiometric constant) | No need to plumb through schema. |
+| `thickness` | Per-assembly (BEAMweb-supplied) | n/a — not from EPD | EPD-Parser does NOT see thickness; BEAMweb provides per-component. |
+
+The two new schema fields (`methodology.biogenic_factor`, `methodology.carbon_content_kgc_kg`) require a `material.schema.json` bump — flag for Mélanie review whether these names match BEAM's existing terminology, and whether they should live under `methodology` or `physical`.
+
+### 11.5. Output rules — Tier 10 produces, never overrides
+
+`applyCalculations(rec)` runs as Tier 10 in `extract.mjs`, AFTER Tier 9 db-fallbacks. It:
+
+1. Reads inputs from the candidate record (Tier 1–9 outputs).
+2. Computes `full_C` and `stored` per the formula above (per declared unit, NOT per m² — that's BEAMweb's job).
+3. Writes the result to a new `methodology.beam_calc.{full_c_kgco2e, stored_kgco2e, inputs[]}` slot.
+4. Marks the value with `source: "calculated"` AND records the input-chain in a sibling `methodology.beam_calc.inputs[]` array (e.g. `["physical.density.value_kg_m3 (epd_direct)", "methodology.biogenic_factor (generic_default)", ...]`).
+5. **Never touches `impacts.gwp_bio_kgco2e.*`** — those are EPD-published values and authoritative. Tier 10 is purely derivative.
+
+The `inputs[]` chain is the audit trail. If a calculated value used a `generic_default` density and a `user_edit` biogenic factor, that fact is visible in the `methodology.beam_calc.inputs[]` array. The form pane's CYAN `CALC` chip + tooltip (already in §10.1's provenance scheme) surfaces this to the practitioner.
+
+### 11.6. Display — practitioner-facing UI
+
+The database viewer's expanded record detail already has the audit-trail scaffolding (the section the user described in Slack):
+
+```
+stated     — kgCO₂e / 1 m³   [source: —]
+             stages declared: —
+      │
+      ▼   —
+          factor = —    (—)
+      │
+      ▼
+common     — kgCO₂e / —     ( · )
+      │
+      ▼
+biogenic   method: —
+           biogenic_factor=—  carbon_content=— kgC/kg
+           full_C   = density × thickness × bio × C × 3.67 = — kgCO₂e
+           stored   = full_C × — = — kgCO₂e
+           C/unit   = — kgC.
+```
+
+After C-fb6 lands, the placeholders fill in. The `stated` line shows the **EPD-published biogenic value** (single source of truth). The `biogenic` block shows the **BEAM-normalized derivation** (computed from the same EPD value plus assembly geometry). Both are visible side-by-side; both are labelled with their `source`. The practitioner sees the EPD value AND understands how BEAMweb will use it downstream — without ambiguity that one is replacing the other.
+
+### 11.7. Out of scope (under this chapter)
+
+- **No re-computation of biogenic carbon when the EPD publishes it.** If `impacts.gwp_bio_kgco2e.total.value` is non-null, Tier 10 displays the EPD value alongside the BEAM-normalized derivation, and discrepancies (which can occur — different assumptions, different system boundaries) are surfaced for the practitioner. Neither value overrides the other.
+- **No methodology coercion.** EPDs use various biogenic-carbon methodologies (ISO 21930 §7.2.7, EN 15804+A2, IPCC 2013 GWP-100, IPCC 2021 GWP*). Tier 10 doesn't translate between them. Practitioners working on a project with a specific methodology requirement filter records by `epd.methodology.biogenic_method`* (new schema field, flag for Mélanie).
+- **No BEAMweb-side assembly math.** Per-component roll-up (studs/m², coverage factors, hybrid-component weighted averages) is BEAMweb's job, not EPD-Parser's. Tier 10 produces per-material per-declared-unit derivative values; BEAMweb then projects those onto its assembly geometry.
+- **No "carbon storage" claims to end users beyond what EPDs state.** BfCA's display surfaces are factual: "this EPD reports A1 = –1045.63 kgCO₂e biogenic." We don't editorialize. The 0.9 WWF storage factor (when applied) is labelled explicitly in the audit trail so practitioners can see it's a BfCA convention layered on top of the EPD value.
+
+### 11.8. Open questions for Mélanie's review
+
+Listed concretely so this chapter can be skimmed and approved in one pass:
+
+1. **Storage factor source.** Should `storage_factor = 0.9` be a hard-coded BfCA constant (current BEAM CSV behaviour, col 28) or read from each EPD's biogenic methodology section if stated? If the latter, what's the schema slot — `methodology.storage_factor`?
+2. **Biogenic factor + carbon content fallbacks.** When the EPD doesn't publish `biogenic_factor` or `carbon_content_kgC_kg` explicitly, BEAM CSV uses material-type-keyed defaults (Wood = 0.989, 0.5 respectively from Glulam row). Should these defaults live in `db-fallbacks.json` alongside density / k / Cp etc., or in a separate biogenic-specific lookup? The former matches the existing pattern; the latter is more semantically clean.
+3. **Schema-field naming.** Proposed new fields:
+   - `methodology.biogenic_factor` (kg-biomass / kg-product, default 1.0 for solid wood)
+   - `methodology.carbon_content_kgc_kg` (kgC / kg-biomass, default 0.5 for wood)
+   - `methodology.beam_calc.{full_c_kgco2e, stored_kgco2e, inputs[]}` (Tier 10 output, source: "calculated")
+   
+   Do these names match BEAM's existing terminology? Should `beam_calc` be under `methodology` or `physical`?
+
+4. **BEAM CSV column 23 — `GWP-bio from EPD`.** This appears to already capture the EPD-direct biogenic value for the existing 821 records. After C-fb6 lands, EPD-Parser's `impacts.gwp_bio_kgco2e.total.value` should round-trip to this column. Confirm the column header convention.
+
+5. **Per-stage biogenic vs aggregate.** The EPD publishes per-stage biogenic (Kalesnikoff GLT: A1 = –1045.63, A3 = +1045.63, net total = 0). BEAM CSV col 31 (`Full C value`) appears to be a single number per material — is that the A1 value (carbon stored), the A1-A3 net (≈ 0 for cradle-to-gate), or something else? P3.3 already extracts the per-stage matrix; need clarity on which slot BEAMweb wants for its assembly math.
+
+6. **Validation samples.** After Tier 10 ships, can we validate by comparing `methodology.beam_calc.full_c_kgco2e` for the 5 samples we'll have annotated under C-fb5 (Kalesnikoff CLT, GLT, xcarb cold-formed, etc.) against the corresponding rows in `BEAM Database-DUMP.csv`? Numeric tolerance ±5%? Per-row mismatches would surface either a formula misunderstanding on our side or a computed-vs-published difference in BEAM's source data.
+
+Once these are answered, C-fb6 implementation (Tier 10 + the 3 new schema fields + form-pane render of the audit trail) is ~3 hours of work. Schema bump requires Mélanie sign-off; everything else is mechanical.
+
+---
+
+## 12. Out of scope (v1)
 
 - **OCR** (Tesseract.js fallback) — P7 phase. **Real demand confirmed in P1 calibration** (`EPD_Polyiso walls.pdf` is image-only, zero text-layer items). v1 detects this case and surfaces a "needs OCR" banner; the actual OCR pass lands in P7.
 - **Hard delete of database records.** Forever. Soft-delete via `status.visibility = "flagged_for_deletion"` is the only deletion path; flagged records stay in `schema/materials/*.json` for back-office manual review (see [`Database.md`](Database.md) §6).
