@@ -41,15 +41,16 @@ jobs:
         # data/beam/. Local dev runs `npm run stage:data` to produce the
         # same data/ layout.
         run: |
-          mkdir -p _site/data/schema _site/data/beam _site/data/beam/samples
+          mkdir -p _site/data/schema _site/data/schema/lookups _site/data/beam _site/data/beam/samples
 
           # Deployable app surface
-          cp index.html pdfparser.html matrix.html database.html beamweb.html dependencies.html _site/
+          cp index.html pdfparser.html matrix.html database.html beamweb.html epdparser.html dependencies.html _site/
           cp bfcastyles.css _site/
           cp -r js graphics lib _site/
 
           # Runtime data (staged from authoritative sources)
           cp -r schema/materials _site/data/schema/
+          cp -r schema/lookups/. _site/data/schema/lookups/
           cp schema/material.schema.json _site/data/schema/
           cp schema/sample.json _site/data/schema/
           cp "docs/csv files from BEAM/Footings & Slabs.csv" _site/data/beam/footings-slabs.csv

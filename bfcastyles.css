@@ -21,6 +21,7 @@
      §8  APP: BEAMweb (embodied carbon calculator)
      §9  APP: Landing (app directory)
      §10 APP: Deps (dev dependency manifest)
+     §11 APP: EPD-Parser (Environmental Product Declaration ingest)
 
    ## Roadmap — "one file" goal
    Phase 0 (today): consolidate four app CSS files into this one, grouped by
@@ -3303,6 +3304,41 @@ html.app-matrix body {
   border-bottom-color: var(--accent);
 }
 
+/* Trust-committed rows surfaced via EPD-Parser (Database.md §5.5(d)+(e)).
+   Yellow tint distinguishes "this entry isn't in schema/materials/*.json
+   yet — it's a pending patch that survives in IndexedDB until the team
+   runs apply-patch.mjs". Persists across reloads. Hover + expanded states
+   layer over the same yellow bed so the cue stays visible. */
+#db-table tbody tr.db-row-main.db-row-fresh {
+  background: rgba(250, 204, 21, 0.16);
+}
+#db-table tbody tr.db-row-main.db-row-fresh:hover {
+  background: rgba(250, 204, 21, 0.24);
+}
+#db-table tbody tr.db-row-main.db-row-fresh.expanded {
+  background: rgba(250, 204, 21, 0.3);
+  border-bottom-color: rgb(250, 204, 21);
+}
+.db-fresh-chip {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: "Helvetica Neue", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+.db-fresh-chip-new {
+  background: rgba(250, 204, 21, 0.32);
+  color: rgb(254, 240, 138);
+}
+.db-fresh-chip-refresh {
+  background: rgba(245, 158, 11, 0.32);
+  color: rgb(254, 215, 170);
+}
+
 /* Group-header rows in the database viewer. Styled to echo the BEAMweb
    assembly-tab group headers: rounded container, padded away from the
    page edge, hover affordance, expanded-state contrast. The banner lives
@@ -3694,6 +3730,254 @@ html.app-matrix body {
   .db-subtitle {
     display: none;
   }
+}
+
+/* §7 — EPD-Parser pending-changes panel + Trust + Verify modal.
+   Bridge between EPD-Parser (producer) and the Database viewer (consumer)
+   per Database.md §4–§5. UX wording mirrors the existing PDF-Parser → BEAM
+   bridge so muscle-memory transfers (js/beamweb.mjs:519). */
+
+.db-pending-panel {
+  margin: 0 16px 12px 16px;
+  border: 1px solid var(--accent);
+  background: linear-gradient(180deg, rgba(42, 92, 63, 0.12), rgba(42, 92, 63, 0.04));
+  border-radius: 6px;
+  overflow: hidden;
+}
+.db-pending-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(42, 92, 63, 0.18);
+  flex-wrap: wrap;
+}
+.db-pending-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+.db-pending-count {
+  background: var(--accent);
+  color: #fff;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-family: "Courier New", monospace;
+}
+.db-pending-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.db-pending-rows {
+  display: flex;
+  flex-direction: column;
+}
+.db-pending-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+}
+.db-pending-row:first-child {
+  border-top: none;
+}
+.db-pending-row-meta {
+  flex: 1;
+  min-width: 0;
+}
+.db-pending-row-name {
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.db-pending-row-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.db-pending-row-sub .db-pending-grp {
+  font-family: "Courier New", monospace;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 6px;
+}
+.db-pending-row-source {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  font-family: "Courier New", monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.db-pending-row-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.db-pending-row-actions button {
+  background: var(--bg-surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-family: var(--font);
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.db-pending-row-actions .db-pending-trust {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.db-pending-row-actions .db-pending-trust:hover {
+  background: var(--accent-lit);
+  border-color: var(--accent-lit);
+}
+.db-pending-row-actions .db-pending-verify:hover {
+  border-color: var(--accent-lit);
+  color: var(--accent-lit);
+}
+.db-pending-row-actions .db-pending-discard {
+  padding: 5px 8px;
+  color: var(--text-dim);
+}
+.db-pending-row-actions .db-pending-discard:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+/* Trust + Verify modal — stub today, shows the candidate JSON.
+   P3 replaces the body with the side-by-side per-field diff. */
+.db-verify-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 100;
+}
+.db-verify-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(720px, 92vw);
+  max-height: 85vh;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  z-index: 101;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
+}
+.db-verify-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.db-verify-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+.db-verify-close {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+}
+.db-verify-close:hover {
+  color: var(--text);
+}
+.db-verify-body {
+  padding: 14px 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+.db-verify-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+.db-verify-meta b {
+  color: var(--text-dim);
+  font-weight: 500;
+}
+.db-verify-hint {
+  background: var(--bg-surface);
+  border-left: 3px solid var(--accent-lit);
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  border-radius: 0 3px 3px 0;
+}
+.db-verify-json {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text);
+  white-space: pre-wrap;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.db-verify-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+.db-verify-cancel,
+.db-verify-commit {
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-family: var(--font);
+  font-size: 12px;
+  cursor: pointer;
+}
+.db-verify-cancel {
+  background: var(--bg-surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.db-verify-cancel:hover {
+  border-color: var(--text-dim);
+}
+.db-verify-commit {
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.db-verify-commit:hover {
+  background: var(--accent-lit);
+  border-color: var(--accent-lit);
 }
 
 /* ═════════════════════════════════════════════════════════════
@@ -5485,4 +5769,189 @@ details.dep-details pre {
 }
 .dep-drift li.ok {
   color: #4ade80;
+}
+
+/* ═════════════════════════════════════════════════════════════
+   §11  APP: EPD-Parser — Environmental Product Declaration ingest
+   ═════════════════════════════════════════════════════════════ */
+
+/* P2 — 50/50 layout: PDF on the left, schema-form pane on the right.
+   Scoped to .app-epdparser so PDF-Parser's narrow-sidebar layout stays
+   untouched. The HTML structure is unchanged from PDF-Parser (sidebar
+   first, viewer second); we just flip the flex direction and widen the
+   sidebar. */
+.app-epdparser #main {
+  flex-direction: row-reverse;
+}
+/* PDF gets 60%, form pane gets 40% — both flex from 0, so they
+   redistribute cleanly at any viewport width. Override the
+   PDF-Parser #sidebar fixed-width and #viewer-area flex:1 base. */
+.app-epdparser #sidebar {
+  flex: 4 1 0;
+  width: auto;
+  min-width: 380px;
+  border-right: none;
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+}
+.app-epdparser #viewer-area {
+  flex: 6 1 0;
+}
+
+/* P1 — raw text dump panel (sidebar). Scoped to .app-epdparser so the
+   PDF-Parser sidebar stays untouched. */
+
+.app-epdparser .epd-text-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.app-epdparser .epd-text-header span:last-child {
+  color: var(--accent-lit);
+  font-family: "Courier New", monospace;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.app-epdparser .epd-text-dump {
+  margin: 0;
+  padding: 8px 10px;
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--text);
+  background: transparent;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+.app-epdparser .epd-text-dump:empty::before {
+  content: "(no text on this page)";
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* P2 — Schema record form (sidebar / right pane). */
+.app-epdparser #sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.app-epdparser .epd-match-status {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.app-epdparser .epd-form {
+  padding: 0 12px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.app-epdparser .epd-form-section {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 12px 12px 12px;
+  margin: 0;
+  background: var(--bg-surface);
+}
+.app-epdparser .epd-form-section legend {
+  padding: 0 6px;
+  margin-left: 4px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--accent-lit);
+  line-height: 1;
+}
+.app-epdparser .epd-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 10px;
+}
+.app-epdparser .epd-form-row:first-of-type {
+  margin-top: 12px;
+}
+.app-epdparser .epd-form-row label {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.app-epdparser .epd-form-row input,
+.app-epdparser .epd-form-row select {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 5px 7px;
+  border-radius: 3px;
+  font-family: var(--font);
+  font-size: 12px;
+}
+.app-epdparser .epd-form-row input:focus,
+.app-epdparser .epd-form-row select:focus {
+  outline: none;
+  border-color: var(--accent-lit);
+}
+.app-epdparser .epd-form-row input[type="number"] {
+  font-family: "Courier New", monospace;
+}
+
+/* P2 — Capture button + status bar at the bottom of the form pane. */
+.app-epdparser .epd-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-surface);
+  position: sticky;
+  bottom: 0;
+}
+.app-epdparser .epd-form-status {
+  flex: 1;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: "Courier New", monospace;
+}
+.app-epdparser .epd-capture-btn {
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-family: var(--font);
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.app-epdparser .epd-capture-btn:hover {
+  background: var(--accent-lit);
+  border-color: var(--accent-lit);
+}
+.app-epdparser .epd-capture-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.app-epdparser .epd-open-db-link {
+  font-size: 11px;
+  color: var(--accent-lit);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.app-epdparser .epd-open-db-link:hover {
+  text-decoration: underline;
 }

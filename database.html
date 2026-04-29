@@ -98,6 +98,52 @@
         </div>
       </div>
 
+      <!-- ── EPD-Parser pending-changes panel ────────────────
+           Hidden when there are no captured rows in the shared
+           IndexedDB queue. Trust / Trust + Verify per row mirror
+           the PDF-Parser → BEAM bridge (js/beamweb.mjs:519). -->
+      <section id="db-pending-panel" class="db-pending-panel" style="display: none">
+        <div class="db-pending-header">
+          <span class="db-pending-title">
+            <i class="bi bi-inbox"></i>
+            Pending changes <span id="db-pending-count" class="db-pending-count">0</span>
+          </span>
+          <span class="db-pending-hint">
+            From EPD-Parser · click <b>Trust</b> for one-click commit, <b>Trust + Verify</b> for the side-by-side review
+          </span>
+        </div>
+        <div id="db-pending-rows" class="db-pending-rows"></div>
+      </section>
+
+      <!-- Trust + Verify modal (review the candidate before commit) -->
+      <div id="db-verify-backdrop" class="db-verify-backdrop" style="display: none"></div>
+      <div id="db-verify-modal" class="db-verify-modal" style="display: none">
+        <div class="db-verify-header">
+          <span class="db-verify-title">Trust + Verify</span>
+          <button type="button" class="db-verify-close" id="db-verify-close" title="Close">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <div class="db-verify-body">
+          <div class="db-verify-meta">
+            <div><b>Source file:</b> <span id="db-verify-source"></span></div>
+            <div><b>Match outcome:</b> <span id="db-verify-outcome"></span></div>
+            <div><b>Editor:</b> <span id="db-verify-editor"></span></div>
+            <div><b>Captured at:</b> <span id="db-verify-captured"></span></div>
+          </div>
+          <div class="db-verify-hint">
+            Stub: shows the candidate JSON the parser captured. P3 will replace this with the side-by-side per-field diff (existing record vs incoming) per workplan Database.md §5.
+          </div>
+          <pre id="db-verify-json" class="db-verify-json"></pre>
+        </div>
+        <div class="db-verify-actions">
+          <button type="button" id="db-verify-cancel" class="db-verify-cancel">Cancel</button>
+          <button type="button" id="db-verify-commit" class="db-verify-commit">
+            <i class="bi bi-check-lg"></i> Commit (stub)
+          </button>
+        </div>
+      </div>
+
       <!-- ── Table ────────────────────────────────────────── -->
       <div id="db-table-wrap">
         <table id="db-table">
