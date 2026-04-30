@@ -6,13 +6,31 @@
 
 ## Agent handoff (read this first)
 
-**You are picking up at 2026-04-29 PM with the four Kalesnikoff bugs fixed end-to-end (display name, density-from-Mass, full impact-table extraction, db-fallbacks coverage), the three database-viewer bugs fixed (duplicate-EPD detection on Trust, × remove button on fresh rows, BEAM ID column widened), C-fb5 harness ground-truth verification shipped, and P3.3 per-stage breakdown extraction shipped.** Branch is parked at `ae20837` on `EPD-PARSER-SPRINT-2`, both remotes pushed. Only C-fb6 (BEAM-math calc tier, gated on Andy's formulas) remains from the original §10 plan.
+**You are picking up at 2026-04-30, with Andy shifting context to a funder report.** The EPD-Parser is in a clean state: PR #16 (8 commits) merged into main 2026-04-29 evening, sprint-3 branch is +3 commits ahead with three additive improvements (shared text-join module, biogenic-calc workplan chapter, by_stage harness dimension + xcarb per-stage extraction). No open bugs blocking next steps; work is queued on the four follow-ups in `## Open follow-ups (next agent to triage)` below.
 
-**Today's coverage state**: metadata 267/420 (63.6%) → 275/420 (65.5%); impacts 147/300 (49.0%) → 163/300 (54.3%). Both Kalesnikoff samples now 14/14 metadata + 10/10 impacts (perfect score). Per-stage A1/A2/A3 cells now populate for cradle-to-gate EPDs (10 indicators × 3 stages = 30 cells per Kalesnikoff sample, all verified against published Table 3).
+**Coverage state, end of 2026-04-29 (live numbers from `docs/workplans/EPD-coverage-history/2026-04-29T21-47-50Z.md`):**
+- Metadata: **279/420 (66.4%)** across 30 samples (14 fields each)
+- Impact totals: **162/300 (54.0%)** (10 indicators each)
+- Per-stage matrix: **473/5100 (9.3%)** — NEW dimension as of 2026-04-29 PM (10 indicators × 17 EN 15804+A2 stages × 30 samples = 5100 max). 9.3% sounds low because most samples are cradle-to-gate (only A1/A2/A3 published — that's 3/17 stages × 10 indicators × subset of indicators per sample). Cradle-to-grave samples (xcarb 3×, EU/IBU Wood Fibre) reach significantly higher per-sample density.
+- Format detection: na=18, epd_international=2, nsf=2, eu_ibu=1, unknown=7
+- Ground-truth checks: **2/30 samples annotated** (Kalesnikoff GLT, xcarb cold-formed) with 110 expected keys total. All passing — 0 extraction failures, 0 silent-override violations, 0 defaults-applied failures.
 
-**Ground-truth checks (C-fb5)**: 1 sample annotated (Kalesnikoff GLT) with 52 expected keys (22 totals + 30 per-stage). All passing. 0 extraction failures, 0 silent-override violations.
+**Per-sample by_stage state (snapshot as of 2026-04-29T21-47-50Z):**
 
-**What shipped this session** (chronological, all on `EPD-PARSER-SPRINT-2`):
+| Sample group | by_stage / 170 per sample | Notes |
+|---|---|---|
+| Kalesnikoff CLT/GLT (cradle-to-gate, NA long-English) | 30 each | Full A1/A2/A3 — published cells exhausted |
+| 2023 BC Wood ASTM (CLT/GLT/SPF/SPF-Plywood) | 15-26 each | Most A1/A2/A3 captured |
+| **xcarb steel (cold-formed/hollow/deck)** | **48 each** | **Full A1/A2/A3/C1/C2/C3/C4/D — module D recycling-credit signs preserved** |
+| Sopra-XPS / Genyk / EU-IBU Wood Fibre | 18-36 each | Decent — could improve in subsequent rounds |
+| 2017/2020 BC Wood AWC industry-avg | 12-18 each | Partial — older format |
+| Concrete CRMCA / EPD International S-P-10278 (×2) / Fab Steel Plates | 9-19 each | Minimal — distinct format families |
+| 2013 LVL / 2016 WRC (older AWC industry-avg) | 0 | **Correct.** EPDs publish only `Total \| Forestry \| LVL Production` (process breakdown, NOT life-cycle stages) — no per-stage data exists in the source PDF |
+| Lafarge cement (NSF) | 0 | **Correct for now.** Multi-product table (4 cement types in columns), not per-stage. Needs future multi-product UI work to disambiguate |
+| CISC steel | 0 | Not extracted yet — separate "Use of net fresh water 1 mt 2.88E+00" pattern not in regex (see follow-up #2) |
+| 7 unknown-format samples (Sopra Cellulose/ISO, Polyiso, Boreal TDS, etc.) | 0 | Format detection gives up; mostly scanned PDFs / TDS docs / no-EPD references |
+
+**What shipped 2026-04-29 (chronological, all on `EPD-PARSER-SPRINT-2` then merged to main as PR #16):**
 
 | SHA       | Scope                                                                                                                                       |
 | --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -23,34 +41,50 @@
 | `ca025ee` | archive interim coverage snapshot                                                                                                            |
 | `43f0cf3` | **DB viewer** — duplicate-EPD detection on Trust (over-write prompt) + × remove button on `_fresh` rows (catalogue-immutable) + BEAM ID col 96px → 140px |
 | `ae20837` | **P3.3** — per-stage breakdown extraction (A1/A2/A3/.../D) with nearest-header-by-count selection; 30 by_stage ground-truth keys added       |
+| `9a073cc` | EPD-Parser.md handoff section refresh                                                                                                        |
+
+**What shipped 2026-04-29 evening on `EPD-PARSER-SPRINT-3` (current active branch, +3 since merged main `046108a`):**
+
+| SHA       | Scope                                                                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `607a4ed` | **Shared text-join module** — `js/shared/text-join.mjs` extracts `_itemsToLines` + `_flushLine` so the harness uses identical logic to the browser (without this, the harness was falsely-green for browser-specific pdf.js fragmentation bugs — rev-3's sign-stripping was exactly that). +4 metadata, 1 silent-false-positive removed. |
+| `0c2c70d` | **§11 Biogenic Calculations chapter (review-pending)** — drafts the principle (EPD as single source of truth, BEAM as normalization-only for BEAMweb hybrid components). Six concrete questions for Mélanie's review in §11.8. Once signed off, C-fb6 (Tier 10 implementation) is ~3 hrs of mechanical work. |
+| `34570bc` | **by_stage harness dimension + xcarb per-stage extraction + density thousand-comma fix.** Harness now tabulates per-stage coverage; `_BYSTAGE_LABELS` extended for bracketed-unit short codes (xcarb/IPCC AR5/TRACI 2.1 family); unit-cell-skip in tokenizer prevents misaligned values; density regex now handles "7,800" form (xcarb density bug fixed: 800 → 7800). xcarb cold-formed annotated as ground truth (56 keys, all passing). |
 
 ### Pickup — what you're doing next
 
-**1. C-fb6 (review-pending, not strictly gated)**. `applyCalculations(rec)` Tier 10. Per the BEAM-CSV inventory done 2026-04-29 PM, the formula + all inputs are present in `docs/csv files from BEAM/` (see §11 for the full reasoning + draft chapter). The remaining ask is **review by Mélanie** of the principle (§11.1: EPD as single source of truth, BEAM as normalization-only) and the six concrete questions in §11.8 — schema-field naming, storage_factor source, defaults location, validation tolerance. Once those are answered, ~3 hrs of mechanical implementation.
+**Today (2026-04-30): Andy is writing a funder report.** The EPD-Parser side is in a stable state for that work. No urgent code action required. When code work resumes, the four open follow-ups below are pre-prioritised.
 
-**2. Per-stage extraction → cradle-to-grave EPDs**. P3.3 verified for cradle-to-gate (Kalesnikoff, 4-column header). Cradle-to-grave EPDs (xcarb steel, EU/IBU Wood Fibre, etc.) have full A1-D headers (~17 columns). The same nearest-header-by-count logic should Just Work, but no ground-truth file annotated yet. Pick a cradle-to-grave sample, annotate per-stage values, run harness, verify. Expand `_BYSTAGE_LABELS` if any indicator labels need broadening for new format families.
+### Open follow-ups (next agent to triage)
 
-**3. Per-sample ground-truth backlog (C-fb5 expansion)**. Only 1/30 samples annotated so far. Each new annotated sample tightens the no-silent-override guarantee. Priority order:
-- xcarb steel cold-formed (3 samples, density=800 false-positive bug to surface — see §0 known issues)
-- 2023 BC Wood ASTM family (CLT, GLT, SPF, SPF-Plywood — same format as Kalesnikoff, all at 13/14 + 10/10, low risk)
-- EU/IBU Wood Fibre (different format, exercises the EU/IBU regex paths)
-- Lafarge Exshaw cement (NSF format)
+Listed with concrete repro / fix sketches so the next agent can pick the highest-leverage one without re-discovering context.
 
-**4. xcarb steel density=800 bug**. The 3 xcarb steel samples currently extract `density=800` (wrong; real steel is 7800). Use C-fb5 ground truth: annotate one xcarb sample with `epd_omits: ["physical.density.value_kg_m3"]` AND `epd_publishes: { ... no density ... }`, run harness, watch the silent-override check fail, then tighten the density regex in `extractNA()` to fix.
+**Follow-up #1 — Mélanie's review of §11 (gates C-fb6).** Send Mélanie the link to §11 of this workplan. The six questions in §11.8 are designed to be answerable with short / yes-no replies. Once back: ~3 hrs of mechanical implementation produces Tier 10 (`applyCalculations(rec)` in `js/epd/extract.mjs`) with 3 new schema fields and the form-pane audit-trail render. Validation harness against `BEAM Database-DUMP.csv` cols 24, 25, 28, 29, 31, 33 (per-row tolerance ±5%).
 
-### Branch state
+**Follow-up #2 — xcarb "total = A1" false positive.** For cradle-to-gate-with-options EPDs (xcarb 3 samples) that publish per-stage A1/A2/A3/C1-C4/D but NO precomputed A1-A3 composite, the IMPACT_INDICATORS regex in `js/epd/extract.mjs` grabs the FIRST numeric value (which is A1) and stores it as `impacts.<key>.total.value`. For xcarb cold-formed GWP that's 1230 (= A1) instead of A1+A2+A3 = ~1257. Choose one of:
+   - **(a)** After `_extractByStage` runs, if `total.value` is null AND `by_stage.A1`, `by_stage.A2`, `by_stage.A3` are all populated, compute `total.value = A1 + A2 + A3` and mark `source: "calculated"`. Most accurate.
+   - **(b)** When stage-header lacks the A1-A3 composite, suppress total-extraction entirely and rely on by_stage. Cleanest semantically.
+   - **(c)** Status quo (currently shipped) but mark with a comment in `methodology.notes` flagging that total = A1 only.
+   
+   See xcarb cold-formed ground truth notes for the documentation. Not currently asserted (so it doesn't fail the harness today).
+
+**Follow-up #3 — CISC water "Use of net fresh water 1 mt 2.88E+00" pattern.** CISC Industry-Avg Steel publishes WDP as `Use of net fresh water    1 mt    2.88E+00` (with the `1 mt` functional-unit prefix between label and value, breaking the existing EU/IBU "fresh water" regex's adjacency). Add a regex variant catching this. Tests: CISC by_stage 0/170 → ≥1/170 (just WDP), and aggregate impact totals 162 → 163.
+
+**Follow-up #4 — Lafarge multi-product disambiguation.** Lafarge cement EPD covers 4 cement types (GU/HS, GUL/HSL, HE, OWG) in COLUMNS of the impact table, not life-cycle stages. The current extractor grabs the first cement-type column as the indicator value. Properly fixing this requires a "pick which product" UI in the EPD-Parser form pane (workplan §0 phases-pending: "Multi-product EPD disambiguation"). Same pattern applies to Genyk (3 SPFs) and AWC/CWC industry-avg (multi-product). Estimated 3-4 hrs of UI + state work.
+
+**Follow-up #5 — Per-stage extension to other formats.** Current per-stage coverage: Kalesnikoff 30/170, xcarb 48/170, Sopra-XPS 36/170, Genyk 31/170. To reach higher density on Sopra/Genyk/EU-IBU/2023 BC Wood, audit which `_BYSTAGE_LABELS` patterns aren't matching and either tighten or add variants. Driven by ground-truth annotation: pick a sample, annotate, run harness, see what fails.
+
+### Branch state (2026-04-30 morning)
 
 ```
-main                            cda8102   PR #15 merged
-└── EPD-PARSER-SPRINT-2  (active, 7 commits since main)
-    ├── 6347183  C-fb1.1 db-fallbacks Wood alias
-    ├── 44fc4f1  §9.5 fix #5 Kalesnikoff impacts + display_name from taxonomy
-    ├── 28f48d3  §9.5 fix #6 Mass density + produced-by mfr + EPD-ID truncation
-    ├── 7176915  C-fb5 harness ground-truth verification
-    ├── ca025ee  archive interim snapshot
-    ├── 43f0cf3  DB viewer: duplicate detection + remove button + col width
-    └── ae20837  P3.3 per-stage breakdown (← tip)
+main                            046108a   PR #16 merged 2026-04-29 evening
+└── EPD-PARSER-SPRINT-3  (active, 3 commits since main)
+    ├── 607a4ed  shared text-join module
+    ├── 0c2c70d  §11 Biogenic Calculations chapter (review-pending)
+    └── 34570bc  by_stage harness dimension + xcarb per-stage + density fix (← tip)
 ```
+
+Both remotes synced. No PR open yet (waiting for either Mélanie's §11 review to land C-fb6, or another batch of work to bundle).
 
 ### Read this order
 
@@ -95,7 +129,7 @@ npm run serve                                                     # local dev se
 
 ---
 
-## 0. Current state (2026-04-29 PM)
+## 0. Current state (2026-04-30 morning)
 
 **Phases shipped** (chronological):
 
@@ -123,29 +157,67 @@ npm run serve                                                     # local dev se
 - ✅ **C-fb5 — harness ground-truth verification** _(shipped 2026-04-29 PM, `7176915`)_. `docs/PDF References/EPD SAMPLES/expected/<sample>.json` files annotate each sample's `epd_publishes` and `epd_omits`. Harness gains three checks per workplan §10.3: (1) extraction fidelity — every published key must extract within ±1% numeric tolerance / substring match; (2) defaults applied — every omitted key must be filled via catalogue with `source: "generic_default"`; (3) no silent overrides — every published key's post-fallback source must NOT be `generic_default`. Per-sample line gets `GT=✓` tag, aggregate summary adds one line, markdown snapshot grows a "Ground-truth checks" section with per-failure detail. First annotated: 2022 BC Wood GLT Kalesnikoff EPD.
 - ✅ **DB viewer — duplicate detection + remove button + BEAM ID column width** _(shipped 2026-04-29 PM, `43f0cf3`)_. (i) `_findDuplicate(candidate)` looks for likely matches among in-session committed records via two-tier match (manufacturer + epd.id, then display_name + group_prefix). When found, `handleTrust` prompts `confirm()` "OK = overwrite, Cancel = create separate". Restricted to `_fresh` entries — original 821 BEAM records can never be implicitly over-written. (ii) `.db-row-remove` × button on `_fresh` rows; `handleRemoveFresh(id)` confirm-then-delete from IndexedDB + state. Hard guard: button only renders on `_fresh`, AND handler re-checks the flag at click time (catalogue records are immutable through this path, even with forged DOM markup). (iii) `.db-th-id` width 96px → 140px + `white-space: nowrap` so full 6-char hex + NEW/UPDATED chip + × button all fit on one line. End-to-end verified via Playwright.
 - ✅ **P3.3 — per-stage breakdown extraction** _(shipped 2026-04-29 PM, `ae20837`)_. New `_extractByStage(text, rec)` populates `impacts.<key>.by_stage.<stage>.{value, source}` for individual stages A1, A2, A3, A4, A5, B1..B7, C1..C4, D. `_detectStageHeaders(text)` returns ALL candidate header lines (deliberately not just the first — Kalesnikoff has a generic 17-stage life-cycle list at line 126 that isn't a column header; the actual Table 3 header is at line 260). Per-row extractor picks the nearest preceding header whose stage-count matches the row's value-count exactly. `_tokenizeImpactNumbers` filters subscript digits (the `2` in CO2e, `3` in O3) by accepting only decimals / sci-not / 3+ digit integers / thousand-comma values. Idempotent — never overwrites existing by_stage. C-fb5 ground truth extended with 30 per-stage keys for Kalesnikoff GLT (A1/A2/A3 for all 10 indicators, including `gwp_bio.by_stage.A1 = -1045.63` — the carbon-stored value). All 52 keys pass.
+- ✅ **rev-3 fix — browser pdf.js fragmentation stripping signs + sci-not exponents** _(shipped 2026-04-29 PM, `ce3c7cc`)_. Browser pdf.js fragments composite tokens like `-953.23` → `["-", "953.23"]` and `2.27E-06` → `["2.27E", "-", "06"]` (touching, < 1.5px gap). Node pdfjs-dist keeps them intact. The browser's `_flushLine` was inserting implicit space between adjacent items, breaking the regex's negative-sign and exponent capture — silent, since the harness used Node pdfjs and didn't see the divergence. Fix gates implicit-space insertion on `item.x + item.width` gap > 1.5px. Verified end-to-end via Playwright (PDF drop → Capture → Trust → matrix expand): GWP A1 = -953.23, GWP-bio A1 = -1045.63, ODP A1 = 1.03e-6, all correct.
+- ✅ **rev-2 fixes — BEAM ID column ellipsis + functional_unit normalisation + manufacturer Declaration Owner revert** _(shipped 2026-04-29 PM, `7bea52b`)_. `.db-th-id` 140px → 200px + per-cell `overflow: visible` override on `td:first-child` (chip + × button now fully visible). New `_normalizeDeclaredUnit(raw, fullText)` extracts leading "<number> <unit>" token and disambiguates pdf.js-stripped superscripts via doc-context scan; result plumbed into `impacts.functional_unit` so DB index entry surfaces it. Result for Kalesnikoff GLT: both `carbon.stated.per_unit` and `impacts.functional_unit` now hold "1 m³".
+- ✅ **PR #16 merged 2026-04-29 evening** — all of the above shipped to main as `046108a`.
+- ✅ **Shared text-join module** _(shipped 2026-04-29 evening, `607a4ed`)_. `js/shared/text-join.mjs` extracts `_itemsToLines` + `_flushLine` so Node harness uses identical logic to the browser. Without this, the harness was falsely-green for any future bug class that depends on browser-specific pdf.js fragmentation. Wired into both `js/epdparser.mjs` and `schema/scripts/test-epd-extract.mjs`; harness now adds `width: it.width` to the pdf.js item mapper. Coverage delta: metadata +4 (Wood OSB + WRC pick up density via cleaner join); impacts -1 (CISC steel WDP=3 was a FALSE POSITIVE — published value is 2.88, prior text-join was matching wrong text and getting 3; cleaner join correctly returns null).
+- ✅ **§11 Biogenic Calculations chapter (review-pending)** _(shipped 2026-04-29 evening, `0c2c70d`)_. Drafts the principle for C-fb6: EPD-published biogenic values are authoritative and never recomputed; BEAM normalization layer (Tier 10) exists ONLY as unit-conversion + per-functional-unit projection so BEAMweb can consume per-material values in hybrid-component assemblies. Six concrete questions in §11.8 for Mélanie's sign-off on schema-field naming, storage_factor source, defaults location, validation tolerance. BEAM-CSV inventory confirmed all formula inputs (density, biogenic_factor, carbon_content, 3.67 stoichiometric constant) are already present in `docs/csv files from BEAM/BEAM Database-DUMP.csv`.
+- ✅ **by_stage harness dimension + xcarb per-stage extraction + density thousand-comma fix** _(shipped 2026-04-29 evening, `34570bc`)_. Three additive improvements: (i) Harness now counts per-stage cells (10 indicators × 17 stages = 170 max per sample); per-sample console line gains `by_stage=N/170` field; aggregate adds `By-stage coverage:` row; markdown snapshot grows per-sample by_stage column AND a per-indicator-by-sample matrix table. (ii) 10 new `_BYSTAGE_LABELS` entries for bracketed-unit short-code labels (xcarb / IPCC AR5 / TRACI 2.1 family: `GWP 100 [kg CO2 eq]`, `AP [kg SO2 eq.]`, etc.); per-stage tokenizer skips the unit-cell prefix to avoid mis-counting the methodology label number ("100" in "GWP 100" is the IPCC 100-year-time-horizon designation, not a stage value). xcarb cold-formed verified against published Table on page 5: GWP A1=1230, A2=11.7, A3=15.3, C1=0.666, C2=22.3, C3=0.668, C4=1.30, **D=-241** (recycling-credit sign preserved). (iii) Density regex now accepts US thousand-comma form `\d{1,3}(?:,\d{3})+` so xcarb's published `density of 7,800 kg/m3` extracts 7800 (was 800 — silently-stripped by `\d{2,5}` skipping past the `7,` prefix).
 
-**Latest measured coverage** (`node schema/scripts/test-epd-extract.mjs`, 2026-04-29 16:07Z, snapshot at `EPD-coverage-history/2026-04-29T16-07-22Z.md`):
+**Latest measured coverage** (`node schema/scripts/test-epd-extract.mjs`, 2026-04-29 21:47Z, snapshot at `EPD-coverage-history/2026-04-29T21-47-50Z.md`):
 
 - 30/30 samples processed, no errors
-- **Metadata: 275/420 = 65.5%** (14 fields × 30 samples)
-- **Impact totals: 163/300 = 54.3%** (10 indicators × 30 samples)
-- **Per-stage by_stage cells: now extracted** for cradle-to-gate samples (Kalesnikoff family fills A1/A2/A3 across all 10 indicators); harness aggregate doesn't currently tabulate by_stage coverage as a separate dimension (deferred — present per-sample in record.impacts).
-- **Ground-truth checks**: 1 sample annotated (Kalesnikoff GLT) with 52 expected keys (22 totals + 30 per-stage). All passing.
+- **Metadata: 279/420 = 66.4%** (14 fields × 30 samples)
+- **Impact totals: 162/300 = 54.0%** (10 indicators × 30 samples)
+- **Per-stage cells: 473/5100 = 9.3%** (10 indicators × 17 EN 15804+A2 stages × 30 samples)
+- Ground-truth checks: **2 samples annotated** (Kalesnikoff GLT 54 keys, xcarb cold-formed 56 keys = 110 expected keys total). 0 extraction failures, 0 silent-override violations, 0 defaults-applied failures.
 - Format detection: na=18, epd_international=2, nsf=2, eu_ibu=1, unknown=7
 
-**Coverage delta this session (afternoon)** (vs 2026-04-29 12:06Z baseline):
+**Per-sample by_stage coverage** (snapshot 2026-04-29T21-47-50Z, of 170 max per sample):
 
-- Metadata: 63.6% → 65.5% (+5 from Wood alias fallback, +1 from Kalesnikoff CLT density via Mass, +1 from GLT density via Mass, +1 Steel Plates from produced-by mfr fallback)
-- Impacts: 49.0% → 54.3% (+8 Kalesnikoff CLT impacts, +8 Kalesnikoff GLT impacts via fix #5)
-- Per-stage cells: 0 → fully populated for cradle-to-gate Kalesnikoff family (P3.3)
+| Sample | by_stage | Notes |
+|---|---:|---|
+| 03 Concrete/CRMCA Ontario Regional Industry-Avg | 9 | partial — concrete-format header detection partial |
+| 03 Concrete/Lafarge Exshaw Cement Plant | 0 | multi-product table (4 cement types in cols), needs disambiguation UI |
+| 05 Metals/CISC Industry-Avg Hot-Rolled Sections | 0 | impacts entirely missed; needs CISC-format regex |
+| 05 Metals/EPD International S-P-10278 (×2) | 10 each | partial — EPD-International format |
+| 05 Metals/Fabricated Steel Plates 2019 | 19 | partial |
+| **05 Metals/xcarb cold-formed/hollow/deck** | **48 each** | **Full A1/A2/A3/C1/C2/C3/C4/D — sign preserved on D recycling credit** |
+| 06 Wood/2013 BC Wood LVL | 0 | **correct** — EPD publishes only `Total \| Forestry \| LVL Production` (process breakdown, NOT life-cycle stages) |
+| 06 Wood/2015 BC Wood DF Density (No EPD) | 0 | **correct** — not an EPD |
+| 06 Wood/2015 LSL Summary | 0 | summary-form EPD, no per-stage |
+| 06 Wood/2016 BC Wood LSL AWC | 15 | partial |
+| 06 Wood/2016 BC Wood WRC | 0 | older AWC industry-avg, no per-stage |
+| 06 Wood/2017 BC Wood WRC AWC | 18 | partial |
+| 06 Wood/2020 BC Wood OSB | 18 | partial |
+| **06 Wood/2022 BC Wood CLT/GLT Kalesnikoff** | **30 each** | **Full A1/A2/A3 — published cells exhausted (cradle-to-gate)** |
+| 06 Wood/2022 BC Wood Hemlock Density (No EPD) | 0 | **correct** — not an EPD |
+| 06 Wood/2023 BC Wood CLT EPD ASTM | 15 | partial |
+| 06 Wood/2023 BC Wood GLT EPD ASTM | 26 | partial |
+| 06 Wood/2023 BC Wood SPF | 18 | partial |
+| 06 Wood/2023 BC Wood SPF Plywood | 26 | partial |
+| 07 Thermal/Boreal Nature Elite TDS | 0 | **correct** — not an EPD |
+| 07 Thermal/Sopra-Cellulose / Sopra-ISO / Polyiso walls | 0 | scanned PDFs (no text layer); needs OCR (P7) |
+| 07 Thermal/Sopra-XPS | 36 | decent |
+| 07 Thermal/Genyk SPF | 31 | decent (3-product EPD, only one product captured) |
+| 07 Thermal/EU-IBU Wood Fibre | 18 | partial |
 
-**Phases pending** (ranked by leverage post-2026-04-29 PM):
+**Coverage delta this 2-day session** (vs 2026-04-28 baseline pre-fix-#1):
 
-- 🟨 **C-fb6 — `applyCalculations()` Tier 10** — review-pending (was: gated). The BEAM-CSV inventory done 2026-04-29 PM confirmed all formula inputs are present in `docs/csv files from BEAM/BEAM Database-DUMP.csv`; the formula itself is in `Glossary.csv:20-26`. New §11 of this workplan drafts the principle (EPD as single source of truth + BEAM normalization layer for BEAMweb assemblies, not a parallel methodology) for Mélanie's review. Six concrete questions in §11.8 need sign-off; once answered, ~3 hrs of mechanical implementation.
-- 🔜 **P3.3 cradle-to-grave verification** — per-stage extraction works structurally for any header; needs ground-truth annotation for at least one cradle-to-grave sample (xcarb steel, EU/IBU Wood Fibre) to lock in the full A1-D path.
-- 🔜 **C-fb5 ground-truth backlog** — only 1/30 samples annotated. Priority: xcarb (surface the density=800 silent-override bug), 2023 BC Wood ASTM family (low-risk), EU/IBU Wood Fibre, Lafarge cement.
-- ⏳ **P4 — Match-status surfacing** (`NEW` vs `REFRESH → <id>`) on the EPD-Parser form banner — Database-side dupe detection now does this server-side via the over-write prompt; form-side preview is a UX enhancement.
-- ⏳ **Multi-product EPD disambiguation** (Genyk 3 SPFs, Lafarge 6 cement types, AWC/CWC industry-avg). UI work in the form pane.
+- Metadata: 57.6% → 66.4% (+8.8 pp)
+- Impact totals: 36.0% → 54.0% (+18 pp)
+- Per-stage cells: 0% → 9.3% (NEW dimension)
+- Ground-truth annotated samples: 0 → 2 (Kalesnikoff GLT, xcarb cold-formed)
+
+**Phases pending** (ranked by leverage post-2026-04-29 evening):
+
+- 🟨 **C-fb6 — `applyCalculations()` Tier 10** — review-pending. The BEAM-CSV inventory confirmed all formula inputs are present; §11 drafts the principle for Mélanie's review. Six concrete questions in §11.8 need sign-off; once answered, ~3 hrs of mechanical implementation.
+- 🔜 **xcarb total = A1 false positive** — for cradle-to-gate-with-options EPDs without a published A1-A3 composite, the IMPACT_INDICATORS regex grabs A1 as "total". Should compute total = A1+A2+A3 OR leave null. Annotated in xcarb cold-formed ground-truth notes; not asserted (so harness doesn't fail on it). See follow-up #2 in agent handoff.
+- 🔜 **CISC water "Use of net fresh water 1 mt 2.88E+00"** — regex variant for the "1 mt" functional-unit prefix between label and value. CISC currently 0/10 impacts and 0/170 by_stage; this would unblock at least WDP. See follow-up #3 in agent handoff.
+- 🔜 **C-fb5 ground-truth backlog** — only 2/30 samples annotated. Priority: 2023 BC Wood ASTM family (CLT/GLT/SPF/SPF-Plywood — same format as Kalesnikoff, low risk, locks in coverage), EU/IBU Wood Fibre (different format, exercises EU/IBU paths), Lafarge cement (NSF format).
+- 🔜 **Per-stage extension to other formats** — 18-36 cells per Sopra/Genyk/EU-IBU/2023 BC Wood is decent but could be improved by auditing which `_BYSTAGE_LABELS` patterns aren't matching and adding variants. Driven by ground-truth annotation.
+- ⏳ **P4 — Match-status surfacing** (`NEW` vs `REFRESH → <id>`) on the EPD-Parser form banner — Database-side dupe detection now does this server-side; form-side preview is a UX enhancement.
+- ⏳ **Multi-product EPD disambiguation** (Genyk 3 SPFs, Lafarge 6 cement types, AWC/CWC industry-avg). UI work in the form pane. ~3-4 hrs.
 - ⏳ **P6 — Refresh queue** (DB-driven entry point for expired-record backlog).
 - ⏳ **P7 — Coverage hardening** (OCR fallback for 3 Sopra family scanned EPDs + Polyiso + Hemlock no-EPD docs in the calibration set, multi-EPD bulk upload).
 
