@@ -6,7 +6,13 @@
 
 ## Agent handoff (read this first)
 
-**You are picking up at 2026-04-30, with Andy shifting context to a funder report.** The EPD-Parser is in a clean state: PR #16 (8 commits) merged into main 2026-04-29 evening, sprint-3 branch is +3 commits ahead with three additive improvements (shared text-join module, biogenic-calc workplan chapter, by_stage harness dimension + xcarb per-stage extraction). No open bugs blocking next steps; work is queued on the four follow-ups in `## Open follow-ups (next agent to triage)` below.
+**You are picking up at 2026-04-30 evening, with TWO decision-points pending and a directive to pause adding format-specific extractors.** Andy paused mid-implementation of CISC + 2023 BC Wood ASTM per-format extractors with the directive: *"You seem to be in a loop making highly customized readers for a handful of specific EPDs where we need GENERALIZED functionality for ANY EPD the Parser loads."* See §12 (new) for the architecture-review chapter + 5 questions for Andy.
+
+**Two decisions are gating further code work:**
+1. **§11 — Mélanie's review of the biogenic-calc principle + 6 schema-naming / storage-factor questions.** Gates C-fb6 (Tier-10 biogenic).
+2. **§12 — Andy's choice between Option A (geometric table extraction) / Option B (declarative format library) / Option C (HITL form-pane UX) / hybrid.** Gates any further per-format extractor work.
+
+**A larger sample directory is incoming 2026-05-01.** The harness now accepts `--root <dir>` (workplan §12.6) so it can scan that directory in place. The new per-format breakdown + per-parameter aggregate hit-rate (workplan §12.5) tabulates which formats / fields are under-served at scale — feeds the §12.3 architectural decision.
 
 **Coverage state, end of 2026-04-29 (live numbers from `docs/workplans/EPD-coverage-history/2026-04-29T21-47-50Z.md`):**
 - Metadata: **279/420 (66.4%)** across 30 samples (14 fields each)
@@ -53,7 +59,17 @@
 
 ### Pickup — what you're doing next
 
-**Today (2026-04-30): Andy is writing a funder report.** The EPD-Parser side is in a stable state for that work. No urgent code action required. When code work resumes, the four open follow-ups below are pre-prioritised.
+**Do NOT add new format-specific patterns to `IMPACT_INDICATORS`, `_BYSTAGE_LABELS`, or any analogous list until §12.3 is resolved.** This was the explicit reason for today's pause. The audit data the harness now produces (per-format breakdown + per-parameter aggregate hit-rate, §12.5) is the input to that decision.
+
+When Andy returns:
+1. Resolve §12.3 (architecture choice) — answer the 5 questions in §12.4.
+2. If Option A or B chosen: refactor begins. Existing per-format patterns may be deprecated.
+3. If Option C chosen: shift focus to form-pane UX work.
+4. Independently: chase §11.8 with Mélanie to unblock C-fb6.
+5. When Andy supplies the larger sample directory tomorrow:
+   - Run `node schema/scripts/test-epd-extract.mjs --root <dir>`.
+   - Examine per-format breakdown + per-parameter aggregate. This is the canonical scaling test.
+   - Per-pattern hit-count audit (which existing patterns matched 0 samples in the larger set?) drives deprecation candidates.
 
 ### Open follow-ups (next agent to triage)
 
@@ -74,17 +90,16 @@ Listed with concrete repro / fix sketches so the next agent can pick the highest
 
 **Follow-up #5 — Per-stage extension to other formats.** Current per-stage coverage: Kalesnikoff 30/170, xcarb 48/170, Sopra-XPS 36/170, Genyk 31/170. To reach higher density on Sopra/Genyk/EU-IBU/2023 BC Wood, audit which `_BYSTAGE_LABELS` patterns aren't matching and either tighten or add variants. Driven by ground-truth annotation: pick a sample, annotate, run harness, see what fails.
 
-### Branch state (2026-04-30 morning)
+### Branch state (2026-04-30 evening)
 
 ```
-main                            046108a   PR #16 merged 2026-04-29 evening
-└── EPD-PARSER-SPRINT-3  (active, 3 commits since main)
-    ├── 607a4ed  shared text-join module
-    ├── 0c2c70d  §11 Biogenic Calculations chapter (review-pending)
-    └── 34570bc  by_stage harness dimension + xcarb per-stage + density fix (← tip)
+main                       3fd57e2   PR #17 merged 2026-04-30
+└── EPD-PARSER-4  (active, 2 commits since main)
+    ├── 3839b47  cradle-to-gate-with-options total recompute + CISC compact-label per-stage
+    └── (tip — workplan §12 + harness --root flag + per-format/per-param audit)
 ```
 
-Both remotes synced. No PR open yet (waiting for either Mélanie's §11 review to land C-fb6, or another batch of work to bundle).
+Both remotes synced. The `3839b47` commit added CISC-format extraction; flagged in §12.2 as per-EPD baggage, may be deprecated depending on §12.3 decision (Option A geometric extraction would replace it; Option B declarative would relocate it; Option C HITL would deprecate it in favour of form-pane UX). No PR open until §12.3 lands.
 
 ### Read this order
 
@@ -985,7 +1000,108 @@ Once these are answered, C-fb6 implementation (Tier 10 + the 3 new schema fields
 
 ---
 
-## 12. Out of scope (v1)
+## 12. Architecture review — generalization vs per-format pattern inflation (decision-pending)
+
+> **Status:** Drafted 2026-04-30 PM after Andy paused mid-implementation of CISC + 2023 BC Wood ASTM per-format extractors. Decision needed on the architectural shape before any further extractor work. **Do not add new format-specific patterns until §12.3 is resolved.**
+
+### 12.1. The problem
+
+The parser currently grows a hand-tuned regex library per EPD format encountered. Examples accumulated by 2026-04-30:
+
+- `IMPACT_INDICATORS` — ~24 regex entries, multiple per indicator (NA short codes, English long form, EU/IBU bracketed, ISO 21930 codes, …)
+- `_BYSTAGE_LABELS` — ~16 entries
+- `_CISC_LABEL_PATTERNS` + `_findCISCDataRowKey` look-around — CISC-specific multi-line layout
+- Pre-paused: `_ASTM_INDICATOR_PATTERNS` for 2023 BC Wood ASTM family (reverted, not committed)
+- Format-specific extractors: `extractNA`, `extractEpdIntl`, `extractNSF`, `extractEuIbu`
+
+This shape **does not scale** to "any EPD the parser loads". The wood-EPD families alone use 4+ distinct table layouts; there are dozens of program operators issuing EPDs in their own templates. Calibration samples grow → regex library grows linearly → maintenance cost grows superlinearly (each new pattern can interact with existing ones).
+
+The parser was designed to handle 30 calibration EPDs. Andy is bringing a much larger directory tomorrow (2026-05-01). The current shape will produce diminishing returns — many new samples will extract poorly, a handful will need bespoke regex additions, and overall coverage will plateau.
+
+### 12.2. What's general vs over-fitted in the current code
+
+**General (worth keeping regardless of architecture choice):**
+
+- `js/shared/text-join.mjs` — pdf.js item → text reconstruction. Browser-vs-Node parity. Format-agnostic.
+- C-fb5 harness ground-truth check — works for any annotated sample.
+- Density thousand-comma fix — genuinely general regex bug (`7,800` → 7800).
+- Sign + sci-not preservation via x-gap heuristic — pdf.js-level, not format-specific.
+- `_extractByStage` shell: stage-header detection + position-mapping logic.
+- xcarb total-recompute (`3839b47`): "if the indicator's used header has no A1-A3 composite, sum A1+A2+A3 to derive total" — generally correct LCA math, not per-format.
+- Tier-9 db-fallbacks layer (catalogue defaults with provenance marking).
+- `_normalizeDeclaredUnit` — extracts canonical unit token from descriptive prose; format-agnostic.
+
+**Per-EPD baggage (over-fitted; subject to deprecation depending on §12.3 choice):**
+
+- All format-specific entries in `IMPACT_INDICATORS` — 24+ regex variants
+- All entries in `_BYSTAGE_LABELS` — 16 patterns
+- `_CISC_LABEL_PATTERNS` + look-around heuristics (committed in `3839b47`; flagged for revisit)
+- Per-format extractors `extractNA` / `extractEpdIntl` / `extractNSF` / `extractEuIbu` — partially over-fitted; the format-detection signals (`detectFormat`) are general but the per-format probes are largely format-tuned
+
+### 12.3. Three architectural options on the table
+
+**Option A — Geometric / column-based table extraction.**
+Use pdf.js item `x`/`y` positions to detect column boundaries and row groupings. Build a 2D table model. Map indicator label → row, stage code → column, look up cell by intersection. This is how Tabula / pdfplumber / Camelot work.
+
+- Pros: replaces 80%+ of per-format pattern files with one general engine. Scales to arbitrary table layouts. Handles split-line headers and centred labels structurally.
+- Cons: ~1-2 weeks of foundational work. Requires re-architecting `_extractByStage` and `_extractIndicatorTotals`. Still needs an indicator-label vocabulary to map row labels → schema keys (but vocabulary, not regex-spaghetti).
+- Best for: long-term scaling. Andy's "any EPD" stated goal.
+
+**Option B — Declarative format library.**
+A `schema/lookups/epd-formats.json` describing each program operator's table layout (anchor strings, column count, indicator-code vocabulary, header patterns). Adding a new format = adding a JSON entry, not editing extract.mjs.
+
+- Pros: Lower bar than (A). Makes per-format patterns reviewable + diff-friendly. Mélanie or other reviewers could add format entries without touching code.
+- Cons: Doesn't solve the inflation problem — still N entries for N formats. Just relocates the spaghetti from .mjs to .json.
+- Best for: stopgap if (A) is too big a rewrite right now.
+
+**Option C — Live with partial extraction + better human-in-the-loop.**
+Accept 50-60% extraction coverage. Invest in form-pane UX: per-row "extract this column" buttons, copy-cell-from-text helpers, OCR overlay for clicking on a value to extract it.
+
+- Pros: EPD-Parser is already human-reviewed (form pane, Trust commit). Practitioners are domain experts who can quickly fix a row. Avoids the architecture-rewrite cost entirely.
+- Cons: Doesn't reduce per-EPD reviewer burden as the catalogue grows. Coverage will plateau at whatever the current regex library handles.
+- Best for: pragmatic shipping if engineering time is the constraint.
+
+**Hybrid (most likely outcome):** (A) as the primary extraction path + (C) for cells (A) misses. (B) as a fallback shim during the (A) build-out.
+
+### 12.4. Decision-pending — questions for Andy
+
+1. Which option (A / B / C / hybrid)?
+2. If (A): what's the time budget? Block the larger sample set's coverage targets behind it, or run per-format patterns in parallel as a fallback?
+3. If (B): is the JSON schema per-program-operator (UL Environment, ASTM, CSA, NSF, IBU, EPD International) or per-table-layout (some program operators issue multiple template versions)?
+4. If (C): what's the form-pane UX target — click-to-extract from PDF render? Or a structured-paste-from-text input?
+5. Mélanie's review of §11 (biogenic) is independently pending. Do we want to ship Tier-10 (biogenic) BEFORE Option A/B/C decision lands, or wait?
+
+### 12.5. Re-test plan against today's code (before tomorrow's larger sample set)
+
+Once §12.3 decision lands, re-run the harness against the current 30 samples and audit per-format which patterns are EARNING THEIR KEEP vs which are dead weight from over-fitting:
+
+1. **Per-pattern hit count.** For each entry in `IMPACT_INDICATORS` and `_BYSTAGE_LABELS`, log how many samples actually match. Patterns matching 0 or 1 samples are candidates for removal (the cost is greater than the value).
+2. **Per-format coverage breakdown.** Tabulate metadata + impact + by_stage coverage by detected format (na / epd_international / nsf / eu_ibu / unknown). Surface which formats are most under-served.
+3. **Per-parameter extraction rate.** For each schema field (e.g. `manufacturer.name`, `epd.id`, `physical.density.value_kg_m3`), aggregate hit rate across all 30 samples. Surface which fields have systemic gaps vs which are sample-idiosyncratic.
+
+Tomorrow when Andy supplies the larger sample directory, the same harness should run against that with `--root <dir>` (see §12.6 below for the new flag) and produce the same per-format / per-parameter breakdown — that's the canonical test of whether each pattern earns its keep at scale.
+
+### 12.6. Harness `--root <dir>` flag (shipped 2026-04-30 evening)
+
+To support tomorrow's larger sample set without copying PDFs into `docs/PDF References/EPD SAMPLES/`, the harness now accepts `--root <directory>`:
+
+```bash
+node schema/scripts/test-epd-extract.mjs --root /path/to/larger/sample/set
+```
+
+The harness recursively walks the directory for `*.pdf` files, runs the same extraction + per-sample coverage matrix, and emits the same markdown snapshot to `docs/workplans/EPD-coverage-history/`. Sample names are recorded as `<basename>` (no group prefix, since the larger set may not follow the `03/05/06/07` group convention).
+
+Combined with the per-pattern-hit-count and per-format / per-parameter breakdown (§12.5), the harness against a 100-sample directory will tell us within a few minutes:
+
+- What % of the larger set extracts cleanly with current patterns
+- Which formats need new generalization (informs Option A's scope)
+- Which existing patterns matched 0 samples and should be deprecated (cleanup target)
+
+The `--root` flag is purely additive — running the harness without it falls back to the canonical 30-sample EPD SAMPLES/ tree as before.
+
+---
+
+## 13. Out of scope (v1)
 
 - **OCR** (Tesseract.js fallback) — P7 phase. **Real demand confirmed in P1 calibration** (`EPD_Polyiso walls.pdf` is image-only, zero text-layer items). v1 detects this case and surfaces a "needs OCR" banner; the actual OCR pass lands in P7.
 - **Hard delete of database records.** Forever. Soft-delete via `status.visibility = "flagged_for_deletion"` is the only deletion path; flagged records stay in `schema/materials/*.json` for back-office manual review (see [`Database.md`](Database.md) §6).
