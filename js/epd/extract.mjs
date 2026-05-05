@@ -747,7 +747,13 @@ var IMPACT_INDICATORS = [
     schemaKey: "water_consumption_m3",
     label: "WDP (FW / ISO 21930)",
     regex: /\bFW\b\s*\[?\s*m\s*[³^]?3?\s*\]?\s+(-?\s*\d{1,3}(?:,\d{3})*(?:[.,]\d+)?(?:E\s*[-+]?\s*\d+)?)/
-  }
+  },
+
+  // (CISC standalone water row removed — it has 3 per-stage values
+  // [A1, A2, A3] in the spatially-joined `1 mt VALUE_A1 VALUE_A2
+  // VALUE_A3` line, NOT a single value. The CISC look-back path in
+  // _extractByStage routes this row to by_stage extraction; the
+  // recompute-totals block then sums A1+A2+A3 → calculated total.)
 ];
 
 function _extractIndicatorTotals(text, rec) {
@@ -911,6 +917,60 @@ function _tokenizeImpactNumbers(line) {
   return out;
 }
 
+// CISC look-around: when a line begins with "1 mt" / "1 ton" / "1 metric ton"
+// / "1 short ton" followed by a sci-not value, the indicator label sits on
+// a NEARBY but separate line (CISC's table has the label centred at the
+// y-midpoint of its 2-row value cell, so spatial-join puts it BETWEEN the
+// two value rows). Layout pattern repeating per indicator:
+//   <data 1 mt>           ← line i (first data row)
+//   <label>               ← line i+1 (centred label)
+//   <unit + 1 ton>        ← line i+2
+//   <data 1 ton>          ← line i+3 (second data row)
+// So for "1 mt" rows, label is at i+1 (forward 1).
+// For "1 ton" rows, label is at i-2 (back 2).
+// Try those two positions in order; first match wins.
+var _CISC_LABEL_PATTERNS = [
+  { rx: /^\s*Global\s+warming\s*$/i, key: "gwp_kgco2e" },
+  { rx: /^\s*Ozone\s+depletion\s*$/i, key: "ozone_depletion_kgcfc11eq" },
+  { rx: /^\s*Acidification\s+of\s+land\s+and\s+water\s*$/i, key: "acidification_kgso2eq" },
+  { rx: /^\s*Eutrophication\s*$/i, key: "eutrophication_kgneq" },
+  { rx: /^\s*Smog\s*$/i, key: "smog_kgo3eq" },
+  { rx: /^\s*Depletion\s+of\s+abiotic\s+resources\s*\(\s*fossil\s*\)\s*$/i, key: "abiotic_depletion_fossil_mj" },
+  // CISC water row uses Pattern B layout (label ABOVE the data row,
+  // then unit-continuation, then "1 ton" data). Probe i-1 covers it.
+  { rx: /^\s*Use\s+of\s+net\s+fresh\s+water\s*$/i, key: "water_consumption_m3" }
+];
+var _CISC_DATA_ROW_RX = /^\s*1\s+(?:mt|ton|metric\s+ton|short\s+ton)\s+-?\s*\d/i;
+
+function _findCISCDataRowKey(lines, i) {
+  var unitMatch = lines[i].match(/^\s*1\s+(mt|ton|metric\s+ton|short\s+ton)\s+-?\s*\d/i);
+  if (!unitMatch) return null;
+  var unit = unitMatch[1].toLowerCase().replace(/\s+/g, " ");
+  var isMt = unit === "mt" || unit === "metric ton";
+  // For "1 mt" first-row data: label at i+1 (Pattern A — centred label
+  // sits between the two value rows), or i-1 (Pattern B — label sits
+  // ABOVE the data row, e.g. CISC water row). Also probe i-2 as a
+  // fall-through.
+  // For "1 ton" second-row data: label at i-2 (Pattern A only). DO NOT
+  // probe i+1 from a "1 ton" row because i+1 is the NEXT indicator's
+  // "1 mt" data row, not a label — without this restriction, a "1 ton"
+  // row from an unrelated resource indicator (e.g. "Recovered energy
+  // 1 ton 0.00..." on line 588) would false-pair with the water label
+  // on line 589 and write 0/0/0 to water before the real water row at
+  // line 590 fires.
+  var candidates = isMt ? [i + 1, i - 1, i - 2] : [i - 2];
+  for (var c = 0; c < candidates.length; c++) {
+    var idx = candidates[c];
+    if (idx < 0 || idx >= lines.length) continue;
+    var probe = lines[idx];
+    if (probe == null) continue;
+    for (var pl = 0; pl < _CISC_LABEL_PATTERNS.length; pl++) {
+      if (_CISC_LABEL_PATTERNS[pl].rx.test(probe)) return _CISC_LABEL_PATTERNS[pl].key;
+    }
+  }
+  return null;
+}
+
 function _extractByStage(text, rec) {
   var headers = _detectStageHeaders(text);
   if (headers.length === 0) return;
@@ -920,9 +980,58 @@ function _extractByStage(text, rec) {
   var headerLineSet = {};
   for (var h = 0; h < headers.length; h++) headerLineSet[headers[h].lineIdx] = true;
 
+  // Per-indicator: which header was used for this indicator's row?
+  // Used after the loop to decide whether to recompute total — only the
+  // header actually consumed by a real indicator row is load-bearing,
+  // not prose descriptions like "EPD scope ... (A1-A3), C1-C4 and D"
+  // that pass _detectStageHeaders' >=3-stage-code threshold.
+  var headerUsedFor = {};
+
   for (var i = 0; i < lines.length; i++) {
     if (headerLineSet[i]) continue;
     var line = lines[i];
+
+    // CISC look-back: data row (1 mt / 1 ton + sci-not) with label on
+    // a separate preceding line. Synthesize a fake "lm" with the
+    // looked-back key so the existing stage-mapping code below applies
+    // unchanged. Only fires when no inline label match would catch the
+    // line (prevents double-processing).
+    var cscKey = _findCISCDataRowKey(lines, i);
+    if (cscKey) {
+      var nums = _tokenizeImpactNumbers(line);
+      if (nums.length === 0) continue;
+      var stages = null;
+      for (var pp = headers.length - 1; pp >= 0; pp--) {
+        if (headers[pp].lineIdx > i) continue;
+        if (headers[pp].stages.length === nums.length) {
+          stages = headers[pp].stages;
+          break;
+        }
+      }
+      if (!stages) {
+        for (var qq = headers.length - 1; qq >= 0; qq--) {
+          if (headers[qq].lineIdx > i) continue;
+          stages = headers[qq].stages;
+          break;
+        }
+      }
+      if (!stages) continue;
+      headerUsedFor[cscKey] = stages;
+      for (var kk = 0; kk < stages.length && kk < nums.length; kk++) {
+        var sst = stages[kk];
+        if (sst === "A1-A3") {
+          if (_get(rec, "impacts." + cscKey + ".total.value") != null) continue;
+          _setPath(rec, "impacts." + cscKey + ".total.value", nums[kk]);
+          _setPath(rec, "impacts." + cscKey + ".total.source", "epd_direct");
+          continue;
+        }
+        if (_get(rec, "impacts." + cscKey + ".by_stage." + sst + ".value") != null) continue;
+        _setPath(rec, "impacts." + cscKey + ".by_stage." + sst + ".value", nums[kk]);
+        _setPath(rec, "impacts." + cscKey + ".by_stage." + sst + ".source", "epd_direct");
+      }
+      continue; // CISC line consumed; move on
+    }
+
     for (var j = 0; j < _BYSTAGE_LABELS.length; j++) {
       var lm = _BYSTAGE_LABELS[j];
       if (!lm.rx.test(line)) continue;
@@ -961,18 +1070,75 @@ function _extractByStage(text, rec) {
       }
       if (!stages) break;
 
-      // Map numbers to stages by position. "A1-A3" is the total slot
-      // (already populated by Tier 8) — skip; the rest map to individual
+      // Record which header is being used for THIS indicator. Used by
+      // the recompute-total block below to decide whether the EPD
+      // published an A1-A3 composite for this indicator (per the actual
+      // table header, not a prose mention elsewhere in the doc).
+      headerUsedFor[lm.key] = stages;
+
+      // Map numbers to stages by position. "A1-A3" is the total slot —
+      // when the EPD publishes a composite column (e.g. CISC's
+      // "A1 A2 A3 A1-A3" header), write that value to total.value
+      // (only if the slot is null — IMPACT_INDICATORS regex still wins
+      // when both sources extract). Other stages map to individual
       // by_stage entries. Stages with no positional value stay null.
       for (var k = 0; k < stages.length && k < nums.length; k++) {
         var st = stages[k];
-        if (st === "A1-A3") continue;
+        if (st === "A1-A3") {
+          if (_get(rec, "impacts." + lm.key + ".total.value") != null) continue;
+          _setPath(rec, "impacts." + lm.key + ".total.value", nums[k]);
+          _setPath(rec, "impacts." + lm.key + ".total.source", "epd_direct");
+          continue;
+        }
         if (_get(rec, "impacts." + lm.key + ".by_stage." + st + ".value") != null) continue;
         _setPath(rec, "impacts." + lm.key + ".by_stage." + st + ".value", nums[k]);
         _setPath(rec, "impacts." + lm.key + ".by_stage." + st + ".source", "epd_direct");
       }
       break; // line matched one indicator; don't try the rest
     }
+  }
+
+  // After by_stage extraction: per-indicator, if the header actually
+  // used for that indicator's row did NOT include the "A1-A3" composite
+  // column AND we have all three stage cells (A1, A2, A3) populated,
+  // recompute total = A1+A2+A3 and mark source: "calculated". This
+  // handles cradle-to-gate-with-options EPDs (xcarb steel) whose
+  // published table has A1 / A2 / A3 / C1-D columns but NO precomputed
+  // A1-A3 composite. The IMPACT_INDICATORS regex would otherwise grab
+  // A1 as the "total" (1230 instead of A1+A2+A3 = ~1257 for xcarb GWP).
+  // Per-indicator gating (via headerUsedFor) prevents prose mentions of
+  // "A1-A3" elsewhere in the doc from inhibiting the recompute.
+  var indicators = [
+    "gwp_kgco2e",
+    "gwp_bio_kgco2e",
+    "ozone_depletion_kgcfc11eq",
+    "acidification_kgso2eq",
+    "eutrophication_kgneq",
+    "smog_kgo3eq",
+    "abiotic_depletion_fossil_mj",
+    "water_consumption_m3",
+    "primary_energy_nonrenewable_mj",
+    "primary_energy_renewable_mj"
+  ];
+  for (var ki = 0; ki < indicators.length; ki++) {
+    var key = indicators[ki];
+    var usedHeader = headerUsedFor[key];
+    if (!usedHeader) continue;
+    var a1 = _get(rec, "impacts." + key + ".by_stage.A1.value");
+    var a2 = _get(rec, "impacts." + key + ".by_stage.A2.value");
+    var a3 = _get(rec, "impacts." + key + ".by_stage.A3.value");
+    if (a1 == null || a2 == null || a3 == null) continue;
+    var hasA1A3InHeader = usedHeader.indexOf("A1-A3") >= 0;
+    var totalAlreadySet = _get(rec, "impacts." + key + ".total.value") != null;
+    // Skip recompute ONLY when the EPD published a composite total
+    // (A1-A3 stage in the actual table header) AND that composite was
+    // captured. Recompute fires when:
+    //   - usedHeader has no A1-A3 (xcarb cradle-to-gate-with-options)
+    //   - usedHeader has A1-A3 but the composite cell wasn't filled
+    //     (CISC water row: 3-value layout under a 4-stage header)
+    if (hasA1A3InHeader && totalAlreadySet) continue;
+    _setPath(rec, "impacts." + key + ".total.value", a1 + a2 + a3);
+    _setPath(rec, "impacts." + key + ".total.source", "calculated");
   }
 }
 
