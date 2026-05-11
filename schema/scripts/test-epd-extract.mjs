@@ -73,12 +73,13 @@ const IMPACT_KEYS = [
 ];
 
 function parseArgs(argv) {
-  const args = { json: null, md: null, only: null };
+  const args = { json: null, md: null, only: null, root: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--json") args.json = argv[++i];
     else if (a === "--md") args.md = argv[++i];
     else if (a === "--only") args.only = argv[++i];
+    else if (a === "--root") args.root = argv[++i];
   }
   return args;
 }
@@ -327,10 +328,19 @@ async function main() {
     materialGroups: mg
   });
 
-  const pdfs = await walkPdfs(SAMPLES_ROOT);
+  // --root <dir> overrides the default 30-sample EPD SAMPLES tree.
+  // Used to point the harness at a larger external sample directory
+  // for scaling tests (workplan §12.6). Resolved against CWD to
+  // accept both absolute paths and paths relative to the user's
+  // current working directory.
+  const sampleRoot = args.root ? resolve(process.cwd(), args.root) : SAMPLES_ROOT;
+  const pdfs = await walkPdfs(sampleRoot);
   if (pdfs.length === 0) {
-    console.error("No PDFs found under:", SAMPLES_ROOT);
+    console.error("No PDFs found under:", sampleRoot);
     process.exit(1);
+  }
+  if (args.root) {
+    console.log(`Using --root ${sampleRoot} (${pdfs.length} PDFs)`);
   }
 
   const results = [];
@@ -416,6 +426,59 @@ async function main() {
       .map(([k, v]) => `${k}=${v}`)
       .join(", ")}`
   );
+
+  // ── Per-format breakdown (workplan §12.5) ───────────
+  // Tabulate metadata + impact + by_stage coverage by detected format.
+  // Surfaces which formats are most under-served — informs the §12.3
+  // architectural choice (geometric vs declarative vs HITL).
+  const formatBreakdown = {};
+  for (const r of ok) {
+    if (!formatBreakdown[r.format]) {
+      formatBreakdown[r.format] = { count: 0, meta: 0, metaMax: 0, impact: 0, impactMax: 0, byStage: 0, byStageMax: 0 };
+    }
+    const fb = formatBreakdown[r.format];
+    fb.count++;
+    fb.meta += r.metaHit;
+    fb.metaMax += METADATA_FIELDS.length;
+    fb.impact += r.impactHit;
+    fb.impactMax += IMPACT_KEYS.length;
+    fb.byStage += r.byStageHit || 0;
+    fb.byStageMax += IMPACT_KEYS.length * ALL_STAGES.length;
+  }
+  console.log("");
+  console.log("Per-format breakdown:");
+  for (const fmt of Object.keys(formatBreakdown).sort()) {
+    const fb = formatBreakdown[fmt];
+    const mPct = ((100 * fb.meta) / fb.metaMax).toFixed(1);
+    const iPct = ((100 * fb.impact) / fb.impactMax).toFixed(1);
+    const bPct = ((100 * fb.byStage) / fb.byStageMax).toFixed(1);
+    console.log(`  ${fmt.padEnd(20)} n=${fb.count.toString().padStart(3)}  meta=${mPct}%  impact=${iPct}%  by_stage=${bPct}%`);
+  }
+
+  // ── Per-parameter aggregate hit-rate (workplan §12.5) ───
+  // Surfaces which schema fields have systemic gaps vs sample-
+  // idiosyncratic gaps. A field with low hit-rate across many formats
+  // suggests a generalization opportunity; low hit-rate concentrated
+  // in one format suggests a per-format extractor needs work (or the
+  // EPD genuinely doesn't publish that field).
+  const paramHits = {};
+  for (const f of METADATA_FIELDS) paramHits[f] = 0;
+  for (const k of IMPACT_KEYS) paramHits["impacts." + k + ".total.value"] = 0;
+  for (const r of ok) {
+    for (const f of METADATA_FIELDS) {
+      if (r.meta[f] != null) paramHits[f]++;
+    }
+    for (const k of IMPACT_KEYS) {
+      if (r.impacts[k] != null) paramHits["impacts." + k + ".total.value"]++;
+    }
+  }
+  console.log("");
+  console.log("Per-parameter aggregate hit-rate (across", ok.length, "samples):");
+  const sortedParams = Object.entries(paramHits).sort((a, b) => b[1] - a[1]);
+  for (const [path, hits] of sortedParams) {
+    const pct = ((100 * hits) / ok.length).toFixed(0);
+    console.log(`  ${path.padEnd(50)} ${hits.toString().padStart(3)}/${ok.length}  (${pct}%)`);
+  }
 
   // ── Ground-truth aggregate (workplan §10.3) ─────────
   const annotated = ok.filter((r) => r.expected);

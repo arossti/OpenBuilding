@@ -12,6 +12,13 @@
     "impacts.functional_unit": "1 metric ton",
     "physical.density.value_kg_m3": 7800,
 
+    "impacts.gwp_kgco2e.total.value": 1257,
+    "impacts.acidification_kgso2eq.total.value": 2.6046,
+    "impacts.eutrophication_kgneq.total.value": 0.11893,
+    "impacts.ozone_depletion_kgcfc11eq.total.value": 8.498e-10,
+    "impacts.smog_kgo3eq.total.value": 49.516,
+    "impacts.abiotic_depletion_fossil_mj.total.value": 1398.4,
+
     "impacts.gwp_kgco2e.by_stage.A1.value": 1230,
     "impacts.gwp_kgco2e.by_stage.A2.value": 11.7,
     "impacts.gwp_kgco2e.by_stage.A3.value": 15.3,
@@ -67,5 +74,5 @@
     "impacts.abiotic_depletion_fossil_mj.by_stage.D.value": -16.1
   },
   "epd_omits": [],
-  "notes": "ArcelorMittal Dofasco XCarb cold-formed steel sections. Cradle-to-gate-with-options scope: A1, A2, A3, C1, C2, C3, C4, D (8 columns, NO A1-A3 composite total in the published table). Per-stage values from Table on page 5 (IPCC AR5 100yr GWP + TRACI 2.1 for AP/EP/ODP/SFP/ADPfossil — note 'GWP 100' is the 100-year-time-horizon methodology label, not a numeric value). Sign on module D values is load-bearing (-241 kgCO2e D = end-of-life recycling credit). Density IS published in the declared-product line: '1 metric ton of cold formed steel sections with a density of 7,800 kg/m3' — fix to the density regex (per-fix-after-rev3) handles US thousand-comma form so 7,800 doesn't truncate to 800. KNOWN-BUG-TO-FIX-LATER: impacts.gwp_kgco2e.total.value currently = 1230 (= A1 only, NOT A1-A3 sum which would be ~1257). For cradle-to-gate-with-options EPDs that don't publish an A1-A3 composite, the extractor should either compute total = A1 + A2 + A3 OR leave total null and rely on by_stage. Out of scope this round; deliberately not annotated in epd_publishes so the harness's coverage check still counts the (wrong) value as filled while this note flags it."
+  "notes": "ArcelorMittal Dofasco XCarb cold-formed steel sections. Cradle-to-gate-with-options scope: A1, A2, A3, C1, C2, C3, C4, D (8 columns, NO A1-A3 composite total in the published table). Per-stage values from Table on page 5 (IPCC AR5 100yr GWP + TRACI 2.1 for AP/EP/ODP/SFP/ADPfossil — note 'GWP 100' is the 100-year-time-horizon methodology label, not a numeric value). Sign on module D values is load-bearing (-241 kgCO2e D = end-of-life recycling credit). Density IS published in the declared-product line: '1 metric ton of cold formed steel sections with a density of 7,800 kg/m3' — density regex now handles US thousand-comma form so 7,800 doesn't truncate to 800. Totals (impacts.<key>.total.value) are RECOMPUTED as A1+A2+A3 sum with source: 'calculated' because the EPD does NOT publish an A1-A3 composite column — the per-indicator headerUsedFor gating ensures we don't recompute when the EPD does publish a composite (e.g. Kalesnikoff's 'A1-A3 A1 A2 A3' header). Asserted values: GWP=1257, AP=2.6046, EP=0.11893, ODP=8.498e-10, SFP=49.516, ADPf=1398.4. Note this round's xcarb total=A1 false-positive fix is now structural — covers all cradle-to-gate-with-options EPDs going forward (xcarb +3 samples, plus surfaced totals on Fabricated Steel Plates, BC Wood OSB, Sopra-XPS, Genyk where per-stage data was extracting but no total was being grabbed)."
 }
