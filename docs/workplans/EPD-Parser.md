@@ -9,8 +9,8 @@
 **You are picking up at 2026-04-30 evening, with TWO decision-points pending and a directive to pause adding format-specific extractors.** Andy paused mid-implementation of CISC + 2023 BC Wood ASTM per-format extractors with the directive: *"You seem to be in a loop making highly customized readers for a handful of specific EPDs where we need GENERALIZED functionality for ANY EPD the Parser loads."* See §12 (new) for the architecture-review chapter + 5 questions for Andy.
 
 **Two decisions are gating further code work:**
-1. **§11 — Mélanie's review of the biogenic-calc principle + 6 schema-naming / storage-factor questions.** Gates C-fb6 (Tier-10 biogenic).
-2. **§12 — Andy's choice between Option A (geometric table extraction) / Option B (declarative format library) / Option C (HITL form-pane UX) / hybrid.** Gates any further per-format extractor work.
+1. **§11 — Mélanie answered the 6 questions on 2026-05-05 (see §11.8).** Her answers SIGNIFICANTLY EXPAND the C-fb6 scope: biogenic_factor isn't a single material-type default; it's derived from the EPD's Material Content of the Product table, with carbon content from EITHER the EPD or the Phyllis 2 biomass database (https://phyllis.nl/). Three distinct biogenic-source paths (EPD GWP-bio / EPD BCRP / BfCA-calculated). NEW captures needed: material content table + biogenic inventory table (BCRP/BCEP/BCRK/BCEW per stage). Revised commit plan in §11.9 — was ~3 hrs, now ~19 hrs across 7 sub-commits. Remaining open items for Monday review listed in §11.10.
+2. **§12 — Andy's choice between Option A (geometric table extraction) / Option B (declarative format library) / Option C (HITL form-pane UX) / hybrid.** Gates any further per-format extractor work. Note: Mélanie's expanded C-fb6 scope (material-content table extraction, biogenic-inventory table extraction) is itself a per-format extraction problem — these sub-commits are gated on §12.3 too.
 
 **A larger sample directory is incoming 2026-05-01.** The harness now accepts `--root <dir>` (workplan §12.6) so it can scan that directory in place. The new per-format breakdown + per-parameter aggregate hit-rate (workplan §12.5) tabulates which formats / fields are under-served at scale — feeds the §12.3 architectural decision.
 
@@ -226,7 +226,7 @@ npm run serve                                                     # local dev se
 
 **Phases pending** (ranked by leverage post-2026-04-29 evening):
 
-- 🟨 **C-fb6 — `applyCalculations()` Tier 10** — review-pending. The BEAM-CSV inventory confirmed all formula inputs are present; §11 drafts the principle for Mélanie's review. Six concrete questions in §11.8 need sign-off; once answered, ~3 hrs of mechanical implementation.
+- 🟧 **C-fb6 — `applyCalculations()` Tier 10** — design-pending (revised 2026-05-05 after Mélanie's answers in §11.8). Was estimated ~3 hrs; now ~19 hrs across 7 sub-commits (§11.9). Mélanie clarified: biogenic_factor isn't a per-material-type default — it's derived from the EPD's Material Content table + Phyllis 2 biomass carbon-content lookup (https://phyllis.nl/). Three distinct biogenic-source paths (EPD GWP-bio / EPD BCRP / BfCA-calculated). New schema: `classification.material_content[]`, `physical.beam_calc.{full_c_kgco2e, biogenic_source, storage_cycle, ...}`, `impacts.biogenic_inventory.{bcrp, bcep, bcrk, bcew}.by_stage.*`. Compound-gated on Monday's Mélanie review (§11.10) AND §12.3 architecture choice (material-content table extraction is itself a per-format problem).
 - 🔜 **xcarb total = A1 false positive** — for cradle-to-gate-with-options EPDs without a published A1-A3 composite, the IMPACT_INDICATORS regex grabs A1 as "total". Should compute total = A1+A2+A3 OR leave null. Annotated in xcarb cold-formed ground-truth notes; not asserted (so harness doesn't fail on it). See follow-up #2 in agent handoff.
 - 🔜 **CISC water "Use of net fresh water 1 mt 2.88E+00"** — regex variant for the "1 mt" functional-unit prefix between label and value. CISC currently 0/10 impacts and 0/170 by_stage; this would unblock at least WDP. See follow-up #3 in agent handoff.
 - 🔜 **C-fb5 ground-truth backlog** — only 2/30 samples annotated. Priority: 2023 BC Wood ASTM family (CLT/GLT/SPF/SPF-Plywood — same format as Kalesnikoff, low risk, locks in coverage), EU/IBU Wood Fibre (different format, exercises EU/IBU paths), Lafarge cement (NSF format).
@@ -977,26 +977,146 @@ After C-fb6 lands, the placeholders fill in. The `stated` line shows the **EPD-p
 - **No BEAMweb-side assembly math.** Per-component roll-up (studs/m², coverage factors, hybrid-component weighted averages) is BEAMweb's job, not EPD-Parser's. Tier 10 produces per-material per-declared-unit derivative values; BEAMweb then projects those onto its assembly geometry.
 - **No "carbon storage" claims to end users beyond what EPDs state.** BfCA's display surfaces are factual: "this EPD reports A1 = –1045.63 kgCO₂e biogenic." We don't editorialize. The 0.9 WWF storage factor (when applied) is labelled explicitly in the audit trail so practitioners can see it's a BfCA convention layered on top of the EPD value.
 
-### 11.8. Open questions for Mélanie's review
+### 11.8. Mélanie's answers — 2026-05-05
 
-Listed concretely so this chapter can be skimmed and approved in one pass:
+> **Status:** Mélanie's responses inline, with my interpretation and implementation impact noted under each. Several answers expand the scope significantly; revised implementation roadmap in §11.9. Items still needing back-and-forth flagged for the Monday review in §11.10.
 
-1. **Storage factor source.** Should `storage_factor = 0.9` be a hard-coded BfCA constant (current BEAM CSV behaviour, col 28) or read from each EPD's biogenic methodology section if stated? If the latter, what's the schema slot — `methodology.storage_factor`?
-2. **Biogenic factor + carbon content fallbacks.** When the EPD doesn't publish `biogenic_factor` or `carbon_content_kgC_kg` explicitly, BEAM CSV uses material-type-keyed defaults (Wood = 0.989, 0.5 respectively from Glulam row). Should these defaults live in `db-fallbacks.json` alongside density / k / Cp etc., or in a separate biogenic-specific lookup? The former matches the existing pattern; the latter is more semantically clean.
-3. **Schema-field naming.** Proposed new fields:
-   - `methodology.biogenic_factor` (kg-biomass / kg-product, default 1.0 for solid wood)
-   - `methodology.carbon_content_kgc_kg` (kgC / kg-biomass, default 0.5 for wood)
-   - `methodology.beam_calc.{full_c_kgco2e, stored_kgco2e, inputs[]}` (Tier 10 output, source: "calculated")
-   
-   Do these names match BEAM's existing terminology? Should `beam_calc` be under `methodology` or `physical`?
+**Q1 — Storage factor source.** Should `storage_factor = 0.9` be hard-coded or per-EPD?
 
-4. **BEAM CSV column 23 — `GWP-bio from EPD`.** This appears to already capture the EPD-direct biogenic value for the existing 821 records. After C-fb6 lands, EPD-Parser's `impacts.gwp_bio_kgco2e.total.value` should round-trip to this column. Confirm the column header convention.
+> **MT:** Right now it is a constant hard-coded BfCA constant.
 
-5. **Per-stage biogenic vs aggregate.** The EPD publishes per-stage biogenic (Kalesnikoff GLT: A1 = –1045.63, A3 = +1045.63, net total = 0). BEAM CSV col 31 (`Full C value`) appears to be a single number per material — is that the A1 value (carbon stored), the A1-A3 net (≈ 0 for cradle-to-gate), or something else? P3.3 already extracts the per-stage matrix; need clarity on which slot BEAMweb wants for its assembly math.
+→ **Confirmed.** Stays at `0.9` as a BfCA convention. No per-EPD override needed. **But see Q3 below** — Mélanie clarifies that this `0.9` is specifically the **carbon storage long cycle** factor (not just a generic storage factor). Schema needs a flag for long-cycle vs short-cycle storage.
 
-6. **Validation samples.** After Tier 10 ships, can we validate by comparing `methodology.beam_calc.full_c_kgco2e` for the 5 samples we'll have annotated under C-fb5 (Kalesnikoff CLT, GLT, xcarb cold-formed, etc.) against the corresponding rows in `BEAM Database-DUMP.csv`? Numeric tolerance ±5%? Per-row mismatches would surface either a formula misunderstanding on our side or a computed-vs-published difference in BEAM's source data.
+**Q2 — Biogenic factor + carbon content fallbacks.** Where do default values live when the EPD doesn't publish them explicitly?
 
-Once these are answered, C-fb6 implementation (Tier 10 + the 3 new schema fields + form-pane render of the audit trail) is ~3 hours of work. Schema bump requires Mélanie sign-off; everything else is mechanical.
+> **MT:** The biogenic factor is usually from the EPD. They usually list the "Material Content of the Product" with %, then we identify which material of the product contains biogenic material (usually only one material, but can be two). Then, using the Phyllis 2 database (https://phyllis.nl/), we find the carbon content for those materials. Some EPDs provide the carbon content now, but not all. Based on this information, which structure do you propose?
+
+→ **Significant scope expansion.** This is more layered than my draft assumed:
+- The "biogenic factor" isn't one number per material_type — it's derived from the EPD's **Material Content of the Product** table (e.g. "70% wood + 30% adhesive" → biogenic_factor for wood-component is 0.7).
+- Each biogenic component then needs a **carbon content** value, which comes from EITHER the EPD itself (when published) OR the **Phyllis 2 database** (https://phyllis.nl/, Dutch ECN biomass composition reference) for the relevant biomass type.
+- So Tier-10 needs THREE inputs the parser must capture / look up:
+  1. Material content breakdown (per-material % of the product)
+  2. Which materials are biogenic (BfCA-curated tagging of biomass types)
+  3. Carbon content per biomass type (EPD-published OR Phyllis 2 lookup)
+
+**My proposed structure (for Mélanie's Monday review):**
+
+```
+schema/lookups/phyllis2-biomass-carbon-content.json   ← curated lookup
+  { "wood_softwood_dry":   { "carbon_content_kgC_kg": 0.50, "source": "Phyllis 2 / NREL" },
+    "wood_hardwood_dry":   { "carbon_content_kgC_kg": 0.49, ... },
+    "bamboo":              { "carbon_content_kgC_kg": 0.524, ... },
+    "straw":               { "carbon_content_kgC_kg": 0.48, ... },
+    "wool":                { "carbon_content_kgC_kg": 0.50, ... },
+    ... (~20 entries covering BfCA-relevant biomass types)
+  }
+
+EPD-Parser extracts:
+  classification.material_content[] = [
+    { material_type: "softwood", percent: 0.70, biogenic: true },
+    { material_type: "phenolic_resin_adhesive", percent: 0.30, biogenic: false }
+  ]
+
+Tier-10 derives, per biogenic component:
+  biogenic_factor = component.percent  (e.g. 0.70)
+  carbon_content  = lookup(component.material_type) OR EPD-published
+  full_C contribution = density × thickness × biogenic_factor × carbon_content × 3.67
+  Sum across all biogenic components.
+```
+
+Implementation impact: new schema field `classification.material_content[]`, new lookup file `phyllis2-biomass-carbon-content.json`, EPD-Parser extraction of the Material Content of the Product table (which is its own per-format challenge — table layouts vary). **Tier-10 implementation is no longer ~3 hours; revised estimate ~8-10 hours plus the Phyllis 2 curation.**
+
+**Q3 — Schema-field naming.**
+
+> **MT:** I'm not sure I understand the difference between methodology and physical. Also about "default 1.0 for solid wood" — I don't know how the machine read this, but a product can have solid wood as part of its material content, but it wouldn't be a factor of 1 necessarily. Those names make sense to me. Also, in the repo when you reference the "WWF Storage Factor kgCO2e/kgC" column, this is actually the **carbon storage long cycle**. But the methodology is the same to calculate it. We would need a way to flag it as carbon storage long cycle.
+
+→ **Three clarifications:**
+1. **methodology vs physical** — pragmatic call: I'll put `beam_calc` directly under `physical` (since it's about physical properties of the material as derived/normalized for BEAMweb). Mélanie can override on Monday.
+2. **"default 1.0 for solid wood" was wrong** — confirmed by the Q2 answer above. There's no universal default; it always comes from the EPD's material content table (or Phyllis 2 fallback for the carbon-content piece).
+3. **Long-cycle vs short-cycle storage flag** — NEW. The `0.9` storage factor specifically applies to LONG-CYCLE (durable, building-life) storage. Different materials/uses might be short-cycle (annual crops, packaging). Schema needs:
+   ```
+   physical.beam_calc.storage_cycle: "long_cycle" | "short_cycle"
+   physical.beam_calc.storage_factor: 0.9 (when long_cycle, BfCA constant)
+   ```
+   Default for construction materials = `long_cycle`. Short-cycle would be flagged for materials like straw bales used non-permanently, or packaging.
+
+**Q4 — BEAM CSV column 23 (`GWP-bio from EPD`).** Round-trip to this column?
+
+> **MT:** I'm not sure to understand. There are 3 ways we calculate biogenic carbon:
+> 1. EPDs has no mention of biogenic storage, but human know there are some based on the material content: BfCA methodology: mass × biogenic content × carbon factor × 44/12.
+> 2. EPDs provide BCRP = Biogenic carbon removal from product.
+> 3. EPDs provide the GWP-bio.
+>
+> The current structure in the BEAM database is all over the place and not optimal, and we should take some time to think about the new structure. GWP-bio from EPD include BCRP and GWP-bio in the current database.
+
+→ **Schema needs a derivation-source flag.** Three distinct origins of the biogenic value, which BEAMweb / database viewer must surface separately:
+```
+physical.beam_calc.biogenic_source: "epd_gwp_bio" | "epd_bcrp" | "calculated_from_material_content"
+```
+
+The current `BEAM Database-DUMP.csv` col 23 mixes #2 and #3 (EPD-direct biogenic, regardless of whether it's GWP-bio or BCRP). Going forward we should separate them; legacy 821 records will need a one-time migration to attribute their col-23 values to the right source (Mélanie + curator review).
+
+**Q5 — Per-stage biogenic vs aggregate.** Which slot does BEAMweb consume?
+
+> **MT:** Some EPDs that look at cradle-to-gate only, and using the -1/+1 methodology for carbon storage, where they say that all the carbon is released at end of life, all the other stages are captured in A3, so carbon storage equals to 0.
+> Also GWP-bio when listed per stage, includes in A3 the BCRK = Biogenic carbon removal from packaging; which we have not been including, since the packaging won't make it to the assembly, and is not part of the carbon content of the product. So yes, we often take the **A1 value only for GWP-bio**.
+> (Reference: https://www.woodworks.org/resources/understanding-the-carbon-numbers-in-a-wood-epd/ — though as you'll see, they only provide GWP total (including biogenic) and GWP. Usually we have GWP-total, GWP fossil, GWP bio.)
+> We should **extract from the EPD all the stages of GWP-bio**, AND also extract the table with the **BCRP, BCEP, BCRK, BCEW** for all the stages provided.
+
+→ **Two captures needed:**
+
+1. **Per-stage GWP-bio** (already in P3.3 — `impacts.gwp_bio_kgco2e.by_stage.{A1, A2, ...}`). **A1 is the load-bearing slot for BEAMweb assembly math** (= carbon stored in product; excludes packaging contributions in A3).
+
+2. **NEW: Biogenic inventory table** with 4 categories per stage:
+   ```
+   impacts.biogenic_inventory.bcrp.by_stage.{A1, A2, ..., D}   ← Biogenic Carbon Removal from Product
+   impacts.biogenic_inventory.bcep.by_stage.{...}              ← Biogenic Carbon Emission from Product
+   impacts.biogenic_inventory.bcrk.by_stage.{...}              ← Biogenic Carbon Removal from packaging (excluded from BEAMweb math)
+   impacts.biogenic_inventory.bcew.by_stage.{...}              ← Biogenic Carbon Emission from Waste
+   ```
+   This is a SEPARATE table on most EPDs (we already saw it in Kalesnikoff GLT — Table 2 "Biogenic Carbon Inventory Parameters" with columns `Total | A1 | A2 | A3 | A5 | C3/C4`).
+
+**For BEAMweb consumption priority:**
+- Prefer `impacts.gwp_bio_kgco2e.by_stage.A1.value` (the EPD's per-stage GWP-bio A1, with packaging already netted by the EPD)
+- Fall back to `impacts.biogenic_inventory.bcrp.by_stage.A1` (Biogenic Carbon Removal from Product specifically — excludes BCRK packaging)
+- Fall back to BfCA-calculated value (`physical.beam_calc.full_c_kgco2e`) when EPD has neither
+
+**Q6 — Validation samples.** Compare `methodology.beam_calc.full_c_kgco2e` against `BEAM Database-DUMP.csv` for already-annotated samples?
+
+> **MT:** Not sure I understand the question. Let's revise it together on Monday, or you can provide more explanation here. Thanks! :)
+
+→ **Restated for Monday's review:**
+
+Once Tier-10 (`applyCalculations`) is implemented, every record produced by EPD-Parser will have a `physical.beam_calc.full_c_kgco2e` (or whatever we settle on for the field name) — this is BEAM's normalized biogenic-carbon value, computed from the EPD inputs.
+
+For the 821 existing records in `BEAM Database-DUMP.csv` (which were imported from BEAM's original spreadsheet), col 31 already contains a "Full C value" computed by Mélanie's spreadsheet using the same formula. **We can use these as a regression test:** for each of our currently-annotated C-fb5 samples (Kalesnikoff GLT, xcarb cold-formed) — IF those samples also have rows in `BEAM Database-DUMP.csv` — re-extract via EPD-Parser, run Tier-10, and compare `physical.beam_calc.full_c_kgco2e` against the spreadsheet's col 31. Numeric agreement within ±5% would mean our formula implementation matches Mélanie's. Mismatches would surface either a formula misunderstanding on our side OR a stale/inconsistent value in the existing BEAM database.
+
+The question is whether you (Mélanie) think ±5% tolerance is reasonable, or whether the spreadsheet's values should be exactly reproducible (±0.1%)?
+
+### 11.9. Revised implementation roadmap (post-Mélanie review)
+
+C-fb6 has grown from "~3 hours of mechanical implementation" to a multi-step build with new data-acquisition work. Revised commit plan:
+
+| Commit | Scope | Estimate |
+|---|---|---|
+| C-fb6.1 | Schema bump: add `classification.material_content[]` array, `physical.beam_calc.{full_c_kgco2e, stored_kgco2e, biogenic_source, storage_cycle, storage_factor, inputs[]}`, `impacts.biogenic_inventory.{bcrp, bcep, bcrk, bcew}.by_stage.*` | ~2 hrs |
+| C-fb6.2 | Curate `schema/lookups/phyllis2-biomass-carbon-content.json` from Phyllis 2 (~20 entries covering BfCA materials) | ~3 hrs (mostly data work, needs Mélanie review) |
+| C-fb6.3 | Extract Material Content of the Product table from EPDs (per-format extraction; format detection for the table varies wildly — same architectural concern as §12) | ~4 hrs (gated on §12.3 architecture decision — geometric extraction would handle this generically) |
+| C-fb6.4 | Extract Biogenic Inventory (BCRP/BCEP/BCRK/BCEW) per-stage table | ~3 hrs (also gated on §12.3) |
+| C-fb6.5 | Implement Tier-10 `applyCalculations(rec)` with BEAM formula + provenance chain + storage_cycle handling | ~3 hrs |
+| C-fb6.6 | Form-pane audit-trail render (already scaffolded — fill in the placeholders with calculated values + chips) | ~2 hrs |
+| C-fb6.7 | Validation harness: compare Tier-10 output against `BEAM Database-DUMP.csv` col 31 for annotated samples (per Q6) | ~2 hrs |
+
+**Total revised estimate: ~19 hours** (was ~3 hours pre-review). Most of the inflation is C-fb6.3 + C-fb6.4 — material-content table extraction — which is the same per-format extraction problem §12 paused on. **C-fb6 is now compound-gated:** §11.10 (Monday review with Mélanie) AND §12.3 (Andy's architecture choice).
+
+### 11.10. Open items needing Monday review (with Mélanie)
+
+1. **Schema-field locations.** Confirm `physical.beam_calc.*` (under `physical`, not `methodology`) is the right home. Confirm `classification.material_content[]` is the right slot for the Material Content table.
+2. **`storage_cycle` enum values.** Proposed: `"long_cycle"` (durable building materials, default) | `"short_cycle"` (packaging, annual crops). Are there other values needed (e.g. `"medium_cycle"` for materials with reuse / refurbishment cycles)?
+3. **Phyllis 2 lookup curation.** Mélanie review the proposed ~20-entry list of biomass types + carbon content values before C-fb6.2 ships. Probably easiest to do this against a draft JSON file in a Monday session.
+4. **Material Content table extraction.** Format varies per EPD program operator; this is an instance of the §12 architecture problem. Discuss whether to wait for §12.3 decision or build a stop-gap per-format extractor for the most common 3-4 layouts.
+5. **Existing 821 records — derivation_source migration.** The BEAM CSV col 23 mixes EPD-GWP-bio + EPD-BCRP. Should the migration be: (a) one-shot manual review with Mélanie tagging each row's source, (b) re-extract from the original EPD PDFs (most aren't archived in our repo), or (c) leave the legacy records flagged `biogenic_source: "legacy_unknown"` and only attribute new EPD-Parser commits going forward?
+6. **Validation tolerance.** ±5% as proposed in Q6, or stricter?
 
 ---
 
