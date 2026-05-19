@@ -1282,16 +1282,24 @@ function extractNA(text, rec) {
     if (pcrLine) _setPath(rec, "methodology.pcr_guidelines", _cleanLine(pcrLine[1]));
   }
 
-  // Publication date — label-then-window
+  // Publication date — label-then-window. "Date of Issuance" added
+  // 2026-05-19 (Arcadia / EFCO-family use this variant), and a bare
+  // "Issuance date" form for completeness.
   var pubIso =
     _findDateAfterLabel(text, /Date\s+of\s+Issue\s*(?:&\s*Validity\s+Period)?/i) ||
+    _findDateAfterLabel(text, /Date\s+of\s+Issuance/i) ||
     _findDateAfterLabel(text, /Publication\s+date/i) ||
+    _findDateAfterLabel(text, /Issuance\s+date/i) ||
     _findDateAfterLabel(text, /Issue\s+date/i);
   if (pubIso) _setPath(rec, "epd.publication_date", pubIso);
 
-  // Expiry / validity
+  // Expiry / validity. "Valid through" added 2026-05-19 (Arcadia
+  // uses "Valid through April 11, 2026"); "Valid thru" / "Valid
+  // until" already supported.
   var expIso =
     _findDateAfterLabel(text, /Period\s+of\s+validity/i) ||
+    _findDateAfterLabel(text, /Valid\s+through/i) ||
+    _findDateAfterLabel(text, /Valid\s+thru/i) ||
     _findDateAfterLabel(text, /Valid\s+until/i) ||
     _findDateAfterLabel(text, /Valid\s+to/i) ||
     _findDateAfterLabel(text, /Expiry\s+date/i);
@@ -1597,6 +1605,18 @@ function _parseDate(s) {
   // DD/MM/YYYY (European)
   var eu = str.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
   if (eu) return eu[3] + "-" + _pad2(eu[2]) + "-" + _pad2(eu[1]);
+
+  // DD.MM.YYYY (German / European IBU convention — e.g. "08.06.2021"
+  // for "8 June 2021"). Order is unambiguous because the year is 4
+  // digits; the day-first / month-first ambiguity in DD/MM vs MM/DD
+  // doesn't apply to dot-separated dates outside North America.
+  var euDot = str.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if (euDot) return euDot[3] + "-" + _pad2(euDot[2]) + "-" + _pad2(euDot[1]);
+
+  // DD-MM-YYYY (European dash). Same disambiguation logic as dots —
+  // 4-digit year locks the position regardless of separator.
+  var euDash = str.match(/^\s*(\d{1,2})-(\d{1,2})-(\d{4})\b/);
+  if (euDash) return euDash[3] + "-" + _pad2(euDash[2]) + "-" + _pad2(euDash[1]);
 
   // "DD Month YYYY" — tolerate weird whitespace around the comma
   var en = str.match(/(\d{1,2})\s+([A-Za-z]+)\s*,?\s*(\d{4})/);
