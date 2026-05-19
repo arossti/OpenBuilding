@@ -231,6 +231,51 @@ The lifespan input doesn't deserve its own axis — instead it drives the tempor
 
 Dragging the lifespan number from 75 → 25 re-runs the climate calc: the B4-onwards carbon flows shift to earlier years, the IRF convolution sees the EOL release sooner, ΔCRF(100) becomes less negative, the blue line on the climate-response axes moves toward the red line. **Visible, immediate, intuitive.** This is the "demolished after 10 years" pro-rating question I raised earlier — handled natively by the chart.
 
+### 3.4.5. Multi-component stratification — N red lines + N blue lines
+
+**Refined by Andy 2026-05-19 PM (mid-prep):** the chart isn't *one* red line vs *one* blue line per building. It's **N red lines + N blue lines**, where N = the number of material components in the building (flooring, structural frame, roofing, cladding, surface coatings, insulation, glazing, etc.). Each component gets its own RT/PT pair.
+
+The "game" the practitioner is playing becomes intuitive at a glance:
+
+- **N red lines** trace the Reference Trajectory for each component (what would happen to that material's carbon under its counterfactual)
+- **N blue lines (shaded with semi-transparent fill beneath)** trace the Project Trajectory for each component (what actually happens given the design choices)
+- **Visual goal: pull every blue line below its corresponding red line at every life-cycle module axis.** The shaded fill between blue line and red line is the per-component climate benefit.
+- Components where blue is *above* red are the design problems — the practitioner can immediately see *which* materials are dragging the building's climate response in the wrong direction.
+
+Sample reading: a building with CLT structural frame + cork flooring + spray-foam insulation + steel cladding. The CLT and cork blue lines sit comfortably below their reds (carbon-storing perennials with long lifespans + good EOL). Spray-foam blue sits on top of red (no storage, fossil-derived). Steel cladding blue sits at red (no biogenic component). The chart shows at-a-glance: structural choice is doing the heavy lifting; spray-foam is the design's climate liability; cladding is neutral.
+
+```
+       A1   A2   A3   A4   A5   B4   C1   C2   C3   C4   D    │  ΔCRF(100) ΔT(100) Completeness
+       ───────────────────────────────────────────────────────────────────────────────────────
+      ●╲                                              ╱●     │
+       ╲╲─────────────●────                        ╱╱╱        │   ← CLT structural (red RT)
+        ╲▓●─────●──────▓▓▓▓▓▓▓▓▓▓▓▓▓▓●────●─────●▓▓●          │   ← CLT structural (blue PT, shaded)
+                                                              │
+      ●─────●─────●─────●─────●─────●─────●─────●─────●       │   ← Spray-foam (red RT, flat at zero benefit)
+      ●╱╱╱╱●╱╱╱╱●╱╱╱╱●╱╱╱╱●╱╱╱╱●╱╱╱╱●╱╱╱╱●╱╱╱╱●╱╱╱╱●          │   ← Spray-foam (blue PT, above red = liability)
+                                                              │
+       (etc., one pair per component)                         │
+       ───────────────────────────────────────────────────────────────────────────────────────
+       (summary row: building-level totals at each output axis)
+```
+
+Sub-totals per component live in the row strip beneath the chart, with a final row for the **building-level total ΔT(100) in °C·year** — the headline number for the building, accumulated across all component trajectories.
+
+### 3.4.6. Metric on the building-level total — °C·year vs. W·m⁻²·year
+
+Andy asked: *"total impacts in terms of °C temperature change... unless I am mistaken."* The mapping:
+
+| Metric | Unit | What it represents | When to use as the headline |
+|---|---|---|---|
+| **Cumulative Temperature Response** ∫ΔT(t)dt | **°C·year** | Integral of temperature change vs time. *Intuitive for practitioners* — directly speaks to "how much warming we caused over the period." | **The practitioner-friendly headline.** Recommended as the primary big-number on the bottom summary row. |
+| **Cumulative Radiative Forcing** ∫ΔRF(t)dt | W·m⁻²·year | Integral of radiative forcing vs time. *Rigorous methodology-aligned headline* — what CCLIMB §4.2.1 and Appendix A specify as the GWP100-comparable metric. | The reportable headline in EPDs and methodology-compliant outputs. Used in tables, not the at-a-glance display. |
+
+So **both metrics show up**, but their roles are different:
+- Big bold number at the top right of the chart (°C·year) — what the practitioner *feels*.
+- Small precise number in the export table (W·m⁻²·year as ΔCRF(100y)) — what the EPD annex *requires*.
+
+Both are computed; both are exportable; the dashboard shows °C as the love-at-first-sight metric, W·m⁻²·year as the rigorous companion. Per CCLIMB §4.2.3 + Critical Note in §5.2.4, neither value can be reported in CO₂e terms or used as a carbon credit / offset.
+
 ### 3.5. Per-category input requirements (axis vocabulary)
 
 Folding in **Table from CCOB §6 (p.12–13)** — what each feedstock category requires as input. This drives which axes are *editable* for each feedstock the user selects, and which axes get defaulted from RT-A archetypes.
@@ -454,15 +499,79 @@ v1 ships the methodology faithfully for the *bulk* of carbon-storing building pr
 
 ---
 
-## 7. Open questions for the 3pm call
+## 7. Questions for the working-group call
 
-1. **Working-group adoption of the IRF model.** Is there a preferred climate model (FaIR? OSCAR? Bern reduced-complexity?) the methodology will mandate, or is "AR6-consistent" sufficient and tools choose?
-2. **T_ref calibration.** Is ~250 years the final number, or pending?
-3. **Tier 2 timeline.** Is Category D / timber going to be in v2 of the methodology, and on roughly what horizon?
-4. **EPD requirements.** Does the methodology contemplate eventual mandatory inclusion in EN 15804+A2 / ISO 21930, or remains a supplementary annex forever?
-5. **Calculator certification.** §6 lists Calculator requirements but no certification process. Is there a plan for vetting which engines comply? (Direct relevance to BfCA shipping CCLIMB-app as a public tool.)
-6. **Connection to GWP-bio in EPDs today.** Many EPDs publish `GWP-bio per stage A1/A2/A3...` (workplan §11). How does CCLIMB's `A1 carbon storage` input relate to / replace / augment that? Same number, different framing, or genuinely different?
-7. **Default decay rates.** §3 references "US EPA WARM model" for landfill/incineration. Is that the working-group consensus, or a placeholder for a future Canada-context source?
+These are framed for direct discussion, not just internal flags. Order roughly by how load-bearing the answers are for BfCA's CCLIMB-app implementation.
+
+### 7.1. Climate model — mandated or implementer's choice?
+
+CCLIMB §6.2 specifies "AR6-consistent" impulse-response or emulator-based models, but doesn't mandate a specific one. Different calculators implementing different IRFs (Bern reduced-complexity vs FaIR vs OSCAR vs Joos et al. 2013) will produce *different* ΔCRF and ΔT values for the same input inventory.
+
+**Question for the group:**
+- Will the methodology eventually mandate a specific IRF (which one, and on what timeline)?
+- Or stay implementer-choice but require disclosure (calculator declares which model + parameters)?
+- Without convergence, ΔCRF(100y) values reported across calculators won't be comparable. Is that an acceptable v1 state?
+
+### 7.2. T_ref calibration — 250 years final or pending?
+
+CCLIMB §5 marks T_ref ≈ 250 years as "provisional." Completeness C(H) is computed relative to T_ref, so the number is load-bearing — a different T_ref shifts every reported completeness.
+
+**Question for the group:**
+- What's the path to finalizing T_ref? Working group vote? Literature alignment? Specific scientific reference?
+- Should CCLIMB-app expose T_ref as a configurable parameter pending finalization, or lock it at 250 yr and re-release when the working group settles?
+
+### 7.3. Tier 2 / Category D (timber) timeline
+
+CCLIMB v1 defers timber to v2. But timber (CLT, glulam, LVL, dimension lumber) is *most* of the structural-mass-timber EPD market and one of the biggest carbon-storage stories in modern construction. Without Tier 2 support, CCLIMB v1 covers maybe half the materials practitioners care most about.
+
+**Question for the group:**
+- Is there a target timeline for Tier 2?
+- Is BfCA welcome to propose an interim Tier 2 treatment that the working group can vet against the eventual final spec?
+- For products with *combined* feedstocks (e.g. wood-cement composites — Cat A or C residue + Cat D timber), how does v1 handle them? §4 "Combined Feedstocks" says classify each independently; does that mean the timber portion gets *excluded* from CCLIMB analysis until v2?
+
+### 7.4. Calculator certification process
+
+CCLIMB §6 lists Calculator Requirements (scope, scientific basis, gas coverage, temporal treatment, transparency, etc.) but doesn't specify *how* a calculator's compliance is verified or by *whom*. If BfCA ships CCLIMB-app as a public tool, on what basis does a practitioner trust that it computes correctly?
+
+**Question for the group:**
+- Is there a planned governance / certification body?
+- Will there be a reference test-suite (input → expected output) that calculators can self-verify against?
+- For now, what's the disclosure expectation — "this app implements CCLIMB methodology v1.0 with documented deviations: X, Y, Z"?
+
+### 7.5. EPD-annex normative status
+
+Appendix A defines CCLIMB results as "supplementary information only" — outside the core ISO 14025 / EN 15804+A2 indicator tables. Practitioners reading an EPD might miss it; PCRs may not yet have a slot for it.
+
+**Question for the group:**
+- Is there a path toward CCLIMB ΔCRF(100y) becoming a *normative* indicator in some PCRs (especially for biogenic-carbon-rich product families)?
+- For early adopters (BfCA, Vancouver building requirements, etc.) who want CCLIMB-style time-explicit reporting alongside GWP100, what's the formal sanctioning mechanism short of methodology adoption by an SDO?
+
+### 7.6. Connection to existing GWP-biogenic reporting in EPDs
+
+Many EPDs today already publish per-stage `GWP-bio` (carbon dioxide-equivalent biogenic emissions per LCA module A1, A2, A3, etc. — see [`../workplans/EPD-Parser.md`](../workplans/EPD-Parser.md) §11 and Mélanie's 2026-05-05 answers). This is the inventory data CCLIMB ingests as Step 1 inputs.
+
+**Question for the group:**
+- Is the GWP-bio per-stage already in EPDs *the same number* CCLIMB ingests as A1/A3/etc. carbon flow, or are there definitional differences (BCRP vs GWP-bio vs material-content-derived calculations)?
+- For products with multiple biogenic components, how does CCLIMB handle the per-component allocation? (Tied to the §3.4.5 multi-line stratification question — does the methodology require per-feedstock breakdown, or only per-product aggregate?)
+
+### 7.7. Default decay rates — US EPA WARM or future Canada-context
+
+CCLIMB §3 references "US EPA WARM model" for landfill / incineration decay rates. For Canadian projects (where BfCA operates and where Vancouver's mandatory EC programs apply), is there a planned Canadian-context source?
+
+**Question for the group:**
+- Is WARM the working-group consensus default, or a placeholder?
+- For the BfCA CCLIMB-app shipping to Canadian practitioners, can we configure WARM as a default but allow user-supplied Canadian decay rates (e.g. from CMHC, ECCC, NRCan studies) as overrides?
+
+### 7.8. Multi-component visualization sanction
+
+(BfCA-specific design proposal, not a methodology question — but worth raising for working-group reaction.)
+
+The BfCA CCLIMB-app proposes a **per-component stratified parallel-coordinates chart** — N red lines (one per material component) + N shaded-blue lines (one per material component) — for whole-building analysis (see §3.4.5). This visualizes per-component climate response across all LCA modules, with building-level totals as a summary row.
+
+**Question for the group:**
+- Does the methodology say anything about per-component vs aggregate reporting at the building scale (Step 9 of the workflow)?
+- Is per-component disclosure *required*, *optional*, or *out of scope* at the WBLCA reporting level?
+- Concern with per-component reporting: it could be interpreted as ranking materials ("CLT good, spray-foam bad") which Appendix A §A.6 explicitly prohibits. **But** showing per-component results in a *neutral comparison frame* (every component compared to its own RT) avoids ranking — each line is just "this material's climate response relative to its own counterfactual." Is the working group comfortable with that framing?
 
 ---
 
