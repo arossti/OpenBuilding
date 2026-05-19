@@ -6067,3 +6067,306 @@ details.dep-details pre {
 .app-epdparser .epd-open-db-link:hover {
   text-decoration: underline;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* §12  APP: CCLIMB — Time-explicit climate response (parallel coords)          */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*
+ * Phase 0 — scaffolding. P1 will harmonize palette + per-component shading
+ * + axis banding once the OBJECTIVE parallel-coords source has been ported.
+ *
+ * Visual identity: shares the BfCA dark-theme palette; RT = red (#dc3545,
+ * matches OBJECTIVE convention); PT = blue (#007bff, same convention).
+ * Per-component lines: PT lines use opacity-stack shading; RT lines are
+ * solid red strokes.
+ */
+
+html.app-cclimb {
+  --rt-color: #dc3545;
+  --pt-color: #007bff;
+  --pt-shade: rgba(0, 123, 255, 0.18);
+}
+
+.app-cclimb body {
+  background: var(--bg-base, #1e1e1e);
+  color: var(--text-base, #ddd);
+  margin: 0;
+  font-family: var(--font-body, Helvetica Neue, Arial, sans-serif);
+}
+
+.app-cclimb #cclimb-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-cclimb .cclimb-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  background: var(--bg-elevated, #252525);
+  border-bottom: 1px solid var(--border-dim, #333);
+}
+
+.app-cclimb .header-logo {
+  height: 32px;
+}
+
+.app-cclimb .cclimb-title-block {
+  flex: 0 0 auto;
+}
+
+.app-cclimb .cclimb-title {
+  font-family: Georgia, serif;
+  font-size: 22px;
+  font-weight: normal;
+  margin: 0;
+}
+
+.app-cclimb .cclimb-subtitle {
+  display: block;
+  font-size: 12px;
+  color: var(--text-dim, #999);
+  margin-top: 2px;
+}
+
+.app-cclimb .cclimb-subtitle a {
+  color: var(--text-dim, #999);
+  text-decoration: underline;
+}
+
+.app-cclimb .cclimb-spacer {
+  flex: 1;
+}
+
+.app-cclimb .cclimb-nav {
+  display: flex;
+  gap: 4px;
+}
+
+.app-cclimb .cclimb-nav .nav-btn {
+  padding: 6px 14px;
+  color: var(--text-dim, #999);
+  text-decoration: none;
+  border: 1px solid var(--border-dim, #333);
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.app-cclimb .cclimb-nav .nav-btn:hover {
+  background: var(--bg-hover, #2a2a2a);
+  color: var(--text-base, #ddd);
+}
+
+.app-cclimb .cclimb-nav .nav-btn.active {
+  background: var(--accent-green, #2a5c3f);
+  color: #fff;
+  border-color: var(--accent-green, #2a5c3f);
+}
+
+.app-cclimb .cclimb-status-bar {
+  padding: 10px 24px;
+  background: var(--bg-warn, rgba(255, 165, 0, 0.08));
+  border-bottom: 1px solid var(--border-dim, #333);
+  font-size: 13px;
+  color: var(--text-base, #ddd);
+}
+
+.app-cclimb .cclimb-status-bar code {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.app-cclimb .cclimb-status-bar a {
+  color: var(--accent-green-light, #7bbf94);
+}
+
+.app-cclimb .cclimb-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 0;
+}
+
+.app-cclimb .cclimb-form-pane {
+  padding: 20px;
+  background: var(--bg-elevated, #252525);
+  border-right: 1px solid var(--border-dim, #333);
+  overflow-y: auto;
+}
+
+.app-cclimb .cclimb-section-heading {
+  font-family: Georgia, serif;
+  font-size: 14px;
+  font-weight: normal;
+  margin: 18px 0 8px;
+  color: var(--text-dim, #999);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.app-cclimb .cclimb-section-heading:first-child {
+  margin-top: 0;
+}
+
+.app-cclimb .cclimb-form-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.app-cclimb .cclimb-form-label {
+  font-size: 12px;
+  color: var(--text-dim, #999);
+}
+
+.app-cclimb .cclimb-form-row input,
+.app-cclimb .cclimb-form-row select {
+  background: var(--bg-base, #1e1e1e);
+  color: var(--text-base, #ddd);
+  border: 1px solid var(--border-dim, #333);
+  border-radius: 3px;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: Courier New, monospace;
+}
+
+.app-cclimb .cclimb-compute-btn {
+  margin-top: 24px;
+  width: 100%;
+  padding: 10px;
+  background: var(--accent-green, #2a5c3f);
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0.5;
+}
+
+.app-cclimb .cclimb-compute-btn:disabled {
+  cursor: not-allowed;
+}
+
+.app-cclimb .cclimb-chart-pane {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.app-cclimb .cclimb-pcg-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-dim, #333);
+}
+
+.app-cclimb .cclimb-pcg-btn {
+  padding: 6px 12px;
+  background: var(--bg-elevated, #252525);
+  color: var(--text-base, #ddd);
+  border: 1px solid var(--border-dim, #333);
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.app-cclimb .cclimb-pcg-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.app-cclimb .cclimb-btn-decarb {
+  background: var(--accent-green, #2a5c3f);
+  color: #fff;
+  border-color: var(--accent-green, #2a5c3f);
+}
+
+.app-cclimb .cclimb-pcg-legend {
+  margin-left: auto;
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-dim, #999);
+}
+
+.app-cclimb .cclimb-pcg-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-cclimb .cclimb-pcg-swatch {
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.app-cclimb .cclimb-pcg-swatch-rt {
+  background: var(--rt-color);
+}
+
+.app-cclimb .cclimb-pcg-swatch-pt {
+  background: var(--pt-color);
+  box-shadow: 0 6px 0 -3px var(--pt-shade);
+}
+
+.app-cclimb .parallel-coordinates-container {
+  flex: 1;
+  min-height: 400px;
+  background: var(--bg-base, #1e1e1e);
+  border: 1px dashed var(--border-dim, #333);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-cclimb .cclimb-pcg-placeholder {
+  text-align: center;
+  color: var(--text-dim, #999);
+  font-size: 13px;
+  padding: 20px;
+}
+
+.app-cclimb .cclimb-pcg-placeholder p {
+  margin: 6px 0;
+}
+
+.app-cclimb .cclimb-pcg-placeholder code {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.app-cclimb .cclimb-summary-table {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-dim, #333);
+  font-size: 12px;
+  color: var(--text-dim, #999);
+}
+
+.app-cclimb .cclimb-footer {
+  padding: 8px 24px;
+  background: var(--bg-elevated, #252525);
+  border-top: 1px solid var(--border-dim, #333);
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-dim, #999);
+}
+
+.app-cclimb .cclimb-footer a {
+  color: var(--text-dim, #999);
+  text-decoration: underline;
+}
