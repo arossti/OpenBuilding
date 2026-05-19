@@ -6,13 +6,21 @@
 
 ## Agent handoff (read this first)
 
-**You are picking up at 2026-04-30 evening, with TWO decision-points pending and a directive to pause adding format-specific extractors.** Andy paused mid-implementation of CISC + 2023 BC Wood ASTM per-format extractors with the directive: *"You seem to be in a loop making highly customized readers for a handful of specific EPDs where we need GENERALIZED functionality for ANY EPD the Parser loads."* See §12 (new) for the architecture-review chapter + 5 questions for Andy.
+**You are picking up at 2026-05-11 evening, with no active branch and TWO decision-points still gating further code work.** PR #18 merged into main on both remotes 2026-05-11 (`dc7040d` on openbuilding, mirrored to origin via realign — both now at `78565a8` after the Pages-workflow guard widening). No active sprint branch. Andy ended the prior session with: *"we will continue EPD parser work tomorrow."*
 
-**Two decisions are gating further code work:**
-1. **§11 — Mélanie answered the 6 questions on 2026-05-05 (see §11.8).** Her answers SIGNIFICANTLY EXPAND the C-fb6 scope: biogenic_factor isn't a single material-type default; it's derived from the EPD's Material Content of the Product table, with carbon content from EITHER the EPD or the Phyllis 2 biomass database (https://phyllis.nl/). Three distinct biogenic-source paths (EPD GWP-bio / EPD BCRP / BfCA-calculated). NEW captures needed: material content table + biogenic inventory table (BCRP/BCEP/BCRK/BCEW per stage). Revised commit plan in §11.9 — was ~3 hrs, now ~19 hrs across 7 sub-commits. Remaining open items for Monday review listed in §11.10.
-2. **§12 — Andy's choice between Option A (geometric table extraction) / Option B (declarative format library) / Option C (HITL form-pane UX) / hybrid.** Gates any further per-format extractor work. Note: Mélanie's expanded C-fb6 scope (material-content table extraction, biogenic-inventory table extraction) is itself a per-format extraction problem — these sub-commits are gated on §12.3 too.
+**Two decisions are gating further code work** (unchanged since 2026-04-30 — both still need human input):
 
-**A larger sample directory is incoming 2026-05-01.** The harness now accepts `--root <dir>` (workplan §12.6) so it can scan that directory in place. The new per-format breakdown + per-parameter aggregate hit-rate (workplan §12.5) tabulates which formats / fields are under-served at scale — feeds the §12.3 architectural decision.
+1. **§11.10 — Monday review with Mélanie on biogenic-calc.** Mélanie's 2026-05-05 answers (§11.8) significantly expanded C-fb6 scope from ~3 hrs to ~19 hrs across 7 sub-commits (§11.9). Six items still need her sign-off (§11.10): schema-field locations, `storage_cycle` enum values, Phyllis 2 curation, material-content extraction architecture, legacy 821-record migration, validation tolerance. Gates C-fb6 implementation.
+
+2. **§12.3 — Andy's choice between Option A (geometric table extraction) / Option B (declarative format library) / Option C (HITL form-pane UX) / hybrid.** Gates any further per-format extractor work. Reminder from §12: *"You seem to be in a loop making highly customized readers for a handful of specific EPDs where we need GENERALIZED functionality for ANY EPD the Parser loads."* — DO NOT add new entries to `IMPACT_INDICATORS`, `_BYSTAGE_LABELS`, `_CISC_LABEL_PATTERNS`, or any analogous list until §12.3 lands. Mélanie's expanded C-fb6 scope (material-content + biogenic-inventory table extraction) is itself a per-format extraction problem — compound-gated on §12.3 too.
+
+**The larger EPD sample directory exists** (Google Drive folder `1B5ilRZ-exHRZSbqIh3MYNpZFk7KuhBIO` titled "New EPDs for 2022 DUMP- STOP DUMPING!", shared with Andy 2026-05-11). The Drive API can see the folder metadata but couldn't enumerate its contents — either indexing lag on the fresh share OR Drive sharing scope doesn't extend list-children permission to API clients. **Plan:** Andy downloads the folder to local disk (Drive web UI → kebab → Download → unzip), then runs the harness:
+```bash
+node schema/scripts/test-epd-extract.mjs --root /path/to/unzipped/EPDs
+```
+The harness (workplan §12.6) accepts `--root <dir>` to walk any directory of PDFs. The per-format breakdown + per-parameter aggregate hit-rate (workplan §12.5) is the canonical input to §12.3 — surfaces which formats / fields are most under-served at scale.
+
+**Infrastructure shipped 2026-05-11 (post-PR-#18 merge, commit `78565a8`):** GitHub Pages now auto-deploys on BOTH remotes via the same workflow. Workflow guard widened from `if: github.repository == 'arossti/OpenBuilding'` to also include `bfca-labs/at`. Both sites live: https://arossti.github.io/OpenBuilding/ and https://bfca-labs.github.io/at/ — identical artifacts, separate Pages sites. Going forward: open PR only on **arossti/OpenBuilding** (canonical), then `git push origin main` after merge to keep the bfca-labs mirror in sync. This avoids the dual-merge-commit divergence that happened with PR #18 / PR #3 (resolved 2026-05-11 by force-pushing openbuilding/main → origin/main; trees were identical, only merge-commit SHAs differed).
 
 **Coverage state, end of 2026-04-29 (live numbers from `docs/workplans/EPD-coverage-history/2026-04-29T21-47-50Z.md`):**
 - Metadata: **279/420 (66.4%)** across 30 samples (14 fields each)
@@ -90,16 +98,19 @@ Listed with concrete repro / fix sketches so the next agent can pick the highest
 
 **Follow-up #5 — Per-stage extension to other formats.** Current per-stage coverage: Kalesnikoff 30/170, xcarb 48/170, Sopra-XPS 36/170, Genyk 31/170. To reach higher density on Sopra/Genyk/EU-IBU/2023 BC Wood, audit which `_BYSTAGE_LABELS` patterns aren't matching and either tighten or add variants. Driven by ground-truth annotation: pick a sample, annotate, run harness, see what fails.
 
-### Branch state (2026-04-30 evening)
+### Branch state (2026-05-11 evening)
 
 ```
-main                       3fd57e2   PR #17 merged 2026-04-30
-└── EPD-PARSER-4  (active, 2 commits since main)
-    ├── 3839b47  cradle-to-gate-with-options total recompute + CISC compact-label per-stage
-    └── (tip — workplan §12 + harness --root flag + per-format/per-param audit)
+main   78565a8   ci: enable Pages workflow on bfca-labs/at (2026-05-11)
+        ↑
+       dc7040d   Merge PR #18 from arossti/EPD-PARSER-4 (2026-05-11)
+       d73cffe   §11 Mélanie biogenic answers + revised C-fb6 scope
+       394cbea   §12 architecture review + harness --root + audit
+       3839b47   cradle-to-gate-with-options total recompute + CISC compact-label per-stage
+       3fd57e2   Merge PR #17 (2026-04-30)
 ```
 
-Both remotes synced. The `3839b47` commit added CISC-format extraction; flagged in §12.2 as per-EPD baggage, may be deprecated depending on §12.3 decision (Option A geometric extraction would replace it; Option B declarative would relocate it; Option C HITL would deprecate it in favour of form-pane UX). No PR open until §12.3 lands.
+No active sprint branch. Both remotes synced at `78565a8`. Both Pages sites deployed and live. The `3839b47` CISC commit added per-format extraction patterns; flagged in §12.2 as per-EPD baggage, **may be deprecated** depending on §12.3 decision (Option A geometric would replace it; Option B declarative would relocate it; Option C HITL would deprecate it in favour of form-pane UX). No PR open until either §11.10 (Mélanie) or §12.3 (Andy) lands.
 
 ### Read this order
 
