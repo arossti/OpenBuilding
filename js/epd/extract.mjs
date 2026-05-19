@@ -211,7 +211,23 @@ var _MATERIAL_TYPE_DISPLAY_KEYWORDS = [
   { rx: /\bfiberglass\b|\bfibreglass\b/i, type: "Fiberglass" },
   // Finishes
   { rx: /\bgypsum\b|\bdrywall\b/i, type: "Gypsum" },
-  { rx: /\bvinyl\s+(?:floor|tile|sheet)\b|\bLVT\b/i, type: "Luxury vinyl tile" }
+  { rx: /\bvinyl\s+(?:floor|tile|sheet)\b|\bLVT\b/i, type: "Luxury vinyl tile" },
+  // Membranes / barriers (added 2026-05-19). Captures vapour/vapor
+  // control membranes, weather-resistive barriers (WRB), air barriers,
+  // liquid-applied membranes, and self-adhered membranes — a large
+  // family in roofing/cladding/envelope EPDs.
+  { rx: /\bvapou?r\s+(?:control\s+)?membrane\b|\bWRB\b|\bweather[- ]?resistive\s+barrier\b|\bair\s+barrier\b/i, type: "Membrane" },
+  { rx: /\bself[- ]?adhered\s+membrane\b|\bstick[- ]?down\s+membrane\b|\bliquid[- ]?applied\s+membrane\b/i, type: "Membrane" },
+  { rx: /\bbituminous\s+membrane\b|\basphalt\s+(?:roll\s+)?roofing\b|\bAPP\s+modified\s+asphalt\b/i, type: "Bituminous membrane" },
+  // Wood fibre insulation (PAVATEX / GUTEX / Steico). Already partially
+  // covered by db-fallbacks "wood_fiberboard" alias, but the explicit
+  // keyword anchors the Tier-2 classifier so we don't drop to "unknown
+  // material_type" on dry-process insulation boards.
+  { rx: /\bwood\s+fib(?:re|er)(?:\s+(?:insulation|board))?\b/i, type: "Wood fiber insulation" },
+  // Sheep wool insulation (Thermafleece, Black Mountain, etc.).
+  { rx: /\bsheep['\s]?\s*wool(?:\s+insulation)?\b|\bThermafleece\b|\bnatural\s+wool\s+insulation\b/i, type: "Sheep wool insulation" },
+  // Concrete admixtures (BioLock, plasticizers, accelerators).
+  { rx: /\bconcrete\s+admixture\b|\bcement\s+admixture\b/i, type: "Admixture" }
 ];
 
 function extractType(text, rec) {
@@ -227,7 +243,7 @@ function extractType(text, rec) {
   // three separate one-letter-then-rest lines, each of which would
   // otherwise pass the picker as a 2-word title candidate.
   var skipPrefix =
-    /^(?:type\s+iii|e\s*nvironmental(?:\s+p\s*roduct\s+d\s*eclaration)?|p\s*roduct\s*$|d\s*eclaration\s*$|environmental\s+product\s+declaration|epd\b|in\s+accordance|as\s+per\b|according\s+to\b|programme|program\b|publisher\b|owner\s+of|declaration\s+number|issue\s+date|valid\s+to|valid\s+until|publication\s+date|page\s+\d|\d+\s*\/\s*\d+|—|–|-{2,})/i;
+    /^(?:type\s+iii|e\s*nvironmental(?:\s+p\s*roduct\s+d\s*eclaration)?|p\s*roduct\s*$|d\s*eclaration\s*$|environmental\s+product\s+declaration|epd\b|in\s+accordance|as\s+per\b|according\s+to\b|programme|program\b|publisher\b|owner[\s:]|holder[\s:]|deklarationsinhaber|herausgeber|owner\s+of|declaration\s+number|issue\s+date|valid\s+to|valid\s+until|publication\s+date|page\s+\d|\d+\s*\/\s*\d+|—|–|-{2,}|an\s+environmental\s+product\s+declaration|an\s+epd\b|product\s+declaration\b|report\s+for\s+review|fiche\s+de\s+d[ée]claration|eco\s+epd\s+ref|version\s+\d+\s*$)/i;
   // Standards-citation lines also need to be skipped — these often
   // appear right under the title block on EU/IBU layouts where the
   // line "as per ISO 14025 and EN 15804+A1" otherwise gets picked.
