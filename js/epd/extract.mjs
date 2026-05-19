@@ -1254,8 +1254,26 @@ function extractNA(text, rec) {
     if (dInLine) _setPath(rec, "physical.density.value_kg_m3", _toNum(dInLine[1].replace(/,/g, "")));
   }
   if (_get(rec, "physical.density.value_kg_m3") == null) {
-    var d = text.match(/density\s*(?:of\s+)?((?:\d{1,3}(?:,\d{3})+|\d{2,})(?:\.\d+)?)\s*kg\/m\s*[³^]?3?/i);
+    // density[:\s]* tolerates "Density: 25.214 kg/m^3" (AFT Cellulose,
+    // 2026-05-19 audit) — old regex required whitespace immediately
+    // after "density" and choked on the colon. Also added kg\s*\/\s*m
+    // to absorb pdf.js-inserted spaces around the slash.
+    var d = text.match(/density[\s:]*(?:of\s+)?((?:\d{1,3}(?:,\d{3})+|\d{2,})(?:\.\d+)?)\s*kg\s*\/\s*m\s*[³^]?3?/i);
     if (d) _setPath(rec, "physical.density.value_kg_m3", _toNum(d[1].replace(/,/g, "")));
+  }
+
+  // Specific gravity / relative density fallback. SOPRASEAL family
+  // publishes "Specific gravity 1.08 kg/L" — kg/L is numerically
+  // identical to g/cm³; multiplied by 1000 it gives kg/m³. Bounded
+  // to 0.1–25 to capture realistic building-material range
+  // (lightweight wood ~0.3 to steel ~7.85; cap at 25 leaves room
+  // for unusual cases without admitting wildly off values).
+  if (_get(rec, "physical.density.value_kg_m3") == null) {
+    var sg = text.match(/(?:specific\s+gravity|relative\s+density)\s*[:\s]+((?:\d{1,2})(?:\.\d+)?)\s*(?:kg\s*\/\s*L|g\s*\/\s*cm|\b)/i);
+    if (sg) {
+      var sgVal = parseFloat(sg[1]);
+      if (sgVal > 0.1 && sgVal < 25) _setPath(rec, "physical.density.value_kg_m3", Math.round(sgVal * 1000));
+    }
   }
   // Wood EPD product-properties table form: "Mass (including moisture)
   // kg <N>" where <N> is mass per the declared unit. For declared unit
@@ -1466,7 +1484,10 @@ function extractEuIbu(text, rec) {
     if (unitM) _setPath(rec, "carbon.stated.per_unit", _cleanLine(unitM[1]));
   }
   if (_get(rec, "physical.density.value_kg_m3") == null) {
-    var densM = text.match(/(?:average\s+weighted\s+)?density\s+of\s+((?:\d{1,3}(?:,\d{3})+|\d{2,})(?:\.\d+)?)\s*kg\/m\s*[³^]?3?/i);
+    // Tolerant variants (2026-05-19): "density: <N>" / "density <N>"
+    // (no `of`), pdf.js-inserted whitespace around the slash, optional
+    // "gross / dry / apparent / bulk" qualifiers preceding "density".
+    var densM = text.match(/(?:gross|dry|apparent|bulk|average\s+weighted)?\s*density[\s:]*(?:of\s+)?((?:\d{1,3}(?:,\d{3})+|\d{2,})(?:\.\d+)?)\s*kg\s*\/\s*m\s*[³^]?3?/i);
     if (densM) _setPath(rec, "physical.density.value_kg_m3", _toNum(densM[1].replace(/,/g, "")));
   }
 }
