@@ -47,6 +47,18 @@ Day's net delta: **+3pp canonical, +9.7pp v1.1, +5.7pp Existing BEAM** on metada
 - weak: 76 (37%) — noisy, threshold tuning deferred
 - **unmatched: 30 (14%)** — the catalogue-update candidates BfCA should review
 
+### Known issue discovered EOD 2026-05-19 — Pass 1+2 patches in wrong function
+
+Late in the marathon (after the strategic-§14 commit) a debug-trace on 810.CRMCA_EPD_BC.pdf (NSF format) revealed that the new date / EPD-type / validation patterns added in Pass 1 + Pass 2 are inside `extractNA` (line 1163+), not the actual `extractCommon` (line 412+) as the commit messages claimed. The functions are ~700 lines apart and the visual context was easy to mistake.
+
+**Impact:** NSF (30 Existing-BEAM samples), EPD-International (14), and unknown-format (49) samples never see the Pass 1+2 improvements — about 26% of the 354-sample audit. This explains why Pass 1's pub_date lift on Existing BEAM was only +6pp instead of the +22pp v1.1 saw.
+
+**Fix (single follow-up commit):** Move three blocks from inside `extractNA` (lines 1319–1411) up into the real `extractCommon` (line 412+). The blocks: pub_date chain, expiry chain, EPD-type label+prose, markets, validation-type. NSF / EPD-Intl / unknown samples should see immediate coverage lift; canonical 30 should be unchanged (NA samples still get the same patterns since extractCommon runs after the per-format extractors); v1.1 should see another +5-10pp metadata.
+
+**Verification:** After moving the blocks, re-run all 3 audits. The 810.CRMCA-class test case is: `Period of Validity 5 Years – Valid until July 27, 2027` should set `epd.expiry_date: 2027-07-27`.
+
+This is the cleanest first-thing-tomorrow task. Independent of any §14 / LLM-as-parser work.
+
 ### Pickup — what you're doing next
 
 The branch is at a clean stopping point. Most likely user-driven next moves:
