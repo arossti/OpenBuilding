@@ -488,7 +488,7 @@ function extractCommon(text, rec) {
 // harness 2026-04-27.
 var DATA_ROW_TAIL = "(?=\\s+-?\\s*\\d|\\s*[\\]\\)]|\\s*$)";
 
-var IMPACT_INDICATORS = [
+export var IMPACT_INDICATORS = [
   // GWP fossil / total — comes BEFORE the biogenic regex so the more
   // specific "BIO" alternation doesn't grab the fossil row.
   {
@@ -801,7 +801,7 @@ function _extractIndicatorTotals(text, rec) {
 // the labels EPDs actually use in tabular impact rows; reuses the same
 // vocabulary as the IMPACT_INDICATORS regexes for English forms but
 // strips the unit + value parts so the regex matches the row prefix.
-var _BYSTAGE_LABELS = [
+export var _BYSTAGE_LABELS = [
   // GWP fossil/total — guards against matching the Fossil/Biogenic
   // sub-rows by negative lookahead, same pattern as fix #5.
   {
@@ -929,7 +929,7 @@ function _tokenizeImpactNumbers(line) {
 // So for "1 mt" rows, label is at i+1 (forward 1).
 // For "1 ton" rows, label is at i-2 (back 2).
 // Try those two positions in order; first match wins.
-var _CISC_LABEL_PATTERNS = [
+export var _CISC_LABEL_PATTERNS = [
   { rx: /^\s*Global\s+warming\s*$/i, key: "gwp_kgco2e" },
   { rx: /^\s*Ozone\s+depletion\s*$/i, key: "ozone_depletion_kgcfc11eq" },
   { rx: /^\s*Acidification\s+of\s+land\s+and\s+water\s*$/i, key: "acidification_kgso2eq" },

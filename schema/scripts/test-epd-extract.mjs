@@ -309,6 +309,55 @@ function fmtPct(n, d) {
   return `${n}/${d}`;
 }
 
+// Synthesise a short human-readable label from a regex source so the
+// per-pattern audit table is readable. Strips escape backslashes /
+// whitespace tokens, truncates with ellipsis.
+function shortRxLabel(rx, maxLen) {
+  if (!rx || !rx.source) return "?";
+  let s = rx.source
+    .replace(/\\s\+/g, " ")
+    .replace(/\\s\*/g, "")
+    .replace(/\\s/g, " ")
+    .replace(/\\b/g, "")
+    .replace(/\\\./g, ".")
+    .replace(/\(\?:/g, "(")
+    .replace(/\\n|\\r/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (s.length > maxLen) s = s.substring(0, maxLen - 1) + "…";
+  return s;
+}
+
+// Per-pattern hit tally (workplan §12.5 item 1). Mirrors production
+// semantics: IMPACT_INDICATORS are matched against the whole joined
+// text (same as _extractIndicatorTotals); _BYSTAGE_LABELS and
+// _CISC_LABEL_PATTERNS are tested per-line (same as _extractByStage /
+// _findCISCDataRowKey). A pattern with 0 hits across the full sample
+// set is a deprecation candidate.
+function tallyWholeText(allText, patternArr, getRx, hits) {
+  for (let i = 0; i < patternArr.length; i++) {
+    const rx = getRx(patternArr[i]);
+    if (!rx) continue;
+    if (rx.test(allText)) hits[i]++;
+  }
+}
+
+function tallyPerLine(allText, patternArr, getRx, hits) {
+  const lines = allText.split("\n");
+  for (let i = 0; i < patternArr.length; i++) {
+    const rx = getRx(patternArr[i]);
+    if (!rx) continue;
+    let matched = false;
+    for (let l = 0; l < lines.length; l++) {
+      if (rx.test(lines[l])) {
+        matched = true;
+        break;
+      }
+    }
+    if (matched) hits[i]++;
+  }
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const pdfjs = await loadPdfjs();
@@ -343,6 +392,15 @@ async function main() {
     console.log(`Using --root ${sampleRoot} (${pdfs.length} PDFs)`);
   }
 
+  // Per-pattern hit-count audit (workplan §12.5 item 1). Counters
+  // sized to each pattern array; bumped once per sample where the
+  // regex fires (mirrors production semantics — see tallyWholeText /
+  // tallyPerLine). Patterns with 0 hits across the full set surface
+  // as deprecation candidates in the snapshot.
+  const impactHits = new Array(Extract.IMPACT_INDICATORS.length).fill(0);
+  const byStageLabelHits = new Array(Extract._BYSTAGE_LABELS.length).fill(0);
+  const ciscHits = new Array(Extract._CISC_LABEL_PATTERNS.length).fill(0);
+
   const results = [];
   for (const pdfPath of pdfs) {
     const rel = relative(REPO_ROOT, pdfPath);
@@ -367,6 +425,14 @@ async function main() {
       console.error(`✗ ${file}  extract failed: ${err.message}`);
       continue;
     }
+
+    // Per-pattern audit: re-join page texts the same way extract()
+    // does (page-pair separator "\n\n") so the regexes see identical
+    // input to production.
+    const allText = (extracted.pageTexts || []).join("\n\n");
+    tallyWholeText(allText, Extract.IMPACT_INDICATORS, (e) => e.regex, impactHits);
+    tallyPerLine(allText, Extract._BYSTAGE_LABELS, (e) => e.rx, byStageLabelHits);
+    tallyPerLine(allText, Extract._CISC_LABEL_PATTERNS, (e) => e.rx, ciscHits);
 
     const summary = summarizeRecord(result.record);
     const expected = await loadExpected(file);
@@ -480,6 +546,47 @@ async function main() {
     console.log(`  ${path.padEnd(50)} ${hits.toString().padStart(3)}/${ok.length}  (${pct}%)`);
   }
 
+  // ── Per-pattern hit count (workplan §12.5 item 1) ───
+  // For each entry in IMPACT_INDICATORS / _BYSTAGE_LABELS /
+  // _CISC_LABEL_PATTERNS, report how many samples the regex fires on.
+  // Patterns with 0 hits are deprecation candidates; patterns with 1
+  // hit are also candidates if the matched sample's coverage is
+  // already strong from another regex. This is the data input to the
+  // §12.3 architecture decision — geometric/declarative/HITL choice
+  // becomes cheaper to evaluate when we can name the dead weight.
+  function printPatternAudit(title, patternArr, hits, getRx, getLabel) {
+    console.log("");
+    console.log(`Per-pattern hit count — ${title} (${patternArr.length} patterns × ${ok.length} samples):`);
+    for (let i = 0; i < patternArr.length; i++) {
+      const hit = hits[i];
+      const pct = ok.length ? ((100 * hit) / ok.length).toFixed(0) : "0";
+      const tag = hit === 0 ? "  DEAD" : "";
+      const label = getLabel(patternArr[i], i) || shortRxLabel(getRx(patternArr[i]), 56);
+      console.log(`  [${String(i).padStart(2, "0")}] ${label.padEnd(58)} hits=${String(hit).padStart(3)}/${ok.length}  (${pct}%)${tag}`);
+    }
+  }
+  printPatternAudit(
+    "IMPACT_INDICATORS",
+    Extract.IMPACT_INDICATORS,
+    impactHits,
+    (e) => e.regex,
+    (e) => (e.schemaKey ? `${e.schemaKey} — ${e.label || ""}`.trim() : null)
+  );
+  printPatternAudit(
+    "_BYSTAGE_LABELS",
+    Extract._BYSTAGE_LABELS,
+    byStageLabelHits,
+    (e) => e.rx,
+    (e) => e.key
+  );
+  printPatternAudit(
+    "_CISC_LABEL_PATTERNS",
+    Extract._CISC_LABEL_PATTERNS,
+    ciscHits,
+    (e) => e.rx,
+    (e) => e.key
+  );
+
   // ── Ground-truth aggregate (workplan §10.3) ─────────
   const annotated = ok.filter((r) => r.expected);
   const totalExtractFailures = annotated.reduce((a, r) => a + r.groundTruth.extractionFailures.length, 0);
@@ -564,6 +671,49 @@ async function main() {
         `| ${r.group}/${r.file} | ${bsCell(bs.gwp_kgco2e)} | ${bsCell(bs.gwp_bio_kgco2e)} | ${bsCell(bs.ozone_depletion_kgcfc11eq)} | ${bsCell(bs.acidification_kgso2eq)} | ${bsCell(bs.eutrophication_kgneq)} | ${bsCell(bs.smog_kgo3eq)} | ${bsCell(bs.abiotic_depletion_fossil_mj)} | ${bsCell(bs.water_consumption_m3)} | ${bsCell(bs.primary_energy_nonrenewable_mj)} | ${bsCell(bs.primary_energy_renewable_mj)} |`
       );
     }
+    // Per-pattern hit count (workplan §12.5 item 1). Identifies dead-
+    // weight regexes that are candidates for deprecation in the §12.3
+    // architecture review. A pattern matching 0 samples earned nothing
+    // for its maintenance cost; 1 sample is also a candidate when the
+    // matched sample's coverage is already strong from another regex.
+    function mdPatternAudit(title, patternArr, hits, getRx, getLabel) {
+      lines.push("");
+      lines.push(`## Per-pattern hit count — ${title}`);
+      lines.push("");
+      lines.push(`${patternArr.length} patterns × ${ok.length} samples. \`DEAD\` = 0 hits, deprecation candidate.`);
+      lines.push("");
+      lines.push("| # | Key / label | Hits | % | Status |");
+      lines.push("|---:|---|---:|---:|---|");
+      for (let i = 0; i < patternArr.length; i++) {
+        const hit = hits[i];
+        const pct = ok.length ? ((100 * hit) / ok.length).toFixed(0) : "0";
+        const tag = hit === 0 ? "DEAD" : hit === 1 ? "thin" : "";
+        const label = getLabel(patternArr[i], i) || shortRxLabel(getRx(patternArr[i]), 56);
+        lines.push(`| ${i} | ${label.replace(/\|/g, "\\|")} | ${hit}/${ok.length} | ${pct}% | ${tag} |`);
+      }
+    }
+    mdPatternAudit(
+      "IMPACT_INDICATORS",
+      Extract.IMPACT_INDICATORS,
+      impactHits,
+      (e) => e.regex,
+      (e) => (e.schemaKey ? `\`${e.schemaKey}\` — ${e.label || ""}`.trim() : null)
+    );
+    mdPatternAudit(
+      "_BYSTAGE_LABELS",
+      Extract._BYSTAGE_LABELS,
+      byStageLabelHits,
+      (e) => e.rx,
+      (e) => (e.key ? `\`${e.key}\`` : null)
+    );
+    mdPatternAudit(
+      "_CISC_LABEL_PATTERNS",
+      Extract._CISC_LABEL_PATTERNS,
+      ciscHits,
+      (e) => e.rx,
+      (e) => (e.key ? `\`${e.key}\`` : null)
+    );
+
     // Ground-truth section appended only when at least one sample is
     // annotated. Empty expected/ dir = no section, no clutter.
     if (annotated.length) {
