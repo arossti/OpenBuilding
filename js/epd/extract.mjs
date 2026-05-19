@@ -1305,13 +1305,38 @@ function extractNA(text, rec) {
     _findDateAfterLabel(text, /Expiry\s+date/i);
   if (expIso) _setPath(rec, "epd.expiry_date", expIso);
 
-  // EPD type
-  var typ = text.match(/EPD\s+type\s*[:\s]+([^\n\r]{4,40})/i);
+  // EPD type — label-anchored first ("EPD type: <value>" / "Declaration
+  // type:" / "EPD scope:"). The labels themselves are uncommon — only
+  // ~20% of EPDs publish an explicit type field — but when present they
+  // give the cleanest signal.
+  var typ =
+    text.match(/EPD\s+type\s*[:\s]+([^\n\r]{4,80})/i) ||
+    text.match(/Declaration\s+type\s*[:\s]+([^\n\r]{4,80})/i) ||
+    text.match(/Type\s+of\s+EPD\s*[:\s]+([^\n\r]{4,80})/i);
   if (typ) {
     var t = typ[1].toLowerCase();
     if (/product[-\s]*specific/.test(t)) _setPath(rec, "epd.type", "product_specific");
-    else if (/industry[-\s]*average/.test(t)) _setPath(rec, "epd.type", "industry_average");
+    else if (/(?:industry|business|sector)[-\s]*average/.test(t)) _setPath(rec, "epd.type", "industry_average");
+    else if (/company[-\s]*specific/.test(t)) _setPath(rec, "epd.type", "product_specific");
     else if (/generic/.test(t)) _setPath(rec, "epd.type", "generic");
+  }
+
+  // Prose-based fallback. Most NA / Wood EPDs declare type in title-prose
+  // ("A company-specific cradle-to-gate EPD for X", "product-specific
+  // Type III Environmental Product Declaration"). Scope to the first
+  // 100 lines + require the type keyword to sit within 60 chars of an
+  // EPD/Declaration/"Type III" anchor so body-text mentions of e.g.
+  // "industry-average data" don't false-positive into the type slot.
+  if (!_get(rec, "epd.type")) {
+    var head = text.split("\n").slice(0, 100).join("\n");
+    var anchored =
+      head.match(/(?:EPD|Declaration|Type\s*III)[^\n]{0,60}?(product[-\s]+specific|company[-\s]+specific|industry[-\s]+average|business[-\s]+average|sector[-\s]+average)/i) ||
+      head.match(/(product[-\s]+specific|company[-\s]+specific|industry[-\s]+average|business[-\s]+average|sector[-\s]+average)[^\n]{0,60}?(?:EPD|Declaration|Type\s*III)/i);
+    if (anchored) {
+      var phrase = anchored[1].toLowerCase();
+      if (/product[-\s]+specific|company[-\s]+specific/.test(phrase)) _setPath(rec, "epd.type", "product_specific");
+      else if (/(?:industry|business|sector)[-\s]+average/.test(phrase)) _setPath(rec, "epd.type", "industry_average");
+    }
   }
 
   // Markets of applicability
@@ -1321,6 +1346,31 @@ function extractNA(text, rec) {
   if (mkts) {
     var arr = _splitToCodes(mkts[1]);
     if (arr.length) _setPath(rec, "provenance.markets_of_applicability", arr);
+  }
+
+  // Validation type — runs for all formats (per-format extractors only
+  // see the subset where their format detection fires). Tries the
+  // verification-marker forms in order of specificity:
+  //   - "internally X externally"            — IBU adverb form
+  //   - "internal X external"                — adjective form (Arcadia)
+  //   - "X__ Externally" / "___ X external"  — underscore-noise from
+  //                                            checkbox-replacement layout (EFCO)
+  //   - "External verification" / "Independent verification" — prose
+  if (!_get(rec, "epd.validation.type")) {
+    var validationText = text.replace(/_+/g, " "); // collapse underscore checkbox-noise
+    if (/internally\s*[x✓]\s*externally/i.test(validationText)) {
+      _setPath(rec, "epd.validation.type", "external");
+    } else if (/internal\s*[x✓]\s*external/i.test(validationText)) {
+      _setPath(rec, "epd.validation.type", "external");
+    } else if (/[x✓]\s*externally/i.test(validationText) || /[x✓]\s*external\b/i.test(validationText)) {
+      _setPath(rec, "epd.validation.type", "external");
+    } else if (/[x✓]\s*internally/i.test(validationText) || /[x✓]\s*internal\b/i.test(validationText)) {
+      _setPath(rec, "epd.validation.type", "internal");
+    } else if (/(?:external|independent|third[-\s]+party)\s+verification/i.test(text)) {
+      _setPath(rec, "epd.validation.type", "external");
+    } else if (/internal\s+verification/i.test(text)) {
+      _setPath(rec, "epd.validation.type", "internal");
+    }
   }
 }
 
