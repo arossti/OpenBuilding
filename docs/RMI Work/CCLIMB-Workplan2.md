@@ -165,43 +165,107 @@ The OBJECTIVE pattern adds another layer that fits CCLIMB perfectly:
 
 That's the central interaction: practitioner pulls service life from 35 → 100 years, watches the blue (PT) curve shift left of red (RT), watches ΔCRF(100) become more negative (cooling effect), watches completeness rise toward 1.0.
 
-### 3.2. Axis layout for CCLIMB
+### 3.2. Axis layout for CCLIMB — one axis per LCA module
 
-Draft axis order (left to right; tunable based on what makes the call narrative cleanest):
+**Clarified by Andy 2026-05-19:** *"Each axis on the PC graph would be an ISO scoped carbon division, i.e. A1, A2, A3, etc."*
 
-```
-INPUTS (sliders, blue editable dots)          |  CALCULATED (red & blue lines)
-─────────────────────────────────────────────────────────────────────────────────────
-LIFESPAN     RT_growth   RT_decay   EOL_inc%  EOL_landfill%  ΔCRF(20)  ΔCRF(50)  ΔCRF(100)  ΔCRF(T_ref)  ΔT(100)  C(100)
-   yr           yr           yr        %            %        Wm⁻²·yr   Wm⁻²·yr   Wm⁻²·yr    Wm⁻²·yr      °C·yr    —
-```
+This is the right framing because LCA practitioners already think in module terms. Putting one axis per EN 15804+A2 module aligns the chart directly with the way EPDs are read, and the way BEAMweb / EPD-Parser stratify data internally. The OBJECTIVE pattern (each axis = one engineering metric) maps cleanly: in CCLIMB, each axis = one life-cycle module.
 
-For the OBJECTIVE-style "Reference" vs "Target" split:
-- **Red line (RT)** — the reference trajectory through the input axes (RT-A defaults: e.g. lifespan = 0 means immediate release, decay 5y) and the resulting output curve through ΔCRF axes
-- **Blue line (PT)** — the project trajectory: user's actual product lifespan, custom RT-B parameters, real EOL mix, resulting in the project's climate response
-
-When the practitioner drags a blue input slider, the blue output recomputes. The red line stays fixed (it's the counterfactual). **The vertical gap between the two lines at each output axis is the climate benefit (or burden) of the project at that horizon.**
-
-### 3.3. Per-phase axis groups (A1 / A3 / A5 / B / C4)
-
-CCLIMB inputs are stratified by EN 15804+A2 phase. The parallel-coordinates chart can have *banded axes* (visual grouping) to make the phase boundaries explicit:
+Draft axis order (left to right):
 
 ```
-│  A1   │   A3   │     A5      │    B      │    C4     │  ↓ Climate response (calculated)
-│ C_A1  │  C_A3  │  C_inc  C_lf│  lifespan │  EOL mix  │  ΔCRF(20)  ΔCRF(50)  ΔCRF(100)  ΔCRF(T_ref) ...
+PRODUCT STAGE  │  CONSTRUCTION  │      USE STAGE       │     END OF LIFE     │ BEYOND │ CLIMATE RESPONSE (calculated)
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  A1   A2   A3 │    A4    A5    │ B1 B2 B3 B4 B5 B6 B7 │   C1   C2   C3   C4 │   D    │ ΔCRF(100)  ΔT(100)  C(100)
+ kgCO2e per module                                                              kgCO2e   Wm⁻²·yr      °C·yr   —
 ```
 
-Banding could be done via background-color zones behind the axis labels (like the OBJECTIVE Refresh/Decarbonize/Optimize button row, but applied to the axis strip). The user immediately reads "these axes are A1 inputs, these are EOL, these are climate response."
+Per-axis interpretation:
+- **A1** = raw material extraction (often negative for biogenic — carbon-uptake during feedstock growth)
+- **A2** = transport from extraction to manufacturing
+- **A3** = manufacturing-stage process emissions
+- **A4** = transport to site
+- **A5** = installation-stage emissions (incl. install-waste decay routed via WARM)
+- **B1–B7** = use-stage (operational + maintenance + replacement); typically near-zero for most carbon-storing materials, B4 replacement carries new A+C of the replacement product
+- **C1–C4** = end-of-life (demolition + transport + waste processing + disposal/release)
+- **D** = beyond-system-boundary credits (recycling potential, energy recovery)
+- **Climate response axes** (right side, calculated only) = ΔCRF(100), ΔT(100), Completeness — collapsed time-explicit response
 
-### 3.4. Per-phase axis groups — the A-D scope Andy raised
+Red line (RT) and blue line (PT) trace through every module axis. **The gap between red and blue at each axis = the per-module carbon flow attributable to the project relative to the counterfactual.** That's a far richer comparison than a single GWP100 number can deliver — at a glance the practitioner sees which modules drive the climate benefit.
 
-Andy's framing in the request — "RT/PT comparison could be done in the form of a parallel coordinate graph for each phase of scoped carbon A-D" — implies *separate* parallel-coordinate views per LCA module, or a master view with phase grouping. Two designs to discuss:
+Phase grouping happens via banded backgrounds behind the axes (Product / Construction / Use / EOL / Beyond / Response), so the eye reads the EN 15804 phase boundaries without needing axis-label noise.
 
-**(a) Master chart with phase banding** (described above). One chart, all axes, with visual grouping. Pros: side-by-side comparison across the full life cycle. Cons: lots of axes.
+### 3.3. Inputs vs calculated axes
 
-**(b) Per-phase mini-charts + master summary chart.** Four small parallel-coordinate widgets (A, B-use, C-EOL, D-credits/benefits) above one master chart that shows the integrated climate response. Pros: legibility per phase. Cons: more code.
+OBJECTIVE distinguishes input (editable, blue dot) vs calculated (small dot) per its legend. CCLIMB inherits that convention:
 
-Likely answer is **(a) for v1** — master with banding — because the OBJECTIVE codebase Andy has already does the single-chart form. (b) is a v2 enhancement when we know what practitioners reach for.
+| Axis category | Editable / calculated | Notes |
+|---|---|---|
+| A1, A3, A5 carbon flows | **Editable** for standalone mode; **pre-filled & editable** for catalogue mode | These are the EPD-supplied module inventories |
+| B4 (replacement) | **Editable** | Models a service-life shortfall — user drags B4 up to simulate early replacement |
+| C1–C4 EOL emissions | **Editable** but derived from EOL mix (Incineration / Landfill / Recycle / Reuse %) and decay rates | Sliders for EOL mix sit *under* the axes, drive the C-module values |
+| D credits | **Editable** | Reuse / recycle credit estimates from EPD or user input |
+| ΔCRF(100), ΔT(100), Completeness | **Calculated only** | Output of the IRF convolution; tiny dots, no drag |
+
+**Service life** lives in the form pane *next to* the chart (not as an axis), because it affects WHICH year each module's flow lands in — that's a time-shift parameter rather than a per-module magnitude.
+
+### 3.4. Service life as a chart-driving parameter (separate from axes)
+
+The lifespan input doesn't deserve its own axis — instead it drives the temporal placement of each module's flow in the underlying convolution. UI sketch:
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  Product:  [Dropdown: Glulam beam ▼]    Lifespan: [75] yr   T_ref: [250] yr │
+│                                                                              │
+│  Feedstock category: [C — Perennial regenerative ▼]                          │
+│  Reference Trajectory: [RT-A: –5/+5 default ▼]  or [RT-B custom: g=5 d=5 yr] │
+│  End-of-life mix:  Inc [10]%  Landfill [60]%  Recycle [20]%  Reuse [10]%     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  [Parallel-coordinates chart — one axis per A1..D + climate response]        │
+│                                                                              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  Reference (RT) / Project (PT) / Δ / Direction / Completeness rows           │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+Dragging the lifespan number from 75 → 25 re-runs the climate calc: the B4-onwards carbon flows shift to earlier years, the IRF convolution sees the EOL release sooner, ΔCRF(100) becomes less negative, the blue line on the climate-response axes moves toward the red line. **Visible, immediate, intuitive.** This is the "demolished after 10 years" pro-rating question I raised earlier — handled natively by the chart.
+
+### 3.5. Per-category input requirements (axis vocabulary)
+
+Folding in **Table from CCOB §6 (p.12–13)** — what each feedstock category requires as input. This drives which axes are *editable* for each feedstock the user selects, and which axes get defaulted from RT-A archetypes.
+
+| Cat | Required PT inputs (axis values user enters or pre-fills from EPD) | Required RT inputs (red-line counterfactual) | Documented additionally |
+|---|---|---|---|
+| **A** Residues / Waste | Biogenic carbon entering product (A1); timing of carbon retention (lifespan); EOL release profile (decay / combustion / landfill) | Counterfactual near-term atmospheric release profile absent product use | Decay assumptions; sensitivity analysis if timing materially affects results |
+| **B** Short-rotation crops | Carbon incorporated; product retention duration; EOL release profile | Continued short-cycle biological turnover profile absent product use | Regrowth cycle length; LULUC excluded unless explicitly in inventory |
+| **C** Perennial regenerative | Same as B | Multi-year regrowth trajectory with standing carbon stock maintained | Harvest cycle duration; explicit statement that harvest does not materially reduce standing stocks |
+| **D** Virgin long-rotation timber *(v2)* | Same | Forest counterfactual trajectory per Timber Tier framework (Tier 1 Commodity / Tier 2 Managed Regional / Tier 3 Stand-Specific) | Tier level disclosed; explicit counterfactual documentation |
+| **E** Engineered atmospheric uptake | Atmospheric CO₂ incorporated; timing of incorporation; durability / stability / decay profile | Baseline: CO₂ remains in atmosphere absent engineered incorporation | Permanence + durability assumptions documented; opportunity cost modeled only if land displacement |
+
+UI mapping: when the user picks a feedstock category in the form pane, the chart's editable-axis set updates accordingly. E.g. picking **A — Residues** enables A1 + A5 + C4 (decay timing) axes, defaults the RT line to RT-A's exponential-decay archetype with the documented k constant. Picking **C — Perennial** enables A1 + B (replacement) + harvest cycle, defaults the RT to "continuous uptake with minimal stock loss." This category-driven UI prevents the user from filling in axes that don't apply to their product type and reduces the chance of methodology mis-application.
+
+### 3.6. The CCOB calculation-workflow diagram as a chart precedent
+
+CCOB Workplan p.14 has a horizontal calculation-workflow diagram showing the module flow:
+
+```
+[Photosynthetic CO₂ removal]  [Biogenic harvest residues]  [Biogenic mfg residues]  [Construction residues]  [Waste incineration / other EOL]
+       A1                              A2                          A3                       A5                          C4
+   (negative)                      (positive)                  (positive)                (positive)            (positive or negative for D credit)
+```
+
+with colored arrows (green = removal, red = emission) on each module. **This is essentially the parallel-coordinates axis layout in a static form.** CCLIMB-app's interactive version replaces the static arrow widths with draggable axis points: practitioner sees the same horizontal module flow they already understand from CCOB documentation, but each point is a value they can adjust to test sensitivity. The continuity with the methodology's own diagram is a UX gift — practitioners don't need to learn a new visualization language.
+
+### 3.7. Whole-building roll-up
+
+For Step 9 of Chris's flowchart (whole-building view), the same parallel-coordinates chart aggregates across products. Two presentations to consider:
+
+**(a) Sum-of-products** — one PT line that's the sum of all products' module flows. RT line is the sum of all products' reference trajectories. Same chart, same axis layout, just bigger numbers. Cleanest.
+
+**(b) Stacked-product overlay** — each product gets its own faint line, the bold blue line is the total. Useful for spotting which products contribute most to the climate response.
+
+Likely answer is **(a) for v1** with a sortable per-product table beneath (which product contributes how much to each module). (b) as a v2 toggle if practitioners ask for it.
 
 ### 3.5. Below-the-chart numerical table (OBJECTIVE-style)
 
@@ -454,7 +518,100 @@ Estimated 8–11 days for v1 alpha. Most of the cost is climate-model implementa
 
 ---
 
-## 11. Outstanding from Andy before P0 starts
+## 11. Methodology evolution — CCOB → CCLIMB
+
+The CCOB first draft (Feb 26, 2023) and the CCLIMB second draft (April 26, 2023) share most of the methodology, but several decisions evolved between them. Worth knowing at the working-group call so the conversation distinguishes "what's settled" from "what's still moving."
+
+### 11.1. Document scope expanded
+
+- **CCOB** = *Carbon Climate Overlay for Buildings* — framed as an "overlay" sitting alongside LCA, focused on buildings.
+- **CCLIMB** = *Carbon & Climate Impact Model for Materials and Buildings* — promoted from "overlay" to "model" + explicitly covering both materials and buildings (consistent with EPD-level + WBLCA-level applicability).
+
+The name change signals broader ambition + clearer methodological standing in the LCA community.
+
+### 11.2. Feedstock categorization refined (4 → 5)
+
+CCOB had four Tier 1 sub-categories: A (Waste), B (Short-rotation), C (Perennial), D (Engineered Atmospheric Uptake).
+
+CCLIMB second draft has five: **C "Perennial systems" was split into C (Perennial regenerative — bamboo, coppice) and a new D "Harvest without depletion" (cork, rubber)**, and the original D became **E (Engineered Atmospheric Uptake)**.
+
+The refinement matters because cork and rubber have *different* counterfactuals than bamboo (no harvest-cycle reset; continuous accumulation absent harvest). CCLIMB-app should respect the five-category structure not the original four.
+
+### 11.3. Tier 1 horizon: 10 yr → 5 yr (in flight)
+
+CCOB used a **10-year horizon** consistently as the Tier 1 categorization criterion. CCLIMB second draft has **both 5-year (in some places) and 10-year (in others)** — the working group has been tightening 10 → 5 but didn't fully sweep the doc.
+
+This is a real working-group decision in flight, not a translation typo. CCLIMB-app v1 should support both as a configurable parameter until the working group settles.
+
+### 11.4. Calculator requirements formalized
+
+CCOB §6 was a short bullet list of calculator-model criteria (IPCC alignment, transparency, CO₂ + CH₄ tracking, LCA-scale suitability, open source).
+
+CCLIMB §6 (now spanning ~30 lines and 10 sub-sections) formalizes this into a Calculator Requirements specification covering: scope and role, scientific basis (AR6 chain), climate system parameters (ECS / TCR), gas coverage, input requirements, temporal treatment, output requirements, transparency, consistency, scenario treatment.
+
+**Implication for BfCA's CCLIMB-app:** the app is itself a "climate calculation engine" per CCLIMB §6.1, and the requirements there are not aspirational — they're how the methodology defines a *compliant* calculator. v1 must meet §6.1–§6.9 minimum or the working group won't recognize CCLIMB-app as a valid implementation.
+
+### 11.5. Appendix A — EPD annex framing (CCLIMB-only addition)
+
+CCOB did not have a formal EPD-annex specification. CCLIMB's Appendix A is *the* mechanism by which CCLIMB results live in EPDs without conflicting with declared GWP100 values:
+
+- **Supplementary information only** — never inside the core environmental impact tables.
+- **Shall not** be used to adjust, offset, or reinterpret declared GWP.
+- **ΔCRF(100y)** is the EPD-reportable headline, with the explicit "comparable in logic to GWP100 but NOT a CO₂e value" framing.
+- Required interpretation statement must accompany every reported result.
+
+The CCLIMB-app's export pipeline (§4.6 above) needs to emit reports that conform to Appendix A — the supplementary section title, the required interpretation statement, the counterfactual-definition disclosure, etc.
+
+### 11.6. Climate-response metric split
+
+CCOB had a single `ΔCR(t)` (climate response) metric. CCLIMB split this into:
+
+- `ΔRF(t)` — radiative forcing response (instantaneous)
+- `∫ΔRF(t)dt` — integrated / cumulative radiative forcing (the GWP100-comparable form)
+- `ΔT(t)` — temperature change response
+
+The split gives practitioners more granular reporting + makes the comparison to GWP100 cleaner. Both axes are reportable.
+
+### 11.7. RT-Low / RT-High demoted to appendix
+
+CCOB §5.1.2–§5.1.3 had RT-Low (optimistic bound) and RT-High (conservative bound) as primary RT archetypes alongside RT-A and RT-B.
+
+CCLIMB second draft kept RT-Low / RT-High in the methodology but moved them to "Draft Reference Trajectories for Tier 2" appendix, since Tier 2 (timber) is deferred to v2. RT-A and RT-B are the only Tier 1 archetypes in v1 of the methodology.
+
+CCLIMB-app v1 only needs to ship RT-A + RT-B. When Tier 2 lands, RT-Low / RT-High come back as the bracket pair for timber counterfactuals.
+
+---
+
+## 12. Interpretation neutrality — load-bearing design principle
+
+CCOB §11 (carried forward as CCLIMB's design ethos): *"CCOB does not declare materials 'good' or 'bad.' Instead, it reports whether building use delays or accelerates atmospheric return relative to each reference trajectory, and how that timing translates into radiative forcing and temperature response over time. Climate benefit or disbenefit exists only relative to a defined reference trajectory and is determined solely by the time-explicit comparison of trajectories. (Rationale: Reinforces 'let results speak' neutrality.)"*
+
+This is non-negotiable for the BfCA CCLIMB-app:
+
+- **No ranking** of materials, no "best to worst" lists, no green-checkmark / red-X scoring.
+- **No recommendations** ("you should choose CLT over concrete") — the app only reports the time-explicit comparison.
+- **No defaults that imply judgment** — when the user picks RT-B custom, no auto-fill that biases toward "favorable" counterfactual assumptions.
+- **Three semantic layers in the output panel** (also from CCOB §9 Reporting requirements):
+  - **Carbon storage (state)** — how much carbon is in the product at any given time. *Factual.*
+  - **Delayed emissions (mechanism)** — what's been deferred from atmosphere vs counterfactual. *Mechanistic.*
+  - **Climate benefit or disbenefit (conditional interpretation)** — the ΔCRF(100y) value with the explicit "relative to specified RT" caveat. *Interpretive.*
+
+The output panel should visually separate these three layers so practitioners can't accidentally read the state value as a benefit claim. Likely UI: three rows, three different colors, three explicit labels.
+
+### 12.1. What this rules out for the app
+
+- A "decarbonize my building" optimizer that picks materials. CCLIMB-app does not optimize — it reports.
+- A "score" or "grade" assigned to a product based on its ΔCRF. The methodology is intentionally bound to relative comparison against an explicit RT; an absolute score would force a hidden RT.
+- A leaderboard / catalogue ranking by ΔCRF — same reason.
+
+### 12.2. What this enables
+
+- A practitioner brings their *own* RT-B custom inputs (regional regrowth rates, project-specific lifespans), and the app *shows them the result*. The practitioner — not the app — assigns "benefit" or "disbenefit" meaning.
+- Side-by-side scenario comparison (two PT lines, one RT line) — the practitioner sees how different lifespan assumptions move the climate response, and reports both as alternative scenarios.
+
+---
+
+## 13. Outstanding from Andy before P0 starts
 
 - [ ] **Working-group decisions** from the 3pm call — particularly which IRF model is mandated and whether T_ref locks at 250 yr.
 - [ ] **OBJECTIVE D3 codebase** — Andy's existing parallel-coordinates implementation. Where it lives, what its current axis API looks like, what state-management it expects.
