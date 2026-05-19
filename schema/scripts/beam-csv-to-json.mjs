@@ -334,6 +334,27 @@ function buildRecord({ row, rowIndex, lookups, warnings, csvSha256 }) {
   const wwfFactorEval = wwfFactorRaw.startsWith("=") ? evalArithmeticFormula(wwfFactorRaw, row) : (wwfFactorRaw ? Number(wwfFactorRaw) : null);
   const wwfStorageFactor = wwfFactorEval !== null && Number.isFinite(wwfFactorEval) ? Math.round(wwfFactorEval * 100) / 100 : null;
   const density = readNum(row, "AG");
+  // 2026-05-19: read the Density Units column (AH) alongside the value. The
+  // BEAM source CSV stores density correctly with units like "kg/m3", "kg/m2",
+  // "kg/m", "g/cm3", "g/m2" — the prior importer dropped this column and
+  // stamped every value as kg/m³, corrupting ~170 of 673 density-bearing
+  // records (per the parity-matcher audit). The fix preserves both the raw
+  // value and its source unit; only known-convertible units populate the
+  // derived `value_kg_m3` slot, leaving null for the rest so downstream
+  // consumers can't misread per-area or per-linear values as volumetric.
+  const densityUnits = readStr(row, "AH") || null;
+  // Convert to volumetric kg/m³ where the source unit is unambiguous.
+  // Anything else returns null — preserving the raw value but refusing to
+  // pretend it's a volumetric density.
+  function _densityToKgM3(value, units) {
+    if (value === null || value === undefined) return null;
+    if (!units) return value; // legacy fallback: no units string means trust as kg/m³
+    const u = String(units).toLowerCase().trim();
+    if (u === "kg/m3" || u === "kg/m^3" || u === "kg/m³") return value;
+    if (u === "g/cm3" || u === "g/cm^3" || u === "g/cm³") return Math.round(value * 1000 * 100) / 100;
+    return null; // kg/m2, g/m2, kg/m (linear), kg/m2 at RSI 1, etc. — not directly convertible without geometry
+  }
+  const densityKgM3 = _densityToKgM3(density, densityUnits);
   const addnFactor = readNum(row, "AI");
   const biogenicFactor = readNum(row, "X");
   const carbonContent = readNum(row, "Y");
@@ -342,10 +363,13 @@ function buildRecord({ row, rowIndex, lookups, warnings, csvSha256 }) {
   if (biogenicFull === null && biogenicStored !== null && storageRetention !== null && storageRetention > 0) {
     biogenicFull = Math.round((biogenicStored / storageRetention) * 100) / 100;
   }
-  // carbon_content_kgc_per_unit = density × thickness × biogenicFactor × carbonContent (no CO2/C ratio)
+  // carbon_content_kgc_per_unit = density × thickness × biogenicFactor × carbonContent
+  // CRITICAL: this calc only makes sense when density is genuinely in kg/m³.
+  // Gate on densityKgM3 (not raw density) so per-area or per-linear values
+  // don't corrupt the biogenic carbon-content computation.
   let carbonContentKgcPerUnit = null;
-  if (density !== null && addnFactor !== null && biogenicFactor !== null && carbonContent !== null) {
-    carbonContentKgcPerUnit = Math.round(density * addnFactor * biogenicFactor * carbonContent * 100) / 100;
+  if (densityKgM3 !== null && addnFactor !== null && biogenicFactor !== null && carbonContent !== null) {
+    carbonContentKgcPerUnit = Math.round(densityKgM3 * addnFactor * biogenicFactor * carbonContent * 100) / 100;
   }
   const biogenicMethod = (biogenicFactor !== null && carbonContent !== null) ? "wwf_storage_factor" : "none";
 
@@ -435,8 +459,20 @@ function buildRecord({ row, rowIndex, lookups, warnings, csvSha256 }) {
 
     "physical": {
       "density": {
-        "value_kg_m3": density,
-        "value_lb_ft3": density !== null ? Math.round(density * 0.06243 * 100) / 100 : null,
+        // Raw value + units from the BEAM source spreadsheet — verbatim,
+        // no conversion. Units string preserves the source intent so that
+        // BEAMweb / CCLIMB assembly math can interpret per-area, per-linear,
+        // or per-volume values appropriately at consumption time.
+        "value": density,
+        "units": densityUnits,
+        // Derived volumetric kg/m³ — populated only when the source unit
+        // is unambiguous (kg/m3 or g/cm3). For per-area (kg/m2), per-linear
+        // (kg/m), and other formats, value_kg_m3 is null and consumers must
+        // use {value, units} with their own geometry to derive volumetric
+        // density. This prevents per-area grammage from being silently
+        // misread as volumetric density (the 2026-05-19 import bug).
+        "value_kg_m3": densityKgM3,
+        "value_lb_ft3": densityKgM3 !== null ? Math.round(densityKgM3 * 0.06243 * 100) / 100 : null,
         "source": density !== null ? "epd" : null
       },
       "thermal": {
