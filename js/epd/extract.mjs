@@ -1156,17 +1156,50 @@ function extractNA(text, rec) {
     text.match(/D\s*ECLARATION\s+H\s*OLDER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
     text.match(/Manufacturer\s+name(?:\s+and\s+address)?\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
     text.match(/EPD\s+Commissioner\s+(?:and\s+)?Owner\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i) ||
-    text.match(/Declaration\s+holder\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i);
+    text.match(/Declaration\s+holder\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i) ||
+    // New label patterns from 2026-05-19 scaling audit. EFCO uses
+    // "EPD HOLDER" (no colon), LP_ExpertFinish uses "DECLARATION OWNER"
+    // (no colon), Element5 uses "Owner of the EPD" (mixed case).
+    text.match(/EPD\s+HOLDER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
+    text.match(/DECLARATION\s+OWNER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
+    text.match(/Owner\s+of\s+the\s+EPD\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i);
   if (mfr) _setPath(rec, "manufacturer.name", _cleanLine(mfr[1]));
 
   // Title-prose fallback for layouts where spatial join breaks the
   // label-then-value relationship. Cover-page titles commonly read
   // "EPD for X produced by/at <CompanyName>", and the company name is
   // followed by lowercase words ("in", "for", "'s facility") which the
-  // capital-letter chain naturally stops on.
+  // capital-letter chain naturally stops on. Extended 2026-05-19 to
+  // also accept "in" (Mutual Materials: "produced in Mutual Material's
+  // Mica Plant") and "for" (LP: "PRODUCED BY LOUISIANA-PACIFIC"), to
+  // allow hyphens / dots / apostrophes in the company name, and to
+  // run case-insensitively for ALL-CAPS cover-page prose.
   if (!_get(rec, "manufacturer.name")) {
-    var prodBy = text.match(/produced\s+(?:by|at)\s+([A-Z][A-Za-z]+(?:'\w+)?(?:\s+[A-Z][A-Za-z]+){0,2})/);
+    var prodBy = text.match(/produced\s+(?:by|at|in|for)\s+([A-Z][A-Za-z0-9.\-]+(?:'\w+)?(?:\s+[A-Z][A-Za-z0-9.\-]+){0,4})/i);
     if (prodBy) _setPath(rec, "manufacturer.name", _cleanLine(prodBy[1]));
+  }
+
+  // Narrative-ownership fallback. "<X> is pleased to present this EPD"
+  // / "<X> presents this declaration" — common cover-page phrasing
+  // where no label-anchor exists (SOPRASEAL: "SOPREMA is pleased to
+  // present this Environmental Product Declaration"). Bounded by the
+  // narrative verb so the capture can't drift into body text.
+  if (!_get(rec, "manufacturer.name")) {
+    var present = text.match(/([A-Z][A-Za-z0-9 &.,'\-]{2,60}?)\s+(?:is\s+pleased\s+to\s+present|presents\s+this|hereby\s+presents)/);
+    if (present) _setPath(rec, "manufacturer.name", _cleanLine(present[1]));
+  }
+
+  // Corporate-suffix line fallback. Standalone line of the form
+  // "<X> Inc./Corp./LLC/LP/Ltd./GmbH/S.A./S.r.l." with no label.
+  // Element5 cover page ("ELEMENT5 LP – MODERN TIMBER BUILDINGS"),
+  // SOPRASEAL page 1 ("SOPREMA Inc."). Limited to the first 60 lines
+  // of the document (cover page + immediate front-matter) to avoid
+  // customer-reference bleed from body text. The capture stops at
+  // the suffix so the trailing tagline doesn't get included.
+  if (!_get(rec, "manufacturer.name")) {
+    var lines60 = text.split("\n").slice(0, 60).join("\n");
+    var suffix = lines60.match(/(?:^|\n)\s*([A-Z][A-Za-z0-9 &.,'\-]{1,60}\s+(?:Inc|Corp|Corporation|LLC|LLP|LP|Ltd|Limited|GmbH|S\.?\s?A\.?|S\.r\.l\.))\.?(?=\s|$|,|\n|–|—|-)/m);
+    if (suffix) _setPath(rec, "manufacturer.name", _cleanLine(suffix[1]));
   }
 
   // EPD ID / Declaration Number — allow embedded spaces in the value
@@ -1176,8 +1209,12 @@ function extractNA(text, rec) {
   // Glulam 3" → "EPD 296"). EPD IDs are 1-2 tokens of alphanumeric +
   // dashes/dots; anything after a known next-label word is column-bleed.
   var epdId =
-    text.match(/D\s*eclaration\s+N\s*umber\s*[#:\s]+([A-Z][A-Z0-9.\-#\s]{2,38}\d[A-Z0-9.\-#]{0,10})/i) ||
-    text.match(/EPD\s+(?:Registration\s+)?Number\s*[#:\s]+([A-Z0-9][A-Z0-9.\-#\s]{2,38}\d[A-Z0-9.\-#]{0,10})/i);
+    // First-char allows digits now (2026-05-19) so numeric-only ids
+    // like EFCO's "DECLARATION NUMBER 494" extract. Length floor
+    // dropped to 1 so "EPD 1" / "EPD 12" survive; the {2,38} body
+    // covers the typical 3-7-digit shapes.
+    text.match(/D\s*eclaration\s+N\s*umber\s*[#:\s]+([A-Z0-9][A-Z0-9.\-#\s]{1,38}\d?[A-Z0-9.\-#]{0,10})/i) ||
+    text.match(/EPD\s+(?:Registration\s+)?Number\s*[#:\s]+([A-Z0-9][A-Z0-9.\-#\s]{1,38}\d?[A-Z0-9.\-#]{0,10})/i);
   if (epdId) {
     var idRaw = epdId[1].split(
       /\s+(?=(?:Declared|Date|Period|Unit|Owner|Holder|Type|Scope|Reference|Markets|Description|Year|EPD\s+Type|EPD\s+Scope|Programme|Program|Issue|Valid|Publisher))/i
