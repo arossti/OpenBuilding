@@ -6,152 +6,125 @@
 
 ## Agent handoff (read this first)
 
-**You are picking up at 2026-05-11 evening, with no active branch and TWO decision-points still gating further code work.** PR #18 merged into main on both remotes 2026-05-11 (`dc7040d` on openbuilding, mirrored to origin via realign — both now at `78565a8` after the Pages-workflow guard widening). No active sprint branch. Andy ended the prior session with: *"we will continue EPD parser work tomorrow."*
+**You are picking up at 2026-05-19 evening, end of an extended field-tuning marathon session. Active branch: `EPD-PARSER-5` with 9 commits since main, pushed to both remotes, no PR open yet.** Andy made an important strategic clarification at the end of the day that's now captured in §14 — read it before doing any extraction work. *"This process seems exhausting. Will we get to 90% or 100% coverage at this rate?"* The honest answer was no; the path to 90%+ is LLM-as-parser as an internal back-of-house tool (§14.3).
 
-**Two decisions are gating further code work** (unchanged since 2026-04-30 — both still need human input):
+**Today's session at a glance (2026-05-19):**
 
-1. **§11.10 — Monday review with Mélanie on biogenic-calc.** Mélanie's 2026-05-05 answers (§11.8) significantly expanded C-fb6 scope from ~3 hrs to ~19 hrs across 7 sub-commits (§11.9). Six items still need her sign-off (§11.10): schema-field locations, `storage_cycle` enum values, Phyllis 2 curation, material-content extraction architecture, legacy 821-record migration, validation tolerance. Gates C-fb6 implementation.
+1. Andy cut `EPD-PARSER-5` off `main` (78565a8) for the day's work.
+2. Per-pattern hit-count audit shipped to the harness (§12.5 item 1) — `IMPACT_INDICATORS` / `_BYSTAGE_LABELS` / `_CISC_LABEL_PATTERNS` get DEAD-tagged when 0 hits across the audit set.
+3. Andy resolved the BfCA Drive-share blocker (BfCA had download-disable on the original folder; resolved via a separate share). Two new sample folders staged at `docs/PDF References/EPD-scaling-sets/`:
+   - `EPDs to consider for v1.1 update/` — 116 candidate PDFs for the next catalogue update.
+   - `Existing BEAM Database EPDs/` — 208 PDFs from BfCA's archive (may or may not be currently catalogued; the parity matcher sorts them).
+4. Two scaling-audit snapshots + the §12.3 decision dataset committed (`55247fc`).
+5. Catalogue-parity matcher built and shipped (`bd12ef9`) — for each candidate, scores against the 821 records in `schema/materials/*.json` and emits match category + field diff. Surfaced **~10–20 catalogue rows with unit-misencoded density values** (e.g. `mpa000` aluminum at 2.07 kg/m³, `1f3cc3` fiberglass at 0.488 kg/m³). NOT a parser problem — a catalogue-side data-quality issue that the parser now flags.
+6. Mélanie review draft for §11.10 written at `docs/workplans/melanie-review-draft-2026-05-19.md` (`9303991`). Andy's decisions on Q1 (`methodology.beam_calc.*`), Q2 (`long_cycle | short_cycle`, medium deferred), Q5 (`legacy_unknown` flag), Q6 (two-tier ±0.1% / ±5%) are baked in. Phyllis 2 starter shortlist drafted (20 entries) with `// is this right?` markers on the 5 entries needing Mélanie's review. **Pending Andy's red-line pass before sending.**
+7. Five field-tuning passes shipped (manufacturer/epd.id; dates; type/validation; density; material_type). See "Branch state" below for the SHA chain.
+8. Strategic clarification (`§14`, this session): EPD-Parser is **internal back-of-house BfCA tooling**, not public-facing. The materials catalogue is the same. BEAMweb / PDF-Parser / Matrix / DB-read are public-facing; EPD-Parser + DB curation are not. This unlocks LLM-as-parser as a Tier-8.5 extension (Claude API call on BfCA staff workstations to fill the long-tail fields regex can't reach). See §14 in full.
 
-2. **§12.3 — Andy's choice between Option A (geometric table extraction) / Option B (declarative format library) / Option C (HITL form-pane UX) / hybrid.** Gates any further per-format extractor work. Reminder from §12: *"You seem to be in a loop making highly customized readers for a handful of specific EPDs where we need GENERALIZED functionality for ANY EPD the Parser loads."* — DO NOT add new entries to `IMPACT_INDICATORS`, `_BYSTAGE_LABELS`, `_CISC_LABEL_PATTERNS`, or any analogous list until §12.3 lands. Mélanie's expanded C-fb6 scope (material-content + biogenic-inventory table extraction) is itself a per-format extraction problem — compound-gated on §12.3 too.
+**Decisions still gating downstream work:**
 
-**The larger EPD sample directory exists** (Google Drive folder `1B5ilRZ-exHRZSbqIh3MYNpZFk7KuhBIO` titled "New EPDs for 2022 DUMP- STOP DUMPING!", shared with Andy 2026-05-11). The Drive API can see the folder metadata but couldn't enumerate its contents — either indexing lag on the fresh share OR Drive sharing scope doesn't extend list-children permission to API clients. **Plan:** Andy downloads the folder to local disk (Drive web UI → kebab → Download → unzip), then runs the harness:
-```bash
-node schema/scripts/test-epd-extract.mjs --root /path/to/unzipped/EPDs
-```
-The harness (workplan §12.6) accepts `--root <dir>` to walk any directory of PDFs. The per-format breakdown + per-parameter aggregate hit-rate (workplan §12.5) is the canonical input to §12.3 — surfaces which formats / fields are most under-served at scale.
+1. **Mélanie review of §11.10 (gates C-fb6).** Draft is ready in `docs/workplans/melanie-review-draft-2026-05-19.md` — Andy hasn't sent yet. Once Mélanie signs off Q3 (Phyllis 2 shortlist), C-fb6.1 (schema bump) → C-fb6.7 (validation harness) can start.
 
-**Infrastructure shipped 2026-05-11 (post-PR-#18 merge, commit `78565a8`):** GitHub Pages now auto-deploys on BOTH remotes via the same workflow. Workflow guard widened from `if: github.repository == 'arossti/OpenBuilding'` to also include `bfca-labs/at`. Both sites live: https://arossti.github.io/OpenBuilding/ and https://bfca-labs.github.io/at/ — identical artifacts, separate Pages sites. Going forward: open PR only on **arossti/OpenBuilding** (canonical), then `git push origin main` after merge to keep the bfca-labs mirror in sync. This avoids the dual-merge-commit divergence that happened with PR #18 / PR #3 (resolved 2026-05-11 by force-pushing openbuilding/main → origin/main; trees were identical, only merge-commit SHAs differed).
+2. **§12.3 architecture choice — now with Option D added.** §14.6 reframes the decision: Option D (LLM-as-parser, internal CLI) is the recommended path; Option C (HITL form-pane) is complementary. Options A (geometric) and B (declarative) deprioritized. **Andy hasn't formally answered §12.4's questions; treat §14 as the working answer until he says otherwise.** The §12 pause on `IMPACT_INDICATORS` / `_BYSTAGE_LABELS` / `_CISC_LABEL_PATTERNS` inflation **still stands** — the metadata extractor work today did NOT touch those three arrays.
 
-**Coverage state, end of 2026-04-29 (live numbers from `docs/workplans/EPD-coverage-history/2026-04-29T21-47-50Z.md`):**
-- Metadata: **279/420 (66.4%)** across 30 samples (14 fields each)
-- Impact totals: **162/300 (54.0%)** (10 indicators each)
-- Per-stage matrix: **473/5100 (9.3%)** — NEW dimension as of 2026-04-29 PM (10 indicators × 17 EN 15804+A2 stages × 30 samples = 5100 max). 9.3% sounds low because most samples are cradle-to-gate (only A1/A2/A3 published — that's 3/17 stages × 10 indicators × subset of indicators per sample). Cradle-to-grave samples (xcarb 3×, EU/IBU Wood Fibre) reach significantly higher per-sample density.
-- Format detection: na=18, epd_international=2, nsf=2, eu_ibu=1, unknown=7
-- Ground-truth checks: **2/30 samples annotated** (Kalesnikoff GLT, xcarb cold-formed) with 110 expected keys total. All passing — 0 extraction failures, 0 silent-override violations, 0 defaults-applied failures.
+**Coverage state, end of 2026-05-19:**
 
-**Per-sample by_stage state (snapshot as of 2026-04-29T21-47-50Z):**
+After today's 9 commits, three audit sets snapshot in `docs/workplans/EPD-coverage-history/`:
 
-| Sample group | by_stage / 170 per sample | Notes |
-|---|---|---|
-| Kalesnikoff CLT/GLT (cradle-to-gate, NA long-English) | 30 each | Full A1/A2/A3 — published cells exhausted |
-| 2023 BC Wood ASTM (CLT/GLT/SPF/SPF-Plywood) | 15-26 each | Most A1/A2/A3 captured |
-| **xcarb steel (cold-formed/hollow/deck)** | **48 each** | **Full A1/A2/A3/C1/C2/C3/C4/D — module D recycling-credit signs preserved** |
-| Sopra-XPS / Genyk / EU-IBU Wood Fibre | 18-36 each | Decent — could improve in subsequent rounds |
-| 2017/2020 BC Wood AWC industry-avg | 12-18 each | Partial — older format |
-| Concrete CRMCA / EPD International S-P-10278 (×2) / Fab Steel Plates | 9-19 each | Minimal — distinct format families |
-| 2013 LVL / 2016 WRC (older AWC industry-avg) | 0 | **Correct.** EPDs publish only `Total \| Forestry \| LVL Production` (process breakdown, NOT life-cycle stages) — no per-stage data exists in the source PDF |
-| Lafarge cement (NSF) | 0 | **Correct for now.** Multi-product table (4 cement types in columns), not per-stage. Needs future multi-product UI work to disambiguate |
-| CISC steel | 0 | Not extracted yet — separate "Use of net fresh water 1 mt 2.88E+00" pattern not in regex (see follow-up #2) |
-| 7 unknown-format samples (Sopra Cellulose/ISO, Polyiso, Boreal TDS, etc.) | 0 | Format detection gives up; mostly scanned PDFs / TDS docs / no-EPD references |
+| Set | n | Metadata | Notable |
+|---|---:|---|---|
+| Canonical 30 (regression baseline) | 30 | 69.5% (was 66.4%) | material_type 83%, manufacturer 70%, epd.id 67% |
+| v1.1-candidates | 116 | 65.6% (was 55.9%) | manufacturer 60%, epd.id 65%, pub_date 66% |
+| Existing BEAM | 208 | 66.1% (was 60.4%) | display_name 100%, epd.id 64% (was 23%) |
 
-**What shipped 2026-04-29 (chronological, all on `EPD-PARSER-SPRINT-2` then merged to main as PR #16):**
+Day's net delta: **+3pp canonical, +9.7pp v1.1, +5.7pp Existing BEAM** on metadata aggregate. Impact + by_stage unchanged (no `IMPACT_INDICATORS` / `_BYSTAGE_LABELS` touched).
 
-| SHA       | Scope                                                                                                                                       |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `6347183` | **C-fb1.1** — Wood alias resolution in db-fallbacks (TIMBER → "Wood" canonical + 13 aliases for Glulam / CLT / GLT / LVL / LSL / etc.)      |
-| `44fc4f1` | **§9.5 fix #5** — Kalesnikoff long-English impact extraction + display_name from `Group \| Type` taxonomy + per-glyph header skip + q-optional unit |
-| `28f48d3` | **§9.5 fix #6** — Mass-per-declared-unit density + "produced by/at" manufacturer prose fallback + EPD-ID truncation post-process            |
-| `7176915` | **C-fb5** — harness ground-truth verification (extraction fidelity / defaults applied / no silent overrides; first annotated: Kalesnikoff GLT) |
-| `ca025ee` | archive interim coverage snapshot                                                                                                            |
-| `43f0cf3` | **DB viewer** — duplicate-EPD detection on Trust (over-write prompt) + × remove button on `_fresh` rows (catalogue-immutable) + BEAM ID col 96px → 140px |
-| `ae20837` | **P3.3** — per-stage breakdown extraction (A1/A2/A3/.../D) with nearest-header-by-count selection; 30 by_stage ground-truth keys added       |
-| `9a073cc` | EPD-Parser.md handoff section refresh                                                                                                        |
-
-**What shipped 2026-04-29 evening on `EPD-PARSER-SPRINT-3` (current active branch, +3 since merged main `046108a`):**
-
-| SHA       | Scope                                                                                                                                       |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `607a4ed` | **Shared text-join module** — `js/shared/text-join.mjs` extracts `_itemsToLines` + `_flushLine` so the harness uses identical logic to the browser (without this, the harness was falsely-green for browser-specific pdf.js fragmentation bugs — rev-3's sign-stripping was exactly that). +4 metadata, 1 silent-false-positive removed. |
-| `0c2c70d` | **§11 Biogenic Calculations chapter (review-pending)** — drafts the principle (EPD as single source of truth, BEAM as normalization-only for BEAMweb hybrid components). Six concrete questions for Mélanie's review in §11.8. Once signed off, C-fb6 (Tier 10 implementation) is ~3 hrs of mechanical work. |
-| `34570bc` | **by_stage harness dimension + xcarb per-stage extraction + density thousand-comma fix.** Harness now tabulates per-stage coverage; `_BYSTAGE_LABELS` extended for bracketed-unit short codes (xcarb/IPCC AR5/TRACI 2.1 family); unit-cell-skip in tokenizer prevents misaligned values; density regex now handles "7,800" form (xcarb density bug fixed: 800 → 7800). xcarb cold-formed annotated as ground truth (56 keys, all passing). |
+**Catalogue-parity check on Existing BEAM 208 (after today's lifts):**
+- strong: 33 (16%)
+- strong-multi: 23 (11%)
+- medium: 4 (2%)
+- medium-multi: 42 (20%)
+- weak: 76 (37%) — noisy, threshold tuning deferred
+- **unmatched: 30 (14%)** — the catalogue-update candidates BfCA should review
 
 ### Pickup — what you're doing next
 
-**Do NOT add new format-specific patterns to `IMPACT_INDICATORS`, `_BYSTAGE_LABELS`, or any analogous list until §12.3 is resolved.** This was the explicit reason for today's pause. The audit data the harness now produces (per-format breakdown + per-parameter aggregate hit-rate, §12.5) is the input to that decision.
+The branch is at a clean stopping point. Most likely user-driven next moves:
 
-When Andy returns:
-1. Resolve §12.3 (architecture choice) — answer the 5 questions in §12.4.
-2. If Option A or B chosen: refactor begins. Existing per-format patterns may be deprecated.
-3. If Option C chosen: shift focus to form-pane UX work.
-4. Independently: chase §11.8 with Mélanie to unblock C-fb6.
-5. When Andy supplies the larger sample directory tomorrow:
-   - Run `node schema/scripts/test-epd-extract.mjs --root <dir>`.
-   - Examine per-format breakdown + per-parameter aggregate. This is the canonical scaling test.
-   - Per-pattern hit-count audit (which existing patterns matched 0 samples in the larger set?) drives deprecation candidates.
+1. **Open the PR for `EPD-PARSER-5`.** 9 commits, clean lineage, all pushed. Title suggestion: *"EPD-Parser: per-pattern audit + catalogue parity + 5-pass metadata lift + §14 strategic positioning"*. This is the natural unit of review.
 
-### Open follow-ups (next agent to triage)
+2. **Mélanie draft pending Andy red-line.** Check `docs/workplans/melanie-review-draft-2026-05-19.md`. Has an "Andy's review notes" checklist at the bottom. When Andy says it's ready, send through whatever channel BfCA uses.
 
-Listed with concrete repro / fix sketches so the next agent can pick the highest-leverage one without re-discovering context.
+3. **Prototype LLM-as-parser (§14.5 step 2).** Andy didn't authorize this yet but it's the natural next step. ~30 min to wire a Claude API call against 10 wild v1.1 samples + JSON-Schema-as-system-prompt, compare LLM output vs regex output. Confirms or refutes the 90%+ claim with hard data.
 
-**Follow-up #1 — Mélanie's review of §11 (gates C-fb6).** Send Mélanie the link to §11 of this workplan. The six questions in §11.8 are designed to be answerable with short / yes-no replies. Once back: ~3 hrs of mechanical implementation produces Tier 10 (`applyCalculations(rec)` in `js/epd/extract.mjs`) with 3 new schema fields and the form-pane audit-trail render. Validation harness against `BEAM Database-DUMP.csv` cols 24, 25, 28, 29, 31, 33 (per-row tolerance ±5%).
+4. **More regex fine-tuning.** Andy explicitly said *"we should continue to refine the Regex and parser as much as possible, but I think now I see the limits and extended solutions."* So additional passes are welcome but expected to deliver diminishing returns. Highest-headroom remaining fields: `epd.type` (37%), `epd.expiry_date` (15% on Existing BEAM), `physical.density` (63%), validation.type (24% on Existing BEAM).
 
-**Follow-up #2 — xcarb "total = A1" false positive.** For cradle-to-gate-with-options EPDs (xcarb 3 samples) that publish per-stage A1/A2/A3/C1-C4/D but NO precomputed A1-A3 composite, the IMPACT_INDICATORS regex in `js/epd/extract.mjs` grabs the FIRST numeric value (which is A1) and stores it as `impacts.<key>.total.value`. For xcarb cold-formed GWP that's 1230 (= A1) instead of A1+A2+A3 = ~1257. Choose one of:
-   - **(a)** After `_extractByStage` runs, if `total.value` is null AND `by_stage.A1`, `by_stage.A2`, `by_stage.A3` are all populated, compute `total.value = A1 + A2 + A3` and mark `source: "calculated"`. Most accurate.
-   - **(b)** When stage-header lacks the A1-A3 composite, suppress total-extraction entirely and rely on by_stage. Cleanest semantically.
-   - **(c)** Status quo (currently shipped) but mark with a comment in `methodology.notes` flagging that total = A1 only.
-   
-   See xcarb cold-formed ground truth notes for the documentation. Not currently asserted (so it doesn't fail the harness today).
-
-**Follow-up #3 — CISC water "Use of net fresh water 1 mt 2.88E+00" pattern.** CISC Industry-Avg Steel publishes WDP as `Use of net fresh water    1 mt    2.88E+00` (with the `1 mt` functional-unit prefix between label and value, breaking the existing EU/IBU "fresh water" regex's adjacency). Add a regex variant catching this. Tests: CISC by_stage 0/170 → ≥1/170 (just WDP), and aggregate impact totals 162 → 163.
-
-**Follow-up #4 — Lafarge multi-product disambiguation.** Lafarge cement EPD covers 4 cement types (GU/HS, GUL/HSL, HE, OWG) in COLUMNS of the impact table, not life-cycle stages. The current extractor grabs the first cement-type column as the indicator value. Properly fixing this requires a "pick which product" UI in the EPD-Parser form pane (workplan §0 phases-pending: "Multi-product EPD disambiguation"). Same pattern applies to Genyk (3 SPFs) and AWC/CWC industry-avg (multi-product). Estimated 3-4 hrs of UI + state work.
-
-**Follow-up #5 — Per-stage extension to other formats.** Current per-stage coverage: Kalesnikoff 30/170, xcarb 48/170, Sopra-XPS 36/170, Genyk 31/170. To reach higher density on Sopra/Genyk/EU-IBU/2023 BC Wood, audit which `_BYSTAGE_LABELS` patterns aren't matching and either tighten or add variants. Driven by ground-truth annotation: pick a sample, annotate, run harness, see what fails.
-
-### Branch state (2026-05-11 evening)
+### Branch state (2026-05-19 EOD)
 
 ```
-main   78565a8   ci: enable Pages workflow on bfca-labs/at (2026-05-11)
-        ↑
-       dc7040d   Merge PR #18 from arossti/EPD-PARSER-4 (2026-05-11)
-       d73cffe   §11 Mélanie biogenic answers + revised C-fb6 scope
-       394cbea   §12 architecture review + harness --root + audit
-       3839b47   cradle-to-gate-with-options total recompute + CISC compact-label per-stage
-       3fd57e2   Merge PR #17 (2026-04-30)
+EPD-PARSER-5 (both remotes):
+  1ab6301   Pass 4: material_type vocab + title-picker fixes
+  7b54f2b   Pass 3: density extraction lift (modest)
+  63de94f   Pass 2: epd.type + validation.type extraction lift
+  3429602   Pass 1: date extraction lift (DD.MM.YYYY + new labels)
+  b0bc986   manufacturer + epd.id extraction lift (+20–41pp recall)
+  9303991   Mélanie draft — fold in catalogue-parity findings
+  bd12ef9   Catalogue-parity matcher + 208-sample audit
+  55247fc   §12.3 decision data — scaling audit on 324 PDFs
+  202b5a1   Per-pattern hit-count audit (§12.5 item 1)
+         ↑
+  main 78565a8 (unchanged since 2026-05-11)
 ```
 
-No active sprint branch. Both remotes synced at `78565a8`. Both Pages sites deployed and live. The `3839b47` CISC commit added per-format extraction patterns; flagged in §12.2 as per-EPD baggage, **may be deprecated** depending on §12.3 decision (Option A geometric would replace it; Option B declarative would relocate it; Option C HITL would deprecate it in favour of form-pane UX). No PR open until either §11.10 (Mélanie) or §12.3 (Andy) lands.
+PR not yet opened. When ready: open on `arossti/OpenBuilding` (canonical), then `git push origin main` post-merge to keep `bfca-labs` mirror in sync.
 
 ### Read this order
 
-1. §0 — current state (full SHA log + coverage trail)
-2. **§11 — Biogenic calculations (review-pending)** — read in full before C-fb6; especially §11.1 (EPD as single source of truth) and §11.8 (the six questions for Mélanie's review). The BEAM CSV math is documented; only the schema-field naming + storage-factor convention need sign-off.
-3. **§10 — Fallback database (db-fallbacks.json)** — read in full before C-fb5; especially §10.3 (verification before fallback)
-4. §7.6 — Harness contract (the "no regex change ships unless coverage moves up" rule; C-fb5 extends it)
-5. §5.6 — Hierarchical extraction (shipped 2026-04-28; reference)
-6. §9.5 — calibration findings + remaining fix-list (mostly cleared)
+1. **§14 — Internal positioning + Last Mile (new today)** — load-bearing for any architectural decision going forward. Read in full.
+2. §11 — Biogenic calculations (review-pending) — §11.8 (Mélanie answers) and §11.10 (Monday-review items, with Andy's decisions now in the message draft).
+3. §12 — Architecture review — pause is still active for the three pattern arrays.
+4. §10 — Fallback database (db-fallbacks.json) — Tier-9 layer.
+5. §7.6 — Harness contract.
 
-### File map for C-fb5
+### File map (current)
 
-| File                                                 | What you'll touch                                                                                                                                      |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `schema/scripts/test-epd-extract.mjs`                | Extend `main()` with the three new checks. The existing METADATA_FIELDS + IMPACT_KEYS coverage logic stays as-is alongside the new ground-truth check. |
-| `docs/PDF References/EPD SAMPLES/expected/*.json`    | New directory + per-sample ground-truth files. Start with 1–2 annotated samples to prove the pipeline; empty for the rest is fine.                     |
-| `docs/workplans/EPD-coverage-history/<timestamp>.md` | Auto-snapshotted by the harness as usual. New dimensions tabulate as additional rows or columns.                                                       |
+| File / path | What's there |
+|---|---|
+| `js/epd/extract.mjs` | Main extractor. Tier-by-tier (Type → Group → per-format → Common → DB-fallbacks → BEAM-calc). Today's edits in extractNA + extractCommon for manufacturer/epd.id/dates/type/density/material_type. |
+| `schema/scripts/test-epd-extract.mjs` | Harness. Per-format breakdown, per-parameter aggregate, per-pattern audit (§12.5 item 1), catalogue-parity matcher (today). |
+| `docs/PDF References/EPD SAMPLES/` | Canonical 30 with `expected/*.json` ground truth (2 annotated). Default harness target. |
+| `docs/PDF References/EPD-scaling-sets/` | Two folders dropped today: 116 v1.1-candidates + 208 Existing-BEAM-archive. Harness via `--root <dir>`. |
+| `docs/workplans/EPD-coverage-history/` | Auto-snapshotted runs. ~12 new snapshots from today's marathon. |
+| `docs/workplans/melanie-review-draft-2026-05-19.md` | Mélanie message awaiting Andy's red-line. |
+| `schema/materials/*.json` | 821-record catalogue. Read-only on Pages; write side is internal-only (§14.1). |
 
 **Hard rules — do not violate:**
 
-- **§7.6 + §10.3 harness contract:** every commit that touches `js/epd/extract.mjs` re-runs `node schema/scripts/test-epd-extract.mjs` and commits a fresh snapshot to `docs/workplans/EPD-coverage-history/`. Aggregate coverage must move up; no individual sample may regress; once C-fb5 lands, no `epd_publishes` ground-truth value may be silently overridden by the catalogue.
-- **§5.5 BEAM ID convention:** `beam_id` is BfCA-internal and never extracted from a PDF. P3's `extract.mjs` produces `beam_id: null`. Minting happens on the Database side at commit (wired in `database.mjs` `_mintId6` — 6-char hex matching the existing catalogue convention).
-- **§8 security:** no in-browser Anthropic API integration, ever. Andy ruled this out 2026-04-25.
-- **§9 IP guardrails:** no `CSI` / `MasterFormat` / `Division` / `MCE²` / `NRCan` / Crown-copyright tool names in code, UI strings, or the workplan. Numeric `group_prefix` (`03`/`06`/`07`/etc.) is the only classification convention.
-- **Soft-delete only.** Hard-delete forbidden forever ([`Database.md`](Database.md) §6).
+- **§7.6 + §10.3 harness contract:** every commit that touches `js/epd/extract.mjs` re-runs `node schema/scripts/test-epd-extract.mjs` and commits a fresh snapshot to `docs/workplans/EPD-coverage-history/`. Canonical-30 aggregate coverage must move up or stay equal; no individual canonical sample may regress.
+- **§5.5 BEAM ID convention:** `beam_id` is BfCA-internal and never extracted from a PDF. `extract.mjs` produces `beam_id: null`. Minting happens on the Database side at commit.
+- **§8 security (refined by §14):** no Anthropic API integration on public-facing surfaces (BEAMweb, PDF-Parser, Matrix, Database read view). Internal-only tooling on BfCA staff workstations IS permitted — see §14 for the Last Mile strategy.
+- **§12.3 pause (still active):** no new entries to `IMPACT_INDICATORS`, `_BYSTAGE_LABELS`, `_CISC_LABEL_PATTERNS`. Metadata extractors (manufacturer/dates/type/density/material_type label patterns inside extractNA / extractEuIbu / extractCommon) are NOT covered by this pause — that's where today's work happened.
+- **§9 IP guardrails:** no `CSI` / `MasterFormat` / `Division` / `MCE²` / `NRCan` / Crown-copyright tool names in code, UI strings, or workplan.
+- **Soft-delete only.** Hard-delete forbidden forever.
 
 **Daily-driver commands:**
 
 ```
-node schema/scripts/test-epd-extract.mjs                          # run harness, auto-snapshot
-node schema/scripts/test-epd-extract.mjs --only Lafarge           # filter to one sample (no snapshot)
-node schema/scripts/test-epd-extract.mjs --json /tmp/full.json    # full per-candidate dump
-npm run serve                                                     # local dev server (port 8000)
+node schema/scripts/test-epd-extract.mjs                          # run on canonical 30, auto-snapshot
+node schema/scripts/test-epd-extract.mjs --root "docs/PDF References/EPD-scaling-sets/EPDs to consider for v1.1 update"
+node schema/scripts/test-epd-extract.mjs --root "docs/PDF References/EPD-scaling-sets/Existing BEAM Database EPDs"
+node schema/scripts/test-epd-extract.mjs --only Kalesnikoff       # substring filter (no snapshot)
+node schema/scripts/test-epd-extract.mjs --json /tmp/dump.json    # full per-candidate dump
+npm run serve                                                     # local dev server
 ```
 
 **Cross-references:**
 
-- [`Database.md`](Database.md) — sibling workplan for the Database viewer (commit point, list/hide UX, persistence pipeline).
-- [`docs/PDF References/EPD SAMPLES/`](../PDF%20References/EPD%20SAMPLES/) — 30 calibration PDFs across `03 Concrete / 05 Metals / 06 Wood / 07 Thermal`.
+- [`Database.md`](Database.md) — sibling workplan for the Database viewer.
+- [`docs/PDF References/EPD SAMPLES/`](../PDF%20References/EPD%20SAMPLES/) — canonical 30.
+- [`docs/PDF References/EPD-scaling-sets/`](../PDF%20References/EPD-scaling-sets/) — 324 PDFs added today for scaling tests.
 - [`schema/material.schema.json`](../../schema/material.schema.json) — target shape for emitted records.
-- [`schema/lookups/`](../../schema/lookups/) — `material-type-to-group.json`, `display-name-keywords.json`, `country-codes.json`, `lifecycle-stages.json`, `typical-elements.json`, `material-groups.json`.
+- [`schema/lookups/`](../../schema/lookups/) — lookup tables primed via `Extract.setLookups()`.
 
 ---
 
@@ -1237,10 +1210,116 @@ The `--root` flag is purely additive — running the harness without it falls ba
 - **OCR** (Tesseract.js fallback) — P7 phase. **Real demand confirmed in P1 calibration** (`EPD_Polyiso walls.pdf` is image-only, zero text-layer items). v1 detects this case and surfaces a "needs OCR" banner; the actual OCR pass lands in P7.
 - **Hard delete of database records.** Forever. Soft-delete via `status.visibility = "flagged_for_deletion"` is the only deletion path; flagged records stay in `schema/materials/*.json` for back-office manual review (see [`Database.md`](Database.md) §6).
 - **Direct browser-side writes to `schema/materials/*.json`.** Pages serves source data read-only. Commits flow EPD-Parser → shared IndexedDB → DB viewer → patch JSON download → Node patch script → git.
-- **In-browser Anthropic API integration.** Ruled out for security (§8).
+- **In-browser Anthropic API integration on public-facing surfaces.** Ruled out for security (§8). The deployed Pages site, BEAMweb, and the database viewer must never carry an API key. See §14 for the internal-only LLM extraction path (CLI / IDE on BfCA team workstations), which is a different deployment model and is in scope.
 - **Scraping EPD-program registries** (CSA, ULE, IBU, EPD International). Where they expose public APIs, P7 may wrap them; without an API, the team uses the copy-paste-URL workflow (§8).
 - **Auto-minting BfCA-internal `beam_id` values for new entries from EPD-Parser.** Out of scope here; `beam_id` is `null` on the candidate record P3 produces. Actual minting (the `GG####` convention from §5.5) happens at the Database viewer's commit step. Existing 821 records keep their legacy heterogeneous IDs — do not rewrite. EPD-Parser must never populate `beam_id` from a regex anchor.
 - **Regression test fixtures for the parser.** Defer until calibration samples stabilize. Wood EPDs are now in `docs/PDF References/EPD SAMPLES/`; fixture extraction is a P3 follow-up.
+
+---
+
+## 14. Strategic positioning — internal back-of-house tool + Last Mile LLM extension
+
+> Drafted 2026-05-19 PM after Andy's clarification at the end of today's field-tuning marathon. This section names two things explicitly that had been implicit: (1) EPD-Parser and the materials catalogue are BfCA-internal, not public-facing; (2) regex extraction has a structural ceiling around 82–85% on metadata aggregate, and the path to the remaining 15–18% is LLM-as-parser, deployed as an internal CLI / IDE tool that the BfCA team runs on their own workstations to expand the catalogue.
+
+### 14.1. Public-facing vs. internal-only — the deployment split
+
+| Surface                  | Audience                | Deployment            | API access |
+|--------------------------|-------------------------|------------------------|------------|
+| BEAMweb                  | Anyone (practitioners)  | GitHub Pages, public   | None ever  |
+| PDF-Parser               | Anyone (practitioners)  | GitHub Pages, public   | None ever  |
+| Matrix                   | Anyone                  | GitHub Pages, public   | None ever  |
+| Database viewer (read)   | Anyone                  | GitHub Pages, public   | None ever  |
+| **EPD-Parser**           | **BfCA team only**      | **CLI / local browser** | **Permitted on staff workstations** |
+| **DB curation workflow** | **BfCA team only**      | **Local, behind auth-gate if web** | **Permitted on staff workstations** |
+
+The materials catalogue is the BfCA "secret sauce" — practitioners consume it through BEAMweb, but the curation pipeline (EPD-Parser → review → Trust commit → patch JSON → git) stays inside BfCA. This split was implicit in §7.7 and §8's "back-office tools" line; §14 makes it the load-bearing architectural fact.
+
+This changes what the §8 "no in-browser API integration" rule is protecting against. The rule's intent — *no API keys exposed to anonymous traffic, no Anthropic costs scaling with public usage* — is preserved by the public-facing surfaces remaining API-free. **Internal tooling run on BfCA staff workstations does not share that constraint** (the key is an env var on the curator's laptop, not embedded in a page someone can right-click → View Source on).
+
+### 14.2. Coverage trajectory — why regex caps around 82–85%
+
+Today's marathon (9 commits on `EPD-PARSER-5`) lifted v1.1-candidates metadata coverage from 55.9% → 65.6%, with per-pass lift visibly decelerating:
+
+| Pass                       | v1.1 lift                 |
+|----------------------------|--------------------------|
+| manufacturer + epd.id      | +25pp / +26pp             |
+| Pass 1 — dates             | +22pp / +22pp             |
+| Pass 2 — type/validation   | +18pp / +8pp              |
+| Pass 3 — density           | +3pp                      |
+| Pass 4 — material_type     | +10pp                     |
+
+Three structural floors prevent regex from reaching 90%+ on the 354-sample audit:
+
+1. **The 14% unknown-format bucket** (49 / 354 samples). Format detection itself fails for these, so the per-format extractors never run. They sit at 11–27% metadata coverage. Even if other formats reach 95%, the weighted average is mathematically capped near 86%.
+2. **Truly-missing data.** Many EPDs don't publish density (membranes publish grammage instead). Many don't publish expiry. Many don't publish a typed verification field. Regex can't extract data that isn't in the document.
+3. **Multi-language / multi-region drift.** German `Deklarationsinhaber`, French `FICHE DE DÉCLARATION`, Spanish manufacturer-name conventions — each language family is another N patterns to write. Combinatorial.
+
+Realistic regex-only trajectory: **75–85% on metadata aggregate, plateauing as long-tail patterns become per-EPD specials.**
+
+### 14.3. Last Mile — LLM-as-parser as a back-of-house CLI
+
+For the gap between regex's 82% and the 95%+ BfCA wants for catalogue ingestion, the path is **a Claude API call wired into the parser pipeline, deployed as an internal tool**:
+
+```
+[Tier 1–8 regex extractor]    ← today's parser. ~65% of fields filled. Free, fast, deterministic.
+        │
+        ▼  for fields still null
+[Tier 8.5 LLM extractor]      ← new. Hands joined text + JSON Schema → Claude API → structured record.
+                                Fills the long-tail fields regex couldn't.
+        │
+        ▼
+[Tier 9 db-fallbacks]         ← today's catalogue-default fill (unchanged)
+        │
+        ▼
+[Tier 10 BEAM calc]           ← C-fb6, biogenic-carbon normalization (unchanged)
+        │
+        ▼
+[form pane → Trust commit]    ← curator reviews, hits Trust, record lands in catalogue
+```
+
+**Why this works for the catalogue-ingestion use case:**
+- The model reads multi-language fields natively, interprets context ("Specific gravity 1.08 kg/L" → density 1080 kg/m³), and handles arbitrary layouts without per-format engineering.
+- Costs scale with curation cadence, not user traffic. Re-processing today's 354 samples: ~$5–20 once. Per-EPD going forward: ~$0.02–0.10.
+- Latency is acceptable. EPD-Parser is one-EPD-at-a-time curator-driven; 5–30s per call is fine.
+- Stays §8-compatible. The API key lives in an env var on the BfCA staff workstation, never in a public-facing browser bundle.
+
+**Why regex stays — it's the "leg up":**
+- Free + fast first pass. Reduces LLM token cost ~3×.
+- Deterministic — same input always produces same output. Useful for regression tracking and the harness's per-pattern audit (workplan §12.5).
+- Catches the easy 65% so the LLM only does the long-tail 25–30%.
+- The per-pattern audit becomes a tool for retiring regexes the LLM consistently outperforms — codebase shrinks over time.
+
+**Continued regex refinement is still worthwhile.** Each percentage point regex captures removes some LLM inference cost. Today's marathon delivered real lift even as the per-pass return diminished. The plan is **keep grinding on regex AND prototype the LLM tier**, not choose one over the other.
+
+### 14.4. Deployment shapes — CLI first, then maybe IDE
+
+Three viable shapes for the internal LLM tool:
+
+**(A) CLI** — `npm run epd:extract <pdf>` reads the file, runs both extractors, prints the candidate JSON. Curator can pipe it into a review file or open it in their editor. Zero browser involvement. Easiest to ship.
+
+**(B) Local browser** — same EPD-Parser UI, but the "Capture" button now also hits Claude for null fields before populating the form. API key in an env var loaded at `npm run serve` time, never reaches the rendered HTML. Curator workflow is unchanged from today's experience.
+
+**(C) IDE plugin / Claude Code skill** — extraction wrapped as a Claude Code skill the BfCA team invokes during catalogue review. Highest friction to ship, lowest cost per use, integrates with the team's existing tooling if Claude Code becomes a daily driver.
+
+(A) ships first. (B) follows if curators want the form-pane UX over a JSON dump. (C) is speculative and depends on how the team adopts Claude Code.
+
+### 14.5. Implementation sequencing
+
+1. **Ship today's regex improvements as a PR** (`EPD-PARSER-5`, 9 commits, metadata 60% → 67% average across sets).
+2. **Prototype the LLM extractor** against 10 wild v1.1 samples (~30 minutes — Claude API + JSON Schema + the joined text + a "fill what you can" prompt). Confirm 90%+ on the same 10 samples the regex hits ~65% on.
+3. **If validated:** design the Tier-8.5 wiring. Schema for the Claude request payload, retry/timeout policy, cost budget per session, audit-trail for which fields came from LLM vs regex (extend the source-enum: `epd_direct | epd_inferred | epd_llm | calculated | generic_default | user_edit`).
+4. **Wire results** into the existing form-pane / Trust-commit flow unchanged. The form pane already renders provenance chips; `epd_llm` joins them.
+5. **Future regex work** — focused on fields where the LLM struggles (cross-stage `by_stage` tables, biogenic-inventory format variation), where deterministic extraction is easier to audit than LLM consistency.
+
+### 14.6. What this means for §12.3 (architecture review)
+
+The §12.3 paused decision (Option A geometric / B declarative / C HITL / hybrid) was framed before LLM-as-parser was on the table. Adding it gives a fourth option that subsumes most of A's value (handles arbitrary formats) without the implementation cost. The revised menu:
+
+- **Option D (LLM-as-parser)** — primary new path forward, internal-only deployment.
+- **Option C (HITL form-pane)** — still useful as a last-mile reviewer experience, complementary to D.
+- **Option A (geometric)** and **Option B (declarative)** — deprioritized. Most of the leverage they offered against unknown formats is collapsed by D.
+
+The §12.3 question is no longer "which one architecture do we commit to" — it's "in what order do we ship D and C." See §14.5 for the proposed sequencing.
 
 ---
 
