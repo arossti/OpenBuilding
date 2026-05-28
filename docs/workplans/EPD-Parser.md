@@ -1390,6 +1390,65 @@ The bug was a "column added to the spreadsheet later, paired unit column missed 
 
 ---
 
+## 16. Parity validation — CSV ↔ JSON database (planned, next session)
+
+> Drafted 2026-05-19 PM. BfCA's goal: assurance that the BEAMweb JSON database aligns with the original BEAM spreadsheet, validated against the EPDs now in hand. Two distinct parity questions; this section defines both and specifies the deliverable BfCA requested.
+
+### 16.1. Two parity questions — A and B
+
+| | Parity A | Parity B |
+|---|---|---|
+| **Compares** | BEAM CSV ↔ JSON database | Source EPDs ↔ CSV / JSON |
+| **Checks** | Is the `beam-csv-to-json.mjs` import faithful? | Did the EPDs get transcribed into the catalogue correctly? |
+| **Regex involved?** | **No** — deterministic transform check | Yes — needs EPD extraction |
+| **Multi-product needed?** | **No** | **Yes** (280 EPDs → 639 rows; many EPDs cover 2–8 products) |
+| **Cost** | Low — re-run importer + field diff | High — gated on multi-product extraction |
+| **Status** | **Do first (next session)** | Deferred — tied to LLM-as-parser (§14) for multi-product |
+
+**Parity A is the high-assurance-per-hour move and directly answers BfCA's "values align" question.** The JSON database was *generated from* the CSV, so it should be 1:1 — 639 JSON records ↔ 639 CSV rows. Any mismatch is an import bug (the density-units bug in §15 was exactly this class). Re-run the importer, diff every field against the source CSV, surface mismatches. Target stat: "N of 639 catalogue rows match their CSV source row, field-by-field, at 100% parity."
+
+**Parity B (EPD-sourced validation)** requires the parser to extract *all* products from multi-product EPDs (Follow-up #4 / §0 "Multi-product EPD disambiguation"). Today the parser emits one record per PDF and grabs the first product column on multi-product EPDs. Since 280 EPDs map to 639 rows, multi-product is the norm — Parity B can't be complete without it. This is the strongest argument for the §14 LLM-as-parser path: "list every product variant in this EPD with its per-stage impacts" is trivial for an LLM and a per-format slog with column-walking regex. **Defer B until multi-product extraction lands.**
+
+### 16.2. BfCA's requested deliverable — 3-sheet parity workbook
+
+BfCA asked for a 3-worksheet summary (CSV-format sheets, or one XLSX) for human-in-the-loop review:
+
+| Sheet | Content | Source |
+|---|---|---|
+| **1 — BEAM CSV** | Original `BEAM Database-DUMP.csv` materials values, selected columns, sorted by BEAM ID | the CSV |
+| **2 — BEAMweb DB** | Same columns, same row order (sorted by BEAM ID), values read from `schema/materials/*.json` | the JSON catalogue |
+| **3 — Diff** | Per-cell `MATCH` / `MISMATCH` (+ numeric delta where applicable), same row order | computed A↔B |
+
+Sheet 3 is structured so BfCA applies Excel conditional formatting → GREEN = match, RED = mismatch. We supply the data + the per-cell verdict; they apply (or we pre-apply if shipping XLSX) the colour.
+
+**Column set to compare** (the load-bearing fields, sorted by BEAM ID):
+- Identity: `ID`, `Display Name`
+- Carbon: Stated EPD GWP + unit (CSV 16/17), GWP per common unit + unit (18/19), GWP-bio (22)
+- Biogenic: Biogenic Storage (25), Carbon content kgC/unit (28), Full C value (30), Storage % reduction (31)
+- Physical: Density value + units (32/33 — now correctly split post-§15 fix), Additional factors + units (34/35)
+- Provenance: EPD ID (50), EPD Type (51), Program Operator (54), Service Life (62)
+
+Tolerance: numeric fields match within ±0.5% (rounding in the CSV → JSON transform); strings match on normalized comparison (trim + case-insensitive); units match exact.
+
+### 16.3. Implementation sketch (next session)
+
+New script `schema/scripts/csv-json-parity.mjs`:
+
+1. Parse `BEAM Database-DUMP.csv` → keyed by BEAM ID
+2. Load all `schema/materials/*.json` → keyed by `id`
+3. For each of the 639 IDs, align CSV row ↔ JSON record
+4. Field-by-field compare per the column set + tolerance above
+5. Emit three CSVs: `parity-sheet1-csv.csv`, `parity-sheet2-json.csv`, `parity-sheet3-diff.csv` (or one XLSX with 3 sheets + conditional formatting via a lib)
+6. Console summary: "X/639 rows 100%-parity, Y rows with ≥1 mismatch, top mismatched fields: …"
+
+This harness is **independent of the EPD-extraction harness** (`test-epd-extract.mjs`) — different inputs (CSV+JSON vs PDFs), different question (import faithfulness vs extraction accuracy). Keep them separate.
+
+### 16.4. Expected outcome
+
+After the §15 density fix, Parity A should be high already. The harness will quantify it: most fields likely 100%, density now correct, and any residual mismatches (value rounding, null handling, field-mapping edge cases) surfaced for a targeted second importer fix. The 3-sheet workbook is the artifact BfCA reviews to sign off "the BEAMweb database matches the spreadsheet."
+
+---
+
 ## Iteration infrastructure (planned)
 
 - **`npm run serve`** — already in place, no-cache dev server on port 8000. Drop EPD samples into `docs/pdf-samples/epd/` (parallel to `docs/pdf-samples/sample-metric.pdf` already used by PDF-Parser) for repeatable testing.
