@@ -249,7 +249,7 @@ npm run serve                                                     # local dev se
 - 🔜 **CISC water "Use of net fresh water 1 mt 2.88E+00"** — regex variant for the "1 mt" functional-unit prefix between label and value. CISC currently 0/10 impacts and 0/170 by_stage; this would unblock at least WDP. See follow-up #3 in agent handoff.
 - 🔜 **C-fb5 ground-truth backlog** — only 2/30 samples annotated. Priority: 2023 BC Wood ASTM family (CLT/GLT/SPF/SPF-Plywood — same format as Kalesnikoff, low risk, locks in coverage), EU/IBU Wood Fibre (different format, exercises EU/IBU paths), Lafarge cement (NSF format).
 - 🔜 **Per-stage extension to other formats** — 18-36 cells per Sopra/Genyk/EU-IBU/2023 BC Wood is decent but could be improved by auditing which `_BYSTAGE_LABELS` patterns aren't matching and adding variants. Driven by ground-truth annotation.
-- 🔜 **"Export CSV" row-dump button** (team request 2026-05-28, spec in §17) — yellow bottom-right button → modal with the scraped record as a single CSV/TSV row in exact `BEAM Database-DUMP.csv` column order → Copy to clipboard (Safari-download-restriction workaround + preview). Lets the team paste a scraped row into Excel/Sheets to eyeball extraction quality. Inverse of the importer; reuse one shared column map.
+- 🔜 **"Export CSV" row-dump button** (team request 2026-05-28, spec in §17) — yellow bottom-right button → modal with the scraped record as a single **tab-separated** row (no header) in exact `BEAM Database-DUMP.csv` column order → Copy to clipboard (Safari-download-restriction workaround + preview). Pastes straight across columns to append a new EPD row in Google Sheets/Excel. Inverse of the importer; reuse one shared column map.
 - ⏳ **P4 — Match-status surfacing** (`NEW` vs `REFRESH → <id>`) on the EPD-Parser form banner — Database-side dupe detection now does this server-side; form-side preview is a UX enhancement.
 - ⏳ **Multi-product EPD disambiguation** (Genyk 3 SPFs, Lafarge 6 cement types, AWC/CWC industry-avg). UI work in the form pane. ~3-4 hrs.
 - ⏳ **P6 — Refresh queue** (DB-driven entry point for expired-record backlog).
@@ -1490,7 +1490,7 @@ After the §15 density fix, Parity A should be high already. The harness will qu
 
 ### 17.1. What
 
-A **yellow "Export CSV" button, bottom-right** of the EPD-Parser form pane. On click it opens a **modal** containing the scraped candidate record serialised as a **single CSV row whose column order matches `BEAM Database-DUMP.csv` EXACTLY** (col A → col BL, the same sequence the importer reads). The modal has:
+A **yellow "Export CSV" button, bottom-right** of the EPD-Parser form pane (label is the team's term; the payload is actually **tab-separated** — see §17.3). On click it opens a **modal** containing the scraped candidate record serialised as a **single tab-separated row whose column order matches `BEAM Database-DUMP.csv` EXACTLY** (col A → col BL, the same sequence the importer reads). The modal has:
 
 - the CSV string shown in a selectable text field (so the user previews exactly what they'll copy);
 - a **Copy** button → `navigator.clipboard.writeText(...)`;
@@ -1509,9 +1509,13 @@ The row must reproduce the DUMP's column order 1:1 so a paste lands under the ri
 - **No header row** — single data row only (the target sheet already has the BEAM headers). Optionally offer a "with header" toggle later.
 - **Excluded:** col AX (abandoned classification column, §9 / near-empty).
 
-### 17.3. Delimiter gotcha — decide before building
+### 17.3. Delimiter = TAB (decided 2026-05-28)
 
-A **comma**-delimited string pasted into Excel/Sheets lands in **one cell** (the user then needs Data → Text-to-Columns). A **tab**-delimited string pastes **directly across columns** in both Excel and Google Sheets — which is the "paste a row and it fills the BEAM columns" behaviour the team actually wants. Recommendation: default the copy payload to **tab-separated** for paste-friendliness (still "one row"), and/or offer a CSV-vs-TSV toggle in the modal. Confirm with the team which they expect before shipping. Standard CSV escaping (quote fields containing the delimiter, quotes, or newlines — display names often contain commas) applies to whichever delimiter is chosen.
+**Payload is tab-separated (TSV), single row, no header.** Confirmed with the team: the row gets pasted into existing BEAM data in **Google Sheets** (and Excel) to append a new EPD. A **comma**-delimited string pastes into **one cell** (needs Text-to-Columns); a **tab**-delimited string pastes **directly across columns** in both Sheets and Excel — select the first empty cell under col A, paste, and it fills A→BL across. That's the required behaviour, so tab it is. No toggle needed.
+
+**TSV has no quoting standard** (unlike CSV), so the exporter must **sanitise each value**: replace any embedded **tab** or **newline/CR** with a single space before joining — otherwise one stray line-break in a display name or notes field shifts/splits the whole row. Join the (sanitised) values with `\t`; emit one line, no trailing tab.
+
+Minor known hazard (sheet-side, not ours to fully fix): Google Sheets may auto-format some pasted values (e.g. coerce an ID-like or date-like string). Acceptable for an eyeball/test workflow; if it bites, the team can paste-special as text.
 
 ### 17.4. Acceptance
 
