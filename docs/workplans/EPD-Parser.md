@@ -6,20 +6,42 @@
 
 ## Agent handoff (read this first)
 
-**You are picking up at 2026-05-19 evening, end of an extended field-tuning marathon session. Active branch: `EPD-PARSER-5` with 9 commits since main, pushed to both remotes, no PR open yet.** Andy made an important strategic clarification at the end of the day that's now captured in §14 — read it before doing any extraction work. *"This process seems exhausting. Will we get to 90% or 100% coverage at this rate?"* The honest answer was no; the path to 90%+ is LLM-as-parser as an internal back-of-house tool (§14.3).
+**You are picking up after a long 2026-05-19 session. Active branch: `EPD-PARSER-5`, ~18 commits since main (`78565a8`), all pushed to both remotes, no PR open yet.** The day covered four workstreams: (a) EPD-extraction field-tuning, (b) catalogue data-quality fixes, (c) the CCLIMB methodology + 6th-module scaffold, (d) parity-validation planning.
 
-**Today's session at a glance (2026-05-19):**
+### ⭐ NEXT SESSION — START HERE
 
-1. Andy cut `EPD-PARSER-5` off `main` (78565a8) for the day's work.
-2. Per-pattern hit-count audit shipped to the harness (§12.5 item 1) — `IMPACT_INDICATORS` / `_BYSTAGE_LABELS` / `_CISC_LABEL_PATTERNS` get DEAD-tagged when 0 hits across the audit set.
-3. Andy resolved the BfCA Drive-share blocker (BfCA had download-disable on the original folder; resolved via a separate share). Two new sample folders staged at `docs/PDF References/EPD-scaling-sets/`:
-   - `EPDs to consider for v1.1 update/` — 116 candidate PDFs for the next catalogue update.
-   - `Existing BEAM Database EPDs/` — 208 PDFs from BfCA's archive (may or may not be currently catalogued; the parity matcher sorts them).
-4. Two scaling-audit snapshots + the §12.3 decision dataset committed (`55247fc`).
-5. Catalogue-parity matcher built and shipped (`bd12ef9`) — for each candidate, scores against the 821 records in `schema/materials/*.json` and emits match category + field diff. Surfaced **~10–20 catalogue rows with unit-misencoded density values** (e.g. `mpa000` aluminum at 2.07 kg/m³, `1f3cc3` fiberglass at 0.488 kg/m³). NOT a parser problem — a catalogue-side data-quality issue that the parser now flags.
-6. Mélanie review draft for §11.10 written at `docs/workplans/melanie-review-draft-2026-05-19.md` (`9303991`). Andy's decisions on Q1 (`methodology.beam_calc.*`), Q2 (`long_cycle | short_cycle`, medium deferred), Q5 (`legacy_unknown` flag), Q6 (two-tier ±0.1% / ±5%) are baked in. Phyllis 2 starter shortlist drafted (20 entries) with `// is this right?` markers on the 5 entries needing Mélanie's review. **Pending Andy's red-line pass before sending.**
-7. Five field-tuning passes shipped (manufacturer/epd.id; dates; type/validation; density; material_type). See "Branch state" below for the SHA chain.
-8. Strategic clarification (`§14`, this session): EPD-Parser is **internal back-of-house BfCA tooling**, not public-facing. The materials catalogue is the same. BEAMweb / PDF-Parser / Matrix / DB-read are public-facing; EPD-Parser + DB curation are not. This unlocks LLM-as-parser as a Tier-8.5 extension (Claude API call on BfCA staff workstations to fill the long-tail fields regex can't reach). See §14 in full.
+1. **Build the Parity-A harness** (`schema/scripts/csv-json-parity.mjs`) — fully spec'd in **§16**. Diffs 639 JSON catalogue records ↔ 639 BEAM CSV rows field-by-field, emits BfCA's requested **3-sheet workbook** (Sheet 1 = CSV values, Sheet 2 = JSON values same order, Sheet 3 = per-cell MATCH/MISMATCH for GREEN/RED conditional formatting). This is BfCA's top ask — "prove the BEAMweb database matches the spreadsheet." Regex-independent, deterministic, high-assurance-per-hour. Density-units bug already fixed (§15) so most fields should come back green.
+2. **Finish the CCLIMB chart-config correction** — `js/cclimb/chart-config.mjs` still defines `LCA_MODULES` as axes; the corrected design (TIME_HORIZONS, per §3.2.E of `docs/RMI Work/CCLIMB-Workplan2.md`) needs to replace it. Workplan2 §3.2 is already corrected; only the scaffold code lags.
+3. **Open the PR** for `EPD-PARSER-5` when ready — it's a big, coherent branch (field-tuning + catalogue fix + parity planning + CCLIMB scaffold). Title suggestion: *"EPD-Parser: scaling audit + catalogue-parity + metadata field-tuning + density-units fix + CCLIMB scaffold"*.
+
+### Pending on Andy (not blocking the above)
+
+- **Mélanie review** — materials at `docs/workplans/melanie-review-2026-05-19.{html,rtf,docx}` (the RTF/DOCX are gitignored as `*.rtf`/`*.docx`; the `.html` source + the original markdown draft are tracked). Gating C-fb6 (Tier-10 biogenic). Andy was meeting her 4:15pm 2026-05-19.
+- **§12.3 architecture** — treat §14 (Option D = LLM-as-parser, internal) as the working answer. The pause on `IMPACT_INDICATORS` / `_BYSTAGE_LABELS` / `_CISC_LABEL_PATTERNS` inflation **still stands**.
+- **Pass 1+2 metadata-extractor bug** (flagged in "Known issue" below) — date/type/validation patterns landed in `extractNA` not `extractCommon`, so NSF/EPD-Intl/unknown formats skip them. ~26% of samples affected. Clean follow-up: move 5 blocks from `extractNA` → real `extractCommon`.
+
+### What shipped 2026-05-19 (full session)
+
+**(a) EPD-extraction field-tuning** (metadata recall, all canonical-30-regression-clean):
+- Per-pattern hit-count audit added to harness (§12.5 item 1).
+- Six field-tuning passes: manufacturer + epd.id (+20–41pp), dates (+22pp v1.1), epd.type/validation (+18pp), density (+3pp), material_type (+10pp). Canonical 30 metadata 66.4 → 69.5%.
+- ⚠️ **Bug:** dates/type/validation passes edited `extractNA` not `extractCommon` (see "Known issue").
+
+**(b) Catalogue data-quality:**
+- **Density-units import bug FOUND + FIXED** (`16d4ebd`, documented §15). The BEAM CSV stores density with correct units in col 33 (`kg/m2`, `kg/m`, `g/cm3`, etc.); the importer dropped the unit column and stamped all as `kg/m³` — corrupting ~180 of 684 density records. Fix: importer reads col 33, emits `{value, units, value_kg_m3 (null unless volumetric), value_lb_ft3, source}`. Parity "differ" count dropped 102 → 36. **Mélanie's source data was correct; the bug was BfCA-side.**
+- **Full CSV units audit** (§15.3): density was the ONLY affected column — every other value column anchors to the per-material "common unit" (col 19) which the importer reads correctly.
+
+**(c) CCLIMB — RMI methodology + 6th BfCA module:**
+- Read CCLIMB methodology (`docs/RMI Work/CCLIMB-Workplan.md` = Chris's proposal) + CCOB earlier draft + Chris's flowchart PDFs.
+- Wrote `docs/RMI Work/CCLIMB-Workplan2.md` — implementation interpretation (~730 lines): summary, 6th-module fit, parallel-coordinates UX (per Andy: axes = TIME HORIZONS, RT vs PT per-material multi-line, RT = unbounded counterfactual not module-stratified), climate-model sketch, v1/v2 scope, working-group questions.
+- Scaffolded the module (`7a6ef51`): `cclimb.html` + `js/cclimb.mjs` + `js/cclimb/*.mjs` (chart-config, climate-model, reference-trajectories, feedstock-categories, parallel-coords stubs) + `js/cclimb/parallel-coordinates.objective-source.js` (verbatim port-reference from OBJECTIVE module 18 via gh CLI) + §12 CCLIMB CSS + landing card.
+- ⚠️ chart-config.mjs axes need the TIME_HORIZONS correction (see NEXT SESSION #2).
+
+**(d) Parity-validation planning** (§16): A (CSV↔JSON, do-first) vs B (EPD↔CSV/JSON, needs multi-product extraction, deferred). Multi-product = the parser emits 1 record/PDF today but 280 EPDs → 639 BEAM rows (EPDs cover 2–8 products each); Follow-up #4 gap, gates Parity B, strongest argument for LLM-as-parser.
+
+**Strategic (§14):** EPD-Parser + materials catalogue are **internal back-of-house** (the catalogue is BfCA's "secret sauce"); BEAMweb/PDF-Parser/Matrix/DB-read are public. Internal tools can use the Claude API on staff workstations → LLM-as-parser is the path to 90%+ extraction. §8 in-browser-API ban applies to public surfaces only.
+
+**Large sample sets (gitignored, local-only):** `docs/PDF References/EPD-scaling-sets/` (116 v1.1-candidates + 208 existing-BEAM) and `docs/PDF References/EPD SAMPLES/BEAM 639 Rows/` (280 PDFs → 639 BEAM rows, the parity validation set). All gitignore-protected — never commit.
 
 **Decisions still gating downstream work:**
 
