@@ -168,7 +168,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 2,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -228,6 +228,8 @@
       },
       "physical": {
         "density": {
+          "value": 690,
+          "units": "kg/m3",
           "value_kg_m3": 690,
           "value_lb_ft3": 43.08,
           "source": "epd"
@@ -387,7 +389,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 71,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -446,6 +448,8 @@
       },
       "physical": {
         "density": {
+          "value": 690,
+          "units": "kg/m3",
           "value_kg_m3": 690,
           "value_lb_ft3": 43.08,
           "source": "epd"
@@ -605,7 +609,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 72,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -660,6 +664,8 @@
       },
       "physical": {
         "density": {
+          "value": 1059.75,
+          "units": "kg/m3",
           "value_kg_m3": 1059.75,
           "value_lb_ft3": 66.16,
           "source": "epd"
@@ -780,7 +786,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 73,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -839,6 +845,8 @@
       },
       "physical": {
         "density": {
+          "value": 1150,
+          "units": "kg/m3",
           "value_kg_m3": 1150,
           "value_lb_ft3": 71.79,
           "source": "epd"
@@ -993,7 +1001,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 74,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -1052,6 +1060,8 @@
       },
       "physical": {
         "density": {
+          "value": 1250,
+          "units": "kg/m3",
           "value_kg_m3": 1250,
           "value_lb_ft3": 78.04,
           "source": "epd"
@@ -1206,7 +1216,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 75,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -1264,6 +1274,8 @@
       },
       "physical": {
         "density": {
+          "value": 689,
+          "units": "kg/m3",
           "value_kg_m3": 689,
           "value_lb_ft3": 43.01,
           "source": "epd"
@@ -1427,7 +1439,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 76,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -1485,6 +1497,8 @@
       },
       "physical": {
         "density": {
+          "value": 1150,
+          "units": "kg/m3",
           "value_kg_m3": 1150,
           "value_lb_ft3": 71.79,
           "source": "epd"
@@ -1629,7 +1643,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 77,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -1684,6 +1698,8 @@
       },
       "physical": {
         "density": {
+          "value": 933.3333333,
+          "units": "kg/m3",
           "value_kg_m3": 933.3333333,
           "value_lb_ft3": 58.27,
           "source": "epd"
@@ -1801,7 +1817,7 @@
         "markets_of_applicability": [],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 78,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -1858,6 +1874,8 @@
       },
       "physical": {
         "density": {
+          "value": 700,
+          "units": "kg/m3",
           "value_kg_m3": 700,
           "value_lb_ft3": 43.7,
           "source": "epd"
@@ -2015,7 +2033,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 79,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -2072,6 +2090,8 @@
       },
       "physical": {
         "density": {
+          "value": 1050,
+          "units": "kg/m3",
           "value_kg_m3": 1050,
           "value_lb_ft3": 65.55,
           "source": "epd"
@@ -2229,7 +2249,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 80,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -2286,6 +2306,8 @@
       },
       "physical": {
         "density": {
+          "value": 1050,
+          "units": "kg/m3",
           "value_kg_m3": 1050,
           "value_lb_ft3": 65.55,
           "source": "epd"
@@ -2443,7 +2465,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 81,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -2500,6 +2522,8 @@
       },
       "physical": {
         "density": {
+          "value": 689,
+          "units": "kg/m3",
           "value_kg_m3": 689,
           "value_lb_ft3": 43.01,
           "source": "epd"
@@ -2655,7 +2679,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 82,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -2711,6 +2735,8 @@
       },
       "physical": {
         "density": {
+          "value": 1050,
+          "units": "kg/m3",
           "value_kg_m3": 1050,
           "value_lb_ft3": 65.55,
           "source": "epd"
@@ -2853,7 +2879,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 83,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -2904,6 +2930,8 @@
       },
       "physical": {
         "density": {
+          "value": 209,
+          "units": "kg/m3",
           "value_kg_m3": 209,
           "value_lb_ft3": 13.05,
           "source": "epd"
@@ -3049,7 +3077,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 118,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -3105,6 +3133,8 @@
       },
       "physical": {
         "density": {
+          "value": 299,
+          "units": "kg/m3",
           "value_kg_m3": 299,
           "value_lb_ft3": 18.67,
           "source": "epd"
@@ -3224,7 +3254,7 @@
         "markets_of_applicability": [],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 154,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -3282,6 +3312,8 @@
       },
       "physical": {
         "density": {
+          "value": 379,
+          "units": "kg/m3",
           "value_kg_m3": 379,
           "value_lb_ft3": 23.66,
           "source": "epd"
@@ -3434,7 +3466,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 155,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -3492,6 +3524,8 @@
       },
       "physical": {
         "density": {
+          "value": 379,
+          "units": "kg/m3",
           "value_kg_m3": 379,
           "value_lb_ft3": 23.66,
           "source": "epd"
@@ -3644,7 +3678,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 156,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -3844,7 +3878,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 157,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -3901,6 +3935,8 @@
       },
       "physical": {
         "density": {
+          "value": 140,
+          "units": "kg/m3",
           "value_kg_m3": 140,
           "value_lb_ft3": 8.74,
           "source": "epd"
@@ -4051,7 +4087,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 158,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -4106,6 +4142,8 @@
       },
       "physical": {
         "density": {
+          "value": 459.9166667,
+          "units": "kg/m3",
           "value_kg_m3": 459.9166667,
           "value_lb_ft3": 28.71,
           "source": "epd"
@@ -4223,7 +4261,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 325,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -4283,6 +4321,8 @@
       },
       "physical": {
         "density": {
+          "value": 456,
+          "units": "kg/m3",
           "value_kg_m3": 456,
           "value_lb_ft3": 28.47,
           "source": "epd"
@@ -4444,7 +4484,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 326,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -4504,6 +4544,8 @@
       },
       "physical": {
         "density": {
+          "value": 486,
+          "units": "kg/m3",
           "value_kg_m3": 486,
           "value_lb_ft3": 30.34,
           "source": "epd"
@@ -4665,7 +4707,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 327,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -4724,6 +4766,8 @@
       },
       "physical": {
         "density": {
+          "value": 481,
+          "units": "kg/m3",
           "value_kg_m3": 481,
           "value_lb_ft3": 30.03,
           "source": "epd"
@@ -4869,7 +4913,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 328,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -4928,6 +4972,8 @@
       },
       "physical": {
         "density": {
+          "value": 448,
+          "units": "kg/m3",
           "value_kg_m3": 448,
           "value_lb_ft3": 27.97,
           "source": "epd"
@@ -5077,7 +5123,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 329,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -5136,6 +5182,8 @@
       },
       "physical": {
         "density": {
+          "value": 446,
+          "units": "kg/m3",
           "value_kg_m3": 446,
           "value_lb_ft3": 27.84,
           "source": "epd"
@@ -5285,7 +5333,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 330,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -5344,6 +5392,8 @@
       },
       "physical": {
         "density": {
+          "value": 442.5,
+          "units": "kg/m3",
           "value_kg_m3": 442.5,
           "value_lb_ft3": 27.63,
           "source": "epd"
@@ -5493,7 +5543,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 331,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -5552,6 +5602,8 @@
       },
       "physical": {
         "density": {
+          "value": 546,
+          "units": "kg/m3",
           "value_kg_m3": 546,
           "value_lb_ft3": 34.09,
           "source": "epd"
@@ -5702,7 +5754,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 332,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -5763,6 +5815,8 @@
       },
       "physical": {
         "density": {
+          "value": 449,
+          "units": "kg/m3",
           "value_kg_m3": 449,
           "value_lb_ft3": 28.03,
           "source": "epd"
@@ -5915,7 +5969,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 335,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -5965,6 +6019,8 @@
       },
       "physical": {
         "density": {
+          "value": 548,
+          "units": "kg/m3",
           "value_kg_m3": 548,
           "value_lb_ft3": 34.21,
           "source": "epd"
@@ -6108,7 +6164,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 398,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -6158,6 +6214,8 @@
       },
       "physical": {
         "density": {
+          "value": 548,
+          "units": "kg/m3",
           "value_kg_m3": 548,
           "value_lb_ft3": 34.21,
           "source": "epd"
@@ -6301,7 +6359,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 399,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -6352,6 +6410,8 @@
       },
       "physical": {
         "density": {
+          "value": 544,
+          "units": "kg/m3",
           "value_kg_m3": 544,
           "value_lb_ft3": 33.96,
           "source": "epd"
@@ -6494,7 +6554,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 400,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -6552,6 +6612,8 @@
       },
       "physical": {
         "density": {
+          "value": 442.1,
+          "units": "kg/m3",
           "value_kg_m3": 442.1,
           "value_lb_ft3": 27.6,
           "source": "epd"
@@ -6698,7 +6760,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 401,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -6757,6 +6819,8 @@
       },
       "physical": {
         "density": {
+          "value": 481.68,
+          "units": "kg/m3",
           "value_kg_m3": 481.68,
           "value_lb_ft3": 30.07,
           "source": "epd"
@@ -6903,7 +6967,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 402,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -7099,7 +7163,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 403,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -7296,7 +7360,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 404,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -7356,6 +7420,8 @@
       },
       "physical": {
         "density": {
+          "value": 448,
+          "units": "kg/m3",
           "value_kg_m3": 448,
           "value_lb_ft3": 27.97,
           "source": "epd"
@@ -7502,7 +7568,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 405,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -7554,8 +7620,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 8.44,
-          "value_lb_ft3": 0.53,
+          "value": 8.44,
+          "units": "kg/m2 at 5/8\"",
           "source": "epd"
         },
         "dimensions": {
@@ -7693,7 +7759,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 418,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -7888,7 +7954,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 419,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -7947,8 +8013,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 9.97,
-          "value_lb_ft3": 0.62,
+          "value": 9.97,
+          "units": "kg/m2",
           "source": "epd"
         }
       },
@@ -8094,7 +8160,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 420,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -8146,8 +8212,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 12.287,
-          "value_lb_ft3": 0.77,
+          "value": 12.287,
+          "units": "kg/m2 at 3/4\"",
           "source": "epd"
         },
         "dimensions": {
@@ -8285,7 +8351,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 421,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -8481,7 +8547,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 422,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -8539,8 +8605,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 12.35,
-          "value_lb_ft3": 0.77,
+          "value": 12.35,
+          "units": "kg/m2",
           "source": "epd"
         }
       },
@@ -8686,7 +8752,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 423,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -8744,6 +8810,8 @@
       },
       "physical": {
         "density": {
+          "value": 428.75,
+          "units": "kg/m3",
           "value_kg_m3": 428.75,
           "value_lb_ft3": 26.77,
           "source": "epd"
@@ -8858,7 +8926,7 @@
         "markets_of_applicability": [],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 429,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -8919,6 +8987,8 @@
       },
       "physical": {
         "density": {
+          "value": 420,
+          "units": "kg/m3",
           "value_kg_m3": 420,
           "value_lb_ft3": 26.22,
           "source": "epd"
@@ -9073,7 +9143,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 430,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -9133,6 +9203,8 @@
       },
       "physical": {
         "density": {
+          "value": 390,
+          "units": "kg/m3",
           "value_kg_m3": 390,
           "value_lb_ft3": 24.35,
           "source": "epd"
@@ -9277,7 +9349,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 431,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -9337,6 +9409,8 @@
       },
       "physical": {
         "density": {
+          "value": 390,
+          "units": "kg/m3",
           "value_kg_m3": 390,
           "value_lb_ft3": 24.35,
           "source": "epd"
@@ -9481,7 +9555,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 432,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -9541,6 +9615,8 @@
       },
       "physical": {
         "density": {
+          "value": 515,
+          "units": "kg/m3",
           "value_kg_m3": 515,
           "value_lb_ft3": 32.15,
           "source": "epd"
@@ -9686,7 +9762,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 433,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -9747,8 +9823,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 10.5,
-          "value_lb_ft3": 0.66,
+          "value": 10.5,
+          "units": "kg/m2",
           "source": "epd"
         }
       },
@@ -9899,7 +9975,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 434,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -9958,6 +10034,8 @@
       },
       "physical": {
         "density": {
+          "value": 570.22,
+          "units": "kg/m3",
           "value_kg_m3": 570.22,
           "value_lb_ft3": 35.6,
           "source": "epd"
@@ -10101,7 +10179,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 462,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -10160,6 +10238,8 @@
       },
       "physical": {
         "density": {
+          "value": 548,
+          "units": "kg/m3",
           "value_kg_m3": 548,
           "value_lb_ft3": 34.21,
           "source": "epd"
@@ -10298,7 +10378,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 463,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -10355,6 +10435,8 @@
       },
       "physical": {
         "density": {
+          "value": 483.4,
+          "units": "kg/m3",
           "value_kg_m3": 483.4,
           "value_lb_ft3": 30.18,
           "source": "epd"
@@ -10501,7 +10583,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 464,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -10561,6 +10643,8 @@
       },
       "physical": {
         "density": {
+          "value": 593,
+          "units": "kg/m3",
           "value_kg_m3": 593,
           "value_lb_ft3": 37.02,
           "source": "epd"
@@ -10713,7 +10797,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 465,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -10773,6 +10857,8 @@
       },
       "physical": {
         "density": {
+          "value": 539,
+          "units": "kg/m3",
           "value_kg_m3": 539,
           "value_lb_ft3": 33.65,
           "source": "epd"
@@ -10911,7 +10997,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 466,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -10962,6 +11048,8 @@
       },
       "physical": {
         "density": {
+          "value": 620,
+          "units": "kg/m3",
           "value_kg_m3": 620,
           "value_lb_ft3": 38.71,
           "source": "epd"
@@ -11105,7 +11193,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 537,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -11156,6 +11244,8 @@
       },
       "physical": {
         "density": {
+          "value": 620,
+          "units": "kg/m3",
           "value_kg_m3": 620,
           "value_lb_ft3": 38.71,
           "source": "epd"
@@ -11299,7 +11389,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 538,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -11350,6 +11440,8 @@
       },
       "physical": {
         "density": {
+          "value": 620,
+          "units": "kg/m3",
           "value_kg_m3": 620,
           "value_lb_ft3": 38.71,
           "source": "epd"
@@ -11493,7 +11585,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 539,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -11544,6 +11636,8 @@
       },
       "physical": {
         "density": {
+          "value": 620,
+          "units": "kg/m3",
           "value_kg_m3": 620,
           "value_lb_ft3": 38.71,
           "source": "epd"
@@ -11687,7 +11781,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 540,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -11738,6 +11832,8 @@
       },
       "physical": {
         "density": {
+          "value": 620,
+          "units": "kg/m3",
           "value_kg_m3": 620,
           "value_lb_ft3": 38.71,
           "source": "epd"
@@ -11881,7 +11977,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 541,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -11939,6 +12035,8 @@
       },
       "physical": {
         "density": {
+          "value": 678.28,
+          "units": "kg/m3",
           "value_kg_m3": 678.28,
           "value_lb_ft3": 42.35,
           "source": "epd"
@@ -12095,7 +12193,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 542,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -12153,6 +12251,8 @@
       },
       "physical": {
         "density": {
+          "value": 765,
+          "units": "kg/m3",
           "value_kg_m3": 765,
           "value_lb_ft3": 47.76,
           "source": "epd"
@@ -12303,7 +12403,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 543,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -12361,6 +12461,8 @@
       },
       "physical": {
         "density": {
+          "value": 765,
+          "units": "kg/m3",
           "value_kg_m3": 765,
           "value_lb_ft3": 47.76,
           "source": "epd"
@@ -12511,7 +12613,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 544,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -12569,6 +12671,8 @@
       },
       "physical": {
         "density": {
+          "value": 765,
+          "units": "kg/m3",
           "value_kg_m3": 765,
           "value_lb_ft3": 47.76,
           "source": "epd"
@@ -12719,7 +12823,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 545,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -12771,6 +12875,8 @@
       },
       "physical": {
         "density": {
+          "value": 662,
+          "units": "kg/m3",
           "value_kg_m3": 662,
           "value_lb_ft3": 41.33,
           "source": "epd"
@@ -12922,7 +13028,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 546,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -12975,6 +13081,8 @@
       },
       "physical": {
         "density": {
+          "value": 660,
+          "units": "kg/m3",
           "value_kg_m3": 660,
           "value_lb_ft3": 41.2,
           "source": "epd"
@@ -13132,7 +13240,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 547,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -13185,6 +13293,8 @@
       },
       "physical": {
         "density": {
+          "value": 660,
+          "units": "kg/m3",
           "value_kg_m3": 660,
           "value_lb_ft3": 41.2,
           "source": "epd"
@@ -13342,7 +13452,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 548,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -13395,6 +13505,8 @@
       },
       "physical": {
         "density": {
+          "value": 660,
+          "units": "kg/m3",
           "value_kg_m3": 660,
           "value_lb_ft3": 41.2,
           "source": "epd"
@@ -13552,7 +13664,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 549,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -13605,6 +13717,8 @@
       },
       "physical": {
         "density": {
+          "value": 223,
+          "units": "kg/m3",
           "value_kg_m3": 223,
           "value_lb_ft3": 13.92,
           "source": "epd"
@@ -13754,7 +13868,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 550,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -13807,6 +13921,8 @@
       },
       "physical": {
         "density": {
+          "value": 223,
+          "units": "kg/m3",
           "value_kg_m3": 223,
           "value_lb_ft3": 13.92,
           "source": "epd"
@@ -13956,7 +14072,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 551,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -14009,6 +14125,8 @@
       },
       "physical": {
         "density": {
+          "value": 223,
+          "units": "kg/m3",
           "value_kg_m3": 223,
           "value_lb_ft3": 13.92,
           "source": "epd"
@@ -14158,7 +14276,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 552,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -14211,6 +14329,8 @@
       },
       "physical": {
         "density": {
+          "value": 325,
+          "units": "kg/m3",
           "value_kg_m3": 325,
           "value_lb_ft3": 20.29,
           "source": "epd"
@@ -14360,7 +14480,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 553,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -14418,6 +14538,8 @@
       },
       "physical": {
         "density": {
+          "value": 670,
+          "units": "kg/m3",
           "value_kg_m3": 670,
           "value_lb_ft3": 41.83,
           "source": "epd"
@@ -14568,7 +14690,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 554,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -14626,6 +14748,8 @@
       },
       "physical": {
         "density": {
+          "value": 662,
+          "units": "kg/m3",
           "value_kg_m3": 662,
           "value_lb_ft3": 41.33,
           "source": "epd"
@@ -14776,7 +14900,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 555,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -14827,6 +14951,8 @@
       },
       "physical": {
         "density": {
+          "value": 484,
+          "units": "kg/m3",
           "value_kg_m3": 484,
           "value_lb_ft3": 30.22,
           "source": "epd"
@@ -14970,7 +15096,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 556,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -15021,6 +15147,8 @@
       },
       "physical": {
         "density": {
+          "value": 484,
+          "units": "kg/m3",
           "value_kg_m3": 484,
           "value_lb_ft3": 30.22,
           "source": "epd"
@@ -15164,7 +15292,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 557,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -15215,6 +15343,8 @@
       },
       "physical": {
         "density": {
+          "value": 484,
+          "units": "kg/m3",
           "value_kg_m3": 484,
           "value_lb_ft3": 30.22,
           "source": "epd"
@@ -15358,7 +15488,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 558,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -15417,6 +15547,8 @@
       },
       "physical": {
         "density": {
+          "value": 477.33,
+          "units": "kg/m3",
           "value_kg_m3": 477.33,
           "value_lb_ft3": 29.8,
           "source": "epd"
@@ -15562,7 +15694,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 559,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -15621,6 +15753,8 @@
       },
       "physical": {
         "density": {
+          "value": 477.33,
+          "units": "kg/m3",
           "value_kg_m3": 477.33,
           "value_lb_ft3": 29.8,
           "source": "epd"
@@ -15766,7 +15900,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 560,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -15825,6 +15959,8 @@
       },
       "physical": {
         "density": {
+          "value": 477.33,
+          "units": "kg/m3",
           "value_kg_m3": 477.33,
           "value_lb_ft3": 29.8,
           "source": "epd"
@@ -15970,7 +16106,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 561,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -16029,8 +16165,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 8.9,
-          "value_lb_ft3": 0.56,
+          "value": 8.9,
+          "units": "kg/m2 at 3/4\"",
           "source": "epd"
         }
       },
@@ -16177,7 +16313,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 562,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -16236,8 +16372,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 4.38,
-          "value_lb_ft3": 0.27,
+          "value": 4.38,
+          "units": "kg/m2 at 3/8\"",
           "source": "epd"
         }
       },
@@ -16384,7 +16520,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 563,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -16443,8 +16579,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 4.38,
-          "value_lb_ft3": 0.27,
+          "value": 4.38,
+          "units": "kg/m2 at 3/8\"",
           "source": "epd"
         }
       },
@@ -16591,7 +16727,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 564,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -16748,7 +16884,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 612,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -16906,7 +17042,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 613,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -17064,7 +17200,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 614,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -17222,7 +17358,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 615,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -17380,7 +17516,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 616,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -17439,6 +17575,8 @@
       },
       "physical": {
         "density": {
+          "value": 100,
+          "units": "kg/m3",
           "value_kg_m3": 100,
           "value_lb_ft3": 6.24,
           "source": "epd"
@@ -17593,7 +17731,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 700,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -17650,6 +17788,8 @@
       },
       "physical": {
         "density": {
+          "value": 100,
+          "units": "kg/m3",
           "value_kg_m3": 100,
           "value_lb_ft3": 6.24,
           "source": "epd"
@@ -17801,7 +17941,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 701,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -17860,8 +18000,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 110,
-          "value_lb_ft3": 6.87,
+          "value": 110,
+          "units": "kg/m2",
           "source": "epd"
         },
         "thermal": {
@@ -18013,7 +18153,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 702,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -18070,6 +18210,8 @@
       },
       "physical": {
         "density": {
+          "value": 280,
+          "units": "kg/m3",
           "value_kg_m3": 280,
           "value_lb_ft3": 17.48,
           "source": "epd"
@@ -18216,7 +18358,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 703,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -18274,6 +18416,8 @@
       },
       "physical": {
         "density": {
+          "value": 379,
+          "units": "kg/m3",
           "value_kg_m3": 379,
           "value_lb_ft3": 23.66,
           "source": "epd"
@@ -18423,7 +18567,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 704,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -18480,8 +18624,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 18.5,
-          "value_lb_ft3": 1.15,
+          "value": 18.5,
+          "units": "kg/m2",
           "source": "epd"
         }
       },
@@ -18621,7 +18765,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 705,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -18775,7 +18919,7 @@
         "markets_of_applicability": [],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 710,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -18931,7 +19075,7 @@
         "markets_of_applicability": [],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 711,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -19099,7 +19243,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 722,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -19266,7 +19410,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 738,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -19326,6 +19470,8 @@
       },
       "physical": {
         "density": {
+          "value": 35,
+          "units": "kg/m3",
           "value_kg_m3": 35,
           "value_lb_ft3": 2.19,
           "source": "epd"
@@ -19480,7 +19626,7 @@
         "markets_of_applicability": [],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 747,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -19643,7 +19789,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 748,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -19702,6 +19848,8 @@
       },
       "physical": {
         "density": {
+          "value": 50,
+          "units": "kg/m3",
           "value_kg_m3": 50,
           "value_lb_ft3": 3.12,
           "source": "epd"
@@ -19849,7 +19997,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 749,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -19906,6 +20054,8 @@
       },
       "physical": {
         "density": {
+          "value": 55,
+          "units": "kg/m3",
           "value_kg_m3": 55,
           "value_lb_ft3": 3.43,
           "source": "epd"
@@ -20052,7 +20202,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 750,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -20109,6 +20259,8 @@
       },
       "physical": {
         "density": {
+          "value": 254,
+          "units": "kg/m3",
           "value_kg_m3": 254,
           "value_lb_ft3": 15.86,
           "source": "epd"
@@ -20256,7 +20408,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 751,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -20312,6 +20464,8 @@
       },
       "physical": {
         "density": {
+          "value": 254,
+          "units": "kg/m3",
           "value_kg_m3": 254,
           "value_lb_ft3": 15.86,
           "source": "epd"
@@ -20458,7 +20612,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 752,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -20516,6 +20670,8 @@
       },
       "physical": {
         "density": {
+          "value": 210,
+          "units": "kg/m3",
           "value_kg_m3": 210,
           "value_lb_ft3": 13.11,
           "source": "epd"
@@ -20664,7 +20820,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 753,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -20722,6 +20878,8 @@
       },
       "physical": {
         "density": {
+          "value": 140,
+          "units": "kg/m3",
           "value_kg_m3": 140,
           "value_lb_ft3": 8.74,
           "source": "epd"
@@ -20870,7 +21028,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 754,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -20928,6 +21086,8 @@
       },
       "physical": {
         "density": {
+          "value": 110,
+          "units": "kg/m3",
           "value_kg_m3": 110,
           "value_lb_ft3": 6.87,
           "source": "epd"
@@ -21076,7 +21236,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 755,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -21134,6 +21294,8 @@
       },
       "physical": {
         "density": {
+          "value": 200,
+          "units": "kg/m3",
           "value_kg_m3": 200,
           "value_lb_ft3": 12.49,
           "source": "epd"
@@ -21285,7 +21447,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 756,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -21343,6 +21505,8 @@
       },
       "physical": {
         "density": {
+          "value": 140,
+          "units": "kg/m3",
           "value_kg_m3": 140,
           "value_lb_ft3": 8.74,
           "source": "epd"
@@ -21496,7 +21660,7 @@
         "markets_of_applicability": [],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 757,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -21554,6 +21718,8 @@
       },
       "physical": {
         "density": {
+          "value": 130,
+          "units": "kg/m3",
           "value_kg_m3": 130,
           "value_lb_ft3": 8.12,
           "source": "epd"
@@ -21705,7 +21871,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 758,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -21763,6 +21929,8 @@
       },
       "physical": {
         "density": {
+          "value": 115,
+          "units": "kg/m3",
           "value_kg_m3": 115,
           "value_lb_ft3": 7.18,
           "source": "epd"
@@ -21914,7 +22082,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 759,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -21972,6 +22140,8 @@
       },
       "physical": {
         "density": {
+          "value": 110,
+          "units": "kg/m3",
           "value_kg_m3": 110,
           "value_lb_ft3": 6.87,
           "source": "epd"
@@ -22123,7 +22293,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 760,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -22176,6 +22346,8 @@
       },
       "physical": {
         "density": {
+          "value": 417,
+          "units": "kg/m3",
           "value_kg_m3": 417,
           "value_lb_ft3": 26.03,
           "source": "epd"
@@ -22321,7 +22493,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 761,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -22377,8 +22549,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 5.6,
-          "value_lb_ft3": 0.35,
+          "value": 5.6,
+          "units": "kg/m",
           "source": "epd"
         }
       },
@@ -22528,7 +22700,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 762,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -22584,8 +22756,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 7.05,
-          "value_lb_ft3": 0.44,
+          "value": 7.05,
+          "units": "kg/m",
           "source": "epd"
         }
       },
@@ -22735,7 +22907,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 763,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -22791,8 +22963,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 6.7,
-          "value_lb_ft3": 0.42,
+          "value": 6.7,
+          "units": "kg/m",
           "source": "epd"
         }
       },
@@ -22942,7 +23114,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 764,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -23096,7 +23268,7 @@
         "markets_of_applicability": [],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 765,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -23148,6 +23320,8 @@
       },
       "physical": {
         "density": {
+          "value": 456,
+          "units": "kg/m3",
           "value_kg_m3": 456,
           "value_lb_ft3": 28.47,
           "source": "epd"
@@ -23284,7 +23458,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 766,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -23335,6 +23509,8 @@
       },
       "physical": {
         "density": {
+          "value": 456,
+          "units": "kg/m3",
           "value_kg_m3": 456,
           "value_lb_ft3": 28.47,
           "source": "epd"
@@ -23471,7 +23647,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 767,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -23522,6 +23698,8 @@
       },
       "physical": {
         "density": {
+          "value": 456,
+          "units": "kg/m3",
           "value_kg_m3": 456,
           "value_lb_ft3": 28.47,
           "source": "epd"
@@ -23662,7 +23840,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 768,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -23713,6 +23891,8 @@
       },
       "physical": {
         "density": {
+          "value": 456,
+          "units": "kg/m3",
           "value_kg_m3": 456,
           "value_lb_ft3": 28.47,
           "source": "epd"
@@ -23853,7 +24033,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 769,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -23904,6 +24084,8 @@
       },
       "physical": {
         "density": {
+          "value": 456,
+          "units": "kg/m3",
           "value_kg_m3": 456,
           "value_lb_ft3": 28.47,
           "source": "epd"
@@ -24044,7 +24226,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 770,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -24095,6 +24277,8 @@
       },
       "physical": {
         "density": {
+          "value": 456,
+          "units": "kg/m3",
           "value_kg_m3": 456,
           "value_lb_ft3": 28.47,
           "source": "epd"
@@ -24234,7 +24418,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 771,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -24293,6 +24477,8 @@
       },
       "physical": {
         "density": {
+          "value": 462.91,
+          "units": "kg/m3",
           "value_kg_m3": 462.91,
           "value_lb_ft3": 28.9,
           "source": "epd"
@@ -24444,7 +24630,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 772,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -24503,6 +24689,8 @@
       },
       "physical": {
         "density": {
+          "value": 462.91,
+          "units": "kg/m3",
           "value_kg_m3": 462.91,
           "value_lb_ft3": 28.9,
           "source": "epd"
@@ -24654,7 +24842,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 773,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -24713,6 +24901,8 @@
       },
       "physical": {
         "density": {
+          "value": 462.91,
+          "units": "kg/m3",
           "value_kg_m3": 462.91,
           "value_lb_ft3": 28.9,
           "source": "epd"
@@ -24864,7 +25054,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 774,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -24915,6 +25105,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -25058,7 +25250,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 775,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -25109,6 +25301,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -25252,7 +25446,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 776,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -25303,6 +25497,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -25446,7 +25642,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 777,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -25497,6 +25693,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -25640,7 +25838,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 778,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -25691,6 +25889,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -25834,7 +26034,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 779,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -25885,6 +26085,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -26028,7 +26230,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 780,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -26079,6 +26281,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -26222,7 +26426,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 781,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -26273,6 +26477,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -26416,7 +26622,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 782,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -26467,6 +26673,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -26610,7 +26818,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 783,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -26661,6 +26869,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -26804,7 +27014,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 784,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -26855,6 +27065,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -26998,7 +27210,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 785,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -27049,6 +27261,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -27192,7 +27406,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 786,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -27243,6 +27457,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -27386,7 +27602,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 787,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -27436,6 +27652,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -27577,7 +27795,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 788,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -27627,6 +27845,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -27768,7 +27988,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 789,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -27818,6 +28038,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -27959,7 +28181,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 790,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -28009,6 +28231,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -28150,7 +28374,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 791,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -28200,6 +28424,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -28341,7 +28567,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 792,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -28391,6 +28617,8 @@
       },
       "physical": {
         "density": {
+          "value": 460,
+          "units": "kg/m3",
           "value_kg_m3": 460,
           "value_lb_ft3": 28.72,
           "source": "epd"
@@ -28532,7 +28760,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 793,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -28583,8 +28811,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 4.34,
-          "value_lb_ft3": 0.27,
+          "value": 4.34,
+          "units": "kg/m at avg depth",
           "source": "epd"
         },
         "additional_factor": {
@@ -28718,7 +28946,7 @@
         "markets_of_applicability": [],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 794,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -28769,8 +28997,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 4.018,
-          "value_lb_ft3": 0.25,
+          "value": 4.018,
+          "units": "kg/m at depth",
           "source": "epd"
         },
         "additional_factor": {
@@ -28907,7 +29135,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 795,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -28958,8 +29186,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 4.464,
-          "value_lb_ft3": 0.28,
+          "value": 4.464,
+          "units": "kg/m at depth",
           "source": "epd"
         },
         "additional_factor": {
@@ -28994,7 +29222,6 @@
           "biogenic_factor": 0.975,
           "storage_retention_pct": 0.9,
           "wwf_storage_factor_kgco2e_per_kgc": 8.01,
-          "carbon_content_kgc_per_unit": 2.24,
           "co2_to_c_molar_ratio": 3.67,
           "method": "wwf_storage_factor",
           "notes": "full_C = density × thickness × biogenic_factor × carbon_content × 3.67; stored = full_C × storage_retention"
@@ -29101,7 +29328,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 796,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -29152,8 +29379,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 4.911,
-          "value_lb_ft3": 0.31,
+          "value": 4.911,
+          "units": "kg/m at depth",
           "source": "epd"
         },
         "additional_factor": {
@@ -29290,7 +29517,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 797,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -29341,8 +29568,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 5.209,
-          "value_lb_ft3": 0.33,
+          "value": 5.209,
+          "units": "kg/m at depth",
           "source": "epd"
         },
         "additional_factor": {
@@ -29479,7 +29706,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 798,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -29530,8 +29757,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 3.9,
-          "value_lb_ft3": 0.24,
+          "value": 3.9,
+          "units": "kg/m",
           "source": "epd"
         }
       },
@@ -29666,7 +29893,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 799,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -29876,7 +30103,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 800,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -30086,7 +30313,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 801,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -30296,7 +30523,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 802,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -30506,7 +30733,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 803,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -30716,7 +30943,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 804,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -30926,7 +31153,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 805,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -30978,6 +31205,8 @@
       },
       "physical": {
         "density": {
+          "value": 417,
+          "units": "kg/m3",
           "value_kg_m3": 417,
           "value_lb_ft3": 26.03,
           "source": "epd"
@@ -31119,7 +31348,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 807,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -31177,8 +31406,8 @@
       },
       "physical": {
         "density": {
-          "value_kg_m3": 17.09,
-          "value_lb_ft3": 1.07,
+          "value": 17.09,
+          "units": "kg/m2",
           "source": "epd"
         }
       },
@@ -31329,7 +31558,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 808,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -31388,6 +31617,8 @@
       },
       "physical": {
         "density": {
+          "value": 400,
+          "units": "kg/m3",
           "value_kg_m3": 400,
           "value_lb_ft3": 24.97,
           "source": "epd"
@@ -31534,7 +31765,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 809,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }
@@ -31593,6 +31824,8 @@
       },
       "physical": {
         "density": {
+          "value": 400,
+          "units": "kg/m3",
           "value_kg_m3": 400,
           "value_lb_ft3": 24.97,
           "source": "epd"
@@ -31737,7 +31970,7 @@
         ],
         "import_metadata": {
           "imported_from": "BEAM Database-DUMP.csv",
-          "import_date": "2026-04-20",
+          "import_date": "2026-05-19",
           "beam_csv_row_index": 810,
           "beam_csv_sha256": "dfa1b965aeec4f004eeeecfae8121abc1c635de52d773a3f028d1c997b16ce6f"
         }

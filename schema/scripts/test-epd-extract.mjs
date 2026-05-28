@@ -32,6 +32,7 @@ const SAMPLES_ROOT = join(REPO_ROOT, "docs", "PDF References", "EPD SAMPLES");
 const EXPECTED_ROOT = join(SAMPLES_ROOT, "expected");
 const EXTRACT_MJS = join(REPO_ROOT, "js", "epd", "extract.mjs");
 const LOOKUPS_DIR = join(REPO_ROOT, "schema", "lookups");
+const MATERIALS_DIR = join(REPO_ROOT, "schema", "materials");
 const COVERAGE_HISTORY_DIR = join(REPO_ROOT, "docs", "workplans", "EPD-coverage-history");
 
 // Numeric tolerance for ground-truth extraction-fidelity check
@@ -71,6 +72,195 @@ const IMPACT_KEYS = [
   "primary_energy_nonrenewable_mj",
   "primary_energy_renewable_mj"
 ];
+
+/* ── Catalogue parity check ─────────────────────────────────────────── */
+//
+// Match each extracted candidate against the 821 records in
+// schema/materials/*.json and report:
+//   - Match category (strong / multi / medium / weak / unmatched)
+//   - Field-by-field diff on safely-comparable fields
+//
+// Why some fields are unsafe to diff today: the catalogue's
+// `impacts.<key>.total.value` is BEAM-normalized (per-common-unit,
+// `source: "beam_derived"`), while the parser writes per-declared-unit
+// values into the same path with `source: "epd_direct"`. Direct
+// comparison would produce false-positive divergences. Once Tier-10
+// (C-fb6) normalizes parser output via methodology.beam_calc, the
+// impact comparisons can be added.
+//
+// Today's safe fields: density (unit-independent), manufacturer,
+// display_name (string proximity), classification (group + material
+// type), epd.id (substring match for heterogeneous formats).
+
+const STOP_TOKENS = new Set([
+  "the", "and", "for", "with", "epd", "epd's", "product", "products",
+  "declaration", "environmental", "to", "of", "in", "on", "by", "an", "a",
+  "is", "are", "as", "or", "from", "no"
+]);
+
+function _normalize(s) {
+  return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function _tokens(s) {
+  return _normalize(s)
+    .split(/\s+/)
+    .filter((t) => t.length > 2 && !STOP_TOKENS.has(t));
+}
+
+async function loadCatalogue() {
+  const out = [];
+  const files = await readdir(MATERIALS_DIR);
+  for (const f of files) {
+    if (!f.endsWith(".json")) continue;
+    if (f === "index.json" || f === "import-report.json") continue;
+    const raw = await readFile(join(MATERIALS_DIR, f), "utf8");
+    const data = JSON.parse(raw);
+    const records = data.records || data;
+    for (const r of records) out.push(r);
+  }
+  return out;
+}
+
+// Score-based ranker. The thresholds (80 / 50 / 30) are empirical —
+// tunable from the snapshot's distribution.
+function matchCandidate(candidate, catalogue) {
+  const cd = {
+    displayTokens: _tokens(candidate.naming && candidate.naming.display_name),
+    group: candidate.classification && candidate.classification.group_prefix,
+    material: _normalize(candidate.classification && candidate.classification.material_type),
+    manufacturer: _normalize(candidate.manufacturer && candidate.manufacturer.name),
+    epdId: _normalize(candidate.epd && candidate.epd.id)
+  };
+
+  const ranked = [];
+  for (const rec of catalogue) {
+    const rd = {
+      displayTokens: _tokens(rec.naming && rec.naming.display_name),
+      group: rec.classification && rec.classification.group_prefix,
+      material: _normalize(rec.classification && rec.classification.material_type),
+      manufacturer: _normalize(rec.manufacturer && rec.manufacturer.name),
+      epdId: _normalize(rec.epd && rec.epd.id),
+      isIndustryAvg: rec.status && rec.status.is_industry_average === true
+    };
+
+    let score = 0;
+    const reasons = [];
+
+    // STRONG signals — manufacturer + epd.id substring overlap.
+    // epd.id requires 5+ chars on both sides so we don't false-match
+    // single-digit citation snippets like "2011".
+    if (cd.epdId && rd.epdId && cd.epdId.length > 5 && rd.epdId.length > 5) {
+      if (rd.epdId.includes(cd.epdId) || cd.epdId.includes(rd.epdId)) {
+        score += 80;
+        reasons.push("epd.id");
+      }
+    }
+    if (cd.manufacturer && rd.manufacturer && cd.manufacturer.length > 3) {
+      if (rd.manufacturer.includes(cd.manufacturer) || cd.manufacturer.includes(rd.manufacturer)) {
+        score += 40;
+        reasons.push("mfr");
+      }
+    }
+
+    // MEDIUM — display_name token overlap (Jaccard-ish, asymmetric).
+    if (cd.displayTokens.length && rd.displayTokens.length) {
+      let shared = 0;
+      for (const t of cd.displayTokens) if (rd.displayTokens.includes(t)) shared++;
+      const overlap = shared / cd.displayTokens.length;
+      if (overlap >= 0.5) {
+        score += Math.round(40 * overlap);
+        reasons.push(`disp(${shared}/${cd.displayTokens.length})`);
+      }
+    }
+
+    // WEAK — classification anchors. Same-group bonus, cross-group small penalty.
+    if (cd.group && cd.group === rd.group) {
+      score += 10;
+      reasons.push("group");
+    } else if (cd.group && rd.group && cd.group !== rd.group) {
+      score -= 5;
+    }
+    if (cd.material && cd.material === rd.material) {
+      score += 10;
+      reasons.push("mat");
+    }
+
+    if (score > 0) {
+      ranked.push({
+        id: rec.id,
+        score,
+        reasons,
+        isIndustryAvg: rd.isIndustryAvg,
+        displayName: (rec.naming && rec.naming.display_name) || "—"
+      });
+    }
+  }
+
+  ranked.sort((a, b) => b.score - a.score);
+  return ranked;
+}
+
+function classifyMatch(ranked) {
+  if (ranked.length === 0) return { category: "unmatched", topScore: 0, matches: [] };
+  const top = ranked[0];
+  // 1:N detection — cluster matches within 10 points of the top score.
+  // Same EPD producing multiple catalogue rows (e.g. bamboo plywood
+  // 1/2" + 3/4" both reference the same SmartEPD id) lands here.
+  const cluster = ranked.filter((m) => m.score >= top.score - 10);
+  if (top.score >= 80) {
+    return { category: cluster.length > 1 ? "strong-multi" : "strong", topScore: top.score, matches: cluster };
+  }
+  if (top.score >= 50) {
+    return { category: cluster.length > 1 ? "medium-multi" : "medium", topScore: top.score, matches: cluster };
+  }
+  if (top.score >= 30) {
+    return { category: "weak", topScore: top.score, matches: [top] };
+  }
+  return { category: "unmatched", topScore: top.score, matches: [] };
+}
+
+// Field-by-field diff between a candidate and ONE catalogue record.
+// Returns an array of { path, status: "match"|"differ"|"one-null"|"both-null", candidate, catalogue }.
+function fieldDiff(candidate, rec) {
+  const out = [];
+  const compare = (path, comparator) => {
+    const cVal = getPath(candidate, path);
+    const rVal = getPath(rec, path);
+    if (cVal == null && rVal == null) {
+      out.push({ path, status: "both-null", candidate: null, catalogue: null });
+      return;
+    }
+    if (cVal == null || rVal == null) {
+      out.push({ path, status: "one-null", candidate: cVal == null ? null : cVal, catalogue: rVal == null ? null : rVal });
+      return;
+    }
+    out.push({ path, status: comparator(cVal, rVal) ? "match" : "differ", candidate: cVal, catalogue: rVal });
+  };
+
+  const strEq = (a, b) => _normalize(a) === _normalize(b);
+  const strContains = (a, b) => {
+    const na = _normalize(a);
+    const nb = _normalize(b);
+    if (!na || !nb) return false;
+    return na.includes(nb) || nb.includes(na);
+  };
+  const numWithin5pct = (a, b) => {
+    if (typeof a !== "number" || typeof b !== "number") return false;
+    if (b === 0 && a === 0) return true;
+    const denom = Math.max(Math.abs(b), 1e-12);
+    return Math.abs(a - b) / denom <= 0.05;
+  };
+
+  compare("classification.group_prefix", strEq);
+  compare("classification.material_type", strEq);
+  compare("manufacturer.name", strContains);
+  compare("physical.density.value_kg_m3", numWithin5pct);
+  compare("epd.id", strContains);
+  // NOT comparing impacts.* — see header comment.
+
+  return out;
+}
 
 function parseArgs(argv) {
   const args = { json: null, md: null, only: null, root: null };
@@ -309,6 +499,55 @@ function fmtPct(n, d) {
   return `${n}/${d}`;
 }
 
+// Synthesise a short human-readable label from a regex source so the
+// per-pattern audit table is readable. Strips escape backslashes /
+// whitespace tokens, truncates with ellipsis.
+function shortRxLabel(rx, maxLen) {
+  if (!rx || !rx.source) return "?";
+  let s = rx.source
+    .replace(/\\s\+/g, " ")
+    .replace(/\\s\*/g, "")
+    .replace(/\\s/g, " ")
+    .replace(/\\b/g, "")
+    .replace(/\\\./g, ".")
+    .replace(/\(\?:/g, "(")
+    .replace(/\\n|\\r/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (s.length > maxLen) s = s.substring(0, maxLen - 1) + "…";
+  return s;
+}
+
+// Per-pattern hit tally (workplan §12.5 item 1). Mirrors production
+// semantics: IMPACT_INDICATORS are matched against the whole joined
+// text (same as _extractIndicatorTotals); _BYSTAGE_LABELS and
+// _CISC_LABEL_PATTERNS are tested per-line (same as _extractByStage /
+// _findCISCDataRowKey). A pattern with 0 hits across the full sample
+// set is a deprecation candidate.
+function tallyWholeText(allText, patternArr, getRx, hits) {
+  for (let i = 0; i < patternArr.length; i++) {
+    const rx = getRx(patternArr[i]);
+    if (!rx) continue;
+    if (rx.test(allText)) hits[i]++;
+  }
+}
+
+function tallyPerLine(allText, patternArr, getRx, hits) {
+  const lines = allText.split("\n");
+  for (let i = 0; i < patternArr.length; i++) {
+    const rx = getRx(patternArr[i]);
+    if (!rx) continue;
+    let matched = false;
+    for (let l = 0; l < lines.length; l++) {
+      if (rx.test(lines[l])) {
+        matched = true;
+        break;
+      }
+    }
+    if (matched) hits[i]++;
+  }
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const pdfjs = await loadPdfjs();
@@ -343,6 +582,21 @@ async function main() {
     console.log(`Using --root ${sampleRoot} (${pdfs.length} PDFs)`);
   }
 
+  // Per-pattern hit-count audit (workplan §12.5 item 1). Counters
+  // sized to each pattern array; bumped once per sample where the
+  // regex fires (mirrors production semantics — see tallyWholeText /
+  // tallyPerLine). Patterns with 0 hits across the full set surface
+  // as deprecation candidates in the snapshot.
+  const impactHits = new Array(Extract.IMPACT_INDICATORS.length).fill(0);
+  const byStageLabelHits = new Array(Extract._BYSTAGE_LABELS.length).fill(0);
+  const ciscHits = new Array(Extract._CISC_LABEL_PATTERNS.length).fill(0);
+
+  // Catalogue parity (§11.10 follow-up — verifies extracted records
+  // against the 821-record schema/materials/ catalogue). Loaded once
+  // per harness run; matcher runs per-sample after extraction.
+  const catalogue = await loadCatalogue();
+  console.log(`Loaded ${catalogue.length} catalogue records for parity check.`);
+
   const results = [];
   for (const pdfPath of pdfs) {
     const rel = relative(REPO_ROOT, pdfPath);
@@ -368,9 +622,34 @@ async function main() {
       continue;
     }
 
+    // Per-pattern audit: re-join page texts the same way extract()
+    // does (page-pair separator "\n\n") so the regexes see identical
+    // input to production.
+    const allText = (extracted.pageTexts || []).join("\n\n");
+    tallyWholeText(allText, Extract.IMPACT_INDICATORS, (e) => e.regex, impactHits);
+    tallyPerLine(allText, Extract._BYSTAGE_LABELS, (e) => e.rx, byStageLabelHits);
+    tallyPerLine(allText, Extract._CISC_LABEL_PATTERNS, (e) => e.rx, ciscHits);
+
     const summary = summarizeRecord(result.record);
     const expected = await loadExpected(file);
     const gt = evaluateGroundTruth(result.record, expected);
+
+    // Catalogue parity — match candidate against the 821-record catalogue
+    // and field-diff against the top match (if any). For unmatched
+    // samples, parity = null and the snapshot tags them as candidates
+    // for new entries.
+    const ranked = matchCandidate(result.record, catalogue);
+    const classification = classifyMatch(ranked);
+    const parity =
+      classification.matches.length > 0
+        ? {
+            category: classification.category,
+            topScore: classification.topScore,
+            matches: classification.matches.slice(0, 5),
+            diff: fieldDiff(result.record, catalogue.find((r) => r.id === classification.matches[0].id))
+          }
+        : { category: "unmatched", topScore: classification.topScore, matches: [], diff: [] };
+
     results.push({
       group,
       file,
@@ -386,15 +665,20 @@ async function main() {
       byStagePerIndicator: summary.byStagePerIndicator,
       record: result.record,
       expected,
-      groundTruth: gt
+      groundTruth: gt,
+      parity
     });
     const gtTag = expected
       ? gt.extractionFailures.length === 0 && gt.silentOverrides.length === 0 && gt.defaultsAppliedFailures.length === 0
         ? "  GT=✓"
         : `  GT=✗ ext:${gt.extractionFailures.length} silent:${gt.silentOverrides.length} dflt:${gt.defaultsAppliedFailures.length}`
       : "";
+    const parityTag =
+      parity.category === "unmatched"
+        ? "  cat=—"
+        : `  cat=${parity.category}(${parity.topScore})`;
     console.log(
-      `✓ ${group}/${file.padEnd(60)}  fmt=${result.format.padEnd(20)}  meta=${fmtPct(summary.metaHit, summary.metaTotal)}  impacts=${fmtPct(summary.impactHit, summary.impactTotal)}  by_stage=${fmtPct(summary.byStageHit, summary.byStageTotal)}  pages=${extracted.pageCount}${gtTag}`
+      `✓ ${group}/${file.padEnd(60)}  fmt=${result.format.padEnd(20)}  meta=${fmtPct(summary.metaHit, summary.metaTotal)}  impacts=${fmtPct(summary.impactHit, summary.impactTotal)}  by_stage=${fmtPct(summary.byStageHit, summary.byStageTotal)}  pages=${extracted.pageCount}${gtTag}${parityTag}`
     );
   }
 
@@ -478,6 +762,94 @@ async function main() {
   for (const [path, hits] of sortedParams) {
     const pct = ((100 * hits) / ok.length).toFixed(0);
     console.log(`  ${path.padEnd(50)} ${hits.toString().padStart(3)}/${ok.length}  (${pct}%)`);
+  }
+
+  // ── Per-pattern hit count (workplan §12.5 item 1) ───
+  // For each entry in IMPACT_INDICATORS / _BYSTAGE_LABELS /
+  // _CISC_LABEL_PATTERNS, report how many samples the regex fires on.
+  // Patterns with 0 hits are deprecation candidates; patterns with 1
+  // hit are also candidates if the matched sample's coverage is
+  // already strong from another regex. This is the data input to the
+  // §12.3 architecture decision — geometric/declarative/HITL choice
+  // becomes cheaper to evaluate when we can name the dead weight.
+  function printPatternAudit(title, patternArr, hits, getRx, getLabel) {
+    console.log("");
+    console.log(`Per-pattern hit count — ${title} (${patternArr.length} patterns × ${ok.length} samples):`);
+    for (let i = 0; i < patternArr.length; i++) {
+      const hit = hits[i];
+      const pct = ok.length ? ((100 * hit) / ok.length).toFixed(0) : "0";
+      const tag = hit === 0 ? "  DEAD" : "";
+      const label = getLabel(patternArr[i], i) || shortRxLabel(getRx(patternArr[i]), 56);
+      console.log(`  [${String(i).padStart(2, "0")}] ${label.padEnd(58)} hits=${String(hit).padStart(3)}/${ok.length}  (${pct}%)${tag}`);
+    }
+  }
+  printPatternAudit(
+    "IMPACT_INDICATORS",
+    Extract.IMPACT_INDICATORS,
+    impactHits,
+    (e) => e.regex,
+    (e) => (e.schemaKey ? `${e.schemaKey} — ${e.label || ""}`.trim() : null)
+  );
+  printPatternAudit(
+    "_BYSTAGE_LABELS",
+    Extract._BYSTAGE_LABELS,
+    byStageLabelHits,
+    (e) => e.rx,
+    (e) => e.key
+  );
+  printPatternAudit(
+    "_CISC_LABEL_PATTERNS",
+    Extract._CISC_LABEL_PATTERNS,
+    ciscHits,
+    (e) => e.rx,
+    (e) => e.key
+  );
+
+  // ── Catalogue parity (§11.10 follow-up) ──────────────
+  // Distribution of match category + field-diff aggregate. Unmatched
+  // samples are candidates for new catalogue entries; matched ones
+  // give us extraction-fidelity signal against authoritative values
+  // (limited to safely-comparable fields today — impact values still
+  // pending Tier-10 unit normalization).
+  const parityCounts = {};
+  const parityFieldStats = {};
+  const PARITY_FIELDS = [
+    "classification.group_prefix",
+    "classification.material_type",
+    "manufacturer.name",
+    "physical.density.value_kg_m3",
+    "epd.id"
+  ];
+  for (const p of PARITY_FIELDS) parityFieldStats[p] = { match: 0, differ: 0, oneNull: 0, bothNull: 0 };
+  for (const r of ok) {
+    const cat = r.parity.category;
+    parityCounts[cat] = (parityCounts[cat] || 0) + 1;
+    if (r.parity.category !== "unmatched") {
+      for (const d of r.parity.diff) {
+        const stat = parityFieldStats[d.path];
+        if (!stat) continue;
+        if (d.status === "match") stat.match++;
+        else if (d.status === "differ") stat.differ++;
+        else if (d.status === "one-null") stat.oneNull++;
+        else if (d.status === "both-null") stat.bothNull++;
+      }
+    }
+  }
+  console.log("");
+  console.log(`Catalogue parity check (${ok.length} candidates × ${catalogue.length} catalogue records):`);
+  const CAT_ORDER = ["strong", "strong-multi", "medium", "medium-multi", "weak", "unmatched"];
+  for (const cat of CAT_ORDER) {
+    const n = parityCounts[cat] || 0;
+    const pct = ok.length ? ((100 * n) / ok.length).toFixed(0) : "0";
+    console.log(`  ${cat.padEnd(14)} ${String(n).padStart(4)}/${ok.length}  (${pct}%)`);
+  }
+  console.log("");
+  console.log(`Field-diff on matched samples (excluding unmatched):`);
+  for (const p of PARITY_FIELDS) {
+    const s = parityFieldStats[p];
+    const totalNonNull = s.match + s.differ + s.oneNull;
+    const matchPct = totalNonNull ? ((100 * s.match) / totalNonNull).toFixed(0) : "—";
+    console.log(`  ${p.padEnd(50)} match=${s.match}  differ=${s.differ}  one-null=${s.oneNull}  both-null=${s.bothNull}  (${matchPct}%)`);
   }
 
   // ── Ground-truth aggregate (workplan §10.3) ─────────
@@ -564,6 +936,113 @@ async function main() {
         `| ${r.group}/${r.file} | ${bsCell(bs.gwp_kgco2e)} | ${bsCell(bs.gwp_bio_kgco2e)} | ${bsCell(bs.ozone_depletion_kgcfc11eq)} | ${bsCell(bs.acidification_kgso2eq)} | ${bsCell(bs.eutrophication_kgneq)} | ${bsCell(bs.smog_kgo3eq)} | ${bsCell(bs.abiotic_depletion_fossil_mj)} | ${bsCell(bs.water_consumption_m3)} | ${bsCell(bs.primary_energy_nonrenewable_mj)} | ${bsCell(bs.primary_energy_renewable_mj)} |`
       );
     }
+    // Per-pattern hit count (workplan §12.5 item 1). Identifies dead-
+    // weight regexes that are candidates for deprecation in the §12.3
+    // architecture review. A pattern matching 0 samples earned nothing
+    // for its maintenance cost; 1 sample is also a candidate when the
+    // matched sample's coverage is already strong from another regex.
+    function mdPatternAudit(title, patternArr, hits, getRx, getLabel) {
+      lines.push("");
+      lines.push(`## Per-pattern hit count — ${title}`);
+      lines.push("");
+      lines.push(`${patternArr.length} patterns × ${ok.length} samples. \`DEAD\` = 0 hits, deprecation candidate.`);
+      lines.push("");
+      lines.push("| # | Key / label | Hits | % | Status |");
+      lines.push("|---:|---|---:|---:|---|");
+      for (let i = 0; i < patternArr.length; i++) {
+        const hit = hits[i];
+        const pct = ok.length ? ((100 * hit) / ok.length).toFixed(0) : "0";
+        const tag = hit === 0 ? "DEAD" : hit === 1 ? "thin" : "";
+        const label = getLabel(patternArr[i], i) || shortRxLabel(getRx(patternArr[i]), 56);
+        lines.push(`| ${i} | ${label.replace(/\|/g, "\\|")} | ${hit}/${ok.length} | ${pct}% | ${tag} |`);
+      }
+    }
+    mdPatternAudit(
+      "IMPACT_INDICATORS",
+      Extract.IMPACT_INDICATORS,
+      impactHits,
+      (e) => e.regex,
+      (e) => (e.schemaKey ? `\`${e.schemaKey}\` — ${e.label || ""}`.trim() : null)
+    );
+    mdPatternAudit(
+      "_BYSTAGE_LABELS",
+      Extract._BYSTAGE_LABELS,
+      byStageLabelHits,
+      (e) => e.rx,
+      (e) => (e.key ? `\`${e.key}\`` : null)
+    );
+    mdPatternAudit(
+      "_CISC_LABEL_PATTERNS",
+      Extract._CISC_LABEL_PATTERNS,
+      ciscHits,
+      (e) => e.rx,
+      (e) => (e.key ? `\`${e.key}\`` : null)
+    );
+
+    // Catalogue parity (§11.10 follow-up) — aggregate distribution
+    // + per-field diff + per-sample top-match listing. Sample listing
+    // helps Andy/Mélanie spot-check that the matcher is making sensible
+    // assignments before we trust the divergence signal at scale.
+    lines.push("");
+    lines.push("## Catalogue parity check");
+    lines.push("");
+    lines.push(`${ok.length} candidates × ${catalogue.length} catalogue records.`);
+    lines.push("");
+    lines.push("| Category | Count | % |");
+    lines.push("|---|---:|---:|");
+    for (const cat of CAT_ORDER) {
+      const n = parityCounts[cat] || 0;
+      const pct = ok.length ? ((100 * n) / ok.length).toFixed(0) : "0";
+      lines.push(`| ${cat} | ${n}/${ok.length} | ${pct}% |`);
+    }
+    lines.push("");
+    lines.push("### Field diff on matched samples");
+    lines.push("");
+    lines.push("Impact values (`impacts.*`) deliberately excluded — catalogue stores BEAM-normalized values; parser stores per-declared-unit values. Comparison would false-positive until Tier-10 (C-fb6) normalizes parser output.");
+    lines.push("");
+    lines.push("| Field | Match | Differ | One-null | Both-null | Match% (excl. both-null) |");
+    lines.push("|---|---:|---:|---:|---:|---:|");
+    for (const p of PARITY_FIELDS) {
+      const s = parityFieldStats[p];
+      const totalNonNull = s.match + s.differ + s.oneNull;
+      const matchPct = totalNonNull ? ((100 * s.match) / totalNonNull).toFixed(0) + "%" : "—";
+      lines.push(`| \`${p}\` | ${s.match} | ${s.differ} | ${s.oneNull} | ${s.bothNull} | ${matchPct} |`);
+    }
+    lines.push("");
+    lines.push("### Per-sample top match");
+    lines.push("");
+    lines.push("| Sample | Category | Score | Catalogue id | Catalogue display_name | Reasons |");
+    lines.push("|---|---|---:|---|---|---|");
+    for (const r of results) {
+      if (r.error || !r.parity) continue;
+      const p = r.parity;
+      if (p.category === "unmatched") {
+        lines.push(`| ${r.group}/${r.file} | unmatched | ${p.topScore || 0} | — | — | — |`);
+      } else {
+        const top = p.matches[0];
+        const reasons = top.reasons.join(", ");
+        const multi = p.matches.length > 1 ? ` (+${p.matches.length - 1} more)` : "";
+        const dispEsc = String(top.displayName).replace(/\|/g, "\\|");
+        lines.push(`| ${r.group}/${r.file} | ${p.category} | ${top.score} | \`${top.id}\`${multi} | ${dispEsc} | ${reasons} |`);
+      }
+    }
+    // Per-sample divergence detail — only for samples with at least one "differ".
+    const divergent = results.filter((r) => !r.error && r.parity && r.parity.diff.some((d) => d.status === "differ"));
+    if (divergent.length) {
+      lines.push("");
+      lines.push("### Divergence detail (matched samples with at least one differing field)");
+      lines.push("");
+      for (const r of divergent) {
+        const diffs = r.parity.diff.filter((d) => d.status === "differ");
+        if (!diffs.length) continue;
+        lines.push(`**${r.group}/${r.file}** (top: \`${r.parity.matches[0].id}\` — ${r.parity.matches[0].displayName}):`);
+        for (const d of diffs) {
+          lines.push(`- \`${d.path}\` — candidate \`${JSON.stringify(d.candidate)}\` vs catalogue \`${JSON.stringify(d.catalogue)}\``);
+        }
+        lines.push("");
+      }
+    }
+
     // Ground-truth section appended only when at least one sample is
     // annotated. Empty expected/ dir = no section, no clutter.
     if (annotated.length) {

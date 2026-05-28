@@ -211,7 +211,23 @@ var _MATERIAL_TYPE_DISPLAY_KEYWORDS = [
   { rx: /\bfiberglass\b|\bfibreglass\b/i, type: "Fiberglass" },
   // Finishes
   { rx: /\bgypsum\b|\bdrywall\b/i, type: "Gypsum" },
-  { rx: /\bvinyl\s+(?:floor|tile|sheet)\b|\bLVT\b/i, type: "Luxury vinyl tile" }
+  { rx: /\bvinyl\s+(?:floor|tile|sheet)\b|\bLVT\b/i, type: "Luxury vinyl tile" },
+  // Membranes / barriers (added 2026-05-19). Captures vapour/vapor
+  // control membranes, weather-resistive barriers (WRB), air barriers,
+  // liquid-applied membranes, and self-adhered membranes — a large
+  // family in roofing/cladding/envelope EPDs.
+  { rx: /\bvapou?r\s+(?:control\s+)?membrane\b|\bWRB\b|\bweather[- ]?resistive\s+barrier\b|\bair\s+barrier\b/i, type: "Membrane" },
+  { rx: /\bself[- ]?adhered\s+membrane\b|\bstick[- ]?down\s+membrane\b|\bliquid[- ]?applied\s+membrane\b/i, type: "Membrane" },
+  { rx: /\bbituminous\s+membrane\b|\basphalt\s+(?:roll\s+)?roofing\b|\bAPP\s+modified\s+asphalt\b/i, type: "Bituminous membrane" },
+  // Wood fibre insulation (PAVATEX / GUTEX / Steico). Already partially
+  // covered by db-fallbacks "wood_fiberboard" alias, but the explicit
+  // keyword anchors the Tier-2 classifier so we don't drop to "unknown
+  // material_type" on dry-process insulation boards.
+  { rx: /\bwood\s+fib(?:re|er)(?:\s+(?:insulation|board))?\b/i, type: "Wood fiber insulation" },
+  // Sheep wool insulation (Thermafleece, Black Mountain, etc.).
+  { rx: /\bsheep['\s]?\s*wool(?:\s+insulation)?\b|\bThermafleece\b|\bnatural\s+wool\s+insulation\b/i, type: "Sheep wool insulation" },
+  // Concrete admixtures (BioLock, plasticizers, accelerators).
+  { rx: /\bconcrete\s+admixture\b|\bcement\s+admixture\b/i, type: "Admixture" }
 ];
 
 function extractType(text, rec) {
@@ -227,7 +243,7 @@ function extractType(text, rec) {
   // three separate one-letter-then-rest lines, each of which would
   // otherwise pass the picker as a 2-word title candidate.
   var skipPrefix =
-    /^(?:type\s+iii|e\s*nvironmental(?:\s+p\s*roduct\s+d\s*eclaration)?|p\s*roduct\s*$|d\s*eclaration\s*$|environmental\s+product\s+declaration|epd\b|in\s+accordance|as\s+per\b|according\s+to\b|programme|program\b|publisher\b|owner\s+of|declaration\s+number|issue\s+date|valid\s+to|valid\s+until|publication\s+date|page\s+\d|\d+\s*\/\s*\d+|—|–|-{2,})/i;
+    /^(?:type\s+iii|e\s*nvironmental(?:\s+p\s*roduct\s+d\s*eclaration)?|p\s*roduct\s*$|d\s*eclaration\s*$|environmental\s+product\s+declaration|epd\b|in\s+accordance|as\s+per\b|according\s+to\b|programme|program\b|publisher\b|owner[\s:]|holder[\s:]|deklarationsinhaber|herausgeber|owner\s+of|declaration\s+number|issue\s+date|valid\s+to|valid\s+until|publication\s+date|page\s+\d|\d+\s*\/\s*\d+|—|–|-{2,}|an\s+environmental\s+product\s+declaration|an\s+epd\b|product\s+declaration\b|report\s+for\s+review|fiche\s+de\s+d[ée]claration|eco\s+epd\s+ref|version\s+\d+\s*$)/i;
   // Standards-citation lines also need to be skipped — these often
   // appear right under the title block on EU/IBU layouts where the
   // line "as per ISO 14025 and EN 15804+A1" otherwise gets picked.
@@ -488,7 +504,7 @@ function extractCommon(text, rec) {
 // harness 2026-04-27.
 var DATA_ROW_TAIL = "(?=\\s+-?\\s*\\d|\\s*[\\]\\)]|\\s*$)";
 
-var IMPACT_INDICATORS = [
+export var IMPACT_INDICATORS = [
   // GWP fossil / total — comes BEFORE the biogenic regex so the more
   // specific "BIO" alternation doesn't grab the fossil row.
   {
@@ -801,7 +817,7 @@ function _extractIndicatorTotals(text, rec) {
 // the labels EPDs actually use in tabular impact rows; reuses the same
 // vocabulary as the IMPACT_INDICATORS regexes for English forms but
 // strips the unit + value parts so the regex matches the row prefix.
-var _BYSTAGE_LABELS = [
+export var _BYSTAGE_LABELS = [
   // GWP fossil/total — guards against matching the Fossil/Biogenic
   // sub-rows by negative lookahead, same pattern as fix #5.
   {
@@ -929,7 +945,7 @@ function _tokenizeImpactNumbers(line) {
 // So for "1 mt" rows, label is at i+1 (forward 1).
 // For "1 ton" rows, label is at i-2 (back 2).
 // Try those two positions in order; first match wins.
-var _CISC_LABEL_PATTERNS = [
+export var _CISC_LABEL_PATTERNS = [
   { rx: /^\s*Global\s+warming\s*$/i, key: "gwp_kgco2e" },
   { rx: /^\s*Ozone\s+depletion\s*$/i, key: "ozone_depletion_kgcfc11eq" },
   { rx: /^\s*Acidification\s+of\s+land\s+and\s+water\s*$/i, key: "acidification_kgso2eq" },
@@ -1156,17 +1172,50 @@ function extractNA(text, rec) {
     text.match(/D\s*ECLARATION\s+H\s*OLDER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
     text.match(/Manufacturer\s+name(?:\s+and\s+address)?\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
     text.match(/EPD\s+Commissioner\s+(?:and\s+)?Owner\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i) ||
-    text.match(/Declaration\s+holder\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i);
+    text.match(/Declaration\s+holder\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i) ||
+    // New label patterns from 2026-05-19 scaling audit. EFCO uses
+    // "EPD HOLDER" (no colon), LP_ExpertFinish uses "DECLARATION OWNER"
+    // (no colon), Element5 uses "Owner of the EPD" (mixed case).
+    text.match(/EPD\s+HOLDER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
+    text.match(/DECLARATION\s+OWNER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
+    text.match(/Owner\s+of\s+the\s+EPD\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i);
   if (mfr) _setPath(rec, "manufacturer.name", _cleanLine(mfr[1]));
 
   // Title-prose fallback for layouts where spatial join breaks the
   // label-then-value relationship. Cover-page titles commonly read
   // "EPD for X produced by/at <CompanyName>", and the company name is
   // followed by lowercase words ("in", "for", "'s facility") which the
-  // capital-letter chain naturally stops on.
+  // capital-letter chain naturally stops on. Extended 2026-05-19 to
+  // also accept "in" (Mutual Materials: "produced in Mutual Material's
+  // Mica Plant") and "for" (LP: "PRODUCED BY LOUISIANA-PACIFIC"), to
+  // allow hyphens / dots / apostrophes in the company name, and to
+  // run case-insensitively for ALL-CAPS cover-page prose.
   if (!_get(rec, "manufacturer.name")) {
-    var prodBy = text.match(/produced\s+(?:by|at)\s+([A-Z][A-Za-z]+(?:'\w+)?(?:\s+[A-Z][A-Za-z]+){0,2})/);
+    var prodBy = text.match(/produced\s+(?:by|at|in|for)\s+([A-Z][A-Za-z0-9.\-]+(?:'\w+)?(?:\s+[A-Z][A-Za-z0-9.\-]+){0,4})/i);
     if (prodBy) _setPath(rec, "manufacturer.name", _cleanLine(prodBy[1]));
+  }
+
+  // Narrative-ownership fallback. "<X> is pleased to present this EPD"
+  // / "<X> presents this declaration" — common cover-page phrasing
+  // where no label-anchor exists (SOPRASEAL: "SOPREMA is pleased to
+  // present this Environmental Product Declaration"). Bounded by the
+  // narrative verb so the capture can't drift into body text.
+  if (!_get(rec, "manufacturer.name")) {
+    var present = text.match(/([A-Z][A-Za-z0-9 &.,'\-]{2,60}?)\s+(?:is\s+pleased\s+to\s+present|presents\s+this|hereby\s+presents)/);
+    if (present) _setPath(rec, "manufacturer.name", _cleanLine(present[1]));
+  }
+
+  // Corporate-suffix line fallback. Standalone line of the form
+  // "<X> Inc./Corp./LLC/LP/Ltd./GmbH/S.A./S.r.l." with no label.
+  // Element5 cover page ("ELEMENT5 LP – MODERN TIMBER BUILDINGS"),
+  // SOPRASEAL page 1 ("SOPREMA Inc."). Limited to the first 60 lines
+  // of the document (cover page + immediate front-matter) to avoid
+  // customer-reference bleed from body text. The capture stops at
+  // the suffix so the trailing tagline doesn't get included.
+  if (!_get(rec, "manufacturer.name")) {
+    var lines60 = text.split("\n").slice(0, 60).join("\n");
+    var suffix = lines60.match(/(?:^|\n)\s*([A-Z][A-Za-z0-9 &.,'\-]{1,60}\s+(?:Inc|Corp|Corporation|LLC|LLP|LP|Ltd|Limited|GmbH|S\.?\s?A\.?|S\.r\.l\.))\.?(?=\s|$|,|\n|–|—|-)/m);
+    if (suffix) _setPath(rec, "manufacturer.name", _cleanLine(suffix[1]));
   }
 
   // EPD ID / Declaration Number — allow embedded spaces in the value
@@ -1176,8 +1225,12 @@ function extractNA(text, rec) {
   // Glulam 3" → "EPD 296"). EPD IDs are 1-2 tokens of alphanumeric +
   // dashes/dots; anything after a known next-label word is column-bleed.
   var epdId =
-    text.match(/D\s*eclaration\s+N\s*umber\s*[#:\s]+([A-Z][A-Z0-9.\-#\s]{2,38}\d[A-Z0-9.\-#]{0,10})/i) ||
-    text.match(/EPD\s+(?:Registration\s+)?Number\s*[#:\s]+([A-Z0-9][A-Z0-9.\-#\s]{2,38}\d[A-Z0-9.\-#]{0,10})/i);
+    // First-char allows digits now (2026-05-19) so numeric-only ids
+    // like EFCO's "DECLARATION NUMBER 494" extract. Length floor
+    // dropped to 1 so "EPD 1" / "EPD 12" survive; the {2,38} body
+    // covers the typical 3-7-digit shapes.
+    text.match(/D\s*eclaration\s+N\s*umber\s*[#:\s]+([A-Z0-9][A-Z0-9.\-#\s]{1,38}\d?[A-Z0-9.\-#]{0,10})/i) ||
+    text.match(/EPD\s+(?:Registration\s+)?Number\s*[#:\s]+([A-Z0-9][A-Z0-9.\-#\s]{1,38}\d?[A-Z0-9.\-#]{0,10})/i);
   if (epdId) {
     var idRaw = epdId[1].split(
       /\s+(?=(?:Declared|Date|Period|Unit|Owner|Holder|Type|Scope|Reference|Markets|Description|Year|EPD\s+Type|EPD\s+Scope|Programme|Program|Issue|Valid|Publisher))/i
@@ -1217,8 +1270,26 @@ function extractNA(text, rec) {
     if (dInLine) _setPath(rec, "physical.density.value_kg_m3", _toNum(dInLine[1].replace(/,/g, "")));
   }
   if (_get(rec, "physical.density.value_kg_m3") == null) {
-    var d = text.match(/density\s*(?:of\s+)?((?:\d{1,3}(?:,\d{3})+|\d{2,})(?:\.\d+)?)\s*kg\/m\s*[³^]?3?/i);
+    // density[:\s]* tolerates "Density: 25.214 kg/m^3" (AFT Cellulose,
+    // 2026-05-19 audit) — old regex required whitespace immediately
+    // after "density" and choked on the colon. Also added kg\s*\/\s*m
+    // to absorb pdf.js-inserted spaces around the slash.
+    var d = text.match(/density[\s:]*(?:of\s+)?((?:\d{1,3}(?:,\d{3})+|\d{2,})(?:\.\d+)?)\s*kg\s*\/\s*m\s*[³^]?3?/i);
     if (d) _setPath(rec, "physical.density.value_kg_m3", _toNum(d[1].replace(/,/g, "")));
+  }
+
+  // Specific gravity / relative density fallback. SOPRASEAL family
+  // publishes "Specific gravity 1.08 kg/L" — kg/L is numerically
+  // identical to g/cm³; multiplied by 1000 it gives kg/m³. Bounded
+  // to 0.1–25 to capture realistic building-material range
+  // (lightweight wood ~0.3 to steel ~7.85; cap at 25 leaves room
+  // for unusual cases without admitting wildly off values).
+  if (_get(rec, "physical.density.value_kg_m3") == null) {
+    var sg = text.match(/(?:specific\s+gravity|relative\s+density)\s*[:\s]+((?:\d{1,2})(?:\.\d+)?)\s*(?:kg\s*\/\s*L|g\s*\/\s*cm|\b)/i);
+    if (sg) {
+      var sgVal = parseFloat(sg[1]);
+      if (sgVal > 0.1 && sgVal < 25) _setPath(rec, "physical.density.value_kg_m3", Math.round(sgVal * 1000));
+    }
   }
   // Wood EPD product-properties table form: "Mass (including moisture)
   // kg <N>" where <N> is mass per the declared unit. For declared unit
@@ -1245,28 +1316,61 @@ function extractNA(text, rec) {
     if (pcrLine) _setPath(rec, "methodology.pcr_guidelines", _cleanLine(pcrLine[1]));
   }
 
-  // Publication date — label-then-window
+  // Publication date — label-then-window. "Date of Issuance" added
+  // 2026-05-19 (Arcadia / EFCO-family use this variant), and a bare
+  // "Issuance date" form for completeness.
   var pubIso =
     _findDateAfterLabel(text, /Date\s+of\s+Issue\s*(?:&\s*Validity\s+Period)?/i) ||
+    _findDateAfterLabel(text, /Date\s+of\s+Issuance/i) ||
     _findDateAfterLabel(text, /Publication\s+date/i) ||
+    _findDateAfterLabel(text, /Issuance\s+date/i) ||
     _findDateAfterLabel(text, /Issue\s+date/i);
   if (pubIso) _setPath(rec, "epd.publication_date", pubIso);
 
-  // Expiry / validity
+  // Expiry / validity. "Valid through" added 2026-05-19 (Arcadia
+  // uses "Valid through April 11, 2026"); "Valid thru" / "Valid
+  // until" already supported.
   var expIso =
     _findDateAfterLabel(text, /Period\s+of\s+validity/i) ||
+    _findDateAfterLabel(text, /Valid\s+through/i) ||
+    _findDateAfterLabel(text, /Valid\s+thru/i) ||
     _findDateAfterLabel(text, /Valid\s+until/i) ||
     _findDateAfterLabel(text, /Valid\s+to/i) ||
     _findDateAfterLabel(text, /Expiry\s+date/i);
   if (expIso) _setPath(rec, "epd.expiry_date", expIso);
 
-  // EPD type
-  var typ = text.match(/EPD\s+type\s*[:\s]+([^\n\r]{4,40})/i);
+  // EPD type — label-anchored first ("EPD type: <value>" / "Declaration
+  // type:" / "EPD scope:"). The labels themselves are uncommon — only
+  // ~20% of EPDs publish an explicit type field — but when present they
+  // give the cleanest signal.
+  var typ =
+    text.match(/EPD\s+type\s*[:\s]+([^\n\r]{4,80})/i) ||
+    text.match(/Declaration\s+type\s*[:\s]+([^\n\r]{4,80})/i) ||
+    text.match(/Type\s+of\s+EPD\s*[:\s]+([^\n\r]{4,80})/i);
   if (typ) {
     var t = typ[1].toLowerCase();
     if (/product[-\s]*specific/.test(t)) _setPath(rec, "epd.type", "product_specific");
-    else if (/industry[-\s]*average/.test(t)) _setPath(rec, "epd.type", "industry_average");
+    else if (/(?:industry|business|sector)[-\s]*average/.test(t)) _setPath(rec, "epd.type", "industry_average");
+    else if (/company[-\s]*specific/.test(t)) _setPath(rec, "epd.type", "product_specific");
     else if (/generic/.test(t)) _setPath(rec, "epd.type", "generic");
+  }
+
+  // Prose-based fallback. Most NA / Wood EPDs declare type in title-prose
+  // ("A company-specific cradle-to-gate EPD for X", "product-specific
+  // Type III Environmental Product Declaration"). Scope to the first
+  // 100 lines + require the type keyword to sit within 60 chars of an
+  // EPD/Declaration/"Type III" anchor so body-text mentions of e.g.
+  // "industry-average data" don't false-positive into the type slot.
+  if (!_get(rec, "epd.type")) {
+    var head = text.split("\n").slice(0, 100).join("\n");
+    var anchored =
+      head.match(/(?:EPD|Declaration|Type\s*III)[^\n]{0,60}?(product[-\s]+specific|company[-\s]+specific|industry[-\s]+average|business[-\s]+average|sector[-\s]+average)/i) ||
+      head.match(/(product[-\s]+specific|company[-\s]+specific|industry[-\s]+average|business[-\s]+average|sector[-\s]+average)[^\n]{0,60}?(?:EPD|Declaration|Type\s*III)/i);
+    if (anchored) {
+      var phrase = anchored[1].toLowerCase();
+      if (/product[-\s]+specific|company[-\s]+specific/.test(phrase)) _setPath(rec, "epd.type", "product_specific");
+      else if (/(?:industry|business|sector)[-\s]+average/.test(phrase)) _setPath(rec, "epd.type", "industry_average");
+    }
   }
 
   // Markets of applicability
@@ -1276,6 +1380,31 @@ function extractNA(text, rec) {
   if (mkts) {
     var arr = _splitToCodes(mkts[1]);
     if (arr.length) _setPath(rec, "provenance.markets_of_applicability", arr);
+  }
+
+  // Validation type — runs for all formats (per-format extractors only
+  // see the subset where their format detection fires). Tries the
+  // verification-marker forms in order of specificity:
+  //   - "internally X externally"            — IBU adverb form
+  //   - "internal X external"                — adjective form (Arcadia)
+  //   - "X__ Externally" / "___ X external"  — underscore-noise from
+  //                                            checkbox-replacement layout (EFCO)
+  //   - "External verification" / "Independent verification" — prose
+  if (!_get(rec, "epd.validation.type")) {
+    var validationText = text.replace(/_+/g, " "); // collapse underscore checkbox-noise
+    if (/internally\s*[x✓]\s*externally/i.test(validationText)) {
+      _setPath(rec, "epd.validation.type", "external");
+    } else if (/internal\s*[x✓]\s*external/i.test(validationText)) {
+      _setPath(rec, "epd.validation.type", "external");
+    } else if (/[x✓]\s*externally/i.test(validationText) || /[x✓]\s*external\b/i.test(validationText)) {
+      _setPath(rec, "epd.validation.type", "external");
+    } else if (/[x✓]\s*internally/i.test(validationText) || /[x✓]\s*internal\b/i.test(validationText)) {
+      _setPath(rec, "epd.validation.type", "internal");
+    } else if (/(?:external|independent|third[-\s]+party)\s+verification/i.test(text)) {
+      _setPath(rec, "epd.validation.type", "external");
+    } else if (/internal\s+verification/i.test(text)) {
+      _setPath(rec, "epd.validation.type", "internal");
+    }
   }
 }
 
@@ -1371,7 +1500,10 @@ function extractEuIbu(text, rec) {
     if (unitM) _setPath(rec, "carbon.stated.per_unit", _cleanLine(unitM[1]));
   }
   if (_get(rec, "physical.density.value_kg_m3") == null) {
-    var densM = text.match(/(?:average\s+weighted\s+)?density\s+of\s+((?:\d{1,3}(?:,\d{3})+|\d{2,})(?:\.\d+)?)\s*kg\/m\s*[³^]?3?/i);
+    // Tolerant variants (2026-05-19): "density: <N>" / "density <N>"
+    // (no `of`), pdf.js-inserted whitespace around the slash, optional
+    // "gross / dry / apparent / bulk" qualifiers preceding "density".
+    var densM = text.match(/(?:gross|dry|apparent|bulk|average\s+weighted)?\s*density[\s:]*(?:of\s+)?((?:\d{1,3}(?:,\d{3})+|\d{2,})(?:\.\d+)?)\s*kg\s*\/\s*m\s*[³^]?3?/i);
     if (densM) _setPath(rec, "physical.density.value_kg_m3", _toNum(densM[1].replace(/,/g, "")));
   }
 }
@@ -1560,6 +1692,18 @@ function _parseDate(s) {
   // DD/MM/YYYY (European)
   var eu = str.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
   if (eu) return eu[3] + "-" + _pad2(eu[2]) + "-" + _pad2(eu[1]);
+
+  // DD.MM.YYYY (German / European IBU convention — e.g. "08.06.2021"
+  // for "8 June 2021"). Order is unambiguous because the year is 4
+  // digits; the day-first / month-first ambiguity in DD/MM vs MM/DD
+  // doesn't apply to dot-separated dates outside North America.
+  var euDot = str.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if (euDot) return euDot[3] + "-" + _pad2(euDot[2]) + "-" + _pad2(euDot[1]);
+
+  // DD-MM-YYYY (European dash). Same disambiguation logic as dots —
+  // 4-digit year locks the position regardless of separator.
+  var euDash = str.match(/^\s*(\d{1,2})-(\d{1,2})-(\d{4})\b/);
+  if (euDash) return euDash[3] + "-" + _pad2(euDash[2]) + "-" + _pad2(euDash[1]);
 
   // "DD Month YYYY" — tolerate weird whitespace around the comma
   var en = str.match(/(\d{1,2})\s+([A-Za-z]+)\s*,?\s*(\d{4})/);
