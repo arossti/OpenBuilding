@@ -1335,6 +1335,61 @@ The §12.3 question is no longer "which one architecture do we commit to" — it
 
 ---
 
+## 15. Catalogue data-quality — density-units import bug + audit (2026-05-19)
+
+> Surfaced by the catalogue-parity matcher (§ catalogue-parity check in the harness). Fixed same day in commit `16d4ebd`. This section records the bug, the fix, and the audit confirming density was the only affected column — so a future agent doesn't re-investigate.
+
+### 15.1. The bug
+
+The BEAM source CSV (`docs/csv files from BEAM/BEAM Database-DUMP.csv`) stores density with its unit in a paired column: col 32 `Density` (value) + col 33 `Density Units`. The JSON importer (`schema/scripts/beam-csv-to-json.mjs`) read col 32 but **dropped col 33**, stamping every value as `kg/m³` regardless of the source unit.
+
+Density-unit distribution in the source CSV (684 density-bearing rows):
+- 502 `kg/m3` (correctly volumetric)
+- 104 `kg/m2` (per-area grammage)
+- 19 `g/m2`, 7 `kg/m` (linear), 5 `kg/m2 at RSI 1`, 4 `g/cm3`, ~20 other variants
+
+So ~180 records had per-area or per-linear values silently stored as volumetric density. Examples: fiberglass batt `1f3cc3` (0.488 kg/m² stored as 0.488 kg/m³), EPDM membrane `676103` (2.07 kg/m²), wood I-joist `9aedf1` (3.9 kg/m linear). The parity matcher flagged these as catalogue-vs-parser divergences; tracing to source revealed Mélanie's spreadsheet was correct all along — the bug was BfCA-side at JSON conversion.
+
+### 15.2. The fix (`16d4ebd`)
+
+Importer now reads both columns and emits:
+
+```json
+"physical": { "density": {
+  "value": 0.488,            // raw from CSV, no conversion
+  "units": "kg/m2 at RSI 1", // verbatim from col 33
+  "value_kg_m3": null,       // populated ONLY when source unit is kg/m3 or g/cm3
+  "value_lb_ft3": null,      // null when value_kg_m3 is null
+  "source": "epd"
+}}
+```
+
+`value_kg_m3` is now null for non-volumetric source units, so consumers (BEAMweb assembly math, CCLIMB, parity matcher) can no longer misread a per-area grammage as a volumetric density. The biogenic carbon-content calc gates on `densityKgM3` (not raw density) to avoid corruption. Catalogue-parity density "differ" count dropped 102 → 36 (−65%).
+
+**Schema convention going forward:** `physical.density` carries `{value, units, value_kg_m3, value_lb_ft3, source}`. The unit string is *data*, not metadata — downstream consumers read both `value` + `units` and convert with their own geometry context when needed.
+
+### 15.3. Audit — density was the only affected column
+
+Scanned all value/unit column pairs in the CSV to check for the same dropped-units pattern. Result: **density was the only genuine bug.** Every other value column anchors to the per-material **"common unit"** (CSV col 19), which the importer *does* read (→ `carbon.common.per_functional_unit`). GWP, biogenic storage, and carbon content are all expressed *per that common unit*, so their unit context flows through correctly.
+
+| CSV cols | Field | Importer reads unit? | Verdict |
+|---|---|---|---|
+| 16/17 | Stated EPD GWP / unit | ✅ (→ `carbon.stated.per_unit`) | OK |
+| 18/19 | GWP / common unit | ✅ (→ `carbon.common.per_functional_unit`) | OK |
+| 20/21 | Metric / Imperial unit labels | ✅ | OK |
+| 25/26 | Biogenic Storage / common unit | ⚠️ col 26 not read, but **verified redundant** with col 19 (always identical) | OK |
+| 28/29 | Carbon content / units | ⚠️ col 29 not read, but **106/111 blank**, implied per-common-unit | OK (low risk) |
+| **32/33** | **Density** | **❌ → FIXED `16d4ebd`** | **was broken** |
+| 34/35 | Additional factors / units | ✅ (→ `physical.additional_factor.units`) | OK |
+
+Verification that col 26 is redundant with col 19 (3 biogenic-storage records): `bbb000` col26=`m2` col19=`m²`; `BAM002` col26=`m2 at 1/2"` col19=`m2 @1/2"`; `BAM003` same. Density was unique because its kg/m³ vs kg/m² distinction is *independent* of the common unit — that's why dropping its unit column genuinely corrupted the value's meaning while the others stayed sound.
+
+### 15.4. Forward-looking pipeline note
+
+The bug was a "column added to the spreadsheet later, paired unit column missed in the importer" pattern. **Checklist item for the spreadsheet → CSV → JSON pipeline:** when the BEAM spreadsheet adds a new value column, wire its paired unit column into the importer at the same time. A units-presence assertion in `validate.mjs` (flag any density/factor value whose unit column exists in CSV but isn't carried to JSON) would catch a recurrence automatically.
+
+---
+
 ## Iteration infrastructure (planned)
 
 - **`npm run serve`** — already in place, no-cache dev server on port 8000. Drop EPD samples into `docs/pdf-samples/epd/` (parallel to `docs/pdf-samples/sample-metric.pdf` already used by PDF-Parser) for repeatable testing.

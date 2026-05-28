@@ -32,3 +32,9 @@ data/beam/
 *.docx
 *.xlsx
 *.xls
+
+# Large external EPD sample sets — local only, never committed (BfCA-shared
+# binary dumps). Explicit folder ignore catches .jpg / uppercase .PDF that
+# the extension rules miss.
+docs/PDF References/EPD SAMPLES/BEAM 639 Rows/
+docs/PDF References/EPD-scaling-sets/
