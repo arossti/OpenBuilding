@@ -1431,6 +1431,16 @@ The bug was a "column added to the spreadsheet later, paired unit column missed 
 
 **Parity B (EPD-sourced validation)** requires the parser to extract *all* products from multi-product EPDs (Follow-up #4 / §0 "Multi-product EPD disambiguation"). Today the parser emits one record per PDF and grabs the first product column on multi-product EPDs. Since 280 EPDs map to 639 rows, multi-product is the norm — Parity B can't be complete without it. This is the strongest argument for the §14 LLM-as-parser path: "list every product variant in this EPD with its per-stage impacts" is trivial for an LLM and a per-format slog with column-walking regex. **Defer B until multi-product extraction lands.**
 
+#### 16.1.1. `epd.id` is the multi-product grouping key (per Mélanie + Andy, 2026-05-28)
+
+`beam_id` is the **per-product unique key** (one per catalogue row); `epd.id` is the **grouping / join key** that ties the multiple products of one EPD back together. Mélanie's "6 materials coming from one EPD" is this relationship — and it is *already latent in the catalogue*, so Parity B doesn't have to reconstruct the EPD→products fan-out, it can **read** it:
+
+- Of 821 records, 777 carry an `epd.id` but only **355 are distinct** — **113 EPD IDs are shared across >1 row** (one EPD → up to **43** rows; e.g. `EPD 352` → 24, `EPD10294` → 20, the `EPD 346–352` family → 12–24 each).
+- **Parity B mechanism:** group catalogue rows by `epd.id`, fetch the source PDF once, validate *all* of that EPD's product rows as a set (instead of one-PDF-one-record).
+- **Multi-product extraction contract:** when the parser emits N records from one PDF, they all carry the same `epd.id` + `epd.source_document_url`, differing only in `naming.display_name` / `classification.material_type` / per-product impacts. Shared `epd.id` is what re-links them downstream.
+
+**Grouping needs canonicalization → a blocking key.** `epd.id` is free-text and inconsistent: clean program-operator IDs (`EPD 352`, `EPD10294`, `S-P-10278`) cluster on exact match, but some rows store a full literature citation *as* the ID (e.g. `"Bolin & Smith, 2011, LCA Assessment of ACQ-treated lumber, Journal of Cleaner Production"`), which won't group. The precise technique: **canonicalize `epd.id` into a canonical form (a *blocking key*)** — strip punctuation / whitespace / case so `EPD 352` / `EPD352` / `epd-352` collapse to one key — then group on that. The citation-style values cross into light **entity resolution / record linkage** (deciding whether two differently-spelled IDs denote the same EPD), where the canonical key *is* the blocking key. Flag during review: a handful of sequential beam_ids (`str000…`, `aaacc1…`, `a12345`) look like seed/placeholder rows.
+
 ### 16.2. BfCA's requested deliverable — 3-sheet parity workbook
 
 BfCA asked for a 3-worksheet summary (CSV-format sheets, or one XLSX) for human-in-the-loop review:
@@ -1462,6 +1472,8 @@ New script `schema/scripts/csv-json-parity.mjs`:
 4. Field-by-field compare per the column set + tolerance above
 5. Emit three CSVs: `parity-sheet1-csv.csv`, `parity-sheet2-json.csv`, `parity-sheet3-diff.csv` (or one XLSX with 3 sheets + conditional formatting via a lib)
 6. Console summary: "X/639 rows 100%-parity, Y rows with ≥1 mismatch, top mismatched fields: …"
+
+Row order: **sort by canonicalized `epd.id` (primary), then BEAM ID (secondary)** (per §16.1.1) so each EPD's product cluster lands contiguously — a reviewer can eyeball all rows of one EPD as a set rather than hunting scattered BEAM IDs. BEAM ID is still the first data column, so an individual row stays findable. (CSI/MasterFormat column `AX` is excluded from the comparison set per §9.)
 
 This harness is **independent of the EPD-extraction harness** (`test-epd-extract.mjs`) — different inputs (CSV+JSON vs PDFs), different question (import faithfulness vs extraction accuracy). Keep them separate.
 
