@@ -165,9 +165,107 @@ The OBJECTIVE pattern adds another layer that fits CCLIMB perfectly:
 
 That's the central interaction: practitioner pulls service life from 35 → 100 years, watches the blue (PT) curve shift left of red (RT), watches ΔCRF(100) become more negative (cooling effect), watches completeness rise toward 1.0.
 
-### 3.2. Axis layout for CCLIMB — one axis per LCA module
+### 3.2. Axis layout — CORRECTED 2026-05-19 PM mid-call
 
-**Clarified by Andy 2026-05-19:** *"Each axis on the PC graph would be an ISO scoped carbon division, i.e. A1, A2, A3, etc."*
+> **Important semantic correction from Andy mid-call:** *"The Reference Trajectory is not 'another material' — but what would happen if that feedstock DID NOT flow into a construction material, such as burning sugarcane stock instead of turning it into structural panels. So Reference is unmitigated material flow, and Project Trajectory is what happens when that material becomes a carbon sequestering building material. So scoped phases for vertical axes may not make as much sense."*
+>
+> The earlier draft (LCA modules A1, A2, A3 ... as axes) treated RT and PT as if they could both be stratified by EN 15804 module. But **RT does not have an A1/A3/A5** — RT is an *unbounded counterfactual atmospheric flow over time*, not a module-stratified inventory. PT *is* stratified by EN 15804 module (because the project commits carbon at specific module events: A1 at Year 0, A5 at Year 0, C4 at Year = lifespan). But the comparison RT-vs-PT happens in the **time domain**, not the module domain.
+
+### 3.2.A. Corrected axis layout — TIME HORIZONS as axes
+
+Each axis = a time horizon (Year 0, Year 5, Year 20, Year 50, Year 100, Year T_ref ≈ 250). Each axis value = the **cumulative atmospheric carbon emission** at that horizon (in kgCO₂e or per-functional-unit equivalent).
+
+```
+   Y0     Y5     Y20    Y50    Y100   Y250(Tref)  │  dCRF(100)  dT(100)  Completeness(100)  Direction
+   ───────────────────────────────────────────────────────────────────────────────────────────────────
+   ●──────●──────●──────●──────●──────●           │   value     value    value              cooling
+       (red — Reference Trajectory)              │
+   ●──────●──────●──────●──────●──────●           │   value     value    value              cooling
+       (blue, shaded — Project Trajectory)        │
+```
+
+Per-axis interpretation:
+- **Y0** = cumulative emission to atmosphere *at installation* (negative for RT if feedstock was just harvested but not yet released; negative for PT since A1 deposits carbon into the building)
+- **Y5** = cumulative emission *5 years post-installation*. For RT-A default_5 trajectory, this is roughly where the feedstock would have fully decayed under counterfactual. For PT, this is still mostly storage.
+- **Y20, Y50** = the meaningful storage-benefit horizons (RT has fully released; PT still holds)
+- **Y100** = the GWP100-comparable horizon; ΔCRF(100) is the EPD-reportable headline
+- **Y250 (T_ref)** = full reference completeness — by this year the PT has also fully released its carbon (typically, for non-permanent storage)
+
+Per-line interpretation:
+- **Red line (RT — per material)** traces the counterfactual cumulative emission through time. For an RT-A default_5 archetype, by Year 5 the line crosses the initial carbon stock (full release).
+- **Blue line, shaded (PT — per material)** traces the project's cumulative emission through time. For a glulam beam with 75-year lifespan, the curve stays *much lower* than RT through Year 0–75, then jumps at Year 75 + decay tail.
+
+**The shaded area between blue and red is the climate benefit** at each horizon. Lower blue = more atmospheric carbon avoided at that point in time. The chart at-a-glance shows where the storage benefit is largest and when the post-EOL "catch-up" happens.
+
+### 3.2.B. The output axes (right side, calculated)
+
+After the time-horizon axes, divider, then climate-response output axes:
+
+| Axis | Unit | Computed from |
+|---|---|---|
+| **ΔCRF(100)** | W·m⁻²·year | ∫₀¹⁰⁰ ΔRF(t) dt — the GWP100-comparable EPD-reportable |
+| **ΔT(100)** | °C·year | ∫₀¹⁰⁰ ΔT(t) dt — practitioner-friendly headline |
+| **Completeness(100)** | — | C(100) = ΔT(100) / ΔT(T_ref) |
+| **Direction** | — | cooling (negative ΔCRF) / warming (positive) |
+
+Per-material RT vs PT lines populate the time-horizon axes; the output axes show building-level totals at the rightmost end.
+
+### 3.2.C. What still works from the earlier (rejected) module-based design
+
+- **Multi-component stratification** (N red + N blue lines, one pair per material). Still correct — each material gets its own RT vs PT trajectory pair traced through time. See §3.4.5.
+- **Phase grouping via banded backgrounds**. Still useful, but for the TIME axes now: "First decade" / "20–50 yr" / "Use period" / "Beyond completeness" colored bands behind axis labels.
+- **Per-component summary table beneath the chart**. Unchanged.
+
+### 3.2.D. Where the EN 15804 module structure DOES live in the UI
+
+PT's module-stratified inventory (A1, A3, A5, B4, C4) is still load-bearing — that's the data feeding into the curve. It lives in the **form pane** (left side of the screen):
+
+```
+┌──────────────────────────────────────────────────┐
+│  Product: Glulam beam                            │
+│                                                  │
+│  Inventory (kgCO₂e per declared unit):           │
+│    A1:  -1000   (feedstock carbon)               │
+│    A3:     50   (manufacturing)                  │
+│    A5:     15   (install waste)                  │
+│    B4:      0   (no replacement)                 │
+│    C4:    +1000 (EOL release at Year 75)         │
+│                                                  │
+│  Feedstock:    [C — Perennial regenerative ▼]    │
+│  Lifespan:     [75] years                        │
+│  RT:           [RT-A: −5/+5 ▼]                   │
+│  EOL mix:      Inc[10] LF[60] Rec[20] Reuse[10]  │
+└──────────────────────────────────────────────────┘
+```
+
+The form pane is the *module-domain* input; the chart is the *time-domain* output. They're synchronized — change a module value, the PT curve in the chart updates.
+
+### 3.2.E. Scaffold-code revision needed
+
+The Phase-0 scaffold committed in `7a6ef51` (file `js/cclimb/chart-config.mjs`) defines `LCA_MODULES` as axes. That's the now-superseded design and gets revised in the next commit. The new shape:
+
+```js
+// chart-config.mjs (revised)
+export const TIME_HORIZONS = [
+  { id: "Y0",    label: "Year 0",    years: 0,   phase: "install" },
+  { id: "Y5",    label: "Year 5",    years: 5,   phase: "early" },
+  { id: "Y20",   label: "Year 20",   years: 20,  phase: "service" },
+  { id: "Y50",   label: "Year 50",   years: 50,  phase: "service" },
+  { id: "Y100",  label: "Year 100",  years: 100, phase: "gwp_comparison" },
+  { id: "YTref", label: "Year 250",  years: 250, phase: "full" }
+];
+
+export const OUTPUT_AXES = [
+  { id: "dCRF_100", label: "ΔCRF(100)", unit: "W·m⁻²·yr", calculated: true },
+  { id: "dT_100",   label: "ΔT(100)",   unit: "°C·yr",    calculated: true },
+  { id: "C_100",    label: "Completeness(100)", unit: "—", calculated: true },
+  { id: "direction", label: "Direction", unit: "—", calculated: true }
+];
+```
+
+The PT-inventory form-pane fields (A1, A3, A5, B4, C4, lifespan, EOL mix) move to `js/cclimb/inventory-form.mjs` (NEW, P0.5) where they belong as form bindings rather than chart axes.
+
+### 3.2.F. Original (rejected) module-based axis design — kept for historical reference
 
 This is the right framing because LCA practitioners already think in module terms. Putting one axis per EN 15804+A2 module aligns the chart directly with the way EPDs are read, and the way BEAMweb / EPD-Parser stratify data internally. The OBJECTIVE pattern (each axis = one engineering metric) maps cleanly: in CCLIMB, each axis = one life-cycle module.
 
