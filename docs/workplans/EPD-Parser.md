@@ -249,6 +249,7 @@ npm run serve                                                     # local dev se
 - 🔜 **CISC water "Use of net fresh water 1 mt 2.88E+00"** — regex variant for the "1 mt" functional-unit prefix between label and value. CISC currently 0/10 impacts and 0/170 by_stage; this would unblock at least WDP. See follow-up #3 in agent handoff.
 - 🔜 **C-fb5 ground-truth backlog** — only 2/30 samples annotated. Priority: 2023 BC Wood ASTM family (CLT/GLT/SPF/SPF-Plywood — same format as Kalesnikoff, low risk, locks in coverage), EU/IBU Wood Fibre (different format, exercises EU/IBU paths), Lafarge cement (NSF format).
 - 🔜 **Per-stage extension to other formats** — 18-36 cells per Sopra/Genyk/EU-IBU/2023 BC Wood is decent but could be improved by auditing which `_BYSTAGE_LABELS` patterns aren't matching and adding variants. Driven by ground-truth annotation.
+- 🔜 **"Export CSV" row-dump button** (team request 2026-05-28, spec in §17) — yellow bottom-right button → modal with the scraped record as a single CSV/TSV row in exact `BEAM Database-DUMP.csv` column order → Copy to clipboard (Safari-download-restriction workaround + preview). Lets the team paste a scraped row into Excel/Sheets to eyeball extraction quality. Inverse of the importer; reuse one shared column map.
 - ⏳ **P4 — Match-status surfacing** (`NEW` vs `REFRESH → <id>`) on the EPD-Parser form banner — Database-side dupe detection now does this server-side; form-side preview is a UX enhancement.
 - ⏳ **Multi-product EPD disambiguation** (Genyk 3 SPFs, Lafarge 6 cement types, AWC/CWC industry-avg). UI work in the form pane. ~3-4 hrs.
 - ⏳ **P6 — Refresh queue** (DB-driven entry point for expired-record backlog).
@@ -1480,6 +1481,41 @@ This harness is **independent of the EPD-extraction harness** (`test-epd-extract
 ### 16.4. Expected outcome
 
 After the §15 density fix, Parity A should be high already. The harness will quantify it: most fields likely 100%, density now correct, and any residual mismatches (value rounding, null handling, field-mapping edge cases) surfaced for a targeted second importer fix. The 3-sheet workbook is the artifact BfCA reviews to sign off "the BEAMweb database matches the spreadsheet."
+
+---
+
+## 17. TODO — "Export CSV" row-dump button (team request, 2026-05-28)
+
+> **Status: TODO, not started.** Requested by the team so they can test the EPD reader end-to-end: drop an EPD → scrape → export the derived values as one CSV row → paste into Excel / Google Sheets and eyeball it against the BEAM spreadsheet. A fast feedback loop on extraction quality without round-tripping through the DB commit flow.
+
+### 17.1. What
+
+A **yellow "Export CSV" button, bottom-right** of the EPD-Parser form pane. On click it opens a **modal** containing the scraped candidate record serialised as a **single CSV row whose column order matches `BEAM Database-DUMP.csv` EXACTLY** (col A → col BL, the same sequence the importer reads). The modal has:
+
+- the CSV string shown in a selectable text field (so the user previews exactly what they'll copy);
+- a **Copy** button → `navigator.clipboard.writeText(...)`;
+- direct manual text-selection + copy from the field also works (don't trap selection).
+
+**Why a modal, not a file download:** Safari blocks / nags on programmatic file downloads. A copy-to-clipboard modal sidesteps that entirely *and* gives the user a preview of the payload before they paste. No `Blob`/`download` attribute path.
+
+### 17.2. Column sequence = DUMP order (the load-bearing requirement)
+
+The row must reproduce the DUMP's column order 1:1 so a paste lands under the right BEAM headers. This is the **inverse of the importer** (`schema/scripts/beam-csv-to-json.mjs`): for each DUMP column (A=ID, B=Display Name, … Q=Stated GWP, … AG/AH=Density/units, … AY=EPD ID, … BL=Source URL), read the corresponding JSON path from the candidate record and emit its value.
+
+- **Single source of truth for the column map.** The importer encodes the CSV-column ↔ JSON-path mapping by column letter; `csv-json-parity.mjs` (§16) re-encodes a subset. Do **not** hand-write a third copy. Extract the full A→BL column→path map into one shared module that the importer, the parity harness, and this exporter all consume. Otherwise the three drift.
+- **`beam_id` (col A) is null from the parser** (§5.5 — minted on the DB side at commit). Emit blank for col A, or a placeholder the team recognises.
+- **Formula columns** (e.g. col S `GWP/(common unit)`): emit the *computed value*, never a formula string.
+- **Empty/unscraped fields** → empty CSV cell (preserve column position so alignment holds).
+- **No header row** — single data row only (the target sheet already has the BEAM headers). Optionally offer a "with header" toggle later.
+- **Excluded:** col AX (abandoned classification column, §9 / near-empty).
+
+### 17.3. Delimiter gotcha — decide before building
+
+A **comma**-delimited string pasted into Excel/Sheets lands in **one cell** (the user then needs Data → Text-to-Columns). A **tab**-delimited string pastes **directly across columns** in both Excel and Google Sheets — which is the "paste a row and it fills the BEAM columns" behaviour the team actually wants. Recommendation: default the copy payload to **tab-separated** for paste-friendliness (still "one row"), and/or offer a CSV-vs-TSV toggle in the modal. Confirm with the team which they expect before shipping. Standard CSV escaping (quote fields containing the delimiter, quotes, or newlines — display names often contain commas) applies to whichever delimiter is chosen.
+
+### 17.4. Acceptance
+
+Drop a known EPD → Export CSV → paste into a sheet whose header row is the BEAM DUMP columns → every value sits under its correct column, matching what the form pane shows. Round-trips cleanly for at least the canonical-30 set.
 
 ---
 
