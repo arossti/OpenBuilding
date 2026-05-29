@@ -6068,6 +6068,122 @@ details.dep-details pre {
   text-decoration: underline;
 }
 
+/* §17 — Export (TSV row dump) button + modal. The button is gold to set it
+   apart from the cyan Capture action; the modal previews the row to copy. */
+.app-epdparser .epd-export-btn {
+  background: #e9c46a;
+  color: #1a1a1a;
+  border: 1px solid #d4af4f;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.app-epdparser .epd-export-btn:hover {
+  background: #f0d488;
+  border-color: #e9c46a;
+}
+.app-epdparser .epd-export-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 200;
+}
+.app-epdparser .epd-export-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(760px, 92vw);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+}
+.app-epdparser .epd-export-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.app-epdparser .epd-export-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+.app-epdparser .epd-export-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+.app-epdparser .epd-export-close:hover {
+  color: var(--text);
+}
+.app-epdparser .epd-export-body {
+  padding: 14px 16px;
+}
+.app-epdparser .epd-export-hint {
+  margin: 0 0 10px;
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+.app-epdparser .epd-export-text {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  white-space: pre;
+  overflow-x: auto;
+  resize: vertical;
+}
+.app-epdparser .epd-export-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 14px;
+}
+.app-epdparser .epd-export-status {
+  flex: 1;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: "Courier New", monospace;
+}
+.app-epdparser .epd-export-copy {
+  background: #e9c46a;
+  color: #1a1a1a;
+  border: 1px solid #d4af4f;
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.app-epdparser .epd-export-copy:hover {
+  background: #f0d488;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════ */
 /* §12  APP: CCLIMB — Time-explicit climate response (parallel coords)          */
 /* ═══════════════════════════════════════════════════════════════════════════ */

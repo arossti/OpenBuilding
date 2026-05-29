@@ -66,6 +66,9 @@
           <!-- Capture button area — promotes draft → captured for the DB viewer -->
           <div id="epd-form-actions" class="epd-form-actions" style="display: none">
             <span id="epd-form-status" class="epd-form-status">Draft auto-saved · ready to capture</span>
+            <button type="button" id="epd-export-btn" class="epd-export-btn" title="Copy a Tab-Separated (TSV) row to paste into Excel / Google Sheets">
+              <i class="bi bi-clipboard-data"></i> Export
+            </button>
             <button type="button" id="epd-capture-btn" class="epd-capture-btn">
               <i class="bi bi-box-arrow-in-down-right"></i> Capture
             </button>
@@ -126,6 +129,27 @@
         <span id="file-label"></span>
         <span style="flex: 1"></span>
         <span>EPD-Parser v0.1.0 — P0</span>
+      </div>
+
+      <!-- ── Export modal — TSV row dump (workplan §17) ── -->
+      <div id="epd-export-backdrop" class="epd-export-backdrop" style="display: none"></div>
+      <div id="epd-export-modal" class="epd-export-modal" style="display: none" role="dialog" aria-modal="true" aria-labelledby="epd-export-title">
+        <div class="epd-export-header">
+          <span class="epd-export-title" id="epd-export-title">Export row · Tab-Separated (TSV)</span>
+          <button type="button" class="epd-export-close" id="epd-export-close" title="Close"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="epd-export-body">
+          <p class="epd-export-hint">
+            One tab-separated row in BEAM spreadsheet column order (A→BL). Copy, then paste into the first
+            empty cell of a new row in the BEAM sheet — it fills straight across the columns. Tip: format the
+            destination columns as plain text first so leading zeros and codes stay intact.
+          </p>
+          <textarea id="epd-export-text" class="epd-export-text" readonly rows="4" wrap="off" spellcheck="false"></textarea>
+        </div>
+        <div class="epd-export-actions">
+          <span id="epd-export-status" class="epd-export-status"></span>
+          <button type="button" id="epd-export-copy" class="epd-export-copy"><i class="bi bi-clipboard"></i> Copy</button>
+        </div>
       </div>
     </div>
 
