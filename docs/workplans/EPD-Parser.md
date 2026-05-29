@@ -249,7 +249,8 @@ npm run serve                                                     # local dev se
 - 🔜 **CISC water "Use of net fresh water 1 mt 2.88E+00"** — regex variant for the "1 mt" functional-unit prefix between label and value. CISC currently 0/10 impacts and 0/170 by_stage; this would unblock at least WDP. See follow-up #3 in agent handoff.
 - 🔜 **C-fb5 ground-truth backlog** — only 2/30 samples annotated. Priority: 2023 BC Wood ASTM family (CLT/GLT/SPF/SPF-Plywood — same format as Kalesnikoff, low risk, locks in coverage), EU/IBU Wood Fibre (different format, exercises EU/IBU paths), Lafarge cement (NSF format).
 - 🔜 **Per-stage extension to other formats** — 18-36 cells per Sopra/Genyk/EU-IBU/2023 BC Wood is decent but could be improved by auditing which `_BYSTAGE_LABELS` patterns aren't matching and adding variants. Driven by ground-truth annotation.
-- 🔜 **"Export" row-dump button** (team request 2026-05-28, spec in §17) — yellow bottom-right button (tooltip: "Copy a TSV row to paste into Excel/Sheets") → modal with the scraped record as a single **tab-separated** row (no header) in exact `BEAM Database-DUMP.csv` column order → Copy to clipboard (Safari-download-restriction workaround + preview). Pastes straight across columns to append a new EPD row in Google Sheets/Excel. Inverse of the importer; reuse one shared column map. CSV/TSV toggle = second-pass enhancement.
+- ✅ **"Export" row-dump button** (team request 2026-05-28, §17) — SHIPPED PR #20. Yellow bottom-right button → modal with the scraped record as a single TSV row in exact `BEAM Database-DUMP.csv` column order → Copy to clipboard. Built on `js/shared/beam-columns.mjs`.
+- 🔜 **Export completeness — normalize + DB-side export** (decided 2026-05-29, spec in §18) — §17's button drops density + GWP because the candidate shape diverges from canonical (`density.value_kg_m3` vs `density.value`/`units`; `impacts.gwp` vs `carbon.stated.value_kgco2e`). Fix: `record-normalize.mjs` applied at Trust commit + export, then add an authoritative per-row TSV export to the Database viewer (carries the minted `beam_id`). Confirm the GWP→stated mapping (§18.4) before shipping.
 - ⏳ **P4 — Match-status surfacing** (`NEW` vs `REFRESH → <id>`) on the EPD-Parser form banner — Database-side dupe detection now does this server-side; form-side preview is a UX enhancement.
 - ⏳ **Multi-product EPD disambiguation** (Genyk 3 SPFs, Lafarge 6 cement types, AWC/CWC industry-avg). UI work in the form pane. ~3-4 hrs.
 - ⏳ **P6 — Refresh queue** (DB-driven entry point for expired-record backlog).
@@ -1484,9 +1485,11 @@ After the §15 density fix, Parity A should be high already. The harness will qu
 
 ---
 
-## 17. TODO — "Export CSV" row-dump button (team request, 2026-05-28)
+## 17. "Export" row-dump button (team request, 2026-05-28)
 
-> **Status: TODO, not started.** Requested by the team so they can test the EPD reader end-to-end: drop an EPD → scrape → export the derived values as one TSV row → paste into Excel / Google Sheets and eyeball it against the BEAM spreadsheet. A fast feedback loop on extraction quality without round-tripping through the DB commit flow.
+> **Status: SHIPPED 2026-05-28/29** (PR #20, `8c32da7`). Drop an EPD → scrape → Export → modal with one TSV row → paste into Excel / Google Sheets. Built from `js/shared/beam-columns.mjs` (canonical A→BL column map + `recordToRow`) wired into `js/epdparser.mjs` + a modal in `epdparser.html` + §11 CSS. Verified in-browser.
+>
+> ⚠️ **Known completeness gap → see §18.** The button serialises the raw scraped *candidate*, whose shape diverges from the canonical DUMP schema in two spots, so **density and GWP do not currently export from a fresh scrape**. The fix (candidate→canonical normalization + moving the authoritative export to the Database side) is specced in §18 and deferred to a future session.
 
 ### 17.1. What
 
@@ -1528,6 +1531,54 @@ This is **not fixable from the export side** for a paste workflow (the numeric i
 ### 17.4. Acceptance
 
 Drop a known EPD → Export → Copy → paste into a sheet whose header row is the BEAM DUMP columns → every value sits under its correct column, matching what the form pane shows. Round-trips cleanly for at least the canonical-30 set.
+
+---
+
+## 18. TODO — Export completeness: candidate→canonical normalization + DB-side export (decided 2026-05-29, deferred)
+
+> **Status: TODO, not started.** Decided by Andy 2026-05-29: **"Normalize + DB export."** Implement in a future session. This section is the spec.
+
+### 18.1. The finding (why §17's export is incomplete)
+
+A verification of the EPD-Parser sidebar form against the DUMP surfaced two layered issues:
+
+1. **The form (sections 1–7) is a curated ~21-field edit subset**, not the full DUMP. ~30+ DUMP data columns aren't shown in the form (biogenic block, stated GWP value, common-unit value/labels, dimensions/thermal/mass, material subtype/product type, EPD owner/prepared-by/verifier, footnote, notes, specifications, service life, …). That's fine *as a form* — but it means the form is not a place to review/correct most exported fields.
+
+2. **The Export reads the candidate, not the form — and the candidate's shape diverges from the canonical (importer/DUMP-aligned) schema.** `extract.mjs` writes a few values to different paths than the DUMP columns read:
+
+| Value | Extractor writes | DUMP/Export (and importer) reads |
+|---|---|---|
+| Density | `physical.density.value_kg_m3` | `physical.density.value` + `physical.density.units` (AG/AH) |
+| GWP | `impacts.gwp_kgco2e.total.value` | `carbon.stated.value_kgco2e` (Q) — see 18.4 |
+
+  Result: **density and GWP come back empty from a fresh scrape.** Proof: `recordToRow()` on a *catalogue* record (importer shape) emits a full ~40-cell row; on an EPD-Parser *candidate* it emits a sparse ~10-cell row with AG/AH/Q blank. `database.mjs` already documents this divergence (the `_indexEntryFromRecord` comment: "EPD-Parser writes `physical.declared_unit` but the catalogue index reads `impacts.functional_unit`").
+
+  **Note — NOT a mismatch:** the declared/functional unit. The extractor already sets `carbon.stated.per_unit` (R) correctly, so R exports fine. Do **not** map `impacts.functional_unit` → `carbon.common.per_functional_unit` (T): T is BfCA's *common* unit (often m²), a different quantity from the EPD's declared unit, computed downstream. Leave T for the DB/BfCA.
+
+### 18.2. Why "export from the DB" only half-fixes it (the robustness nuance)
+
+`handleTrust` stores a **new** EPD's candidate **verbatim** (`mergedRecord = candidate`) + mints a `beam_id` — it does **not** reshape to canonical. So a DB export of a brand-new record would be just as sparse (only difference: it has an ID). The robustness Andy noted applies to:
+- **Refreshes**: `_mergeRefresh(existingFull, candidate)` merges the candidate **onto an existing catalogue record**, inheriting that record's canonical density/GWP/biogenic fields → a complete row.
+- Plus minted `beam_id` (col A), duplicate detection, and the human Trust/Trust+Verify gate.
+
+So the DB is the right *home* for the authoritative, ID'd export — but new entries still need the candidate normalized to canonical shape, or they export sparse from either surface.
+
+### 18.3. The plan (decided)
+
+1. **`js/shared/record-normalize.mjs`** (NEW) — `normalizeRecord(rec)` returns a canonical-shaped copy, filling only when the target is empty (idempotent, non-destructive):
+   - `physical.density.value_kg_m3` → `physical.density.value` (same number) + `physical.density.units = "kg/m3"` (+ `value_lb_ft3`), preserving `source`.
+   - `impacts.gwp_kgco2e.total.value` → `carbon.stated.value_kgco2e` (see 18.4).
+2. **Apply at Trust commit** (`handleTrust`, before `putCommittedPatch`) so committed records are canonical → the index entry computes correctly AND a DB export is complete.
+3. **Apply in the EPD-Parser export path** too (normalize a copy before `recordToRow`) so §17's quick button stops dropping density/GWP.
+4. **Make the Database viewer the authoritative export home** — a per-row "Export TSV" action + modal reusing `beam-columns.recordToRow` (committed/catalogue records are canonical, so rows are complete and carry the minted `beam_id`). §17's EPD-Parser button stays as the fast pre-commit check.
+
+### 18.4. Open question to confirm (Mel / Andy) — GWP target slot
+
+The extractor's `impacts.gwp_kgco2e.total.value` is the GWP per the EPD's **declared unit**, which maps most honestly to **`carbon.stated.value_kgco2e` (Q)** — pairs with `carbon.stated.per_unit` (R). The **common-unit** value `carbon.common.value_kgco2e` (S) is a *derived/converted* number BfCA computes (the importer fills it via the col-S conversion formula); a scrape can't compute S without the conversion divisor, so leave S for the DB/BfCA. ⚠️ Caveat: the importer *also* stuffs the common value into the `impacts.gwp_kgco2e.total` slot for its index — so the slot is overloaded. **Confirm Q (stated) is the right target before shipping**, since a wrong stated-vs-common mapping would mislabel an EC number.
+
+### 18.5. Acceptance
+
+After normalization: scrape a canonical EPD → Export (EPD-Parser) shows density + GWP populated in AG/AH/Q. Trust-commit it → the committed record is canonical (index GWP/unit correct) → Database "Export TSV" emits a complete row with the minted `beam_id` in col A. No regression to the §7.6 extraction harness (normalization is downstream of `extract.mjs`, not inside it).
 
 ---
 
