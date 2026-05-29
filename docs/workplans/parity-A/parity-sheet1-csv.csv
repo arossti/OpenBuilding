@@ -1,0 +1,822 @@
+beam_id,epd_id,ID,Display Name,Stated kgCO2e/unit,GWP units per,GWP/common unit,Common unit,GWP-bio from EPD,Biogenic Storage,Carbon content kgC/unit,Full C value,Storage % Reduction,Density,Density Units,Addnl factor,Addnl factor units,EPD ID,EPD Type,EPD Program/Operator,Service Life (yr)
+15e087,,15e087,"SIP panel - R23 6.5"" - EPS 5.5"" @ R4/in. core, 2 sheets 1/2"" OSB",,,20.77,m²,,,,,,,,,,,,,
+47032e,,47032e,"SIP panel - R48 12-7/8"" - EPS 11-7/8"" @ R4/in. core, 2 sheets 1/2"" OSB",,,37.7,m²,,,,,,,,,,,,,
+5712f2,,5712f2,"WOOD CHIP CEMENT ICF 12"" R-22 with MINERAL WOOL INSERTS, (3 in. @ R4.2/in.), 15M REBAR",,,99.31,m²,,58.86,,,,,,,,,,,
+5e22ee,,5e22ee,"SIP panel - EPS foam core / 7/16"" OSB, Type II EPS",,,655.33,"m2 at 1""",,,,,,,,,,,,,
+6d2eca,,6d2eca,"Straw bale infill with wood framing (SIP) / R-46 / 14"" / double 2x4 @ 30"" o/c",,,5.52,m²,,72.41,,,,,,,,,,,
+707a65,,707a65,"WOOD CHIP CEMENT ICF 14"" R-28 with MINERAL WOOL INSERTS (5 in. @ R4.2/in.), 15M REBAR",,,119.39,m²,,65.06,,,,,,,,,,,
+7b40de,,7b40de,"SIP panel - R30 8.25"" - EPS 7.25"" @ R4/in. core, 2 sheets 1/2"" OSB",,,25.42,m²,,,,,,,,,,,,,
+7bc57a,,7bc57a,Masonry Mortar Mix / 1 part Masonry cement / 3 parts avg sand,66.75,m3,66.75,m3,,,,,,375,kg/m3 masonry cement,960,kg/m3 sand,,,,
+81f1a7,,81f1a7,"SIP panel - R38 10.5"" - EPS 9.5"" @ R4/in. core, 2 sheets 1/2"" OSB",,,31.39,m²,,,,,,,,,,,,,
+8ad79d,,8ad79d,"TREATED WOOD FOUNDATION - 2x8 framing @ 16"" OC, 3/4"" plywood sheathing",,,8.69,m²,,,,,0.9,,,,,,,,
+BAM00X,,BAM00X,Bamboo Cladding [BEAM Avg],,,32.03,m²,,27.01,,,,1059.75,kg/m3,,,,beam_average,,
+BAM01X,,BAM01X,Bamboo Flooring [BEAM Avg],,,8.25,m²,,26.45,,,,933.3333333,kg/m3,,,,beam_average,,
+BRI00X,,BRI00X,Thin Veneer Brick [BEAM Avg | US & CA],,,10.44,m²,,,,,,269,kgCO2/m3 mortar,,"83% brick, 17% mortar",,beam_average,,
+CAR00x,,CAR00x,Carpet / [BEAM Avg],,,12.04,m²,,,,,,,,,,,beam_average,,
+CSB00X,,CSB00X,Ceiling Sheet Barrier / [BEAM Avg],,,0.62,m²,,,,,,,,,,,beam_average,,
+FIB00X,,FIB00X,Fiber Cement siding [BEAM Avg],,,8.28,m²,,1.63,,,,11.1,kg/m3,,,,beam_average,,
+HTW00X,,HTW00X,Heat Treated Wood Cladding [BEAM Avg],,,7.74,m²,,,,,,428.75,kg/m3,,,,beam_average,,
+LAB00X,,LAB00X,Liquid Applied Barrier / [BEAM Avg],,,5.16,m²,,,,,,,,,,,beam_average,,
+LAM00X,,LAM00X,Cross Laminated Timber (CLT) [BEAM Avg | US & CA],,,10.59,m²,,,,,,459.9166667,kg/m3,,,,beam_average,,
+LIN00X,,LIN00X,Linoleum flooring / 4.0 mm [BEAM Avg],,m²,6.43,m²,,5.31,,,,,,,,,beam_average,,
+LP000X,,LP000X,Engineered Wood Siding [BEAM Avg | US & CA],,,3.23,m²,,,,,,654.554,kg/m3,,,,beam_average,,
+MWB0ew,,MWB0ew,Mineral wool batt / [BEAM Avg],,m2•RSI,1.54,m2•RSI,,,,,,,,,,,beam_average,,
+MWB0iw,,MWB0iw,Mineral wool batt (Sound and Fire application)  / [BEAM Avg],,m2•RSI,1.74,m2•RSI,,,,,,,,,,,beam_average,,
+RLB00X,,RLB00X,Roof Deck Liquid Applied Barrier / [BEAM Avg],,,6.78,m²,,,,,,,,,,,beam_average,,
+RSB00X,,RSB00X,Roof Deck Sheet Barrier / [BEAM Avg],,,0.78,m²,,,,,,,,,,,beam_average,,
+SAB00X,,SAB00X,Self-Adhered Barrier / [BEAM Avg],,,2.55,m²,,,,,,,,,,,beam_average,,
+SBM00X,,SBM00X,Sheet Barrier Moisture-Variable / [BEAM Avg],,,0.71,m²,,,,,,,,,,,beam_average,,
+SBNP0X,,SBNP0X,Sheet barrier Non-Permeable / [BEAM Avg],,,0.58,m²,,,,,,,,,,,beam_average,,
+SBP00X,,SBP00X,Sheet Barrier Permeable / [BEAM Avg],,,0.73,m²,,,,,,,,,,,beam_average,,
+STU00X,,STU00X,Synthetic Stucco (Acrylic) [BEAM Avg | US & CA],,,37.5,m²,,,,,,,,,,,beam_average,,
+WB000X,,WB000X,Wool batt / R 3.8 /inch [BEAM Avg ],,m2•RSI,1.22,m2•RSI,,1.03,,,,,,,,,beam_average,,
+c8fcb5,,c8fcb5,"WOOD CHIP CEMENT ICF 12"" R-21 with CORK BOARD INSERTS (3 in. @ R4/in.), 15M REBAR",,,87.49,m²,,81.89,,,,,,,,,,,
+d201fq,,d201fq,"Cement ""Stucco"" Plaster / 1:1:4 mix of Portland, masonry cement, sand @ 1/2"" [Industry Avg | US & CA]",0.396,kg,10,"m² @ 1/2""",,,,,,1992,kg/m3,1450,kg/m3 masonry sand,,,,
+d7w02l,,d7w02l,"Drywall 1/2"" [BEAM Avg | US & CA]",,,3.09,m²,,,,,,,,,,,beam_average,,
+e533ed,,e533ed,"TREATED WOOD DECKING, 1-1/4"" X 3-1/2"" with 1/4"" Spacing",,,8.15,m²,,,,,0.9,,,,,,,,
+e933b8,,e933b8,"EPS FOAM ICF R-23, 2 Sheets of 2.75""@R4-in., includes webbing & 15M rebar (not incl. 6"" concrete core)",,,24.8,m²,,,,,,,,,,,,,
+e9d87f,,e9d87f,"ICE PANEL - EPS FOAM CORE with STEEL STUDS, 9-1/4"", R-37",,,51.93,m²,,,,,,,,,,,,,
+ecd60d,,ecd60d,"WOOD CHIP CEMENT ICF 14"" R-27 with CORK BOARD INSERTS (5 in. @ R4/in.), 15M REBAR",,,99.7,m²,,103.44,,,,,,,,,,,
+efba68,,efba68,"ICE PANEL - EPS FOAM CORE with STEEL STUDS, 7-1/2"", R-30",,,47.28,m²,,,,,,,,,,,,,
+f03m68,,f03m68,Fiberglass batt / R 3.6-inch [BEAM Avg],,,0.94,m2•RSI,,,,,,,,,,,beam_average,,
+g692me,,g692me,Wood fiber batt / [BEAM Avg | EU],,,1.19,m2•RSI,,2.8,,,,,,,,,beam_average,,
+p8c2la,,p8c2la,Linoleum flooring / 2.5 mm [BEAM Avg],,m²,4.19,m²,,4.01,,,,,,,,,beam_average,,
+s0vjke,,s0vjke,Fiberglass loose fill / ~R2.6-inch [BEAM Avg],,,1.29,m2•RSI,,,,,,,,,,,beam_average,,
+21dw0f,01-001,21dw0f,Synthetic Stucco (Acrylic) / Sto / Stolit Freeform & Freeform Dark Colors (avg),50.9,m²,50.9,m²,,,,,,,,,,01-001,product_specific,,10
+5caf85,01-001,5caf85,Synthetic Stucco (Acrylic) / Sto / Stolit 1.0 & 1.0 Dark Colors (avg),28.8,m²,28.8,m²,,,,,,,,,,01-001,product_specific,,10
+f93xa0,01-001,f93xa0,Synthetic Stucco (Acrylic) / Sto / Stolit 1.5 & 1.5 Dark Colors (avg),32.8,m²,32.8,m²,,,,,,,,,,01-001,product_specific,,10
+1fkf0c,01-002,1fkf0c,Synthetic Stucco (Acrylic) / Sto / Stolit Lotusan 1.0 & 1.0 Dark Colors (avg),29.5,m²,29.5,m²,,,,,,,,,,01-002,product_specific,,10
+v0w92k,01-002,v0w92k,Synthetic Stucco (Acrylic) / Sto / Stolit Lotusan Freeform & Freeform Dark Colors (avg),51.7,m²,51.7,m²,,,,,,,,,,01-002,product_specific,,10
+yds03d,01-002,yds03d,Synthetic Stucco (Acrylic) / Sto / Stolit Lotusan 1.5 & 1.5 Dark Colors (avg),34,m²,34,m²,,,,,,,,,,01-002,product_specific,,10
+p9dbo4,01-004,p9dbo4,Stucco Base coat / Sto / BTS Plus – adhered over average (flat) substrate,13.5,m²,13.5,m²,,,,,,,,,,01-004,product_specific,,10
+xsp4tl,01-004,xsp4tl,Stucco Base coat / Sto / BTS Plus – adhered over rough masonry concrete & CMUs,38.6,m²,38.6,m²,,,,,,,,,,01-004,product_specific,,10
+9d6057,075/2018,9d6057,Reflective roof coating / Selena Group / COOL-R / SRI 107 / Poland,1.12,kg,2.58,m²,,,,,,,,2.3,kg/m2,075/2018,product_specific,,
+541b20,11345278.101.1,541b20,"Helical pier / Generic / 3"" Nominal Pipe, 3.5 x 3/16"" (89 x 5.5 mm), 10"" Helix, Sched 40 Galvanized steel [Industry Avg]",1.48,kg,17.62,m of pier length,,,,,,7800,kg/m3,11.908,kg/m,11345278.101.1,industry_average,,
+12a279,11345278.101.2,12a279,"Steel post / Generic / 3.5 x 0.216"" (89 x 5.5 mm), Sched 40 STD",2.48,kg,30.46,m of pier length,,,,,,7800,kg/m3,12.284,kg/m,11345278.101.2,industry_average,,
+CMU007,176277033092021,CMU007,"Compressed earth block wall / Briques Technic Concept - Cycle terre / Stabilized with 0.2% NHL - 2.2% CEM III / 100mm (4"") width, incl. mortar [EU]",4.5,m2,4.46,m2 @ 0.1 m depth,,,,,,160.053,kg/m2 @ 0.1m width,,20.277,176277033092021,industry_average,Agence Française de Normalisation (AFNOR),100
+www118,200,www118,"Window, double-glazed, aluminum frame / Arcadia / CV200, T200 / Projected & casement",125,m2,125,m2,,,,,,,,,,200,product_specific,ASTM,
+1110de,2016-06-01,1110de,Cedar Siding / Western Red Cedar Lumber Assn / 1x6 Boards [Industry Avg | CA],213.52,1000 BF,1.72,"m2 at 0.01905 m (3/4"")",,,,7.31,0.9,209,kg/m3,2.36,m3/1000 BF,2016-06-01,industry_average,,
+f1864e,2016-06-01,f1864e,"Cedar Shingles & Shakes / Red Cedar Lumber Assn / 3/4"" max thickness [Industry Avg | CA]",213.52,1000 BF,1.72,"m2 at 0.01905 m (3/4"")",,,,7.31,0.9,209,kg/m3,2.36,m3/1000 BF,2016-06-01,industry_average,,
+bbb000,2021M20141,bbb000,"Int. Wall & Ceiling Barrier, sheet / Rothoblaas / Vapor In Green 200 / Non-permeable / 0.35 mm / EU",0.4,m²,0.42,m²,0.178,0.16,,,0.9,200,g/m2,,,2021M20141,product_specific,Sphera,
+bbb001,2021M20141,bbb001,"Ext. & Int. Wall & Roof Barrier, sheet / Rothoblaas / Clima Control Net 160 / Moisture-variable / 0.5 mm / EU",0.9,m²,0.94,m²,,,,,,160,g/m2,,,2021M20141,product_specific,Sphera,
+bbb002,2021M20141,bbb002,"Ext. & Int. Wall & Roof Barrier, sheet / Rothoblaas / Traspir EVO 160 / 12.3 Perms / 0.5 mm / EU",0.6,m²,0.63,m²,,,,,,160,g/m2,,,2021M20141,product_specific,Sphera,
+bbb003,2021M20141,bbb003,"Ext. & Int. Wall & Roof Barrier, sheet / Rothoblaas / Traspir Vapor 225 / Non-permeable / 0.8 mm / EU",0.7,m²,0.7,m²,,,,,,225,g/m2,,,2021M20141,product_specific,Sphera,
+bbb004,2021M20141,bbb004,"Ext. & Int. Wall Barrier, sheet / Rothoblaas / Traspir 110 / 101 Perms / 0.4 mm / EU",0.3,m²,0.32,m²,,,,,,112,g/m2,,,2021M20141,product_specific,Sphera,
+bbb005,2021M20141,bbb005,"Ext. & Int. Wall Barrier, sheet / Rothoblaas / Traspir EVO UV 210 / 41.7 Perms / 0.3 mm / EU",1.4,m²,1.37,m²,,,,,,210,g/m2,,,2021M20141,product_specific,Sphera,
+bbb006,2021M20141,bbb006,"Ext. Roof Barrier, sheet / Rothoblaas / Traspir Weld EVO 360 / 17.5 Perms / 1.0 mm / EU",1.6,m²,1.58,m²,,,,,,360,g/m2,,,2021M20141,product_specific,Sphera,
+bbb029,2021M20141,bbb029,"Int. Wall & Ceiling Barrier, sheet / Rothoblaas / Clima Control 80 / Moisture-variable / 0.22 mm / EU",0.7,m²,0.74,m²,,,,,,80,g/m2,,,2021M20141,product_specific,Sphera,
+bbb030,2021M20141,bbb030,"Int. Wall & Ceiling Barrier, sheet / Rothoblaas / Vapor In NET 140 / Non-permeable / 0.15 mm / EU",0.4,m²,0.45,m²,,,,,,140,g/m2,,,2021M20141,product_specific,Sphera,
+CMU006,20220329507,CMU006,"Compressed earth block wall / Briques Technic Concept - Cycle terre / Stabilized with 3.7% NHL / 300mm (11 13/16"") width, incl. mortar [EU]",27.8,m2,27.8,m2 @ 0.3 m depth,,,,,,535.695,kg/m2 @ 0.3m width,,43.114,20220329507,industry_average,Agence Française de Normalisation (AFNOR),100
+GRE001,30.06.2021,GRE001,"Green roof system / Nature Impact / Nature Roof Standard 60/25 / Extensive, Saturated weight 1020 kg/m3 [EU]",13.7,m2,13.7,m2,,,,,,,,,,30.06.2021,product_specific,Eco Platform,
+CAR005,4029-8012,CAR005,Carpet / Venture Carpet / Average Product - Nylon 2520 Yarn System / 3.5 mm Modular Carpet,13.38,m2,13.38,m²,,,,,,3.765,kg/m2,,,4029-8012,product_specific,CSA Group,15
+CAR006,4029-8012,CAR006,Carpet / Venture Carpet / Average Product - Polypropylene Yarn System / 3.5 mm Modular Carpet,6.83,m2,6.83,m²,,,,,,3.621,kg/m2,,,4029-8012,product_specific,CSA Group,15
+CAR007,4029-8012,CAR007,Carpet / Venture Carpet / Polyester Yarn System / 10.0 mm Modular Carpet,9.88,m2,9.88,m²,,,,,,4.44,kg/m2,,,4029-8012,product_specific,CSA Group,15
+CAR008,4029-8012,CAR008,Carpet / Venture Carpet / Recycled nylon 6 yarn system / 3.5 mm Modular Carpet,7.8,m2,7.8,m²,,,,,,3.77,kg/m2,,,4029-8012,product_specific,CSA Group,15
+MPS002,4078-8004,MPS002,Metal Panels - Steel / Canadian Sheet Steel Building Institute / 24 gauge [Industry Avg | CA],2.434,kg,11.88,m²,,,,,,7800,kg/m3,4.88,kg/m2,4078-8004,industry_average,CSA,75
+9d1b2b,4786663719.107.0,9d1b2b,"[Discontinued] Drywall 1/2"" / CertainTeed / AirRenew / 1/2"" (12.7 mm)",138,92.9m2,1.49,m²,,,,,,7.3,kg/m2,,,4786663719.107.0,product_specific,,
+676103,4786842353.103.1,676103,EPDM Roofing Membrane / Non-reinforced single ply / SPRI  [Industry Avg | US],6.69,m²,6.69,m²,,,,,,2.07,kg/m2,,,4786842353.103.1,industry_average,UL Environment,
+PLY004,4786969381.102.1,PLY004,"Plywood / 1/2"" / Roseburg softwood plywood /",1.5,"m2 at 3/8""",2,m²,,,10.12,,0.9,4.38,"kg/m2 at 3/8""",,,4786969381.102.1,product_specific,UL Environment,
+PLY005,4786969381.102.1,PLY005,"Plywood / 3/4"" / Roseburg softwood plywood",1.5,"m2 at 3/8""",3,m²,,,15.19,,0.9,4.38,"kg/m2 at 3/8""",,,4786969381.102.1,product_specific,UL Environment,
+2c3p9d,4786969381.104.1,2c3p9d,Laminated veneer lumber (LVL) / Roseburg F.P. / RigidLam LVL,274,m3,274,m3,,,,945.55,0.9,539,kg/m3,,,4786969381.104.1,product_specific,UL Environment,
+f14060,4786969381.105.1,f14060,Wood framing - Softwood / Roseburg /,44.7,m3,44.7,m³,,,,836.76,0.9,456,kg/m3,,,4786969381.105.1,product_specific,,
+9aedf1,4786969381.106.1,9aedf1,Wood I joist / Roseburg / RFPI Joist /,1.82,m,1.82,m at unit size,,,1.755,6.44,0.9,3.9,kg/m,,,4786969381.106.1,product_specific,,
+PLY003,4786969381.107.1,PLY003,"Plywood / 3/4"" / Roseburg / SkyPly / hardwood plywood, incl. walnut, alder, cherry, mahogany, oak, birch, maple faces",4.57,"m2 at 3/4""",4.57,m²,,,15.04,,0.9,8.9,"kg/m2 at 3/4""",,,4786969381.107.1,product_specific,UL Environment,
+9ee6d9,4787109018.102.1,9ee6d9,"Cement mortar for tile / Tile Council of North America / Industry average. Includes dry-set, modified dry-set and improved modified dry-set cement mortar",0.519,m²,0.52,m²,,,,,,4.07,kg/m2,,,4787109018.102.1,industry_average,UL Environment,
+15067d,4787168709.101.1,15067d,[Replaced] Asphalt Shingles [Industry Avg | US & CA],5.1,m²,5.1,m²,,,,,,12.7,kg/m2,,,4787168709.101.1,industry_average,,
+237e64,4787168709.104.1,237e64,"SBS Modified Bitumen Roofing / ARMA / Includes: CertainTeed, Firestone, GAF, Henry, IKO, Johns Mansville, Malarkey, Siplast, Soprema / [Industry Avg | US & CA]",6.7,m²,6.7,m²,,,,,,8.4,kg/m2,,,4787168709.104.1,industry_average,,
+42f8f1,4787319688.101.1,42f8f1,Wood fiber board / R 2.7-inch / AWC/CWC [Industry Avg | US & CA],295.05,m3,16,m2•RSI,,20.97,6.348951309,23.3,0.9,254,kg/m3,13.77212865,kg/m2•RSI,4787319688.101.1,industry_average,,
+b8e3dc,4787352797.110.1,b8e3dc,"Gypsum panels - glass mat / 1/2"" / USG / Securock ExoAir 430 / 1/2""",568,92.9m2,6.11,m²,,,,,,,,,,4787352797.110.1,product_specific,,
+LVT005,4787521006.133.1,LVT005,Luxury vinyl tile (LVT) / Interface / All tile & plank models / 3.0 mm,10.4,m2,10.4,m2,,,,,,5.44,kg/m2,,,4787521006.133.1,product_specific,,
+68328c,4788424634.101.1,68328c,"OSB sheathing / 5/8"" / AWC & CWC [Industry Avg | US & CA]",242.58,m3,3.85,"m2 at 0.0159 m (5/8"")",,,,17.31,0.9,620,kg/m3,9.8456,"kg/m2 at 5/8""",4788424634.101.1,industry_average,,
+69ac20,4788424634.101.1,69ac20,"OSB sheathing / 3/4"" / AWC & CWC [Industry Avg | US & CA]",242.58,m3,4.62,"m2 at 0.0159 m (3/4"")",,,,20.76,0.9,620,kg/m3,11.811,"kg/m2 at 3/4""",4788424634.101.1,industry_average,,
+d14a8f,4788424634.101.1,d14a8f,"OSB sheathing / 7/8"" / AWC & CWC [Industry Avg | US & CA]",242.58,m3,5.39,"m2 at 0.0159 m (7/8"")",,,,24.22,0.9,620,kg/m3,13.7795,"kg/m2 at 7/8""",4788424634.101.1,industry_average,,
+edcc0d,4788424634.101.1,edcc0d,"OSB sheathing / 1/2"" / AWC & CWC [Industry Avg | US & CA]",242.58,m3,3.08,"m2 at 0.0127 m (1/2"")",,,,13.84,0.9,620,kg/m3,7.874,"kg/m2 at 1/2""",4788424634.101.1,industry_average,,
+f0c8ce,4788424634.101.1,f0c8ce,"OSB sheathing / 7/16"" / AWC & CWC [Industry Avg | US & CA]",242.58,m3,2.7,"m2 at 0.0127 m (7/16"")",,,,12.11,0.9,620,kg/m3,6.88975,"kg/m2 at 7/16""",4788424634.101.1,industry_average,,
+12dc8t,4788424634.102.1,12dc8t,Wood / SPF / 2x3 Lumber / AWC & CWC [Industry Avg | US & CA],63.12,m3,4.01,m²,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+1k46tl,4788424634.102.1,1k46tl,Wood / SPF / 1x8 Lumber / AWC & CWC [Industry Avg | US & CA],63.12,m3,0.22,m,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+2m3nf4,4788424634.102.1,2m3nf4,Wood / SPF / 2x4 Lumber / AWC & CWC [Industry Avg | US & CA],63.12,m3,5.61,m²,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+4f140x,4788424634.102.1,4f140x,Wood / SPF / 1x10 Lumber / AWC & CWC [Industry Avg | US & CA],63.12,m3,0.28,m,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+4lv9wd,4788424634.102.1,4lv9wd,Wood / SPF / 2x8 Lumber / AWC & CWC [Industry Avg | US & CA],63.12,m3,11.62,m²,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+4scwf3,4788424634.102.1,4scwf3,"Wood / SPF / 3/4"" boards / AWC & CWC [Industry Avg | US & CA]",63.12,m3,1.2,m²,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+8vkef3,4788424634.102.1,8vkef3,Wood / SPF / 2x10 Lumber / AWC & CWC [Industry Avg | US & CA],63.12,m3,14.83,m²,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+9219e5,4788424634.102.1,9219e5,Wood / SPF / Lumber by volume / AWC & CWC [Industry Avg | US & CA],63.12,m3,63.12,m³,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+92d24d,4788424634.102.1,92d24d,Wood / SPF / 1x6 Lumber / AWC & CWC [Industry Avg | US & CA],63.12,m3,0.17,m,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+c309dk,4788424634.102.1,c309dk,Wood / SPF / 2x6 Lumber / AWC & CWC [Industry Avg | US & CA],63.12,m3,8.82,m²,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+k2f2dm,4788424634.102.1,k2f2dm,Wood / SPF / 1x2 Lumber / AWC & CWC [Industry Avg | US & CA],63.12,m3,0.05,m,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+l2kgs9,4788424634.102.1,l2kgs9,"Wood / SPF / 1/2"" boards / AWC & CWC [Industry Avg | US & CA]",63.12,m3,0.8,m²,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+o3kwx9,4788424634.102.1,o3kwx9,Wood / SPF / 2x12 Lumber / AWC & CWC [Industry Avg | US & CA],63.12,m3,18.04,m²,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+p2v3x5,4788424634.102.1,p2v3x5,"Wood / SPF / 5/8"" boards / AWC & CWC [Industry Avg | US & CA]",63.12,m3,1,m²,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+s029f2,4788424634.102.1,s029f2,Wood / SPF / 1x4 Lumber / AWC & CWC [Industry Avg | US & CA],63.12,m3,0.11,m,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+t2c9ss,4788424634.102.1,t2c9ss,"Wood / SPF / 1/4"" boards / AWC & CWC [Industry Avg | US & CA]",63.12,m3,0.4,m²,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+w93kcl,4788424634.102.1,w93kcl,Wood / SPF / 1x3 Lumber / AWC & CWC [Industry Avg | US & CA],63.12,m3,0.08,m,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+x3fk2s,4788424634.102.1,x3fk2s,"Wood / SPF / 7/8"" boards / AWC & CWC [Industry Avg | US & CA]",63.12,m3,1.4,m²,,,,844.1,0.9,460,kg/m3,,,4788424634.102.1,industry_average,,
+61a79e,4788424634.103.1,61a79e,"Plywood / 3/4"" / AWC & CWC [Industry Avg | US & CA]",219.32,m3,4.18,"m2 at 3/4""",,,,16.43,0.9,484,kg/m3,9.2202,"kg/m2 at 3/4""",4788424634.103.1,industry_average,,
+c41283,4788424634.103.1,c41283,"Plywood / 1/2"" / AWC & CWC [Industry Avg | US & CA]",219.32,m3,2.79,"m2 at 1/2""",,,,10.95,0.9,484,kg/m3,6.1468,"kg/m2 at 1/2""",4788424634.103.1,industry_average,,
+d88aad,4788424634.103.1,d88aad,"Plywood / 5/8"" / AWC & CWC [Industry Avg | US & CA]",219.32,m3,3.49,"m2 at 5/8""",,,,13.71,0.9,484,kg/m3,7.6956,"kg/m2 at 5/8""",4788424634.103.1,industry_average,,
+f92a05,4788424634.104.1,f92a05,Glued Laminated Timber (Glulam) / AWC & CWC [Industry Avg | US & CA],137.19,m3,137.19,m3,,,,994.52,0.9,548,kg/m3,,,4788424634.104.1,industry_average,,
+vd92kd,4788424634.104.1,vd92kd,"Glued Laminated Timber (Glulam) / AWC & CWC / 3-1/2"" Panel [Industry Avg | US & CA]",137.19,m3,12.22,"m2 at 3-1/2"" thickness",,,,88.61,0.9,548,kg/m3,,,4788424634.104.1,industry_average,,
+ebd574,4788424634.105.1,ebd574,Laminated veneer lumber (LVL) / AWC & CWC [Industry Avg | US & CA],361.45,m3,361.45,m3,,,,961.33,0.9,548,kg/m3,,,4788424634.105.1,industry_average,UL Environment,
+a6h0p2,4788424634.106.1,a6h0p2,"Wood I joist / TJI 230/360 / 14"" Depth / AWC & CWC [Industry Avg | US & CA]",1.97,m at avg depth,2.23,"m at 14""",9.7918,,,,0.9,4.911,kg/m at depth,1.132,ratio to avg,4788424634.106.1,industry_average,,
+cec541,4788424634.106.1,cec541,"Wood I joist / TJI 230/360 / 11-7/8"" Depth / AWC & CWC [Industry Avg | US & CA]",1.97,m at avg depth,2.03,"m at 11-7/8""",8.90085,,2.11575,,0.9,4.464,kg/m at depth,1.029,ratio to avg,4788424634.106.1,industry_average,,
+d92kl5,4788424634.106.1,d92kl5,"Wood I joist / TJI 230/360 / 9-1/2"" Depth / AWC & CWC [Industry Avg | US & CA]",1.97,m at avg depth,1.82,"m at 9-1/2""",8.0099,,,,0.9,4.018,kg/m at depth,0.926,ratio to avg,4788424634.106.1,industry_average,,
+dk02lm,4788424634.106.1,dk02lm,Wood I joist / TJI 230/360 / Industry Average Depth / AWC & CWC [Industry Avg | US & CA],1.97,m at avg depth,1.97,m at avg depth,8.65,,,,0.9,4.34,kg/m at avg depth,1,ratio to avg,4788424634.106.1,industry_average,,
+f53d9a,4788424634.106.1,f53d9a,"Wood I joist / TJI 230/360 / 16"" Depth / AWC & CWC [Industry Avg | US & CA]",1.97,m at avg depth,2.36,"m at 16""",10.38,,,,0.9,5.209,kg/m at depth,1.2,ratio to avg,4788424634.106.1,industry_average,,
+10d47f,4788424634.107.1,10d47f,Wood / Redwood / Lumber by volume / AWC & CWC [Industry Avg | US & CA],37.97,m3,37.97,m³,,,,836.76,0.9,456,kg/m3,,,4788424634.107.1,industry_average,,
+31ckd0,4788424634.107.1,31ckd0,Wood / Redwood / 1x4 Lumber / AWC & CWC [Industry Avg | US & CA],37.97,m3,0.06,m,,,,836.76,0.9,456,kg/m3,,,4788424634.107.1,industry_average,,
+iv303x,4788424634.107.1,iv303x,Wood / Redwood / 1x3 Lumber / AWC & CWC [Industry Avg | US & CA],37.97,m3,0.05,m,,,,836.76,0.9,456,kg/m3,,,4788424634.107.1,industry_average,,
+jk29kd,4788424634.107.1,jk29kd,Wood / Redwood / 1x2 Lumber / AWC & CWC [Industry Avg | US & CA],37.97,m3,0.03,m,,,,836.76,0.9,456,kg/m3,,,4788424634.107.1,industry_average,,
+pd92mn,4788424634.107.1,pd92mn,"Wood / Redwood / 3/4"" boards / AWC & CWC [Industry Avg | US & CA]",37.97,m3,0.72,m²,,,,836.76,0.9,456,kg/m3,,,4788424634.107.1,industry_average,,
+1f3cc3,4788647002.101.1,1f3cc3,Fiberglass batt / CertainTeed / Sustainable Insulation / R 3.6-inch,0.94,m2•RSI,0.94,m2•RSI,,,,,,0.488,kg/m2 at RSI 1,,,4788647002.101.1,product_specific,,
+f33e5e,4788647002.102.1,f33e5e,"Fiberglass loose fill / CertainTeed / InsulSafe, Optima, TruComfort / R 2.6-inch",1.29,m2•RSI,1.29,m2•RSI,,,,,,0.574,kg/m2 at RSI 1,,,4788647002.102.1,product_specific,,
+9cd566,4788721182.101.1,9cd566,"XPS foam board / Owens Corning / Foamular 250 / HFC-filled / R 5.0-inch, 25 psi [MEXICO]",50.5,m2•RSI,50.5,m2•RSI,,,,,,24.8,kg/m3,,,4788721182.101.1,product_specific,,
+MPA001,4788736474.105.1,MPA001,"Metal Wall Panels - Aluminum / CENTRIA / RZR / 0.060""",6020,100 m2,60.2,m2,,,,,,10.49,kg/m2,,,4788736474.105.1,product_specific,UL Environment,
+MPA002,4788736474.105.1,MPA002,"Metal Wall Panels - Aluminum / CENTRIA / LVLZ / 0.060""",7700,100 m2,77,m2,,,,,,13.62,kg/m2,,,4788736474.105.1,product_specific,UL Environment,
+LVT014,4788753451.101.1,LVT014,Vinyl flooring / Resilient Floor Covering Institute / Heterogeneous [Industry Avg | US & CA],7.04,m²,7.04,m²,,,,,,2.1,kg/m2,,,4788753451.101.1,industry_average,UL Environment,30
+LVT000,4788753451.103.1,LVT000,Rigid core vinyl flooring  / Resilient Floor Covering Institute [Industry Avg | US & CA],20.5,m²,20.5,m²,,,,,,9.2,kg/m2,,,4788753451.103.1,industry_average,UL Environment,30
+891444,4788753451.104.1,891444,Rubber flooring / Resilient Floor Covering Institute / Includes tiles and rolls / 2mm [Industry Avg | US & CA],15.6,m²,15.6,m²,,,,,,5.6,kg/m2,,,4788753451.104.1,industry_average,,
+f2932d,4788753451.105.1,f2932d,Vinyl flooring / Resilient Floor Covering Institute / Vinyl Composition Tile [Industry Avg | US & CA],4.96,m²,4.96,m²,,,,,,6.5,kg/m2,,,4788753451.105.1,industry_average,,
+LVT001,4788753451.106.1,LVT001,Luxury Vinyl Tile / Resilient Floor Covering Institute / LVT and SVT [Industry Avg | US & CA],11.9,m²,11.9,m²,,,,,,5.9,kg/m2,,,4788753451.106.1,industry_average,UL Environment,30
+LIN000,4788756650.101.1,LIN000,Linoleum flooring / Gerflor  / DLW Linoleum Acousticplus / 4.0 mm sheet style linoleum with Neocare backing,10.116,m²,10.12,m²,6.99,6.29,1.47,5.39,0.9,3.5,kg/m2,,,4788756650.101.1,product_specific,UL Environment,25
+LIN003,4788756650.102.1,LIN003,Linoleum flooring / Gerflor  / DLW Linoleum Compact / 2.5 mm sheet style linoleum,6.901,m²,6.9,m²,6.38,5.74,1.3818,5.07,0.9,2.94,kg/m2,,,4788756650.102.1,product_specific,UL Environment,25
+4dadb7,4788863727.101.1,4dadb7,Ceramic tile / Crossville / Porcelain / Standard grade (mortar included),23.9,m²,26.08,m²,,,,,,24.41,kg/m2,,,4788863727.101.1,product_specific,,
+5a9ecd,4788873607.102.1,5a9ecd,Carpet / Interface / CQUEST BioX / 1.5 mm Modular tile carpet,-0.256,m²,4.57,m²,4.67,4.67,,,,2.8,kg/m2,,,4788873607.102.1,product_specific,,15
+MWB006,4789092768.101.1,MWB006,Mineral wool batt / Rockwool / Safe'n'Sound / R 4.0-inch,1.31,m2•RSI,1.31,m2•RSI,,,,,,,,2.64,RSI (m2K/W),4789092768.101.1,product_specific,,
+MWB008,4789092768.101.1,MWB008,Mineral wool board  / Rockwool / Cavityrock / R 4.3-inch,2.1,m2•RSI,2.1,m2•RSI,,,,,,,,,,4789092768.101.1,product_specific,,
+MWB009,4789092768.101.1,MWB009,Mineral wool board  / Rockwool / Comfortboard 80 / R 4.2-inch,4.061,m2•RSI,4.06,m2•RSI,,,,,,128,kg/m3,,,4789092768.101.1,product_specific,,
+MWB010,4789092768.101.1,MWB010,Mineral wool board  / Rockwool / Comfortboard 110 / R 4.0-inch,5.63,m2•RSI,5.63,m2•RSI,,,,,,,,,,4789092768.101.1,product_specific,,
+MWB011,4789092768.101.1,MWB011,Mineral wool board  / Rockwool / Toprock DD / R 4.3-inch,5.63,m2•RSI,5.63,m2•RSI,,,,,,,,,,4789092768.101.1,product_specific,,
+MWB014,4789092768.101.1,MWB014,Mineral wool batt / Rockwool / ComfortBatt R-24 (Wood Studs) / R 4.4-inch,1.7,m2•RSI,1.7,m2•RSI,,,,,,,,,,4789092768.101.1,product_specific,UL Environment,75
+MWB017,4789092768.101.1,MWB017,Mineral wool batt / Rockwool / ComfortBatt R-23 / R 4.2-inch,1.44,m2•RSI,1.44,m2•RSI,,,,,,,,,,4789092768.101.1,product_specific,UL Environment,75
+MWB018,4789092768.101.1,MWB018,Mineral wool batt / Rockwool / ComfortBatt R-15 / R 4.3-inch,1.31,m2•RSI,1.31,m2•RSI,,,,,,,,,,4789092768.101.1,product_specific,UL Environment,75
+MWB019,4789092768.101.1,MWB019,"Mineral wool batt / Rockwool / ComfortBatt R-10, R-14, R-22, R-28, R-30, R-32 / R 4.0-inch",1.18,m2•RSI,1.18,m2•RSI,,,,,,,,,,4789092768.101.1,product_specific,UL Environment,75
+MWB020,4789092768.101.1,MWB020,Mineral wool batt / Rockwool / ComfortBatt R-24 (Steel Studs) / R 4.0-inch,1.18,m2•RSI,1.18,m2•RSI,,,,,,,,,,4789092768.101.1,product_specific,UL Environment,75
+CER000,4789101745.101.1,CER000,Ceramic tile / Tile Council of North America/ 18.8 kg/m2 / [Industry Avg | US & CA],14.1,m²,14.1,m²,,,,,,18.8,kg/m2,,,4789101745.101.1,industry_average,UL Environment,75
+OSB000,4789103593.101.1,OSB000,"OSB sheathing / 1/2"" / Huber  / AdvanTech / 1/2"" Sheathing",420,m3,5.33,"m2 @ 1/2""",,,,14.27,0.9,662,kg/m3,8.407,"kg/m2 at 1/2""",4789103593.101.1,product_specific,UL,
+OSB006,4789103593.101.1,OSB006,"OSB subflooring / Huber  / AdvanTech / 19/32"" Subflooring",470,m3,7.09,"m2 @ 19/32""",,,,17.18,0.9,670,kg/m3,10.12,"kg/m2 at 1/2""",4789103593.101.1,product_specific,UL,
+2fg4um,4789103593.102.1,2fg4um,"OSB sheathing & barrier / Huber ZIP System / Roof and Wall Sheathing / 5/8""",380,m³,6.04,m²,,,,17.81,0.9,660,kg/m3,10.494,"kg/m2 at  5/8""",4789103593.102.1,product_specific,UL,75
+2gy8rd,4789103593.102.1,2gy8rd,"Insulated OSB sheathing & barrier / Huber ZIP System / R-12 / 7/16"" OSB; 2"" foam (polyisocyanurate)",260,m³,16.09,m²,,,,,0.9,223,kg/m3,,,4789103593.102.1,product_specific,,75
+3lkfm3,4789103593.102.1,3lkfm3,"Insulated OSB sheathing & barrier / Huber ZIP System / R-6 / 7/16"" OSB; 1"" foam (polyisocyanurate)",280,m³,10.22,m²,,,,,0.9,223,kg/m3,,,4789103593.102.1,product_specific,,75
+7vi3jf,4789103593.102.1,7vi3jf,"OSB sheathing & barrier / Huber ZIP System / Roof and Wall Sheathing / 7/16""",380,m³,4.18,"m2 @  7/16""",,,,12.32,0.9,660,kg/m3,7.26,"kg/m2 at  7/16""",4789103593.102.1,product_specific,UL,75
+dsa30i,4789103593.102.1,dsa30i,"Insulated OSB sheathing & barrier / Huber ZIP System / R-3 / 7/16"" OSB; 1/2"" foam (polyisocyanurate)",310,m³,7.38,m²,,,,,0.9,325,kg/m3,,,4789103593.102.1,product_specific,,75
+g83od3,4789103593.102.1,g83od3,"OSB sheathing & barrier / Huber ZIP System / Roof and Wall Sheathing / 1/2""",380,m³,4.83,m²,,,,14.23,0.9,660,kg/m3,8.382,"kg/m2 at  1/2""",4789103593.102.1,product_specific,UL,75
+t5ydsd,4789103593.102.1,t5ydsd,"Insulated OSB sheathing & barrier / Huber ZIP System / R-9 / 7/16"" OSB; 1.5"" foam (polyisocyanurate)",260,m³,12.79,m²,,,,,0.9,223,kg/m3,,,4789103593.102.1,product_specific,,75
+34db3d,4789289084.103.1,34db3d,Metal Panels - Aluminum / 22 gauge / Metal Construction Assn. [Industry Avg | US],1860,100m2,18.6,m²,,,,,,2720,kg/m3,,,4789289084.103.1,industry_average,,
+98a9cd,4789289084.103.1,98a9cd,Metal Panels - Steel / Metal Construction Assn.  / 24 gauge [Industry Avg | US],1530,100m2,15.3,m²,,,,,,8030,kg/m3,,,4789289084.103.1,industry_average,,
+LIN001,4789356590.101.2,LIN001,Linoleum flooring / Tarkett  / Lino Acoustic / 3.8 mm sheet style linoleum with polyurethane foam backing,2.36,m²,7.08,m²,,4.72,1.43106,5.25,0.9,3.66,kg/m3,,,4789356590.101.2,product_specific,UL Environment,30
+LIN002,4789356590.101.2,LIN002,Linoleum flooring / Tarkett  / Veneto Acoustic Cork / 4.4 mm sheet style linoleum with cork backing,-0.413,m²,5.88,m²,,6.3,1.90808,7,0.9,4.88,kg/m3,,,4789356590.101.2,product_specific,UL Environment,30
+LIN004,4789356590.101.2,LIN004,"Linoleum flooring / Tarkett  / Lino Veneto xf2, Etrusco, Style Elle|Emme, Veneto, Originale, LinoRail, Linosport / 2.5 mm sheet style linoleum",-0.6,m²,3.5,m²,,4.1,1.24338,4.56,0.9,3.18,kg/m2,,,4789356590.101.2,product_specific,UL Environment,30
+MPA000,4789365778.101.1,MPA000,"Metal Panels - Aluminum / Petersen Aluminum Corp / Pac-Clad, all profiles / 20 gauge",3840,100m2,38.4,m²,,,,,,2.07,kg/m2,207,kg/100m2,4789365778.101.1,product_specific,UL Environment,75
+MPS000,4789365778.101.1,MPS000,"Metal Panels - Steel / Petersen Aluminum Corp / Pac-Clad, all profiles / 24 gauge",1580,100m2,15.8,m²,,,,,,2.07,kg/m2,207,kg/100m2,4789365778.101.1,product_specific,UL Environment,75
+s0gp3f,4789365778.101.1,s0gp3f,(Exclude until EPD concern resolved) Metal Panels - Aluminum / Petersen Aluminum Corp / Pac-Clad / 22 gauge,384,100m2,3.84,m²,,,,,,4.91,kg/m2,,,4789365778.101.1,product_specific,UL Environment,
+61aa40,4789400789.101.1,61aa40,Asphalt Shingles / Owens Corning / Supreme /,2.75,m²,2.75,m²,,,,,,9.26,kg/m2,,,4789400789.101.1,product_specific,,
+G60979,4789400789.101.1,G60979,Asphalt Shingles / Owens Corning / Duration /,3.49,m²,3.49,m²,,,,,,10.12,kg/m2,,,4789400789.101.1,product_specific,,
+e7ab5a,4789400789.101.1,e7ab5a,Asphalt Shingles / Owens Corning / Oakridge /,3.21,m²,3.21,m²,,,,,,9.93,kg/m2,,,4789400789.101.1,product_specific,,
+f4l2kx,4789410886.101.1,f4l2kx,Wood fiber board / R 2.7-inch / NAFA [Industry Avg | US & CA],196.13,m3,10.63,m2•RSI,437.62,20.95,6.348951309,23.28,0.9,254,kg/m3,13.77212865,kg/m2•RSI,4789410886.101.1,industry_average,,
+ac0e7f,4789456400.101.1,ac0e7f,"Hardwood flooring / mafi / Natural Hardwood Planks / 3/4"", 3 ply laminated solid, oil pre-finished [EU]",-8.09,m²,13.99,m²,,,,20.77,0.9,12.287,"kg/m2 at 3/4""",,,4789456400.101.1,product_specific,,
+GYP000,4789532059.140.1,GYP000,"Gypsum panels - glass mat / 5/8"" / CertainTeed / GlasRoc Sheathing gypsum board / 5/8""",310,92.9m2,3.34,"m2 @ 5/8""",,,,,,1165,kg/92.9m2,12.54,kg/m2,4789532059.140.1,product_specific,UL Environment,
+STR000,4789556099.102.1,STR000,"Structural Steel / L-Angle / L 3.5 x 3.5 x 1/4""/ AISC [Industry Avg | US]",1.22,kg,10.43,linear m,,,,,,7800,kg/m3,8.55,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR001,4789556099.102.1,STR001,"Structural Steel / Rectangular HSS / 8 x 6 x 5/16""/ AISC [Industry Avg | US]",1.22,kg,50.14,linear m,,,,,,7800,kg/m3,41.1,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR002,4789556099.102.1,STR002,"Structural Steel / Square HSS / 3 x 3 x 3/16""/ AISC [Industry Avg | US]",1.22,kg,12.57,linear m,,,,,,7800,kg/m3,10.3,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR003,4789556099.102.1,STR003,"Structural Steel / Square HSS / 4 x 4 x 1/4""/ AISC [Industry Avg | US]",1.22,kg,39.28,linear m,,,,,,7800,kg/m3,32.2,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR004,4789556099.102.1,STR004,"Structural Steel / Square HSS / 5 x 5 x 1/4""/ AISC [Industry Avg | US]",1.22,kg,28.3,linear m,,,,,,7800,kg/m3,23.2,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR005,4789556099.102.1,STR005,"Structural Steel / Square HSS / 5 x 5 x 1/2""/ AISC [Industry Avg | US]",1.22,kg,51.61,linear m,,,,,,7800,kg/m3,42.3,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR006,4789556099.102.1,STR006,"Structural Steel / Square HSS / 8 x 8 x 1/4""/ AISC [Industry Avg | US]",1.22,kg,46.24,linear m,,,,,,7800,kg/m3,37.9,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR007,4789556099.102.1,STR007,Structural Steel / Wide Flange / W150x22 (US W6x15) / AISC [Industry Avg | US],1.22,kg,27.45,linear m,,,,,,7800,kg/m3,22.5,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR008,4789556099.102.1,STR008,Structural Steel / Wide Flange / W150x30 (US W6x20) / AISC [Industry Avg | US],1.22,kg,36.36,linear m,,,,,,7800,kg/m3,29.8,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR009,4789556099.102.1,STR009,Structural Steel / Wide Flange / W200x22 (US W8x15) / AISC [Industry Avg | US],1.22,kg,27.45,linear m,,,,,,7800,kg/m3,22.5,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR010,4789556099.102.1,STR010,Structural Steel / Wide Flange / W200x27 (US W8x18) / AISC [Industry Avg | US],1.22,kg,32.45,linear m,,,,,,7800,kg/m3,26.6,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR011,4789556099.102.1,STR011,Structural Steel / Wide Flange / W200x31 (US W8x21) / AISC [Industry Avg | US],1.22,kg,38.19,linear m,,,,,,7800,kg/m3,31.3,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR012,4789556099.102.1,STR012,Structural Steel / Wide Flange / W200x36 (US W8x24) / AISC [Industry Avg | US],1.22,kg,43.8,linear m,,,,,,7800,kg/m3,35.9,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR013,4789556099.102.1,STR013,Structural Steel / Wide Flange / W200x42 (US W8x28) / AISC [Industry Avg | US],1.22,kg,50.87,linear m,,,,,,7800,kg/m3,41.7,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR014,4789556099.102.1,STR014,Structural Steel / Wide Flange / W200x59 (US W8x40) / AISC [Industry Avg | US],1.22,kg,71.98,linear m,,,,,,7800,kg/m3,59,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR015,4789556099.102.1,STR015,Structural Steel / Wide Flange / W200x71 (US W8x48) / AISC [Industry Avg | US],1.22,kg,86.62,linear m,,,,,,7800,kg/m3,71,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR016,4789556099.102.1,STR016,Structural Steel / Wide Flange / W250x18 (US W10x12) / AISC [Industry Avg | US],1.22,kg,21.84,linear m,,,,,,7800,kg/m3,17.9,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR017,4789556099.102.1,STR017,Structural Steel / Wide Flange / W250x22 (US W10x15) / AISC [Industry Avg | US],1.22,kg,27.21,linear m,,,,,,7800,kg/m3,22.3,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR018,4789556099.102.1,STR018,Structural Steel / Wide Flange / W250x25 (US W10x17) / AISC [Industry Avg | US],1.22,kg,30.87,linear m,,,,,,7800,kg/m3,25.3,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR019,4789556099.102.1,STR019,Structural Steel / Wide Flange / W250x28 (US W10x19) / AISC [Industry Avg | US],1.22,kg,34.65,linear m,,,,,,7800,kg/m3,28.4,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR020,4789556099.102.1,STR020,Structural Steel / Wide Flange / W250x33 (US W10x22) / AISC [Industry Avg | US],1.22,kg,39.89,linear m,,,,,,7800,kg/m3,32.7,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR021,4789556099.102.1,STR021,Structural Steel / Wide Flange / W250x39 (US W10x26) / AISC [Industry Avg | US],1.22,kg,46.97,linear m,,,,,,7800,kg/m3,38.5,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR022,4789556099.102.1,STR022,Structural Steel / Wide Flange / W250x45 (US W10x30) / AISC [Industry Avg | US],1.22,kg,54.66,linear m,,,,,,7800,kg/m3,44.8,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR023,4789556099.102.1,STR023,Structural Steel / Wide Flange / W250x50 (US W10x33) / AISC [Industry Avg | US],1.22,kg,59.9,linear m,,,,,,7800,kg/m3,49.1,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR024,4789556099.102.1,STR024,Structural Steel / Wide Flange / W250x58 (US W10x38) / AISC [Industry Avg | US],1.22,kg,70.76,linear m,,,,,,7800,kg/m3,58,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR025,4789556099.102.1,STR025,Structural Steel / Wide Flange / W250x67 (US W10x45) / AISC [Industry Avg | US],1.22,kg,81.74,linear m,,,,,,7800,kg/m3,67,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR026,4789556099.102.1,STR026,Structural Steel / Wide Flange / W250x73 (US W10x49) / AISC [Industry Avg | US],1.22,kg,89.06,linear m,,,,,,7800,kg/m3,73,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR027,4789556099.102.1,STR027,Structural Steel / Wide Flange / W250x80 (US W10x54) / AISC [Industry Avg | US],1.22,kg,97.6,linear m,,,,,,7800,kg/m3,80,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR028,4789556099.102.1,STR028,Structural Steel / Wide Flange / W250x131 (US W10x88) / AISC [Industry Avg | US],1.22,kg,159.82,linear m,,,,,,7800,kg/m3,131,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR029,4789556099.102.1,STR029,Structural Steel / Wide Flange / W310x129 (US W12x87) / AISC [Industry Avg | US],1.22,kg,157.38,linear m,,,,,,7800,kg/m3,129,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR030,4789556099.102.1,STR030,Structural Steel / Wide Flange / W310x21 (US W12x14) / AISC [Industry Avg | US],1.22,kg,25.62,linear m,,,,,,7800,kg/m3,21,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR031,4789556099.102.1,STR031,Structural Steel / Wide Flange / W310x33 (US W12x22) / AISC [Industry Avg | US],1.22,kg,39.89,linear m,,,,,,7800,kg/m3,32.7,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR032,4789556099.102.1,STR032,Structural Steel / Wide Flange / W310x39 (US W12x26) / AISC [Industry Avg | US],1.22,kg,46.97,linear m,,,,,,7800,kg/m3,38.5,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR033,4789556099.102.1,STR033,Structural Steel / Wide Flange / W310x45 (US W12x30) / AISC [Industry Avg | US],1.22,kg,54.29,linear m,,,,,,7800,kg/m3,44.5,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR034,4789556099.102.1,STR034,Structural Steel / Wide Flange / W310x52 (US W12x35) / AISC [Industry Avg | US],1.22,kg,63.44,linear m,,,,,,7800,kg/m3,52,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR035,4789556099.102.1,STR035,Structural Steel / Wide Flange / W310x79 (US W12x53) / AISC [Industry Avg | US],1.22,kg,96.38,linear m,,,,,,7800,kg/m3,79,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR036,4789556099.102.1,STR036,Structural Steel / Wide Flange / W360x33 (US W14x22) / AISC [Industry Avg | US],1.22,kg,39.94,linear m,,,,,,7800,kg/m3,32.736,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR037,4789556099.102.1,STR037,Structural Steel / Wide Flange / W360x45 (US W14x30) / AISC [Industry Avg | US],1.22,kg,54.46,linear m,,,,,,7800,kg/m3,44.64,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR038,4789556099.102.1,STR038,Structural Steel / Wide Flange / W360x51 (US W14x34) / AISC [Industry Avg | US],1.22,kg,61.72,linear m,,,,,,7800,kg/m3,50.59,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR039,4789556099.102.1,STR039,Structural Steel / Wide Flange / W360x57 (US W14x38) / AISC [Industry Avg | US],1.22,kg,68.98,linear m,,,,,,7800,kg/m3,56.544,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR040,4789556099.102.1,STR040,Structural Steel / Wide Flange / W410x74 (US W16x50) / AISC [Industry Avg | US],1.22,kg,90.28,linear m,,,,,,7800,kg/m3,74,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR041,4789556099.102.1,STR041,Structural Steel / Wide Flange / W530x72 (US W21x48) / AISC [Industry Avg | US],1.22,kg,87.84,linear m,,,,,,7800,kg/m3,72,kg/m,4789556099.102.1,industry_average,UL Environment,
+STR042,4789556099.102.1,STR042,Structural Steel / Wide Flange / W530x85 (US W21x55) / AISC [Industry Avg | US],1.22,kg,103.7,linear m,,,,,,7800,kg/m3,85,kg/m,4789556099.102.1,industry_average,UL Environment,
+19e71c,4789559274.101.1,19e71c,"XPS foam board / DuPont / Styrofoam / HFC-filled / R 5.6-inch, 25 psi",60.8,m2•RSI,60.8,m2•RSI,,,,,,,,,,4789559274.101.1,product_specific,,
+175f1a,4789559274.102.1,175f1a,"XPS foam board / DuPont / Styrofoam / Reduced GWP / R 5.6-inch, 25 psi",36.5,m2•RSI,36.5,m2•RSI,,,,,,,,,,4789559274.102.1,product_specific,,
+c630d2,4789559274.103.1,c630d2,Polyisocyanurate / Wall Boards / DuPont / Thermax / R 6.5/inch,2.39,m2•RSI,2.39,m2•RSI,,,,,,29.53,kg/m3,,,4789559274.103.1,product_specific,UL Environment,
+4k2v0s,4789710952.101.1,4k2v0s,Laminated strand lumber (LSL) / AWC & CWC [Industry Avg | US & CA],274.9,m3,274.9,m3,,,,978.34,0.9,570.22,kg/m3,,,4789710952.101.1,industry_average,UL Environment,
+www115,4789733794.104.1,www115,"Window, double-glazed, aluminum frame / Kawneer / OptiQ AA5450, TR-9100, 8400TL, AA6400|6500|6600 / Hung & sliding",188,m2,188,m2,,,,,,,,,,4789733794.104.1,product_specific,UL Environment,
+www116,4789733794.106.1,www116,"Window, double-glazed, aluminum frame / Kawneer / Optiq AA4325, 8225TL|TLF, 526, AA 6400|6500, NX-300|3000 / Projected & casement",222,m2,222,m2,,,,,,,,,,4789733794.106.1,product_specific,UL Environment,
+20fslq,4789752901.101.1,20fslq,"Cold-formed steel floor joist assembly / ClarkDietrich / 24"" o.c. spacing, 10"" height, 16g (Joist: 1000S162-54, Rim: 1000S125-54)",2380,MT of steel,18.88,kg of steel,,,,,,,,7.932,kg/m,4789752901.101.1,product_specific,UL Environment,
+3kg0d7,4789752901.101.1,3kg0d7,"Cold-formed steel floor joist assembly / ClarkDietrich / 16"" o.c. spacing, 8"" height, 18g (Joist: 800S162-43, Rim: 800S125-43)",2380,MT of steel,18.21,"m2 floor at 16""oc",,,,,,,,7.653,kg/m,4789752901.101.1,product_specific,UL Environment,
+9wmfex,4789752901.101.1,9wmfex,"Cold-formed steel floor joist assembly / ClarkDietrich / 16"" o.c. spacing, 12"" height, 14g (Joist: 1200S162-68, Rim: 1200S125-68)",2380,MT of steel,38.18,kg of steel,,,,,,,,16.04,kg/m,4789752901.101.1,product_specific,UL Environment,
+SSS000,4789752901.101.1,SSS000,"Steel studs - Load bearing / ClarkDietrich / 600-S-137-54, 16 gauge",2.38,kg,6.2,"m of ""2x6"" stud",,,,,,7850,kg/m3,2.604,kg/m,4789752901.101.1,product_specific,UL Environment,
+SSS002,4789752901.101.1,SSS002,"Steel studs - Non-loadbearing / ClarkDietrich / 362-S-125-18, 20EQ gauge",2.38,kg,1.5,"m of ""2x6"" stud",,,,,,7850,kg/m3,0.6293817,kg/m,4789752901.101.1,product_specific,UL Environment,
+bv0gw2,4789752901.101.1,bv0gw2,"Cold-formed steel floor joist assembly / ClarkDietrich / 12"" o.c. spacing, 12"" height, 14g (Joist: 1200S162-68, Rim: 1200S125-68)",2380,MT of steel,49.24,kg of steel,,,,,,,,20.69,kg/m,4789752901.101.1,product_specific,UL Environment,
+cd204s,4789752901.101.1,cd204s,Cold-formed steel framing products / ClarkDietrich / cold-form steel by mass (kg),2380,MT of steel,2.38,kg of steel,,,,,,,,,,4789752901.101.1,product_specific,UL Environment,
+cx93wm,4789752901.101.1,cx93wm,"Cold-formed steel floor joist assembly / ClarkDietrich / 16"" o.c. spacing, 10"" height, 16g (Joist: 1000S162-54, Rim: 1000S125-54)",2380,MT of steel,26.61,kg of steel,,,,,,,,11.18,kg/m,4789752901.101.1,product_specific,UL Environment,
+e923k2,4789752901.101.1,e923k2,"Cold-formed steel floor joist assembly / ClarkDietrich / 12"" o.c. spacing, 8"" height, 18g (Joist: 800S162-43, Rim: 800S125-43)",2380,MT of steel,23.52,"m2 floor at 16""oc",,,,,,,,9.884,kg/m,4789752901.101.1,product_specific,UL Environment,
+gsl3dd,4789752901.101.1,gsl3dd,"Cold-formed steel floor joist assembly / ClarkDietrich / 24"" o.c. spacing, 12"" height, 14g (Joist: 1200S162-68, Rim: 1200S125-68)",2380,MT of steel,27.11,kg of steel,,,,,,,,11.389,kg/m,4789752901.101.1,product_specific,UL Environment,
+v2r3a4,4789752901.101.1,v2r3a4,"Cold-formed steel floor joist assembly / ClarkDietrich / 24"" o.c. spacing, 8"" height, 18g (Joist: 800S162-43, Rim: 800S125-43)",2380,MT of steel,12.9,"m2 floor at 16""oc",,,,,,,,5.422,kg/m,4789752901.101.1,product_specific,UL Environment,
+xv9sm2,4789752901.101.1,xv9sm2,"Cold-formed steel floor joist assembly / ClarkDietrich / 12"" o.c. spacing, 10"" height, 16g (Joist: 1000S162-54, Rim: 1000S125-54)",2380,MT of steel,34.34,kg of steel,,,,,,,,14.428,kg/m,4789752901.101.1,product_specific,UL Environment,
+MPS001,4789771662.103.1,MPS001,Metal Panels - Steel / Metal Building Manufacturers Assn / 24 gauge [Industry Avg | US],1233,100 m2,12.33,m²,,,,,,4.73,kg/m2,,,4789771662.103.1,industry_average,UL Environment,75
+rnd601,4789773836.101.1,rnd601,Spray polyurethane foam - Closed Cell (HFO gas) / Huntsman / Heatlok Soya HFO & Heatlok HFO / R 6.5-inch,2.5026,m2•RSI,2.5,m2•RSI,,,,,,38.4,kg/m3,,,4789773836.101.1,product_specific,UL Environment,75
+1cgews,4789793365.101.1,1cgews,Rebar / Nucor Corporation / #5,0.863,kg,1.34,m,,,,,,7800,kg/m3,1.556,kg/m,4789793365.101.1,product_specific,UL Environment,
+3fxswa,4789793365.101.1,3fxswa,Rebar / Nucor Corporation / #8,0.863,kg,3.44,m,,,,,,7800,kg/m3,3.982,kg/m,4789793365.101.1,product_specific,UL Environment,
+3vwqxf,4789793365.101.1,3vwqxf,Rebar / Nucor Corporation / #6,0.863,kg,1.93,m,,,,,,7800,kg/m3,2.24,kg/m,4789793365.101.1,product_specific,UL Environment,
+a03cls,4789793365.101.1,a03cls,Rebar / Nucor Corporation / 15M,0.863,kg,1.35,m,,,,,,7800,kg/m3,1.57,kg/m,4789793365.101.1,product_specific,UL Environment,
+bomxc2,4789793365.101.1,bomxc2,Rebar / Nucor Corporation / #4,0.863,kg,0.86,m,,,,,,7800,kg/m3,0.996,kg/m,4789793365.101.1,product_specific,UL Environment,
+fdk49v,4789793365.101.1,fdk49v,Rebar / Nucor Corporation / #3,0.863,kg,0.48,m,,,,,,7800,kg/m3,0.561,kg/m,4789793365.101.1,product_specific,UL Environment,
+g42xas,4789793365.101.1,g42xas,Rebar / Nucor Corporation / #7,0.863,kg,2.63,m,,,,,,7800,kg/m3,3.049,kg/m,4789793365.101.1,product_specific,UL Environment,
+l2jfis,4789793365.101.1,l2jfis,Rebar / Nucor Corporation / 10M,0.863,kg,0.68,m,,,,,,7800,kg/m3,0.785,kg/m,4789793365.101.1,product_specific,UL Environment,
+sdf38s,4789793365.101.1,sdf38s,Rebar / Nucor Corporation / 20M,0.863,kg,2.03,m,,,,,,7800,kg/m3,2.355,kg/m,4789793365.101.1,product_specific,UL Environment,
+CAR000,4789796942.128.2,CAR000,Carpet / Patcraft / Ecoworx carpet tiles with Needlebond polyester Face fiber / 3.71 mm,4.04,m2,4.04,m²,,,,,,2.28,kg/m2,,,4789796942.128.2,product_specific,UL Environment,15
+CAR001,4789796942.139.1,CAR001,Carpet / Shaw / Residential Broadloom,30.5,m2,30.5,m2,,,,,,3.16,kg/m2,,,4789796942.139.1,product_specific,UL Environment,5
+CAR002,4789796942.140.1.1,CAR002,Carpet / Shaw / Residential Broadloom with ClearTouch Platinum,7.2,m2,7.18,m2,,,,,,2.38,kg/m2,,,4789796942.140.1.1,product_specific,UL Environment,5
+CAR003,4789796942.141.1,CAR003,Carpet / Shaw / Strataworx / Carpet tile,18.1,m2,18.1,m2,,,,,,2.71,kg/m2,,,4789796942.141.1,product_specific,UL Environment,5
+CAR004,4789796942.141.1,CAR004,Carpet / Shaw / StrataWorx Carpet tile witn Nylon-6 Face Fiber / 5.7 mm,18.1,m2,18.1,m²,,,,,,2.71,kg/m2,,,4789796942.141.1,product_specific,UL Environment,15
+RRR110,4789862118.111.1,RRR110,Asphalt Shingles / Asphalt Roofing Manufacturers Association / Fiberglass Asphalt Shingles [Industry Avg | US & CA],4.38,m²,4.38,m²,,,,,,12.39,kg/m2,,,4789862118.111.1,industry_average,UL Environment,
+1a16ad,4789868895.101.1,1a16ad,"XPS foam board / DuPont / Styrofoam ST-100 / R 5.0-inch, 25 psi",4.67,m2•RSI,4.67,m2•RSI,,,,,,,,,,4789868895.101.1,product_specific,,
+9ee6d0,4789883337.101.1,9ee6d0,Cement Mortar for Tile / Tile Council of North America / [Industry Avg | US & CA],2.18,m² of tile,2.18,m²,,,,,,,,,,4789883337.101.1,industry_average,,75
+INS009,4789973160.110.1,INS009,"Fiberglass loose fill / Johns Manville / Climate Pro, Attic Protector, JM Spider PLUS (Canada) / R 2.8-inch",0.551,m2•RSI,0.55,m2•RSI,,,,,,0.46,kg/m2,,,4789973160.110.1,product_specific,UL Environment,75
+INS006,47899773160.101.1,INS006,"Fiberglass batt / Johns Manville / Unfaced, ComfortTherm, Cavity-SHIELD, FSK-25 / R 3.4-inch",1.14,m2•RSI,1.14,m2•RSI,,,,,,,,,,47899773160.101.1,product_specific,UL Environment,75
+SSS004,4789985166.101.1,SSS004,"Steel joists / Open web / Steel Joist Institute / 12"" 12K3 joist [Industry Avg | US & CA]",1.43,kg,12.13,linear m,,,,,,7800,kg/m3,8.480979592,kg/m,4789985166.101.1,industry_average,UL Environment,75
+LVT012,4789992969.101.1,LVT012,Luxury Vinyl Tile (LVT) / Fuhua / FloraFloor / Click & Loose lay / 4.0 mm,5.63,m²,5.63,m2,,,,,,7094.7,g/m2,,,4789992969.101.1,product_specific,UL,15
+SSS001,4789995390.101.1,SSS001,"Steel studs - Load bearing / MarinoWARE / Structural stud and track / 600-S-137-54, 16 gauge",2.48,kg,6.46,"m of ""2x6"" stud",,,,,,7800,kg/m3,2.604,kg/m,4789995390.101.1,product_specific,UL,
+SSS003,4789995390.101.1,SSS003,Steel studs - Non-loadbearing / MarinoWARE / Viper Stud Viper 20 / 20EQ gauge,2.48,kg,1.56,"m of ""2x4"" stud",,,,,,7850,kg/m3,0.6293817,kg/m,4789995390.101.1,product_specific,UL,
+MWB001,4790011847.101.1,MWB001,Mineral wool batt / Owens Corning / Thermafiber SAFB (4 pcf) (Plant Avg) / R3.7/inch,2.16,m2•RSI,2.16,m2•RSI,,,,,,40,kg/m3,2.5,pcf,4790011847.101.1,product_specific,UL Environment,75
+MWB003,4790011847.101.1,MWB003,Mineral wool board / Owens Corning / Thermafiber RainBarrier HD (Plant Avg) / R 4.3-inch,3.21,m2•RSI,3.21,m2•RSI,,,,,,,,,,4790011847.101.1,product_specific,UL Environment,75
+MWB004,4790011847.101.1,MWB004,Mineral wool board / Owens Corning / Thermafiber RainBarrier ci 80 (Plant Avg) / R 4.2-inch,3.785,m2•RSI,3.79,m2•RSI,,,,,,,,,,4790011847.101.1,product_specific,UL Environment,75
+MWB005,4790011847.101.1,MWB005,Mineral wool board / Owens Corning / Thermafiber RainBarrier HC Max (Plant Avg) / R 4.2-inch,5.913,m2•RSI,5.91,m2•RSI,,,,,,,,,,4790011847.101.1,product_specific,UL Environment,75
+MWB012,4790011847.101.1,MWB012,"Mineral wool batt / Owens Corning / UltraBatt - Fire & Sound Guard Plus R-15, R-30 (plant Avg) / R 4.2-inch",1.9,m2•RSI,1.9,m2•RSI,,,,,,,,,,4790011847.101.1,product_specific,UL Environment,75
+MWB013,4790011847.101.1,MWB013,Mineral wool batt / Owens Corning / UltraBatt - Fire & Sound Guard Plus R-23 (plant Avg) / R 4.2-inch,1.86,m2•RSI,1.86,m2•RSI,,,,,,,,,,4790011847.101.1,product_specific,UL Environment,75
+MWB015,4790011847.101.1,MWB015,Mineral wool batt / Owens Corning / UltraBatt - Fire & Sound Guard Plus R-10 (plant Avg) / R 4.0-inch,1.69,m2•RSI,1.69,m2•RSI,,,,,,,,,,4790011847.101.1,product_specific,UL Environment,75
+MWB016,4790011847.101.1,MWB016,Mineral wool batt / Owens Corning / UltraBatt - Fire & Sound Guard Plus R-24 (plant Avg) / R 4.0-inch,1.61,m2•RSI,1.61,m2•RSI,,,,,,,,,,4790011847.101.1,product_specific,UL Environment,75
+RRR116,4790050198.101.1,RRR116,Asphalt Shingles / Malarkey Roofing / Legacy /,343,100m2,3.43,m2,,,,,,,,,,4790050198.101.1,product_specific,UL Environment,35
+RRR117,4790050198.102.1,RRR117,Asphalt Shingles / Malarkey Roofing / Vista /,299,100m2,2.99,m2,,,,,,,,,,4790050198.102.1,product_specific,UL Environment,30
+RRR118,4790050198.103.1,RRR118,Asphalt Shingles / Malarkey Roofing / Windsor /,453,100m2,4.53,m2,,,,,,,,,,4790050198.103.1,product_specific,UL Environment,35
+RRR115,4790050198.104.1,RRR115,Asphalt Shingles / Malarkey Roofing / Highlander NEX /,277,100m2,2.77,m2,,,,,,,,,,4790050198.104.1,product_specific,UL Environment,25
+RRR112,4790050198.105.1,RRR112,Asphalt Shingles / Malarkey Roofing /  Ecoasis NEX /,282,100m2,2.82,m2,,,,,,,,,,4790050198.105.1,product_specific,UL Environment,25
+RRR113,4790050198.105.1,RRR113,Asphalt Shingles / Malarkey Roofing /  Ecoasis Premium /,373,100m2,3.73,m2,,,,,,,,,,4790050198.105.1,product_specific,UL Environment,25
+RRR114,4790050198.106.1,RRR114,Asphalt Shingles / Malarkey Roofing / Dura-Seal /,225,100m2,2.25,m2,,,,,,,,,,4790050198.106.1,product_specific,UL Environment,25
+LVT007,4790050503.103.1,LVT007,Luxury vinyl tile (LVT)  / Shaw - Patcraft / Luxury Vinyl Tile / 2 - 5 mm,9.59,m2,9.59,m²,,,,,,0.00576,g/mm2,,,4790050503.103.1,product_specific,UL Environment,15
+VRS000,4790500569.102.1,VRS000,"Ventilated rainscreen system / Branch / BranchClad Stucco / R1.3 / 6"" / Avg. of all finishes",141,m²,141,m²,,,,,,32.6,kg/m2,,,4790500569.102.1,product_specific,UL,
+INS041,4790550934-101.1,INS041,Spray polyurethane foam - Closed Cell (HFC gas) / Carlisle CSFI / SealTite PRO Closed Cell (HFC) / R 7.0-inch,9.01,m2•RSI,9.01,m2•RSI,,,,,,32,kg/m3,,,4790550934-101.1,product_specific,UL Environment,75
+INS042,4790550934-101.1,INS042,"Spray polyurethane foam - Closed Cell (HFO gas) / Carlisle CSFI / SealTite PRO HFO, SealTite One / R 7.0-inch",2.67,m2•RSI,2.67,m2•RSI,,,,,,32,kg/m3,,,4790550934-101.1,product_specific,UL Environment,75
+INS044,4790550934-101.1,INS044,"Spray polyurethane foam - Open Cell / Carlisle CSFI / SealTite PRO Open Cell, SealTite PRO High Yield, SealTite PRO No Mix, SealTite PRO OCX / R 3.7-inch",1.12,m2•RSI,1.12,m2•RSI,,,,,,48,kg/m3,,,4790550934-101.1,product_specific,UL Environment,75
+INS046,4790550934-101.1,INS046,Spray polyurethane foam - High Density  (HFC gas) / Carlisle CSFI / PremiSEAL / R 6.5-inch,12.99,m2•RSI,12.99,m2•RSI,,,,,,48,kg/m3,,,4790550934-101.1,product_specific,UL Environment,75
+INS047,4790550934-101.1,INS047,Spray polyurethane foam - High Density  (HFO gas) / Carlisle CSFI / PremiR + EVO / R 6.5-inch,4.44,m2•RSI,4.44,m2•RSI,,,,,,48,kg/m3,,,4790550934-101.1,product_specific,UL Environment,75
+EPS000,4790678084.101.1,EPS000,"EPS foam board / Type XV / R 4.3-inch, 60 psi / EPS Industry Alliance [Industry Avg | US & CA]",7.04,m2•RSI,7.04,m2•RSI,,,,,,48.1,kg/m3,0.76,KM2/w,4790678084.101.1,industry_average,UL Environment,75
+EPS001,4790678084.101.1,EPS001,"EPS foam board / Type IX / R 4.2-inch, 25 psi / EPS Industry Alliance [Industry Avg | US & CA]",4.33,m2•RSI,4.33,m2•RSI,,,,,,28.8,kg/m3,0.74,KM2/w,4790678084.101.1,industry_average,UL Environment,75
+EPS002,4790678084.101.1,EPS002,"EPS foam board / Type II / R 4.0-inch, 15 psi / EPS Industry Alliance [Industry Avg | US & CA]",3.43,m2•RSI,3.43,m2•RSI,,,,,,21.6,kg/m3,0.7,KM2/w,4790678084.101.1,industry_average,UL Environment,75
+EPS003,4790678084.101.1,EPS003,"EPS foam board / Type I / R 3.6-inch, 10 psi / EPS Industry Alliance [Industry Avg | US & CA]",2.53,m2•RSI,2.53,m2•RSI,,,,,,14.4,kg/m3,,,4790678084.101.1,industry_average,UL Environment,75
+LIN005,4790690881.101.1,LIN005,Linoleum flooring / Forbo / Marmoleum / 2.0 mm sheet style linoleum,2.62,m²,2.62,m²,2.73,2.46,,,0.9,2.4,kg/m2,,,4790690881.101.1,product_specific,UL Environment,
+e075b4,4790690881.101.1,e075b4,Linoleum flooring / Forbo / Marmoleum / 2.5 mm sheet style linoleum,3.73,m²,3.73,m²,4.17,3.75,,,0.9,3,kg/m2,,,4790690881.101.1,product_specific,UL Environment,
+b8ldec,4937-6316,b8ldec,Rebar / ArcelorMittal Long Products Canada / 10M,1.29,kg,1.01,m,,,,,,7850,kg/m3,0.785,kg/m,4937-6316,product_specific,CSA Groups,
+kb2gox,4937-6316,kb2gox,Rebar / ArcelorMittal Long Products Canada / 15M,1.29,kg,2.02,m,,,,,,7850,kg/m3,1.57,kg/m,4937-6316,product_specific,CSA Groups,
+l29vks,4937-6316,l29vks,Rebar / ArcelorMittal Long Products Canada / 20M,1.29,kg,3.03,m,,,,,,7850,kg/m3,2.355,kg/m,4937-6316,product_specific,CSA Groups,
+www119,494,www119,"Window, double-glazed, aluminum frame / EFCO / Xtherm, 5FXT, FX45, 6615, 6621, 6715, FX32, OG32, OG45 / Fixed",94.38,m2,94.38,m2,,,,,,,,,,494,product_specific,ASTM,
+www120,494,www120,"Window, double-glazed, aluminum frame / EFCO / Xtherm, 875V, 2700, 2701, 450G, 590X, 6725, PG32, PX32, WV410, WV430 / Projected & casement",146.28,m2,146.28,m2,,,,,,,,,,494,product_specific,ASTM,
+LAM010,5915-5885,LAM010,"Cross Laminated Timber (CLT) / Nordic  / Nordic Lam / 3-1/2""",136.34,m3,12.12,"m2 at 3.5""",,,,77.61,0.9,486,kg/m3,0.09,m thickness,5915-5885,product_specific,CSA,
+LAM011,5960-4998,LAM011,"Cross Laminated Timber (CLT) / Nordic  / X-Lam / 3-1/2""",69.96,m3,6.22,"m2 at 3.5""",,,,74.53,0.9,456,kg/m3,0.09,m thickness,5960-4998,product_specific,CSA,
+EWF001,6742-7944,EWF001,Engineered Wood flooring / Wickham / Engineered Hardwood / 16 mm,10.5,m2,10.5,m2,13.49,,,,0.9,9.97,kg/m2,,,6742-7944,product_specific,CSA,
+WWF001,6742-7944,WWF001,"Hardwood flooring / Wickham / Solid Hardwood / 3/4""",3.2,m2,3.2,m2,20.95,,,,0.9,12.35,kg/m2,,,6742-7944,product_specific,CSA,
+8b5828,#7730-2734,8b5828,Window - frame only / AluQuébec / Aluminum frame / Canada,136,m²,136,m2 of window,,,,,,,,,,#7730-2734,product_specific,,
+www117,7730-2734,www117,"Window, double-glazed, aluminum frame / AluQuebec / Avg of fixed, casement, slider, hung, tilt & turn, awning",136,m2,136,m2,,,,,,,,,,7730-2734,product_specific,CSA,
+MPS003,7740-1109,MPS003,Metal panels - steel / ArcelorMittal / XCarb RRP / 24 gauge,1.36,kg,6.64,m2,,,,,,7800,kg/m3,4.88,kg/m2,7740-1109,product_specific,CSA,
+Cel001,AFT-20200701-001,Cel001,Cellulose / dense pack / Advanced Fiber Technology / AFT Carbon Smart / 56 kg/m3 / R3.8-inch,0.389,m2•RSI,0.86,m²•RSI,,3.02,,,0.9,56,kg/m3,2.13,kg/m2 at RSI1,AFT-20200701-001,product_specific,NSF,
+Cel003,AFT-20200701-001,Cel003,Cellulose / loose fill / Advanced Fiber Technology / AFT Carbon Smart / 25.2 kg/m3 / R3.8-inch,0.389,m2•RSI,0.39,m²•RSI,,1.36,,,0.9,25.214,kg/m3,0.957,kg/m2 at RSI1,AFT-20200701-001,product_specific,NSF,
+Cel002,AGG-20221209-001,Cel002,Cellulose / dense pack / Greenfiber / Sanctuary / Avg of all facilties / 56.1 kg/m3 / R3.8-inch,0.24,m²•RSI,0.78,m²•RSI,,3.01,,,0.9,56.1,kg/m3,2.171,kg/m2 at RSI1,AGG-20221209-001,product_specific,"Ecoform, LLC",75
+cel004,AGG-20221209-001,cel004,Cellulose / loose fill / Greenfiber / Sanctuary / Avg of all facilties / 17.1 kg/m3 / R3.8-inch,0.24,m²•RSI,0.24,m²•RSI,,0.92,,,0.9,17.1,kg/m3,0.662,kg/m2 at RSI1,AGG-20221209-001,product_specific,"Ecoform, LLC",75
+7d79df,"April, 2018",7d79df,Hempcrete / Cast in-situ / IsoHemp / R 2.2-inch / [EU],-96.3,m3,3.91,m2•RSI,,10.22,3.1,10.22,0.9,300,kg/m3,19.7,kg/m2 at RSI1,"April, 2018",,,
+HEMPCX,"April, 2018, Arehart et al, 2020 LCA, SEN-01_22, SEN-01_22",HEMPCX,Hempcrete / R 2.4-inch [BEAM Avg],,,6.6,m2•RSI,,10.71,,,,255,kg/m3,,,"April, 2018, Arehart et al, 2020 LCA, SEN-01_22, SEN-01_22",beam_average,,
+5731ae,"Arehart et al, 2020 LCA",5731ae,Hempcrete / Cast in-situ / Avg. mix using NHL & PHL / R 2.2-inch / USA,-4.32,m2•RSI,8.86,m2•RSI,,13.18,3.1,10.22,0.9,300,kg/m3,19.7,kg/m2 at RSI1,"Arehart et al, 2020 LCA",,,
+TPO000,ASTM-EPD425,TPO000,TPO Roofing Membrane / Carlisle / Sure-Weld / 60 mils,3.77,m²,3.77,m²,,,,,,1.62,kg/m2,,,ASTM-EPD425,product_specific,ASTM International,
+INS021,BAU-EPD-FASBA-2019-01-GABI,INS021,Straw Bale / Wheat & rye straw / FASBA (Germany) / R 2.8-inch [Industry Avg | EU],6.58,m3,0.28,m2•RSI,134,5.19,5.8,,0.9,100,kg/m3,4.3,kg/m2•RSI,BAU-EPD-FASBA-2019-01-GABI,industry_average,Bau-EPD,50
+CCF001,BAU-EPD-Perlmooser-2022-1-Ecoinvent,CCF001,Cementitious Foam / Perlmooser / Airium Spray / R3.43/inch / 70 kg/m3 [EU],31.4,m3,1.32,m²•RSI,,,,,,70,kg/m3,,,BAU-EPD-Perlmooser-2022-1-Ecoinvent,product_specific,Bau EPD GmbH,50
+95a692,"Ben-Alon et al LCA, 2019",95a692,"Earthen Floor / Cast-in-place / Clay, sand, and straw / 4"" (100 mm) [US]",3.45,m²,3.45,"m2 at 4""",3.1,2.79,,,0.9,168.2,kg/m2,1.8,kg straw/m2,"Ben-Alon et al LCA, 2019",,,
+f8cf09,"Ben-Alon et al LCA, 2019",f8cf09,"Cob wall / Site mixed / 18"" (457 mm) avg. thickness [US]",13.2,m²,13.12,m2 at 457 mm,17.41,15.67,,,0.9,1222,kg/m3,10.1,kg straw/m2,"Ben-Alon et al LCA, 2019",,,
+INS010,B-EPD 23.0183.001-01.00.01,INS010,Grass Insulation / Gramitherm 100 batt / R3.5-inch [EU],2.5,m2@RSI 2.47,1.01,m²•RSI,7.514,2.74,,3.04,0.9,40,kg/m3,,,B-EPD 23.0183.001-01.00.01,product_specific,"B-EPD Federal Public Service of Health, Food Chain Safety and Environment",60
+INS000,B-EPD n° 21-0123-002-00.00-EN,INS000,Straw board / VestaEco Straw Insulation Boards 140 / R 4-inch  [EU],5.7,m2•RSI,5.65,m2•RSI,8.53,7.68,,,0.9,140,kg/m3,,,B-EPD n° 21-0123-002-00.00-EN,product_specific,"Federal Public Service of Health, Food Chain Safety
+and Environment",60
+INT009,B-EPD n° 21-0123-002-00.00-EN,INT009,Straw board sheathing / VestaEco Straw Boards 280 / 30 mm [EU],262.9,m3,7.89,m2,397,10.72,,,0.9,280,kg/m3,,,B-EPD n° 21-0123-002-00.00-EN,product_specific,"Federal Public Service of Health, Food Chain Safety
+and Environment",60
+1c4002,BfCA Study (Tally),1c4002,Window - double-glazed / Vinyl frame / BfCA Study [US & CA],,,86,m2 of window,,,,,,,,,,BfCA Study (Tally),,,
+32a4e7,BfCA Study (Tally),32a4e7,Window - triple pane / Wood frame / BfCA Study [US & CA],,,85,m2 of window,,,,18.25,0.9,,,,,BfCA Study (Tally),,,
+5644c4,BfCA Study (Tally),5644c4,Window - double-glazed / Wood frame / BfCA Study [US & CA],,,72,m2 of window,,,,18.25,0.9,,,,,BfCA Study (Tally),,,
+595ddd,BfCA Study (Tally),595ddd,Window - triple pane / Vinyl frame / BfCA Study [US & CA],,,99,m2 of window,,,,,,,,,,BfCA Study (Tally),,,
+6f579d,BfCA Study (Tally),6f579d,"Window - double-glazed / Wood frame, aluminum cladding / BfCA Study [US & CA]",,,99,m2 of window,,,,9.05,0.9,,,,,BfCA Study (Tally),,,
+952dee,BfCA Study (Tally),952dee,"Window - triple pane / Wood frame, aluminum cladding / BfCA Study [US & CA]",,,112,m2 of window,,,,9.05,0.9,,,,,BfCA Study (Tally),,,
+a4f3bf,BfCA Study (Tally),a4f3bf,Window - double-glazed / Fiberglass frame / BfCA Study [US & CA],,,114,m2 of window,,,,,,,,,,BfCA Study (Tally),beam_average,,
+bc7038,BfCA Study (Tally),bc7038,Window - triple pane / Fiberglass frame / BfCA Study [US & CA],,,127,m2 of window,,,,,,,,,,BfCA Study (Tally),,,
+6ab68b,"Bolin & Smith, 2011, LCA Assessment of ACQ-treated lumber, Journal of Cleaner Production",6ab68b,ACQ wood treatment,174,1000 BF,0.8,m2 surface area,,,,,,,,216.7,m2 surface area/1000 BF,"Bolin & Smith, 2011, LCA Assessment of ACQ-treated lumber, Journal of Cleaner Production",,,
+INS002,CENIA 01.03.2023,INS002,Compressed straw board/ Ekopanely / Ekopanel E40-800 / 40 mm / R1.45-inch [EU],5,m2 @ 40mm,12.42,m²•RSI,9.44,77.11,85.68,,0.9,379,kg/m3,,,CENIA 01.03.2023,product_specific,None,75
+INS001,CENIA 01.03.2024,INS001,Compressed straw board / Ekopanely / Ekopanel E60-1200 / 60 mm / R1.45-inch [EU],7.1,m2 @ 60mm,11.75,m²•RSI,14.3,77.86,86.515,,0.9,379,kg/m3,,,CENIA 01.03.2024,product_specific,None,75
+WAL000,CENIA 01.03.2024,WAL000,Straw board partition wall / Ekopanely / Ekopanel E60-1200 / 60 mm  [EU],8,m2,8,m2,54,48.6,,,0.9,379,kg/m3,,,CENIA 01.03.2024,product_specific,None,75
+STRABX,"CENIA 01.03.2024, CENIA 01.03.2023, S-P-10940, B-EPD n° 21-0123-002-00.00-EN",STRABX,Straw Board / R 2.0-inch [BEAM Avg],,,9.78,m2•RSI,,49.78,,,,299,kg/m3,,,"CENIA 01.03.2024, CENIA 01.03.2023, S-P-10940, B-EPD n° 21-0123-002-00.00-EN",beam_average,,
+1ca576,CIM – 20191223 – 001,1ca576,Cellulose / loose fill / CIMA / R 3.7-inch / [Industry Avg | US & CA],0.487,m2•RSI,0.49,m2•RSI,,1.35,,,0.9,24.4,kg/m3,0.951,kg/m2 at RSI1,CIM – 20191223 – 001,industry_average,UL Environment,75
+967ad6,CIM – 20191223 – 001,967ad6,Cellulose / batt / CMS / EcoCell / R 3.6-inch,0.487,m2•RSI,0.71,m2•RSI,,2.27,,,0.9,40,kg/m3,1.6,kg/m2 at RSI1,CIM – 20191223 – 001,product_specific,,
+fc7d3a,CIM – 20191223 – 001,fc7d3a,Cellulose / dense pack / CIMA / R 3.7-inch / [Industry Avg | US & CA],0.487,m2•RSI,1.12,m2•RSI,,3.1,,,0.9,56,kg/m3,2.184,kg/m2 at RSI1,CIM – 20191223 – 001,industry_average,,
+PLY000,EP397,PLY000,"Plywood / 1/2"" / British Columbia Average",131.68,m3,1.67,m2,680.99,,8.648573,,0.9,477.33,kg/m3,,,EP397,industry_average,ASTM International,
+PLY001,EP397,PLY001,"Plywood / 3/4"" / British Columbia Average",131.68,m3,2.51,m2,680.99,,13.62,,0.9,477.33,kg/m3,,,EP397,industry_average,ASTM International,
+PLY002,EP397,PLY002,"Plywood / 5/8"" / British Columbia Average",131.68,m3,2.09,m2,680.99,,10.81,,0.9,477.33,kg/m3,,,EP397,industry_average,ASTM International,
+SPF000,EP398,SPF000,Wood / SPF / 2x4 Lumber / Surfaced Dry Softwood Lumber Produced in British Columbia,45.86,m3,4.08,m²,785.7,,69.8,,0.9,462.91,kg/m3,,,EP398,industry_average,ASTM International,
+SPF001,EP398,SPF001,Wood / SPF / 2x6 Lumber / Surfaced Dry Softwood Lumber Produced in British Columbia,45.86,m3,6.41,m²,785.7,,109.8,,0.9,462.91,kg/m3,,,EP398,industry_average,ASTM International,
+SPF002,EP398,SPF002,Wood / SPF / 2x8 Lumber / Surfaced Dry Softwood Lumber Produced in British Columbia,45.86,m3,8.45,m²,785.7,,144.7,,0.9,462.91,kg/m3,,,EP398,industry_average,ASTM International,
+2014f0,EPD-003,2014f0,Polyester-limestone composite tile / Armstrong / BioBased Tile (BBT™) / 2.0 mm,4.55,m²,4.55,m²,,,,,,7.03,kg/m2,,,EPD-003,product_specific,,
+a3d86b,EPD‐009,a3d86b,"PVC Roofing Membrane / single-ply, polyester, reinforced / 48 mils (1.219 mm) / CIFA [Industry Avg | US & CA]",5.39,m²,5.39,m²,,,,,,1.463,kg/m2,,,EPD‐009,industry_average,ASTM International,30
+e0e76c,EPD 034,e0e76c,Masonry Cement / Portland Cement Association [Industry Avg | US & CA],0.692,kg,0.69,kg,,,,,,,,,,EPD 034,industry_average,,
+1a89c6,EPD-038,1a89c6,"[Replaced] Gypsum panels - glass mat / Includes American Gypsum, CertainTeed, Continental, Georgia-Pacific, National Gypsum, Pabco, USG, CGC / 1/2""",358,92.9m2,3.85,"m2 @ 1/2""",,,,,,,,,,EPD-038,industry_average,,
+b23a5c,EPD-038,b23a5c,"[Replaced] Gypsum panels - glass mat / Includes American Gypsum, CertainTeed, Continental, Georgia-Pacific, National Gypsum, Pabco, USG, CGC / 5/8""",417,92.9m2,4.49,"m2 @ 5/8""",,,,,,,,,,EPD-038,industry_average,,
+21a5bb,EPD-054,21a5bb,"Stone Cladding, incl. mortar & ties / Arriscraft / Natural Limestone Masonry / Weighted average product profile",441,100sf (9.29m2),47.47,m²,,,,,,,,,,EPD-054,product_specific,,
+INS040,EPD 070,INS040,Spray polyurethane foam - Closed Cell (HFO gas) / R 6.6-inch / SPFA [Industry Avg | US & CA],3.47,m2•RSI,3.47,m2•RSI,,,,,,31.2,kg/m3,,,EPD 070,industry_average,ASTM,75
+INS043,EPD 070,INS043,Spray polyurethane foam - Open Cell / R 4.1-inch / SPFA [Industry Avg | US & CA],1.42,m2•RSI,1.42,m2•RSI,,,,,,9.6,kg/m3,,,EPD 070,industry_average,ASTM,75
+INS045,EPD 070,INS045,Spray polyurethane foam - High Density (HFO gas) / R 6.5-inch / SPFA [Industry Avg | US & CA],4.05,m2•RSI,4.05,m2•RSI,,,,,,52,kg/m3,,,EPD 070,industry_average,ASTM,75
+7f7bd8,EPD-073,7f7bd8,Waterproofing membrane adhesive / GCP / Bituthene /,2.4,m²,2.4,m²,,,,,,,,,,EPD-073,product_specific,,
+8ded24,EPD-087,8ded24,Spray polyurethane foam - Closed Cell (HFC gas) / R 6.6-inch / SPFA [Industry Avg | US & CA],13.16,m2•RSI,13.16,m2•RSI,,,,,,31.2,kg/m3,,,EPD-087,industry_average,,
+dc197c,EPD-087,dc197c,Spray polyurethane foam - High Density (HFC gas) / R 6.3-inch / SPFA [Industry Avg | US & CA],17.02,m2•RSI,17.02,m2•RSI,,,,,,52,kg/m3,,,EPD-087,industry_average,,
+CMU004,EPD-088,CMU004,"CMU - Light weight / Brampton Brick (Boehmers) / 8"" CarboClave Block  / 8 x 8 x 16",256,m3,27.21,"m2 at 8"" block thickness",,,,,,1750,kg/m3,186,kg/m2 of wall,EPD-088,product_specific,ASTM International,
+CMU005,EPD-088,CMU005,"CMU - Normal weight / Brampton Brick (Boehmers) / 8"" CarboClave Block  / 8 x 8 x 16",196,m3,20.81,"m2 at 8"" block thickness",,,,,,2100,kg/m3,223,kg/m2 of wall,EPD-088,product_specific,ASTM International,
+391b5b,EPD10056,391b5b,"Steel studs - Load bearing / ClarkDietrich / 600-S-137-54, 16 gauge",2.39,kg,6.22,"m of ""2x6"" stud",,,,,,7850,kg/m3,2.604,kg/m,EPD10056,product_specific,,
+1ea5e4,EPD10092,1ea5e4,"Concrete – 31-35 MPa, 35-50% Slag, GU / CRMCA [Industry Avg | CA]",307.8,m3,307.78,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+38d491,EPD10092,38d491,"Concrete – 26-30 MPa, 15-29% Fly Ash, GU / CRMCA [Industry Avg | CA]",324.5,m3,324.49,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+43fc51,EPD10092,43fc51,"Concrete – 31-35 MPa, 25-34% Slag, GU / CRMCA [Industry Avg | CA]",339.3,m3,339.33,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+4e0f8a,EPD10092,4e0f8a,"Concrete – 0-25 MPa, 0-14% FA/SL, GU / CRMCA [Industry Avg | CA]",320.4,m3,320.39,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+6ed061,EPD10092,6ed061,"Concrete – 0-25 MPa, 25-34% Slag, GU / CRMCA [Industry Avg | CA]",262.2,m3,262.24,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+7de1da,EPD10092,7de1da,"Concrete – 0-25 MPa, Canadian Benchmark Average / CRMCA [Industry Avg | CA]",304.5,m3,304.52,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+814de3,EPD10092,814de3,"Concrete – 26-30 MPa, 30-40% Fly Ash, GU / CRMCA [Industry Avg | CA]",285.8,m3,285.77,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+897eab,EPD10092,897eab,"Concrete – 26-30 MPa, Canadian Benchmark Average / CRMCA [Industry Avg | CA]",349.7,m3,349.68,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+a6839d,EPD10092,a6839d,"Concrete – 26-30 MPa, 25-34% Slag, GU / CRMCA [Industry Avg | CA]",293.7,m3,293.71,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+ad41fc,EPD10092,ad41fc,"Concrete – 31-35 MPa, 0-14% FA/SL, GU / CRMCA [Industry Avg | CA]",418.2,m3,418.2,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+b069b6,EPD10092,b069b6,"Concrete – 0-25 MPa, 35-50% Slag, GU / CRMCA [Industry Avg | CA]",239,m3,238.99,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+b1d6d5,EPD10092,b1d6d5,"Concrete – 26-30 MPa, 35-50% Slag, GU / CRMCA [Industry Avg | CA]",267.1,m3,267.08,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+be7b88,EPD10092,be7b88,"Concrete – 26-30 MPa, 0-14% FA/SL, GU / CRMCA [Industry Avg | CA]",360.3,m3,360.3,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+cfa664,EPD10092,cfa664,"Concrete – 31-35 MPa, 15-29% Fly Ash, GU / CRMCA [Industry Avg | CA]",375.8,m3,375.78,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+d873ca,EPD10092,d873ca,"Concrete – 0-25 MPa, 30-40% Fly Ash, GU / CRMCA [Industry Avg | CA]",255.3,m3,255.31,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+dac0ae,EPD10092,dac0ae,"Concrete – 31-35 MPa, 30-40% Fly Ash, GU / CRMCA [Industry Avg | CA]",329.9,m3,329.92,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+dad6dc,EPD10092,dad6dc,"Concrete – 31-35 MPa, Canadian Benchmark Average / CRMCA [Industry Avg | CA]",417.1,m3,417.05,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+e72bcd,EPD10092,e72bcd,"Concrete – 0-25 MPa, 15-29% Fly Ash, GU / CRMCA [Industry Avg | CA]",289.1,m3,289.12,m3,,,,,,2305,kg/m3,,,EPD10092,industry_average,,
+LVT004,EPD10156,LVT004,Luxury vinyl tile (LVT)  / Parterre Flooring / Dryback LVT / Tile or plank - 5 mm,10.9,m²,10.9,m²,,,,,,10.3,kg/m2,,,EPD10156,product_specific,NSF International,30
+LVT009,EPD10158,LVT009,Rigid core vinyl flooring / Parterre Flooring / Rigid Core Click / Tile or plank - 5 mm,6.52,m²,6.52,m²,,,,,,6.71,kg/m2,,,EPD10158,product_specific,NSF International,30
+GYP002,EPD10268,GYP002,"Gypsum panels - glass mat / 5/8"" / Georiga Pacific / DensGlass Sheathing / 5/8""",454,92.9m2,4.89,m²,,,,,,12.68,kg/m2,,,EPD10268,product_specific,"NSF Certification, LLC",60
+ba3064,EPD 10270,ba3064,"Drywall 5/8"" Type X / Gypsum Association [Industry Avg | US & CA]",277,92.9m2,2.98,m²,,,,,,10.67,kg/m2,,,EPD 10270,industry_average,,
+eddd4c,EPD 10270,eddd4c,"[Replaced] Drywall 5/8"" / Includes American Gypsum, CertainTeed, Continental, Georgia-Pacific, National Gypsum, Pabco, USG, CGC / 5/8""",277,92.9m2,2.98,m²,,,,,,10.67,kg/m2,,,EPD 10270,industry_average,,
+CER001,EPD10277,CER001,Ceramic tile / American Wonder Porcelain / Porcelain - recycled content / Standard and Second grade /,11.5,m²,13.68,m²,,,,,,20.105,kg/m2,,,EPD10277,product_specific,NSF,75
+1a5a48,EPD10294,1a5a48,"Concrete - 0-2500 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",178.7,m3,178.7,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+43fe24,EPD10294,43fe24,"Concrete - 2501-3000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",311.39,m3,311.39,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+809f93,EPD10294,809f93,"Concrete - 2501-3000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",244.3,m3,244.3,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+900b85,EPD10294,900b85,"Concrete - 2501-3000 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",197.1,m3,197.1,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+921b8b,EPD10294,921b8b,"Concrete - 0-2500 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",199.73,m3,199.73,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+949348,EPD10294,949348,"Concrete - 0-2500 psi, Standard mix / NRMCA [Industry Avg | US & CA]",279.56,m3,279.56,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+a7c43b,EPD10294,a7c43b,"Concrete - 2501-3000 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",268.4,m3,268.4,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+b7e1fe,EPD10294,b7e1fe,"Concrete - 0-2500 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",241.6,m3,241.6,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+c50635,EPD10294,c50635,"Concrete - 2501-3000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",220.82,m3,220.82,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+d6132a,EPD10294,d6132a,"Concrete - 0-2500 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",220.4,m3,220.4,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+s33333,EPD10294,s33333,"Concrete - 3001-4000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",383.6,m3,383.6,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+s33334,EPD10294,s33334,"Concrete - 3001-4000 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",329.2,m3,329.2,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+s33335,EPD10294,s33335,"Concrete - 3001-4000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",298.6,m3,298.6,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+s33336,EPD10294,s33336,"Concrete - 3001-4000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",268.9,m3,268.9,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+s33337,EPD10294,s33337,"Concrete - 3001-4000 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",238.7,m3,238.7,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+s33338,EPD10294,s33338,"Concrete - 4001-5000 psi, Standard mix / NRMCA [Industry Avg | US & CA]",468.9,m3,468.9,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+s33339,EPD10294,s33339,"Concrete - 4001-5000 psi, 20-29% Fly Ash / NRMCA [Industry Avg | US & CA]",401,m3,401,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+s33340,EPD10294,s33340,"Concrete - 4001-5000 psi, 30-39% FA/SL / NRMCA [Industry Avg | US & CA]",363,m3,363,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+s33341,EPD10294,s33341,"Concrete - 4001-5000 psi, 40-49% FA/SL mix / NRMCA [Industry Avg | US & CA]",325.8,m3,325.8,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+s33342,EPD10294,s33342,"Concrete - 4001-5000 psi, >50% SCM mix / NRMCA [Industry Avg | US & CA]",288.1,m3,288.1,m3,,,,,,2305,kg/m3,,,EPD10294,industry_average,,
+1742d8,EPD10310,1742d8,"Drywall 1/2"" Type C / Georgia-Pacific / ToughRock Fireguard C /",285,1000 ft2,3.07,m²,,,,,,8.128,kg/m2,,,EPD10310,product_specific,,
+INT004,EPD10312,INT004,"Drywall 5/8"" / Georgia-Pacific / ToughRock Fireguard C/",296,1000 ft2,3.19,m²,,,,,,,,,,EPD10312,product_specific,"NSF Certification, LLC",60
+CER002,EPD10355,CER002,Ceramic tile / Fireclay Tile / Ceramic / Standard and Second grade /,45.9,m²,48.08,m²,,,,,,17.58,kg/m2,,,EPD10355,product_specific,NSF,75
+GYP001,EPD10358,GYP001,"Gypsum panels - glass mat / 1/2"" / Georiga Pacific / DensGlass Sheathing / 1/2""",400,92.9m2,4.31,m²,,,,,,9.96,kg/m2,,,EPD10358,product_specific,"NSF Certification, LLC",60
+INT003,EPD10360,INT003,"Drywall 1/2""/ Georgia-Pacific / ToughRock Mold-Guard /",237,92.9m2,2.55,m²,,,,,,774,kg/92.9m2,8.33,kg/m2,EPD10360,product_specific,NSF,
+LIN006,EPD10362,LIN006,Linoleum flooring / Mannington / Legato Flooring / 2.2 liquid applied,2.65,m²,2.65,m²,,3.92,1.188,4.36,0.9,0.9,kg/dm3,1.98,kg/m2,EPD10362,product_specific,NSF,30
+RRR111,EPD10396,RRR111,Asphalt Shingles / GAF / Timberline Cool Series /,4.34,m²,4.34,m²,,,,,,10.12,kg/m2,,,EPD10396,product_specific,NSF,
+2b19ae,EPD10397,2b19ae,Asphalt Shingles / GAF / Timberline / Timberline,3.88,m²,3.88,m²,,,,,,9.83,kg/m2,,,EPD10397,product_specific,,
+84c2b6,EPD10447,84c2b6,"Brick, Clay, Generic Modular / Bricks by Volume (no mortar) / Brick Industry Association / [Industry Avg | US-Canada]",503,m3 of brick,503,m³,,,,,,2120,kg/m3,,,EPD10447,industry_average,NSF,
+e73378,EPD10447,e73378,"Brick, Clay, Generic Modular / 3-5/8"" x 2-3/4"" x 7-5/8"" incl. 3/8"" mortar / Brick Industry Association / [Industry Avg | US-Canada]",503,m3 of brick,47.25,m²,,,,,,269,kgCO2/m3 mortar,,"83% brick, 17% mortar",EPD10447,industry_average,NSF,
+d0rm3c,EPD10465,d0rm3c,Polyisocyanurate / Roof Boards / GRF Facer / R 5.6/inch / PIMA [Industry Avg | US & CA],2.1086,m2•RSI,2.11,m2•RSI,,,,,,37.64,kg/m3,,,EPD10465,industry_average,,
+f2l0sm,EPD10465,f2l0sm,Polyisocyanurate / Roof Boards / CGF Facer / R 5.6/inch / PIMA [Industry Avg | US & CA],2.9486,m2•RSI,2.95,m2•RSI,,,,,,37.64,kg/m3,,,EPD10465,industry_average,,
+n9cx2a,EPD10466,n9cx2a,Polyisocyanurate / Wall Boards / R 6.5/inch / PIMA [Industry Avg | US & CA],4.0959,m2•RSI,4.1,m2•RSI,,,,,,49.09,kg/m3,,,EPD10466,industry_average,NSF,
+l2j0sa,EPD10467,l2j0sa,Polyisocyanurate / Roof Boards / High density / R 5.0/inch / PIMA / [Industry Avg | US & CA],10.678,m2•RSI,10.68,m2•RSI,,,,,,37.64,kg/m3,,,EPD10467,industry_average,,
+bbb008,EPD10568,bbb008,"Ext. Wall & Roof Barrier, liquid applied / Carlisle / Barrithane VP / 11.1 Perms, 40 mils",5.2,m²,5.18,m²,,,,,,1.498,m2/kg,,,EPD10568,product_specific,NSF,
+bbb024,EPD10568,bbb024,"Ext. Waterproofing Barrier, liquid applied / Carlisle / MiraSEAL & MiraTITE",8.4,m²,8.37,m²,,,,,,0.484,m2/kg,,,EPD10568,product_specific,NSF,
+bbb023,EPD10572,bbb023,"Ext. Waterproofing Barrier, adhesive / Carlisle / MiraPLY V",8.6,m²,8.55,m²,,,,,,0.471,m2/kg,,,EPD10572,product_specific,NSF,
+LVT006,EPD10668,LVT006,Luxury vinyl tile (LVT) / Mannington / All tile & plank models / 4.0 mm,10.1,m2,10.1,m2,,,,,,5.45,kg/m2,,,EPD10668,product_specific,,
+LVT011,EPD10668,LVT011,Luxury vinyl tile (LVT) / Mannington / Luxury Vinyl Tile / 2.5 mm Tile and Plank,6.51,m²,6.51,m²,,,,,,2.79,kg/m2,,,EPD10668,product_specific,NSF,30
+bbb016,EPD10786,bbb016,"Ext. Wall barrier, liquid applied / GCP / Perm-a-Barrier NPL 10 (fire-resistant) / Non-permeable, 1 mm",4.8,m²,4.8,m²,,,,,,1.4,g/cm3,,,EPD10786,product_specific,NSF,
+bbb017,EPD10786,bbb017,"Ext. Wall barrier, liquid applied / GCP / Perm-a-Barrier VPL / 20 Perms, 0.64 mm",4.01,m²,4.01,m²,,,,,,1.4,g/cm3,,,EPD10786,product_specific,NSF,
+bbb018,EPD10786,bbb018,"Ext. Wall barrier, liquid applied / GCP / Perm-a-Barrier VPL 50RS UV stable / 13 Perms, 0.51 mm",1.53,m²,1.53,m²,,,,,,1.4,g/cm3,,,EPD10786,product_specific,NSF,
+bbb019,EPD10786,bbb019,"Ext. Wall barrier, sheet / GCP / Perm-a-Barrier NPS / Non-permeable, 0.46 mm",1.12,m²,1.12,m²,,,,,,1.4,g/cm3,,,EPD10786,product_specific,NSF,
+bbb011,EPD10787,bbb011,"Ext. Wall barrier, adhesive / GCP / Perm-a-Barrier / Non-permeable, 1 mm",1.94,m²,1.94,m²,,,,,,,,,,EPD10787,product_specific,NSF,
+INT000,EPD10792,INT000,"Drywall 1/2"" / National Gypsum / Gold Bond XP Gypsum Board / 1/2""",428,92.9m2,4.61,"m2 @ 1/2""",0.549,0.49,0,0,0.9,859,kg/92.9m2,9.25,kg/m2,EPD10792,product_specific,NSF,75
+INT005,EPD10792,INT005,"Drywall 5/8"" / National Gypsum / Gold Bond XP Fire-Shield Gypsum Board / 5/8"" type X",481,92.9m2,5.18,"m2 @ 5/8""",0.527,0.47,,,0.9,1195,kg/92.9m2,12.86,kg/m2,EPD10792,product_specific,NSF,75
+EPS004,EPD10841,EPS004,"EPS foam board with graphite / BASF  / Neopor F 5200 Plus / R 4.7-inch, Type IX, 25 psi",2.944,m2•RSI,2.94,m2•RSI,,,,,,21.62,kg/m3,,,EPD10841,product_specific,NSF,
+EPS005,EPD10841,EPS005,"EPS foam board with graphite / BASF / Neopor F 5200 Plus / R 4.7-inch, Type II, 15 psi (Type 2, 110 kPa)",2.275,m2•RSI,2.28,m2•RSI,,,,,,14.42,kg/m3,,,EPD10841,product_specific,NSF,
+EPS006,EPD10842,EPS006,"EPS foam board with graphite / BASF / Neopor F 5200 & F 5300 Plus BMB / R 4.7-inch, Type IX, 25 psi (Type 9, 175 kPa)",3.084,m2•RSI,3.08,m2•RSI,,,,,,28.8,kg/m3,,,EPD10842,product_specific,NSF Certification LLC,75
+EPS007,EPD10842,EPS007,"EPS foam board with graphite / BASF / Neopor F 5200 & F 5300 Plus BMB  / R 4.7-inch, Type II, 15 psi (Type 2, 110 kPa)",2.313,m2•RSI,2.31,m2•RSI,,,,,,21.6,kg/m3,,,EPD10842,product_specific,NSF Certification LLC,75
+4s1lp2,EPD-117,4s1lp2,Structural Precast Concrete / 10'' Hollow core slab / CPCI - PCI / North American Average,256.3,1000 kg,88.8,m2 at 10'',,,,,,71,lb/ft2,,,EPD-117,industry_average,ASTM International,
+134c8d,EPD124,134c8d,"Cross Laminated Timber (CLT) / Structurlam / CrossLam / 3-1/2""",124.02,m3,11.16,"m2 at 3-1/2"" thickness",,,,79.04,0.9,481,kg/m3,0.09,m thickness,EPD124,product_specific,,
+da1134,EPD125,da1134,"Glued Laminated Timber (Glulam) / Structurlam / Glulam Plus  3-1/2"" Panel / BC",115.32,m3,10.28,"m2 at 3-1/2"" thickness",,,,88.68,0.9,544,kg/m3,,,EPD125,product_specific,,
+2d7548,EPD-131,2d7548,"Brick, Clay / Interstate / Avg Face Brick / 3-5/8"" x 2-3/4"" x 7-5/8"" (92 x 70 x 194 mm) incl. 3/8"" mortar",566.85,m3,47.49,m²,,,,,,269,kgCO2/m3 mortar,,"83% brick, 17% mortar",EPD-131,product_specific,,
+c9a7f3,EPD-131,c9a7f3,"Brick, Clay / Interstate / Avg Thin Face Brick / 3-9/16"" x 5/8"" x 11-5/8"" (90 x 16 mm x 295) incl. 3/8"" mortar and ties",755.85,m3,13.77,m²,,,,,,269,kgCO2/m3 mortar,,"87% brick, 13% mortar, plus 100% surface mortar @ 10mm",EPD-131,product_specific,,
+cfd454,EPD-132,cfd454,"Cement board / 1/2"" (13 mm) / Durock with EdgeGuard / USG (Baltimore, MD plant)",912.19,92.9m2,9.82,m²,,,,,,921,kg/m3,,,EPD-132,product_specific,,
+f034jf,EPD-132,f034jf,"Cement board / 1/4"" (6 mm) / Durock with EdgeGuard / USG (Baltimore, MD plant)",636.49,92.9m2,6.85,m²,,,,,,,kg/m3,,,EPD-132,product_specific,,
+m210vf,EPD-132,m210vf,"Cement board / 5/8"" (16 mm) / Durock with EdgeGuard / USG (Baltimore, MD plant)",1112.3,92.9m2,11.97,m²,,,,,,927,kg/m3,,,EPD-132,product_specific,,
+d00294,EPD 142,d00294,Gypsum concrete floor underlayment / USG / Levelrock 2500 Green / 30 mm,165,1000 kg,9.43,m2 at 30 mm,,,,,,1906,kg/m3,,,EPD 142,product_specific,,
+bc703d,EPD-156,bc703d,"Drywall 1/2"" / Pabco / QuietRock / QuietRock 1/2""",451,92.9m2,4.85,m²,,,,,,10.3,kg/m2,,,EPD-156,product_specific,,
+c930d2,EPD157,c930d2,"Dowel Laminated Timber / StructureCraft / DowelLam / 3-1/2""",121.4,m3,10.79,"m2 at 3-1/2"" thickness",924.01,,,,0.9,449,kg/m3,0.09,m thickness,EPD157,product_specific,ASTM International,
+LAM012,EPD160,LAM012,Mass ply panels (MPP) / Freres Lumber,259.16,m3,259.16,m3,2105.83,,2105.83,979.87,0.9,546,kg/m3,,,EPD160,product_specific,ASTM International,
+LAM002,EPD 168,LAM002,"Glued Laminated Timber (Glulam) / Vaagen / Colville, WA",147.99,m3,147.99,m3,1014.99,,,,0.9,442.1,kg/m3,,,EPD 168,product_specific,ASTM,
+LAM009,EPD 168,LAM009,"Cross Laminated Timber (CLT) / Vaagen / Crosslam CLT / 3-1/2""",136.11,m3,12.1,"m2 at 3.5""",850.23,,,,0.9,442.5,kg/m3,,,EPD 168,product_specific,ASTM,
+LAM000,EPD 169,LAM000,Laminated Veneer Lumber (LVL) / Boise Cascade / Versa-Lam,239.47,m³,239.47,m³,-777.59,,777.59,,0.9,483.4,kg/m3,,,EPD 169,product_specific,ASTM International,75
+LAM013,EPD 169,LAM013,Veneer Laminated Timber (VLT) / Boise Cascade /  VersaWorks,239.47,m³,239.47,m³,-777.59,,777.59,,0.9,483.4,kg/m3,,,EPD 169,product_specific,ASTM International,75
+2480d6,EPD 1725-6769,2480d6,"Wood floor truss / Common (Warren, 45 deg) web pattern / Top chord bearing, variable depth / QWEB [Industry Avg | CA]",181.6,m3,2.06,linear m of truss,,,2.24815125,8.25,0.9,417,kg/m3,0.01135,m3/linear m,EPD 1725-6769,industry_average,,
+s93mwu,EPD 194,s93mwu,Masonry Cement / Portland Cement Association [Industry Avg | US & CA],589,ton (metric),0.59,kg,,,,,,3000,kg/m3 masonry cement,,,EPD 194,industry_average,,
+p3fe4l,EPD 195,p3fe4l,"Portland Cement (Types I,II,III,IV,V) / Portland Cement Association [Industry Avg | US & CA]",922,ton (metric),0.92,kg,,,,,,3150,kg/m3,,,EPD 195,industry_average,,
+2fe063,EPD-197,2fe063,Hemp fiber batt / NaturFibre / Hemp Wool / R 3.7-inch,-0.8019,m2 RSI,1.74,m2 RSI,1.9,1.71,,,0.9,35,kg/m3,1.36,kg/m2 at 0.039 m,EPD-197,product_specific,,
+HEMP0X,"EPD-197, S-P-01961, S-P-02290",HEMP0X,Hemp Fiber Batt / R 3.6-inch [BEAM Avg],,,1.16,m2•RSI,,1.63,,,,35,kg/m3,,,"EPD-197, S-P-01961, S-P-02290",beam_average,,
+g93fwm,EPD-2022-7601,g93fwm,"Straw Insulated Panels with wood framing (SIP) / EcoCocon / Prefabricated panel, 40 cm / R35 [EU]",14.3,m²,14.3,m²,94.41666667,84.98,25.75,,0.9,110,kg/m2,44,kg/m2 at 40cm,EPD-2022-7601,product_specific,N.A.,75
+155f0d,EPD 206,155f0d,"Gypsum panels - glass mat / 1/2"" / Gypsum Association [Industry Avg | N.America]",437.4,92.9m2,4.71,"m2 @ 1/2""",,,,,,,,,,EPD 206,industry_average,,
+bf151b,EPD 206,bf151b,"Gypsum panels - glass mat / 5/8"" Type X / Gypsum Association [Industry Avg | N.America]",503.9,92.9m2,5.42,"m2 @ 5/8""",,,,,,,,,,EPD 206,industry_average,,
+LVT008,EPD 207,LVT008,"Luxury vinyl tile (LVT) / Armstrong / Biome, Coalesce, Duo, Exchange, Parallel USA, Terra & Theorem / 2.5 mm",6.88,m2,6.88,m2,,,,,,4363,g/m2,,,EPD 207,product_specific,ASTM International,30
+INT002,EPD211,INT002,"Drywall 1/2"" / USG / Sheetrock Ultralight Panels",161,1000 ft2,1.73,m²,,,,,,6.5,kg/m2,,,EPD211,product_specific,ASTM International,75
+INT001,EPD215,INT001,"Drywall 1/2"" / USG / Sheetrock Brand UltraLight Sag-Resistant Ceilling Board",157,1000 ft2,1.69,m²,,,,,,6.7,kg/m2,,,EPD215,product_specific,ASTM International,75
+INT006,EPD 216,INT006,"Drywall 5/8"" / USG / Sheetrock Brand EcoSmart Firecode X / 5/8""",219,1000 ft2,2.36,m²,,,,,,8.8,kg/m2,,,EPD 216,product_specific,ASTM International,75
+EWF003,EPD-234,EWF003,"Engineered Wood Flooring / CRAFT Artisan Wood Floors / Engineered / 5/8""",15.4,m²,15.4,m²,,,,14.27,0.9,8.44,"kg/m2 at 5/8""",,,EPD-234,product_specific,ASTM International,
+LAM004,EPD246,LAM004,"Glued Laminated Timber (Glulam) / Western Archrib / Boissevain, Manitoba",169.48,m³,169.4,m³,784.53,,,,0.9,,,,,EPD246,,ASTM International,
+LAM005,EPD247,LAM005,"Glued Laminated Timber (Glulam) / Western Archrib / Edmonton, Alberta",369.8,m³,369.8,m³,784.53,,,,0.9,,,,,EPD247,,ASTM International,
+POLY10,EPD 253,POLY10,"Polyisocyanurate / Wall Boards / Hunter / Xci / R 6.3-inch, 20 psi",4.25,m2•RSI,4.25,m2•RSI,,,,,,33.73,kg/m3,,,EPD 253,product_specific,ASTM International,75
+POLY00,EPD254,POLY00,"Polyisocyanurate / Roof Boards / High density / Carlisle / Type II, R 5.0-inch, 80 psi",10.95,m2•RSI,10.95,m²•RSI,,,,,,,,,,EPD254,product_specific,ASTM International,40
+POLY03,EPD255,POLY03,"Polyisocyanurate / Roof Boards / CGF facer / Carlisle / Type II, R 5.6-inch, 16 psi",3.02,m2•RSI,3.02,m²•RSI,,,,,,,,,,EPD255,product_specific,ASTM International,40
+POLY06,EPD 255,POLY06,"Polyisocyanurate / Roof Boards / GRF facer / Carlisle / Type II, R 5.6-inch, 16 psi",2.18,m2•RSI,2.18,m2•RSI,,,,,,28.92,kg/m3,,,EPD 255,product_specific,ASTM International,40
+s76tf2,EPD 266,s76tf2,"Window - double-glazed / Inline Fiberglass / Series 300, 325, 325, 400 / Fiberglass frame / CAN",75.7,m²,75.7,m2 of window,,,,,,,,31.02564103,kg/m2 window,EPD 266,product_specific,ASTM International,
+POLY02,EPD 267,POLY02,"Polyisocyanurate / Roof Boards / High density / Hunter / Type II R 5.0-inch, 80 psi",10.95,m2•RSI,10.95,m2•RSI,,,,,,28.92,kg/m3,,,EPD 267,product_specific,ASTM International,40
+POLY01,EPD 268,POLY01,"Polyisocyanurate / Roof Boards / High density / Versico / Type II, R 5.0-inch, 80 psi",10.95,m2•RSI,10.95,m2•RSI,,,,,,28.92,kg/m3,,,EPD 268,product_specific,ASTM International,40
+POLY04,EPD 270,POLY04,"Polyisocyanurate / Roof Boards / CGF facer / Versico / Type II, R 5.6-inch, 16 psi",3.02,m2•RSI,3.02,m2•RSI,,,,,,28.92,kg/m3,,,EPD 270,product_specific,ASTM International,40
+POLY08,EPD 270,POLY08,"Polyisocyanurate / Roof Boards / GRF facer / Versico / Type II, R 5.6-inch, 16 psi",2.176,m2•RSI,2.18,m2•RSI,,,,,,28.92,kg/m3,,,EPD 270,product_specific,ASTM International,40
+POLY05,EPD 271,POLY05,"Polyisocyanurate / Roof Boards / CGF facer / Hunter / H-Shield CG / Type II R 5.6-inch, 16 psi",3.02,m2•RSI,3.02,m2•RSI,,,,,,28.92,kg/m3,,,EPD 271,product_specific,ASTM International,40
+POLY07,EPD 271,POLY07,"Polyisocyanurate / Roof Boards / GRF facer / Hunter / H-Shield / Type II, R 5.6-inch, 16 psi",2.18,m2•RSI,2.18,m2•RSI,,,,,,28.92,kg/m3,,,EPD 271,product_specific,ASTM International,40
+POLY09,EPD273,POLY09,"Polyisocyanurate / Wall Boards / Carlisle / R2+ Silver / R6.3-inch, 20 psi",4.25,m2•RSI,4.25,m²•RSI,,,,,,,,,,EPD273,product_specific,ASTM International,75
+3kglse,EPD-283,3kglse,XPS foam board / SOPREMA / SOPRA-XPS (entire product line) / R 5.0-inch,1.92588,m2•RSI,1.93,m2•RSI,,,,,,32.8,kg/m3,1.102,kg/m2 at RSI1,EPD-283,product_specific,ASTM International,
+LAM008,EPD295,LAM008,"Cross Laminated Timber (CLT) / Kalesnikoff / 3-1/2""",124.5,m3,11.07,"m2 at 3.5""",1045.63,,,,0.9,446,kg/m3,,,EPD295,product_specific,ASTM International,75
+LAM003,EPD296,LAM003,Glued Laminated Timber (Glulam) / Kalesnikoff Lumber Co. / BC,124.5,m³,124.5,m³,817.67,,,,0.9,481.68,kg/m3,,,EPD296,product_specific,ASTM International,75
+VIN001,EPD 325,VIN001,"Vinyl Siding / Vinyl Siding Institute / 0.040"" Double 4.5"" [Industry Avg | US & CA]",4.71,m2,4.71,m²,,,,,,1430,kg/m3,,,EPD 325,industry_average,ASTM,
+VIN002,EPD 326,VIN002,"Insulated Vinyl Siding / Vinyl Siding Institute / 0.040"" Double 4.5"" [Industry Avg | US & CA] / R-0.5",6.1,m2,6.05,m2,,,,,,2.53,kg/m2,,,EPD 326,industry_average,ASTM,50
+VIN000,EPD 327,VIN000,"Polypropylene siding / Vinyl Siding Institute  / 0.085"" Single 7"" wood shake appearance [Industry Avg | US & CA]",9.81,m2,9.81,m²,,,,,,1025,kg/m3,9.29,m2/100ft2,EPD 327,industry_average,,50
+CMU000,EPD-338,CMU000,"CMU - Light weight / 8"" Light weight blocks / 15 MPa, 390 x 190 x 190 mm / CCMPA East Region [Industry Avg | CA]",177,m3,19.09,"m2 at 8"" block thickness",,,,,,1722.56,kg/m3,186,kg/m2 of wall,EPD-338,industry_average,ASTM,
+CMU001,EPD-338,CMU001,"CMU - Light weight / 8"" Light weight blocks / 15 MPa, 390 x 190 x 190 mm / CCMPA West Region [Industry Avg | CA]",214,m3,23.14,"m2 at 8"" block thickness",,,,,,1722.56,kg/m3,186,kg/m2 of wall,EPD-338,industry_average,ASTM,
+CMU002,EPD-338,CMU002,"CMU - Normal weight / 8"" Normal weight blocks / 15 MPa, 390 x 190 x 190 mm / CCMPA East Region [Industry Avg | CA]",205,m3,20.95,"m2 at 8"" block thickness",,,,,,2186.12,kg/m3,223,kg/m2 of wall,EPD-338,industry_average,ASTM,
+CMU003,EPD-338,CMU003,"CMU - Normal weight / 8"" Normal weight blocks / 15 MPa, 390 x 190 x 190 mm / CCMPA West Region [Industry Avg | CA]",252,m3,25.67,"m2 at 8"" block thickness",,,,,,2186.12,kg/m3,223,kg/m2 of wall,EPD-338,industry_average,ASTM,
+91617a,EPD 3409-8229,91617a,"Wood roof truss / Gable Roof, Double Howe, 2x6 Chords, 2x4 Webs, 4:12 Pitch / QWEB [Industry Avg | CA]",178,m3,2.53,linear m of truss,,,,10.32,0.9,417,kg/m3,0.0142,m3/linear m,EPD 3409-8229,,,
+A12363,EPD 346,A12363,"Concrete – 25 MPa, 20% FA, GUL / Concrete Alberta [Industry Avg | CA]",255.8,m3,255.8,m3,,,,,,2305,kg/m3,,,EPD 346,industry_average,ASTM,
+A12364,EPD 346,A12364,"Concrete – 30 MPa, 20% FA, GUL / Concrete Alberta [Industry Avg | CA]",292,m3,291.97,m3,,,,,,2305,kg/m3,,,EPD 346,industry_average,ASTM,
+A12365,EPD 346,A12365,"Concrete – 35 MPa, 20% FA, GUL / Concrete Alberta [Industry Avg | CA]",323.72,m3,323.72,m3,,,,,,2305,kg/m3,,,EPD 346,industry_average,ASTM,
+aaacc100,EPD 346,aaacc100,"Concrete – 35 MPa, 10% FA, GU / Concrete Alberta [Industry Avg | CA]",397.06,m3,397.06,m3,,,,,,2305,kg/m3,,,EPD 346,industry_average,ASTM,
+aaacc101,EPD 346,aaacc101,"Concrete – 35 MPa, 20% FA, GU / Concrete Alberta [Industry Avg | CA]",358.54,m3,358.54,m3,,,,,,2305,kg/m3,,,EPD 346,industry_average,ASTM,
+aaacc93,EPD 346,aaacc93,"Concrete – 25 MPa, GU / Concrete Alberta [Industry Avg | CA]",341.8,m3,341.8,m3,,,,,,2305,kg/m3,,,EPD 346,industry_average,ASTM,
+aaacc94,EPD 346,aaacc94,"Concrete – 25 MPa, 10% FA, GU / Concrete Alberta [Industry Avg | CA]",312.37,m3,312.37,m3,,,,,,2305,kg/m3,,,EPD 346,industry_average,ASTM,
+aaacc95,EPD 346,aaacc95,"Concrete – 25 MPa, 20% FA, GU / Concrete Alberta [Industry Avg | CA]",282.5,m3,282.5,m3,,,,,,2305,kg/m3,,,EPD 346,industry_average,ASTM,
+aaacc96,EPD 346,aaacc96,"Concrete – 30 MPa, GU / Concrete Alberta [Industry Avg | CA]",384.98,m3,384.98,m3,,,,,,2305,kg/m3,,,EPD 346,industry_average,ASTM,
+aaacc97,EPD 346,aaacc97,"Concrete – 30 MPa, 10% FA, GU / Concrete Alberta [Industry Avg | CA]",351.67,m3,351.67,m3,,,,,,2305,kg/m3,,,EPD 346,industry_average,ASTM,
+aaacc98,EPD 346,aaacc98,"Concrete – 30 MPa, 20% FA, GU / Concrete Alberta [Industry Avg | CA]",317.9,m3,317.9,m3,,,,,,2305,kg/m3,,,EPD 346,industry_average,ASTM,
+aaacc99,EPD 346,aaacc99,"Concrete – 35 MPa, GU / Concrete Alberta [Industry Avg | CA]",435.13,m3,435.13,m3,,,,,,2305,kg/m3,,,EPD 346,industry_average,ASTM,
+A12361,EPD 347,A12361,"Concrete – 25 MPa, 40% FA, GUL / Atlantic Concrete Association [Industry Avg | CA]",252.18,m3,252.18,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+A12362,EPD 347,A12362,"Concrete – 30 MPa, 40% FA, GUL / Atlantic Concrete Association [Industry Avg | CA]",270.08,m3,270.08,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+A12368,EPD 347,A12368,"Concrete – 35 MPa, 40% FA, GUL / Atlantic Concrete Association [Industry Avg | CA]",300.26,m3,300.26,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc78,EPD 347,aaacc78,"Concrete – 25 MPa, GU / Atlantic Concrete Association [Industry Avg | CA]",387.2,m3,387.2,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc79,EPD 347,aaacc79,"Concrete – 25 MPa, 10% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",357.51,m3,357.51,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc80,EPD 347,aaacc80,"Concrete – 25 MPa, 20% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",327.82,m3,327.82,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc81,EPD 347,aaacc81,"Concrete – 25 MPa, 30% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",298.12,m3,298.12,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc82,EPD 347,aaacc82,"Concrete – 25 MPa, 40% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",268.43,m3,268.43,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc83,EPD 347,aaacc83,"Concrete – 30 MPa, GU / Atlantic Concrete Association [Industry Avg | CA]",419.64,m3,419.64,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc84,EPD 347,aaacc84,"Concrete – 30 MPa, 10% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",386.75,m3,386.75,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc85,EPD 347,aaacc85,"Concrete – 30 MPa, 20% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",353.86,m3,353.86,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc86,EPD 347,aaacc86,"Concrete – 30 MPa, 30% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",320.97,m3,320.97,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc87,EPD 347,aaacc87,"Concrete – 30 MPa, 40% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",288.08,m3,288.08,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc88,EPD 347,aaacc88,"Concrete – 35 MPa, GU / Atlantic Concrete Association [Industry Avg | CA]",487.53,m3,487.53,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc89,EPD 347,aaacc89,"Concrete – 35 MPa, 10% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",448.25,m3,448.25,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc90,EPD 347,aaacc90,"Concrete – 35 MPa, 20% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",408.96,m3,408.96,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc91,EPD 347,aaacc91,"Concrete – 35 MPa, 30% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",369.67,m3,369.67,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+aaacc92,EPD 347,aaacc92,"Concrete – 35 MPa, 40% FA, GU / Atlantic Concrete Association [Industry Avg | CA]",330.39,m3,330.39,m3,,,,,,2305,kg/m3,,,EPD 347,industry_average,ASTM,
+A12359,EPD 348,A12359,"Concrete – 25 MPa, 40% SCM, GUL / Concrete BC [Industry Avg | CA]",174.8,m3,174.85,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+A12360,EPD 348,A12360,"Concrete – 30 MPa, 40% SCM, GUL / Concrete BC [Industry Avg | CA]",204.4,m3,204.41,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+A12366,EPD 348,A12366,"Concrete – 35 MPa, 40% SCM, GUL / Concrete BC [Industry Avg | CA]",232.935,m3,232.94,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+aaacc66,EPD 348,aaacc66,"Concrete – 25 MPa, GU / Concrete BC [Industry Avg | CA]",263.94,m3,263.94,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+aaacc67,EPD 348,aaacc67,"Concrete – 25 MPa, 15% SCM, GU / Concrete BC [Industry Avg | CA]",234.65,m3,234.65,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+aaacc68,EPD 348,aaacc68,"Concrete – 25 MPa, 25% SCM, GU / Concrete BC [Industry Avg | CA]",215.66,m3,215.66,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+aaacc69,EPD 348,aaacc69,"Concrete – 25 MPa, 40% SCM, GU / Concrete BC [Industry Avg | CA]",186.29,m3,186.29,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+aaacc70,EPD 348,aaacc70,"Concrete – 30 MPa, GU / Concrete BC [Industry Avg | CA]",310.69,m3,310.69,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+aaacc71,EPD 348,aaacc71,"Concrete – 30 MPa, 15% SCM, GU / Concrete BC [Industry Avg | CA]",275.96,m3,275.96,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+aaacc72,EPD 348,aaacc72,"Concrete – 30 MPa, 25% SCM, GU / Concrete BC [Industry Avg | CA]",252.8,m3,252.8,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+aaacc73,EPD 348,aaacc73,"Concrete – 30 MPa, 40% SCM, GU / Concrete BC [Industry Avg | CA]",218.06,m3,218.06,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+aaacc74,EPD 348,aaacc74,"Concrete – 35 MPa, GU / Concrete BC [Industry Avg | CA]",355.26,m3,355.26,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+aaacc75,EPD 348,aaacc75,"Concrete – 35 MPa, 15% SCM, GU / Concrete BC [Industry Avg | CA]",315.41,m3,315.41,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+aaacc76,EPD 348,aaacc76,"Concrete – 35 MPa, 25% SCM, GU / Concrete BC [Industry Avg | CA]",288.94,m3,288.94,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+aaacc77,EPD 348,aaacc77,"Concrete – 35 MPa, 40% SCM, GU / Concrete BC [Industry Avg | CA]",248.67,m3,248.67,m3,,,,,,2305,kg/m3,,,EPD 348,industry_average,ASTM,
+A12355,EPD 349,A12355,"Concrete – 25 MPa, 40% FA, GUL / Concrete Manitoba [Industry Avg | CA]",161.6,m3,161.6,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+A12356,EPD 349,A12356,"Concrete – 30 MPa, 40% FA, GUL / Concrete Manitoba [Industry Avg | CA]",176.915,m3,176.92,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+A12358,EPD 349,A12358,"Concrete – 35 MPa, 40% FA, GUL / Concrete Manitoba [Industry Avg | CA]",199.9,m3,199.91,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc51,EPD 349,aaacc51,"Concrete – 25 MPa, GU / Concrete Manitoba [Industry Avg | CA]",270.73,m3,270.73,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc52,EPD 349,aaacc52,"Concrete – 25 MPa, 10% FA, GU / Concrete Manitoba [Industry Avg | CA]",249.17,m3,249.17,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc53,EPD 349,aaacc53,"Concrete – 25 MPa, 20% FA, GU / Concrete Manitoba [Industry Avg | CA]",226.64,m3,226.64,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc54,EPD 349,aaacc54,"Concrete – 25 MPa, 30% FA, GU / Concrete Manitoba [Industry Avg | CA]",205.07,m3,205.07,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc55,EPD 349,aaacc55,"Concrete – 25 MPa, 40% FA, GU / Concrete Manitoba [Industry Avg | CA]",182.54,m3,182.54,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc56,EPD 349,aaacc56,"Concrete – 30 MPa, GU / Concrete Manitoba [Industry Avg | CA]",298.23,m3,298.23,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc57,EPD 349,aaacc57,"Concrete – 30 MPa, 10% FA, GU / Concrete Manitoba [Industry Avg | CA]",273.77,m3,273.77,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc58,EPD 349,aaacc58,"Concrete – 30 MPa, 20% FA, GU / Concrete Manitoba [Industry Avg | CA]",249.23,m3,249.23,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc59,EPD 349,aaacc59,"Concrete – 30 MPa, 30% FA, GU / Concrete Manitoba [Industry Avg | CA]",224.77,m3,224.77,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc60,EPD 349,aaacc60,"Concrete – 30 MPa, 40% FA, GU / Concrete Manitoba [Industry Avg | CA]",200.24,m3,200.24,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc61,EPD 349,aaacc61,"Concrete – 35 MPa, GU / Concrete Manitoba [Industry Avg | CA]",339.35,m3,339.35,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc62,EPD 349,aaacc62,"Concrete – 35 MPa, 10% FA, GU / Concrete Manitoba [Industry Avg | CA]",311.66,m3,311.66,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc63,EPD 349,aaacc63,"Concrete – 35 MPa, 20% FA, GU / Concrete Manitoba [Industry Avg | CA]",283,m3,283,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc64,EPD 349,aaacc64,"Concrete – 35 MPa, 30% FA, GU / Concrete Manitoba [Industry Avg | CA]",255.31,m3,255.31,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+aaacc65,EPD 349,aaacc65,"Concrete – 35 MPa, 40% FA, GU / Concrete Manitoba [Industry Avg | CA]",226.66,m3,226.66,m3,,,,,,2305,kg/m3,,,EPD 349,industry_average,ASTM,
+A12352,EPD 350,A12352,"Concrete – 25 MPa, 40% FA, GUL / Concrete Sask [Industry Avg | CA]",218.345,m3,218.35,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+A12353,EPD 350,A12353,"Concrete – 30 MPa, 40% FA, GUL / Concrete Sask [Industry Avg | CA]",236.235,m3,236.24,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+A12354,EPD 350,A12354,"Concrete – 35 MPa, 40% FA, GUL / Concrete Sask [Industry Avg | CA]",287.515,m3,287.52,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc36,EPD 350,aaacc36,"Concrete – 25 MPa, GU / Concrete Sask [Industry Avg | CA]",345.28,m3,345.28,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc37,EPD 350,aaacc37,"Concrete – 25 MPa, 10% FA, GU / Concrete Sask [Industry Avg | CA]",318.05,m3,318.05,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc38,EPD 350,aaacc38,"Concrete – 25 MPa, 20% FA, GU / Concrete Sask [Industry Avg | CA]",290.83,m3,290.83,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc39,EPD 350,aaacc39,"Concrete – 25 MPa, 30% FA, GU / Concrete Sask [Industry Avg | CA]",263.61,m3,263.61,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc40,EPD 350,aaacc40,"Concrete – 25 MPa, 40% FA, GU / Concrete Sask [Industry Avg | CA]",236.39,m3,236.39,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc41,EPD 350,aaacc41,"Concrete – 30 MPa, GU / Concrete Sask [Industry Avg | CA]",376.92,m3,376.92,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc42,EPD 350,aaacc42,"Concrete – 30 MPa, 10% FA, GU / Concrete Sask [Industry Avg | CA]",346.99,m3,346.99,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc43,EPD 350,aaacc43,"Concrete – 30 MPa, 20% FA, GU / Concrete Sask [Industry Avg | CA]",316.58,m3,316.58,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc44,EPD 350,aaacc44,"Concrete – 30 MPa, 30% FA, GU / Concrete Sask [Industry Avg | CA]",286.65,m3,286.65,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc45,EPD 350,aaacc45,"Concrete – 30 MPa, 40% FA, GU / Concrete Sask [Industry Avg | CA]",256.24,m3,256.24,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc46,EPD 350,aaacc46,"Concrete – 35 MPa, GU / Concrete Sask [Industry Avg | CA]",442.03,m3,442.03,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc47,EPD 350,aaacc47,"Concrete – 35 MPa, 10% FA, GU / Concrete Sask [Industry Avg | CA]",406.22,m3,406.22,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc48,EPD 350,aaacc48,"Concrete – 35 MPa, 20% FA, GU / Concrete Sask [Industry Avg | CA]",369.44,m3,369.44,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc49,EPD 350,aaacc49,"Concrete – 35 MPa, 30% FA, GU / Concrete Sask [Industry Avg | CA]",333.63,m3,333.63,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+aaacc50,EPD 350,aaacc50,"Concrete – 35 MPa, 40% FA, GU / Concrete Sask [Industry Avg | CA]",296.84,m3,296.84,m3,,,,,,2305,kg/m3,,,EPD 350,industry_average,ASTM,
+A12349,EPD 351,A12349,"Concrete – 25 MPa, 50% SL, GUL / Ontario Concrete RMCAO [Industry Avg | CA]",168.58,m3,168.58,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+A12350,EPD 351,A12350,"Concrete – 30 MPa, 50% SL, GUL / Ontario Concrete RMCAO [Industry Avg | CA]",188.23,m3,188.23,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+A12351,EPD 351,A12351,"Concrete – 35 MPa, 50% SL, GUL / Ontario Concrete RMCAO [Industry Avg | CA]",211.34,m3,211.34,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc21,EPD 351,aaacc21,"Concrete – 25 MPa, GU / Ontario Concrete RMCAO [Industry Avg | CA]",273.67,m3,273.67,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc22,EPD 351,aaacc22,"Concrete – 25 MPa, 15% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",244.24,m3,244.24,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc23,EPD 351,aaacc23,"Concrete – 25 MPa, 25% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",224.62,m3,224.62,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc24,EPD 351,aaacc24,"Concrete – 25 MPa, 35% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",205.01,m3,205.01,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc25,EPD 351,aaacc25,"Concrete – 25 MPa, 50% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",175.58,m3,175.58,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc26,EPD 351,aaacc26,"Concrete – 30 MPa, GU / Ontario Concrete RMCAO [Industry Avg | CA]",296.62,m3,296.62,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc27,EPD 351,aaacc27,"Concrete – 30 MPa, 15% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",264.38,m3,264.38,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc28,EPD 351,aaacc28,"Concrete – 30 MPa, 25% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",242.88,m3,242.88,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc29,EPD 351,aaacc29,"Concrete – 30 MPa, 35% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",221.39,m3,221.39,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc30,EPD 351,aaacc30,"Concrete – 30 MPa, 50% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",189.14,m3,189.14,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc31,EPD 351,aaacc31,"Concrete – 35 MPa, GU / Ontario Concrete RMCAO [Industry Avg | CA]",354.3,m3,354.3,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc32,EPD 351,aaacc32,"Concrete – 35 MPa, 15% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",314.98,m3,314.98,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc33,EPD 351,aaacc33,"Concrete – 35 MPa, 25% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",288.76,m3,288.76,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc34,EPD 351,aaacc34,"Concrete – 35 MPa, 35% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",262.54,m3,262.54,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+aaacc35,EPD 351,aaacc35,"Concrete – 35 MPa, 50% SL, GU / Ontario Concrete RMCAO [Industry Avg | CA]",223.22,m3,223.22,m3,,,,,,2305,kg/m3,,,EPD 351,industry_average,ASTM,
+A12345,EPD 352,A12345,"Concrete – 25 MPa, 30% FA, GUL / ABQ [Industry Avg | CA]",209.43,m3,209.43,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+A12346,EPD 352,A12346,"Concrete – 30 MPa, 30% FA, GUL / ABQ [Industry Avg | CA]",233.1,m3,233.1,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+A12348,EPD 352,A12348,"Concrete – 35 MPa, 30% FA, GUL / ABQ [Industry Avg | CA]",262.155,m3,262.16,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc1,EPD 352,aaacc1,"Concrete – 25 MPa, 10% SL, GU / ABQ [Industry Avg | CA]",280.57,m3,280.57,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc10,EPD 352,aaacc10,"Concrete – 30 MPa, 20% SL, GU / ABQ [Industry Avg | CA]",289.05,m3,289.05,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc11,EPD 352,aaacc11,"Concrete – 30 MPa, 20% FA, GU / ABQ [Industry Avg | CA]",279.28,m3,279.28,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc12,EPD 352,aaacc12,"Concrete – 30 MPa, 30% SL, GU / ABQ [Industry Avg | CA]",264.86,m3,264.86,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc13,EPD 352,aaacc13,"Concrete – 30 MPa, 30% FA, GU / ABQ [Industry Avg | CA]",250.16,m3,250.16,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc14,EPD 352,aaacc14,"Concrete – 35 MPa, Quebec Baseline Average / ABQ [Industry Avg | CA]",369.32,m3,369.32,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc15,EPD 352,aaacc15,"Concrete – 35 MPa, 10% SL, GU / ABQ [Industry Avg | CA]",353.75,m3,353.75,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc16,EPD 352,aaacc16,"Concrete – 35 MPa, 10% FA, GU / ABQ [Industry Avg | CA]",348.16,m3,348.16,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc17,EPD 352,aaacc17,"Concrete – 35 MPa, 20% SL, GU / ABQ [Industry Avg | CA]",326.4,m3,326.4,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc18,EPD 352,aaacc18,"Concrete – 35 MPa, 20% FA, GU / ABQ [Industry Avg | CA]",315.15,m3,315.15,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc19,EPD 352,aaacc19,"Concrete – 35 MPa, 30% SL, GU / ABQ [Industry Avg | CA]",298.49,m3,298.49,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc2,EPD 352,aaacc2,"Concrete – 25 MPa, 10% FA, GU / ABQ [Industry Avg | CA]",276.22,m3,276.22,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc20,EPD 352,aaacc20,"Concrete – 35 MPa, 30% FA, GU / ABQ [Industry Avg | CA]",281.66,m3,281.66,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc3,EPD 352,aaacc3,"Concrete – 25 MPa, 20% SL, GU / ABQ [Industry Avg | CA]",258.8,m3,258.8,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc4,EPD 352,aaacc4,"Concrete – 25 MPa, 20% FA, GU / ABQ [Industry Avg | CA]",250.12,m3,250.12,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc5,EPD 352,aaacc5,"Concrete – 25 MPa, 30% SL, GU / ABQ [Industry Avg | CA]",237.5,m3,237.5,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc6,EPD 352,aaacc6,"Concrete – 25 MPa, 30% FA, GU / ABQ [Industry Avg | CA]",224.48,m3,224.48,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc7,EPD 352,aaacc7,"Concrete – 30 MPa, Quebec Baseline Average / ABQ [Industry Avg | CA]",326.97,m3,326.97,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc8,EPD 352,aaacc8,"Concrete – 30 MPa, 10% SL, GU / ABQ [Industry Avg | CA]",312.78,m3,312.78,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+aaacc9,EPD 352,aaacc9,"Concrete – 30 MPa, 10% FA, GU / ABQ [Industry Avg | CA]",307.94,m3,307.94,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+fdsj68,EPD 352,fdsj68,"Concrete – 25 MPa, Quebec Baseline Average / ABQ [Industry Avg | CA]",293.15,m3,293.15,m3,,,,,,2305,kg/m3,,,EPD 352,industry_average,ASTM,
+INT008,EPD 354,INT008,"Wood wool boards / Armstrong / Tectum ceiling & wall boards / 2""",1.33,ft2,14.32,m2,,13.55,,15.05,0.9,17.09,kg/m2,,,EPD 354,product_specific,ASTM,30
+BRI005,EPD 359,BRI005,"Brick, Clay / SHAW / Avg Face Brick / 3-5/8"" x 2-3/4"" x 7-5/8"" (92 x 70 x 194 mm) incl. 3/8"" mortar",721,m3,59.26,m²,,,,,,269,kgCO2/m3 mortar,,"83% brick, 17% mortar",EPD 359,product_specific,ASTM,
+BRI006,EPD 359,BRI006,"Brick, Clay / SHAW / Slender - Thin Face Brick / 2 1/4"" x 1/2"" x 7-1/2"" (57 x 12.7 mm x 190) incl. 3/8"" mortar",721,m3,8.18,m²,,,,,,269,kgCO2/m3 mortar,,"83% brick, 17% mortar",EPD 359,product_specific,ASTM,
+HWF000,EPD 360,HWF000,HempWood / Fibonacci / Natural Laminate Flooring / 16 mm,11.2,m2,11.2,m2,,5.37,,,0.9,10.5,kg/m2,,,EPD 360,product_specific,"ASTM International,",25
+REB000,EPD 362,REB000,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / 10M",0.854,kg,0.67,m,,,,,,7850,kg/m3,0.785,kg/m,EPD 362,industry_average,ASTM International,
+REB001,EPD 362,REB001,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / 15M",0.854,kg,1.34,m,,,,,,7850,kg/m3,1.57,kg/m,EPD 362,industry_average,ASTM International,
+REB002,EPD 362,REB002,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / 20M",0.854,kg,2.01,m,,,,,,7850,kg/m3,2.355,kg/m,EPD 362,industry_average,ASTM International,
+REB003,EPD 362,REB003,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #3",0.854,kg,0.48,m,,,,,,7850,kg/m3,0.561,kg/m,EPD 362,industry_average,ASTM International,
+REB004,EPD 362,REB004,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #4",0.854,kg,0.85,m,,,,,,7850,kg/m3,0.996,kg/m,EPD 362,industry_average,ASTM International,
+REB005,EPD 362,REB005,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #5",0.854,kg,1.33,m,,,,,,7850,kg/m3,1.556,kg/m,EPD 362,industry_average,ASTM International,
+REB006,EPD 362,REB006,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #6",0.854,kg,1.91,m,,,,,,7850,kg/m3,2.24,kg/m,EPD 362,industry_average,ASTM International,
+REB007,EPD 362,REB007,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #7",0.854,kg,2.6,m,,,,,,7850,kg/m3,3.049,kg/m,EPD 362,industry_average,ASTM International,
+REB008,EPD 362,REB008,"Rebar / Concrete Reinforcing Steel Institute / 98% recycled, EAF / [Industry Avg | N.America] / #8",0.854,kg,3.4,m,,,,,,7850,kg/m3,3.982,kg/m,EPD 362,industry_average,ASTM International,
+EWF000,EPD 392,EWF000,"Engineered Wood Flooring / NWFA and Decorative Hardwoods Association / 3/8"" to 3/4""  [Industry Avg | US & CA]",6.849,m²,6.85,m²,11.72,,,,0.9,,,,,EPD 392,industry_average,ASTM International,
+WWF000,EPD 393,WWF000,"Hardwood flooring / NWFA and Decorative Hardwoods Association / Solid Wood Flooring /  3/4""  [Industry Avg | US & CA]",9.793,m²,9.79,m²,22.11,,,,0.9,,,,,EPD 393,industry_average,ASTM International,
+LAM006,EPD 407,LAM006,Glued Laminated Timber (Glulam) / Element5  / Ontario,122,m3,122,m³,865.9,,,,0.9,448,kg/m3,,,EPD 407,product_specific,ASTM,
+LAM007,EPD 408,LAM007,"Cross Laminated Timber (CLT) / Element5 / Crosslam CLT / 3-1/2""",122,m3,10.84,"m2 at 3.5""",865.9,,,,0.9,448,kg/m3,,,EPD 408,product_specific,ASTM,
+TPO001,EPD 446,TPO001,TPO roofing membrane / Single Ply Roofing Industry / 45 mils / [Industry Avg | US ],5.8,m2,5.8,m2,,,,,,1.15,kg/m2,,,EPD 446,product_specific,ASTM International,
+TPO002,EPD 446,TPO002,TPO roofing membrane / Single Ply Roofing Industry / 60 mils / [Industry Avg | US ],7.5,m2,7.5,m2,,,,,,1.48,kg/m2,,,EPD 446,product_specific,ASTM International,
+S12345,EPD 456,S12345,Ground screw / American Ground Screw / AGS IM3316 / 76 x 1600 mm,43.5,1600 mm,27.19,m,,,,,,11.93,kg/1600 mm,,,EPD 456,product_specific,ASTM,
+S12346,EPD 456,S12346,Ground screw / American Ground Screw / AGS IM4516 / 114 x 1600 mm,65.9,1600 mm,41.19,m,,,,,,17.81,kg/1600 mm,,,EPD 456,product_specific,ASTM,
+www112,EPD 499,www112,"Window, double-glazed, aluminum frame / Wausau / INvent fixed windows / US",78.16,m2,78.16,m2,,,,,,,,,,EPD 499,product_specific,ASTM,
+www113,EPD 499,www113,"Window, double-glazed, aluminum frame / Wausau / INvent casement windows / US",110.51,m2,110.51,m2,,,,,,,,,,EPD 499,product_specific,ASTM,
+bbb020,EPD 508,bbb020,"Ext. Wall Barrier, liquid applied / Soprema / SOPRASEAL LM 200 S / 0.6 Perm",9.3,m²,9.27,m²,,,,,,2.014,kg/m2,,,EPD 508,product_specific,ASTM,
+bbb012,EPD 509,bbb012,"Ext. Wall Barrier, adhesive / Soprema / SOPRASEAL STICK 1100 T / Non-permeable / 1.0 mm",1.9,m²,1.93,m²,,,,,,0.975,kg/m2,,,EPD 509,product_specific,ASTM,
+bbb014,EPD 509,bbb014,"Ext. Wall Barrier, adhesive / Soprema / SOPRASOLIN HD (aluminum foil) / Non-permeable / 1.0 mm",1.9,m²,1.92,m²,,,,,,1.025,kg/m2,,,EPD 509,product_specific,ASTM,
+bbb015,EPD 509,bbb015,"Ext. Wall Barrier, adhesive / Soprema / SOPRAVAP'R / Non-permeable / 0.8 mm",1.5,m²,1.52,m²,,,,,,0.763,kg/m2,,,EPD 509,product_specific,ASTM,
+bbb013,EPD 512,bbb013,"Ext. Wall Barrier, adhesive / Soprema / SOPRASEAL STICK VP / 11-17 Perms / 0.6 mm",1.2,m²,1.17,m²,,,,,,0.346,kg/m2,,,EPD 512,product_specific,ASTM,
+BRI001,"EPD-540, EPD-539",BRI001,"Brick, Clay / Mutual Materials / Avg Face Brick (plant Avg) /  3-5/8"" x 2-3/4"" x 7-5/8"" (92 x 70 x 194 mm) incl. 3/8"" mortar",690.5,m3,56.93,m2,,,,,,269,kgCO2/m3 mortar,,"83% brick, 17% mortar","EPD-540, EPD-539",,ASTM International,
+BRI003,"EPD-540, EPD-539",BRI003,"Brick, Clay / Mutual Materials / Avg Thin Face Brick (plant Avg) / 2-1/2"" x 5/8"" x 7-1/2"" (64 x 16 x 190 mm) incl. 3/8"" mortar",690.5,m3,9.9,m2,,,,,,269,kgCO2/m3 mortar,,"83% brick, 17% mortar","EPD-540, EPD-539",,ASTM International,
+bbb021,EPD 552,bbb021,"Ext. Wall Barrier, liquid applied / Soprema / SOPRASEAL LM 204 VP / 10-17 Perms / 0.6 mm",3,m²,2.99,m²,,,,,,0.569,kg/m2,,,EPD 552,product_specific,ASTM,
+OSB004,EPD 555,OSB004,"OSB sheathing / 1/2"" / LP / WeatherLogic® Air & Water Barrier / 1/2""",323.38,m3,4.11,"m2 @  7/16""",1398.83,,17.765,,0.9,765,kg/m3,9.716,"kg/m2 at 7/16""",EPD 555,product_specific,ASTM,
+OSB005,EPD 555,OSB005,"OSB sheathing / 7/16"" / LP / WeatherLogic® Air & Water Barrier / 7/16""",323.38,m3,3.59,"m2 @  7/16""",1398.83,,15.56198375,,0.9,765,kg/m3,8.501,"kg/m2 at 7/16""",EPD 555,product_specific,ASTM,
+OSB002,EPD 556,OSB002,"OSB sheathing / 7/16"" / LP / FlameBlock® Fire-Rated / 7/16"", coated 1 side",333.48,m3,4.56,"m2 @  7/16""",1202.28,,13.3603365,14.29,0.9,678.28,kg/m3,9.276,"kg/m2 at 7/16"" coated 1-side",EPD 556,product_specific,ASTM,
+OSB007,EPD 557,OSB007,"OSB subflooring / LP / LP Legacy® Premium / 5/8""",283.3,m3,4.5,"m2 @  5/8""",1302.14,,20.671,,0.9,662,kg/m3,10.509,"kg/m2 at 5/8""",EPD 557,product_specific,ASTM,
+OSB003,EPD 558,OSB003,"OSB sheathing / 7/16"" / LP / TopNotch® 350 / 7/16""",264.52,m3,2.94,"m2 @  7/16""",1207.51,,13.42,,0.9,765,kg/m3,8.501,"kg/m2 at 7/16""",EPD 558,product_specific,ASTM,
+WIR000,EPD 585,WIR000,"Welded wire reinforcement / Insteel Industries / 4"" x 4"" x 6/6g [US & CA]",1.73,kg,5.24,m2,,,,,,62,lb/100ft2,3.03,kg/m2,EPD 585,product_specific,ASTM,
+WIR001,EPD 585,WIR001,"Welded wire reinforcement / Insteel Industries / 6"" x 6"" x 6/6g [US & CA]",1.73,kg,3.55,m2,,,,,,42,lb/100ft2,2.05,kg/m2,EPD 585,product_specific,ASTM,
+LP0002,EPD 597,LP0002,"Engineered Wood Siding & Trim / LP / SmartSide / 0.418"" (10.6 mm)",279.43,m3,2.96,"m2 at 10.6 mm (0.418"")",1886.06,,,0,0.9,657,kg/m3,,,EPD 597,product_specific,ASTM International,75
+LP0003,EPD 597,LP0003,"Engineered Wood Siding & Trim / LP / SmartSide / 0.578"" (14.7mm)",279.43,m3,4.11,"m2 at 14.7 mm (0.578"")",1886.06,,,0,0.9,657,kg/m3,,,EPD 597,product_specific,ASTM International,75
+LP0004,EPD 597,LP0004,"Engineered Wood Siding & Trim / LP / SmartSide / 0.354"" (9 mm)",279.43,m3,2.51,"m2 at 9 mm (0.354"")",1886.06,,,0,0.9,657,kg/m3,,,EPD 597,product_specific,ASTM International,75
+LP0001,EPD 601,LP0001,"Engineered Wood Siding & Trim / LP / SmartSide ExpertFinish/ 3/8"" (9.5 mm)",487.03,m3,4.63,m2 at 9.5 mm,1095.62,,,,0.9,657,kg/m3,,,EPD 601,product_specific,ASTM International,75
+LP0000,EPD 617,LP0000,"Engineered Wood Siding & Trim / LP / BuilderSeries® Lap Siding / 9/32"" (7.3 mm)",267.01,m3,1.95,m2 at 7.3 mm,1576.54,,,,0.9,644.77,kg/m3,3.67,kg/m2,EPD 617,product_specific,ASTM International,75
+a13a3e,EPD-AMO-20150057-IAA1-EN,a13a3e,Cork flooring / Amorim /  Revestimentos S.A. / Cork floating floor planks [EU],9.34,m²,9.34,m²,,4.73,,5.25,0.9,8.4,kg/m2,,,EPD-AMO-20150057-IAA1-EN,product_specific,,
+b72f13,EPD-CEM-20160113-IAD1-EN,b72f13,Fiber Cement roofing / Cembrit / Slates / 4 mm / [EU],0.946,kg,7,m2 at 4 mm,,0.43,0.1295,0.47,0.9,7.4,kg/m2,,,EPD-CEM-20160113-IAD1-EN,product_specific,,
+8bcce7,EPD-CEM-20160114-IAD1-EN,8bcce7,Fiber Cement roofing / Cembrit / Corrugated sheets / 6.5 mm / [EU],0.804,kg,8.31,m2 at 6.5 mm,,0.68,0.2067,0.76,0.9,10.335,kg/m2,,,EPD-CEM-20160114-IAD1-EN,product_specific,,
+bbb009,EPD-DUP-20210183-IBC1-EN,bbb009,"Ext. Wall & Roof Barrier, sheet / Dupont / Tyvek Monolayer 60 / Permeable / EU",0.3,m2,0.28,m2,,,,,,0.058,kg/m2,,,EPD-DUP-20210183-IBC1-EN,product_specific,IBU,30
+ae7e1c,EPD-ERF-20180184-CCI1-EN,ae7e1c,Cork flooring / European Resilient Flooring Manufacturers' Institute [Industry Avg | EU],-2.74,m²,0.77,m²,,3.51,,3.51,0.9,2,kg/m2,,,EPD-ERF-20180184-CCI1-EN,industry_average,,
+FIB000,EPD-ETE-20190128-CCA1-EN,FIB000,Fiber Cement siding / Equitone / Linea|Lunara sheets / 10 mm [EU],7.8,m²,7.8,"m2 at 8 mm (5/16"")",,1.36,0,0,0.9,16.5,kg/m2 at 10mm,,,EPD-ETE-20190128-CCA1-EN,product_specific,IBU,50
+FIB001,EPD-ETE-20190179-CCC1-EN,FIB001,"Fiber Cement siding / Equitone / Pictura, Natura Pro, sheets / 8 mm [EU]",16.305,m²,16.31,"m2 at 8 mm (5/16"")",,2.32,0.703,2.58,0.9,1850,kg/m3,14.8,kg/m2 at 8mm,EPD-ETE-20190179-CCC1-EN,product_specific,IBU,50
+be052f,EPD-GTX-20180071-IBA1-DE,be052f,Wood fiber batt / GUTEX / ThermoFlex / R 4-inch [EU],-67.5,m3,0.38,m2•RSI,,2.52,0.765,2.81,0.9,50,kg/m3,1.8,kg/m2•RSI,EPD-GTX-20180071-IBA1-DE,product_specific,,
+ins035,EPD-GTX-20190018-IBA1-EN,ins035,Wood fiber loose fill / GUTEX / ThermoFiber / R 3.8-inch [EU],-1.14,kg,1.3,m2•RSI,,2.2,0.665,2.44,0.9,35,kg/m3,1.4,kg/m2•RSI,EPD-GTX-20190018-IBA1-EN,product_specific,IBU,
+ins030,EPD-GTX-20200178-IBC1-EN,ins030,"Wood fiber board / GUTEX / Multi-Therm / R 3.6-inch, 40-200 mm [EU]",-166.3,m3,3.1,m2•RSI,,8.78,2.66,9.75,0.9,140,kg/m3,5.6,kg/m2•RSI,EPD-GTX-20200178-IBC1-EN,product_specific,IBU,
+CCF000,EPD-HOC-20220204-IBD1-EN,CCF000,Cementitious Foam / Holcim / Airium Spray / R3.35/inch / 100 kg/m3 [EU],40.7,m3,1.75,m²•RSI,,,,,,100,kg/m3,,,EPD-HOC-20220204-IBD1-EN,product_specific,IBU,50
+CCF00X,"EPD-HOC-20220204-IBD1-EN, BAU-EPD-Perlmooser-2022-1-Ecoinvent, EPD-MDS-20210038-CBA1-EN",CCF00X,Cementitious Foam / R 3.5-inch [BEAM Avg],,,1.59,m2•RSI,,,,,,80,kg/m3,,,"EPD-HOC-20220204-IBD1-EN, BAU-EPD-Perlmooser-2022-1-Ecoinvent, EPD-MDS-20210038-CBA1-EN",beam_average,,
+CBI000,EPD HUB-0281,CBI000,"Cork board insulation / Amorim  / Expanded Insulation Corkboard (ICB) / R3.6-inch, 115 kg/m3 [EU]",82.8,m3,3.31,m2•RSI,212,7.63,8.48,10.91,0.9,115,kg/m3,4.6,kg/m2 RSI1,EPD HUB-0281,product_specific,EPD Hub,
+bbb027,EPDIE-22-83,bbb027,"Int. Wall & Ceiling Barrier, sheet / Partel / IZOPERM PLUS / Non-permeable / EU",0.4,m²,0.42,m²,,,,,,120,g/m2,,,EPDIE-22-83,product_specific,Irish Green Building Council,
+bbb028,EPDIE-22-83,bbb028,"Int. Wall & Ceiling Barrier, sheet / Partel / VARA PLUS / Moisture-variable / EU",0.4,m²,0.37,m²,,,,,,120,g/m2,,,EPDIE-22-83,product_specific,Irish Green Building Council,
+bbb007,EPDIE-22-84,bbb007,"Ext. Wall & Roof Barrier, adhesive / Partel / Exoperm Mono SA 250 / Permeable / EU",0.8,m²,0.81,m²,,,,,,250,g/m2,,,EPDIE-22-84,product_specific,Irish Green Building Council,
+bbb010,EPDIE-22-84,bbb010,"Ext. Wall & Roof Barrier, sheet / Partel / Exoperm Mono 150 / Permeable / EU",0.5,m²,0.54,m²,,,,,,150,g/m2,,,EPDIE-22-84,product_specific,Irish Green Building Council,
+STU000,EPD-IWM-STO-20210130-IBG1-DE,STU000,"Cement ""Stucco"" Plaster / Sto SE / Pre-mixed rendering & plastering mortar with reinforcing fiber / 1/2"" [EU]",0.4,kg,8.8,m2,,,,,,1600,kg/m3,,,EPD-IWM-STO-20210130-IBG1-DE,product_specific,IBU,
+A23456,EPD-JAM-20220072-CBD1-EN,A23456,Composite sheathing panel / James Hardie Europe / Fermacell / 12.5mm [EU],,m2,3.12,m2,3.58,3.22,,,0.9,14.75,kg/m2,,,EPD-JAM-20220072-CBD1-EN,product_specific,Institut Bauen und Umwelt e.V.,
+S12347,EPD-KRI-20230308-IBC1-EN,S12347,Ground screw / Krinner / E-Series E89x1000-E60 / 89 x 1000 mm [EU],2.39,kg,13.15,m,,,,,,5.5,kg/m,,,EPD-KRI-20230308-IBC1-EN,product_specific,IBU,
+S12348,EPD-KRI-20230308-IBC1-EN,S12348,Ground screw / Krinner / E-Series E140x1600-E76-100 / 140 x 1600 mm [EU],2.39,kg,44.22,m,,,,,,5.5,kg/m,,,EPD-KRI-20230308-IBC1-EN,product_specific,IBU,
+CCF002,EPD-MDS-20210038-CBA1-EN,CCF002,Cementitious Foam /Master Builders Solutions / MasterProtect NFF / R3.8/inch / 70 kg/m3 [EU],45.6,m3,1.71,m²•RSI,,,,,,70,kg/m3,,,EPD-MDS-20210038-CBA1-EN,product_specific,IBU,50
+beed82,EPD-MIS-20150019-IAA2-DE,beed82,"Foam glass aggregate / Misapor  / Glavel / R 1.7-inch, 10-60 mm [EU]",15.2,m3,1.25,m2•RSI,,,,,,130,kg/m3,,,EPD-MIS-20150019-IAA2-DE,product_specific,,
+INS016,EPD n° 21-0078-001.00.00,INS016,Hempcrete block / Isohemp / Hemp Block PAL36EX  including mortar / 600 x 300 x 150-360 mm / R 2.0-inch [EU],45.66,m2 @RSI 5.07,9.01,m2•RSI,65.5,11.63,2.79,10.23,0.9,340,kg/m3,24.1,kg/m2 at RSI1,EPD n° 21-0078-001.00.00,product_specific,B-EPD,60
+BAM004,EPD-NIBE-20210322-18246,BAM004,"Hard Bamboo flooring / MOSO / Purebamboo, Topbamboo, Bamboo Supreme, UltraDensity / 9/16"" (15mm), High Density",576.5,m3,8.65,m2 @15mm,1549.3,20.92,,,0.9,1050,kg/m3,15.75,kg/m2,EPD-NIBE-20210322-18246,product_specific,NIBE,
+BAM005,EPD-NIBE-20210322-18246,BAM005,"Hard Bamboo flooring / MOSO / Solid & Supra Collection / 20mm, High Density",576.5,m3,11.53,"m2 @1/2""",1549.3,43.04,38.7325,,0.9,1050,kg/m3,13.65,kg/m2,EPD-NIBE-20210322-18246,product_specific,NIBE,
+BAM006,EPD-NIBE-20210322-18246,BAM006,Bamboo beams / MOSO / Bamboo Solid Beams / High Density,576.5,m3,576.5,m3,1549.3,,,,0.9,1050,kg/m3,,,EPD-NIBE-20210322-18246,product_specific,NIBE,
+BAM008,EPD-NIBE-20210322-18247,BAM008,"Laminated Bamboo flooring / MOSO / Bamboo Elite & Elite Premium, Industriale /  9/16"" (15mm)",305.28,m3,4.58,m2 @15mm,1140.8,15.4,,,0.9,700,kg/m3,10.5,kg/m2,EPD-NIBE-20210322-18247,product_specific,NIBE,
+INT007,EPD-NIBE-20210615-20084,INT007,"MgO board 1/2"" / Sinh Build / MAGOXX boards / 1/2"" [EU]",6.7,m2,6.7,m2,0.4741,0.43,,,0.9,1000,kg/m3,,,EPD-NIBE-20210615-20084,product_specific,ReThink,
+BAM007,EPD-NIBE-20210625-20247,BAM007,"Bamboo Cladding / MOSO / X-treme, all profiles / Heat treated / 5/8"" (18 mm)",25.26,m2 at 18 mm,25.26,"m2 @5/8""",32.73,29.46,,,0.9,1150,kg/m3,,,EPD-NIBE-20210625-20247,product_specific,NIBE,
+ins029,EPD-PAV-20190182-ABA4-EN,ins029,"Wood fiber board / Pavatex / Isolair, Isoroof, Isolair Multi / R 3.3-inch / 200 kg/m3, 30-80 mm [EU]",-253,m3 @ 200 kg/m3,4.2,m2•RSI,,13.71,,15.23,0.9,200,kg/m3,,,EPD-PAV-20190182-ABA4-EN,product_specific,IBU,
+ins031,EPD-PAV-20190182-ABA4-EN,ins031,"Wood fiber board / Pavatex / Pavawall GF, Pavawall Bloc, Pavawall GF XL / R 3.3-inch / 130 kg/m3 [EU]",-164.5,m3 @ 200 kg/m3,2.73,m2•RSI,,8.91,,9.91,0.9,130,kg/m3,,,EPD-PAV-20190182-ABA4-EN,product_specific,IBU,
+ins032,EPD-PAV-20190182-ABA4-EN,ins032,"Wood fiber board / Pavatex / Pavawall Smart, Pavawall Light, Pavawall FW / R 3.3-inch / 115 kg/m3 [EU]",-145.5,m3 @ 115 kg/m3,2.42,m2•RSI,,7.88,,8.76,0.9,115,kg/m3,,,EPD-PAV-20190182-ABA4-EN,product_specific,IBU,
+ins033,EPD-PAV-20190182-ABA4-EN,ins033,Wood fiber board / Pavatex / Pavatherm / R 3.3-inch / 110 kg/m3 [EU],-139.1,m3 @ 110 kg/m3,6.27,m2•RSI,,7.8,,8.66,0.9,110,kg/m3,,,EPD-PAV-20190182-ABA4-EN,product_specific,IBU,
+92febd,EPD-PCE-2013256-IBA2-DE,92febd,[Replaced] Foam glass board / Pittsburgh Corning Europe / Foamglas T4 / R3.7/inch,1.32,kg,6.22,m2•RSI,,,,,,115,kg/m3,,,EPD-PCE-2013256-IBA2-DE,product_specific,,
+34c7c1,EPD-PCE-20150042-IBA1-DE,34c7c1,"[Replaced] Foam glass board / Pittsburgh Corning Europe / Foamglas W+F, Foamglas T3 / R4/inch",1.26,kg,4.79,m2•RSI,,,,,,100,kg/m3,,,EPD-PCE-20150042-IBA1-DE,product_specific,,
+bb05fc,EPD-PCE-20200299-IBB1-EN,bb05fc,Foam glass board / Pittsburgh Corning Europe / FOAMGLAS T4+ / R 3.5-inch / [EU],1.45,kg,6.54,m2•RSI,,,,,,110,kg/m3,4.5,kg/m2 at RSI1,EPD-PCE-20200299-IBB1-EN,product_specific,,
+ebf499,EPD-PCE-20200300-IBB1-EN,ebf499,Foam glass board / Pittsburgh Corning Europe / FOAMGLAS T3+ / R 4.0-inch / [EU],1.5,kg,5.13,m2•RSI,,,,,,95,kg/m3,3.42,kg/m2 at RSI1,EPD-PCE-20200300-IBB1-EN,product_specific,,
+40c2ea,EPD-PCE-20200301-IBA1-EN,40c2ea,Foam glass board / Pittsburgh Corning Europe / FOAMGLAS F / R 2.9-inch / [EU],1.49,kg,12.29,m2•RSI,,,,,,165,kg/m3,8.25,kg/m2 at RSI1,EPD-PCE-20200301-IBA1-EN,product_specific,,
+a94jf2,"EPD-PCE-20200301-IBA1-EN, EPD-PCE-20200302-IBA1-EN, EPD-PCE-20200300-IBB1-EN, EPD-PCE-20200299-IBB1-EN",a94jf2,Foam glass board / R 3.4-inch [BEAM Avg],,kg,8.18,m2•RSI,,,,,,125,kg/m3,5.5075,,"EPD-PCE-20200301-IBA1-EN, EPD-PCE-20200302-IBA1-EN, EPD-PCE-20200300-IBB1-EN, EPD-PCE-20200299-IBB1-EN",beam_average,,
+8f8df3,EPD-PCE-20200302-IBA1-EN,8f8df3,Foam glass board / Pittsburgh Corning Europe / FOAMGLAS S3 / R 3.2-inch / [EU],1.5,kg,8.78,m2•RSI,,,,,,130,kg/m3,5.85,kg/m2 at RSI1,EPD-PCE-20200302-IBA1-EN,product_specific,,
+3fc60e,EPD-POR-20140214-IBC1-EN,3fc60e,Vacuum Insulated Panel / Porextherm  / Vacupor / Fumed silica core / R 30/inch [EU],42.2,m2 at 25 mm,7.43,m2•RSI,,,,,,181,kg/m3,,,EPD-POR-20140214-IBC1-EN,product_specific,,
+www114,EPD-QKE-20220002-IBG1-DE,www114,"Window, double-glazed, PVC-U frame, tilt & turn / [Industry Avg | EU]",79.2,m2,79.2,m2,,,,,,,,,,EPD-QKE-20220002-IBG1-DE,industry_average,IBU,30
+www121,EPD-QKE-20220156-IBG1-DE,www121,"Window, triple-glazed, PVC-U frame, tilt & turn / [Industry Avg | EU]",95.2,m2,95.2,m2,,,,,,,,,,EPD-QKE-20220156-IBG1-DE,industry_average,IBU,30
+bbb031,EPD-SIG-20220185-CBA1-EN,bbb031,"Int. Wall & Ceiling Barrier, sheet / SIGA / Majrex 200 / Moisture-variable / EU",1.2,m²,1.21,m2,,,,,,0.15,kg/m2,,,EPD-SIG-20220185-CBA1-EN,product_specific,IBU,
+ins026,EPD-STE-20150327-IBD1-EN,ins026,"Wood fiber board / Steico / STEICOprotect S dry, STEICOsafe 40, STEICOuniversal dry / R 3.6-inch, 210 kg/m3 [EU]",-81.57,m3,11.4,m2•RSI,,13.2,2.66,14.67,0.9,210,kg/m3,8.412903333,kg/m2•RSI,EPD-STE-20150327-IBD1-EN,product_specific,,
+ins027,EPD-STE-20150327-IBD1-EN,ins027,"Wood fiber board / Steico / STEICOprotect M dry, STEICOroof dry, STEICOspecial dry, STEICOtop / R 3.6-inch, 140 kg/m3 [EU]",-81.57,m3,6.51,m2•RSI,,8.8,2.66,9.78,0.9,140,kg/m3,5.608602222,kg/m2•RSI,EPD-STE-20150327-IBD1-EN,product_specific,,
+ins028,EPD-STE-20150327-IBD1-EN,ins028,"Wood fiber board / Steico / STEICOtherm dry, STEICOprotect L dry, STEICOsafe / R 3.6-inch, 110 kg/m3 [EU]",-81.57,m3,4.41,m2•RSI,,6.91,2.66,7.68,0.9,110,kg/m3,4.406758889,kg/m2•RSI,EPD-STE-20150327-IBD1-EN,product_specific,,
+ins034,EPD-STE-20150327-IBD1-EN,ins034,Wood fiber batt / Steico / SteicoFlex / R 3.8-inch [EU],-28.27,m3,2,m2•RSI,,3.07,0.84645,3.1,0.9,55,kg/m3,2.087412105,kg/m2•RSI,EPD-STE-20150327-IBD1-EN,product_specific,,
+bbb032,EPD-Synwer-234-EN,bbb032,"Int. Wall & Ceiling Barrier, sheet / Synwer / Syn U 120 Sd 2 / Moisture-variable / EU",0.6,m²,0.58,m²,,,,,,120,g/m2,,,EPD-Synwer-234-EN,product_specific,Kiwa-Ecobility Experts,
+GRE002,EPD-ZIC-20200082-CCA1-EN,GRE002,"Green roof system / ZinCo / Heather with Lavender Green Roof System / Extensive, min. 100 mm depth, Saturated weight 163 kg/m2 [EU]",2.64,m2,2.64,m2,,,,,,163,kg/m2 saturated,103,kg/m2 dry,EPD-ZIC-20200082-CCA1-EN,product_specific,IBU,
+5161f8,"Fernandes et al LCA, 2019",5161f8,"Compressed earth block wall / Factory made / Stabilized with 6.5% NHL / 150 mm (5-7/8"") width [EU]",0.388,block,1.85,m2 at 150mm block,,,,,,1900,kg/m3,4.761904762,blocks/m2,"Fernandes et al LCA, 2019",,,
+f62c9s,"Fernandes et al LCA, 2019",f62c9s,"Compressed earth block floor / Factory made / Stabilized with 6.5% NHL / 2-3/4"" (70 mm) [EU]",0.388,block,8.62,"m2 at 2.75"" thickness",,,,,,1900,kg/m3,22.22222222,blocks/m2,"Fernandes et al LCA, 2019",,,
+c09ed4,"Fernandes et al LCA, 2020",c09ed4,Rammed earth / Stabilized with 3% NHL / no rebar [EU],47.5,m3,1.21,"m2 at 1""",,,,,,1900,kg/m3,0.0254,"m/1""","Fernandes et al LCA, 2020",,,
+bbb033,From ICE Database V3,bbb033,"Barrier, sheet / Polyethylene sheet / 10 mil",0.6,m2,0.61,m2,,,,,,0.233,kg/m2,,,From ICE Database V3,,,
+bbb034,From ICE Database V3,bbb034,"Barrier, sheet / Polyethylene sheet / 6 mil",0.4,m2,0.38,m2,,,,,,0.147,kg/m2,,,From ICE Database V3,,,
+A23457,GlobalEPD EN15804-036,A23457,Composite sheathing panel / Honext / Fire resistant panel / 12 mm [EU],92.5,m3,1.11,m2,751,8.11,,,0.9,,kg/m3,,,GlobalEPD EN15804-036,product_specific,Aenor Confia,25
+285b88,GlobalEPD-RCP-008-001,285b88,Clay roof tiles / HISPALYT / [Industry Avg | Spain],4,m²,3.55,m²,,,,,,56,kg/m2,,,GlobalEPD-RCP-008-001,industry_average,AENOR Internacional S.A.U.,150
+bbb022,HUB-0233,bbb022,"Ext. Wall Barrier, sheet / Building Product Design / Glidevale Protect TF200 / Permeable",0.4,m²,0.35,m²,,,,,,0.1,kg/m2,,,HUB-0233,product_specific,EPD Hub Ltd,
+SIP007,HUB-0634,SIP007,"SIP roof panels / Nexii Roof Panels / 16"" panel / R56",98.8,m2,98.8,m2,,,,,,94.7,kg/m2,,,HUB-0634,product_specific,EPD Hub,60
+SIP005,HUB-0635,SIP005,"SIP wall panel / Nexii Cladding Panels / 10"" panel / R34",116,m2,116,m2,,,,,,102.3,kg/m2,,,HUB-0635,product_specific,EPD Hub,60
+SIP006,HUB-0636,SIP006,"SIP wall panel / Nexii Load-bearing Panels / 10"" panel / R34",128,m2,128,m2,,,,,,127.3,kg/m2,,,HUB-0636,product_specific,EPD Hub,50
+840925,HW-20200605-001,840925,Wool Loose-fill / Havelock Wool / Loose-fill / R 4.4-inch,1.76,m2•RSI,1.76,m2•RSI,,0.99,0.2951513153,,0.9,18.1,kg/m3,0.607,kg/m2 at RSI1,HW-20200605-001,product_specific,Sustainable Minds,
+be49e2,HW-20200605-001,be49e2,Wool batt / Havelock Wool / Batts / R 3.6-inch,2.63,m2•RSI,2.63,m2•RSI,,1.63,0.46251738,,0.9,24.98,kg/m3,0.997,kg/m2 at RSI1,HW-20200605-001,product_specific,Sustainable Minds,
+5231c8,ICC – 20200122– 001,5231c8,"Cellulose / spray applied / International Cellulose Corp. / K-13, ThermoCon / R 3.75-inch",0.325,m2•RSI,0.33,m2•RSI,,2.43,,,0.9,54.5,kg/m3,2.071,kg/m2 at RSI1,ICC – 20200122– 001,industry_average,,
+5fe983,"ICE V3.0, 2019",5fe983,Rammed earth / Stabilized with 5% cement / no rebar [EU],0.061,kg,2.94,"m2 at 1""",,,,,,1900,kg/m3,48.26,"kg/m2-1""","ICE V3.0, 2019",,,
+e5a3bb,"ICE V3.0, 2019",e5a3bb,Polypropylene ICF webbing /,1.93,kg,5.12,m2 of ICF block,,,,,,1030,kg/m3,2.653884965,kg/m2 at 1.315 kg webbing per 0.4955 m2 block,"ICE V3.0, 2019",,,
+bd05f4,"ICE V3.0, 2020",bd05f4,Rammed earth / Stabilized with 8% cement / no rebar [EU],0.084,kg,4.05,"m2 at 1""",,,,,,1900,kg/m3,48.26,"kg/m2-1""","ICE V3.0, 2020",,,
+6877c8,LCA,6877c8,"Wood chip cement ICF / Nexcem, Faswall / 12"" R22 block",93,m3,76.13,m²,,58.86,,,,550,kg/m3,0.1856783367,m3/m2,LCA,product_specific,,
+cac908,LCA,cac908,"Wood chip cement ICF / Nexcem, Faswall / 14"" R28 block",93,m3,84.14,m²,,65.06,,,,550,kg/m3,0.2052234248,m3/m2,LCA,product_specific,,
+BRI007,LCA888510/R20170487,BRI007,"Brick, Waste-based / StoneCycling / Caramel / 215x102x65 mm, incl. 3/8"" mortar / EU",176,ton,31.48,m2,,,,,,1800,kg/m3,269,kgCO2/m3 mortar,LCA888510/R20170487,product_specific,SGS Intron BV,
+BRI000,MD-21011-EN,BRI000,"Brick, Clay / Matzen Tegl / Avg Face Brick, produce with Biogas  / 2-1/2"" x 5/8"" x 7-1/2"" (64 x 16 x 190 mm) incl. 3/8"" mortar [EU]",0.081,kg,15.34,m2,,,,,,1800,kg/m3,269,kgCO2/m3 mortar,MD-21011-EN,product_specific,Danish Technological Institute / EPD Danmark,150
+sl3g0r,MD-21034-EN,sl3g0r,"Eelgrass accoustic board / Søuld ApS / Søuld Acoustic Mats / Flame retardant, NRC 0.90 [EU]",0.566,kg,2.72,m²,,4.08,,,0.9,133,kg/m3,,,MD-21034-EN,product_specific,,
+WWC000,MD-22122-EN,WWC000,Wood cladding / BurntWood / ReUse with linseed oil treatment / 18 mm [EU],5.8,m2,5.83,m2,37.4,2.45,,,0.9,400,kg/m3,,,MD-22122-EN,product_specific,Danish Technological Institute,
+WWC001,MD-22122-EN,WWC001,Wood cladding / BurntWood / ReUse without surface treatment / 18 mm [EU],2.4,m2,2.39,m2,33.3,,,,0.9,400,kg/m3,,,MD-22122-EN,product_specific,Danish Technological Institute,
+2ecd60,"Melia et al LCA, 2014",2ecd60,"Clay Plaster, site mixed / 15 mm (9/16"") [EU]",0.88,m2 at 15mm,0.88,m2 at 15mm,,,,,,,,,,"Melia et al LCA, 2014",,,
+103ade,NEPD-1243-396-EN,103ade,"Foam glass aggregate / Glasopor AS / R 1.7-inch, 10-60 mm [EU]",6.96,m3,0.62,m2•RSI,,,,,,180,kg/m3,,,NEPD-1243-396-EN,product_specific,,
+LEC001,NEPD-1742-715-EN,LEC001,"Light expanded clay aggregate (LECA) / Leca Int'l / Leca ISO 10-20 / R 1.35-inch, 10-20 mm [EU]",61.5,m3,6.56,m2•RSI,,,,,,245,kg/m3,,,NEPD-1742-715-EN,product_specific,Norwegian EPD Foundation,
+LEC002,NEPD-2304-1052-EN,LEC002,"Light expanded clay aggregate (LECA) / Leca Int'l / Leca-sora 4-32 / R 1.2-inch, 4-32 mm [EU]",92.9,m3,11.15,m2•RSI,,,,,,275,kg/m3,,,NEPD-2304-1052-EN,product_specific,Norwegian EPD Foundation,
+LEC000,NEPD-2540-1277-EN,LEC000,"Light expanded clay aggregate (LECA) / Leca Int'l / Leca Arlita 10-20 / R 1.3-inch, 10-20 mm [EU]",65.5,m3,7.25,m2•RSI,,,,,,275,kg/m3,,,NEPD-2540-1277-EN,product_specific,Norwegian EPD Foundation,
+3416a8,"New York State Pollution Prevention Institute LCA, 2013",3416a8,Mycelium board / Ecovative  / Mycofoam / R 3.7-inch,275.38,m3,10.74,m2•RSI,,8.66,,,,121,kg/m3,4.719,kg/m2 at RSI1,"New York State Pollution Prevention Institute LCA, 2013",,,
+INS025,None,INS025,Wool batt / ISOLENA / Optimal batt / 5.5 inch / R 3.8-inch [EU],3,m2 at 135 mm,0.85,m²•RSI,1.217,1.1,,,0.9,18,kg/m3,,,None,product_specific,Agrodome,
+SIP000,Not yet published,SIP000,"SIP panels - EPS foam & OSB / SIPA / R-15 4.5"" panel [Industry Avg | N America]",11.1,m2•RSI,29.37,m2,24.09,,,28.54,0.9,17.804,kg/m2 at RSI1,16.8148,kg/m2 at two layers of 1/2 inch osb,Not yet published,industry_average,EPD Hub,
+SIP001,Not yet published,SIP001,"SIP panels - EPS foam & OSB / SIPA / R-23 6.5"" panel [Industry Avg | N America]",11.1,m2•RSI,45.07,m2,24.09,,,,0.9,17.804,kg/m2 at RSI1,16.8148,kg/m2 at two layers of 1/2 inch osb,Not yet published,industry_average,EPD Hub,
+SIP002,Not yet published,SIP002,"SIP panels - EPS foam & OSB / SIPA / R-30 8.25"" panel [Industry Avg | N America]",11.1,m2•RSI,58.72,m2,24.09,,,,0.9,17.804,kg/m2 at RSI1,16.8148,kg/m2 at two layers of 1/2 inch osb,Not yet published,industry_average,EPD Hub,
+SIP003,Not yet published,SIP003,"SIP panels - EPS foam & OSB / SIPA / R-38 10.25"" panel [Industry Avg | N America]",11.1,m2•RSI,74.37,m2,24.09,,,,0.9,17.804,kg/m2 at RSI1,16.8148,kg/m2 at two layers of 1/2 inch osb,Not yet published,industry_average,EPD Hub,
+SIP004,Not yet published,SIP004,"SIP panels - EPS foam & OSB / SIPA / R-45 12.25"" panel [Industry Avg | N America]",11.1,m2•RSI,88.1,m2,24.09,,,,0.9,17.804,kg/m2 at RSI1,16.8148,kg/m2 at two layers of 1/2 inch osb,Not yet published,industry_average,EPD Hub,
+2c53be,NRMCAEPD: 10020,2c53be,Aggregate / NRMCA / US Average [Industry Avg],9.52,MT,16.01,m³,,,,,,1682,kg/m3,,,NRMCAEPD: 10020,industry_average,,
+NSF000,NSI-20221101-002,NSF000,"Natural stone flooring / Natural Stone Institute / Includes limestone, granite, marble & quartzite / 1/2"" thickness / Mortar included / [Industry Avg, US]",22,m2,22,m2,,,,,,24.32,kg/m2,,,NSI-20221101-002,industry_average,Ecoform,
+n93fd1,NSI – 20221101 – 003,n93fd1,"Stone Cladding, incl. mortar & ties / Natural Stone Institute / Includes limestone, granite, marble, quartzite, sandstone  [Industry Avg | US & CA]",21.4,m²,21.4,m²,,,,,,89.78,"kg/m2 installed stone, mortar, connectors, water",,2507,NSI – 20221101 – 003,industry_average,SM Transparency Report [EPD]™ Program,75
+NSF001,POL-20230213-001,NSF001,"Granite flooring / Polycor Natural Stone / All granite products / 1/2"" thickness",24,m2,24,m2,,,,,,29.79,kg/m2,,,POL-20230213-001,product_specific,Ecoform,
+NSF002,POL-20230213-002,NSF002,"Limestone flooring / Polycor Natural Stone / All limestone products / 1/2"" thickness",9.18,m2,9.18,m2,,,,,,18.2,kg/m2,,,POL-20230213-002,product_specific,Ecoform,
+NSF003,POL-20230213-003,NSF003,"Marble flooring / Polycor Natural Stone / All marble products / 1/2"" thickness",32.7,m2,32.7,m2,,,,,,34.72,kg/m2,,,POL-20230213-003,product_specific,Ecoform,
+f02kr5,RTS_153_21,f02kr5,DeltaBeam Composite Beam / Peikko / D20-200 [EU],1.8289,kg,192.75,m,,,,,,105.39,kg/m,,,RTS_153_21,product_specific,,
+HTW001,RTS 180 22,HTW001,Heat Treated Wood Cladding / Lunawood / Planed Thermowood D / 20 mm [EU],128,m³,2.56,m²,652,,13.04,,0.9,390,kg/m3,,,RTS 180 22,product_specific,Building Information Foundation RTS,
+HTW002,RTS 180 22,HTW002,Heat Treated Wood Cladding / Lunawood / Planed Thermowood S / 20 mm [EU],96.1,m³,1.92,m²,634,,12.68,,0.9,390,kg/m3,,,RTS 180 22,product_specific,Building Information Foundation RTS,
+e06534,SCS-EPD-03576,e06534,Rubber flooring / ECOsurfaces / 6mm,5.9,m²,5.9,m²,,,,,,7.476,kg/m2,,,SCS-EPD-03576,product_specific,,
+63d778,SCS-EPD-04873,63d778,"MgO board 1/2"" / North American MgO / MagTech Ultra / 1/2""",7.4,m²,7.4,m²,,,,,,1000,kg/m3,,,SCS-EPD-04873,product_specific,,
+MGOB0X,"SCS-EPD-04873, EPD-NIBE-20210615-20084",MGOB0X,"MgO board  1/2"" [BEAM Avg]",,,7.05,m²,,,,,,,,,,"SCS-EPD-04873, EPD-NIBE-20210615-20084",beam_average,,
+LVT003,SCS-EPD-05530,LVT003,Luxury vinyl tile (LVT) / Congoleum / CLEO / 4.1mm,11,m2,11,m2,,,,,,0.81,g/cm2,,,SCS-EPD-05530,product_specific,SCS Global Services,15
+3a1205,SCS-EPD05752,3a1205,"Steel studs - Load bearing / Scafco / 600-S-137-54, 16 gauge",3.29,kg,8.57,"m of ""2x6"" stud",,,,,,7850,kg/m3,2.604,kg/m,SCS-EPD05752,product_specific,,
+58154c,SCS-EPD05752,58154c,"Steel studs - Non-loadbearing / Scafco / 362VS125-18, 20EQ gauge",3.29,kg,2.07,"m of ""2x4"" stud",,,,,,7850,kg/m3,0.6293817,kg/m,SCS-EPD05752,product_specific,,
+A23458,SCS-EPD-06489,A23458,Composite sheathing panel / Continuus Materials / Everboard / Fiberglass facing / 1/2-inch,7.5,m2,7.47,m2,,7.98,,8.87,0.9,8.79,kg/m2,,,SCS-EPD-06489,product_specific,SCS Global Services,75
+A23459,SCS-EPD-06489,A23459,Composite sheathing panel / Continuus Materials / Everboard / Paper facing / 1/2-inch,7.3,m2,7.29,m2,,8.27,9.1939005,,0.9,8.79,kg/m2,,,SCS-EPD-06489,product_specific,SCS Global Services,75
+SSS005,SCS-EPD-07103,SSS005,"Steel studs - Load bearing / Steel Framing Industry Assn / 600-S-137-54, 16 gauge [Industry Avg, US & CA]",2.44,kg,6.35,"m of ""2x6"" stud",,,,,,7850,kg/m3,2.604,kg/m,SCS-EPD-07103,industry_average,SCS Global,
+SSS006,SCS-EPD-07103,SSS006,"Steel studs - Non-loadbearing / Steel Framing Industry Assn / 362-S-137-54 20EQ gauge [Industry Avg, US+Can]",2.44,kg,1.54,"m of ""2x4"" stud",,,,,,7800,kg/m3,0.6293817,kg/m,SCS-EPD-07103,industry_average,SCS Global,
+LVT013,SCS-EPD-07131,LVT013,Luxury vinyl tile (LVT) / Altro / Altro Lavencia / 3.0 mm,10.938,m²,10.94,m²,,,,,,5103,g/m2,,,SCS-EPD-07131,product_specific,SCS Global,30
+XPS001,SCS-EPD-07175,XPS001,"XPS foam board / Kingspan / GreenGuard Type IV, Low GWP / R 5.0-inch, 25 psi",3.74,m2•RSI,3.74,m2•RSI,,,,,,25.63,kg/m3,,,SCS-EPD-07175,product_specific,SCS Global,75
+www111,SCS-EPD-07201,www111,"Window - double-glazed / Andersen / E-Series / Wood frame, aluminum cladding / USA",73.8,m²,73.8,m²,,,,,,,,,,SCS-EPD-07201,product_specific,SCS Global Services,
+WIJ000,SCS-EPD-07524,WIJ000,"Wood I joist / RedBuilt / Red-I Joists / Red I-45 / 11.875"" depth, 1.75 x 1.5"" LVL flanges",0.16,m,0.16,m,,,,5.48,0.9,,,3.28,kg/m,SCS-EPD-07524,product_specific,SCS Global,
+WIJ001,SCS-EPD-07524,WIJ001,"Wood I joist / RedBuilt / Red-I Joists / Red I-45 / 14"" depth, 1.75 x 1.5"" LVL flanges",2.9,m,2.9,m,,,,6.21,0.9,,,3.72,kg/m,SCS-EPD-07524,product_specific,SCS Global,
+WIJ002,SCS-EPD-07524,WIJ002,"Wood I joist / RedBuilt / Red-I Joists / Red I-45 / 16"" depth, 1.75 x 1.5"" LVL flanges",3.48,m,3.48,m,,,,7.45,0.9,,,4.46,kg/m,SCS-EPD-07524,product_specific,SCS Global,
+WIJ003,SCS-EPD-07524,WIJ003,"Wood I joist / RedBuilt / Red-I Joists / Red I-65 / 11.875"" depth, 2.5 x 1.5"" LVL flanges",4.17,m,4.17,m,,,,8.93,0.9,,,5.35,kg/m,SCS-EPD-07524,product_specific,SCS Global,
+WIJ004,SCS-EPD-07524,WIJ004,"Wood I joist / RedBuilt / Red-I Joists / Red I-65 / 14"" depth, 2.5 x 1.5"" LVL flanges",4.53,m,4.53,m,,,,9.7,0.9,,,5.81,kg/m,SCS-EPD-07524,product_specific,SCS Global,
+WIJ005,SCS-EPD-07524,WIJ005,"Wood I joist / RedBuilt / Red-I Joists / Red I-65 / 16"" depth, 2.5 x 1.5"" LVL flanges",4.88,m,4.88,m,,,,10.45,0.9,,,6.26,kg/m,SCS-EPD-07524,product_specific,SCS Global,
+LAM001,SCS-EPD-07525,LAM001,Laminated veneer lumber (LVL) / RedBuilt / RedLam LVL,177.23,m3,177.23,m3,,,,1055.51,0.9,593,kg/m3,,,SCS-EPD-07525,product_specific,SCS Global,
+TRU000,SCS-EPD-07526,TRU000,"Wood/steel hybrid floor truss / RedBuilt / Red-L Open-Web / 14"" deep, 1.5 x 3.5"" chords",11.1,m,11.1,m,,,,6.58,0.9,5.6,kg/m,,,SCS-EPD-07526,product_specific,SCS Global,
+TRU001,SCS-EPD-07526,TRU001,"Wood/steel hybrid floor truss / RedBuilt / Red-S Open-Web / 16"" deep, double 1.5 x 2.3"" LVL chords",14.08,m,14.08,m,,,,8.93,0.9,7.05,kg/m,,,SCS-EPD-07526,product_specific,SCS Global,
+TRU002,SCS-EPD-07526,TRU002,"Wood/steel hybrid floor truss / RedBuilt / Red-W Open-Web / 14"" deep, 1.5 x 4.25"" chords",13.5,m,13.5,m,,,,7.87,0.9,6.7,kg/m,,,SCS-EPD-07526,product_specific,SCS Global,
+MPS004,SCS-EPD-07578,MPS004,Metal Panels - Steel / AEP Span / All roofing & wall products / 24 gauge,2160,100 m2,21.6,m²,,,,,,7850,kg/m3,,,SCS-EPD-07578,product_specific,SCS Global,
+CCC000,SCS-EPD-08200,CCC000,"Composite cladding / Fiberon / Wildwood Cladding / 3/4""",14.7,m2,14.69,m2,,,,,,62.47,kg/m2,,,SCS-EPD-08200,product_specific,SCS Global,
+CCC001,SCS-EPD-08391,CCC001,"Composite cladding / Modern Mill / ACRE Cladding / 3/4""",30.9,m2,30.92,m2,,,,,,12.38,kg/m2,,,SCS-EPD-08391,product_specific,SCS Global,
+LVT002,SCS-EPD-08570,LVT002,Luxury vinyl tile (LVT) / Mohawk / Hot & Heavy Floating Tiles / 5.0 mm,11.59,m2,11.59,m2,,,,,,8.09,kg/m2,,,SCS-EPD-08570,product_specific,,
+INS048,SCS-EPD-09348,INS048,"Fiberglass batt & roll / Owens Corning / Unfaced, PINK Next Gen Fiberglas / R 3.6-inch avg.",0.659,m2 RSI1,0.66,m²•RSI,,,,,,,,,,SCS-EPD-09348,product_specific,SCS Global,75
+INS049,SCS-EPD-09349,INS049,"Fiberglass loose fill / Owens Corning / AttiCat, ProCat, ProPink / R 3.28-inch",0.9,m2 RSI1,0.87,m²•RSI,,,,,,0.567,kg/m2 at RSI 1,,,SCS-EPD-09349,product_specific,SCS Global,75
+95e2e7,SCS-EPD-09753,95e2e7,"XPS foam board / Owens Corning / Foamular NGX 250 / R 5.0/inch, 25 psi",8.46,m2•RSI,8.46,m2•RSI,,,,,,24.8,kg/m3,,,SCS-EPD-09753,product_specific,SCS Global,
+XPS002,SCS-EPD-09753,XPS002,"XPS foam board / Owens Corning / Foamular NGX CodeBord/C200 / R 5/inch, 20 psi",8.51,m2•RSI,8.51,m2•RSI,,,,,,24.8,kg/m3,,,SCS-EPD-09753,product_specific,SCS Global,
+a94mfe,"SCS-EPD-09753, 4789868895.101.1",a94mfe,XPS foam board / R 5.0/inch [BEAM Avg | US & CA],,m2•RSI,5.46,m2•RSI,,,,,,,,,,"SCS-EPD-09753, 4789868895.101.1",beam_average,,
+INS013,SEN-01_22,INS013,Hempcrete cast in place / Senini / Bio Beton Jet / R2.7-inch / 230 kg/m3 [EU],43.5,m2 at 30 cm,7.68,m²•RSI,61.8,9.83,10.92,,0.9,230,kg/m3,,,SEN-01_22,product_specific,EPDItaly,
+INS014,SEN-01_22,INS014,Hempcrete dry fill / Senini / Bio Beton Pronto / R2.7-inch / 190 kg/m3 [EU],33.7,m2 at 30 cm,5.96,m²•RSI,60.5,9.62,10.69,,0.9,190,kg/m3,,,SEN-01_22,product_specific,EPDItaly,
+INS015,SEN-01_22,INS015,Hempcrete block / Senini / Blocco Ambiente / 20x50x30 / R2.1-inch / 330 kg/m3 [EU],71.8,m2 at 30 cm,16.74,m²•RSI,65.95,13.84,15.37,,0.9,330,kg/m3,,,SEN-01_22,product_specific,EPDItaly,
+INS005,SmartEPD-2023-003-0010-01,INS005,Fiberglass batt / NAIMA /  R 4.4-inch [Industry Avg | N.America],1.01,m2•RSI,1.01,m2•RSI,,,,,,12.01,kg/m3,0.033,m,SmartEPD-2023-003-0010-01,industry_average,Smart EPD,75
+INS008,SmartEPD-2023-003-0010-01,INS008,Fiberglass loose fill / NAIMA /  R 2.2-inch [Industry Avg | N.America],0.988,m2•RSI,0.99,m2•RSI,,,,,,6.89,kg/m3,0.067,m,SmartEPD-2023-003-0010-01,industry_average,Smart EPD,75
+INS004,SmartEPD-2023-003-0012-01,INS004,Fiberglass board / NAIMA / R-3.2-inch  [Industry Avg | N.America],5,m2•RSI,5.02,m2•RSI,,,,,,57.6,kg/m3,,,SmartEPD-2023-003-0012-01,industry_average,Smart EPD,75
+INS020,SmartEPD-2023-008-0021-01,INS020,Mineral wool loose fill / NAIMA / R 3-inch [Industry Avg | N.America],1.9,m2•RSI,1.89,m2•RSI,,,,,,32.1,kg/m3,,,SmartEPD-2023-008-0021-01,industry_average,Smart EPD,75
+INS019,SmartEPD-2023-008-0022-01,INS019,Mineral wool board - light density / NAIMA / R 3.9-inch [Industry Avg | N.America],2.7,m2•RSI,2.68,m2•RSI,,,,,,38.3,kg/m3,,,SmartEPD-2023-008-0022-01,industry_average,Smart EPD,75
+INS018,SmartEPD-2023-008-0023-01,INS018,Mineral wool board - heavy density / NAIMA / R 4.4-inch [Industry Avg | N.America],6.8,m2•RSI,6.82,m2•RSI,,,,,,99.9,kg/m3,,,SmartEPD-2023-008-0023-01,industry_average,Smart EPD,75
+BAM002,SmartEPD-2023-009-0024-01,BAM002,"Bamboo plywood / Smith & Fong / Plyboo / 1/2"" (uncarved)",250,m3,3.18,"m2 @1/2""",,12.97,,,0.9,690,kg/m3,8.76,"kg/m2 at 1/2""",SmartEPD-2023-009-0024-01,product_specific,Smart EPD,
+BAM003,SmartEPD-2023-009-0024-01,BAM003,"Bamboo plywood / Smith & Fong / Plyboo / 3/4"" (uncarved)",250,m3,4.75,"m2 @1/2""",,19.42,,,0.9,690,kg/m3,13.11,"kg/m2 at 3/4""",SmartEPD-2023-009-0024-01,product_specific,Smart EPD,
+199253,S-P-00725,199253,Aerogel blanket / Aspen Aerogels / R9.6-inch,12.3,1m2 @ 10 mm,18.45,m2•RSI,,,,,,150,kg/m3,,,S-P-00725,product_specific,,
+21cbc7,S-P-01088,21cbc7,"Foam glass aggregate / Hasopor / R 1.7-inch, 10-60 mm [EU]",7.77,m3,0.62,m2•RSI,,,,,,180,kg/m3,,,S-P-01088,product_specific,,
+bbb025,S-P-01140,bbb025,"Int. Wall barrier, sheet / Isover / Vario KM Duplex / Moisture-variable / EU",0.621,m²,0.62,m²,,,,,,80,g/m2,,,S-P-01140,product_specific,International EPD System,
+bbb026,S-P-01141,bbb026,"Int. Wall barrier, sheet / Isover / Vario XTRA / Moisture-variable / EU",0.543,m²,0.54,m²,,,,,,80,g/m2,,,S-P-01141,product_specific,International EPD System,
+HTW000,S-P-01543,HTW000,"Heat Treated Wood Cladding / Abodo / Vulcan - Thermally Modified Timber, Surfaced / 20 mm [NZ]",243,m3,4.86,m²,,,,20.18,0.9,420,kg/m3,11,kg/m2,S-P-01543,product_specific,EPD Australasia Limited,
+g1g2cs,S-P-01642,g1g2cs,"Lime Plaster, NHL 3.5 / Kerakoll / Biocalce Intonaco line @ 2 cm [EU]",0.394,kg,10.24,m² @ 2 cm,,,,,,,,,,S-P-01642,product_specific,The International EPD System,
+d0rk2l,S-P-01928 (registration MR-ENV-EPD-ZDB-20200278-EN),d0rk2l,"Bamboo Cladding / Dasso / dassoXTR Bamboo RainClad® Siding / Shiplap, 3/4'' (19 mm)",1.049,kg,22.92,"m2 @3/4""",,29.61,,,0.9,1150,kg/m3,21.85,kg/m2,S-P-01928 (registration MR-ENV-EPD-ZDB-20200278-EN),product_specific,The International EPD® System,
+s0glec,S-P-01928 (registration MR-ENV-EPD-ZDB-20200278-EN),s0glec,"Bamboo Cladding / Dasso / dassoCTECH outdoor oiled Cladding / Shiplap, 5/8"" (18 mm)",1.019,kg,22.93,"m2 @5/8""",,30.49,,,0.9,1250,kg/m3,22.5,kg/m2,S-P-01928 (registration MR-ENV-EPD-ZDB-20200278-EN),product_specific,The International EPD® System,
+INS011,S-P-01961,INS011,Hemp fiber batt / Ekolution / Hemp fiber insulation / R 3.6-inch [EU],2.2,m2 @ 100 mm and 3.5 kg,0.87,m2•RSI,4.4,1.58,,,0.9,35,kg/m3,,,S-P-01961,product_specific,EPD International AB,75
+4gd03s,S-P-02278,4gd03s,"Clay Plaster, pre-packaged / Clayworks / Tonal or Smooth finishes @ 2 mm [EU]",0.068,kg,0.21,m² @ 2 mm,,,,,,1550,kg/m3,,,S-P-02278,product_specific,The International EPD System,
+ekda34,S-P-02278,ekda34,"Clay Plaster, pre-packaged / Clayworks / Rustic or Demi Rustic finish @ 2 mm [EU]",0.048,kg,0.15,m² @ 2 mm,,,,,,1550,kg/m3,,,S-P-02278,product_specific,The International EPD System,
+INS012,S-P-02290,INS012,Hemp fiber batt / KOBE-cz / ECO HempFlex insulation / R 3.6-inch [EU],2.2,m2 @ 100 mm and 3.5 kg,0.87,m2•RSI,4.4,1.58,,,0.9,35,kg/m3,,,S-P-02290,product_specific,EPD International AB,
+p3m1f1,S-P-03160,p3m1f1,"Cement ""Stucco"" Plaster / Beissier / Premixed Mortar @ 1/2"" [EU]",0.321,kg,5.3,"m² @ 1/2""",,,,,,1300,kg/m3,,,S-P-03160,product_specific,The International EPD System,
+LCP001,S-P-03516,LCP001,"Lime/Cork Plaster (Ext. & Int.) / Diasen / Diathonite Evolution, R3.2-inch / 3/4"" [EU]",0.793,kg,5.44,"m2 @0.01905 m (3/4"")",0.0495,0.31,,,0.9,360,kg/m3,6.858,"kg/m2 at 0.01905 (3/4"")",S-P-03516,product_specific,International EPD System,
+LCP002,S-P-03516,LCP002,"Lime/Cork Plaster (Ext. & Int.) / Diasen / Diathonite Thermactive.037, R3.9-inch / 3/4"" [EU]",0.873,kg,4.16,"m2 @0.01905 m (3/4"")",0.0906,0.39,,,0.9,250,kg/m3,4.7625,"kg/m2 at 0.01905 (3/4"")",S-P-03516,product_specific,International EPD System,
+LCP003,S-P-03516,LCP003,"Lime/Cork Plaster (Int.) / Diasen / Diathonite Acoustix, 3/4"" [EU]",0.858,kg,7.68,"m2 @0.01905 m (3/4"")",0.0786,0.63,,,0.9,470,kg/m3,8.95,"kg/m2 at 0.01905 (3/4"")",S-P-03516,product_specific,International EPD System,
+b4t02m,S-P-03854,b4t02m,Straw Bale / Wheat & barley straw / SNaB (UK) / R 2.8/inch [Industry Avg | EU],12.95,m3,0.67,m2•RSI,128.999477,6.71,,,0.9,100,kg/m3,5.2,kg/m2•RSI,S-P-03854,industry_average,EPD International AB,
+b0emco,S-P-04001,b0emco,"Clay-Lime Plaster, pre-packaged / Armourcoat / Clime @ 2 mm [EU]",0.215,kg,0.54,m² @ 2 mm,,,,,,,,2.5,kg/m2 coverage spec,S-P-04001,product_specific,The International EPD System,
+INS022,S-P-04468,INS022,Wool batt / Thermafleece / Cosywool Slab / R3.8-inch [EU],1,m2•RSI,1.03,m²•RSI,0.975,0.88,,,0.9,21,kg/m3,,,S-P-04468,product_specific,International EPD System,
+INS023,S-P-04468,INS023,Wool batt / Thermafleece / Cosywool Roll / R3.7-inch [EU],0.9,m2•RSI,0.9,m²•RSI,0.858,0.77,,,0.9,18,kg/m3,,,S-P-04468,product_specific,International EPD System,
+INS024,S-P-04468,INS024,Wool batt / Thermafleece / UltraWool Slab / R4.1-inch [EU],0.7,m2•RSI,0.71,m2•RSI,0.859,0.77,,,0.9,31,kg/m3,,,S-P-04468,product_specific,International EPD System,
+FIB002,S-P-05037,FIB002,"Fiber Cement siding / JamesHardie / Hardie Plank HZ10, Hardie Panel HZ10, Hardie Architectural Panel HZ10 / 8 mm",6.84,m2,6.84,m²,1.94,1.75,,,0.9,9.79,kg/m2,,,S-P-05037,product_specific,EPD International,50
+FIB003,S-P-05037,FIB003,"Fiber Cement siding / JamesHardie / Hardie Plank HZ5, Hardie Panel HZ5, Hardie Architectural Panel HZ5 / 8 mm",7.63,m2,7.63,m2,1.93,1.74,,,0.9,9.79,kg/m2,,,S-P-05037,product_specific,EPD International,50
+FIB004,S-P-05037,FIB004,Fiber Cement siding / JamesHardie / Hardie Shingle HZ10 /  6.3 mm,5.11,m2,5.11,m²,1.36,1.22,,,0.9,7.86,kg/m2,,,S-P-05037,product_specific,EPD International,50
+FIB005,S-P-05037,FIB005,Fiber Cement siding / JamesHardie / Hardie Shingle HZ5 / 6.3 mm,5.98,m2,5.98,m²,1.56,1.4,,,0.9,7.86,kg/m2,,,S-P-05037,product_specific,EPD International,50
+GRE000,S-P-05961,GRE000,"Green roof system / Knauf / Urbanscape Green Roof System / Extensive, min. 40 mm depth, Saturated weight 57.55 kg/m2 [EU]",7.73,m2,7.73,m2,,,,,,57.55,kg/m2 saturated,20.55,kg/m2 dry,S-P-05961,product_specific,International EPD System,
+HTW003,S-P-07182,HTW003,Heat Treated Wood Cladding / Russwood / Accoya profiled cladding / 20 mm [EU],1080,m3,21.6,m²,774,,15.48,,0.9,515,kg/m3,,,S-P-07182,product_specific,EPD International AB,60
+BAM000,S-P-08118,BAM000,"Bamboo Cladding / Lamboo / Rainscreen™ Facing System / 11/16"" (17 mm)",4.74,kg,57.02,m²,1.56,18.47,,,0.9,689,kg/m3,12.03,"kg/m2 at 11/16""",S-P-08118,product_specific,EPD International AB,
+BAM001,S-P-08118,BAM001,Bamboo Glulam / Lamboo / Structural Grade Product Systems,4.74,kg,3265.86,m³,1.56,,,,0.9,689,kg/m3,,,S-P-08118,product_specific,EPD International AB,
+Cel000,S-P-08315,Cel000,Cellulose / batt / Ekovilla / Ekovilla Slab / R3.7-inch [EU],1.36,m2•RSI,1.36,m2•RSI,1.91,1.72,,,0.9,40,kg/m3,,,S-P-08315,product_specific,EPD International AB,50
+WRT000,S-P-10277,WRT000,"Wood tube studs / Wood Tube // 1.5 x 2.5"" / Recycled paper, stud only [EU]",0.168,m,4.41,"m2 at 2.5""",1.7,40.16,,,0.9,0.625,kg/m li.,258.33,kg/ m3 of tube,S-P-10277,product_specific,International EPD System,
+INS003,S-P-10940,INS003,Compressed straw board / Durra Panel / Durra Wall & Ceiling Panels / 50 mm / R1.8-inch,5.7,m2,9.28,m²•RSI,25,36.45,,,0.9,,,,,S-P-10940,product_specific,EPD Australasia,
+WAL001,S-P-10940,WAL001,Straw board partition wall / Durra Panel / Durra Wall Panels / 50 mm [AUS],5.7,m2,5.73,m²,25,22.5,,,0.9,18.5,kg/m2,,,S-P-10940,product_specific,EPD Australasia,

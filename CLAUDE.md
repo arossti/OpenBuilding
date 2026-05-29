@@ -10,7 +10,7 @@ Open-source browser-native toolkit for embodied carbon (EC) assessments on Canad
 
 Read this before writing any code or prose that will be served by Pages or included in a data file an app fetches.
 
-- **No `CSI`, `MasterFormat`, or "Division(s)" terminology** in public code, UI strings, fetched JSON, or served doc files. The numeric 2-digit prefix convention stays (`03`, `06`, ...) under the field name `group_prefix` and the lookup path `schema/lookups/material-groups.json`. Labels are single neutral words ("Wood", "Thermal", "Finishes") — not the verbose industry-standard titles.
+- **No `CSI`, `MasterFormat`, or "Division(s)" terminology** in public code, UI strings, fetched JSON, or served doc files. Use **"Group"** for the 2-digit grouping (the established convention). The numeric 2-digit prefix convention stays (`03`, `06`, ...) under the field name `group_prefix` and the lookup path `schema/lookups/material-groups.json`. Labels are single neutral words ("Wood", "Thermal", "Finishes") — not the verbose industry-standard titles.
 - **No positioning as a port of MCE² or any NRCan / Crown-copyright tool.** BEAMweb ports BEAM (BfCA-owned). Historical references in changelog-style docs are factual record and fine; current-state prose should say "BEAM" only.
 - **Matrix is the exception.** `matrix.html` is a regulatory-compliance tool and legitimately cites NRCan, EnerGuide, HOT2000, ENERGY STAR, CHBA, CMHC, VBBL, COV Appendix II, NBC/NECB, etc. — those are programs and codes the tool documents, not brand claims.
 - When in doubt: **the concern is spider-trolls scraping the deployed Pages site**. Anything that doesn't ship to Pages (dev docs, archived PDF references, schema planning docs) is lower priority but still worth neutralising eventually.

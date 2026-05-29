@@ -11,6 +11,7 @@ import * as Viewer from "./canvas-viewer.mjs";
 import * as Store from "./shared/indexed-db-store.mjs";
 import * as TextJoin from "./shared/text-join.mjs";
 import * as Extract from "./epd/extract.mjs";
+import * as BeamColumns from "./shared/beam-columns.mjs";
 
 var _state = {
   fileName: "",
@@ -182,6 +183,7 @@ function init() {
   _renderForm();
   _bindFormChange();
   _bindCaptureButton();
+  _bindExportButton();
   _bindFileInput();
   _bindDragDrop();
   _bindKeyboard();
@@ -612,6 +614,79 @@ function _bindCaptureButton() {
         btn.disabled = false;
       });
   });
+}
+
+/* ── §17: Export — TSV row dump for paste into the BEAM sheet ──────────
+   Serialises the scraped candidate as one tab-separated row in exact
+   BEAM Database-DUMP.csv column order (A→BL) and shows it in a modal with
+   a Copy button. A modal (not a file download) so Safari's download
+   restrictions don't bite, and the user previews exactly what they'll paste. */
+function _bindExportButton() {
+  var btn = document.getElementById("epd-export-btn");
+  if (btn) btn.addEventListener("click", _openExportModal);
+  var close = document.getElementById("epd-export-close");
+  if (close) close.addEventListener("click", _closeExportModal);
+  var backdrop = document.getElementById("epd-export-backdrop");
+  if (backdrop) backdrop.addEventListener("click", _closeExportModal);
+  var copy = document.getElementById("epd-export-copy");
+  if (copy) copy.addEventListener("click", _copyExportRow);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") _closeExportModal();
+  });
+}
+
+function _openExportModal() {
+  var ta = document.getElementById("epd-export-text");
+  var backdrop = document.getElementById("epd-export-backdrop");
+  var modal = document.getElementById("epd-export-modal");
+  var status = document.getElementById("epd-export-status");
+  if (!ta || !modal) return;
+  ta.value = BeamColumns.recordToRow(_state.candidate || {});
+  if (status) status.textContent = "";
+  if (backdrop) backdrop.style.display = "";
+  modal.style.display = "";
+  ta.focus();
+  ta.select();
+}
+
+function _closeExportModal() {
+  var backdrop = document.getElementById("epd-export-backdrop");
+  var modal = document.getElementById("epd-export-modal");
+  if (backdrop) backdrop.style.display = "none";
+  if (modal) modal.style.display = "none";
+}
+
+function _copyExportRow() {
+  var ta = document.getElementById("epd-export-text");
+  var status = document.getElementById("epd-export-status");
+  if (!ta) return;
+
+  function ok() {
+    if (status) status.textContent = "✓ Copied — paste into a new row in the BEAM sheet";
+  }
+  function manual() {
+    // Fallback: select the field so the user can copy with the keyboard.
+    ta.focus();
+    ta.select();
+    var isMac = typeof navigator !== "undefined" && /Mac/i.test(navigator.platform || "");
+    if (status) status.textContent = "Selected — press " + (isMac ? "⌘C" : "Ctrl+C") + " to copy";
+  }
+  function execFallback() {
+    try {
+      ta.focus();
+      ta.select();
+      if (document.execCommand("copy")) ok();
+      else manual();
+    } catch (e) {
+      manual();
+    }
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(ta.value).then(ok, execFallback);
+  } else {
+    execFallback();
+  }
 }
 
 function _loadDraftOrSeed(sourceFile) {
