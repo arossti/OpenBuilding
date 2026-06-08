@@ -256,6 +256,8 @@ npm run serve                                                     # local dev se
 - ✅ **§19 Phase 1a — AY EPD ID shape-aware regex** (2026-06-08) — SHIPPED. Shape patterns for SmartEPD dotted-numeric, SCS-EPD, IBU `EPD-XXX-YYY-EN`, EPDITALY `YYYYMxxxxx`, BEPD, ITB/RTS, year-fractions before the loose label fallback. Lift: +299 matches (+2.1pp); 36.1% → 80.6% on AY. Canonical-30 71.0% (still clean).
 - ✅ **§19 Phase 1b — six new admin/methodology extractors** (2026-06-08) — SHIPPED. BA Owner, BB Prepared by, BE Verifier, BH LCA Method, BI LCA Software, BJ LCI Database all moved off 0%. Manufacturer block moved to `extractCommon`. Lift: +125 matches (+0.9pp).
 - ✅ **§19 Phase 1c — per-column comparison relaxations** (2026-06-08) — SHIPPED. Substring tolerance for org-name fields (BC/BF/BG/BA/BB/BE/BH/BI/BJ/J), year-prefix tolerance for G Expiry, case-insensitive default for non-unit fields. Metric correction reflecting semantic equivalence of variant BEAM forms — DB still receives parser's canonical form. Lift: +1,390 matches (+9.9pp). Per-field highlights: BI 10%→55%, BF 0%→46%, AZ 24%→46%, BE 3%→43%, BG 1%→42%, BC 23%→36%, G 22%→35%, J 2%→34%.
+- ✅ **R extractor fix + probe-pdf tool** (2026-06-08) — SHIPPED. Declared-unit extractor was writing verbose product descriptions ("Roll Formed Metal Wall and Roof Panels…") as the unit when its normalization failed. Added a shape-anchored fallback (number + unit-token) so more rows get clean values; preserved the legacy raw-line fallback so canonical-30 §7.6 isn't regressed. New `schema/scripts/_probe-pdf.mjs` for the systematic PDF-probing methodology Andy directed: look up known BEAM values in their actual EPDs to discover *why* parser fails (rather than guessing regex shapes). First probe: N Country is prose-only in single-manufacturer EPDs and absent in industry-averages.
+- 🔜 **Phase 2 systematic PDF probing** — for remaining 0% fields (I, K, L, N, O, BB, BK, AI–AS), follow §19.4.1 methodology: probe → design → verify. Each field gets its own evidence-based extractor.
 - ✅ **W conditional skip — Andy's biogenic rule** (2026-06-08) — SHIPPED. Steel/inorganic EPDs don't carry biogenic values, so W is skipped from the parity denominator on rows whose PDF text doesn't contain "biogenic". 3 rows skipped in current run.
 - 🔜 **§19 Phase 0b — §18 normalization in extractor** — commit `density.value_kg_m3 → value + units` + `impacts.gwp → carbon.stated.value_kgco2e` maps into `extract.mjs` (or the capture boundary). Pending §19.5 Mel confirmation on GWP target slot. Doesn't change Parity-B numbers (harness already normalizes) but unblocks Goal-B form expansion.
 - 🔜 **§19 Phase 1 remainder — string-normalization wins** — AZ EPD Type vocab (24.4%→target 60%), BC Operator (23.4%→target 60%), AT Material Type (37.7%→target 70%), G Expiry date formats (22.1%→target 50%+), O Markets, BF Standards, BG PCR. Target additional lift ≈ +1,500 matches → cumulative ≈ **24%**.
@@ -1745,6 +1747,19 @@ Phase 3 lift estimate: **+2,000 matches** → cumulative ≈ **50%** ← **targe
 **Phase 5 — the long tail + LLM-as-parser** (§14). Optional headroom. After Phase 3's 50%, additional gains across format variance in the 301-set diminish for pure-regex work. The internal LLM-as-parser path closes the format-variance gap on Phase 1–2 fields (manufacturer, dates, type, validation), nails multi-product disambiguation natively, and reaches the long-tail fields (specifications, notes, brand variants) at higher recall. §14 documents this as "the Last Mile"; Parity-B's Pass-1 numbers are the concrete justification.
 
 Phase 5 lift estimate: **+1,500–2,500 matches** if implemented across the weak fields → cumulative **≈ 62–69%**. (Headroom above that is bounded by genuine EPD-content variance, not architecture.)
+
+### 19.4.1. Methodology for the remaining 0% in-scope fields (Andy 2026-06-08)
+
+Phase 1c essentially exhausted what harness-side relaxations can do — fields still at 0% (`I`, `K`, `L`, `N`, `O`, `R`, `W`, `AI`, `AJ`, `AK`–`AS`, `BK`) are real extractor gaps, not metric artifacts. Andy 2026-06-08 directive: **"Look at known BEAM values, look up the PDF, discover why the parser can't find it."** Apply this methodology to every remaining multi-fail field instead of guessing regex shapes:
+
+1. Pick a row where BEAM has a populated value for the field (sheet1-beam.csv).
+2. Find the corresponding PDF (filename prefix = canonical epd.id).
+3. Probe the PDF text for what the EPD actually says — does it use a structured label, prose narrative, address block, or nothing at all? (Use `schema/scripts/_probe-pdf.mjs <path> <searchTerm…>`.)
+4. Design the extractor against the *real* EPD evidence; verify on canonical-30 (§7.6) + Parity-B.
+
+**First probe (N Country of Manufacture, Kalesnikoff CLT EPD 295):** the EPD has **no** "Country of manufacture" field. The country appears only in prose ("Located in Canada's West Kootney's mountains…", "procured from sustainably managed forests in Canada"). And a second probe on an industry-average EPD (EPD10092) found **no country prose at all** — averages don't have a single source country. So N extraction needs prose-pattern matching for single-manufacturer EPDs, and accepts non-extraction for industry-averages (whose BEAM value is BfCA-assigned region).
+
+This is the playbook for the rest of Phase 2: probe → design → verify.
 
 ### 19.5. Open questions + risks (flag before Phase 0)
 

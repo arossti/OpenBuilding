@@ -1483,10 +1483,27 @@ function extractNA(text, rec) {
     // strips superscripts on some EPDs) → "1 m³" / "1 m²" by scanning for
     // the same unit elsewhere in the doc.
     var cleanUnit = _normalizeDeclaredUnit(rawUnitLine, text);
+    // 2026-06-08: when _normalizeDeclaredUnit returns null AND the raw
+    // line is verbose (legacy behaviour wrote the entire product
+    // description as the unit, e.g. "Roll Formed Metal Wall and Roof
+    // Panels…"), try a shape-anchored match for a number + unit. This
+    // catches cases like "1000 m of AEP Span product…" → "1000 m" and
+    // "1 metric tonne (1,000 kg) of structural…" → "1 metric tonne".
+    if (!cleanUnit) {
+      var shapeM = rawUnitLine.match(
+        /(\d+(?:[.,]\d+)?)\s*(?:×|x)?\s*(metric\s+tons?|metric\s+tonnes?|tonnes?|tons?|kg|m\s*[²³]|m\s*\^?[23]|m[23]|mm|cm|cu\s*ft|cubic\s+(?:feet|metres?|meters?)|board\s+feet|bf|MSF|sq\s*ft|sf|ft\s*[²³]|ft\s*\^?[23]|ft[23]|ft|pieces?|boards?|pcs?\b)(?:\s*[@×]\s*\d+(?:\.\d+)?\s*[A-Za-z]+)?/i
+      );
+      if (shapeM) cleanUnit = shapeM[0].replace(/\s+/g, " ").trim();
+    }
+    // Preserve legacy capture (cleanUnit || rawUnitLine) so the canonical-30
+    // §7.6 contract isn't regressed on samples whose unit our regexes can't
+    // recognize yet. The shape-anchored fallback above gives more rows a
+    // clean value; if it fails too, we fall back to the raw line as before.
     _setPath(rec, "carbon.stated.per_unit", cleanUnit || rawUnitLine);
-    // Plumb the cleaned unit into impacts.functional_unit so the
-    // database viewer's index entry surfaces it (Database.md
-    // _indexEntryFromRecord reads impacts.functional_unit first).
+    // Plumb the cleaned unit into impacts.functional_unit so the database
+    // viewer's index entry surfaces it (Database.md _indexEntryFromRecord
+    // reads impacts.functional_unit first). Only plumb when CLEAN — the
+    // index entry must not show product-description prose.
     if (cleanUnit) _setPath(rec, "impacts.functional_unit", cleanUnit);
     // Number pattern allows US thousand-comma form ("7,800" for steel)
     // OR plain integer with ≥2 digits, with optional decimal. The
