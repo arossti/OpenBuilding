@@ -764,10 +764,14 @@ function extractCommon(text, rec) {
       var arr = _splitToCodes(raw);
       if (arr.length) {
         _setPath(rec, "provenance.markets_of_applicability", arr);
-      } else if (raw.length >= 2 && raw.length <= 60) {
-        // Free-text region label (e.g. "North America", "Worldwide",
-        // "EU & US"). Store as a one-element array so consumers can
-        // treat it uniformly with ISO-code arrays.
+      } else if (raw.length >= 2 && raw.length <= 60 && _looksLikeGeography(raw)) {
+        // Phase 2j (Andy 2026-06-08): geography-token guard. Probes showed
+        // labels like "Geographical scope" being followed by sector text
+        // ("Construction Sector", "Residential", "LCA Software LCI
+        // Databases") in many EPDs — the prior unguarded fallback stored
+        // these as O Markets, blocking later patterns and producing wrong
+        // values. Only accept the raw text when it contains a real geography
+        // indicator (country name, region keyword, ISO code).
         _setPath(rec, "provenance.markets_of_applicability", [raw]);
       }
     }
@@ -2155,6 +2159,17 @@ function _normalizeDeclaredUnit(raw, fullText) {
 
 function _toNum(s) {
   return parseFloat(String(s).replace(",", "."));
+}
+
+// Phase 2j: detect whether a captured "geographic scope" value actually
+// names a geography. Probes showed many EPDs use "Geographical scope" as
+// a heading followed by product-application sector text ("Construction
+// Sector", "Residential Multi-Family Commercial", etc.). Without this
+// guard, the O Markets extractor stored that sector text as the market,
+// blocking later correct-pattern matches and giving a wrong value.
+function _looksLikeGeography(s) {
+  if (!s) return false;
+  return /\b(?:USA?|U\.S\.A?\.?|United\s+States|CAN?|Canada|MEX|Mexico|EU|Europe|European|UK|GBR|Britain|United\s+Kingdom|Global|Worldwide|World[\s-]?wide|North\s+America|N\.A\.|Germany|Deutschland|DEU|France|FRA|Italy|Italia|ITA|Spain|Espa[ñn]a|ESP|Portugal|PRT|Netherlands|Holland|NLD|Belgium|BEL|Denmark|DNK|Sweden|SWE|Norway|NOR|Finland|FIN|Switzerland|Schweiz|CHE|Austria|Österreich|AUT|Poland|Polen|POL|Czech|Hungary|Slovakia|Romania|Russia|Ukraine|Iceland|Greece|Turkey|Japan|JPN|China|CHN|Korea|KOR|India|IND|Vietnam|Thailand|Malaysia|Singapore|Indonesia|Philippines|Australia|AUS|New\s+Zealand|NZL|Brazil|BRA|Argentina|Chile|Colombia|South\s+Africa|Egypt|Israel|UAE|Saudi|Iran|Iraq|Asia|Africa|South\s+America|Latin\s+America)\b/i.test(s);
 }
 
 function _splitToCodes(s) {

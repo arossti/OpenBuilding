@@ -235,12 +235,62 @@ const RELAXED_BY_COL = {
   BJ: "substring",   // LCI Database — same DB with/without version
   J:  "substring",   // Manufacturer — short name ⊂ full legal name
   AT: "substring",   // Material Type — "Clay Brick" ⊃ "Brick", "Cross-laminated timber" ⊃ "CLT"
-  N:  "substring",   // Countries of Manufacture — "Canada" ⊃ "CAN", "USA" ⊃ "US"
-  O:  "substring",   // Markets — "US & CA" partial overlap with parser's ISO arrays
+  N:  "marketTokens", // Countries of Manufacture — tokenize "Canada"/"CAN"/"CA" → CAN, set-compare
+  O:  "marketTokens", // Markets — "US & CA" vs "CAN, USA" vs "United States and Canada" all → {USA, CAN}
   R:  "unitNorm",    // GWP units per — BEAM "m3"/"m²"/"kg" vs parser "1 m³"/"1 cubic meter"
   AK: "numericApprox", // R-value/inch — BEAM rounds to 1-2dp; parser computes from λ (R/inch ≈ 0.1442/λ)
   AL: "numericApprox"  // Thermal conductivity W/(mK) — BEAM rounds; EPDs vary in precision
 };
+
+// Phase 2j (Andy 2026-06-08): tokenize a country/market string into a set of
+// canonical ISO-like codes. BEAM stores "US & CA" / "CA" / "EU" while the
+// parser may emit "CAN, USA" / "United States and Canada" / "Canada" / ISO
+// arrays — semantically identical but string-divergent. Used by N (Countries
+// of Manufacture) and O (Markets of Applicability) parity comparisons.
+function normalizeMarketTokens(s) {
+  if (s === null || s === undefined) return [];
+  const x = " " + String(s).toLowerCase().replace(/[&,;/]/g, " ") + " ";
+  const tokens = new Set();
+  const VARIANTS = [
+    [/\b(?:usa|u\.s\.a\.?|united\s+states(?:\s+of\s+america)?|u\.s\.|us)\b/, "USA"],
+    [/\b(?:can|canada|ca)\b/, "CAN"],
+    [/\b(?:mex|mexico)\b/, "MEX"],
+    [/\b(?:eu|europe|european\s+union)\b/, "EU"],
+    [/\b(?:uk|gbr|united\s+kingdom|britain|great\s+britain)\b/, "GBR"],
+    [/\b(?:global|worldwide|world[-\s]?wide|world)\b/, "WORLD"],
+    [/\b(?:north\s+america|n\.a\.|na)\b/, "NORTH_AMERICA"],
+    [/\b(?:germany|deutschland|deu|de)\b/, "DEU"],
+    [/\b(?:france|frankreich|fra|fr)\b/, "FRA"],
+    [/\b(?:italy|italia|ita|it)\b/, "ITA"],
+    [/\b(?:spain|espa[ñn]a|esp|es)\b/, "ESP"],
+    [/\b(?:portugal|prt|pt)\b/, "PRT"],
+    [/\b(?:netherlands|holland|nld|nl)\b/, "NLD"],
+    [/\b(?:belgium|belgique|bel|be)\b/, "BEL"],
+    [/\b(?:denmark|dnk|dk)\b/, "DNK"],
+    [/\b(?:sweden|swe|se)\b/, "SWE"],
+    [/\b(?:norway|nor|no)\b/, "NOR"],
+    [/\b(?:finland|fin|fi)\b/, "FIN"],
+    [/\b(?:switzerland|schweiz|suisse|che|ch)\b/, "CHE"],
+    [/\b(?:austria|österreich|aut|at)\b/, "AUT"],
+    [/\b(?:poland|polen|pol|pl)\b/, "POL"],
+    [/\b(?:japan|jpn|jp)\b/, "JPN"],
+    [/\b(?:china|chn|cn)\b/, "CHN"],
+    [/\b(?:korea|kor|kr)\b/, "KOR"],
+    [/\b(?:india|ind|in)\b/, "IND"],
+    [/\b(?:australia|aus|au)\b/, "AUS"],
+    [/\b(?:new\s+zealand|nzl|nz)\b/, "NZL"],
+    [/\b(?:brazil|bra|br)\b/, "BRA"]
+  ];
+  for (const [rx, iso] of VARIANTS) {
+    if (rx.test(x)) tokens.add(iso);
+  }
+  // Expand "North America" → {USA, CAN}.
+  if (tokens.has("NORTH_AMERICA")) {
+    tokens.delete("NORTH_AMERICA");
+    tokens.add("USA"); tokens.add("CAN");
+  }
+  return [...tokens].sort();
+}
 
 // Normalize a declared-unit string for comparison: case-fold, fold ³→3 / ²→2,
 // strip a leading "1 " / "1.0 " quantity prefix, and rewrite English unit prose
@@ -324,6 +374,22 @@ function compareCell(c, csvVal, pdfVal) {
     const ub = normalizeUnitForCompare(sb);
     if (ua.length >= 2 && ub.length >= 2 && (ua === ub || ua.includes(ub) || ub.includes(ua))) {
       return { verdict: "MATCH", delta: null };
+    }
+  }
+  if (relaxed === "marketTokens") {
+    // BEAM and parser write the same geography in different alphabets:
+    // "US & CA" / "CAN, USA" / "United States and Canada" / "Canada" / "CA"
+    // all reduce to {USA, CAN} or {CAN}. Match when token sets are equal
+    // OR one is a subset of the other (e.g., BEAM "CA" subset of parser
+    // "CAN, USA" — parser's broader extraction is not wrong, just more
+    // inclusive). Mirrors the substring tolerance pattern used in Phase 1c.
+    const ta = normalizeMarketTokens(sa);
+    const tb = normalizeMarketTokens(sb);
+    if (ta.length > 0 && tb.length > 0) {
+      const setA = new Set(ta), setB = new Set(tb);
+      const allInB = ta.every(t => setB.has(t));
+      const allInA = tb.every(t => setA.has(t));
+      if (allInA || allInB) return { verdict: "MATCH", delta: null };
     }
   }
   if (relaxed === "numericApprox") {
