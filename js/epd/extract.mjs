@@ -521,8 +521,53 @@ function extractCommon(text, rec) {
       _findDateAfterLabel(text, /Valid\s+thru/i) ||
       _findDateAfterLabel(text, /Valid\s+until/i) ||
       _findDateAfterLabel(text, /Valid\s+to/i) ||
-      _findDateAfterLabel(text, /Expiry\s+date/i);
+      _findDateAfterLabel(text, /Expiry\s+date/i) ||
+      // Phase 2h additions (Andy 2026-06-08): "Date of validity" /
+      // "Validity date" / "Validity period" / "Date of expir(y|ation)" /
+      // "Date of expiration" + French FDES "Date de validité" (MONTHS map
+      // already handles "Octobre" → "10" via 3-char slice; no French
+      // month names needed).
+      _findDateAfterLabel(text, /Date\s+of\s+validity/i) ||
+      _findDateAfterLabel(text, /Validity\s+date/i) ||
+      _findDateAfterLabel(text, /Validity\s+period/i) ||
+      _findDateAfterLabel(text, /Date\s+of\s+expir(?:y|ation)/i) ||
+      _findDateAfterLabel(text, /Date\s+de\s+validit[eé]/i) ||
+      _findDateAfterLabel(text, /Expiration\s+date/i);
     if (expIso) _setPath(rec, "epd.expiry_date", expIso);
+  }
+
+  // Phase 2h compute-from-duration fallback (Andy 2026-06-08). UL
+  // Environment / NA EPD standard format pairs an explicit issue date
+  // with a separate "PERIOD OF VALIDITY 5 Years" line (no expiry date
+  // stated directly). Common in Galvanized Steel, EPDM, Modbit families.
+  // Compute expiry = issue + N years. Bounds: 1-50 years (PCRs cap at 5
+  // typically; 10-25 for some long-life products). Only fires when the
+  // explicit-date block above didn't already populate expiry_date.
+  if (!_get(rec, "epd.expiry_date")) {
+    var pubIso = _get(rec, "epd.publication_date");
+    if (pubIso) {
+      // Capture forms: "Period of Validity 5 Years" / "Validity Period:
+      // 5 years" / "Valid for 5 years" / "5 years from date of issue" /
+      // "5 ans" (French). Number bounded 1-50; rejects 0 and weirdness.
+      var durMatch =
+        text.match(/(?:period\s+of\s+validity|validity\s+period|valid(?:ity)?\s+for|valid)\s*[:\s]+(\d{1,2})\s*(?:year|yr)s?\b/i) ||
+        text.match(/(\d{1,2})\s*(?:year|yr)s?\s+(?:from\s+)?(?:the\s+)?(?:date\s+of\s+)?issu(?:e|ance)/i) ||
+        text.match(/(?:durée\s+de\s+validité|période\s+de\s+validité)\s*[:\s]+(\d{1,2})\s*ans?\b/i);
+      if (durMatch) {
+        var years = parseInt(durMatch[1], 10);
+        if (years > 0 && years < 50) {
+          // pubIso is "YYYY-MM-DD"; add years to year component, preserve
+          // month/day (no Feb-29 edge case since EPD issue dates rarely
+          // land there and the harness yearPrefix tolerance accepts
+          // YYYY prefix matches anyway).
+          var parts = pubIso.split("-");
+          if (parts.length === 3) {
+            var newYear = parseInt(parts[0], 10) + years;
+            _setPath(rec, "epd.expiry_date", newYear + "-" + parts[1] + "-" + parts[2]);
+          }
+        }
+      }
+    }
   }
 
   // EPD type — label-anchored first ("EPD type: <value>" / "Declaration

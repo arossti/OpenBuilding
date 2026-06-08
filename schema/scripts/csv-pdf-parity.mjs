@@ -308,6 +308,12 @@ function compareCell(c, csvVal, pdfVal) {
     const yb = /^\d{4}(-\d{2})?$/.exec(sb);
     if (ya && sb.startsWith(sa)) return { verdict: "MATCH", delta: null };
     if (yb && sa.startsWith(sb)) return { verdict: "MATCH", delta: null };
+    // Phase 2h addition: BEAM also stores "MM-YYYY" (20 rows) — accept
+    // when parser's "YYYY-MM-DD" starts with the rearranged "YYYY-MM".
+    const mmyyA = /^(\d{2})-(\d{4})$/.exec(sa);
+    const mmyyB = /^(\d{2})-(\d{4})$/.exec(sb);
+    if (mmyyA && sb.startsWith(mmyyA[2] + "-" + mmyyA[1])) return { verdict: "MATCH", delta: null };
+    if (mmyyB && sa.startsWith(mmyyB[2] + "-" + mmyyB[1])) return { verdict: "MATCH", delta: null };
   }
   if (relaxed === "unitNorm") {
     // Declared/functional unit string. BEAM stores the bare short form ("m3",
