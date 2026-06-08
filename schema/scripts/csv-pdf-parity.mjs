@@ -237,7 +237,9 @@ const RELAXED_BY_COL = {
   AT: "substring",   // Material Type — "Clay Brick" ⊃ "Brick", "Cross-laminated timber" ⊃ "CLT"
   N:  "substring",   // Countries of Manufacture — "Canada" ⊃ "CAN", "USA" ⊃ "US"
   O:  "substring",   // Markets — "US & CA" partial overlap with parser's ISO arrays
-  R:  "unitNorm"     // GWP units per — BEAM "m3"/"m²"/"kg" vs parser "1 m³"/"1 cubic meter"
+  R:  "unitNorm",    // GWP units per — BEAM "m3"/"m²"/"kg" vs parser "1 m³"/"1 cubic meter"
+  AK: "numericApprox", // R-value/inch — BEAM rounds to 1-2dp; parser computes from λ (R/inch ≈ 0.1442/λ)
+  AL: "numericApprox"  // Thermal conductivity W/(mK) — BEAM rounds; EPDs vary in precision
 };
 
 // Normalize a declared-unit string for comparison: case-fold, fold ³→3 / ²→2,
@@ -316,6 +318,18 @@ function compareCell(c, csvVal, pdfVal) {
     const ub = normalizeUnitForCompare(sb);
     if (ua.length >= 2 && ub.length >= 2 && (ua === ub || ua.includes(ub) || ub.includes(ua))) {
       return { verdict: "MATCH", delta: null };
+    }
+  }
+  if (relaxed === "numericApprox") {
+    // Number stored as string; accept ±5% relative + 0.01 absolute floor.
+    // For AK/AL the BEAM value is hand-picked (industry-average thickness,
+    // rounded to 1-2dp) while the parser computes from λ — exact string
+    // match is unrealistic but agreement within 5% is the right semantic.
+    const na = parseFloat(sa);
+    const nb = parseFloat(sb);
+    if (Number.isFinite(na) && Number.isFinite(nb)) {
+      const tol = Math.max(0.05 * Math.max(Math.abs(na), Math.abs(nb)), 0.01);
+      if (Math.abs(na - nb) <= tol) return { verdict: "MATCH", delta: null };
     }
   }
   return { verdict: "MISMATCH", delta: `beam=${fmt(a)} pdf=${fmt(b)}` };

@@ -1,6 +1,6 @@
 # Parity B — BEAM CSV ↔ EPD-parser extraction (Pass 1)
 
-_Generated 2026-06-08T22:03:15.554Z by `schema/scripts/csv-pdf-parity.mjs`._
+_Generated 2026-06-08T22:28:29.678Z by `schema/scripts/csv-pdf-parity.mjs`._
 
 For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness parses the PDF and compares the parser's extracted values against the populated BEAM cells per field. Tolerances: numbers ±0.5% + 0.01 absolute floor; strings trim + case-insensitive; units trim + exact. **Scoring scope** (Andy 2026-06-08, §19): only the EPD-extractable columns are in the parity %. Counted: `G, I, J, K, L, N, O, Q, R, W, AG, AH, AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AS, AT, AY, AZ, BA, BB, BC, BD, BE, BF, BG, BH, BI, BJ, BK`. Out-of-scope (BfCA-internal flags, BfCA-derived units/values, BfCA-computational biogenic block, BfCA taxonomy, internal notation, structural placeholders): everything else.
 
@@ -22,8 +22,8 @@ For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness 
 ## Parity
 
 - Rows at **100% parity**: **0/671** (0.0%)
-- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **4049/14100** (28.7%)
-- Average per-row coverage: **28.9%**
+- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **4075/14100** (28.9%)
+- Average per-row coverage: **29.1%**
 
 ## Per-field match rate (descending)
 
@@ -51,9 +51,10 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 | N | Countries of Manufacture | str | 123 / 487 | 25.3% |
 | AG | Density | str | 89 / 615 | 14.5% |
 | BA | EPD Owner | str | 68 / 515 | 13.2% |
+| AL | k, Thermal Conductivity | str | 14 / 113 | 12.4% |
+| AK | R-value / inch | str | 14 / 130 | 10.8% |
 | Q | Stated EPD kgCO2e / unit | str | 55 / 671 | 8.2% |
 | O | Markets of Applicability | str | 34 / 665 | 5.1% |
-| AL | k, Thermal Conductivity | str | 2 / 113 | 1.8% |
 | AQ | Depth (m) | str | 1 / 115 | 0.9% |
 | K | Product Brand Name | str | 1 / 613 | 0.2% |
 | I | Material | str | 0 / 671 | 0.0% |
@@ -61,7 +62,6 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 | W | GWP-bio from EPD | str | 0 / 86 | 0.0% |
 | AI | Addn'l factors | str | 0 / 182 | 0.0% |
 | AJ | Addn'l factor units | str | 0 / 191 | 0.0% |
-| AK | R-value / inch | str | 0 / 130 | 0.0% |
 | AM | Moisture content % | str | 0 / 12 | 0.0% |
 | AN | Mass (kg) | str | 0 / 6 | 0.0% |
 | AO | Length (m) | str | 0 / 56 | 0.0% |
@@ -96,11 +96,11 @@ Each EPD below maps to >1 BEAM row but the parser emits one record per PDF — s
 | 47884246341061 | 5 | 20.3% | 1.4pp |
 | 47905509341011 | 5 | 35.4% | 3.8pp |
 | epd338 | 4 | 16.1% | 3.6pp |
-| 47906780841011 | 4 | 24.6% | 1.8pp |
+| 47906780841011 | 4 | 25.5% | 5.5pp |
 | epd10786 | 4 | 19.6% | 8.7pp |
 | 40298012 | 4 | 28.0% | 0.0pp |
 | sp05037 | 4 | 27.9% | 3.8pp |
-| epdste20150327ibd1en | 4 | 10.7% | 0.6pp |
+| epdste20150327ibd1en | 4 | 17.4% | 6.4pp |
 | cim20191223001 | 3 | 13.7% | 10.0pp |
 | 47884246341031 | 3 | 35.7% | 0.0pp |
 | ep397 | 3 | 19.2% | 0.0pp |

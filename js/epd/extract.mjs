@@ -810,10 +810,15 @@ function extractCommon(text, rec) {
 
   // AL k Thermal Conductivity W/(mK) — shape-anchored on the unit string
   // itself (W/(m·K) is domain-specific, low false-positive risk). Catches
-  // both labeled forms ("Thermal conductivity λ = 0.034 W/(m·K)") and
-  // table-cell forms ("0.034 W/m·K" in product specs).
+  // labeled forms ("Thermal conductivity λ = 0.034 W/(m·K)"), table-cell
+  // forms ("0.034 W/m·K"), and labeled-without-unit forms ("λ = 0.034",
+  // "lambda 0.034", "k = 0.040") — common in IBU/EU declaration tables
+  // where the unit appears in a column header above the value.
   if (!_get(rec, "physical.thermal.conductivity_w_mk")) {
-    var lambda = text.match(/(\d+\.\d{2,4})\s*W\s*\/?\s*\(?\s*m\s*[·\.\*\-]?\s*K\)?/i);
+    var lambda =
+      text.match(/(\d+\.\d{2,4})\s*W\s*\/?\s*\(?\s*m\s*[·\.\*\-]?\s*K\)?/i) ||
+      text.match(/(?:thermal\s+conductivity|\bλD?\b|\blambda\b|\bk[-\s]?value)\s*(?:declared\s+value\s*)?[:=]\s*(\d+\.\d{2,4})/i) ||
+      text.match(/(?:thermal\s+conductivity|\bλD?\b|\blambda\b)\s+(\d+\.\d{2,4})\b/i);
     if (lambda) {
       var lv = parseFloat(lambda[1]);
       // Sanity: thermal conductivity for building materials 0.015 to 1.0 W/mK
@@ -821,16 +826,40 @@ function extractCommon(text, rec) {
     }
   }
 
-  // AK R-value per inch (imperial) — common in NA insulation EPDs. Often
-  // "R-value: 5 per inch" or "R-X.X/inch" or in product spec tables.
+  // AK R-value per inch (imperial). Three tiers, applied in order:
+  //   1. Direct extraction — labeled or shape patterns ("R-5 per inch
+  //      thickness", "R-value: 4.7 per inch", "R-X.X/inch").
+  //   2. Compute from λ — when AL Thermal Conductivity was extracted above,
+  //      R/inch ≈ 0.1442 / λ (Andy 2026-06-08: R = RSI × 5.678; 1 inch =
+  //      0.0254 m; so R/inch = 0.0254 × 5.678 / λ = 0.1442 / λ).
+  //   3. Skipped — third tier (back-calculate from RSI + thickness) is the
+  //      BfCA judgment call (industry-average EPDs cover multi-thickness
+  //      product lines; BEAM picks a representative thickness, parser can't).
   if (!_get(rec, "physical.thermal.r_value_per_inch_imperial")) {
     var rval =
+      // labeled forms ("R-value: 5 per inch", "R-value 5/inch")
       text.match(/R[-\s]*value\s*(?:per\s+inch|\/\s*in(?:ch)?)\s*[:\s]+(\d+(?:\.\d+)?)/i) ||
-      text.match(/R[-\s]*value[:\s]+(\d+(?:\.\d+)?)\s*(?:per\s+inch|\/\s*in(?:ch)?)/i);
+      text.match(/R[-\s]*value[:\s]+(\d+(?:\.\d+)?)\s*(?:per\s+inch|\/\s*in(?:ch)?)/i) ||
+      // shape forms (Foamular: "thermal resistance of R-5 per inch thickness")
+      text.match(/\bR[-\s]?(\d+(?:\.\d+)?)\s+per\s+inch(?:\s+thickness)?/i) ||
+      // slash forms ("R-3.8/inch")
+      text.match(/\bR[-\s]?(\d+(?:\.\d+)?)\s*\/\s*inch\b/i);
     if (rval) {
       var rv = parseFloat(rval[1]);
       // R-value/inch typically 2-8 for building insulation
       if (rv > 1 && rv < 12) _setPath(rec, "physical.thermal.r_value_per_inch_imperial", rv);
+    }
+  }
+  // Tier 2 — compute from λ when direct extraction failed. Bounded to
+  // insulation range (0.015 < λ < 0.1) so non-insulation EPDs whose AL was
+  // populated by a structural value don't get a bogus R/inch stamp.
+  if (!_get(rec, "physical.thermal.r_value_per_inch_imperial")) {
+    var lam = _get(rec, "physical.thermal.conductivity_w_mk");
+    if (lam != null && lam > 0.015 && lam < 0.1) {
+      var computed = 0.1442 / lam;
+      if (computed > 1 && computed < 12) {
+        _setPath(rec, "physical.thermal.r_value_per_inch_imperial", Math.round(computed * 100) / 100);
+      }
     }
   }
 
