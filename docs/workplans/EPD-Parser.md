@@ -1604,7 +1604,7 @@ After normalization: scrape a canonical EPD → Export (EPD-Parser) shows densit
 
 ### 19.1. The Pass-1 run (what we measured)
 
-Inputs: Jen's `BEAM Database April 20.csv` (the more current BEAM export, ground truth) + the 301-PDF `docs/PDF References/Confirmed EPDs (as listed in BEAM)/` folder (filenames prefixed with the EPD ID, e.g. `EPD10312 - …pdf`).
+Inputs: `ART Database - Materials.csv` (Andy's current BEAM export, the gold-standard ground truth — renamed from `BEAM Database-DUMP.csv` 2026-06-08, +5 rows over Jen's prior April-20 export: ART001-004 + RRR117) + the 301-PDF `docs/PDF References/Confirmed EPDs (as listed in BEAM)/` folder (filenames prefixed with the EPD ID, e.g. `EPD10312 - …pdf`).
 
 Alignment: filename prefix → canonical `epd.id` (§16.1.1 canonicalization), joined to BEAM col AY (canonicalized the same way). Multi-product expected (one PDF → N BEAM rows). Comparison scope: the 37 EPD-extractable columns defined in §19.1.1 (everything else — BfCA-internal flags, BfCA-curated naming, BfCA-derived units/values, BfCA-computational biogenic derivations, BfCA taxonomy, structural placeholders — is silently out of the parity %). §18 normalization inlined into the harness — `density.value_kg_m3 → density.value + units="kg/m3"`; `impacts.gwp_kgco2e.total.value → carbon.stated.value_kgco2e`.
 

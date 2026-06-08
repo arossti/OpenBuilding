@@ -618,8 +618,8 @@ function _bindCaptureButton() {
 
 /* ── §17: Export — TSV row dump for paste into the BEAM sheet ──────────
    Serialises the scraped candidate as one tab-separated row in exact
-   BEAM Database-DUMP.csv column order (A→BL) and shows it in a modal with
-   a Copy button. A modal (not a file download) so Safari's download
+   ART Database - Materials.csv column order (A→BL) and shows it in a modal
+   with a Copy button. A modal (not a file download) so Safari's download
    restrictions don't bite, and the user previews exactly what they'll paste. */
 function _bindExportButton() {
   var btn = document.getElementById("epd-export-btn");

@@ -1,7 +1,7 @@
 /**
- * beam-columns.mjs — canonical BEAM Database-DUMP.csv column map (A → BL).
+ * beam-columns.mjs — canonical ART Database - Materials.csv column map (A → BL).
  *
- * Single source of truth for the DUMP column ORDER and the material-record
+ * Single source of truth for the BEAM column ORDER and the material-record
  * field each column corresponds to. Used by the EPD-Parser "Export" row dump
  * (js/epdparser.mjs) to serialise a scraped candidate record as one delimited
  * row whose column order matches the BEAM spreadsheet EXACTLY, so the team can
@@ -10,11 +10,11 @@
  *
  * The importer (schema/scripts/beam-csv-to-json.mjs) is the historical origin
  * of this CSV-column ↔ JSON-path mapping; this module mirrors it for the
- * reverse direction. Keep the two in sync — if a DUMP column or its target
+ * reverse direction. Keep the two in sync — if a BEAM column or its target
  * path changes in the importer, change it here too. (Migrating the importer +
  * parity harness to consume THIS module is a documented follow-up.)
  *
- * EVERY DUMP column A→BL appears here in order — including columns the importer
+ * EVERY BEAM column A→BL appears here in order — including columns the importer
  * ignores (the AA/AD common-unit repeats and the excluded classification
  * column AX). They emit as empty cells so a pasted row stays aligned under the
  * BEAM headers; dropping them would shift every later column left by one.

@@ -1,6 +1,6 @@
 # Parity B — BEAM CSV ↔ EPD-parser extraction (Pass 1)
 
-_Generated 2026-06-08T21:27:23.376Z by `schema/scripts/csv-pdf-parity.mjs`._
+_Generated 2026-06-08T22:03:15.554Z by `schema/scripts/csv-pdf-parity.mjs`._
 
 For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness parses the PDF and compares the parser's extracted values against the populated BEAM cells per field. Tolerances: numbers ±0.5% + 0.01 absolute floor; strings trim + case-insensitive; units trim + exact. **Scoring scope** (Andy 2026-06-08, §19): only the EPD-extractable columns are in the parity %. Counted: `G, I, J, K, L, N, O, Q, R, W, AG, AH, AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AS, AT, AY, AZ, BA, BB, BC, BD, BE, BF, BG, BH, BI, BJ, BK`. Out-of-scope (BfCA-internal flags, BfCA-derived units/values, BfCA-computational biogenic block, BfCA taxonomy, internal notation, structural placeholders): everything else.
 
@@ -8,14 +8,14 @@ For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness 
 
 | | count |
 |---|---:|
-| CSV total rows | 821 |
-| CSV rows with `epd.id` | 777 |
-| CSV distinct canonical `epd.id` | 347 |
+| CSV total rows | 825 |
+| CSV rows with `epd.id` | 781 |
+| CSV distinct canonical `epd.id` | 349 |
 | PDFs in folder | 302 |
 | PDFs distinct canonical `epd.id` | 301 |
 | **EPDs matched in both** | **294** |
 | **BEAM rows scored** | **671** |
-| BEAM rows excluded (no PDF) | 150 |
+| BEAM rows excluded (no PDF) | 154 |
 | PDF-only (no BEAM row) | 7 |
 | Parse errors | 0 |
 
@@ -107,7 +107,7 @@ Each EPD below maps to >1 BEAM row but the parser emits one record per PDF — s
 
 ## CSV-only canonical `epd.id`s (no PDF found — excluded from parity)
 
-53 EPD IDs in the BEAM CSV have no matching PDF in the folder. Sample (first 30): `47871687091011, 20160601, epd10270, epd206, epd034, epd194, epd195, 47871090181021, notyetpublished, 113452781012, 47887534511051, 47873196881011, , bfcastudytally, bolinsmith2011lcaassessmentofacqtreatedlumberjournalofcleanerproduction, benalonetallca2019, fernandesetallca2019, april2018, arehartetal2020lca, meliaetallca2014, newyorkstatepollutionpreventioninstitutelca2013, fernandesetallca2020, fromicedatabasev3, icev302019, icev302020, 01001, 01002, 01004, 47897969421282, cenia01032024` ….
+55 EPD IDs in the BEAM CSV have no matching PDF in the folder. Sample (first 30): `47871687091011, 20160601, epd10270, epd206, epd034, epd194, epd195, 47871090181021, notyetpublished, 113452781012, 47887534511051, 47873196881011, , bfcastudytally, bolinsmith2011lcaassessmentofacqtreatedlumberjournalofcleanerproduction, benalonetallca2019, fernandesetallca2019, april2018, arehartetal2020lca, meliaetallca2014, newyorkstatepollutionpreventioninstitutelca2013, fernandesetallca2020, fromicedatabasev3, icev302019, icev302020, epd540, epd539, 01001, 01002, 01004` ….
 
 
 ## Sheets

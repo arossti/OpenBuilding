@@ -39,7 +39,7 @@ import { BEAM_COLUMNS, cellValue, getPath } from "../../js/shared/beam-columns.m
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_DIR = resolve(__dirname, "..");
 const REPO_ROOT  = resolve(__dirname, "..", "..");
-const DEFAULT_CSV = join(REPO_ROOT, "docs", "csv files from BEAM", "BEAM Database April 20.csv");
+const DEFAULT_CSV = join(REPO_ROOT, "docs", "csv files from BEAM", "ART Database - Materials.csv");
 const DEFAULT_PDF_ROOT = join(REPO_ROOT, "docs", "PDF References", "Confirmed EPDs (as listed in BEAM)");
 const DEFAULT_OUT_DIR = join(REPO_ROOT, "docs", "workplans", "parity-B");
 const LOOKUPS_DIR = join(SCHEMA_DIR, "lookups");

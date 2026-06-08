@@ -56,7 +56,7 @@ No per-app `.css` files — if you find yourself creating one, add rules to `bfc
 - **Source of truth**: `schema/materials/*.json` (8 files, 821 records, one file per 2-digit material group: 03-concrete, 04-masonry, 05-metals, 06-wood, 07-thermal, 08-openings, 09-finishes, 31-earthwork)
 - `schema/materials/index.json` — lightweight picker catalogue (8 fields per entry)
 - `schema/material.schema.json` — Draft 2020-12 validator, sparse-aware
-- `schema/scripts/beam-csv-to-json.mjs` — importer (reads `docs/csv files from BEAM/BEAM Database-DUMP.csv`)
+- `schema/scripts/beam-csv-to-json.mjs` — importer (reads `docs/csv files from BEAM/ART Database - Materials.csv`)
 - `schema/scripts/validate.mjs` — zero-dep walker; run after any schema change
 - `schema/lookups/*.json` — enum + inference tables (`material-groups.json`, `country-codes.json`, `material-type-to-group.json`, `display-name-keywords.json`, `typical-elements.json`, `lifecycle-stages.json`)
 - **Runtime path**: Pages staging step copies `schema/materials/*` + `schema/material.schema.json` + `schema/sample.json` into `_site/data/schema/` so apps can fetch them with relative paths. Local dev: `npm run stage:data` at repo root produces the same layout in `data/`.

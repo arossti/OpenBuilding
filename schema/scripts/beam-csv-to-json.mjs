@@ -29,7 +29,7 @@ const SCHEMA_DIR = resolve(__dirname, "..");
 const REPO_ROOT  = resolve(__dirname, "..", "..");
 // Source CSV lives under docs/ with the rest of the BEAM reference exports so
 // that docs/csv files from BEAM/ is the single spot for raw BEAM workbook dumps.
-const CSV_PATH = join(REPO_ROOT, "docs", "csv files from BEAM", "BEAM Database-DUMP.csv");
+const CSV_PATH = join(REPO_ROOT, "docs", "csv files from BEAM", "ART Database - Materials.csv");
 
 // ---------------------------------------------------------------------------
 // CSV tokeniser (RFC 4180, minimal). Source CSV has no embedded newlines
@@ -617,7 +617,7 @@ function buildRecord({ row, rowIndex, lookups, warnings, csvSha256 }) {
       "original_beam_added_or_modified_serial": dataModSerial,
       "source_notes": null,
       "import_metadata": {
-        "imported_from": "BEAM Database-DUMP.csv",
+        "imported_from": "ART Database - Materials.csv",
         "import_date": new Date().toISOString().slice(0, 10),
         "beam_csv_row_index": rowIndex,
         "beam_csv_sha256": csvSha256
