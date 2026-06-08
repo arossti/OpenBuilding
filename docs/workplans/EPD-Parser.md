@@ -251,8 +251,9 @@ npm run serve                                                     # local dev se
 - 🔜 **Per-stage extension to other formats** — 18-36 cells per Sopra/Genyk/EU-IBU/2023 BC Wood is decent but could be improved by auditing which `_BYSTAGE_LABELS` patterns aren't matching and adding variants. Driven by ground-truth annotation.
 - ✅ **"Export" row-dump button** (team request 2026-05-28, §17) — SHIPPED PR #20. Yellow bottom-right button → modal with the scraped record as a single TSV row in exact `BEAM Database-DUMP.csv` column order → Copy to clipboard. Built on `js/shared/beam-columns.mjs`.
 - 🔜 **Export completeness — normalize + DB-side export** (decided 2026-05-29, spec in §18) — §17's button drops density + GWP because the candidate shape diverges from canonical (`density.value_kg_m3` vs `density.value`/`units`; `impacts.gwp` vs `carbon.stated.value_kgco2e`). Fix: `record-normalize.mjs` applied at Trust commit + export, then add an authoritative per-row TSV export to the Database viewer (carries the minted `beam_id`). Confirm the GWP→stated mapping (§18.4) before shipping. **Folded into §19 Phase 0 — clear before the bigger lifts.**
-- ✅ **Parity B Pass-1 harness** (2026-06-08, §19) — SHIPPED `schema/scripts/csv-pdf-parity.mjs` + first run on Jen's April-20 CSV + 301-PDF Confirmed folder. Scope authored by Andy 2026-06-08 (§19.1.1 canonical 37-column EPD-extractable list). Headline: **9.5% aggregate parity** (1,336/14,103 matched cells, 0/671 rows at 100%). Per-field rank in `docs/workplans/parity-B/parity-summary.md` is the prioritized lift backlog.
-- 🔜 **§19 Phase 0 — clear blockers** (next session) — (a) move date/type/validation patterns from `extractNA` → real `extractCommon` (handoff "Known issue" 2026-05-19, affects NSF/EPD-Intl/unknown formats); (b) commit §18 normalization into `extract.mjs` (or capture-boundary) so density + GWP slot canonically in the form, export, and DB. Cheap, unblocks Phase 1+.
+- ✅ **Parity B Pass-1 harness** (2026-06-08, §19) — SHIPPED `schema/scripts/csv-pdf-parity.mjs` + first run on Jen's April-20 CSV + 301-PDF Confirmed folder. Scope authored by Andy 2026-06-08 (§19.1.1 canonical 37-column EPD-extractable list). **Current headline: 10.7% aggregate parity** (1,512/14,103 matched cells, 0/671 rows at 100%) post Phase 0a. Per-field rank in `docs/workplans/parity-B/parity-summary.md` is the prioritized lift backlog.
+- ✅ **§19 Phase 0a — `extractNA → extractCommon` move** (2026-06-08) — SHIPPED. Date / EPD-type / markets / validation patterns moved from `extractNA` to `extractCommon` so NSF / EPD-Intl / unknown formats see them. Lift: +176 matches (+1.2pp aggregate). Canonical-30 metadata 69.5% → 70.5%, 0 ground-truth regressions.
+- 🔜 **§19 Phase 0b — §18 normalization in extractor** — commit `density.value_kg_m3 → value + units` + `impacts.gwp → carbon.stated.value_kgco2e` maps into `extract.mjs` (or the capture boundary). Pending §19.5 Mel confirmation on GWP target slot. Doesn't change Parity-B numbers (harness already normalizes) but unblocks Goal-B form expansion.
 - 🔜 **§19 Phase 1 — string-normalization wins** — AY EPD ID content extraction (lift 36% → ≥80%), AZ EPD Type vocab, BC Operator, AT Material Type, J Manufacturer (lift 2% → 50%), G Expiry date formats, O Markets, BF Standards, BG PCR. Target lift ≈ +2,200 matches → cumulative ≈ **27%**.
 - 🔜 **§19 Phase 2 — new-field extractors** — BA Owner, BB Prepared by, BE Verifier, BH LCA Method, BI Software, BJ Database, BK Service Life, AI/AJ Add'l factor. Target lift ≈ +1,280 → cumulative ≈ **36%**.
 - 🔜 **§19 Phase 3 — multi-product extraction** (§16.1 Follow-up #4) — the single biggest unlock; **gets us to the 50% headline target**. Per-product values (density, GWP, dimensions) currently match at most 1 of N rows under each multi-product EPD. Likely needs the §14 LLM-as-parser path.
@@ -1589,7 +1590,7 @@ After normalization: scrape a canonical EPD → Export (EPD-Parser) shows densit
 
 ## 19. Parity-B Pass 1 + lift plan to ≥50% (today's task, 2026-06-08)
 
-> **Status: Pass-1 harness SHIPPED today** (`schema/scripts/csv-pdf-parity.mjs`, commit `8928f1c`); first run captured at `docs/workplans/parity-B/`. **Canonical scope authored by Andy 2026-06-08** (§19.1.1): 37 EPD-extractable BEAM columns. **Headline: 9.5% aggregate cell parity** (1,336 / 14,103 populated cells matched the parser), **0 of 671 rows at 100%**. This section is the writeup for what it will take to lift that to **≥50%**, what past issues block the work, and the phased order to attack it.
+> **Status: Pass-1 harness SHIPPED 2026-06-08** (`schema/scripts/csv-pdf-parity.mjs`, commit `8928f1c`); run output committed at `docs/workplans/parity-B/`. **Canonical scope** (Andy 2026-06-08, §19.1.1): 37 EPD-extractable BEAM columns. **Headline: 10.7% aggregate cell parity** (1,512 / 14,103 populated cells matched the parser, post Phase 0a `extractNA→extractCommon` move), **0 of 671 rows at 100%**. This section is the writeup for what it will take to lift that to **≥50%**, what past issues block the work, and the phased order to attack it.
 
 ### 19.1. The Pass-1 run (what we measured)
 
@@ -1609,9 +1610,9 @@ Alignment: filename prefix → canonical `epd.id` (§16.1.1 canonicalization), j
 | PDF-only (no BEAM row) | 7 |
 | **BEAM rows scored** | **671** |
 | **Populated cells in scope (denominator)** | **14,103** |
-| **Cells matched (numerator)** | **1,336** |
-| **Aggregate parity** | **9.5%** |
-| Average per-row coverage | 9.3% |
+| **Cells matched (numerator)** | **1,512** (post Phase 0a; was 1,336 pre-fix) |
+| **Aggregate parity** | **10.7%** (was 9.5%; +1.2pp from the `extractNA→extractCommon` move) |
+| Average per-row coverage | 10.5% (was 9.3%) |
 | Rows at 100% parity | 0 / 671 |
 
 ### 19.1.1. Canonical EPD-extractable scope (Andy 2026-06-08)
@@ -1644,22 +1645,22 @@ This scope answers the parity question precisely: **"Can the parser reliably pop
 
 **Per-field match rate** (top half = where parser is currently competent; bottom half = the gap):
 
-| col | field | match / pop | rate | read |
-|---|---|---:|---:|---|
-| BD | Validation | 271/504 | **53.8%** | best — Internal/External reliably extracted |
-| AT | Material Type | 148/393 | 37.7% | vocab match good |
-| AH | Density Units | 227/615 | 36.9% | §18 norm fills "kg/m3" when volumetric |
-| AY | EPD ID | 242/671 | 36.1% | **anomaly** — filename alignment ran at 98%, parser-from-content only 36%; extractor regex for EPD IDs is weak across formats |
-| BC | EPD Program/Operator | 119/509 | 23.4% | |
-| AZ | EPD Type | 145/671 | 21.6% | enum-derived; below where keyword extraction should land |
-| AG | Density | 89/615 | 14.5% | non-volumetric BEAM cells stay blank in parser |
-| Q | Stated GWP | 55/671 | 8.2% | multi-product blocker dominates |
-| G | EPD Expiry | 23/671 | 3.4% | date-format variance |
-| J | Manufacturer | 14/668 | 2.1% | string-format divergence (likely fixable) |
-| BG | PCR Guidelines | 3/463 | 0.6% | extractor pulls text, BEAM stores slightly different string |
-| **0 % fields** | B, I, K, L, M, N, O, R, S, T, U, V, W, X, Y, Z, AB, AC, AE, AF, AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AU, AV, AW, BA, BB, BE, BF, BH, BI, BJ, BK, BL | — | 0 | the extractor either doesn't touch the field, or extracts a form that never matches BEAM's stored value |
+| col | field | match / pop | rate | Δ from pre-Phase-0a | read |
+|---|---|---:|---:|---:|---|
+| BD | Validation | 303/504 | **60.1%** | +6.3pp | best — extended-form patterns now run across all formats |
+| AT | Material Type | 148/393 | 37.7% | — | vocab match good |
+| AH | Density Units | 227/615 | 36.9% | — | §18 norm fills "kg/m3" when volumetric |
+| AY | EPD ID | 242/671 | 36.1% | — | **anomaly** — filename alignment ran at 98%, parser-from-content only 36%; extractor regex for EPD IDs is weak across formats |
+| AZ | EPD Type | 164/671 | 24.4% | +2.8pp | enum-derived; lifted modestly by Phase-0a (label+prose patterns now format-agnostic) |
+| BC | EPD Program/Operator | 119/509 | 23.4% | — | |
+| G | EPD Expiry | 148/671 | **22.1%** | **+18.7pp** | biggest Phase-0a lift — date patterns now fire on NSF / EPD-Intl / unknown formats |
+| AG | Density | 89/615 | 14.5% | — | non-volumetric BEAM cells stay blank in parser |
+| Q | Stated GWP | 55/671 | 8.2% | — | multi-product blocker dominates |
+| J | Manufacturer | 14/668 | 2.1% | — | string-format divergence (likely fixable) |
+| BG | PCR Guidelines | 3/463 | 0.6% | — | extractor pulls text, BEAM stores slightly different string |
+| **0% in-scope fields** | I, K, L, N, O, R, W, AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AS, BA, BB, BE, BF, BH, BI, BJ, BK | — | 0 | — | the extractor either doesn't touch the field, or extracts a form that never matches BEAM's stored value |
 
-### 19.2. Where the 9.5% comes from — two contributing layers
+### 19.2. Where the 10.7% comes from — two contributing layers
 
 After the §19.1.1 scope decision the gap decomposes into just two main layers (biogenic-block ambiguity dropped out — it's no longer scored):
 
@@ -1671,21 +1672,21 @@ There is no remaining "structurally unreachable" subset in the new scope — eve
 
 ### 19.3. Blockers / past issues to clear before the big lifts
 
-Three known-issue items from prior sessions should land first because they either gate a big-ticket lift or quietly cap one of the §19.4 phases.
-
-1. **Pass 1+2 extractor patches in the wrong function** (handoff §0 "Known issue", flagged EOD 2026-05-19). Date / EPD-type / validation patterns landed inside `extractNA` (~line 1319) instead of the real `extractCommon` (~line 412), so NSF / EPD-Intl / unknown-format EPDs skip them. **In a BEAM-639-class set, this affects a meaningful slice** (probably 20-30% of PDFs by format). Clean one-commit fix = move 5 blocks up. Estimated lift: **+100–300 matches** on G/AZ/BD across affected formats. **Do first — cheap and clears the path.**
-2. **Multi-product extraction (§16.1 Follow-up #4)** — the biggest single lift in §19.4 depends on this. Currently `extract.mjs` returns one record per PDF; we need it to return N records when the EPD's data table covers N product columns, then per-row alignment can match each BEAM row to its specific product. This is the genuine architectural lift; the §14 LLM-as-parser path is the strongest tool for it.
-3. **§18 normalization not committed to the extractor** — the harness inlines the maps (density `value_kg_m3 → value + units`; `impacts.gwp → carbon.stated.value_kgco2e`), but `extract.mjs` itself still writes only the divergent paths. This means the EPD-Parser app's export + DB commit don't get the same lift. Doesn't change Parity-B numbers (harness already normalizes), but **blocks Goal-B form expansion** because density/GWP need canonical paths to show in the form pane consistently with the DUMP.
+1. ✅ **Pass 1+2 extractor patches in the wrong function** (handoff §0 "Known issue", flagged EOD 2026-05-19) — **SHIPPED 2026-06-08 (Phase 0a).** Date / EPD-type / validation patterns moved from `extractNA` (~line 1319) up to the real `extractCommon` (~line 412), so NSF / EPD-Intl / unknown-format EPDs now see them. **Lift: +176 matches (+1.2pp aggregate); biggest hit on `G EPD Expiry` +18.7pp, `BD Validation` +6.3pp, `AZ EPD Type` +2.8pp.** Canonical-30 regression-clean (69.5% → 70.5% metadata, 0 ground-truth failures).
+2. 🔜 **Multi-product extraction (§16.1 Follow-up #4)** — the biggest single lift in §19.4 depends on this. Currently `extract.mjs` returns one record per PDF; we need it to return N records when the EPD's data table covers N product columns, then per-row alignment can match each BEAM row to its specific product. This is the genuine architectural lift; the §14 LLM-as-parser path is the strongest tool for it.
+3. 🔜 **§18 normalization not committed to the extractor** (Phase 0b) — the harness inlines the maps (density `value_kg_m3 → value + units`; `impacts.gwp → carbon.stated.value_kgco2e`), but `extract.mjs` itself still writes only the divergent paths. This means the EPD-Parser app's export + DB commit don't get the same lift. Doesn't change Parity-B numbers (harness already normalizes), but **blocks Goal-B form expansion** because density/GWP need canonical paths to show in the form pane consistently with the DUMP. **Blocked on §19.5 GWP-target-slot confirmation with Mel** before commit.
 
 Non-blocking but worth queuing:
 - **`4ld02f` duplicate `beam_id`** (Parity-A finding 2026-05-28) — re-mint one side; doesn't affect Parity-B parity numbers but the duplicate distorts the catalogue.
 - **CCLIMB `chart-config.mjs` LCA_MODULES → TIME_HORIZONS** correction (handoff "NEXT SESSION #2") — entirely orthogonal but still pending.
 
-### 19.4. Phased lift plan — getting from 9.5% to ≥50%
+### 19.4. Phased lift plan — getting from 10.7% to ≥50%
 
-Each phase below states (a) what to do, (b) which in-scope fields it lifts, (c) a **rough** cell-count estimate (not a promise — the harness will quantify after each phase). Aggregate target: from **1,336 matches → 7,007+** (50% of 14,014). **The §19.1.1 scope decision puts the 50% target in genuine reach by Phase 3** — no biogenic phase required, since W–AF is now out of scope.
+Each phase below states (a) what to do, (b) which in-scope fields it lifts, (c) a **rough** cell-count estimate (not a promise — the harness will quantify after each phase). Aggregate target: from current **1,512 matches → 7,052+** (50% of 14,103). **The §19.1.1 scope decision puts the 50% target in genuine reach by Phase 3.**
 
-**Phase 0 — clear the blockers** (§19.3 items 1 + 3): the `extractNA→extractCommon` move and the §18 normalization committed to the extractor. Cost: ~1 session. Estimated lift: **+200–400 matches** (mostly on G, AZ, BD across the formats currently skipping the new patterns; also opens accurate density/GWP comparisons on more rows once the §18 norm runs in production rather than only in the harness). Cumulative ≈ **11–12.5%**.
+**Phase 0a — `extractNA → extractCommon` move** (§19.3 item 1) ✅ **SHIPPED 2026-06-08.** Landed +176 matches (+1.2pp). Mostly G EPD Expiry +18.7pp, BD Validation +6.3pp, AZ EPD Type +2.8pp.
+
+**Phase 0b — §18 normalization committed to the extractor** (§19.3 item 3). Pending §19.5 Mel confirmation on the GWP target slot. Won't change Parity-B numbers (harness already normalizes) but unblocks Goal-B form expansion.
 
 **Phase 1 — string-normalization wins** (cheap, before multi-product). Each of these is the parser already extracting something close to the BEAM value but failing the comparison on case / whitespace / vocab. Fix in the harness's `compareCell` first (lower bar = more matches show as MATCH) OR in the extractor's output normalization (cleaner but bigger):
 - **AY EPD ID content extraction** — lift to ≥80% with broader regex coverage. ~+300 matches.
@@ -1698,7 +1699,7 @@ Each phase below states (a) what to do, (b) which in-scope fields it lifts, (c) 
 - **BF Standards** — array → comma-string normalization. ~+140.
 - **BG PCR** — substring-match tolerance. ~+200.
 
-Phase 1 lift estimate: **+2,200 matches** → cumulative ≈ **25–27%**.
+Phase 1 lift estimate: **+2,200 matches** → cumulative ≈ **26–27%** (1,512 → 3,712 / 14,103).
 
 **Phase 2 — new-field extractors** (still pre-multi-product). Each field below is *not currently extracted at all*. Most are textually clear in EPDs (label-then-value). Cost: ~1 day each, less in batch:
 - **BA EPD Owner** (515 pop) — usually "Declaration Owner: X" or "Owner of Declaration: X". ~+260.

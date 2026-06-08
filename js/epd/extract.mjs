@@ -445,11 +445,103 @@ function extractCommon(text, rec) {
     if (spMatch) _setPath(rec, "epd.id", "S-P-" + spMatch[1]);
   }
 
-  // Validation marker — checkbox layout common across NA + EPD-Intl
+  // Publication date — label-then-window. "Date of Issuance" added
+  // 2026-05-19 (Arcadia / EFCO-family use this variant), and a bare
+  // "Issuance date" form for completeness. Moved here 2026-06-08 from
+  // extractNA so NSF / EPD-Intl / unknown formats also see these patterns
+  // (handoff "Known issue" 2026-05-19).
+  if (!_get(rec, "epd.publication_date")) {
+    var pubIso =
+      _findDateAfterLabel(text, /Date\s+of\s+Issue\s*(?:&\s*Validity\s+Period)?/i) ||
+      _findDateAfterLabel(text, /Date\s+of\s+Issuance/i) ||
+      _findDateAfterLabel(text, /Publication\s+date/i) ||
+      _findDateAfterLabel(text, /Issuance\s+date/i) ||
+      _findDateAfterLabel(text, /Issue\s+date/i);
+    if (pubIso) _setPath(rec, "epd.publication_date", pubIso);
+  }
+
+  // Expiry / validity. "Valid through" added 2026-05-19 (Arcadia
+  // uses "Valid through April 11, 2026"); "Valid thru" / "Valid
+  // until" already supported. Moved here 2026-06-08.
+  if (!_get(rec, "epd.expiry_date")) {
+    var expIso =
+      _findDateAfterLabel(text, /Period\s+of\s+validity/i) ||
+      _findDateAfterLabel(text, /Valid\s+through/i) ||
+      _findDateAfterLabel(text, /Valid\s+thru/i) ||
+      _findDateAfterLabel(text, /Valid\s+until/i) ||
+      _findDateAfterLabel(text, /Valid\s+to/i) ||
+      _findDateAfterLabel(text, /Expiry\s+date/i);
+    if (expIso) _setPath(rec, "epd.expiry_date", expIso);
+  }
+
+  // EPD type — label-anchored first ("EPD type: <value>" / "Declaration
+  // type:" / "EPD scope:"). The labels themselves are uncommon — only
+  // ~20% of EPDs publish an explicit type field — but when present they
+  // give the cleanest signal. Moved here 2026-06-08.
+  if (!_get(rec, "epd.type")) {
+    var typ =
+      text.match(/EPD\s+type\s*[:\s]+([^\n\r]{4,80})/i) ||
+      text.match(/Declaration\s+type\s*[:\s]+([^\n\r]{4,80})/i) ||
+      text.match(/Type\s+of\s+EPD\s*[:\s]+([^\n\r]{4,80})/i);
+    if (typ) {
+      var t = typ[1].toLowerCase();
+      if (/product[-\s]*specific/.test(t)) _setPath(rec, "epd.type", "product_specific");
+      else if (/(?:industry|business|sector)[-\s]*average/.test(t)) _setPath(rec, "epd.type", "industry_average");
+      else if (/company[-\s]*specific/.test(t)) _setPath(rec, "epd.type", "product_specific");
+      else if (/generic/.test(t)) _setPath(rec, "epd.type", "generic");
+    }
+  }
+
+  // Prose-based fallback. Most NA / Wood EPDs declare type in title-prose
+  // ("A company-specific cradle-to-gate EPD for X", "product-specific
+  // Type III Environmental Product Declaration"). Scope to the first
+  // 100 lines + require the type keyword to sit within 60 chars of an
+  // EPD/Declaration/"Type III" anchor so body-text mentions of e.g.
+  // "industry-average data" don't false-positive into the type slot.
+  if (!_get(rec, "epd.type")) {
+    var head = text.split("\n").slice(0, 100).join("\n");
+    var anchored =
+      head.match(/(?:EPD|Declaration|Type\s*III)[^\n]{0,60}?(product[-\s]+specific|company[-\s]+specific|industry[-\s]+average|business[-\s]+average|sector[-\s]+average)/i) ||
+      head.match(/(product[-\s]+specific|company[-\s]+specific|industry[-\s]+average|business[-\s]+average|sector[-\s]+average)[^\n]{0,60}?(?:EPD|Declaration|Type\s*III)/i);
+    if (anchored) {
+      var phrase = anchored[1].toLowerCase();
+      if (/product[-\s]+specific|company[-\s]+specific/.test(phrase)) _setPath(rec, "epd.type", "product_specific");
+      else if (/(?:industry|business|sector)[-\s]+average/.test(phrase)) _setPath(rec, "epd.type", "industry_average");
+    }
+  }
+
+  // Markets of applicability. Moved here 2026-06-08.
+  if (!_get(rec, "provenance.markets_of_applicability")) {
+    var mkts =
+      text.match(/Markets\s+of\s+applicability\s*[:\s]+([^\n\r]{2,80})/i) ||
+      text.match(/Region\s+covered\s*[:\s]+([^\n\r]{2,80})/i);
+    if (mkts) {
+      var arr = _splitToCodes(mkts[1]);
+      if (arr.length) _setPath(rec, "provenance.markets_of_applicability", arr);
+    }
+  }
+
+  // Validation type — runs for all formats. Supersedes the prior basic
+  // checkbox-only block (which only caught `[x✓] EXTERNAL` /
+  // `External verification`). Extended forms moved here 2026-06-08:
+  //   - "internally X externally"            — IBU adverb form
+  //   - "internal X external"                — adjective form (Arcadia)
+  //   - "X__ Externally" / "___ X external"  — underscore-noise from
+  //                                            checkbox-replacement layout (EFCO)
+  //   - "External verification" / "Independent verification" — prose
   if (!_get(rec, "epd.validation.type")) {
-    if (/[x✓]\s*EXTERNAL/i.test(text) || /External\s+verification/i.test(text)) {
+    var validationText = text.replace(/_+/g, " "); // collapse underscore checkbox-noise
+    if (/internally\s*[x✓]\s*externally/i.test(validationText)) {
       _setPath(rec, "epd.validation.type", "external");
-    } else if (/[x✓]\s*INTERNAL/i.test(text) || /Internal\s+verification/i.test(text)) {
+    } else if (/internal\s*[x✓]\s*external/i.test(validationText)) {
+      _setPath(rec, "epd.validation.type", "external");
+    } else if (/[x✓]\s*externally/i.test(validationText) || /[x✓]\s*external\b/i.test(validationText)) {
+      _setPath(rec, "epd.validation.type", "external");
+    } else if (/[x✓]\s*internally/i.test(validationText) || /[x✓]\s*internal\b/i.test(validationText)) {
+      _setPath(rec, "epd.validation.type", "internal");
+    } else if (/(?:external|independent|third[-\s]+party)\s+verification/i.test(text)) {
+      _setPath(rec, "epd.validation.type", "external");
+    } else if (/internal\s+verification/i.test(text)) {
       _setPath(rec, "epd.validation.type", "internal");
     }
   }
@@ -1316,96 +1408,9 @@ function extractNA(text, rec) {
     if (pcrLine) _setPath(rec, "methodology.pcr_guidelines", _cleanLine(pcrLine[1]));
   }
 
-  // Publication date — label-then-window. "Date of Issuance" added
-  // 2026-05-19 (Arcadia / EFCO-family use this variant), and a bare
-  // "Issuance date" form for completeness.
-  var pubIso =
-    _findDateAfterLabel(text, /Date\s+of\s+Issue\s*(?:&\s*Validity\s+Period)?/i) ||
-    _findDateAfterLabel(text, /Date\s+of\s+Issuance/i) ||
-    _findDateAfterLabel(text, /Publication\s+date/i) ||
-    _findDateAfterLabel(text, /Issuance\s+date/i) ||
-    _findDateAfterLabel(text, /Issue\s+date/i);
-  if (pubIso) _setPath(rec, "epd.publication_date", pubIso);
-
-  // Expiry / validity. "Valid through" added 2026-05-19 (Arcadia
-  // uses "Valid through April 11, 2026"); "Valid thru" / "Valid
-  // until" already supported.
-  var expIso =
-    _findDateAfterLabel(text, /Period\s+of\s+validity/i) ||
-    _findDateAfterLabel(text, /Valid\s+through/i) ||
-    _findDateAfterLabel(text, /Valid\s+thru/i) ||
-    _findDateAfterLabel(text, /Valid\s+until/i) ||
-    _findDateAfterLabel(text, /Valid\s+to/i) ||
-    _findDateAfterLabel(text, /Expiry\s+date/i);
-  if (expIso) _setPath(rec, "epd.expiry_date", expIso);
-
-  // EPD type — label-anchored first ("EPD type: <value>" / "Declaration
-  // type:" / "EPD scope:"). The labels themselves are uncommon — only
-  // ~20% of EPDs publish an explicit type field — but when present they
-  // give the cleanest signal.
-  var typ =
-    text.match(/EPD\s+type\s*[:\s]+([^\n\r]{4,80})/i) ||
-    text.match(/Declaration\s+type\s*[:\s]+([^\n\r]{4,80})/i) ||
-    text.match(/Type\s+of\s+EPD\s*[:\s]+([^\n\r]{4,80})/i);
-  if (typ) {
-    var t = typ[1].toLowerCase();
-    if (/product[-\s]*specific/.test(t)) _setPath(rec, "epd.type", "product_specific");
-    else if (/(?:industry|business|sector)[-\s]*average/.test(t)) _setPath(rec, "epd.type", "industry_average");
-    else if (/company[-\s]*specific/.test(t)) _setPath(rec, "epd.type", "product_specific");
-    else if (/generic/.test(t)) _setPath(rec, "epd.type", "generic");
-  }
-
-  // Prose-based fallback. Most NA / Wood EPDs declare type in title-prose
-  // ("A company-specific cradle-to-gate EPD for X", "product-specific
-  // Type III Environmental Product Declaration"). Scope to the first
-  // 100 lines + require the type keyword to sit within 60 chars of an
-  // EPD/Declaration/"Type III" anchor so body-text mentions of e.g.
-  // "industry-average data" don't false-positive into the type slot.
-  if (!_get(rec, "epd.type")) {
-    var head = text.split("\n").slice(0, 100).join("\n");
-    var anchored =
-      head.match(/(?:EPD|Declaration|Type\s*III)[^\n]{0,60}?(product[-\s]+specific|company[-\s]+specific|industry[-\s]+average|business[-\s]+average|sector[-\s]+average)/i) ||
-      head.match(/(product[-\s]+specific|company[-\s]+specific|industry[-\s]+average|business[-\s]+average|sector[-\s]+average)[^\n]{0,60}?(?:EPD|Declaration|Type\s*III)/i);
-    if (anchored) {
-      var phrase = anchored[1].toLowerCase();
-      if (/product[-\s]+specific|company[-\s]+specific/.test(phrase)) _setPath(rec, "epd.type", "product_specific");
-      else if (/(?:industry|business|sector)[-\s]+average/.test(phrase)) _setPath(rec, "epd.type", "industry_average");
-    }
-  }
-
-  // Markets of applicability
-  var mkts =
-    text.match(/Markets\s+of\s+applicability\s*[:\s]+([^\n\r]{2,80})/i) ||
-    text.match(/Region\s+covered\s*[:\s]+([^\n\r]{2,80})/i);
-  if (mkts) {
-    var arr = _splitToCodes(mkts[1]);
-    if (arr.length) _setPath(rec, "provenance.markets_of_applicability", arr);
-  }
-
-  // Validation type — runs for all formats (per-format extractors only
-  // see the subset where their format detection fires). Tries the
-  // verification-marker forms in order of specificity:
-  //   - "internally X externally"            — IBU adverb form
-  //   - "internal X external"                — adjective form (Arcadia)
-  //   - "X__ Externally" / "___ X external"  — underscore-noise from
-  //                                            checkbox-replacement layout (EFCO)
-  //   - "External verification" / "Independent verification" — prose
-  if (!_get(rec, "epd.validation.type")) {
-    var validationText = text.replace(/_+/g, " "); // collapse underscore checkbox-noise
-    if (/internally\s*[x✓]\s*externally/i.test(validationText)) {
-      _setPath(rec, "epd.validation.type", "external");
-    } else if (/internal\s*[x✓]\s*external/i.test(validationText)) {
-      _setPath(rec, "epd.validation.type", "external");
-    } else if (/[x✓]\s*externally/i.test(validationText) || /[x✓]\s*external\b/i.test(validationText)) {
-      _setPath(rec, "epd.validation.type", "external");
-    } else if (/[x✓]\s*internally/i.test(validationText) || /[x✓]\s*internal\b/i.test(validationText)) {
-      _setPath(rec, "epd.validation.type", "internal");
-    } else if (/(?:external|independent|third[-\s]+party)\s+verification/i.test(text)) {
-      _setPath(rec, "epd.validation.type", "external");
-    } else if (/internal\s+verification/i.test(text)) {
-      _setPath(rec, "epd.validation.type", "internal");
-    }
-  }
+  // (Pub_date / expiry / EPD type / markets / validation blocks moved to
+  // extractCommon 2026-06-08 — they apply across NA / EPD-Intl / NSF / EU-IBU /
+  // unknown formats. See handoff "Known issue" 2026-05-19.)
 }
 
 /* ── EPD International registry format (S-P-XXXXX) ─────────────────── */

@@ -1,6 +1,6 @@
 # Parity B — BEAM CSV ↔ EPD-parser extraction (Pass 1)
 
-_Generated 2026-06-08T18:33:29.319Z by `schema/scripts/csv-pdf-parity.mjs`._
+_Generated 2026-06-08T18:44:27.535Z by `schema/scripts/csv-pdf-parity.mjs`._
 
 For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness parses the PDF and compares the parser's extracted values against the populated BEAM cells per field. Tolerances: numbers ±0.5% + 0.01 absolute floor; strings trim + case-insensitive; units trim + exact. **Scoring scope** (Andy 2026-06-08, §19): only the EPD-extractable columns are in the parity %. Counted: `G, I, J, K, L, N, O, Q, R, W, AG, AH, AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AS, AT, AY, AZ, BA, BB, BC, BD, BE, BF, BG, BH, BI, BJ, BK`. Out-of-scope (BfCA-internal flags, BfCA-derived units/values, BfCA-computational biogenic block, BfCA taxonomy, internal notation, structural placeholders): everything else.
 
@@ -22,8 +22,8 @@ For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness 
 ## Parity
 
 - Rows at **100% parity**: **0/671** (0.0%)
-- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **1336/14103** (9.5%)
-- Average per-row coverage: **9.2%**
+- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **1512/14103** (10.7%)
+- Average per-row coverage: **10.5%**
 
 ## Per-field match rate (descending)
 
@@ -31,15 +31,15 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 
 | col | field | kind | match / populated | rate |
 |---|---|---|---:|---:|
-| BD | Internal/External Validation | str | 271 / 504 | 53.8% |
+| BD | Internal/External Validation | str | 303 / 504 | 60.1% |
 | AT | Material Type | str | 148 / 393 | 37.7% |
 | AH | Density Units | str | 227 / 615 | 36.9% |
 | AY | EPD ID | str | 242 / 671 | 36.1% |
+| AZ | EPD Type | str | 164 / 671 | 24.4% |
 | BC | EPD Program / Operator | str | 119 / 509 | 23.4% |
-| AZ | EPD Type | str | 145 / 671 | 21.6% |
+| G | EPD Expiry | str | 148 / 671 | 22.1% |
 | AG | Density | str | 89 / 615 | 14.5% |
 | Q | Stated EPD kgCO2e / unit | str | 55 / 671 | 8.2% |
-| G | EPD Expiry | str | 23 / 671 | 3.4% |
 | J | Manufacturer | str | 14 / 668 | 2.1% |
 | BG | EPD PCR Guidelines | str | 3 / 463 | 0.6% |
 | I | Material | str | 0 / 671 | 0.0% |
@@ -75,16 +75,16 @@ Each EPD below maps to >1 BEAM row but the parser emits one record per PDF — s
 | canonical epd.id | rows | avg coverage | spread |
 |---|---:|---:|---:|
 | 47895560991021 | 43 | 15.4% | 0.0pp |
-| epd352 | 24 | 5.3% | 0.0pp |
+| epd352 | 24 | 10.5% | 0.0pp |
 | epd10294 | 20 | 0.0% | 0.0pp |
 | 47884246341021 | 19 | 13.1% | 1.8pp |
 | epd10092 | 18 | 0.0% | 0.0pp |
-| epd351 | 18 | 5.3% | 0.0pp |
-| epd350 | 18 | 5.2% | 0.3pp |
-| epd349 | 18 | 5.3% | 0.0pp |
-| epd347 | 18 | 5.3% | 0.0pp |
-| epd348 | 15 | 5.3% | 0.0pp |
-| epd346 | 12 | 5.3% | 0.0pp |
+| epd351 | 18 | 10.5% | 0.0pp |
+| epd350 | 18 | 10.5% | 0.5pp |
+| epd349 | 18 | 10.5% | 0.0pp |
+| epd347 | 18 | 10.5% | 0.0pp |
+| epd348 | 15 | 10.5% | 0.0pp |
+| epd346 | 12 | 10.5% | 0.0pp |
 | 47890927681011 | 10 | 8.5% | 6.6pp |
 | epd362 | 9 | 20.0% | 0.0pp |
 | 2021m20141 | 9 | 4.5% | 0.2pp |
