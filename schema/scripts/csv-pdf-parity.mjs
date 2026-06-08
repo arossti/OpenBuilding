@@ -233,7 +233,8 @@ const RELAXED_BY_COL = {
   BH: "substring",   // LCA Method — substring tolerance on method names
   BI: "substring",   // LCA Software — same tool with/without version
   BJ: "substring",   // LCI Database — same DB with/without version
-  J:  "substring"    // Manufacturer — short name ⊂ full legal name
+  J:  "substring",   // Manufacturer — short name ⊂ full legal name
+  AT: "substring"    // Material Type — "Clay Brick" ⊃ "Brick", "Cross-laminated timber" ⊃ "CLT"
 };
 
 // ---------------------------------------------------------------------------

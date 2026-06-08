@@ -644,6 +644,22 @@ function extractCommon(text, rec) {
       if (pv && pv.length >= 2) _setPath(rec, "epd.prepared_by", pv);
     }
   }
+  // BA EPD Owner known-org fallback. Many EPDs name the program operator
+  // / certification body / declaration holder in narrative ("EPD issued
+  // by UL Environment", "Certified by NSF", "Declaration Owner: Bau EPD
+  // GmbH"). Curated list mirrors the BC Program Operator known names
+  // since EPD owners are often the program operators themselves.
+  if (!_get(rec, "epd.owner")) {
+    var BA_KNOWN = "(UL\\s+Environment|UL\\s+Solutions|NSF\\s+International|NSF|ASTM\\s+International|ASTM|CSA\\s+Group|EPDITALY|EPD\\s+Italy|IBU(?:\\s*(?:e\\.V\\.|Institut\\s+Bauen\\s+und\\s+Umwelt))?|Bau\\s+EPD(?:\\s+GmbH)?|EPD\\s+International(?:\\s+AB)?|Instytut\\s+Techniki\\s+Budowlanej(?:\\s*\\(ITB\\))?|ITB|AENOR(?:\\s+Internacional)?|RTS|AFNOR(?:\\s+Certification)?|Athena\\s+Sustainable\\s+Materials\\s+Institute|Athena|EPDDanmark|EPDNorge|GlobalEPD|Smart\\s*EPD)";
+    var baNear =
+      text.match(new RegExp("(?:Declaration\\s+(?:owner|holder)|EPD\\s+(?:owner|holder)|issued\\s+by|certified\\s+by|published\\s+by|owner\\s+of)\\s[^\\n]{0,80}?\\b" + BA_KNOWN, "i")) ||
+      text.match(new RegExp("\\b" + BA_KNOWN + "\\s[^\\n]{0,80}?(?:Declaration|EPD|owner|certificat|publish)", "i"));
+    if (baNear) {
+      var baVal = (baNear[1] || "").trim();
+      if (baVal && baVal.length >= 2) _setPath(rec, "epd.owner", baVal);
+    }
+  }
+
   // Known-LCA-org fallback for BB Prepared-by. Many EPDs don't use clean
   // "Prepared by:" labels — they name the LCA practitioner in narrative
   // ("LCA was performed by Sphera", "The Sphera GaBi model..."). Match

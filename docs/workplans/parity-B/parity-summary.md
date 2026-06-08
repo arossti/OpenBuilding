@@ -1,6 +1,6 @@
 # Parity B — BEAM CSV ↔ EPD-parser extraction (Pass 1)
 
-_Generated 2026-06-08T20:18:06.286Z by `schema/scripts/csv-pdf-parity.mjs`._
+_Generated 2026-06-08T20:32:53.289Z by `schema/scripts/csv-pdf-parity.mjs`._
 
 For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness parses the PDF and compares the parser's extracted values against the populated BEAM cells per field. Tolerances: numbers ±0.5% + 0.01 absolute floor; strings trim + case-insensitive; units trim + exact. **Scoring scope** (Andy 2026-06-08, §19): only the EPD-extractable columns are in the parity %. Counted: `G, I, J, K, L, N, O, Q, R, W, AG, AH, AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AS, AT, AY, AZ, BA, BB, BC, BD, BE, BF, BG, BH, BI, BJ, BK`. Out-of-scope (BfCA-internal flags, BfCA-derived units/values, BfCA-computational biogenic block, BfCA taxonomy, internal notation, structural placeholders): everything else.
 
@@ -22,8 +22,8 @@ For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness 
 ## Parity
 
 - Rows at **100% parity**: **0/671** (0.0%)
-- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **3583/14100** (25.4%)
-- Average per-row coverage: **25.3%**
+- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **3612/14100** (25.6%)
+- Average per-row coverage: **25.5%**
 
 ## Per-field match rate (descending)
 
@@ -37,9 +37,9 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 | BK | Product Service Life (Years) | str | 84 / 168 | 50.0% |
 | AZ | EPD Type | str | 306 / 671 | 45.6% |
 | BF | EPD Standards | str | 127 / 279 | 45.5% |
+| AT | Material Type | str | 178 / 393 | 45.3% |
 | BE | EPD Verifying Agent | str | 215 / 503 | 42.7% |
 | BG | EPD PCR Guidelines | str | 196 / 463 | 42.3% |
-| AT | Material Type | str | 149 / 393 | 37.9% |
 | AH | Density Units | str | 227 / 615 | 36.9% |
 | BC | EPD Program / Operator | str | 182 / 509 | 35.8% |
 | G | EPD Expiry | str | 232 / 671 | 34.6% |
