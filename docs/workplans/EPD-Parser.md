@@ -251,7 +251,7 @@ npm run serve                                                     # local dev se
 - 🔜 **Per-stage extension to other formats** — 18-36 cells per Sopra/Genyk/EU-IBU/2023 BC Wood is decent but could be improved by auditing which `_BYSTAGE_LABELS` patterns aren't matching and adding variants. Driven by ground-truth annotation.
 - ✅ **"Export" row-dump button** (team request 2026-05-28, §17) — SHIPPED PR #20. Yellow bottom-right button → modal with the scraped record as a single TSV row in exact `BEAM Database-DUMP.csv` column order → Copy to clipboard. Built on `js/shared/beam-columns.mjs`.
 - 🔜 **Export completeness — normalize + DB-side export** (decided 2026-05-29, spec in §18) — §17's button drops density + GWP because the candidate shape diverges from canonical (`density.value_kg_m3` vs `density.value`/`units`; `impacts.gwp` vs `carbon.stated.value_kgco2e`). Fix: `record-normalize.mjs` applied at Trust commit + export, then add an authoritative per-row TSV export to the Database viewer (carries the minted `beam_id`). Confirm the GWP→stated mapping (§18.4) before shipping. **Folded into §19 Phase 0 — clear before the bigger lifts.**
-- ✅ **Parity B Pass-1 harness** (2026-06-08, §19) — SHIPPED `schema/scripts/csv-pdf-parity.mjs` + first run on Jen's April-20 CSV + 301-PDF Confirmed folder. Scope authored by Andy 2026-06-08 (§19.1.1 canonical 37-column EPD-extractable list). **Current headline: 26.7% aggregate parity** (3,765/14,100 matched cells, 0/671 rows at 100%) post Phase 0a + 1a + 1b + 1c + 2a + 2b + 2c + 2d + W conditional skip. Per-field rank in `docs/workplans/parity-B/parity-summary.md` is the prioritized lift backlog. **Session lift: +17.2pp (+2,429 matches) toward the 50% target.**
+- ✅ **Parity B Pass-1 harness** (2026-06-08, §19) — SHIPPED `schema/scripts/csv-pdf-parity.mjs` + first run on Jen's April-20 CSV + 301-PDF Confirmed folder. Scope authored by Andy 2026-06-08 (§19.1.1 canonical 37-column EPD-extractable list). **Current headline: 28.7% aggregate parity** (4,049/14,100 matched cells, 0/671 rows at 100%) post Phase 0a + 1a + 1b + 1c + 2a + 2b + 2c + 2d + 2e + W conditional skip. Per-field rank in `docs/workplans/parity-B/parity-summary.md` is the prioritized lift backlog. **Session lift: +19.2pp (+2,713 matches) toward the 50% target.**
 - ✅ **§19 Phase 0a — `extractNA → extractCommon` move** (2026-06-08) — SHIPPED. Date / EPD-type / markets / validation patterns moved from `extractNA` to `extractCommon` so NSF / EPD-Intl / unknown formats see them. Lift: +176 matches (+1.2pp aggregate). Canonical-30 metadata 69.5% → 70.5%, 0 ground-truth regressions.
 - ✅ **§19 Phase 1a — AY EPD ID shape-aware regex** (2026-06-08) — SHIPPED. Shape patterns for SmartEPD dotted-numeric, SCS-EPD, IBU `EPD-XXX-YYY-EN`, EPDITALY `YYYYMxxxxx`, BEPD, ITB/RTS, year-fractions before the loose label fallback. Lift: +299 matches (+2.1pp); 36.1% → 80.6% on AY. Canonical-30 71.0% (still clean).
 - ✅ **§19 Phase 1b — six new admin/methodology extractors** (2026-06-08) — SHIPPED. BA Owner, BB Prepared by, BE Verifier, BH LCA Method, BI LCA Software, BJ LCI Database all moved off 0%. Manufacturer block moved to `extractCommon`. Lift: +125 matches (+0.9pp).
@@ -261,7 +261,8 @@ npm run serve                                                     # local dev se
 - ✅ **§19 Phase 2b — BB known-LCA-org / AL/AQ physical / W path normalization** (2026-06-08) — SHIPPED. **BB Prepared-by 3.6% → 28.9%** (+163 matches) via known-practitioner detection (Sphera, thinkstep, WAP, Ecoform, Vertima, Ecochain, EuGeos, Pré Consultants, Quartz, Athena, etc.) with proximity guard (org name within 80 chars of LCA/EPD/prepared keyword to suppress false positives). AL Thermal Conductivity (0% → 1.8%) shape-anchored on `X W/(m·K)` unit (domain-specific). AQ Depth (0% → 0.9%) labeled patterns with mm/cm/in/ft → meters conversion. W path normalization in harness parallel to §18 (parser's `impacts.gwp_bio_kgco2e.total.value` → DUMP's `carbon.biogenic.gwp_bio_from_epd_kgco2e_per_common_unit`) — didn't lift W in this run (parser rarely extracts impacts.gwp_bio for the 86 in-scope rows; orthogonal extractor work needed). Lift: +166 matches (+1.2pp).
 - ✅ **§19 Phase 2c — AT substring tolerance + BA known-EPD-owner orgs** (2026-06-08) — SHIPPED. **AT Material Type 37.9% → 45.3%** (+29 matches) via substring tolerance — many BEAM types are supersets of parser's broader categories ("Clay Brick" ⊃ "Brick", "Cross-laminated timber" ⊃ "CLT"). BA known-EPD-owner detection added (UL Environment, NSF, ASTM International, CSA Group, IBU, Bau EPD GmbH, EPDITALY, ITB, AENOR, etc.) — didn't lift BA in this run (existing extractor + substring already catches the BEAM-matchable cases). Lift: +29 matches (+0.2pp).
 - ✅ **§19 Phase 2d — N Country prose extractor + N/O substring tolerance** (2026-06-08) — SHIPPED. **N Country 0% → 25.3%** (+123 matches) via proximity-anchored country-name prose extractor (50+ country names near "located in" / "manufactured in" / "produced in" / "facility in" / "plant in" / etc.) with ISO-3 mapping output. Substring tolerance added to N (BEAM "Canada" ⊃ parser "CAN") and O (+30 matches via partial overlap on "US & CA" type strings). Lift: +153 matches (+1.1pp).
-- 🔜 **Phase 2 continued — systematic PDF probing for remaining 0% fields** — I Material, L Specifications, N Countries (prose-only per first probe), R units (extractor already fixed; parity-side comparison still mismatches), AI/AJ Additional factor, AK/AM-AS Dimensions/thermal/mass. Each gets its own evidence-based extractor via §19.4.1 playbook.
+- ✅ **§19 Phase 2e — R declared-unit normalization in harness** (2026-06-08) — SHIPPED. **R GWP units 0% → 42.3%** (+284 matches) via `unitNorm` relaxation: case-fold + ³→3/²→2 + strip leading `"1 "` quantity prefix + `cubic met[er|re]` → `m3` / `square met[er|re]` → `m2` + substring tolerance. Metric correction (same semantic fact, divergent representations) — BEAM stores bare short form (`m3` / `m²` / `kg`), parser captures EPD's prose (`1 m³` / `1 cubic meter` / `The declared unit is 1 cubic metre of ready mixed concrete…`). `metric ton` deliberately NOT collapsed with `kg` (1 t ≠ 1 kg). Lift: +284 matches (+2.0pp), R from worst-ranked field to 10th-best.
+- 🔜 **Phase 2 continued — systematic PDF probing for remaining 0% fields** — I Material, L Specifications, AI/AJ Additional factor, AK/AM-AS Dimensions/thermal/mass, K Brand Name. Each gets its own evidence-based extractor via §19.4.1 playbook.
 - ✅ **W conditional skip — Andy's biogenic rule** (2026-06-08) — SHIPPED. Steel/inorganic EPDs don't carry biogenic values, so W is skipped from the parity denominator on rows whose PDF text doesn't contain "biogenic". 3 rows skipped in current run.
 - 🔜 **§19 Phase 0b — §18 normalization in extractor** — commit `density.value_kg_m3 → value + units` + `impacts.gwp → carbon.stated.value_kgco2e` maps into `extract.mjs` (or the capture boundary). Pending §19.5 Mel confirmation on GWP target slot. Doesn't change Parity-B numbers (harness already normalizes) but unblocks Goal-B form expansion.
 - 🔜 **§19 Phase 1 remainder — string-normalization wins** — AZ EPD Type vocab (24.4%→target 60%), BC Operator (23.4%→target 60%), AT Material Type (37.7%→target 70%), G Expiry date formats (22.1%→target 50%+), O Markets, BF Standards, BG PCR. Target additional lift ≈ +1,500 matches → cumulative ≈ **24%**.
@@ -1599,7 +1600,7 @@ After normalization: scrape a canonical EPD → Export (EPD-Parser) shows densit
 
 ## 19. Parity-B Pass 1 + lift plan to ≥50% (today's task, 2026-06-08)
 
-> **Status: Pass-1 harness SHIPPED 2026-06-08**; run output committed at `docs/workplans/parity-B/`. **Canonical scope** (Andy 2026-06-08, §19.1.1): 37 EPD-extractable BEAM columns. **Headline: 26.7% aggregate cell parity** (3,765 / 14,100 populated cells matched the parser, post Phase 2d shipped 2026-06-08), **0 of 671 rows at 100%**. Session lift: 9.5% (baseline pre-Phase-0a) → 26.7% = **+17.2pp** via Phase 0a + 1a + 1b + W conditional skip + Phase 1c (per-column comparison relaxations, +1,390) + Phase 2a (BK Service Life / O Markets / K Brand Name, +89) + Phase 2b (BB known-LCA-org + AL/AQ physical + W path norm, +166) + Phase 2c (AT substring + BA known-EPD-owner orgs, +29) + Phase 2d (N Country prose extractor + N/O substring tolerance, +153). This section is the writeup for what it will take to lift that to **≥50%**, what past issues block the work, and the phased order to attack it.
+> **Status: Pass-1 harness SHIPPED 2026-06-08**; run output committed at `docs/workplans/parity-B/`. **Canonical scope** (Andy 2026-06-08, §19.1.1): 37 EPD-extractable BEAM columns. **Headline: 28.7% aggregate cell parity** (4,049 / 14,100 populated cells matched the parser, post Phase 2e shipped 2026-06-08), **0 of 671 rows at 100%**. Session lift: 9.5% (baseline pre-Phase-0a) → 28.7% = **+19.2pp** via Phase 0a + 1a + 1b + W conditional skip + Phase 1c (per-column comparison relaxations, +1,390) + Phase 2a (BK Service Life / O Markets / K Brand Name, +89) + Phase 2b (BB known-LCA-org + AL/AQ physical + W path norm, +166) + Phase 2c (AT substring + BA known-EPD-owner orgs, +29) + Phase 2d (N Country prose extractor + N/O substring tolerance, +153) + Phase 2e (R declared-unit normalization, +284). This section is the writeup for what it will take to lift that to **≥50%**, what past issues block the work, and the phased order to attack it.
 
 ### 19.1. The Pass-1 run (what we measured)
 
@@ -1619,9 +1620,9 @@ Alignment: filename prefix → canonical `epd.id` (§16.1.1 canonicalization), j
 | PDF-only (no BEAM row) | 7 |
 | **BEAM rows scored** | **671** |
 | **Populated cells in scope (denominator)** | **14,100** (was 14,103 pre-W-skip — Andy's biogenic rule drops 3 rows where BEAM has W but PDF doesn't mention "biogenic") |
-| **Cells matched (numerator)** | **3,765** (was 1,336 pre-Phase-0a; **+2,429 over the session**) |
-| **Aggregate parity** | **26.7%** (was 9.5% baseline; **+17.2pp** via Phase 0a + 1a + 1b + 1c + 2a + 2b + 2c + 2d) |
-| Average per-row coverage | 26.6% (was 9.3%) |
+| **Cells matched (numerator)** | **4,049** (was 1,336 pre-Phase-0a; **+2,713 over the session**) |
+| **Aggregate parity** | **28.7%** (was 9.5% baseline; **+19.2pp** via Phase 0a + 1a + 1b + 1c + 2a + 2b + 2c + 2d + 2e) |
+| Average per-row coverage | 28.9% (was 9.3%) |
 | Rows at 100% parity | 0 / 671 |
 
 ### 19.1.1. Canonical EPD-extractable scope (Andy 2026-06-08)
@@ -1663,6 +1664,7 @@ This scope answers the parity question precisely: **"Can the parser reliably pop
 | BF | EPD Standards | 127/279 | **45.5%** | +45.5pp | Phase 1c substring (parser's `ISO 21930:2017, EN 15804+A2` ⊃ BEAM's `ISO 21930`) |
 | BE | Verifying Agent | 215/503 | **42.7%** | +42.7pp | Phase 1b extractor + Phase 1c substring |
 | BG | PCR Guidelines | 196/463 | **42.3%** | +41.7pp | Phase 1c substring (partial PCR text matches) |
+| R | GWP units kgCO2e per | 284/671 | **42.3%** | **+42.3pp** | Phase 2e — `unitNorm` relaxation (³→3 / ²→2 / strip leading `"1 "` / `cubic met[er\|re]` → m3 / `square met[er\|re]` → m2) + substring; `metric ton` deliberately NOT collapsed with kg |
 | AT | Material Type | 178/393 | **45.3%** | +7.4pp | Phase 2c — substring tolerance ("Clay Brick" ⊃ "Brick", "Cross-laminated timber" ⊃ "CLT") |
 | AH | Density Units | 227/615 | 36.9% | — | §18 norm fills "kg/m3" when volumetric |
 | BC | EPD Program/Operator | 182/509 | **35.8%** | +12.4pp | Phase 1c substring (ASTM ⊂ ASTM International, CSA ⊂ CSA Group) |
@@ -1680,15 +1682,15 @@ This scope answers the parity question precisely: **"Can the parser reliably pop
 | N | Countries of Manufacture | 123/487 | **25.3%** | **+25.3pp** | Phase 2d — prose extractor (proximity-anchored country names near "located in"/"manufactured in" + ISO mapping) + substring tolerance ("Canada" ⊃ "CAN") |
 | O | Markets of Applicability | 34/665 | **5.1%** | +4.5pp | Phase 2a + 2d (substring tolerance — BEAM "US & CA" partial overlap with parser's ISO arrays) |
 | K | Product Brand Name | 1/613 | 0.2% | +0.2pp | Phase 2a — added but BEAM-curated short-brands rarely match the EPD's longer brand-line capture |
-| **0% in-scope fields** | I, L, R, W, AI, AJ, AK, AM, AN, AO, AP, AR, AS | — | 0 | — | the extractor either doesn't touch the field, or extracts a form that never matches BEAM's stored value — true extractor backlog |
+| **0% in-scope fields** | I, L, W, AI, AJ, AK, AM, AN, AO, AP, AR, AS | — | 0 | — | the extractor either doesn't touch the field, or extracts a form that never matches BEAM's stored value — true extractor backlog |
 
-### 19.2. Where the 26.7% comes from — three contributing layers
+### 19.2. Where the 28.7% comes from — three contributing layers
 
 After the §19.1.1 scope decision the gap decomposes into just two main layers (biogenic-block ambiguity dropped out — it's no longer scored):
 
 1. **Fields the extractor doesn't extract at all** (~75% of the gap). Within the in-scope set: `I` Material, `K` Product Brand Name, `L` Specifications, `N` Countries of Manufacture, `O` Markets of Applicability, dimensions/thermal/mass (`AK`–`AR`), EPD owner/prepared-by/verifier (`BA`/`BB`/`BE`), LCA method/software/database (`BH`/`BI`/`BJ`), service life (`BK`). These show 0/N in the per-field rank below.
 2. **Multi-product fan-out** (~15% of the gap). One PDF → N BEAM rows; the parser emits one record (the first product), so per-product fields (`AG` density, `Q` GWP, dimensions) match at most *one* of the N rows. Cross-row spread is ~0pp in the top multi-product EPDs (43, 24, 20 rows…) because only EPD-level fields (operator, type, validation) — which don't vary by product — uniformly match or uniformly miss. The genuine per-product values stay near 0 across the family.
-3. **String / format divergence on already-extracted fields** (~10%). `J` Manufacturer 2.1%, `BC` Operator 23.4%, `AZ` EPD Type 21.6% — the extractor *does* pull these but its output diverges from BEAM's stored form (case, trailing whitespace, punctuation, vocab variants).
+3. **String / format divergence on already-extracted fields** (~10%). `J` Manufacturer 2.1%, `BC` Operator 23.4%, `AZ` EPD Type 21.6%, `R` GWP units 0% (pre-Phase-2e) — the extractor *does* pull these but its output diverges from BEAM's stored form (case, trailing whitespace, punctuation, vocab variants). R was lifted to 42.3% by Phase 2e harness `unitNorm`; the others remain candidates for either harness tolerance or extractor cleanup.
 
 There is no remaining "structurally unreachable" subset in the new scope — every column in §19.1.1 is in principle extractable from EPD content. **The 50% target is now genuinely reachable in the phased plan below, not aspirational.**
 
@@ -1702,9 +1704,9 @@ Non-blocking but worth queuing:
 - **`4ld02f` duplicate `beam_id`** (Parity-A finding 2026-05-28) — re-mint one side; doesn't affect Parity-B parity numbers but the duplicate distorts the catalogue.
 - **CCLIMB `chart-config.mjs` LCA_MODULES → TIME_HORIZONS** correction (handoff "NEXT SESSION #2") — entirely orthogonal but still pending.
 
-### 19.4. Phased lift plan — getting from 26.7% to ≥50%
+### 19.4. Phased lift plan — getting from 28.7% to ≥50%
 
-Each phase below states (a) what to do, (b) which in-scope fields it lifts, (c) a **rough** cell-count estimate (not a promise — the harness quantifies after each phase). Aggregate target: from current **3,765 matches → 7,050+** (50% of 14,100). **Phase 3 (multi-product) puts us at 50%.**
+Each phase below states (a) what to do, (b) which in-scope fields it lifts, (c) a **rough** cell-count estimate (not a promise — the harness quantifies after each phase). Aggregate target: from current **4,049 matches → 7,050+** (50% of 14,100). **Phase 3 (multi-product) puts us at 50%.**
 
 **Phase 0a — `extractNA → extractCommon` move** (§19.3 item 1) ✅ **SHIPPED 2026-06-08.** Landed +176 matches (+1.2pp). Mostly G EPD Expiry +18.7pp, BD Validation +6.3pp, AZ EPD Type +2.8pp.
 
@@ -1732,7 +1734,7 @@ Landed **+1,390 matches (+9.9pp)**. Lifted BI 10.4%→55.2%, BF 0%→45.5%, AZ 2
 - **BF Standards** — array → comma-string normalization. ~+140.
 - **BG PCR** — substring-match tolerance. ~+200.
 
-Phase 1 lift estimate: ~+2,200 matches (Phase 1a + 1b + 1c already booked **+1,814**, putting Phase 1 ahead of the original target). Cumulative actual: **26.7%** (3,765 / 14,100, including Phase 2a + 2b + 2c + 2d). Remaining Phase 1 headroom: AZ vocab expansion, G additional date-format coverage.
+Phase 1 lift estimate: ~+2,200 matches (Phase 1a + 1b + 1c already booked **+1,814**, putting Phase 1 ahead of the original target). Cumulative actual: **28.7%** (4,049 / 14,100, including Phase 2a + 2b + 2c + 2d + 2e). Remaining Phase 1 headroom: AZ vocab expansion, G additional date-format coverage.
 
 **Phase 2 — new-field extractors** (still pre-multi-product). Each field below is *not currently extracted at all*. Most are textually clear in EPDs (label-then-value). Cost: ~1 day each, less in batch:
 - **BA EPD Owner** (515 pop) — usually "Declaration Owner: X" or "Owner of Declaration: X". ~+260.
@@ -1760,7 +1762,7 @@ Phase 5 lift estimate: **+1,500–2,500 matches** if implemented across the weak
 
 ### 19.4.1. Methodology for the remaining 0% in-scope fields (Andy 2026-06-08)
 
-Phase 1c essentially exhausted what harness-side relaxations can do — fields still at 0% (`I`, `K`, `L`, `N`, `O`, `R`, `W`, `AI`, `AJ`, `AK`–`AS`, `BK`) are real extractor gaps, not metric artifacts. Andy 2026-06-08 directive: **"Look at known BEAM values, look up the PDF, discover why the parser can't find it."** Apply this methodology to every remaining multi-fail field instead of guessing regex shapes:
+After Phase 1c + Phase 2e the remaining 0% fields (`I`, `L`, `W`, `AI`, `AJ`, `AK`, `AM`–`AS`) are real extractor gaps, not metric artifacts. (R lifted via Phase 2e harness `unitNorm` — semantic equivalence between BEAM's short form and parser's prose declared-unit, parallel to Phase 1c. K stays low but isn't a harness-tolerance candidate — BEAM's curated short-brands genuinely diverge from EPD brand-line text.) Andy 2026-06-08 directive: **"Look at known BEAM values, look up the PDF, discover why the parser can't find it."** Apply this methodology to every remaining multi-fail field instead of guessing regex shapes:
 
 1. Pick a row where BEAM has a populated value for the field (sheet1-beam.csv).
 2. Find the corresponding PDF (filename prefix = canonical epd.id).

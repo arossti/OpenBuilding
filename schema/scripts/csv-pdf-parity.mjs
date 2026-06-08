@@ -236,8 +236,26 @@ const RELAXED_BY_COL = {
   J:  "substring",   // Manufacturer — short name ⊂ full legal name
   AT: "substring",   // Material Type — "Clay Brick" ⊃ "Brick", "Cross-laminated timber" ⊃ "CLT"
   N:  "substring",   // Countries of Manufacture — "Canada" ⊃ "CAN", "USA" ⊃ "US"
-  O:  "substring"    // Markets — "US & CA" partial overlap with parser's ISO arrays
+  O:  "substring",   // Markets — "US & CA" partial overlap with parser's ISO arrays
+  R:  "unitNorm"     // GWP units per — BEAM "m3"/"m²"/"kg" vs parser "1 m³"/"1 cubic meter"
 };
+
+// Normalize a declared-unit string for comparison: case-fold, fold ³→3 / ²→2,
+// strip a leading "1 " / "1.0 " quantity prefix, and rewrite English unit prose
+// to the short BEAM form (cubic meter → m3, square metre → m2). Keep
+// "metric ton" as-is (not the same as kg — 1 t = 1000 kg, so collapsing would
+// generate false matches between BEAM "kg" and parser "1 metric ton").
+function normalizeUnitForCompare(s) {
+  if (s === null || s === undefined) return "";
+  let x = String(s).trim().toLowerCase();
+  x = x.replace(/³/g, "3").replace(/²/g, "2");
+  x = x.replace(/^1(?:\.0+)?\s+/, "");
+  x = x.replace(/cubic\s+met(?:re|er)s?/g, "m3");
+  x = x.replace(/square\s+met(?:re|er)s?/g, "m2");
+  x = x.replace(/metric\s+tonnes?|metric\s+tons?|tonnes?/g, "metric ton");
+  x = x.replace(/\s+/g, " ").trim();
+  return x;
+}
 
 // ---------------------------------------------------------------------------
 // Cell comparison: ±0.5% relative + 0.01 absolute floor for numbers; trim +
@@ -288,6 +306,17 @@ function compareCell(c, csvVal, pdfVal) {
     const yb = /^\d{4}(-\d{2})?$/.exec(sb);
     if (ya && sb.startsWith(sa)) return { verdict: "MATCH", delta: null };
     if (yb && sa.startsWith(sb)) return { verdict: "MATCH", delta: null };
+  }
+  if (relaxed === "unitNorm") {
+    // Declared/functional unit string. BEAM stores the bare short form ("m3",
+    // "m²", "kg"); parser captures the EPD's prose ("1 m³", "1 cubic meter",
+    // "The declared unit is 1 cubic metre of ready mixed concrete…"). Same
+    // semantic fact — fold to a common form, then substring-tolerate.
+    const ua = normalizeUnitForCompare(sa);
+    const ub = normalizeUnitForCompare(sb);
+    if (ua.length >= 2 && ub.length >= 2 && (ua === ub || ua.includes(ub) || ub.includes(ua))) {
+      return { verdict: "MATCH", delta: null };
+    }
   }
   return { verdict: "MISMATCH", delta: `beam=${fmt(a)} pdf=${fmt(b)}` };
 }
