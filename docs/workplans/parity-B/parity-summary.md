@@ -1,8 +1,8 @@
 # Parity B — BEAM CSV ↔ EPD-parser extraction (Pass 1)
 
-_Generated 2026-06-08T17:53:02.638Z by `schema/scripts/csv-pdf-parity.mjs`._
+_Generated 2026-06-08T18:33:29.319Z by `schema/scripts/csv-pdf-parity.mjs`._
 
-For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness parses the PDF and compares the parser's extracted values against the populated BEAM cells per field. Tolerances: numbers ±0.5% + 0.01 absolute floor; strings trim + case-insensitive; units trim + exact. Skipped from the parity %: `A, C, D, E, F, P, AA, AD, AX` (BfCA-internal status flags + structural placeholders, never EPD-derived).
+For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness parses the PDF and compares the parser's extracted values against the populated BEAM cells per field. Tolerances: numbers ±0.5% + 0.01 absolute floor; strings trim + case-insensitive; units trim + exact. **Scoring scope** (Andy 2026-06-08, §19): only the EPD-extractable columns are in the parity %. Counted: `G, I, J, K, L, N, O, Q, R, W, AG, AH, AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AS, AT, AY, AZ, BA, BB, BC, BD, BE, BF, BG, BH, BI, BJ, BK`. Out-of-scope (BfCA-internal flags, BfCA-derived units/values, BfCA-computational biogenic block, BfCA taxonomy, internal notation, structural placeholders): everything else.
 
 ## Coverage
 
@@ -22,8 +22,8 @@ For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness 
 ## Parity
 
 - Rows at **100% parity**: **0/671** (0.0%)
-- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **1336/20003** (6.7%)
-- Average per-row coverage: **6.5%**
+- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **1336/14103** (9.5%)
+- Average per-row coverage: **9.2%**
 
 ## Per-field match rate (descending)
 
@@ -42,27 +42,13 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 | G | EPD Expiry | str | 23 / 671 | 3.4% |
 | J | Manufacturer | str | 14 / 668 | 2.1% |
 | BG | EPD PCR Guidelines | str | 3 / 463 | 0.6% |
-| B | Display Name | str | 0 / 671 | 0.0% |
-| H | Footnote | str | 0 / 247 | 0.0% |
 | I | Material | str | 0 / 671 | 0.0% |
 | K | Product Brand Name | str | 0 / 613 | 0.0% |
 | L | Specifications | str | 0 / 445 | 0.0% |
-| M | Notes | str | 0 / 299 | 0.0% |
 | N | Countries of Manufacture | str | 0 / 487 | 0.0% |
 | O | Markets of Applicability | str | 0 / 665 | 0.0% |
 | R | GWP units kgCO2e per | str | 0 / 671 | 0.0% |
-| S | GWP kgCO2e/(common unit) | str | 0 / 671 | 0.0% |
-| T | Common Unit: kgCO2e / _ | str | 0 / 671 | 0.0% |
-| U | Metric Units | str | 0 / 671 | 0.0% |
-| V | Imperial Units | str | 0 / 671 | 0.0% |
 | W | GWP-bio from EPD | str | 0 / 89 | 0.0% |
-| X | Biogenic carbon factor | str | 0 / 127 | 0.0% |
-| Y | % Carbon content (kgC/kg) | str | 0 / 113 | 0.0% |
-| Z | Biogenic Storage | str | 0 / 84 | 0.0% |
-| AB | WWF Storage Factor | str | 0 / 109 | 0.0% |
-| AC | Carbon content kgC/unit | str | 0 / 99 | 0.0% |
-| AE | Biogenic CO2 full C value | str | 0 / 90 | 0.0% |
-| AF | Storage % Reduction | str | 0 / 190 | 0.0% |
 | AI | Addn'l factors | str | 0 / 182 | 0.0% |
 | AJ | Addn'l factor units | str | 0 / 191 | 0.0% |
 | AK | R-value / inch | str | 0 / 130 | 0.0% |
@@ -73,9 +59,6 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 | AP | Width (m) | str | 0 / 56 | 0.0% |
 | AQ | Depth (m) | str | 0 / 115 | 0.0% |
 | AR | Unit Volume (m3) | str | 0 / 27 | 0.0% |
-| AU | Material Subtype | str | 0 / 96 | 0.0% |
-| AV | Product Type | str | 0 / 536 | 0.0% |
-| AW | Product Subtype | str | 0 / 392 | 0.0% |
 | BA | EPD Owner | str | 0 / 515 | 0.0% |
 | BB | EPD/LCA Prepared by | str | 0 / 643 | 0.0% |
 | BE | EPD Verifying Agent | str | 0 / 503 | 0.0% |
@@ -84,7 +67,6 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 | BI | EPD LCA Software | str | 0 / 308 | 0.0% |
 | BJ | EPD LCI Database | str | 0 / 308 | 0.0% |
 | BK | Product Service Life (Years) | str | 0 / 168 | 0.0% |
-| BL | Source document URL | str | 0 / 163 | 0.0% |
 
 ## Multi-product fan-out (§16.1 Follow-up #4)
 
@@ -92,36 +74,36 @@ Each EPD below maps to >1 BEAM row but the parser emits one record per PDF — s
 
 | canonical epd.id | rows | avg coverage | spread |
 |---|---:|---:|---:|
-| 47895560991021 | 43 | 11.8% | 0.0pp |
-| epd352 | 24 | 3.8% | 0.0pp |
+| 47895560991021 | 43 | 15.4% | 0.0pp |
+| epd352 | 24 | 5.3% | 0.0pp |
 | epd10294 | 20 | 0.0% | 0.0pp |
-| 47884246341021 | 19 | 7.1% | 0.8pp |
+| 47884246341021 | 19 | 13.1% | 1.8pp |
 | epd10092 | 18 | 0.0% | 0.0pp |
-| epd351 | 18 | 3.8% | 0.0pp |
-| epd350 | 18 | 3.8% | 0.1pp |
-| epd349 | 18 | 3.8% | 0.0pp |
-| epd347 | 18 | 3.8% | 0.0pp |
-| epd348 | 15 | 3.8% | 0.0pp |
-| epd346 | 12 | 3.8% | 0.0pp |
-| 47890927681011 | 10 | 5.9% | 4.3pp |
-| epd362 | 9 | 15.2% | 0.0pp |
-| 2021m20141 | 9 | 3.3% | 0.3pp |
-| 47897933651011 | 9 | 14.3% | 0.0pp |
-| 47891035931021 | 7 | 8.7% | 1.0pp |
-| scsepd07524 | 6 | 5.3% | 0.0pp |
-| 47884246341011 | 5 | 7.7% | 0.0pp |
-| 47884246341071 | 5 | 7.6% | 0.6pp |
-| 47884246341061 | 5 | 4.1% | 0.6pp |
-| 47905509341011 | 5 | 12.0% | 2.9pp |
+| epd351 | 18 | 5.3% | 0.0pp |
+| epd350 | 18 | 5.2% | 0.3pp |
+| epd349 | 18 | 5.3% | 0.0pp |
+| epd347 | 18 | 5.3% | 0.0pp |
+| epd348 | 15 | 5.3% | 0.0pp |
+| epd346 | 12 | 5.3% | 0.0pp |
+| 47890927681011 | 10 | 8.5% | 6.6pp |
+| epd362 | 9 | 20.0% | 0.0pp |
+| 2021m20141 | 9 | 4.5% | 0.2pp |
+| 47897933651011 | 9 | 18.2% | 0.0pp |
+| 47891035931021 | 7 | 12.6% | 1.0pp |
+| scsepd07524 | 6 | 8.3% | 0.0pp |
+| 47884246341011 | 5 | 14.3% | 0.0pp |
+| 47884246341071 | 5 | 15.0% | 2.4pp |
+| 47884246341061 | 5 | 6.8% | 0.5pp |
+| 47905509341011 | 5 | 16.2% | 3.8pp |
 | epd338 | 4 | 0.0% | 0.0pp |
-| 47906780841011 | 4 | 8.2% | 0.5pp |
-| epd10786 | 4 | 3.3% | 0.0pp |
-| 40298012 | 4 | 9.4% | 0.0pp |
-| sp05037 | 4 | 3.6% | 2.9pp |
-| epdste20150327ibd1en | 4 | 3.1% | 0.1pp |
-| cim20191223001 | 3 | 3.9% | 2.1pp |
-| 47884246341031 | 3 | 7.7% | 0.0pp |
-| ep397 | 3 | 2.7% | 0.0pp |
+| 47906780841011 | 4 | 10.5% | 0.8pp |
+| epd10786 | 4 | 4.3% | 0.0pp |
+| 40298012 | 4 | 12.0% | 0.0pp |
+| sp05037 | 4 | 4.8% | 3.8pp |
+| epdste20150327ibd1en | 4 | 5.3% | 0.3pp |
+| cim20191223001 | 3 | 6.2% | 3.0pp |
+| 47884246341031 | 3 | 14.3% | 0.0pp |
+| ep397 | 3 | 3.8% | 0.0pp |
 
 ## CSV-only canonical `epd.id`s (no PDF found — excluded from parity)
 

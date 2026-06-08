@@ -45,13 +45,41 @@ const DEFAULT_OUT_DIR = join(REPO_ROOT, "docs", "workplans", "parity-B");
 const LOOKUPS_DIR = join(SCHEMA_DIR, "lookups");
 const EXTRACT_MJS = join(REPO_ROOT, "js", "epd", "extract.mjs");
 
-// Columns to exclude from the parity grid:
-//   A/C/D/E/F  → beam_id + BfCA status flags (never EPD-derived)
-//   P          → BfCA admin "data added" date (never EPD-derived)
-//   AA/AD/AX   → placeholders / dropped columns (no extractable counterpart)
-// We still emit them as empty columns in the output sheets so column
-// positions match the DUMP, but they don't count in the parity %.
-const SKIP_COLS = new Set(["A", "C", "D", "E", "F", "P", "AA", "AD", "AX"]);
+// Positive "EPD-extractable" column list — the canonical scope for Parity B,
+// authored by Andy 2026-06-08 (§19). Anything NOT in this set is silently out
+// of the parity %: BfCA-internal (A, C–F, M, P), BfCA-curated naming (B),
+// BfCA-derived units/values (S, T, U, V, AC, AF), BfCA-computational biogenic
+// block (W, X, Y, Z, AB, AE), BfCA taxonomy (AU, AV, AW), internal footnote
+// (H), and structural placeholders (AA, AD, AX). The harness still emits
+// every DUMP column in the output sheets so column positions stay aligned
+// with the BEAM spreadsheet; the COMPARE_COLS_SET only governs the parity %.
+const COMPARE_COLS_SET = new Set([
+  // Identification + provenance (free-text / dates, EPD-derivable)
+  "G",  // EPD Expiry
+  "I",  // Material
+  "J",  // Manufacturer
+  "K",  // Product Brand Name
+  "L",  // Specifications
+  "N",  // Countries of Manufacture
+  "O",  // Markets of Applicability
+  // Stated carbon (EPD's own headline number + declared unit)
+  "Q",  // Stated EPD kgCO2e / unit
+  "R",  // GWP units kgCO2e per
+  // Biogenic — only the column that is EXPLICITLY EPD-stated (per its name).
+  // X/Y/Z/AB/AC/AE/AF stay out: BfCA reference lookups + per-material defaults
+  // + derivations from inputs, not directly EPD-stated values.
+  "W",  // GWP-bio from EPD kg CO2e / common unit
+  // Physical (density, factors, thermal, mass, dimensions)
+  "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS",
+  // Classification (HITL-readable per Andy; AU/AV/AW excluded — BfCA taxonomy)
+  "AT",
+  // EPD metadata block — capture wherever available (Andy 2026-06-08):
+  //   AY EPD ID · AZ EPD Type · BA Owner · BB Prepared by · BC Program Operator ·
+  //   BD Validation · BE Verifier · BF Standards · BG PCR · BH LCA Method ·
+  //   BI LCA Software · BJ LCI Database · BK Service Life
+  // BL Source document URL excluded — not always listed on the EPD itself.
+  "AY", "AZ", "BA", "BB", "BC", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BK"
+]);
 
 // ---------------------------------------------------------------------------
 // Minimal CSV tokeniser + cell readers (parity with csv-json-parity.mjs).
@@ -371,7 +399,7 @@ async function main() {
   // parser's single record compares against every BEAM row sharing that ID
   // (multi-product: rows under the same EPD will have different per-product
   // values; mismatches there are expected and reported as such).
-  const COMPARE_COLS = BEAM_COLUMNS.filter(c => (c.path || c.get) && !SKIP_COLS.has(c.col));
+  const COMPARE_COLS = BEAM_COLUMNS.filter(c => COMPARE_COLS_SET.has(c.col) && (c.path || c.get));
   const rowResults = [];     // per (beam_id, key) — used for sheet output and aggregates
   // Keyed by `c.col` (the spreadsheet letter) because BEAM_COLUMNS doesn't
   // carry a per-field id; `c.col` is unique across the descriptor list.
@@ -477,11 +505,11 @@ async function main() {
   for (const r of rowResults) {
     const rec = recordByEpd.get(r.key);
     const beamRow = BEAM_COLUMNS.map(c => {
-      if (SKIP_COLS.has(c.col) || (!c.path && !c.get)) return "";
+      if (!COMPARE_COLS_SET.has(c.col) || (!c.path && !c.get)) return "";
       return readBeamCell(r.row, c);
     });
     const pdfRow = BEAM_COLUMNS.map(c => {
-      if (SKIP_COLS.has(c.col) || (!c.path && !c.get)) return "";
+      if (!COMPARE_COLS_SET.has(c.col) || (!c.path && !c.get)) return "";
       return cellValue(rec, c);
     });
     s1.push([r.beamId, r.epdIdRaw, ...beamRow]);
@@ -489,7 +517,7 @@ async function main() {
 
     // Build per-column verdict, including skipped placeholders as "—"
     const verdicts = BEAM_COLUMNS.map(c => {
-      if (SKIP_COLS.has(c.col) || (!c.path && !c.get)) return "—";
+      if (!COMPARE_COLS_SET.has(c.col) || (!c.path && !c.get)) return "—";
       const cellRes = r.cells.find(x => x.c.col === c.col);
       if (!cellRes) return "—";
       if (!cellRes.populated) return "—";
@@ -507,7 +535,7 @@ async function main() {
   const md = [];
   md.push(`# Parity B — BEAM CSV ↔ EPD-parser extraction (Pass 1)\n`);
   md.push(`_Generated ${new Date().toISOString()} by \`schema/scripts/csv-pdf-parity.mjs\`._\n`);
-  md.push(`For every BEAM CSV row whose \`epd.id\` matches a PDF in the folder, this harness parses the PDF and compares the parser's extracted values against the populated BEAM cells per field. Tolerances: numbers ±0.5% + 0.01 absolute floor; strings trim + case-insensitive; units trim + exact. Skipped from the parity %: \`${[...SKIP_COLS].join(", ")}\` (BfCA-internal status flags + structural placeholders, never EPD-derived).\n`);
+  md.push(`For every BEAM CSV row whose \`epd.id\` matches a PDF in the folder, this harness parses the PDF and compares the parser's extracted values against the populated BEAM cells per field. Tolerances: numbers ±0.5% + 0.01 absolute floor; strings trim + case-insensitive; units trim + exact. **Scoring scope** (Andy 2026-06-08, §19): only the EPD-extractable columns are in the parity %. Counted: \`${[...COMPARE_COLS_SET].join(", ")}\`. Out-of-scope (BfCA-internal flags, BfCA-derived units/values, BfCA-computational biogenic block, BfCA taxonomy, internal notation, structural placeholders): everything else.\n`);
   md.push(`## Coverage\n`);
   md.push(`| | count |`);
   md.push(`|---|---:|`);
