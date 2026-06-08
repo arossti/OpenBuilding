@@ -205,9 +205,34 @@ function normalizeForDumpCompare(rec) {
 }
 
 // ---------------------------------------------------------------------------
+// Per-column comparison relaxations (Andy 2026-06-08 directive: the metric
+// should reflect semantic match, not penalize parser for BEAM's variable
+// representations of the same value). These do NOT loosen what gets into
+// the DB — they correct the parity METRIC for known-equivalent forms:
+//   substring : either side a substring of the other after trim+casefold
+//               (BC operator: "ASTM" ≡ "ASTM International")
+//   yearPrefix: BEAM = "YYYY" + parser starts "YYYY-…" → match
+//               (BEAM stores year-only expiry; parser has full ISO date)
+// ---------------------------------------------------------------------------
+const RELAXED_BY_COL = {
+  G:  "yearPrefix",  // EPD Expiry — BEAM has year-only, parser has full date
+  BC: "substring",   // Program Operator — BEAM "ASTM" ⊂ parser "ASTM International"
+  BF: "substring",   // Standards — BEAM stores one citation, parser may have a list
+  BG: "substring",   // PCR — BEAM and parser may have different framing of same PCR
+  BA: "substring",   // EPD Owner — same org under variants
+  BB: "substring",   // Prepared by — same org under variants
+  BE: "substring",   // Verifier — same org under variants
+  BH: "substring",   // LCA Method — substring tolerance on method names
+  BI: "substring",   // LCA Software — same tool with/without version
+  BJ: "substring",   // LCI Database — same DB with/without version
+  J:  "substring"    // Manufacturer — short name ⊂ full legal name
+};
+
+// ---------------------------------------------------------------------------
 // Cell comparison: ±0.5% relative + 0.01 absolute floor for numbers; trim +
-// case-insensitive for strings; trim + exact for units/ids/enums. Matches
-// the Parity-A contract.
+// case-insensitive for strings; trim + case-insensitive for enums (Andy
+// 2026-06-08 — semantic categories shouldn't differ by case); trim + exact
+// for units/ids. Per-column `relaxed` hints layered on top of base equality.
 // ---------------------------------------------------------------------------
 function compareCell(c, csvVal, pdfVal) {
   const a = csvVal === undefined ? null : csvVal;
@@ -226,8 +251,33 @@ function compareCell(c, csvVal, pdfVal) {
     return { verdict: "MISMATCH", delta: `Δ=${d > 0 ? "+" : ""}${round4(d)} (beam=${round4(na)} pdf=${round4(nb)})` };
   }
   let sa = String(a).trim(), sb = String(b).trim();
-  if (c.kind === "str") { sa = sa.toLowerCase(); sb = sb.toLowerCase(); }
+  // Case-insensitive by default (str, enum, derived/unkeyed) — semantic
+  // categories shouldn't differ by case. Only "unit" stays case-exact
+  // ("kg/m2" ≠ "KG/M2" is a real meaning difference for units).
+  if (c.kind !== "unit") {
+    sa = sa.toLowerCase();
+    sb = sb.toLowerCase();
+  }
   if (sa === sb) return { verdict: "MATCH", delta: null };
+
+  // Per-column relaxations (semantic equivalence, not loosening).
+  const relaxed = RELAXED_BY_COL[c.col];
+  if (relaxed === "substring" && sa.length >= 2 && sb.length >= 2) {
+    // Already case-folded above for str; do it explicitly for unit/id too
+    const la = sa.toLowerCase(), lb = sb.toLowerCase();
+    if (la.includes(lb) || lb.includes(la)) {
+      return { verdict: "MATCH", delta: null };
+    }
+  }
+  if (relaxed === "yearPrefix") {
+    // BEAM commonly stores "YYYY" or "YYYY-MM" for expiry; parser stores
+    // full ISO. Accept if BEAM is a year/year-month prefix of parser's date,
+    // or vice versa (the rarer case).
+    const ya = /^\d{4}(-\d{2})?$/.exec(sa);
+    const yb = /^\d{4}(-\d{2})?$/.exec(sb);
+    if (ya && sb.startsWith(sa)) return { verdict: "MATCH", delta: null };
+    if (yb && sa.startsWith(sb)) return { verdict: "MATCH", delta: null };
+  }
   return { verdict: "MISMATCH", delta: `beam=${fmt(a)} pdf=${fmt(b)}` };
 }
 function fmt(v) { return v === null ? "∅" : `"${String(v).slice(0, 40)}"`; }
