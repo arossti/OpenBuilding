@@ -644,6 +644,24 @@ function extractCommon(text, rec) {
       if (pv && pv.length >= 2) _setPath(rec, "epd.prepared_by", pv);
     }
   }
+  // Known-LCA-org fallback for BB Prepared-by. Many EPDs don't use clean
+  // "Prepared by:" labels — they name the LCA practitioner in narrative
+  // ("LCA was performed by Sphera", "The Sphera GaBi model..."). Match
+  // a known practitioner name that sits within 60 chars of an LCA / EPD /
+  // prepared / conducted keyword (proximity guard against false positives
+  // from generic body-text mentions). Curated org list grows with evidence.
+  if (!_get(rec, "epd.prepared_by")) {
+    var LCA_PRACT = "(Sphera|thinkstep|WAP\\s+Sustainability(?:\\s+Consulting)?|Ecochain(?:\\s+Mobius)?|Ecoform(?:,?\\s+LLC)?|EuGeos(?:\\s+SRL)?|Pr[éè]\\s+(?:Consultants|Sustainability)|Quartz|Long\\s+Trail\\s+Sustainability|Athena\\s+Sustainable\\s+Materials(?:\\s+Institute)?|Vertima\\s+Inc\\.?|Vertima|Sustainable\\s+Solutions\\s+Corporation|Industrial\\s+Ecology\\s+Consultants|Four\\s+Elements\\s+Consulting|Renuables|Epsen\\s+Group|EVEA|Thinkstep,?\\s+Inc\\.?|PE-International|PE\\s+International|RDC\\s+Environment|Ecobilan)";
+    var bbNear =
+      text.match(new RegExp("(?:LCA|EPD|prepared|conducted|performed|study|practitioner)\\s[^\\n]{0,80}?\\b" + LCA_PRACT, "i")) ||
+      text.match(new RegExp("\\b" + LCA_PRACT + "\\s[^\\n]{0,80}?(?:LCA|EPD|prepared|conducted|performed|practitioner)", "i"));
+    if (bbNear) {
+      // Capture group 1 from either branch
+      var bbVal = (bbNear[1] || "").trim();
+      if (bbVal && bbVal.length >= 3) _setPath(rec, "epd.prepared_by", bbVal);
+    }
+  }
+
   if (!_get(rec, "epd.validation.agent")) {
     var ver =
       text.match(/(?:Independent\s+)?(?:third[-\s]+party\s+)?[Vv]erifier\s*(?:[:\s]|$|\n)\s*([^\n\r]{2,120})/i) ||
@@ -710,6 +728,59 @@ function extractCommon(text, rec) {
       if (swv && swv.length >= 2) _setPath(rec, "methodology.lca_software", swv);
     }
   }
+  // AQ Depth (thickness) — labeled in product-specs blocks. Convert to
+  // meters to match the catalogue schema (physical.dimensions.depth_m).
+  // Broader patterns 2026-06-08: also matches "Nominal thickness", "Average
+  // thickness", "Product thickness" — and the "(unit)" parenthesised form.
+  if (!_get(rec, "physical.dimensions.depth_m")) {
+    var thickM =
+      text.match(/(?:Sheet\s+|Nominal\s+|Average\s+|Product\s+)?(?:Thickness|Depth)\s*[:\s]+(\d+(?:[.,]\d+)?)\s*(mm|cm|m\b|in\.?|inch(?:es)?|ft)/i) ||
+      text.match(/(?:Thickness|Depth)\s*\((mm|cm|m\b|in\.?|inch(?:es)?)\)\s*[:\s]+(\d+(?:[.,]\d+)?)/i) ||
+      text.match(/(?:Thickness|Depth)\s*=\s*(\d+(?:[.,]\d+)?)\s*(mm|cm|m\b|in\.?|inch(?:es)?|ft)/i);
+    if (thickM) {
+      var v, u;
+      if (thickM.length === 3) { v = parseFloat(thickM[1].replace(",", ".")); u = thickM[2].toLowerCase(); }
+      else { u = thickM[1].toLowerCase(); v = parseFloat(thickM[2].replace(",", ".")); }
+      var meters = null;
+      if (/^m\b/.test(u)) meters = v;
+      else if (/^cm/.test(u)) meters = v / 100;
+      else if (/^mm/.test(u)) meters = v / 1000;
+      else if (/^in/.test(u)) meters = v * 0.0254;
+      else if (/^ft/.test(u)) meters = v * 0.3048;
+      // Reject implausible thicknesses (catch parse glitches) — building
+      // products are typically 0.0001 m (0.1 mm foil) to 1.0 m
+      if (meters !== null && meters > 0.0001 && meters < 1.0) {
+        _setPath(rec, "physical.dimensions.depth_m", Math.round(meters * 1000000) / 1000000);
+      }
+    }
+  }
+
+  // AL k Thermal Conductivity W/(mK) — shape-anchored on the unit string
+  // itself (W/(m·K) is domain-specific, low false-positive risk). Catches
+  // both labeled forms ("Thermal conductivity λ = 0.034 W/(m·K)") and
+  // table-cell forms ("0.034 W/m·K" in product specs).
+  if (!_get(rec, "physical.thermal.conductivity_w_mk")) {
+    var lambda = text.match(/(\d+\.\d{2,4})\s*W\s*\/?\s*\(?\s*m\s*[·\.\*\-]?\s*K\)?/i);
+    if (lambda) {
+      var lv = parseFloat(lambda[1]);
+      // Sanity: thermal conductivity for building materials 0.015 to 1.0 W/mK
+      if (lv > 0.015 && lv < 1.0) _setPath(rec, "physical.thermal.conductivity_w_mk", lv);
+    }
+  }
+
+  // AK R-value per inch (imperial) — common in NA insulation EPDs. Often
+  // "R-value: 5 per inch" or "R-X.X/inch" or in product spec tables.
+  if (!_get(rec, "physical.thermal.r_value_per_inch_imperial")) {
+    var rval =
+      text.match(/R[-\s]*value\s*(?:per\s+inch|\/\s*in(?:ch)?)\s*[:\s]+(\d+(?:\.\d+)?)/i) ||
+      text.match(/R[-\s]*value[:\s]+(\d+(?:\.\d+)?)\s*(?:per\s+inch|\/\s*in(?:ch)?)/i);
+    if (rval) {
+      var rv = parseFloat(rval[1]);
+      // R-value/inch typically 2-8 for building insulation
+      if (rv > 1 && rv < 12) _setPath(rec, "physical.thermal.r_value_per_inch_imperial", rv);
+    }
+  }
+
   // BK Product Service Life — labeled in most EPDs, plus prose forms
   // ("service life for the product is X years"). Evidence-based per
   // §19.4.1 probing (Andy 2026-06-08): patterns seen across ITB, UL/NA,

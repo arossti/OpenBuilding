@@ -1,6 +1,6 @@
 # Parity B — BEAM CSV ↔ EPD-parser extraction (Pass 1)
 
-_Generated 2026-06-08T20:02:16.006Z by `schema/scripts/csv-pdf-parity.mjs`._
+_Generated 2026-06-08T20:18:06.286Z by `schema/scripts/csv-pdf-parity.mjs`._
 
 For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness parses the PDF and compares the parser's extracted values against the populated BEAM cells per field. Tolerances: numbers ±0.5% + 0.01 absolute floor; strings trim + case-insensitive; units trim + exact. **Scoring scope** (Andy 2026-06-08, §19): only the EPD-extractable columns are in the parity %. Counted: `G, I, J, K, L, N, O, Q, R, W, AG, AH, AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AS, AT, AY, AZ, BA, BB, BC, BD, BE, BF, BG, BH, BI, BJ, BK`. Out-of-scope (BfCA-internal flags, BfCA-derived units/values, BfCA-computational biogenic block, BfCA taxonomy, internal notation, structural placeholders): everything else.
 
@@ -22,8 +22,8 @@ For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness 
 ## Parity
 
 - Rows at **100% parity**: **0/671** (0.0%)
-- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **3417/14100** (24.2%)
-- Average per-row coverage: **24.0%**
+- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **3583/14100** (25.4%)
+- Average per-row coverage: **25.3%**
 
 ## Per-field match rate (descending)
 
@@ -45,11 +45,13 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 | G | EPD Expiry | str | 232 / 671 | 34.6% |
 | J | Manufacturer | str | 229 / 668 | 34.3% |
 | BH | LCA Method | str | 135 / 399 | 33.8% |
+| BB | EPD/LCA Prepared by | str | 186 / 643 | 28.9% |
 | BJ | EPD LCI Database | str | 81 / 308 | 26.3% |
 | AG | Density | str | 89 / 615 | 14.5% |
 | BA | EPD Owner | str | 68 / 515 | 13.2% |
 | Q | Stated EPD kgCO2e / unit | str | 55 / 671 | 8.2% |
-| BB | EPD/LCA Prepared by | str | 23 / 643 | 3.6% |
+| AL | k, Thermal Conductivity | str | 2 / 113 | 1.8% |
+| AQ | Depth (m) | str | 1 / 115 | 0.9% |
 | O | Markets of Applicability | str | 4 / 665 | 0.6% |
 | K | Product Brand Name | str | 1 / 613 | 0.2% |
 | I | Material | str | 0 / 671 | 0.0% |
@@ -60,12 +62,10 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 | AI | Addn'l factors | str | 0 / 182 | 0.0% |
 | AJ | Addn'l factor units | str | 0 / 191 | 0.0% |
 | AK | R-value / inch | str | 0 / 130 | 0.0% |
-| AL | k, Thermal Conductivity | str | 0 / 113 | 0.0% |
 | AM | Moisture content % | str | 0 / 12 | 0.0% |
 | AN | Mass (kg) | str | 0 / 6 | 0.0% |
 | AO | Length (m) | str | 0 / 56 | 0.0% |
 | AP | Width (m) | str | 0 / 56 | 0.0% |
-| AQ | Depth (m) | str | 0 / 115 | 0.0% |
 | AR | Unit Volume (m3) | str | 0 / 27 | 0.0% |
 
 ## Multi-product fan-out (§16.1 Follow-up #4)
@@ -75,16 +75,16 @@ Each EPD below maps to >1 BEAM row but the parser emits one record per PDF — s
 | canonical epd.id | rows | avg coverage | spread |
 |---|---:|---:|---:|
 | 47895560991021 | 43 | 23.3% | 7.7pp |
-| epd352 | 24 | 26.3% | 0.0pp |
+| epd352 | 24 | 31.6% | 0.0pp |
 | epd10294 | 20 | 25.0% | 0.0pp |
 | 47884246341021 | 19 | 26.1% | 3.6pp |
 | epd10092 | 18 | 16.7% | 0.0pp |
-| epd351 | 18 | 26.3% | 0.0pp |
-| epd350 | 18 | 26.2% | 1.3pp |
-| epd349 | 18 | 26.3% | 0.0pp |
-| epd347 | 18 | 26.3% | 0.0pp |
-| epd348 | 15 | 31.6% | 0.0pp |
-| epd346 | 12 | 26.3% | 0.0pp |
+| epd351 | 18 | 31.6% | 0.0pp |
+| epd350 | 18 | 31.5% | 1.6pp |
+| epd349 | 18 | 31.6% | 0.0pp |
+| epd347 | 18 | 31.6% | 0.0pp |
+| epd348 | 15 | 36.8% | 0.0pp |
+| epd346 | 12 | 31.6% | 0.0pp |
 | 47890927681011 | 10 | 24.3% | 9.6pp |
 | epd362 | 9 | 36.0% | 0.0pp |
 | 2021m20141 | 9 | 31.7% | 1.4pp |
@@ -98,7 +98,7 @@ Each EPD below maps to >1 BEAM row but the parser emits one record per PDF — s
 | epd338 | 4 | 12.5% | 3.6pp |
 | 47906780841011 | 4 | 24.6% | 1.8pp |
 | epd10786 | 4 | 15.2% | 8.7pp |
-| 40298012 | 4 | 24.0% | 0.0pp |
+| 40298012 | 4 | 28.0% | 0.0pp |
 | sp05037 | 4 | 24.0% | 3.8pp |
 | epdste20150327ibd1en | 4 | 10.7% | 0.6pp |
 | cim20191223001 | 3 | 13.7% | 10.0pp |

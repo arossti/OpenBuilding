@@ -201,6 +201,14 @@ function normalizeForDumpCompare(rec) {
   const carbon = r.carbon = r.carbon || {};
   const stated = carbon.stated = carbon.stated || {};
   if (gwpVal != null && stated.value_kgco2e == null) stated.value_kgco2e = gwpVal;
+  // W GWP-bio from EPD — parallel to GWP mapping above. Parser writes
+  // impacts.gwp_bio_kgco2e.total.value (per declared unit); DUMP reads
+  // carbon.biogenic.gwp_bio_from_epd_kgco2e_per_common_unit. Map them.
+  const gwpBioVal = imp.gwp_bio_kgco2e && imp.gwp_bio_kgco2e.total && imp.gwp_bio_kgco2e.total.value;
+  const biogenic = carbon.biogenic = carbon.biogenic || {};
+  if (gwpBioVal != null && biogenic.gwp_bio_from_epd_kgco2e_per_common_unit == null) {
+    biogenic.gwp_bio_from_epd_kgco2e_per_common_unit = gwpBioVal;
+  }
   return r;
 }
 
