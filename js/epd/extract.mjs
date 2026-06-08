@@ -693,6 +693,59 @@ function extractCommon(text, rec) {
     }
   }
 
+  // Phase 2i N Country fallbacks (Andy 2026-06-08) — when the proximity-
+  // anchored country-name detection above missed, try address-block, US-
+  // state / Canadian-province codes in city-state form, postal-code-
+  // anchored country, and French/German production language. Probes
+  // surfaced these as the dominant patterns in the remaining 273 misses:
+  // raw addresses, "facility in Kitchener, ON", French FDES "fabriqués
+  // en France", "manufacturing plants in Vernon, CA, Las Vegas, NV".
+  if (!_get(rec, "provenance.countries_of_manufacture")) {
+    var nHead = text.split("\n").slice(0, 150).join("\n");
+    // 2i-a — "facility|plant|production in <City>, <ST|PROV>" comma-anchored.
+    // 2-letter codes used here because the structured "<word>, <STATE>" form
+    // is unambiguous (raw English text doesn't generate "city, AB" by accident).
+    var caProvAbbr = nHead.match(/\b(?:facility|plant|factory|production|manufacturing|located|address|operating)[^\n]{0,30}\s+(?:in|at|of)\s+[^,\n]{2,40},\s*(AB|BC|MB|NB|NL|NS|ON|PE|QC|SK|NT|NU|YT)\b/);
+    var usStAbbr = nHead.match(/\b(?:facility|plant|factory|production|manufacturing|located|address|operating)[^\n]{0,30}\s+(?:in|at|of)\s+[^,\n]{2,40},\s*(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)\b/);
+    if (caProvAbbr && usStAbbr) _setPath(rec, "provenance.countries_of_manufacture", ["CAN", "USA"]);
+    else if (caProvAbbr) _setPath(rec, "provenance.countries_of_manufacture", ["CAN"]);
+    else if (usStAbbr) _setPath(rec, "provenance.countries_of_manufacture", ["USA"]);
+  }
+  if (!_get(rec, "provenance.countries_of_manufacture")) {
+    var nHead2 = text.split("\n").slice(0, 150).join("\n");
+    // 2i-b — Canadian provinces FULL-name in facility context.
+    var caProvFull = nHead2.match(/\b(?:facility|plant|factory|production|manufacturing|located)\s+(?:in|at|of)\s+[^,\n]{0,40}\b(Alberta|British\s+Columbia|Manitoba|New\s+Brunswick|Newfoundland|Nova\s+Scotia|Ontario|Prince\s+Edward\s+Island|Quebec|Qu[eé]bec|Saskatchewan|Yukon)\b/i);
+    if (caProvFull) _setPath(rec, "provenance.countries_of_manufacture", ["CAN"]);
+  }
+  if (!_get(rec, "provenance.countries_of_manufacture")) {
+    var nHead3 = text.split("\n").slice(0, 150).join("\n");
+    // 2i-c — postal-code-anchored country. Canadian A1A 1A1 + "Canada" /
+    // US ZIP 5(+4) + "USA"/"United States" within 40 chars of the code.
+    if (/\b[A-Z]\d[A-Z]\s?\d[A-Z]\d\b[^\n]{0,40}?\bCanada\b/.test(nHead3)) {
+      _setPath(rec, "provenance.countries_of_manufacture", ["CAN"]);
+    } else if (/\b\d{5}(?:-\d{4})?\b[^\n]{0,40}?\b(?:USA|U\.S\.A?\.?|United\s+States(?:\s+of\s+America)?)\b/.test(nHead3)) {
+      _setPath(rec, "provenance.countries_of_manufacture", ["USA"]);
+    }
+  }
+  if (!_get(rec, "provenance.countries_of_manufacture")) {
+    var nHead4 = text.split("\n").slice(0, 150).join("\n");
+    // 2i-d — French/German production language for FDES / IBU.
+    var euLang =
+      nHead4.match(/\b(?:fabriqu[éeo](?:s|es)?|produits?\s+fabriqu[éeo]s?|Sites?\s+de\s+(?:fabrication|production)(?:\s+situ[eé]s?)?)\s+en\s+(France|Belgique|Suisse|Italie|Allemagne|Espagne|Portugal|Pays-Bas|Luxembourg|Autriche)/i) ||
+      nHead4.match(/\b(?:hergestellt|produziert|gefertigt)\s+in\s+(Deutschland|Österreich|Schweiz|Polen|Italien|Frankreich)/i);
+    if (euLang) {
+      var lng2iso = {
+        "france": "FRA", "belgique": "BEL", "suisse": "CHE", "italie": "ITA",
+        "allemagne": "DEU", "espagne": "ESP", "portugal": "PRT", "pays-bas": "NLD",
+        "luxembourg": "LUX", "autriche": "AUT",
+        "deutschland": "DEU", "österreich": "AUT", "schweiz": "CHE", "polen": "POL",
+        "italien": "ITA", "frankreich": "FRA"
+      };
+      var euCountry = euLang[1].toLowerCase();
+      if (lng2iso[euCountry]) _setPath(rec, "provenance.countries_of_manufacture", [lng2iso[euCountry]]);
+    }
+  }
+
   // Markets of applicability — labeled extraction. Extended 2026-06-08
   // per §19.4.1 PDF probing: IBU/EU EPDs use "Geographical validity",
   // "Geographical area", "Geographical scope" instead of "Markets". Also
