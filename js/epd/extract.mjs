@@ -561,14 +561,30 @@ function extractCommon(text, rec) {
     }
   }
 
-  // Markets of applicability. Moved here 2026-06-08.
+  // Markets of applicability — labeled extraction. Extended 2026-06-08
+  // per §19.4.1 PDF probing: IBU/EU EPDs use "Geographical validity",
+  // "Geographical area", "Geographical scope" instead of "Markets". Also
+  // "Geographic scope" (US variant) and "Region covered". Stores ISO
+  // codes when _splitToCodes recognizes them; otherwise stores the raw
+  // free-text region label (so parity-side normalization can compare
+  // "North America" / "Worldwide" / etc. against BEAM's stored form).
   if (!_get(rec, "provenance.markets_of_applicability")) {
     var mkts =
       text.match(/Markets\s+of\s+applicability\s*[:\s]+([^\n\r]{2,80})/i) ||
-      text.match(/Region\s+covered\s*[:\s]+([^\n\r]{2,80})/i);
+      text.match(/Region\s+covered\s*[:\s]+([^\n\r]{2,80})/i) ||
+      text.match(/Geographic(?:al)?\s+(?:validity|area|scope|coverage)\s*[:\s]+([^\n\r]{2,80})/i) ||
+      text.match(/Area\s+of\s+validity\s*[:\s]+([^\n\r]{2,80})/i);
     if (mkts) {
-      var arr = _splitToCodes(mkts[1]);
-      if (arr.length) _setPath(rec, "provenance.markets_of_applicability", arr);
+      var raw = _cleanLine(mkts[1]).split(/\s{2,}|\t/)[0].trim();
+      var arr = _splitToCodes(raw);
+      if (arr.length) {
+        _setPath(rec, "provenance.markets_of_applicability", arr);
+      } else if (raw.length >= 2 && raw.length <= 60) {
+        // Free-text region label (e.g. "North America", "Worldwide",
+        // "EU & US"). Store as a one-element array so consumers can
+        // treat it uniformly with ISO-code arrays.
+        _setPath(rec, "provenance.markets_of_applicability", [raw]);
+      }
     }
   }
 
@@ -694,6 +710,42 @@ function extractCommon(text, rec) {
       if (swv && swv.length >= 2) _setPath(rec, "methodology.lca_software", swv);
     }
   }
+  // BK Product Service Life — labeled in most EPDs, plus prose forms
+  // ("service life for the product is X years"). Evidence-based per
+  // §19.4.1 probing (Andy 2026-06-08): patterns seen across ITB, UL/NA,
+  // IBU, AISC EPDs. Number bounded at 1-200 years (realistic).
+  if (!_get(rec, "epd.product_service_life_years")) {
+    var slMatch =
+      text.match(/(?:Reference\s+)?Service\s+Life(?:\s+RLS)?\s*[:\s]+(?:RLS\s*[:\s]+)?(\d{1,3})\s*years?/i) ||
+      text.match(/service\s+life\s+(?:of\s+the\s+product\s+)?(?:for\s+(?:the\s+)?product\s+)?(?:is|=)\s+(\d{1,3})\s*years?/i) ||
+      text.match(/service\s+life\s+of\s+(\d{1,3})\s*years?/i) ||
+      text.match(/(\d{1,3})\s*years?\s+(?:reference\s+)?service\s+life/i) ||
+      text.match(/(?:RSL|RLS)\s*[:\s]+(\d{1,3})\s*(?:years?)?/i);
+    if (slMatch) {
+      var slYears = parseInt(slMatch[1], 10);
+      if (slYears > 0 && slYears <= 200) _setPath(rec, "epd.product_service_life_years", slYears);
+    }
+  }
+
+  // K Product Brand Name — labeled patterns. The "Product Name" header
+  // shape ("Product Name | Application | Packaging" — table header, not
+  // a value) is filtered out by requiring the line to NOT be a
+  // multi-token-header (no `\s+\w+\s+\w+\s+\w+` after capture).
+  if (!_get(rec, "naming.product_brand_name")) {
+    var brand =
+      text.match(/(?:Product\s+)?Brand\s+Name\s*[:\s]+([A-Z0-9][A-Za-z0-9 &.,'\-®™+]{2,60})/i) ||
+      text.match(/Trade\s+Name\s*[:\s]+([A-Z0-9][A-Za-z0-9 &.,'\-®™+]{2,60})/i) ||
+      text.match(/Product\s+Brand\s*[:\s]+([A-Z0-9][A-Za-z0-9 &.,'\-®™+]{2,60})/i);
+    if (brand) {
+      var bv = _cleanLine(brand[1]).split(/\s{2,}|\t/)[0].trim();
+      // Drop if it looks like a table header (3+ capitalized words like
+      // "Application Packaging Colour")
+      if (bv && !/^([A-Z][a-z]+\s){3,}/.test(bv) && bv.length >= 2) {
+        _setPath(rec, "naming.product_brand_name", bv);
+      }
+    }
+  }
+
   if (!_get(rec, "methodology.lci_database")) {
     var db =
       text.match(/LCI\s+database\s*[:\s]+([^\n\r]{2,120})/i) ||
