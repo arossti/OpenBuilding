@@ -234,7 +234,9 @@ const RELAXED_BY_COL = {
   BI: "substring",   // LCA Software — same tool with/without version
   BJ: "substring",   // LCI Database — same DB with/without version
   J:  "substring",   // Manufacturer — short name ⊂ full legal name
-  AT: "substring"    // Material Type — "Clay Brick" ⊃ "Brick", "Cross-laminated timber" ⊃ "CLT"
+  AT: "substring",   // Material Type — "Clay Brick" ⊃ "Brick", "Cross-laminated timber" ⊃ "CLT"
+  N:  "substring",   // Countries of Manufacture — "Canada" ⊃ "CAN", "USA" ⊃ "US"
+  O:  "substring"    // Markets — "US & CA" partial overlap with parser's ISO arrays
 };
 
 // ---------------------------------------------------------------------------

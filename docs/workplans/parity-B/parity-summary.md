@@ -1,6 +1,6 @@
 # Parity B — BEAM CSV ↔ EPD-parser extraction (Pass 1)
 
-_Generated 2026-06-08T20:32:53.289Z by `schema/scripts/csv-pdf-parity.mjs`._
+_Generated 2026-06-08T20:43:02.734Z by `schema/scripts/csv-pdf-parity.mjs`._
 
 For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness parses the PDF and compares the parser's extracted values against the populated BEAM cells per field. Tolerances: numbers ±0.5% + 0.01 absolute floor; strings trim + case-insensitive; units trim + exact. **Scoring scope** (Andy 2026-06-08, §19): only the EPD-extractable columns are in the parity %. Counted: `G, I, J, K, L, N, O, Q, R, W, AG, AH, AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AS, AT, AY, AZ, BA, BB, BC, BD, BE, BF, BG, BH, BI, BJ, BK`. Out-of-scope (BfCA-internal flags, BfCA-derived units/values, BfCA-computational biogenic block, BfCA taxonomy, internal notation, structural placeholders): everything else.
 
@@ -22,8 +22,8 @@ For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness 
 ## Parity
 
 - Rows at **100% parity**: **0/671** (0.0%)
-- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **3612/14100** (25.6%)
-- Average per-row coverage: **25.5%**
+- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **3765/14100** (26.7%)
+- Average per-row coverage: **26.5%**
 
 ## Per-field match rate (descending)
 
@@ -47,16 +47,16 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 | BH | LCA Method | str | 135 / 399 | 33.8% |
 | BB | EPD/LCA Prepared by | str | 186 / 643 | 28.9% |
 | BJ | EPD LCI Database | str | 81 / 308 | 26.3% |
+| N | Countries of Manufacture | str | 123 / 487 | 25.3% |
 | AG | Density | str | 89 / 615 | 14.5% |
 | BA | EPD Owner | str | 68 / 515 | 13.2% |
 | Q | Stated EPD kgCO2e / unit | str | 55 / 671 | 8.2% |
+| O | Markets of Applicability | str | 34 / 665 | 5.1% |
 | AL | k, Thermal Conductivity | str | 2 / 113 | 1.8% |
 | AQ | Depth (m) | str | 1 / 115 | 0.9% |
-| O | Markets of Applicability | str | 4 / 665 | 0.6% |
 | K | Product Brand Name | str | 1 / 613 | 0.2% |
 | I | Material | str | 0 / 671 | 0.0% |
 | L | Specifications | str | 0 / 445 | 0.0% |
-| N | Countries of Manufacture | str | 0 / 487 | 0.0% |
 | R | GWP units kgCO2e per | str | 0 / 671 | 0.0% |
 | W | GWP-bio from EPD | str | 0 / 86 | 0.0% |
 | AI | Addn'l factors | str | 0 / 182 | 0.0% |
@@ -74,7 +74,7 @@ Each EPD below maps to >1 BEAM row but the parser emits one record per PDF — s
 
 | canonical epd.id | rows | avg coverage | spread |
 |---|---:|---:|---:|
-| 47895560991021 | 43 | 23.3% | 7.7pp |
+| 47895560991021 | 43 | 27.1% | 7.7pp |
 | epd352 | 24 | 31.6% | 0.0pp |
 | epd10294 | 20 | 25.0% | 0.0pp |
 | 47884246341021 | 19 | 26.1% | 3.6pp |
@@ -92,12 +92,12 @@ Each EPD below maps to >1 BEAM row but the parser emits one record per PDF — s
 | 47891035931021 | 7 | 26.9% | 1.9pp |
 | scsepd07524 | 6 | 33.3% | 0.0pp |
 | 47884246341011 | 5 | 28.6% | 0.0pp |
-| 47884246341071 | 5 | 22.5% | 3.6pp |
+| 47884246341071 | 5 | 30.0% | 4.8pp |
 | 47884246341061 | 5 | 20.3% | 1.4pp |
-| 47905509341011 | 5 | 27.7% | 3.8pp |
-| epd338 | 4 | 12.5% | 3.6pp |
+| 47905509341011 | 5 | 31.5% | 3.8pp |
+| epd338 | 4 | 16.1% | 3.6pp |
 | 47906780841011 | 4 | 24.6% | 1.8pp |
-| epd10786 | 4 | 15.2% | 8.7pp |
+| epd10786 | 4 | 19.6% | 8.7pp |
 | 40298012 | 4 | 28.0% | 0.0pp |
 | sp05037 | 4 | 24.0% | 3.8pp |
 | epdste20150327ibd1en | 4 | 10.7% | 0.6pp |

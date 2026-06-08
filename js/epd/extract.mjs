@@ -561,6 +561,43 @@ function extractCommon(text, rec) {
     }
   }
 
+  // N Country of Manufacture — most EPDs don't have a structured field
+  // (probed Kalesnikoff CLT: only prose "Located in Canada's West Kootney's
+  // mountains"). Use proximity-anchored country-name detection: a country
+  // name must sit within 60 chars of a location/manufacturing keyword
+  // (suppresses false-positive matches against body-text mentions like
+  // "ISO data for Canada"). Curated list covers the major
+  // EPD-manufacturer countries seen in BEAM data.
+  if (!_get(rec, "provenance.countries_of_manufacture")) {
+    var COUNTRIES = "(Canada|United\\s+States(?:\\s+of\\s+America)?|USA|U\\.S\\.A?\\.?|US|Mexico|Germany|France|Italy|Spain|Portugal|United\\s+Kingdom|UK|Ireland|Belgium|Netherlands|Holland|Denmark|Sweden|Norway|Finland|Switzerland|Austria|Poland|Czech\\s+Republic|Czechia|Hungary|Slovakia|Slovenia|Romania|Greece|Turkey|Russia|Ukraine|China|Japan|South\\s+Korea|Korea|Taiwan|India|Vietnam|Thailand|Malaysia|Singapore|Indonesia|Philippines|Australia|New\\s+Zealand|Brazil|Argentina|Chile|Colombia|South\\s+Africa|Egypt|Israel|UAE|Saudi\\s+Arabia|Iceland)";
+    var locKeyword = "(?:located\\s+in|manufactured\\s+in|produced\\s+in|factory\\s+in|facility\\s+(?:in|located\\s+in)|plant\\s+in|made\\s+in|originat(?:ing|es)\\s+(?:in|from)|sourced\\s+(?:in|from)|production\\s+(?:facility\\s+)?in|harvested\\s+(?:in|from)|extracted\\s+(?:in|from))";
+    var nameToIso = {
+      canada: "CAN", "united states": "USA", "united states of america": "USA",
+      usa: "USA", "u.s.a": "USA", "u.s.a.": "USA", "u.s.": "USA", us: "USA",
+      mexico: "MEX", germany: "DEU", france: "FRA", italy: "ITA", spain: "ESP",
+      portugal: "PRT", "united kingdom": "GBR", uk: "GBR", ireland: "IRL",
+      belgium: "BEL", netherlands: "NLD", holland: "NLD", denmark: "DNK",
+      sweden: "SWE", norway: "NOR", finland: "FIN", switzerland: "CHE",
+      austria: "AUT", poland: "POL", "czech republic": "CZE", czechia: "CZE",
+      hungary: "HUN", slovakia: "SVK", slovenia: "SVN", romania: "ROU",
+      greece: "GRC", turkey: "TUR", russia: "RUS", ukraine: "UKR",
+      china: "CHN", japan: "JPN", "south korea": "KOR", korea: "KOR",
+      taiwan: "TWN", india: "IND", vietnam: "VNM", thailand: "THA",
+      malaysia: "MYS", singapore: "SGP", indonesia: "IDN", philippines: "PHL",
+      australia: "AUS", "new zealand": "NZL", brazil: "BRA", argentina: "ARG",
+      chile: "CHL", colombia: "COL", "south africa": "ZAF", egypt: "EGY",
+      israel: "ISR", uae: "ARE", "saudi arabia": "SAU", iceland: "ISL"
+    };
+    var nMatch =
+      text.match(new RegExp(locKeyword + "\\s[^\\n]{0,60}?\\b" + COUNTRIES + "\\b", "i")) ||
+      text.match(new RegExp("\\b" + COUNTRIES + "(?:['']s)?\\b[^\\n]{0,60}?(?:plant|factory|facility|production|manufactur)", "i"));
+    if (nMatch) {
+      var nCountry = (nMatch[1] || "").toLowerCase().replace(/\s+/g, " ").trim();
+      var iso = nameToIso[nCountry];
+      if (iso) _setPath(rec, "provenance.countries_of_manufacture", [iso]);
+    }
+  }
+
   // Markets of applicability — labeled extraction. Extended 2026-06-08
   // per §19.4.1 PDF probing: IBU/EU EPDs use "Geographical validity",
   // "Geographical area", "Geographical scope" instead of "Markets". Also
