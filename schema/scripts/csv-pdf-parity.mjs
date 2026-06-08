@@ -371,7 +371,7 @@ async function main() {
   const Extract = await import(EXTRACT_MJS);
   await primeExtract(Extract);
 
-  const recordByEpd = new Map();  // canonical-id → normalized record
+  const recordByEpd = new Map();  // canonical-id → { rec, biogenicEligible }
   const parseErrors = [];          // {key, file, err}
   let parsed = 0;
   for (const key of scoredKeys) {
@@ -391,7 +391,13 @@ async function main() {
       parseErrors.push({ key, file: entry.filename, err: err.message });
       continue;
     }
-    recordByEpd.set(key, normalizeForDumpCompare(result.record || {}));
+    // Andy's W rule (2026-06-08): the "biogenic" word in the EPD is the
+    // tell — steel/inorganic products won't carry a biogenic value, so
+    // expecting parser to find W for them is wrong. Mark each EPD's
+    // biogenic eligibility off the raw text and gate W comparison on it.
+    const fullText = (extracted.pageTexts || []).join("\n");
+    const biogenicEligible = /\bbiogenic\b/i.test(fullText);
+    recordByEpd.set(key, { rec: normalizeForDumpCompare(result.record || {}), biogenicEligible });
   }
   console.log(`\nParsed: ${parsed - parseErrors.length} ok, ${parseErrors.length} failed`);
 
@@ -405,27 +411,36 @@ async function main() {
   // carry a per-field id; `c.col` is unique across the descriptor list.
   const fieldMatchCount = {}; const fieldPopCount = {};
   for (const c of COMPARE_COLS) { fieldMatchCount[c.col] = 0; fieldPopCount[c.col] = 0; }
+  let wSkipped = 0; // count of W cells skipped per Andy's biogenic rule
 
   for (const key of scoredKeys) {
-    if (!recordByEpd.has(key)) continue; // parse failed
-    const rec = recordByEpd.get(key);
+    const cached = recordByEpd.get(key);
+    if (!cached) continue; // parse failed
+    const rec = cached.rec;
+    const biogenicEligible = cached.biogenicEligible;
     const beamRows = csvByEpd.get(key);
     for (const { beamId, epdIdRaw, row } of beamRows) {
       const cells = COMPARE_COLS.map(c => {
         const csvVal = readBeamCell(row, c);
         const pdfVal = c.get ? c.get(rec) : (() => {
           const v = getPath(rec, c.path);
-          // mirror cellValue formatter: arrays comma-joined; numbers and strings pass through
           if (Array.isArray(v)) return v.join(", ");
           return v == null ? null : v;
         })();
-        const populated = csvVal !== null && csvVal !== undefined && csvVal !== "";
+        const csvPopulated = csvVal !== null && csvVal !== undefined && csvVal !== "";
+        // Andy's W rule: if BEAM has W populated but the EPD text doesn't
+        // mention "biogenic", the row isn't biogenic-eligible — skip W from
+        // the denominator (don't count as miss, don't count as match).
+        if (c.col === "W" && csvPopulated && !biogenicEligible) {
+          wSkipped++;
+          return { c, csvVal, pdfVal, populated: false, verdict: "MATCH", delta: null, skipped: true };
+        }
         const cmp = compareCell(c, csvVal, pdfVal);
-        if (populated) {
+        if (csvPopulated) {
           fieldPopCount[c.col]++;
           if (cmp.verdict === "MATCH") fieldMatchCount[c.col]++;
         }
-        return { c, csvVal, pdfVal, populated, ...cmp };
+        return { c, csvVal, pdfVal, populated: csvPopulated, ...cmp };
       });
       const populated = cells.filter(x => x.populated);
       const matched = populated.filter(x => x.verdict === "MATCH").length;
@@ -468,6 +483,7 @@ async function main() {
   console.log(`Scored BEAM rows: ${totalScoredRows} (across ${scoredKeys.length} matched EPD IDs)`);
   console.log(`Rows at 100% parity:    ${perfectRows}/${totalScoredRows} (${pct(perfectRows, totalScoredRows)})`);
   console.log(`Aggregate cell parity:  ${totalMatched}/${totalPopulated} (${pct(totalMatched, totalPopulated)})  [populated BEAM cells, EPD-comparable columns only]`);
+  if (wSkipped > 0) console.log(`  (W skipped on ${wSkipped} rows where the EPD text doesn't mention "biogenic" — Andy 2026-06-08)`);
   console.log(`Average per-row coverage: ${(avgCoverage * 100).toFixed(1)}%`);
   console.log("");
   console.log("Per-field match rate (desc), among populated BEAM cells:");
@@ -503,7 +519,8 @@ async function main() {
   // Sort by canonical epd.id then beam_id so multi-product clusters land together.
   rowResults.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : (a.beamId < b.beamId ? -1 : 1)));
   for (const r of rowResults) {
-    const rec = recordByEpd.get(r.key);
+    const cached = recordByEpd.get(r.key);
+    const rec = cached ? cached.rec : {};
     const beamRow = BEAM_COLUMNS.map(c => {
       if (!COMPARE_COLS_SET.has(c.col) || (!c.path && !c.get)) return "";
       return readBeamCell(r.row, c);

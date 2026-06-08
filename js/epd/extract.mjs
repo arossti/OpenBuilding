@@ -434,15 +434,66 @@ function extractCommon(text, rec) {
     _setPath(rec, "methodology.standards", standards);
   }
 
-  // S-P-XXXXX — the EPD International ID. If we're in NA format and the
-  // doc references both an internal (e.g. CSA #3688-5839) and an EPD
-  // International (S-P-XXXXX) ID, we prefer the EPD-Intl one because it
-  // matches the BEAM internal-ID convention Melanie established.
-  // Tolerant match (_SP_ID_RX) for the EPD-IES filename variant where
-  // per-glyph emission lands the label as "S - P - 10278".
+  // EPD ID — shape-aware patterns FIRST (precise, no trailing-junk risk),
+  // then label-anchored fallback. Order matters: a precise shape match
+  // wins and blocks the looser fallback patterns from grabbing trailing
+  // junk. Drives the AY EPD ID column in Parity-B; per the 2026-06-08 run,
+  // the dominant failure mode was the label-anchored fallback capturing
+  // "<right ID> <product description>" all in one shot.
+  if (!_get(rec, "epd.id")) {
+    var shapeMatch =
+      // SmartEPD / EPD-International dotted-numeric: 4789559274.101.1
+      text.match(/\b(\d{10,12}\.\d{3}\.\d)\b/) ||
+      // SCS EPD: SCS-EPD-07526
+      text.match(/\b(SCS-EPD-\d{5,6})\b/i) ||
+      // SmartEPD long form: SmartEPD-2023-009-0024-01
+      text.match(/\b(SmartEPD-\d{4}-\d{3}-\d{4}-\d{2})\b/) ||
+      // IBU / operator EPD: EPD-RWI-20190075-CCD1-EN, EPD-NIBE-…-EN
+      text.match(/\b(EPD-[A-Z]{2,5}-\d{8}-[A-Z0-9-]{3,12}-[A-Z]{2})\b/) ||
+      // EPDITALY: 2021M20141, 2024M20300
+      text.match(/\b(20\d{2}M\d{4,6})\b/) ||
+      // BEPD prefix: BEPD230183001
+      text.match(/\b(BEPD\d{8,12})\b/i) ||
+      // EPD short numeric: EPD10092, EPD 352, EPD#395
+      text.match(/\b(EPD\s?#?\s?\d{3,6})\b/i) ||
+      // ITB / RTS / ITP / NEPD with year: "ITB 144-2021", "RTS 180 22", "NEPD-3000-1234-EN"
+      text.match(/\b((?:ITB|RTS|ITP|NEPD)[\s-]+\d{3,5}(?:[\s-]+\d{2,4})?(?:-[A-Z]{2})?)\b/) ||
+      // Year-fraction in labeled context: 075/2018, 12/2024
+      text.match(/(?:Number|Declaration|EPD\s+ID|Registration|#)\s*[:#\s]*(\d{2,4}\/20\d{2})\b/i) ||
+      // Hyphen-numeric in labeled context: "#4029-8012", "Declaration #7730-2734"
+      text.match(/(?:Declaration|EPD\s+ID|Number|#)\s*[:#\s]*#?(\d{4}-\d{4})\b/i) ||
+      // Long numeric-only in labeled context: 20220329507, 176277033092021
+      text.match(/(?:Declaration\s+(?:number|ID)|EPD\s+(?:number|ID|registration))\s*[:#\s]+(\d{10,16})\b/i) ||
+      // Bare 4-prefix dotted family (EPD-International SmartEPD without explicit prefix)
+      text.match(/\b(4\d{9,11}\.\d{3}\.\d)\b/);
+    if (shapeMatch) _setPath(rec, "epd.id", shapeMatch[1].replace(/\s+/g, " ").trim());
+  }
+
+  // S-P-XXXXX — the EPD International ID. Tolerant match (_SP_ID_RX) for
+  // the EPD-IES filename variant where per-glyph emission lands the label
+  // as "S - P - 10278". Lower priority than the shape patterns above so
+  // an EPD that quotes BOTH a SmartEPD numeric and an S-P-XXXXX prefers
+  // whichever shape pattern fires first.
   if (!_get(rec, "epd.id")) {
     var spMatch = text.match(_SP_ID_RX);
     if (spMatch) _setPath(rec, "epd.id", "S-P-" + spMatch[1]);
+  }
+
+  // Label-anchored fallback (moved from extractNA 2026-06-08 so it runs
+  // for all formats). Tightened post-processing: the split-on-next-label
+  // logic stays, but the shape patterns above will have caught most
+  // cleaner IDs already, so this is the catch-all for label-prefixed
+  // IDs in formats we haven't shape-matched.
+  if (!_get(rec, "epd.id")) {
+    var epdLabelId =
+      text.match(/D\s*eclaration\s+N\s*umber\s*[#:\s]+([A-Z0-9][A-Z0-9.\-#\s]{1,38}\d?[A-Z0-9.\-#]{0,10})/i) ||
+      text.match(/EPD\s+(?:Registration\s+)?Number\s*[#:\s]+([A-Z0-9][A-Z0-9.\-#\s]{1,38}\d?[A-Z0-9.\-#]{0,10})/i);
+    if (epdLabelId) {
+      var idRaw = epdLabelId[1].split(
+        /\s+(?=(?:Declared|Date|Period|Unit|Owner|Holder|Type|Scope|Reference|Markets|Description|Year|EPD\s+Type|EPD\s+Scope|Programme|Program|Issue|Valid|Publisher))/i
+      )[0];
+      _setPath(rec, "epd.id", idRaw.replace(/^#/, "").replace(/\s+/g, " ").trim());
+    }
   }
 
   // Publication date — label-then-window. "Date of Issuance" added
@@ -552,6 +603,108 @@ function extractCommon(text, rec) {
   if (!_get(rec, "epd.program_operator")) {
     var po = _detectProgramOperator(text);
     if (po) _setPath(rec, "epd.program_operator", po);
+  }
+
+  // EPD admin block — Owner / Prepared-by / Verifier (Parity-B 2026-06-08:
+  // these are columns BA/BB/BE in the BEAM DUMP, all at 0% currently, all
+  // labeled-in-EPD-content). Single-line label-anchored capture, trimmed
+  // on double-space/tab to defuse multi-column bleed.
+  if (!_get(rec, "epd.owner")) {
+    var owner =
+      text.match(/(?:Declaration\s+owner|Owner\s+of\s+(?:the\s+)?[Dd]eclaration|EPD\s+owner|Holder\s+of\s+(?:the\s+)?Declaration)\s*[:\s]+([^\n\r]{2,120})/i);
+    if (owner) {
+      var ov = _cleanLine(owner[1]).split(/\s{2,}|\t/)[0].trim();
+      if (ov && ov.length >= 2) _setPath(rec, "epd.owner", ov);
+    }
+  }
+  if (!_get(rec, "epd.prepared_by")) {
+    var prep =
+      text.match(/LCA\s+(?:performed|prepared|conducted|study)\s+by\s*[:\s]+([^\n\r]{2,120})/i) ||
+      text.match(/(?:EPD|Study|Declaration)\s+(?:prepared|conducted|performed)\s+by\s*[:\s]+([^\n\r]{2,120})/i) ||
+      text.match(/(?:^|\n)\s*Prepared\s+by\s*[:\s]+([^\n\r]{2,120})/i) ||
+      text.match(/Author(?:\s+of\s+(?:the\s+)?(?:LCA|EPD))?\s*[:\s]+([^\n\r]{2,120})/i);
+    if (prep) {
+      var pv = _cleanLine(prep[1]).split(/\s{2,}|\t/)[0].trim();
+      if (pv && pv.length >= 2) _setPath(rec, "epd.prepared_by", pv);
+    }
+  }
+  if (!_get(rec, "epd.validation.agent")) {
+    var ver =
+      text.match(/(?:Independent\s+)?(?:third[-\s]+party\s+)?[Vv]erifier\s*(?:[:\s]|$|\n)\s*([^\n\r]{2,120})/i) ||
+      text.match(/(?:Verified|Verification)\s+by\s*[:\s]+([^\n\r]{2,120})/i);
+    if (ver) {
+      var vv = _cleanLine(ver[1]).split(/\s{2,}|\t/)[0].trim();
+      // Strip leading "by" / colons left by the label tolerance
+      vv = vv.replace(/^by\s+/i, "").replace(/^[:\s]+/, "").trim();
+      if (vv && vv.length >= 2 && !/^(yes|no|n\/?a)$/i.test(vv)) _setPath(rec, "epd.validation.agent", vv);
+    }
+  }
+
+  // Manufacturer name — label patterns + prose fallbacks. Moved here from
+  // extractNA 2026-06-08 so NSF / EPD-Intl / EU-IBU / unknown formats see
+  // the full pattern set rather than just their per-format extractors.
+  if (!_get(rec, "manufacturer.name")) {
+    var mfr =
+      text.match(/Manufacturer\s+name(?:\s+and\s+address)?\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
+      text.match(/EPD\s+Commissioner\s+(?:and\s+)?Owner\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i) ||
+      text.match(/Declaration\s+holder\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i) ||
+      text.match(/EPD\s+HOLDER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
+      text.match(/DECLARATION\s+OWNER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
+      text.match(/Owner\s+of\s+the\s+EPD\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i) ||
+      text.match(/Manufacturer\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/);
+    if (mfr) _setPath(rec, "manufacturer.name", _cleanLine(mfr[1]));
+  }
+  if (!_get(rec, "manufacturer.name")) {
+    var prodBy = text.match(/produced\s+(?:by|at|in|for)\s+([A-Z][A-Za-z0-9.\-]+(?:'\w+)?(?:\s+[A-Z][A-Za-z0-9.\-]+){0,4})/i);
+    if (prodBy) _setPath(rec, "manufacturer.name", _cleanLine(prodBy[1]));
+  }
+  if (!_get(rec, "manufacturer.name")) {
+    var present = text.match(/([A-Z][A-Za-z0-9 &.,'\-]{2,60}?)\s+(?:is\s+pleased\s+to\s+present|presents\s+this|hereby\s+presents)/);
+    if (present) _setPath(rec, "manufacturer.name", _cleanLine(present[1]));
+  }
+  if (!_get(rec, "manufacturer.name")) {
+    var lines60 = text.split("\n").slice(0, 60).join("\n");
+    var suffix = lines60.match(/(?:^|\n)\s*([A-Z][A-Za-z0-9 &.,'\-]{1,60}\s+(?:Inc|Corp|Corporation|LLC|LLP|LP|Ltd|Limited|GmbH|S\.?\s?A\.?|S\.r\.l\.))\.?(?=\s|$|,|\n|–|—|-)/m);
+    if (suffix) _setPath(rec, "manufacturer.name", _cleanLine(suffix[1]));
+  }
+
+  // Methodology block — LCA method / software / LCI database. Labels first
+  // (most reliable), then shape-aware tool-name patterns as fallback (low
+  // false-positive risk since GaBi/SimaPro/openLCA/Ecoinvent are domain
+  // terms).
+  if (!_get(rec, "methodology.lca_method")) {
+    var method =
+      text.match(/LCA\s+method(?:ology)?\s*[:\s]+([^\n\r]{2,120})/i) ||
+      text.match(/(?:LCIA|Impact\s+assessment)\s+method(?:ology)?\s*[:\s]+([^\n\r]{2,120})/i);
+    if (method) {
+      var mv = _cleanLine(method[1]).split(/\s{2,}|\t/)[0].trim();
+      if (mv && mv.length >= 2) _setPath(rec, "methodology.lca_method", mv);
+    }
+  }
+  if (!_get(rec, "methodology.lca_software")) {
+    var sw =
+      text.match(/LCA\s+software\s*[:\s]+([^\n\r]{2,120})/i) ||
+      text.match(/(?:^|\n)\s*Software\s+(?:used|name)?\s*[:\s]+([^\n\r]{2,120})/i) ||
+      // Tool-name shape match (no label) — domain-specific so low FP risk
+      text.match(/\b(GaBi(?:\s+(?:ts\s+)?\d+(?:\.\d+)*)?(?:\s+sp\s?\d+)?)/i) ||
+      text.match(/\b(SimaPro(?:\s+v?\d+(?:\.\d+)*)?)/i) ||
+      text.match(/\b(openLCA(?:\s+v?\d+(?:\.\d+)*)?)/i);
+    if (sw) {
+      var swv = _cleanLine(sw[1]).split(/\s{2,}|\t/)[0].trim();
+      if (swv && swv.length >= 2) _setPath(rec, "methodology.lca_software", swv);
+    }
+  }
+  if (!_get(rec, "methodology.lci_database")) {
+    var db =
+      text.match(/LCI\s+database\s*[:\s]+([^\n\r]{2,120})/i) ||
+      text.match(/(?:Background|Inventory)\s+database\s*[:\s]+([^\n\r]{2,120})/i) ||
+      text.match(/\b(Ecoinvent(?:\s+v?\d+(?:\.\d+)*)?)/i) ||
+      text.match(/\b(GaBi\s+Professional(?:\s+\d{4})?)/i) ||
+      text.match(/\b(US\s+LCI)\b/);
+    if (db) {
+      var dbv = _cleanLine(db[1]).split(/\s{2,}|\t/)[0].trim();
+      if (dbv && dbv.length >= 2) _setPath(rec, "methodology.lci_database", dbv);
+    }
   }
 
   // Impact-table totals — populate impacts.<indicator>.total.{value, source}
@@ -1310,25 +1463,9 @@ function extractNA(text, rec) {
     if (suffix) _setPath(rec, "manufacturer.name", _cleanLine(suffix[1]));
   }
 
-  // EPD ID / Declaration Number — allow embedded spaces in the value
-  // (e.g. "EPD 395") and per-glyph drop-cap split on the label.
-  // Post-process strips trailing label-like content that pdf.js may
-  // have joined into the same line (e.g. "EPD 296 Declared Product
-  // Glulam 3" → "EPD 296"). EPD IDs are 1-2 tokens of alphanumeric +
-  // dashes/dots; anything after a known next-label word is column-bleed.
-  var epdId =
-    // First-char allows digits now (2026-05-19) so numeric-only ids
-    // like EFCO's "DECLARATION NUMBER 494" extract. Length floor
-    // dropped to 1 so "EPD 1" / "EPD 12" survive; the {2,38} body
-    // covers the typical 3-7-digit shapes.
-    text.match(/D\s*eclaration\s+N\s*umber\s*[#:\s]+([A-Z0-9][A-Z0-9.\-#\s]{1,38}\d?[A-Z0-9.\-#]{0,10})/i) ||
-    text.match(/EPD\s+(?:Registration\s+)?Number\s*[#:\s]+([A-Z0-9][A-Z0-9.\-#\s]{1,38}\d?[A-Z0-9.\-#]{0,10})/i);
-  if (epdId) {
-    var idRaw = epdId[1].split(
-      /\s+(?=(?:Declared|Date|Period|Unit|Owner|Holder|Type|Scope|Reference|Markets|Description|Year|EPD\s+Type|EPD\s+Scope|Programme|Program|Issue|Valid|Publisher))/i
-    )[0];
-    _setPath(rec, "epd.id", idRaw.replace(/^#/, "").replace(/\s+/g, " ").trim());
-  }
+  // (EPD ID label-anchored block moved to extractCommon 2026-06-08 so it
+  // runs for all formats — see extractCommon for shape-aware patterns +
+  // the label fallback.)
 
   // Program operator — detect by known name (more robust than label-anchored
   // for tabular layouts where "Program Operator" appears on its own line).
