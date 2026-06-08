@@ -1,6 +1,6 @@
 # Parity B — BEAM CSV ↔ EPD-parser extraction (Pass 1)
 
-_Generated 2026-06-08T22:28:29.678Z by `schema/scripts/csv-pdf-parity.mjs`._
+_Generated 2026-06-08T22:53:32.740Z by `schema/scripts/csv-pdf-parity.mjs`._
 
 For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness parses the PDF and compares the parser's extracted values against the populated BEAM cells per field. Tolerances: numbers ±0.5% + 0.01 absolute floor; strings trim + case-insensitive; units trim + exact. **Scoring scope** (Andy 2026-06-08, §19): only the EPD-extractable columns are in the parity %. Counted: `G, I, J, K, L, N, O, Q, R, W, AG, AH, AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AS, AT, AY, AZ, BA, BB, BC, BD, BE, BF, BG, BH, BI, BJ, BK`. Out-of-scope (BfCA-internal flags, BfCA-derived units/values, BfCA-computational biogenic block, BfCA taxonomy, internal notation, structural placeholders): everything else.
 
@@ -22,8 +22,8 @@ For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness 
 ## Parity
 
 - Rows at **100% parity**: **0/671** (0.0%)
-- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **4075/14100** (28.9%)
-- Average per-row coverage: **29.1%**
+- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **4109/14100** (29.1%)
+- Average per-row coverage: **29.3%**
 
 ## Per-field match rate (descending)
 
@@ -34,8 +34,8 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 | AY | EPD ID | str | 541 / 671 | 80.6% |
 | BD | Internal/External Validation | str | 303 / 504 | 60.1% |
 | BI | EPD LCA Software | str | 170 / 308 | 55.2% |
+| AZ | EPD Type | str | 340 / 671 | 50.7% |
 | BK | Product Service Life (Years) | str | 84 / 168 | 50.0% |
-| AZ | EPD Type | str | 306 / 671 | 45.6% |
 | BF | EPD Standards | str | 127 / 279 | 45.5% |
 | AT | Material Type | str | 178 / 393 | 45.3% |
 | BE | EPD Verifying Agent | str | 215 / 503 | 42.7% |
@@ -86,7 +86,7 @@ Each EPD below maps to >1 BEAM row but the parser emits one record per PDF — s
 | epd348 | 15 | 42.1% | 0.0pp |
 | epd346 | 12 | 36.8% | 0.0pp |
 | 47890927681011 | 10 | 24.3% | 9.6pp |
-| epd362 | 9 | 36.0% | 0.0pp |
+| epd362 | 9 | 40.0% | 0.0pp |
 | 2021m20141 | 9 | 36.2% | 1.6pp |
 | 47897933651011 | 9 | 22.7% | 0.0pp |
 | 47891035931021 | 7 | 31.1% | 1.6pp |
@@ -101,7 +101,7 @@ Each EPD below maps to >1 BEAM row but the parser emits one record per PDF — s
 | 40298012 | 4 | 28.0% | 0.0pp |
 | sp05037 | 4 | 27.9% | 3.8pp |
 | epdste20150327ibd1en | 4 | 17.4% | 6.4pp |
-| cim20191223001 | 3 | 13.7% | 10.0pp |
+| cim20191223001 | 3 | 16.7% | 12.9pp |
 | 47884246341031 | 3 | 35.7% | 0.0pp |
 | ep397 | 3 | 19.2% | 0.0pp |
 

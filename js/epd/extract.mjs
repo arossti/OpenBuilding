@@ -561,6 +561,56 @@ function extractCommon(text, rec) {
     }
   }
 
+  // Phase 2g (Andy 2026-06-08) — broader unanchored head-scan + trade-
+  // association detection. Probes showed many industry-average EPDs declare
+  // type via standalone keyword in title block (Galvanized Steel L62) or
+  // identify the publisher as a trade association in the cover (Modbit
+  // ARMA L6, Galvanized AGA L51). The earlier anchored fallback misses
+  // both because it requires "EPD/Declaration" within 60 chars.
+  if (!_get(rec, "epd.type")) {
+    var headLines = text.split("\n").slice(0, 80).join("\n");
+    // 2g-a — unanchored "industry average" / "industry-wide" / "production-
+    // weighted industry average" / "weighted average of N EPDs" in head.
+    // FP guard: skip when context says reference-data/comparison rather than
+    // this EPD's own type ("industry-average data", "EPDs on the products").
+    var iaRx = /\b(?:production[-\s]+weighted\s+industry[-\s]+average|industry[-\s]+average|industry[-\s]+wide|industry[-\s]+weighted\s+average|weighted\s+industry\s+average|composite\s+of\s+(?:\d+\s+)?EPDs|weighted\s+average\s+of\s+(?:multiple|several|\d+)\s+EPDs)\b/i;
+    var iaMatch = headLines.match(iaRx);
+    if (iaMatch) {
+      var iaIdx = headLines.toLowerCase().indexOf(iaMatch[0].toLowerCase());
+      var iaAfter = headLines.substring(iaIdx + iaMatch[0].length, iaIdx + iaMatch[0].length + 30).toLowerCase();
+      var iaBefore = headLines.substring(Math.max(0, iaIdx - 30), iaIdx).toLowerCase();
+      var isCompareRef =
+        /^\s*(?:data\b|epds?\b|studies\b|methodology|of\s+the\s+products)/.test(iaAfter) ||
+        /(?:other|reference|comparison|than|aligns?\s+with)\s*$/.test(iaBefore);
+      if (!isCompareRef) _setPath(rec, "epd.type", "industry_average");
+    }
+  }
+  if (!_get(rec, "epd.type")) {
+    var headLinesB = text.split("\n").slice(0, 80).join("\n");
+    // 2g-b — unanchored product-/company-/manufacturer-/plant-/facility-
+    // specific keyword. The keyword itself is distinctive enough that even
+    // without "EPD/Declaration" nearby it's a safe signal. Plant/facility-
+    // specific maps to product_specific (schema has no plant_specific enum;
+    // BEAM's "Plant-specific" rows stay MISMATCH against parser's
+    // "Product-specific", but this still gives the right material-record
+    // semantics for the DB).
+    if (/\b(?:product[-\s]+specific|company[-\s]+specific|manufacturer[-\s]+specific|plant[-\s]+specific|facility[-\s]+specific)\b/i.test(headLinesB)) {
+      _setPath(rec, "epd.type", "product_specific");
+    }
+  }
+  if (!_get(rec, "epd.type")) {
+    var headLinesC = text.split("\n").slice(0, 100).join("\n");
+    // 2g-c — known trade-association publishers. These issue EPDs that
+    // cover their member companies' aggregate production — by definition
+    // industry-average. Curated list: probes surfaced ARMA / SPRI / AGA /
+    // NRMCA, plus other major NA trade associations active in EPDs.
+    // Acronym alternatives require word-boundary guards to avoid false
+    // positives against unrelated single-letter sequences in dense tables.
+    var TRADE_ASSOC =
+      /\b(?:American\s+Galvanizers\s+Association|Asphalt\s+Roofing\s+Manufacturers\s+Association|Single\s+Ply\s+Roofing\s+Industry|National\s+Ready\s+Mixed\s+Concrete\s+Association|Polyisocyanurate\s+Insulation\s+Manufacturers\s+Association|American\s+Wood\s+Council|Canadian\s+Wood\s+Council|Concrete\s+Reinforcing\s+Steel\s+Institute|Steel\s+Deck\s+Institute|Engineered\s+Wood\s+Association|National\s+Asphalt\s+Pavement\s+Association|American\s+Iron\s+and\s+Steel\s+Institute|Portland\s+Cement\s+Association|Insulating\s+Concrete\s+Form\s+Manufacturers\s+Association|North\s+American\s+Insulation\s+Manufacturers\s+Association|Steel\s+Recycling\s+Institute|Steel\s+Manufacturers\s+Association|Aluminum\s+Association)\b/i;
+    if (TRADE_ASSOC.test(headLinesC)) _setPath(rec, "epd.type", "industry_average");
+  }
+
   // N Country of Manufacture — most EPDs don't have a structured field
   // (probed Kalesnikoff CLT: only prose "Located in Canada's West Kootney's
   // mountains"). Use proximity-anchored country-name detection: a country
