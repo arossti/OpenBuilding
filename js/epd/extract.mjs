@@ -979,6 +979,79 @@ function extractCommon(text, rec) {
       headForMfr.match(/\b([A-Z][A-Za-z0-9\-]{2,30}\s+(?:Roofing\s+)?(?:Products|Industries|International|Group|Insulation|Wool|Steel|Wood))[®™]?\s/i);
     if (brandMark) _setPath(rec, "manufacturer.name", _cleanLine(brandMark[1]));
   }
+  // Phase 2o (Andy 2026-06-08) — curated known-manufacturer dictionary.
+  // Covers the major EPD-publishing building-materials manufacturers across
+  // insulation, wood/timber, steel, concrete/masonry, roofing, gypsum,
+  // membranes, windows, flooring, and specialty product categories.
+  // Sourced from LLM domain knowledge of the construction-materials
+  // industry, validated against probes of the J parser-empty bucket
+  // (RedBuilt, Rothoblaas, Malarkey, Greenfiber, Havelock Wool, CENTRIA,
+  // MarinoWARE, Partel, BurntWood, Tarkett etc.). Detection scoped to
+  // head≤80 lines (cover/intro page); first hit wins. Names listed in
+  // longest-match-first order where one name contains another (e.g.,
+  // "Owens Corning" before "Owens").
+  if (!_get(rec, "manufacturer.name")) {
+    var KNOWN_MFRS = [
+      // Wood / structural timber
+      "Weyerhaeuser", "Boise Cascade", "Roseburg Forest Products", "Roseburg",
+      "Georgia[-\\s]Pacific", "LP\\s+Building\\s+Solutions", "Louisiana[-\\s]Pacific",
+      "West\\s+Fraser", "Canfor", "Tolko", "Interfor", "Kalesnikoff",
+      "Structurlam", "Nordic\\s+Structures", "Element5", "Vaagen\\s+Timbers",
+      "Freres\\s+Lumber", "Mercer\\s+International", "StructureCraft",
+      "RedBuilt", "Rothoblaas", "Mass\\s+Ply\\s+Panels", "BurntWood",
+      "Stora\\s+Enso", "Binderholz",
+      // Insulation
+      "Owens\\s+Corning", "Johns\\s+Manville", "CertainTeed", "Knauf\\s+Insulation",
+      "Knauf", "Rockwool", "ROXUL", "Kingspan", "Atlas\\s+Roofing",
+      "Greenfiber", "Havelock\\s+Wool", "Thermafiber", "Icynene",
+      "Demilec", "Lapolla", "Insulfoam", "Plastifab", "GUTEX", "Steico",
+      "Thermafleece", "Pavatex", "BASF", "Atlas\\s+Molded\\s+Products",
+      "Applegate", "Hunter\\s+Panels", "Hunter",
+      // Steel
+      "Nucor", "Steel\\s+Dynamics", "ArcelorMittal", "US\\s+Steel",
+      "Algoma\\s+Steel", "Stelco", "Gerdau", "Cleveland[-\\s]Cliffs",
+      "Commercial\\s+Metals", "MarinoWARE", "ClarkDietrich", "Cemco",
+      "CENTRIA", "AEP\\s+Span", "Vulcraft", "McElroy\\s+Metal",
+      "Peikko", "Soprema",
+      // Concrete / masonry / cement
+      "Lafarge(?:Holcim)?", "CRH\\s+Americas", "CRH", "Heidelberg\\s+Cement",
+      "Heidelberg(?:Materials)?", "Cemex", "Buzzi\\s+Unicem", "Holcim",
+      "Boral", "Eagle\\s+Materials", "Boehmers", "Mutual\\s+Materials",
+      "Carboclave", "Cycle\\s+Terre",
+      // Roofing
+      "GAF", "IKO", "Malarkey\\s+Roofing\\s+Products", "Malarkey\\s+Roofing",
+      "Malarkey", "TAMKO", "PABCO", "Carlisle\\s+SynTec", "Firestone",
+      "Sika", "Tremco", "Versico\\s+Roofing", "WeatherBond",
+      // Gypsum / drywall
+      "USG\\s+Corporation", "USG", "National\\s+Gypsum",
+      "Continental\\s+Building\\s+Products", "PABCO\\s+Gypsum",
+      // Membranes / air barriers
+      "Partel", "GCP\\s+Applied\\s+Technologies", "Henry\\s+Company",
+      "VaproShield", "ProClima", "Pro\\s+Clima", "DuPont", "Dow",
+      // Windows / glazing
+      "Arcadia", "YKK\\s+AP", "VELUX", "Pella", "Marvin\\s+Windows",
+      "Andersen\\s+Windows", "EFCO",
+      // Flooring
+      "Tarkett", "Mohawk\\s+Industries", "Shaw\\s+Industries",
+      "Armstrong\\s+Flooring", "Interface", "Forbo",
+      // Specialty
+      "Fibonacci", "Cembrit", "James\\s+Hardie",
+      // Aggregate / earthwork
+      "NRMCA", "AFT\\s+Cellulose"
+    ];
+    // Build alternation pattern. Each entry is a regex fragment (already
+    // includes \s for spaces / etc.). Word-boundary on both sides to
+    // avoid mid-word false positives.
+    var mfrAlt = "(" + KNOWN_MFRS.join("|") + ")";
+    var mfrRx = new RegExp("\\b" + mfrAlt + "\\b", "i");
+    var headForKnownMfr = text.split("\n").slice(0, 80).join("\n");
+    var knownHit = headForKnownMfr.match(mfrRx);
+    if (knownHit) {
+      // Normalize whitespace + remove regex escape characters for display
+      var knownVal = knownHit[1].replace(/\\s\+/g, " ").replace(/\\-/g, "-");
+      _setPath(rec, "manufacturer.name", knownVal);
+    }
+  }
 
   // Methodology block — LCA method / software / LCI database. Labels first
   // (most reliable), then shape-aware tool-name patterns as fallback (low
