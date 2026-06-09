@@ -1,6 +1,6 @@
 # Parity B — BEAM CSV ↔ EPD-parser extraction (Pass 1)
 
-_Generated 2026-06-09T00:31:45.927Z by `schema/scripts/csv-pdf-parity.mjs`._
+_Generated 2026-06-09T00:46:22.398Z by `schema/scripts/csv-pdf-parity.mjs`._
 
 For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness parses the PDF and compares the parser's extracted values against the populated BEAM cells per field. Tolerances: numbers ±0.5% + 0.01 absolute floor; strings trim + case-insensitive; units trim + exact. **Scoring scope** (Andy 2026-06-08, §19): only the EPD-extractable columns are in the parity %. Counted: `G, I, J, K, L, N, O, Q, R, W, AG, AH, AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AS, AT, AY, AZ, BA, BB, BC, BD, BE, BF, BG, BH, BI, BJ, BK`. Out-of-scope (BfCA-internal flags, BfCA-derived units/values, BfCA-computational biogenic block, BfCA taxonomy, internal notation, structural placeholders): everything else.
 
@@ -22,8 +22,8 @@ For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness 
 ## Parity
 
 - Rows at **100% parity**: **0/671** (0.0%)
-- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **5235/14100** (37.1%)
-- Average per-row coverage: **37.5%**
+- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **5258/14100** (37.3%)
+- Average per-row coverage: **37.6%**
 
 ## Per-field match rate (descending)
 
@@ -45,11 +45,11 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 | AT | Material Type | str | 178 / 393 | 45.3% |
 | BG | EPD PCR Guidelines | str | 196 / 463 | 42.3% |
 | R | GWP units kgCO2e per | str | 284 / 671 | 42.3% |
+| J | Manufacturer | str | 252 / 668 | 37.7% |
 | BH | LCA Method | str | 149 / 399 | 37.3% |
 | AH | Density Units | str | 227 / 615 | 36.9% |
 | BJ | EPD LCI Database | str | 113 / 308 | 36.7% |
 | O | Markets of Applicability | str | 232 / 665 | 34.9% |
-| J | Manufacturer | str | 229 / 668 | 34.3% |
 | Q | Stated EPD kgCO2e / unit | str | 173 / 671 | 25.8% |
 | BA | EPD Owner | str | 80 / 515 | 15.5% |
 | AG | Density | str | 89 / 615 | 14.5% |
@@ -90,7 +90,7 @@ Each EPD below maps to >1 BEAM row but the parser emits one record per PDF — s
 | 2021m20141 | 9 | 36.2% | 1.6pp |
 | 47897933651011 | 9 | 50.0% | 0.0pp |
 | 47891035931021 | 7 | 39.5% | 0.9pp |
-| scsepd07524 | 6 | 41.7% | 0.0pp |
+| scsepd07524 | 6 | 45.8% | 0.0pp |
 | 47884246341011 | 5 | 57.1% | 0.0pp |
 | 47884246341071 | 5 | 52.4% | 8.3pp |
 | 47884246341061 | 5 | 39.1% | 4.3pp |

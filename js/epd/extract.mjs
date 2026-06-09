@@ -923,29 +923,61 @@ function extractCommon(text, rec) {
   // Manufacturer name — label patterns + prose fallbacks. Moved here from
   // extractNA 2026-06-08 so NSF / EPD-Intl / EU-IBU / unknown formats see
   // the full pattern set rather than just their per-format extractors.
+  // Phase 2n (Andy 2026-06-08) — character class extended to include ™®
+  // (trademark marks are common right after brand-company names: "RedBuilt™
+  // LLC", "Malarkey Roofing Products®"). Without this, the existing
+  // suffix-anchored fallback misses cases like "RedBuilt™ LLC" — the ™
+  // breaks the character class so the name doesn't match.
   if (!_get(rec, "manufacturer.name")) {
     var mfr =
-      text.match(/Manufacturer\s+name(?:\s+and\s+address)?\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
-      text.match(/EPD\s+Commissioner\s+(?:and\s+)?Owner\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i) ||
-      text.match(/Declaration\s+holder\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i) ||
-      text.match(/EPD\s+HOLDER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
-      text.match(/DECLARATION\s+OWNER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/) ||
-      text.match(/Owner\s+of\s+the\s+EPD\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/i) ||
-      text.match(/Manufacturer\s*[:\s]+([A-Z][A-Za-z0-9 &.,'\-]{2,80})/);
+      text.match(/Manufacturer\s+name(?:\s+and\s+address)?\s*[:\s]+([A-Z][A-Za-z0-9 &.,'™®\-]{2,80})/) ||
+      text.match(/EPD\s+Commissioner\s+(?:and\s+)?Owner\s*[:\s]+([A-Z][A-Za-z0-9 &.,'™®\-]{2,80})/i) ||
+      text.match(/Declaration\s+holder\s*[:\s]+([A-Z][A-Za-z0-9 &.,'™®\-]{2,80})/i) ||
+      text.match(/EPD\s+HOLDER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'™®\-]{2,80})/) ||
+      text.match(/DECLARATION\s+OWNER\s*[:\s]+([A-Z][A-Za-z0-9 &.,'™®\-]{2,80})/) ||
+      text.match(/Owner\s+of\s+the\s+EPD\s*[:\s]+([A-Z][A-Za-z0-9 &.,'™®\-]{2,80})/i) ||
+      text.match(/Manufacturer\s*[:\s]+([A-Z][A-Za-z0-9 &.,'™®\-]{2,80})/);
     if (mfr) _setPath(rec, "manufacturer.name", _cleanLine(mfr[1]));
   }
   if (!_get(rec, "manufacturer.name")) {
-    var prodBy = text.match(/produced\s+(?:by|at|in|for)\s+([A-Z][A-Za-z0-9.\-]+(?:'\w+)?(?:\s+[A-Z][A-Za-z0-9.\-]+){0,4})/i);
+    var prodBy = text.match(/produced\s+(?:by|at|in|for)\s+([A-Z][A-Za-z0-9.™®\-]+(?:'\w+)?(?:\s+[A-Z][A-Za-z0-9.™®\-]+){0,4})/i);
     if (prodBy) _setPath(rec, "manufacturer.name", _cleanLine(prodBy[1]));
   }
   if (!_get(rec, "manufacturer.name")) {
-    var present = text.match(/([A-Z][A-Za-z0-9 &.,'\-]{2,60}?)\s+(?:is\s+pleased\s+to\s+present|presents\s+this|hereby\s+presents)/);
+    var present = text.match(/([A-Z][A-Za-z0-9 &.,'™®\-]{2,60}?)\s+(?:is\s+pleased\s+to\s+present|presents\s+this|hereby\s+presents)/);
     if (present) _setPath(rec, "manufacturer.name", _cleanLine(present[1]));
   }
   if (!_get(rec, "manufacturer.name")) {
     var lines60 = text.split("\n").slice(0, 60).join("\n");
-    var suffix = lines60.match(/(?:^|\n)\s*([A-Z][A-Za-z0-9 &.,'\-]{1,60}\s+(?:Inc|Corp|Corporation|LLC|LLP|LP|Ltd|Limited|GmbH|S\.?\s?A\.?|S\.r\.l\.))\.?(?=\s|$|,|\n|–|—|-)/m);
+    // Phase 2n: expanded corporate-suffix list — Pty (Australian), PLC
+    // (UK), AB (Swedish), AG (German/Swiss), BV (Dutch), NV (Belgian/
+    // Dutch), KG (German), OY (Finnish), AS (Norwegian), ApS (Danish),
+    // S.L. (Spanish), SAS (French), Group, Company, Industries — plus
+    // ™®-tolerant character class so "RedBuilt™ LLC" matches.
+    var suffix = lines60.match(/(?:^|\n)\s*([A-Z][A-Za-z0-9 &.,'™®\-]{1,60}\s+(?:Inc|Corp|Corporation|LLC|LLP|LP|Ltd|Limited|GmbH|S\.?\s?A\.?|S\.r\.l\.|S\.A\.S\.?|SAS|Pty(?:\s+Ltd)?|PLC|plc|AB|AG|BV|N\.V\.|NV|KG|OY|AS|ApS|S\.L\.|Group|Company|Industries|Holdings))\.?(?=\s|$|,|\n|–|—|-)/m);
     if (suffix) _setPath(rec, "manufacturer.name", _cleanLine(suffix[1]));
+  }
+  // Phase 2n: fallback to epd.owner when manufacturer wasn't found by any
+  // pattern above AND the extracted owner clearly looks like a corporate
+  // entity (has a recognized corporate suffix). For product-specific EPDs
+  // the Declaration Owner IS the manufacturer; the existing extractor
+  // missed this implicit equivalence.
+  if (!_get(rec, "manufacturer.name")) {
+    var ownerVal = _get(rec, "epd.owner");
+    if (ownerVal && /\b(?:Inc|LLC|LLP|Ltd|Limited|Corp|Corporation|GmbH|S\.?A\.?|Pty|PLC|AB|AG|BV|KG|OY|ApS|S\.L\.|Group|Industries)\b/.test(ownerVal)) {
+      _setPath(rec, "manufacturer.name", ownerVal);
+    }
+  }
+  // Phase 2n: "by <Brand>®" or "<Brand>® by" — registered-mark patterns
+  // (Greenfiber, Malarkey, Tarkett families). The ® / ™ glyph is almost
+  // always attached to a company/brand name, so capturing the word it
+  // marks is high-confidence. Restricted to head≤30 lines (cover page).
+  if (!_get(rec, "manufacturer.name")) {
+    var headForMfr = text.split("\n").slice(0, 30).join("\n");
+    var brandMark =
+      headForMfr.match(/\bby\s+([A-Z][A-Za-z0-9\-]{2,30})(?:[®™])/i) ||
+      headForMfr.match(/\b([A-Z][A-Za-z0-9\-]{2,30}\s+(?:Roofing\s+)?(?:Products|Industries|International|Group|Insulation|Wool|Steel|Wood))[®™]?\s/i);
+    if (brandMark) _setPath(rec, "manufacturer.name", _cleanLine(brandMark[1]));
   }
 
   // Methodology block — LCA method / software / LCI database. Labels first
