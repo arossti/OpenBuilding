@@ -839,7 +839,7 @@ function extractCommon(text, rec) {
   // GmbH"). Curated list mirrors the BC Program Operator known names
   // since EPD owners are often the program operators themselves.
   if (!_get(rec, "epd.owner")) {
-    var BA_KNOWN = "(UL\\s+Environment|UL\\s+Solutions|NSF\\s+International|NSF|ASTM\\s+International|ASTM|CSA\\s+Group|EPDITALY|EPD\\s+Italy|IBU(?:\\s*(?:e\\.V\\.|Institut\\s+Bauen\\s+und\\s+Umwelt))?|Bau\\s+EPD(?:\\s+GmbH)?|EPD\\s+International(?:\\s+AB)?|Instytut\\s+Techniki\\s+Budowlanej(?:\\s*\\(ITB\\))?|ITB|AENOR(?:\\s+Internacional)?|RTS|AFNOR(?:\\s+Certification)?|Athena\\s+Sustainable\\s+Materials\\s+Institute|Athena|EPDDanmark|EPDNorge|GlobalEPD|Smart\\s*EPD)";
+    var BA_KNOWN = "(UL\\s+Environment|UL\\s+Solutions|NSF\\s+International|NSF|ASTM\\s+International|ASTM|CSA\\s+Group|EPDITALY|EPD\\s+Italy|IBU(?:\\s*(?:e\\.V\\.|Institut\\s+Bauen\\s+und\\s+Umwelt))?|Bau\\s+EPD(?:\\s+GmbH)?|EPD\\s+International(?:\\s+AB)?|Instytut\\s+Techniki\\s+Budowlanej(?:\\s*\\(ITB\\))?|ITB|AENOR(?:\\s+Internacional)?|RTS|AFNOR(?:\\s+Certification)?|Athena\\s+Sustainable\\s+Materials\\s+Institute|Athena|EPDDanmark|EPDNorge|GlobalEPD|Smart\\s*EPD|American\\s+Institute\\s+of\\s+Steel\\s+Construction|AISC|EPS\\s+Industry\\s+Alliance|Soprema(?:\\s+Inc\\.?)?|Nucor(?:\\s+Corporation)?|Malarkey\\s+Roofing(?:\\s+Products)?|Huber\\s+Engineered\\s+Woods|Tarkett|North\\s+American\\s+Insulation\\s+Manufacturers\\s+Association|NAIMA|Concrete\\s+Reinforcing\\s+Steel\\s+Institute|CRSI|Polyisocyanurate\\s+Insulation\\s+Manufacturers\\s+Association|PIMA|American\\s+Wood\\s+Council|AWC|Canadian\\s+Wood\\s+Council|CWC)";
     var baNear =
       text.match(new RegExp("(?:Declaration\\s+(?:owner|holder)|EPD\\s+(?:owner|holder)|issued\\s+by|certified\\s+by|published\\s+by|owner\\s+of)\\s[^\\n]{0,80}?\\b" + BA_KNOWN, "i")) ||
       text.match(new RegExp("\\b" + BA_KNOWN + "\\s[^\\n]{0,80}?(?:Declaration|EPD|owner|certificat|publish)", "i"));
@@ -856,7 +856,7 @@ function extractCommon(text, rec) {
   // prepared / conducted keyword (proximity guard against false positives
   // from generic body-text mentions). Curated org list grows with evidence.
   if (!_get(rec, "epd.prepared_by")) {
-    var LCA_PRACT = "(Sphera|thinkstep|WAP\\s+Sustainability(?:\\s+Consulting)?|Ecochain(?:\\s+Mobius)?|Ecoform(?:,?\\s+LLC)?|EuGeos(?:\\s+SRL)?|Pr[éè]\\s+(?:Consultants|Sustainability)|Quartz|Long\\s+Trail\\s+Sustainability|Athena\\s+Sustainable\\s+Materials(?:\\s+Institute)?|Vertima\\s+Inc\\.?|Vertima|Sustainable\\s+Solutions\\s+Corporation|Industrial\\s+Ecology\\s+Consultants|Four\\s+Elements\\s+Consulting|Renuables|Epsen\\s+Group|EVEA|Thinkstep,?\\s+Inc\\.?|PE-International|PE\\s+International|RDC\\s+Environment|Ecobilan)";
+    var LCA_PRACT = "(Sphera|thinkstep|WAP\\s+Sustainability(?:\\s+Consulting)?|Ecochain(?:\\s+Mobius)?|Ecoform(?:,?\\s+LLC)?|EuGeos(?:\\s+SRL)?|Pr[éè]\\s+(?:Consultants|Sustainability)|Quartz|Long\\s+Trail\\s+Sustainability|Athena\\s+Sustainable\\s+Materials(?:\\s+Institute)?|Vertima\\s+Inc\\.?|Vertima|Sustainable\\s+Solutions\\s+Corporation|Industrial\\s+Ecology\\s+Consultants|Four\\s+Elements\\s+Consulting|Renuables|Epsen\\s+Group|EVEA|Thinkstep,?\\s+Inc\\.?|PE-International|PE\\s+International|RDC\\s+Environment|Ecobilan|UL\\s+Environment|ASTM\\s+International|SCS\\s+Global(?:\\s+Services)?|CORRIM|NIBE|Intertek\\s+Sustainability(?:\\s+Solutions)?|Intertek\\s+Deutschland|Smart\\s*EPD|Th[üu]nen[-\\s]?Institut)";
     var bbNear =
       text.match(new RegExp("(?:LCA|EPD|prepared|conducted|performed|study|practitioner)\\s[^\\n]{0,80}?\\b" + LCA_PRACT, "i")) ||
       text.match(new RegExp("\\b" + LCA_PRACT + "\\s[^\\n]{0,80}?(?:LCA|EPD|prepared|conducted|performed|practitioner)", "i"));
@@ -876,6 +876,22 @@ function extractCommon(text, rec) {
       // Strip leading "by" / colons left by the label tolerance
       vv = vv.replace(/^by\s+/i, "").replace(/^[:\s]+/, "").trim();
       if (vv && vv.length >= 2 && !/^(yes|no|n\/?a)$/i.test(vv)) _setPath(rec, "epd.validation.agent", vv);
+    }
+  }
+  // Phase 2k (Andy 2026-06-08) — BE known-verifier-org fallback. Probes
+  // showed 80+ rows where parser='' for BE despite the EPD naming a
+  // well-known verifier — current label patterns ("Verifier:", "Verified
+  // by:") miss formats where the verifier appears in narrative or in a
+  // signature block. Parallel to the BB known-LCA-org pattern: detect
+  // curated practitioner names near verif/independent/third-party keyword.
+  if (!_get(rec, "epd.validation.agent")) {
+    var VERIFIERS = "(Industrial\\s+Ecology\\s+Consultants|Thomas\\s+P\\.?\\s+Gloria(?:,?\\s+Ph\\.?\\s*D\\.?)?|Tom\\s+Gloria|Jack\\s+Geibig(?:,?\\s+EcoForm)?|EcoForm|Ecoform|James\\s+Mellentine(?:,?\\s+Thrive\\s+ESG)?|Thrive\\s+ESG|Grant\\s+R\\.?\\s+Martin|UL\\s+Environment|UL\\s+Solutions|NSF\\s+Certification\\s+LLC|NSF|ASTM\\s+International|Sphera(?:\\s+Solutions)?|Intertek\\s+Sustainability|Intertek\\s+Deutschland|Patricia\\s+Wolf|Pré\\s+Consultants|Athena\\s+Sustainable\\s+Materials\\s+Institute)";
+    var beNear =
+      text.match(new RegExp("(?:[Vv]erif(?:y|ier|ied|ication)|[Ii]ndependent\\s+(?:third[-\\s]party\\s+)?[Vv]erif|third[-\\s]party\\s+[Vv]erif)\\s[^\\n]{0,80}?\\b" + VERIFIERS, "i")) ||
+      text.match(new RegExp("\\b" + VERIFIERS + "\\s[^\\n]{0,80}?(?:[Vv]erif|[Ii]ndependent|third[-\\s]party)", "i"));
+    if (beNear) {
+      var beVal = (beNear[1] || "").trim();
+      if (beVal && beVal.length >= 2) _setPath(rec, "epd.validation.agent", beVal);
     }
   }
 
@@ -914,7 +930,13 @@ function extractCommon(text, rec) {
   if (!_get(rec, "methodology.lca_method")) {
     var method =
       text.match(/LCA\s+method(?:ology)?\s*[:\s]+([^\n\r]{2,120})/i) ||
-      text.match(/(?:LCIA|Impact\s+assessment)\s+method(?:ology)?\s*[:\s]+([^\n\r]{2,120})/i);
+      text.match(/(?:LCIA|Impact\s+assessment)\s+method(?:ology)?\s*[:\s]+([^\n\r]{2,120})/i) ||
+      // Phase 2k: bare tool-name shape matches (domain-specific, low FP risk).
+      // TRACI / CML / ReCiPe / IPCC are the dominant LCIA methods in EPDs.
+      text.match(/\b(TRACI(?:\s+v?\d+(?:\.\d+)*)?)\b/i) ||
+      text.match(/\b(CML(?:\s*[-\(]?\s*v?\d+(?:\.\d+)*\)?)?)/i) ||
+      text.match(/\b(ReCiPe(?:\s+v?\d+(?:\.\d+)*)?)/i) ||
+      text.match(/\b(IPCC(?:\s+(?:AR\d+|v?\d+(?:\.\d+)*))?)\b/i);
     if (method) {
       var mv = _cleanLine(method[1]).split(/\s{2,}|\t/)[0].trim();
       if (mv && mv.length >= 2) _setPath(rec, "methodology.lca_method", mv);
@@ -1057,6 +1079,13 @@ function extractCommon(text, rec) {
       text.match(/(?:Background|Inventory)\s+database\s*[:\s]+([^\n\r]{2,120})/i) ||
       text.match(/\b(Ecoinvent(?:\s+v?\d+(?:\.\d+)*)?)/i) ||
       text.match(/\b(GaBi\s+Professional(?:\s+\d{4})?)/i) ||
+      // Phase 2k: GaBi <year>(.<sub>) form ("GaBi 2021", "GaBi 2020.2",
+      // "GaBi 2019.3", with optional service-pack annotation) — these dominate
+      // the BJ misses (32+ rows). The version number anchors the match so
+      // bare "GaBi" mentions in body text don't false-positive here.
+      text.match(/\b(GaBi\s+(?:20\d{2}(?:\.\d+)?(?:\s*\(?service\s+pack\s+\d+\)?)?|ts\s+\d+(?:\.\d+)*))/i) ||
+      text.match(/\b(DATASMART(?:\s+v?\d+(?:\.\d+)*)?(?:\s+\(?\d{4}\.\d+\)?)?)/i) ||
+      text.match(/\b(US[-\s]EI(?:\s+\d+(?:\.\d+)*)?)/i) ||
       text.match(/\b(US\s+LCI)\b/);
     if (db) {
       var dbv = _cleanLine(db[1]).split(/\s{2,}|\t/)[0].trim();
