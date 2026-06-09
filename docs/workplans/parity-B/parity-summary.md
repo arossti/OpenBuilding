@@ -1,6 +1,6 @@
 # Parity B — BEAM CSV ↔ EPD-parser extraction (Pass 1)
 
-_Generated 2026-06-08T23:49:11.372Z by `schema/scripts/csv-pdf-parity.mjs`._
+_Generated 2026-06-09T00:20:12.284Z by `schema/scripts/csv-pdf-parity.mjs`._
 
 For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness parses the PDF and compares the parser's extracted values against the populated BEAM cells per field. Tolerances: numbers ±0.5% + 0.01 absolute floor; strings trim + case-insensitive; units trim + exact. **Scoring scope** (Andy 2026-06-08, §19): only the EPD-extractable columns are in the parity %. Counted: `G, I, J, K, L, N, O, Q, R, W, AG, AH, AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AS, AT, AY, AZ, BA, BB, BC, BD, BE, BF, BG, BH, BI, BJ, BK`. Out-of-scope (BfCA-internal flags, BfCA-derived units/values, BfCA-computational biogenic block, BfCA taxonomy, internal notation, structural placeholders): everything else.
 
@@ -22,8 +22,8 @@ For every BEAM CSV row whose `epd.id` matches a PDF in the folder, this harness 
 ## Parity
 
 - Rows at **100% parity**: **0/671** (0.0%)
-- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **4973/14100** (35.3%)
-- Average per-row coverage: **35.8%**
+- Aggregate cell parity (EPD-comparable columns, populated BEAM cells): **5115/14100** (36.3%)
+- Average per-row coverage: **36.7%**
 
 ## Per-field match rate (descending)
 
@@ -32,6 +32,7 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 | col | field | kind | match / populated | rate |
 |---|---|---|---:|---:|
 | AY | EPD ID | str | 541 / 671 | 80.6% |
+| BF | EPD Standards | str | 207 / 279 | 74.2% |
 | G | EPD Expiry | str | 467 / 671 | 69.6% |
 | N | Countries of Manufacture | str | 321 / 487 | 65.9% |
 | BD | Internal/External Validation | str | 303 / 504 | 60.1% |
@@ -39,15 +40,14 @@ Sorted by match rate — top fields are reliable extractions; bottom fields are 
 | BB | EPD/LCA Prepared by | str | 342 / 643 | 53.2% |
 | AZ | EPD Type | str | 340 / 671 | 50.7% |
 | BK | Product Service Life (Years) | str | 84 / 168 | 50.0% |
+| BC | EPD Program / Operator | str | 244 / 509 | 47.9% |
 | BE | EPD Verifying Agent | str | 234 / 503 | 46.5% |
-| BF | EPD Standards | str | 127 / 279 | 45.5% |
 | AT | Material Type | str | 178 / 393 | 45.3% |
 | BG | EPD PCR Guidelines | str | 196 / 463 | 42.3% |
 | R | GWP units kgCO2e per | str | 284 / 671 | 42.3% |
 | BH | LCA Method | str | 149 / 399 | 37.3% |
 | AH | Density Units | str | 227 / 615 | 36.9% |
 | BJ | EPD LCI Database | str | 113 / 308 | 36.7% |
-| BC | EPD Program / Operator | str | 182 / 509 | 35.8% |
 | O | Markets of Applicability | str | 232 / 665 | 34.9% |
 | J | Manufacturer | str | 229 / 668 | 34.3% |
 | BA | EPD Owner | str | 80 / 515 | 15.5% |
@@ -88,16 +88,16 @@ Each EPD below maps to >1 BEAM row but the parser emits one record per PDF — s
 | 47890927681011 | 10 | 24.3% | 9.6pp |
 | epd362 | 9 | 52.0% | 0.0pp |
 | 2021m20141 | 9 | 36.2% | 1.6pp |
-| 47897933651011 | 9 | 45.5% | 0.0pp |
+| 47897933651011 | 9 | 50.0% | 0.0pp |
 | 47891035931021 | 7 | 39.5% | 0.9pp |
-| scsepd07524 | 6 | 37.5% | 0.0pp |
+| scsepd07524 | 6 | 41.7% | 0.0pp |
 | 47884246341011 | 5 | 57.1% | 0.0pp |
 | 47884246341071 | 5 | 52.4% | 8.3pp |
 | 47884246341061 | 5 | 39.1% | 4.3pp |
-| 47905509341011 | 5 | 43.1% | 3.8pp |
-| epd338 | 4 | 19.6% | 3.6pp |
+| 47905509341011 | 5 | 46.9% | 3.8pp |
+| epd338 | 4 | 23.2% | 3.6pp |
 | 47906780841011 | 4 | 39.6% | 6.5pp |
-| epd10786 | 4 | 28.3% | 8.7pp |
+| epd10786 | 4 | 32.6% | 8.7pp |
 | 40298012 | 4 | 28.0% | 0.0pp |
 | sp05037 | 4 | 35.6% | 3.8pp |
 | epdste20150327ibd1en | 4 | 17.4% | 6.4pp |

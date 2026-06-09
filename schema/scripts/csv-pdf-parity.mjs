@@ -225,7 +225,7 @@ function normalizeForDumpCompare(rec) {
 const RELAXED_BY_COL = {
   G:  "yearPrefix",  // EPD Expiry — BEAM has year-only, parser has full date
   BC: "substring",   // Program Operator — BEAM "ASTM" ⊂ parser "ASTM International"
-  BF: "substring",   // Standards — BEAM stores one citation, parser may have a list
+  BF: "standardCodes", // Standards — token-set on ISO/EN/ASTM codes with version stripping
   BG: "substring",   // PCR — BEAM and parser may have different framing of same PCR
   BA: "substring",   // EPD Owner — same org under variants
   BB: "substring",   // Prepared by — same org under variants
@@ -290,6 +290,33 @@ function normalizeMarketTokens(s) {
     tokens.add("USA"); tokens.add("CAN");
   }
   return [...tokens].sort();
+}
+
+// Phase 2l: tokenize a standards-citation string into a canonical set of
+// standard codes ("ISO 21930", "EN 15804+A2", "ASTM E2129"). Strips version
+// suffixes (":YYYY"), normalizes whitespace around colons ("ISO 14025: 2006"
+// → "ISO 14025"), splits on commas/semicolons/"and". Used by BF EPD Standards
+// to bypass exact-string mismatches between BEAM "ISO 21930:2017" and parser
+// "ISO 14025, ISO 21930, EN 15804" (semantically the parser's list contains
+// the BEAM standard).
+function normalizeStandardCodes(s) {
+  if (s === null || s === undefined) return [];
+  const norm = String(s).toLowerCase()
+    .replace(/[:\s]*\d{4}(?:[-/]\d{2}(?:[-/]\d{2})?)?\b/g, "") // strip ":YYYY" / ": 2006" / "/2019" etc.
+    .replace(/[:.\s]+/g, " ")  // collapse colons/dots/spaces
+    .replace(/\s+/g, " ").trim();
+  const parts = norm.split(/[,;]|\s+and\s+|\s*&\s*/);
+  const codes = new Set();
+  for (let p of parts) {
+    p = p.trim();
+    // Standard-code shape: alphabet prefix (ISO/EN/ASTM/NSF/UL/EPD/CEN) + number
+    const m = p.match(/\b((?:iso|en|astm|nsf|ul|epd|cen|nf|nbn|din|dtd|jis|tr)\s*[\d/]+(?:\s*\+\s*[a-z]\d)?)/i);
+    if (m) {
+      // Canonical form: collapse internal whitespace, lowercase
+      codes.add(m[1].replace(/\s+/g, "").toLowerCase());
+    }
+  }
+  return [...codes].sort();
 }
 
 // Normalize a declared-unit string for comparison: case-fold, fold ³→3 / ²→2,
@@ -389,6 +416,19 @@ function compareCell(c, csvVal, pdfVal) {
       const setA = new Set(ta), setB = new Set(tb);
       const allInB = ta.every(t => setB.has(t));
       const allInA = tb.every(t => setA.has(t));
+      if (allInA || allInB) return { verdict: "MATCH", delta: null };
+    }
+  }
+  if (relaxed === "standardCodes") {
+    // BEAM stores one canonical standard ("ISO 21930:2017"), parser captures
+    // a comma-list ("ISO 14025, ISO 21930, EN 15804+A2"). Tokenize both into
+    // standard codes (version-stripped), then subset-match.
+    const ca = normalizeStandardCodes(sa);
+    const cb = normalizeStandardCodes(sb);
+    if (ca.length > 0 && cb.length > 0) {
+      const setA = new Set(ca), setB = new Set(cb);
+      const allInB = ca.every(c => setB.has(c));
+      const allInA = cb.every(c => setA.has(c));
       if (allInA || allInB) return { verdict: "MATCH", delta: null };
     }
   }

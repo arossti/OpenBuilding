@@ -352,12 +352,31 @@ function deriveDisplayName(rec) {
 // since tabular EPD layouts often put the label on its own line away from the
 // value column. List ordered by specificity (longer/more-distinctive first).
 function _detectProgramOperator(text) {
+  // Phase 2l (Andy 2026-06-08) — operators added to vocab from parser-empty
+  // bucket analysis: Smart EPD, NSF Certification LLC, NIBE, Ecoform, EPD
+  // Hub, EPDItaly, AFNOR, Danish Technological Institute, Building Information
+  // Foundation RTS, SCS Global Services. Order: specific multi-word names
+  // before generic acronyms to avoid the IBU-wins-over-UL kind of issue.
+  if (/Smart\s*EPD/i.test(text)) return "Smart EPD";
+  if (/NSF\s+Certification\s+LLC/i.test(text)) return "NSF Certification LLC";
   if (/EPD\s+International\s+AB/i.test(text)) return "EPD International AB";
+  if (/International\s+EPD\s+System/i.test(text)) return "International EPD System";
+  if (/EPD\s+Hub/i.test(text)) return "EPD Hub";
+  if (/EPD\s*Italy|EPDItaly/i.test(text)) return "EPDItaly";
+  if (/Building\s+Information\s+Foundation\s+RTS|\bRTS\s+Foundation/i.test(text)) return "Building Information Foundation RTS";
+  if (/Danish\s+Technological\s+Institute/i.test(text)) return "Danish Technological Institute";
+  // (Athena Sustainable Materials Institute is an LCA practitioner, not a
+  // program operator — kept out of this function so the Kalesnikoff GLT
+  // §7.6 ground truth ASTM International isn't overridden.)
+  if (/Agence\s+Fran[çc]aise\s+de\s+Normalisation|AFNOR/i.test(text)) return "AFNOR";
   if (/Institut\s+Bauen\s+und\s+Umwelt|IBU\s*–|\bIBU\b/.test(text)) return "IBU";
   if (/NSF\s+International/i.test(text)) return "NSF International";
   if (/CSA\s+Group/i.test(text)) return "CSA Group";
   if (/ASTM\s+International/i.test(text)) return "ASTM International";
+  if (/SCS\s+Global(?:\s+Services)?/i.test(text)) return "SCS Global Services";
   if (/UL\s+Environment/i.test(text)) return "UL Environment";
+  if (/Ecoform/i.test(text)) return "Ecoform";
+  if (/\bNIBE\b/i.test(text)) return "NIBE";
   if (/American\s+Wood\s+Council|AWC\s*&?\s*CWC|Canadian\s+Wood\s+Council/i.test(text)) return "AWC & CWC";
   return null;
 }
