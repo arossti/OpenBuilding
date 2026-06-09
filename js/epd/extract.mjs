@@ -597,13 +597,19 @@ function extractCommon(text, rec) {
     var typ =
       text.match(/EPD\s+type\s*[:\s]+([^\n\r]{4,80})/i) ||
       text.match(/Declaration\s+type\s*[:\s]+([^\n\r]{4,80})/i) ||
-      text.match(/Type\s+of\s+EPD\s*[:\s]+([^\n\r]{4,80})/i);
+      text.match(/Type\s+of\s+EPD\s*[:\s]+([^\n\r]{4,80})/i) ||
+      // Phase 2m: French FDES — "Type de FDES Collective" / "Type de FDES
+      // Individuelle". Collective covers multiple manufacturers (≈ industry
+      // average); Individuelle is single-manufacturer (≈ product-specific).
+      text.match(/Type\s+de\s+(?:FDES|d[ée]claration)\s+([^\n\r]{2,40})/i);
     if (typ) {
       var t = typ[1].toLowerCase();
       if (/product[-\s]*specific/.test(t)) _setPath(rec, "epd.type", "product_specific");
       else if (/(?:industry|business|sector)[-\s]*average/.test(t)) _setPath(rec, "epd.type", "industry_average");
       else if (/company[-\s]*specific/.test(t)) _setPath(rec, "epd.type", "product_specific");
       else if (/generic/.test(t)) _setPath(rec, "epd.type", "generic");
+      else if (/individuelle/.test(t)) _setPath(rec, "epd.type", "product_specific");
+      else if (/collective|collectif/.test(t)) _setPath(rec, "epd.type", "industry_average");
     }
   }
 

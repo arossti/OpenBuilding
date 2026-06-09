@@ -239,7 +239,8 @@ const RELAXED_BY_COL = {
   O:  "marketTokens", // Markets — "US & CA" vs "CAN, USA" vs "United States and Canada" all → {USA, CAN}
   R:  "unitNorm",    // GWP units per — BEAM "m3"/"m²"/"kg" vs parser "1 m³"/"1 cubic meter"
   AK: "numericApprox", // R-value/inch — BEAM rounds to 1-2dp; parser computes from λ (R/inch ≈ 0.1442/λ)
-  AL: "numericApprox"  // Thermal conductivity W/(mK) — BEAM rounds; EPDs vary in precision
+  AL: "numericApprox", // Thermal conductivity W/(mK) — BEAM rounds; EPDs vary in precision
+  Q:  "qConvert"       // Stated GWP — try 1:1 match + 1000× ratio (kg ↔ metric ton unit mismatch)
 };
 
 // Phase 2j (Andy 2026-06-08): tokenize a country/market string into a set of
@@ -442,6 +443,23 @@ function compareCell(c, csvVal, pdfVal) {
     if (Number.isFinite(na) && Number.isFinite(nb)) {
       const tol = Math.max(0.05 * Math.max(Math.abs(na), Math.abs(nb)), 0.01);
       if (Math.abs(na - nb) <= tol) return { verdict: "MATCH", delta: null };
+    }
+  }
+  if (relaxed === "qConvert") {
+    // Phase 2m: Q Stated GWP — BEAM often stores per-kg ("1.22") while
+    // parser extracts per-metric-ton ("1220") on steel/HSS EPDs whose
+    // declared unit is "1 metric ton". Try direct match first, then ±5%
+    // numericApprox, then a 1000× ratio (factor between kg and ton).
+    const na = parseFloat(sa);
+    const nb = parseFloat(sb);
+    if (Number.isFinite(na) && Number.isFinite(nb)) {
+      const tol = Math.max(0.05 * Math.max(Math.abs(na), Math.abs(nb)), 0.01);
+      if (Math.abs(na - nb) <= tol) return { verdict: "MATCH", delta: null };
+      // 1000× ratio - one side per-kg, the other per-metric-ton.
+      const tolA = Math.max(0.05 * Math.abs(nb), 0.01);
+      const tolB = Math.max(0.05 * Math.abs(na), 0.01);
+      if (Math.abs(na * 1000 - nb) <= tolA) return { verdict: "MATCH", delta: null };
+      if (Math.abs(nb * 1000 - na) <= tolB) return { verdict: "MATCH", delta: null };
     }
   }
   return { verdict: "MISMATCH", delta: `beam=${fmt(a)} pdf=${fmt(b)}` };
