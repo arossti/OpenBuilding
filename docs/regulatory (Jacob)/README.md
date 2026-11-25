@@ -16,7 +16,7 @@ Reference documentation provided by BfCA to guide Andy's research into regulator
 The EC Matrix (interactive compliance tool) was consolidated into the TakeOffEh app on 2026-04-18. It now lives at:
 
 - **`matrix.html`** — current Matrix app (at repo root post-flatten on 2026-04-20)
-- **`bfcastyles.css` §6** — Matrix light-theme styles (folded in from the old `matrix.css`)
+- **`obstyles.css` §6** — Matrix light-theme styles (folded in from the old `matrix.css`)
 - **`docs/matrix/`** — data model, architecture, and triage docs
 
 Users navigate between the TakeOffEh and Matrix using header buttons in either app.

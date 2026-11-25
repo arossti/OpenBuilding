@@ -33,7 +33,7 @@ Deployed from repo root via GitHub Actions (`.github/workflows/deploy-pages.yml`
 
 ### Styling — single consolidated file
 
-`bfcastyles.css` (~5000 lines) is the single source of truth for every app's styles. Rules are section/app-scoped via html classes:
+`obstyles.css` (~5000 lines) is the single source of truth for every app's styles. Rules are section/app-scoped via html classes:
 
 - `<html class="theme-dark app-takeoffeh">` — TakeOffEh
 - `<html class="theme-dark app-database">` — Database viewer
@@ -41,7 +41,7 @@ Deployed from repo root via GitHub Actions (`.github/workflows/deploy-pages.yml`
 - `<html class="theme-dark app-deps">` — Dependency manifest
 - `<html class="theme-dark app-landing">` — Landing
 
-No per-app `.css` files — if you find yourself creating one, add rules to `bfcastyles.css` under the appropriate `§N  APP: name` section banner instead. Long-term goal is a single ~1500-line file with shared utilities (status bars, chips, tags, action buttons, data tables) that each app consumes.
+No per-app `.css` files — if you find yourself creating one, add rules to `obstyles.css` under the appropriate `§N  APP: name` section banner instead. Long-term goal is a single ~1500-line file with shared utilities (status bars, chips, tags, action buttons, data tables) that each app consumes.
 
 ### JS — ES modules, no build
 
@@ -110,7 +110,7 @@ No build tools, no framework. Opens directly via a local server (`npm run serve`
 
 | File | Content |
 |---|---|
-| `bfcastyles.css` | Shared design system — BEAMweb in §8, TakeOffEh in §5, Database in §7, Landing in §9, Deps in §10 |
+| `obstyles.css` | Shared design system — BEAMweb in §8, TakeOffEh in §5, Database in §7, Landing in §9, Deps in §10 |
 | `docs/PDF References/Building application flow chart Part 9.pdf` | Reference flowchart for building permit process (prescriptive / performance / EnerGuide paths) |
 | `docs/PDF References/Embodied Carbon Tool DB Comparison Report (Priopta).pdf` | 227-page NRC-funded tool comparison report |
 | `docs/PDF References/Navigating Part 9 Building Codes and Municipal Permitting Frameworks.docx` | Part 9 permitting guidance |

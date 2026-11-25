@@ -49,7 +49,7 @@ jobs:
 
           # Deployable app surface
           cp index.html takeoffeh.html database.html beamweb.html dependencies.html _site/
-          cp bfcastyles.css _site/
+          cp obstyles.css _site/
           cp -r js graphics lib _site/
 
           # Runtime data (staged from authoritative sources)

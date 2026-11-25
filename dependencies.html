@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" href="graphics/ob-logo-sm.png" />
     <meta name="robots" content="noindex,nofollow" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="bfcastyles.css" />
+    <link rel="stylesheet" href="obstyles.css" />
   </head>
   <body>
     <div class="dep-app">
@@ -284,7 +284,7 @@
 
       const INTERNAL = [
         {
-          path: "bfcastyles.css",
+          path: "obstyles.css",
           purpose:
             "Single-file CSS source for every OpenBuilding.ca app. Sections: reset · shared tokens · shared header · dark theme · Take Off, Eh! · Database · BEAMweb · Landing · Deps. Rules scoped by html class (theme-dark / app-*). Roadmap: unify duplicated patterns into shared utilities; goal is a single ~1500-line file serving the whole ecosystem.",
           usedBy: ["Landing", "Take Off, Eh!", "Database", "BEAM", "Deps"]
@@ -474,7 +474,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OpenBuilding.ca — My App</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="bfcastyles.css" />
+    <link rel="stylesheet" href="obstyles.css" />
   </head>
   <body>
     <header class="site-header">
@@ -487,7 +487,7 @@
       <a href="beamweb.html" class="nav-btn">OBJECTIVE</a>
     </header>
     <!-- app here -->
-    <!-- Then add your app-specific section to bfcastyles.css under §11+
+    <!-- Then add your app-specific section to obstyles.css under §11+
          scoped with html.app-myapp — the single-file CSS convention. -->
     <script type="module" src="js/my-app.mjs"><\/script>
   </body>

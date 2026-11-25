@@ -70,7 +70,7 @@ Memory files at `/Users/andrewthomson/.claude/projects/<path-hash>/memory/MEMORY
 | `schema/materials/NN-<slug>.json` | ✅ Per-CSI-division sparse records (8 files: 03–09, 31) |
 | `schema/materials/import-report.json` | ✅ Manual-review flags (unresolved divisions, blank IDs) |
 | `database.html` | ✅ Phase 1.5 — stakeholder viewer for the full catalogue |
-| `js/database.mjs` | ✅ Database viewer logic (sortable table, lazy per-group fetch, expandable detail with full per-stage matrix). Styles live in `bfcastyles.css` §7. |
+| `js/database.mjs` | ✅ Database viewer logic (sortable table, lazy per-group fetch, expandable detail with full per-stage matrix). Styles live in `obstyles.css` §7. |
 
 ### Known gotchas / lossy-import hazards
 
@@ -164,7 +164,7 @@ Priority ordering. Each phase is independently valuable; later phases depend on 
 
 **Goal**: Interim stakeholder-facing HTML viewer for the full 821-record catalogue so BfCA / NRCan / AIBC can review the schema choices in a real UI before committing further down the pipeline. Lets teams see the empty per-stage slots and understand what the EPD parser (Phase 2) will fill.
 
-- [x] **`database.html`** — standalone page, dark theme, reuses `bfcastyles.css` (Database styles live in §7 of the consolidated stylesheet). Shared header nav across TakeOffEh / Matrix / Database / BEAMweb.
+- [x] **`database.html`** — standalone page, dark theme, reuses `obstyles.css` (Database styles live in §7 of the consolidated stylesheet). Shared header nav across TakeOffEh / Matrix / Database / BEAMweb.
 - [x] **Main table**: sortable columns (BEAM ID, Display Name, Division, Material, GWP, functional unit, typical elements), sticky header, live search, division chips with per-division counts, EPD-only toggle.
 - [x] **Expanded row detail** (accordion, collapsed by default; Carbon Calc Graph opens by default): Identity & Classification, Manufacturer & Provenance, Physical Properties, Carbon Calc Graph (ASCII flow diagram of BEAM's audit trail), Impacts per-stage matrix, EPD/Methodology/Code Compliance, Raw JSON.
 - [x] **Per-stage matrix**: 10 categories × (Total + 17 stages), horizontal scroll, sticky first column + total column, per-cell source tag (beam_derived / epd_direct) for provenance at a glance.
@@ -880,7 +880,7 @@ Scoping: not a Phase 1 deliverable. Phase 1 ships the intensity-only material re
 ## Appendix B — Changelog
 
 - **2026-04-18 `f82094c`** — Database viewer fix: removed 620px max-height cap on detail pane that clipped the impact matrix at 7 of 10 categories.
-- **2026-04-18 `b40ac44`** — Phase 1.5 Database viewer shipped: `database.html` + `js/database.mjs` (styles in `bfcastyles.css` §7). Sortable + filterable table, expandable row detail with full 10×18 per-stage impact matrix (horizontal scroll), carbon calc graph as ASCII flow diagram, raw JSON inspector. Data staged into `data/schema/` via `npm run stage:data` (local) or workflow step (Pages). Nav cross-links added across TakeOffEh / Matrix / Database. *(Paths updated post-flatten 2026-04-20; originally all under `TakeOffEh/`.)*
+- **2026-04-18 `b40ac44`** — Phase 1.5 Database viewer shipped: `database.html` + `js/database.mjs` (styles in `obstyles.css` §7). Sortable + filterable table, expandable row detail with full 10×18 per-stage impact matrix (horizontal scroll), carbon calc graph as ASCII flow diagram, raw JSON inspector. Data staged into `data/schema/` via `npm run stage:data` (local) or workflow step (Pages). Nav cross-links added across TakeOffEh / Matrix / Database. *(Paths updated post-flatten 2026-04-20; originally all under `TakeOffEh/`.)*
 - **2026-04-18 `e66e513`** — CI fix: gated the Pages deploy job to `arossti/OpenBuilding` only (bfca-labs/at is private, no Pages site → 404). Cosmetic failure noise on the private mirror now suppressed.
 - **2026-04-18 `009a9c5`** — Sparse-by-default serialization. Per-material records omit null scalar leaves and empty sub-objects. 15 top-level object blocks, `impacts.<category>.total` (as `{value, source}`), `impacts.<category>.by_stage`, and all arrays stay present for safe traversal. Full template structure remains documented in `sample.json` and `material.schema.json`. Size: per-record ~13 KB → ~4 KB, batch 18 MB → 4.3 MB (76% reduction). Validator relaxed (required arrays pruned to structural members only; additionalProperties:false and enums/patterns unchanged); 822/822 records still pass.
 - **2026-04-18 `c71ef7d`** — Added `material.schema.json` (JSON Schema Draft 2020-12) and `scripts/validate.mjs` (zero-dep walker).

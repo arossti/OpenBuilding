@@ -34,9 +34,9 @@ The reference document (`2024.09.09 _ Issued for Permit (B-Frame 4.4 M&K).pdf`) 
 
 ### Multi-file HTML app with local JS modules
 
-- `index.html` — TakeOffEh app shell (links `bfcastyles.css` + `takeoffeh.css`)
-- `matrix.html` — EC Matrix app (links `bfcastyles.css` + `matrix.css`)
-- `bfcastyles.css` — shared design system (reset, brand tokens, header, logo, nav)
+- `index.html` — TakeOffEh app shell (links `obstyles.css` + `takeoffeh.css`)
+- `matrix.html` — EC Matrix app (links `obstyles.css` + `matrix.css`)
+- `obstyles.css` — shared design system (reset, brand tokens, header, logo, nav)
 - `takeoffeh.css` — TakeOffEh dark-theme styles
 - `matrix.css` — EC Matrix light-theme styles
 - `js/` — 10 vanilla JS ESM modules (`.mjs`)
@@ -521,8 +521,8 @@ var project = {
 
 ### Step 7.5 — Design System Refactor & UX Polish ✅ (2026-03-28)
 
-- [x] **CSS refactor** — split monolithic `bfcastyles.css` into 3-file architecture:
-  - `bfcastyles.css` (shared foundation: reset, brand tokens, header, logo, nav button)
+- [x] **CSS refactor** — split monolithic `obstyles.css` into 3-file architecture:
+  - `obstyles.css` (shared foundation: reset, brand tokens, header, logo, nav button)
   - `takeoffeh.css` (dark theme: viewer, toolbar, sidebar, measure panel, scale panel, feedback dialogues)
   - `matrix.css` (light theme: cards, phases, flow model, legends, actor lens, persona chips)
 - [x] Extracted 1,418 lines of inline CSS from `matrix.html` into `matrix.css`
@@ -727,7 +727,7 @@ at/                              ← repo root is the deployed site (flat since 
 ├── database.html                ← BfCA Material Database viewer
 ├── beamweb.html                 ← BEAMweb embodied-carbon calculator
 ├── dependencies.html            ← Dev dependency manifest
-├── bfcastyles.css               ← single consolidated design system (~5000 lines)
+├── obstyles.css               ← single consolidated design system (~5000 lines)
 ├── package.json                 ← npm scripts: lint, format, serve, stage:data
 ├── eslint.config.mjs            ← ESLint flat config
 ├── .prettierrc, .prettierignore

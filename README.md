@@ -47,7 +47,7 @@ at/
 ├── database.html                    Material Database viewer
 ├── beamweb.html                     BEAMweb — embodied carbon calculator
 ├── dependencies.html                Dev dependency manifest
-├── bfcastyles.css                   Single consolidated design system (~5000 lines)
+├── obstyles.css                   Single consolidated design system (~5000 lines)
 ├── js/                              ESM modules (vanilla JS, no build step)
 │   ├── app.mjs                      TakeOffEh bootstrap
 │   ├── polygon-tool.mjs             Polygon + window measurement
