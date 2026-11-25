@@ -1,4 +1,4 @@
-name: Deploy BfCA OpenBuilding to GitHub Pages
+name: Deploy OpenBuilding.ca to GitHub Pages
 
 on:
   push:
@@ -40,7 +40,7 @@ jobs:
         # than upload the whole repo (which would otherwise include schema/
         # as source, docs/, the .md workplans, dev configs, etc.).
         #
-        # database.html reads the BfCA material catalogue from data/schema/
+        # database.html reads the OpenBuilding.ca material catalogue from data/schema/
         # at runtime; BEAMweb assembly tabs fetch picker CSVs from
         # data/beam/. Local dev runs `npm run stage:data` to produce the
         # same data/ layout.
@@ -48,7 +48,7 @@ jobs:
           mkdir -p _site/data/schema _site/data/schema/lookups _site/data/beam _site/data/beam/samples
 
           # Deployable app surface
-          cp index.html pdfparser.html matrix.html database.html beamweb.html epdparser.html dependencies.html _site/
+          cp index.html pdfparser.html database.html beamweb.html dependencies.html _site/
           cp bfcastyles.css _site/
           cp -r js graphics lib _site/
 

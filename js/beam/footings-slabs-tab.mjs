@@ -7,7 +7,7 @@
 // group-config qty bridge), computes per-row emissions live, and rolls up
 // per-group + per-tab totals (NET / GROSS / STORAGE Short / STORAGE Long).
 //
-// Per-unit emission factors are looked up from the BfCA materials DB
+// Per-unit emission factors are looked up from the OpenBuilding.ca materials DB
 // (schema/materials/index.json) via materials-db.mjs — the single source
 // of truth that BEAM's gSheet itself uses internally. The assembly CSV
 // only provides STRUCTURE (groups, subgroups, rows) + sample UI defaults
@@ -229,14 +229,14 @@ function renderMaterialRow(group, sub, m) {
         <span class="bw-asm-pct-sign">%</span>
       </td>
       <td class="bw-asm-col-net">
-        <span id="${netId}">0</span>${noFactor ? ' <span class="bw-asm-nofactor" title="No GWP factor for this material in the BfCA materials DB (schema/materials/index.json) — cannot compute.">–</span>' : ""}
+        <span id="${netId}">0</span>${noFactor ? ' <span class="bw-asm-nofactor" title="No GWP factor for this material in the OpenBuilding.ca materials DB (schema/materials/index.json) — cannot compute.">–</span>' : ""}
       </td>
       <td class="bw-asm-foot" title="${esc(m.footnote)}">${renderFootnote(m.footnote)}</td>
     </tr>
   `;
 }
 
-// Footnote renderer. The BEAM CSVs (and the BfCA materials DB) fuse two
+// Footnote renderer. The BEAM CSVs (and the OpenBuilding.ca materials DB) fuse two
 // kinds of signal into a single footnote string with a `;` separator —
 // e.g. `Expired 2025; BfCA BioC calc by mass`. Left of the `;` is a status
 // tag (commonly the expiry date); right is a BfCA annotation about how the
@@ -618,7 +618,7 @@ export async function wireFootingsSlabsTab() {
 
   const note = document.getElementById("bw-fs-load-note");
   if (note) {
-    note.textContent = `${parsed.groups.length} groups · ${matCount} materials · ${withFactor} with GWP factors (BfCA DB ${stats?.count} records).`;
+    note.textContent = `${parsed.groups.length} groups · ${matCount} materials · ${withFactor} with GWP factors (OpenBuilding.ca DB ${stats?.count} records).`;
   }
 
   wireInputs(panel);

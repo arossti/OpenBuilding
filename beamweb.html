@@ -3,11 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BEAM — Embodied Carbon Calculator (BfCA)</title>
-    <link rel="icon" type="image/png" href="graphics/BFCA-LOGO-sm.png" />
+    <title>BEAM — Embodied Carbon Calculator (OpenBuilding.ca)</title>
+    <link rel="icon" type="image/svg+xml" href="graphics/ob-favicon.svg" />
+    <link rel="icon" type="image/png" href="graphics/ob-logo-sm.png" />
     <meta
       name="description"
-      content="Browser port of the BEAM embodied carbon calculator. Calculates material emissions for Canadian construction projects using the BfCA JSON material database."
+      content="Browser port of the BEAM embodied carbon calculator. Calculates material emissions for Canadian construction projects using the OpenBuilding.ca JSON material database."
     />
 
     <!-- CSS: single consolidated file (bfcastyles.css holds shared + per-app rules scoped by html class). Bootstrap only on BEAMweb for modals/dropdowns. -->
@@ -29,16 +30,16 @@
     <div id="beam-app">
       <!-- ── Header ───────────────────────────────────────── -->
       <header class="site-header beam-header">
-        <img src="graphics/beam-logo.png" alt="BEAM" class="header-logo" />
+        <img src="graphics/objective-mark.svg" alt="OBJECTIVE" class="header-logo" />
         <div class="beam-title-block">
           <h1 class="beam-title">
             BEAM
             <span style="font-size: 12px; font-weight: normal; color: var(--text-dim)"
-              >· BfCA Embodied Carbon Calculator</span
+              >· OpenBuilding.ca Embodied Carbon Calculator</span
             >
           </h1>
           <span class="beam-subtitle"
-            >JS port of BEAM · consumes the <span id="beam-material-count">BfCA</span> material database</span
+            >JS port of BEAM · consumes the <span id="beam-material-count">OpenBuilding.ca</span> material database</span
           >
         </div>
         <div class="beam-spacer"></div>
@@ -47,8 +48,7 @@
           <a href="pdfparser.html" class="nav-btn" target="_blank" rel="noopener" title="PDF takeoff + area extraction"
             >PDF-Parser</a
           >
-          <a href="matrix.html" class="nav-btn" target="_blank" rel="noopener" title="EC compliance matrix">Matrix</a>
-          <a href="database.html" class="nav-btn" target="_blank" rel="noopener" title="BfCA material catalogue"
+          <a href="database.html" class="nav-btn" target="_blank" rel="noopener" title="OpenBuilding.ca material catalogue"
             >Database</a
           >
           <a href="beamweb.html" class="nav-btn active" aria-current="page" title="Current app">BEAM</a>

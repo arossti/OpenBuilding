@@ -1,5 +1,5 @@
 /**
- * BfCA Material Database viewer.
+ * OpenBuilding.ca Material Database viewer.
  *
  * Fetches the sparse catalogue at data/schema/materials/index.json (staged via
  * `npm run stage:data` locally or the Pages deploy workflow). Renders a sortable

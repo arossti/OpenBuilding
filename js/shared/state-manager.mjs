@@ -308,7 +308,7 @@ const ARCHITECTURAL_NODES = [
     type: "module",
     architecturalLayer: "Foundation",
     label: "Materials Index",
-    description: "821-record BfCA material catalogue"
+    description: "821-record OpenBuilding.ca material catalogue"
   },
   {
     id: "COORDINATION-PolygonMap",

@@ -1,5 +1,5 @@
 // materials-db.mjs
-// Single source of truth for per-material emission factors. Loads the BfCA
+// Single source of truth for per-material emission factors. Loads the OpenBuilding.ca
 // material catalogue (`schema/materials/index.json`, 821 records, staged at
 // runtime to `data/schema/materials/`) and exposes lookup + unit-conversion
 // helpers consumed by every assembly-tab calc path.

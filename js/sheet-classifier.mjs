@@ -115,7 +115,7 @@ function _findDrawingTypeTitle(textItems) {
   if (extracted.length === 0) return null;
 
   // Rank by row font size (largest = most title-like). Ties break toward
-  // the bottom-right of the page — BfCA title-block convention (large y =
+  // the bottom-right of the page — OpenBuilding.ca title-block convention (large y =
   // visually lower in our top-left coords; large xMax = further right).
   extracted.sort(function (a, b) {
     var fontDiff = (b.row.fontSize || 0) - (a.row.fontSize || 0);

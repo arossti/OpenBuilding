@@ -219,7 +219,7 @@ const PANEL_BODIES = {
   "dependency-graph": renderDependencyGraphPanel(),
   introduction: `
     <div class="beam-tbd bw-intro">
-      <img src="graphics/beam-logo.png" alt="BEAM" class="bw-intro-logo" />
+      <img src="graphics/objective-logo.svg" alt="OBJECTIVE" class="bw-intro-logo" />
       <h3>Welcome to BEAMweb</h3>
       <p class="bw-intro-lede">
         A browser port of the BEAM embodied carbon calculator, built for Canadian projects.
@@ -229,7 +229,7 @@ const PANEL_BODIES = {
       <ul class="bw-intro-list">
         <li>Enter your project meta and areas on the <strong>PROJECT</strong> tab — or import them from a BEAM workbook or a PDF-Parser project.</li>
         <li>For each assembly tab (Footings &amp; Slabs through Garage), select the materials you used and the quantities.</li>
-        <li>Material emissions come from the <a href="database.html" class="db-kv-link">BfCA material database</a> — 821 records, full EN 15804+A2 per-stage scope.</li>
+        <li>Material emissions come from the <a href="database.html" class="db-kv-link">OpenBuilding.ca material database</a> — 821 records, full EN 15804+A2 per-stage scope.</li>
         <li>Review the totals on <strong>REVIEW</strong> + <strong>RESULTS</strong>. Print to PDF for a project report.</li>
       </ul>
 
@@ -243,9 +243,8 @@ const PANEL_BODIES = {
         See <a href="https://github.com/arossti/OpenBuilding/blob/main/docs/workplans/BEAMweb.md" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md</a> for the workplan and open questions.
       </p>
       <p>
-        Data source: <a href="database.html" class="db-kv-link">BfCA Material Database</a>.
+        Data source: <a href="database.html" class="db-kv-link">OpenBuilding.ca Material Database</a>.
         Companion apps: <a href="pdfparser.html" class="db-kv-link">PDF-Parser</a> (area takeoff),
-        <a href="matrix.html" class="db-kv-link">EC Matrix</a> (regulatory compliance),
         <a href="index.html" class="db-kv-link">app directory</a>,
         <a href="dependencies.html" class="db-kv-link">dependency manifest</a> (dev).
       </p>
@@ -354,7 +353,7 @@ function defaultStub(tab) {
       <h3>Implementation pending · Phase ${tab.phase}</h3>
       <p>This tab follows the standard BEAM assembly-tab pattern:</p>
       <ul>
-        <li>Pre-curated candidate material list (subset of the <a href="database.html" class="db-kv-link">BfCA material database</a>)</li>
+        <li>Pre-curated candidate material list (subset of the <a href="database.html" class="db-kv-link">OpenBuilding.ca material database</a>)</li>
         <li>User toggles <code>SELECT</code> and enters <code>QUANTITY</code> per row</li>
         <li>Section-level config (thickness, R-value, framing spacing) above each sub-category</li>
         <li>Per-row net kgCO2e emissions computed from <code>material.carbon.common.value_kgco2e × quantity × %</code></li>

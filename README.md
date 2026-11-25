@@ -1,6 +1,6 @@
-# BfCA OpenBuilding — Embodied Carbon Assessment Framework
+# OpenBuilding.ca — Browser Tools for Canadian Buildings
 
-Research, prototyping, and tooling for embodied carbon (EC) assessment in Canadian construction, developed by [Builders for Climate Action](https://www.buildersforclimateaction.org/) (BfCA).
+Research, prototyping, and tooling for Canadian buildings: PDF takeoff, a material database, and OBJECTIVE, by OpenBuilding.ca.
 
 ## Live Tools
 
@@ -24,20 +24,9 @@ Client-side tool for extracting area and volume data from construction document 
 - Ruler tool with tick marks and dual-unit labels
 - Unified undo/redo (polygons + rulers), JSON project save/load/import, CSV export
 
-### EC Matrix — `/matrix.html`
-
-Interactive reference mapping roles, responsibilities, tools, standards, and compliance requirements for EC assessments across Canadian building types, sizes, jurisdictions, and project phases. Aligned to NBC/NECB 2025 Draft.
-
-**Key features:**
-- Card view with 6-phase status strip (None → Voluntary → Conditional → Emerging → Mandatory)
-- Flow model view (horizontal phase-to-phase with statutory/EC/voluntary tracks)
-- Actor lens mode (dims irrelevant phases, highlights selected role's involvement)
-- 2025 code updates panel, PT equivalents, standards tooltips, BEM glossary
-- Persona quick-filter chips for common role scenarios
-
 ### Material Database — `/database.html`
 
-BfCA material catalogue viewer. 821 EPDs across 8 material groups, full EN 15804+A2 per-stage impact scope, sortable + searchable + filterable by group / country / lifecycle stage. Collapsible group sections mirror the assembly-tab structure in BEAMweb.
+OpenBuilding.ca material catalogue viewer. 821 EPDs across 8 material groups, full EN 15804+A2 per-stage impact scope, sortable + searchable + filterable by group / country / lifecycle stage. Collapsible group sections mirror the assembly-tab structure in BEAMweb.
 
 ### BEAMweb — `/beamweb.html`
 
@@ -55,7 +44,6 @@ Flat layout — the repo root is the deployed site. The Pages workflow stages a 
 at/
 ├── index.html                       Landing — app directory
 ├── pdfparser.html                   PDF-Parser — area + volume takeoff
-├── matrix.html                      EC Matrix — compliance grid
 ├── database.html                    Material Database viewer
 ├── beamweb.html                     BEAMweb — embodied carbon calculator
 ├── dependencies.html                Dev dependency manifest
@@ -100,7 +88,6 @@ at/
 ├── docs/
 │   ├── sample.pdf                   PDF-Parser dev fixture (generic name; swapped for a better drawing set at release)
 │   ├── pdf-samples/                 Larger sample PDFs for parser testing (gitignored)
-│   ├── matrix/                      EC Matrix docs (ARCHITECTURE, TRIAGE, data model)
 │   ├── beam-samples/                Sample BEAMweb project JSONs (DOE Prototype)
 │   ├── csv files from BEAM/         22 BEAM workbook tab snapshots
 │   ├── PDF References/              Vancouver EC guides, NRC reports, code references

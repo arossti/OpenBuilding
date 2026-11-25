@@ -1,5 +1,7 @@
 # BfCA OpenBuilding — Embodied Carbon Assessment Framework
 
+> ⚠ **Being rewritten with Andy (2026-11-25).** The EC Matrix, EPD-Parser and CCLIMB were deleted (that work lives on at BfCA's own labs site); the landing page is now OpenBuilding.ca's, with OBJECTIVE re-badging BEAM and Materials / Assemblies / Section Builder planned (ported from ABCD.EARTH mockups). The BfCA framing and IP rules below are historical until Andy says which still hold.
+
 ## Project Purpose
 
 Open-source browser-native toolkit for embodied carbon (EC) assessments on Canadian construction projects. Four apps share one design system, one material database, and a single dependency manifest.
@@ -25,7 +27,6 @@ Deployed from repo root via GitHub Actions (`.github/workflows/deploy-pages.yml`
 |---|---|---|
 | `/` | `index.html` | Landing page / app directory (4 cards + deps link) |
 | `/pdfparser.html` | `pdfparser.html` | PDF-Parser — area + volume takeoff from drawings |
-| `/matrix.html` | `matrix.html` | EC Matrix — regulatory compliance grid |
 | `/database.html` | `database.html` | BfCA material database viewer (821 records) |
 | `/beamweb.html` | `beamweb.html` | BEAMweb — embodied carbon calculator (Phase 3 live) |
 | `/dependencies.html` | `dependencies.html` | Dev dependency manifest (not nav-linked) |
@@ -39,7 +40,6 @@ Deployed from repo root via GitHub Actions (`.github/workflows/deploy-pages.yml`
 - `<html class="theme-dark app-beamweb">` — BEAMweb
 - `<html class="theme-dark app-deps">` — Dependency manifest
 - `<html class="theme-dark app-landing">` — Landing
-- `<html class="app-matrix">` — Matrix (its own light palette)
 
 No per-app `.css` files — if you find yourself creating one, add rules to `bfcastyles.css` under the appropriate `§N  APP: name` section banner instead. Long-term goal is a single ~1500-line file with shared utilities (status bars, chips, tags, action buttons, data tables) that each app consumes.
 
@@ -110,11 +110,7 @@ No build tools, no framework. Opens directly via a local server (`npm run serve`
 
 | File | Content |
 |---|---|
-| `matrix.html` | **Current Matrix app** — three-track flow view, Part 9/Part 3 splash, full actor/phase sync |
-| `bfcastyles.css` | Shared design system — Matrix styles in §6, BEAMweb in §8, PDF-Parser in §5, Database in §7, Landing in §9, Deps in §10 |
-| `docs/matrix/ec_matrix_v2.md` | Markdown documentation of the full data model |
-| `docs/matrix/TRIAGE.md` | Role/phase refinement Q&A notes |
-| `docs/matrix/ARCHITECTURE.md` | Matrix architecture notes (data model, conventions) |
+| `bfcastyles.css` | Shared design system — BEAMweb in §8, PDF-Parser in §5, Database in §7, Landing in §9, Deps in §10 |
 | `docs/PDF References/Building application flow chart Part 9.pdf` | Reference flowchart for building permit process (prescriptive / performance / EnerGuide paths) |
 | `docs/PDF References/Embodied Carbon Tool DB Comparison Report (Priopta).pdf` | 227-page NRC-funded tool comparison report |
 | `docs/PDF References/Navigating Part 9 Building Codes and Municipal Permitting Frameworks.docx` | Part 9 permitting guidance |

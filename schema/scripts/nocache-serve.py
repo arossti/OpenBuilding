@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-BfCA OpenBuilding — no-cache dev server.
+OpenBuilding.ca — no-cache dev server.
 
 Serves the current working directory via Python's http.server but sends
 ``Cache-Control: no-store, no-cache, must-revalidate, max-age=0`` on every
