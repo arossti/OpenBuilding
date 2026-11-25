@@ -35,7 +35,7 @@ The workflow stages a clean `_site/` (HTML, CSS, `js/`, `graphics/`, `lib/`, `bu
 | `/` | `index.html` | Landing page / tools directory |
 | `/objectivepro.html` | `objectivepro.html` | OBJECTIVE 4.0: sidebar S01–S21 + S22 Glossary, the S01 key values in the masthead |
 | `/takeoffeh.html` | `takeoffeh.html` | Take Off, Eh! — area + volume takeoff from drawings |
-| `/database.html` | `database.html` | Material database viewer (821 records) |
+| (local only) | `database.html` | The BEAM material catalogue viewer (821 records, BfCA data): kept in the repo, never deployed |
 | `/builders/*.html` | `builders/` | Material, Section and Assembly Builders (published from ABCD.EARTH) |
 | `/dependencies.html` | `dependencies.html` | Dev dependency manifest (not nav-linked) |
 
@@ -60,4 +60,6 @@ shared with the Builders (cyan on the web). No per-app `.css` files.
 - `schema/lookups/*.json` — enum + inference tables
 - Runtime: staged into `data/schema/` (Pages workflow, or `npm run stage:data` locally).
 
-The catalogue is the Database page's until the Materials Builder replaces it.
+The catalogue, `docs/csv files from BEAM/` (the BEAM workbook's tab exports) and `docs/beam-samples/` are BfCA's
+data: kept in the repo, **never deployed** (Andy 2026-11-25: *"We may use some of the BfCA database later but we'd need
+permission first."*). The site's materials are the Material Builder's, published from ABCD.EARTH.

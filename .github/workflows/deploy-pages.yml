@@ -35,24 +35,19 @@ jobs:
         # than upload the whole repo (which would otherwise include schema/
         # as source, docs/, the .md workplans, dev configs, etc.).
         #
-        # database.html reads the OpenBuilding.ca material catalogue from data/schema/
-        # at runtime; objectivepro.html's Load Sample reads
-        # data/beam/samples/. Local dev runs `npm run stage:data` to produce the
-        # same data/ layout.
+        # Local dev runs `npm run stage:data` to stage data/, including the
+        # local-only catalogue database.html reads.
         run: |
-          mkdir -p _site/data/schema _site/data/schema/lookups _site/data/beam _site/data/beam/samples
+          mkdir -p _site/data
 
           # Deployable app surface
-          cp index.html takeoffeh.html database.html objectivepro.html dependencies.html _site/
+          cp index.html takeoffeh.html objectivepro.html dependencies.html _site/
           cp obstyles.css _site/
           cp -r js graphics lib builders _site/
 
-          # Runtime data (staged from authoritative sources)
-          cp -r schema/materials _site/data/schema/
-          cp schema/lookups/*.json _site/data/schema/lookups/
-          cp schema/material.schema.json _site/data/schema/
-          cp schema/sample.json _site/data/schema/
-          cp docs/beam-samples/*.json _site/data/beam/samples/
+          # Runtime data. The BEAM material catalogue (schema/), database.html and
+          # the BEAM sample project are BfCA's data: kept in the repo for local use
+          # (`npm run stage:data`), never deployed (Andy 2026-11-25).
           cp docs/sample.pdf _site/data/sample.pdf
 
       - name: Upload artifact

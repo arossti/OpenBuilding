@@ -93,9 +93,7 @@ const DEFAULT_TAB = "introduction";
 // App state — minimal for now
 // ──────────────────────────────────────────────────────────────────────
 const state = {
-  activeTab: DEFAULT_TAB,
-  materialCount: null, // set when index.json loads
-  materialIndex: null // full index.json payload (lazy)
+  activeTab: DEFAULT_TAB
 };
 
 // ──────────────────────────────────────────────────────────────────────
@@ -113,7 +111,6 @@ function boot() {
   wireProjectForm();
   wireDependencyGraphTab();
   setActiveTab(readInitialTabFromHash() || DEFAULT_TAB);
-  loadMaterialIndex();
 }
 
 function wireGlossarySearch() {
@@ -240,7 +237,7 @@ const PANEL_BODIES = {
       </p>
       <p>
         Companion tools: <a href="takeoffeh.html" class="db-kv-link">Take Off, Eh!</a> (area takeoff),
-        <a href="database.html" class="db-kv-link">Material Database</a>,
+        <a href="builders/material-builder.html" class="db-kv-link">Materials</a>,
         <a href="index.html" class="db-kv-link">all OpenBuilding.ca tools</a>.
       </p>
     </div>
@@ -725,31 +722,6 @@ function wireImportModal() {
   document.getElementById("bw-pdf-import-cancel").addEventListener("click", closeImportModal);
   document.getElementById("bw-pdf-import-backdrop").addEventListener("click", closeImportModal);
   document.getElementById("bw-pdf-import-apply").addEventListener("click", applyImportSelection);
-}
-
-// ──────────────────────────────────────────────────────────────────────
-// Material DB probe — confirm the catalogue is reachable.
-// Full fetch + caching lands in Phase 3 when assembly tabs consume it.
-// ──────────────────────────────────────────────────────────────────────
-async function loadMaterialIndex() {
-  const url = "data/schema/materials/index.json";
-  try {
-    const res = await fetch(url, { cache: "no-cache" });
-    if (!res.ok) throw new Error(`${res.status}`);
-    const idx = await res.json();
-    state.materialCount = idx.count;
-    state.materialIndex = idx;
-    document.getElementById("beam-material-source").textContent =
-      `materials: ${idx.count} records · sha ${short(idx.generated_from_csv_sha256)}`;
-  } catch (err) {
-    console.warn("BEAMweb: material index unreachable:", err);
-    document.getElementById("beam-material-source").textContent =
-      `materials: index.json unreachable · run 'npm run stage:data' locally`;
-    setStatus("Material catalogue not staged — run `npm run stage:data` in the repo root", "error");
-  }
-}
-function short(sha) {
-  return sha ? sha.slice(0, 10) : "—";
 }
 
 // ──────────────────────────────────────────────────────────────────────
