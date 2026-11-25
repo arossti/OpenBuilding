@@ -1788,6 +1788,54 @@ function _highlightThumb(pageNum) {
 
 /* ── Info panels ──────────────────────────────────────── */
 
+// Facing of an elevation sheet: the user confirms it (Andy 2026-11-25: verify IN
+// Take Off). The title's direction is offered as a hint, never stored unasked.
+var FACINGS = ["North", "NorthEast", "East", "SouthEast", "South", "SouthWest", "West", "NorthWest"];
+function _facingFromTitle(title) {
+  var t = String(title || "")
+    .toLowerCase()
+    .replace(/[^a-z]+/g, " ");
+  var combos = [
+    ["north east", "NorthEast"],
+    ["northeast", "NorthEast"],
+    ["south east", "SouthEast"],
+    ["southeast", "SouthEast"],
+    ["south west", "SouthWest"],
+    ["southwest", "SouthWest"],
+    ["north west", "NorthWest"],
+    ["northwest", "NorthWest"]
+  ];
+  for (var i = 0; i < combos.length; i++) if (t.indexOf(combos[i][0]) >= 0) return combos[i][1];
+  var singles = [
+    ["north", "North"],
+    ["south", "South"],
+    ["east", "East"],
+    ["west", "West"]
+  ];
+  for (var j = 0; j < singles.length; j++) if (new RegExp("\\b" + singles[j][0] + "\\b").test(t)) return singles[j][1];
+  return null;
+}
+function _facingSelectHtml(pageData) {
+  var hint = _facingFromTitle(pageData.sheetTitle);
+  var cur = pageData.facing || "";
+  var opts = "<option value=''>" + (hint ? "Facing? (title: " + hint + ")" : "Facing? (set it)") + "</option>";
+  for (var i = 0; i < FACINGS.length; i++) {
+    opts +=
+      "<option value='" + FACINGS[i] + "'" + (cur === FACINGS[i] ? " selected" : "") + ">" + FACINGS[i] + "</option>";
+  }
+  return (
+    "<br><select class='facing-select' title='This elevation faces… (OBJECTIVE hosts its walls, windows and doors by it)' onchange='PP.setFacing(" +
+    pageData.pageNum +
+    ", this.value)'>" +
+    opts +
+    "</select>"
+  );
+}
+function setFacing(pageNum, facing) {
+  ProjectStore.setFacing(pageNum, facing);
+  setStatus(facing ? "Facing set: " + facing : "Facing cleared", "ready");
+}
+
 function _updateSheetInfo(pageData) {
   if (!pageData) {
     els.sheetInfo.innerHTML = "";
@@ -1796,6 +1844,7 @@ function _updateSheetInfo(pageData) {
   var html = "<strong>" + (pageData.sheetId || "\u2014") + "</strong>";
   html += " <span class='sheet-class tag-" + pageData.classification + "'>" + pageData.classification + "</span>";
   if (pageData.sheetTitle) html += "<br>" + pageData.sheetTitle;
+  if (pageData.classification === "elevation") html += _facingSelectHtml(pageData);
 
   // Scale badge — three states
   var pageNum = pageData.pageNum;
@@ -3399,6 +3448,7 @@ window.PP = {
   // Measure method
   setMeasureMethod: setMeasureMethod,
   setWindowMode: setWindowMode,
+  setFacing: setFacing,
   // Phase 4b.1 — component tag + assembly preset
   setComponentTag: setComponentTag,
   setAssemblyPreset: setAssemblyPreset,

@@ -43,6 +43,56 @@ export const V3_TARGETS = [
   }
 ];
 
+// S11's rows (V3 keys): ten wall rows, forty window rows, twelve door rows.
+const sfx = (base, n) =>
+  Array.from(
+    { length: n },
+    (_, i) => base + (i < 26 ? "abcdefghijklmnopqrstuvwxyz"[i] : "a" + "abcdefghijklmnopqrstuvwxyz"[i - 26])
+  );
+const WALL_ROWS = ["86", ...sfx("87", 9)];
+
+function shoelace(v) {
+  let a = 0;
+  for (let i = 0; i < v.length; i++) {
+    const j = (i + 1) % v.length;
+    a += v[i].x * v[j].y - v[j].x * v[i].y;
+  }
+  return Math.abs(a) / 2;
+}
+
+// Walls, windows and doors from every elevation sheet whose facing the user
+// confirmed in Take Off, Eh! (page.facing). Each opening is kept on its own —
+// ASHRAE 140 shades window by window (Andy 2026-11-25).
+export function envelopeByFacing(projectJson) {
+  const byFacing = new Map();
+  const unconfirmed = [];
+  for (const page of (projectJson && projectJson.pages) || []) {
+    if (page.classification !== "elevation") continue;
+    const upm = page.calibration && page.calibration.pdfUnitsPerMetre;
+    const polys = (page.polygons || []).filter((p) => p.closed && p.scope !== "garage");
+    if (!polys.length || !upm) continue;
+    if (!page.facing) {
+      unconfirmed.push(`page ${page.pageNum}${page.sheetTitle ? " (" + page.sheetTitle + ")" : ""}`);
+      continue;
+    }
+    const f = byFacing.get(page.facing) || { facing: page.facing, wall: 0, openings: [] };
+    for (const p of polys) {
+      const t = p.type || "area";
+      if (t === "area" && (!p.component || p.component === "wall_exterior"))
+        f.wall += shoelace(p.vertices) / (upm * upm);
+      if (t === "window" || t === "door") {
+        const xs = p.vertices.map((v) => v.x);
+        const ys = p.vertices.map((v) => v.y);
+        const w = (Math.max(...xs) - Math.min(...xs)) / upm;
+        const h = (Math.max(...ys) - Math.min(...ys)) / upm;
+        f.openings.push({ kind: t, label: p.label, w: Number(w.toFixed(3)), h: Number(h.toFixed(3)) });
+      }
+    }
+    byFacing.set(page.facing, f);
+  }
+  return { facings: [...byFacing.values()].filter((f) => f.wall > 0), unconfirmed };
+}
+
 function v3() {
   return window.TEUI || {};
 }
@@ -101,6 +151,35 @@ export async function buildPreview(projectUuid) {
     };
   });
 
+  const env = envelopeByFacing(project.projectJson);
+  if (env.facings.length) {
+    const i86 = rows.findIndex((r) => r.dimId === "d_86");
+    if (i86 >= 0) rows.splice(i86, 1);
+  }
+  const nWin = env.facings.reduce((n, f) => n + f.openings.filter((o) => o.kind === "window").length, 0);
+  const nDoor = env.facings.reduce((n, f) => n + f.openings.filter((o) => o.kind === "door").length, 0);
+  const wallTotal = env.facings.reduce((a, f) => a + f.wall, 0);
+  rows.push({
+    dimId: "s11_envelope",
+    label: "S11 walls, windows, doors by facing",
+    current: null,
+    computed: env.facings.length ? Number(wallTotal.toFixed(2)) : null,
+    summary:
+      (env.facings.length
+        ? env.facings
+            .map((f) => `${f.facing}: wall ${f.wall.toFixed(2)} m\u00b2, ${f.openings.length} opening(s)`)
+            .join(" \u00b7 ") +
+          ` \u2014 walls written by facing; ${nWin} window(s) and ${nDoor} door(s) found, not yet written (each will take its own row).`
+        : "No elevation sheet has a confirmed facing: set each one in Take Off, Eh!.") +
+      (env.unconfirmed.length ? ` Not imported (no facing set): ${env.unconfirmed.join(", ")}.` : ""),
+    contributors: [],
+    warnings: [],
+    hasValue: env.facings.length > 0,
+    missingParams: [],
+    assemblyPresets: [],
+    envelope: env
+  });
+
   return {
     project,
     params,
@@ -120,8 +199,11 @@ export async function applyImport(projectUuid, fieldIdsToApply) {
   let applied = 0;
   for (const row of preview.rows) {
     if (!chosen.has(row.dimId) || !row.hasValue) continue;
-    T.StateManager.setValue(row.dimId, String(row.computed), "user-modified");
-    applied++;
+    if (row.dimId === "s11_envelope") applied += writeEnvelope(T.StateManager, row.envelope);
+    else {
+      T.StateManager.setValue(row.dimId, String(row.computed), "user-modified");
+      applied++;
+    }
   }
   if (applied && T.Calculator?.calculateAll) T.Calculator.calculateAll();
   return { applied, project: preview.project };
@@ -158,4 +240,23 @@ function uniquePresets(contributors) {
   const s = new Set();
   for (const c of contributors) for (const p of c.assembly_presets || []) s.add(p);
   return Array.from(s);
+}
+
+// S11 from the confirmed facings: one wall row per facing (gross area; S11
+// nets out what it hosts). Openings are NOT written yet: writing hosts and
+// W × H into S11's opening rows left the engine's areas stale and the key
+// values blank (2026-11-25 witness); the opening path through the graph is
+// the next step (schema/schema.md §0). Returns the count written.
+function writeEnvelope(SM, env) {
+  const set = (id, v) => SM.setValue(id, String(v), "user-modified");
+  let n = 0;
+  WALL_ROWS.forEach((r) => set(`d_${r}`, 0));
+  env.facings.slice(0, WALL_ROWS.length).forEach((f, i) => {
+    const wallRow = WALL_ROWS[i];
+    set(`c_${wallRow}`, "walls");
+    set(`cf_${wallRow}`, f.facing);
+    set(`d_${wallRow}`, f.wall.toFixed(2));
+    n++;
+  });
+  return n;
 }
