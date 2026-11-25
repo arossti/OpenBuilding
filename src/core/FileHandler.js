@@ -1,0 +1,1637 @@
+// File handler module for TEUI Calculator
+// Handles file operations like importing and exporting Excel/CSV files
+//
+// Recent changes:
+// 2025-05-10: Fixed CSV export to remove commas from numeric values (like "132,938.00" -> "132938.00")
+//             to prevent import issues where commas in values were treated as column separators
+
+(function (window) {
+  "use strict";
+
+  // Keys the house CSV carries that have no field on the page: d_21o, the CDD override (2026-11-19)
+  const STORED_KEYS_WITHOUT_FIELD = ["d_21o"];
+
+  // A "CSA F280 Review Format" row (reviewOf) sits indented under its Part 9 house: the same case with the
+  // Target run as an F280 annual model (S21 F280 Mode On, BASESIMP + AIM-2, the house's foundation and AIM-2
+  // facts), the Reference the case's own; written by tools/f280/review_case.py (Andy 2026-11-19)
+  const SAMPLE_PROJECTS = [
+    // Part 9 Residences
+    { id: "03", file: "03-residence-phi-classic.csv", name: "Part 9: Residence: <strong>PHI Classic</strong>", type: "C-Residential", location: "QC, Hemmingford" },
+    { id: "03-f280", file: "03-residence-phi-classic-f280.csv", name: "CSA F280 Review Format", type: "C-Residential", location: "QC, Hemmingford", reviewOf: "03" },
+    { id: "12", file: "12-residence-phi-low-energy.csv", name: "Part 9: Residence: <strong>PHI Low Energy</strong>", type: "C-Residential", location: "ON, Hawkesbury" },
+    { id: "12-f280", file: "12-residence-phi-low-energy-f280.csv", name: "CSA F280 Review Format", type: "C-Residential", location: "ON, Hawkesbury", reviewOf: "12" },
+    { id: "02", file: "02-residence-sb12-net-zero.csv", name: "Part 9: Residence: <strong>SB12 Net-Zero</strong>", type: "C-Residential", location: "ON, Collingwood" },
+    { id: "02-f280", file: "02-residence-sb12-net-zero-f280.csv", name: "CSA F280 Review Format", type: "C-Residential", location: "ON, Collingwood", reviewOf: "02" },
+    { id: "10", file: "10-residence-sb12-duplex.csv", name: "Part 9: Residence: <strong>SB12 Net Zero Duplex</strong>", type: "C-Residential", location: "ON, Mississauga" },
+    { id: "10-f280", file: "10-residence-sb12-duplex-f280.csv", name: "CSA F280 Review Format", type: "C-Residential", location: "ON, Mississauga", reviewOf: "10" },
+    // Part 3 MURBs (C-Occupancy)
+    { id: "04", file: "04-apartment-necb-small.csv", name: "Part 3: <strong>MURB</strong> (C-Occupancy): <strong>NECB PHIUS</strong> Small", type: "C-Residential", location: "ON, Hamilton" },
+    { id: "06", file: "06-apartment-necb-mid-rise.csv", name: "Part 3: <strong>MURB</strong>: (C-Occupancy) <strong>NECB PHIUS</strong> Mid-Rise", type: "C-Residential", location: "ON, Woodstock" },
+    { id: "05", file: "05-apartment-necb-large.csv", name: "Part 3: <strong>MURB</strong>: (C-Occupancy) <strong>NECB PHIUS</strong> Large", type: "C-Residential", location: "ON, Hamilton" },
+    { id: "07", file: "07-murb-necb-low-rise.csv", name: "Part 3: <strong>MURB</strong>: (C-Occupancy) <strong>NECB PHIUS</strong> Low-Rise", type: "C-Residential", location: "ON, Simcoe" },
+    { id: "08", file: "08-murb-necb-mid-rise.csv", name: "Part 3: <strong>MURB</strong>: (C-Occupancy) <strong>NECB PHIUS</strong> Mid-Rise", type: "C-Residential", location: "ON, London" },
+    // Part 3 Assembly (A2-Occupancy)
+    { id: "09", file: "09-assembly-necb-recreation.csv", name: "Part 3: <strong>Athletic Centre</strong>: (A2-Occupancy) <strong>NECB Net-Zero</strong>", type: "A-Assembly", location: "ON, St. Catharines" },
+    { id: "01", file: "01-assembly-obc-sb10.csv", name: "Part 3: <strong>Event Centre</strong>: (A2-Occupancy) <strong>OBC SB10 Zero-Emission</strong>", type: "A-Assembly", location: "ON, Alexandria" },
+    { id: "11", file: "11-assembly-community-centre.csv", name: "Part 3: <strong>Community Centre</strong>: (A2 Occupancy) <strong>OBC SB10</strong>", type: "A-Assembly", location: "ON, Milton" },
+  ];
+
+  // Define FileHandler class
+  class FileHandler {
+    constructor() {
+      // Ensure references to other modules are robust
+      this.stateManager = window.TEUI?.StateManager;
+      this.fieldManager = window.TEUI?.FieldManager;
+      this.calculator = window.TEUI?.Calculator;
+      this.excelMapper = window.TEUI?.ExcelMapper;
+      this.excelLocationHandler = window.TEUI?.ExcelLocationHandler; // Keep reference if needed
+      this.workbook = null; // Store the last loaded workbook if needed
+
+      this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+      // --- Import/Export Button Wiring ---
+      const importBtn = document.getElementById("import-data-btn"); // Assuming new ID for import menu item
+      const exportBtn = document.getElementById("export-data-btn"); // Assuming new ID for export menu item
+      const fileInput = document.getElementById("excel-file-input"); // Keep existing hidden input
+
+      if (importBtn && fileInput) {
+        importBtn.addEventListener("click", () => {
+          fileInput.value = null; // Reset file input
+          fileInput.click();
+        });
+        fileInput.addEventListener("change", event => {
+          this.handleFileSelect(event);
+        });
+      }
+
+      if (exportBtn) {
+        exportBtn.addEventListener("click", event => {
+          event.preventDefault();
+          this.exportToCSV();
+        });
+      }
+
+      // Remove or repurpose old button listeners if they are redundant
+      const oldImportButton = document.getElementById("import-excel");
+      if (oldImportButton) oldImportButton.style.display = "none"; // Hide old button
+      const oldExportButton = document.getElementById("export-excel");
+      if (oldExportButton) oldExportButton.style.display = "none"; // Hide old button
+
+      // Populate sample project modal list
+      const sampleList = document.getElementById("sample-project-list");
+      if (sampleList) {
+        SAMPLE_PROJECTS.forEach(project => {
+          const link = document.createElement("a");
+          link.href = "#";
+          link.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+          if (project.reviewOf) link.classList.add("ps-5", "py-1", "small");
+          link.innerHTML =
+            `<span>${project.reviewOf ? "&#8627; " : ""}${project.name}</span>` +
+            `<small class="text-muted">${project.location}</small>`;
+          link.addEventListener("click", e => {
+            e.preventDefault();
+            this.loadSampleProject(project);
+          });
+          sampleList.appendChild(link);
+        });
+      }
+    }
+
+    // --- IMPORT LOGIC ---
+
+    handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) {
+        console.warn("No file selected");
+        return;
+      }
+
+      this.showStatus(`Reading file: ${file.name}...`, "info");
+      const reader = new FileReader();
+
+      reader.onload = e => {
+        try {
+          const fileExtension = file.name.split(".").pop().toLowerCase();
+
+          if (fileExtension === "csv") {
+            console.log("Detected CSV file.");
+            const csvString = new TextDecoder("utf-8").decode(
+              new Uint8Array(e.target.result)
+            );
+            this.processImportedCSV(csvString);
+          } else if (fileExtension === "xlsx" || fileExtension === "xls") {
+            console.log("Detected Excel file.");
+            const data = new Uint8Array(e.target.result);
+            this.workbook = XLSX.read(data, { type: "array" });
+            this.processImportedExcel(this.workbook);
+          } else {
+            throw new Error(`Unsupported file type: .${fileExtension}`);
+          }
+        } catch (error) {
+          console.error("Error processing file:", error);
+          this.showStatus(`Error processing file: ${error.message}`, "error");
+        }
+      };
+
+      reader.onerror = () => {
+        console.error("Error reading file");
+        this.showStatus("Error reading file", "error");
+      };
+
+      if (file.name.toLowerCase().endsWith(".csv")) {
+        reader.readAsArrayBuffer(file); // Read as buffer for TextDecoder
+      } else {
+        reader.readAsArrayBuffer(file); // readAsArrayBuffer works for XLSX too
+      }
+
+      event.target.value = null; // Reset file input
+    }
+
+    processImportedExcel(workbook) {
+      if (!this.excelMapper) {
+        this.showStatus("Excel Mapper module is not available.", "error");
+        return;
+      }
+
+      // Import TARGET data from REPORT sheet
+      this.showStatus("Mapping data from Excel REPORT sheet...", "info");
+      const importedData = this.excelMapper.mapExcelToReportModel(workbook);
+
+      // 🔍 DEBUG: Log ALL imported data and specifically check for location fields
+      console.log("[FileHandler] 🔍 REPORT sheet imported data:", importedData);
+      console.log(
+        "[FileHandler] 🔍 d_19 in importedData?",
+        "d_19" in importedData,
+        "Value:",
+        importedData.d_19
+      );
+      console.log(
+        "[FileHandler] 🔍 h_19 in importedData?",
+        "h_19" in importedData,
+        "Value:",
+        importedData.h_19
+      );
+
+      if (importedData.d_19 || importedData.h_19) {
+        console.log(
+          `[FileHandler] 🎯 TARGET Location from REPORT sheet: Province="${importedData.d_19}", City="${importedData.h_19}"`
+        );
+      } else {
+        console.warn(
+          "[FileHandler] ⚠️ NO location data (d_19/h_19) found in REPORT sheet import!"
+        );
+      }
+
+      if (importedData === null) {
+        // mapExcelToReportModel returns null on sheet error
+        this.showStatus(
+          "Error: REPORT sheet not found in Excel file.",
+          "error"
+        );
+        return;
+      }
+
+      if (Object.keys(importedData).length === 0) {
+        this.showStatus("No mappable data found on REPORT sheet.", "warning");
+        return;
+      }
+
+      // 🔒 START IMPORT QUARANTINE - Mute listeners to prevent premature calculations
+      console.log(
+        "[FileHandler] 🔒 IMPORT QUARANTINE START - Muting listeners"
+      );
+      window.TEUI.StateManager.muteListeners();
+
+      // Clear Parallel Coordinates Capital Budget data (new building = new costs)
+      console.log(
+        "[FileHandler] Clearing Parallel Coordinates Capital Budget data..."
+      );
+      const pcAxes = [
+        "shw_efficiency",
+        "dwhr_efficiency",
+        "net_gains",
+        "thermal_bridge",
+        "ach50",
+        "aggregate_ground_uvalue",
+        "aggregate_air_uvalue",
+        "window_wall_ratio",
+        "heating_efficiency",
+        "mvhr_efficiency",
+        "tedi",
+        "teli",
+        "ghgi",
+        "teui",
+      ];
+      pcAxes.forEach(axisId => {
+        localStorage.setItem(`pc_capital_budget_${axisId}`, "0");
+      });
+      console.log(
+        "[FileHandler] Capital budgets set to $0.00 for imported building."
+      );
+
+      try {
+        // Import Target values (REPORT sheet)
+        this.updateStateFromImportData(importedData, 0, false);
+        console.log(
+          `[FileHandler] Imported ${Object.keys(importedData).length} Target values`
+        );
+
+        // Import REFERENCE data from REFERENCE sheet (optional)
+        console.log(
+          "[FileHandler DEBUG] About to call processImportedExcelReference"
+        );
+        this.processImportedExcelReference(workbook);
+        console.log(
+          "[FileHandler DEBUG] Returned from processImportedExcelReference"
+        );
+
+        this.syncPostImportUI();
+      } finally {
+        // 🔓 END IMPORT QUARANTINE - Always unmute, even if import fails
+        window.TEUI.StateManager.unmuteListeners();
+        console.log(
+          "[FileHandler] 🔓 IMPORT QUARANTINE END - Unmuting listeners"
+        );
+      }
+
+      // Trigger clean recalculation with all imported values loaded
+      console.log(
+        "[FileHandler] Triggering post-import calculation with fresh values..."
+      );
+      if (
+        this.calculator &&
+        typeof this.calculator.calculateAll === "function"
+      ) {
+        this.calculator.calculateAll();
+        // calculateAll() handles the complete pipeline:
+        // graph compute → syncToSM → DOMBridge.stampAll → postStamp
+        // No legacy section refreshUI/updateCalculatedDisplayValues needed.
+      }
+    }
+
+    processImportedExcelReference(workbook) {
+      console.log(
+        "[FileHandler DEBUG] processImportedExcelReference called, excelMapper exists:",
+        !!this.excelMapper
+      );
+
+      if (!this.excelMapper) {
+        console.warn("Excel Mapper module not available for reference import");
+        return;
+      }
+
+      console.log("[FileHandler DEBUG] Calling mapExcelToReferenceModel...");
+      this.showStatus("Mapping reference data from REFERENCE sheet...", "info");
+      const referenceData = this.excelMapper.mapExcelToReferenceModel(workbook);
+      console.log(
+        "[FileHandler DEBUG] mapExcelToReferenceModel returned, keys:",
+        Object.keys(referenceData).length
+      );
+
+      if (Object.keys(referenceData).length === 0) {
+        console.log(
+          "No REFERENCE sheet found or no mappable reference data - this is optional"
+        );
+        return;
+      }
+
+      console.log(
+        "[FileHandler DEBUG] About to call updateStateFromImportData for",
+        Object.keys(referenceData).length,
+        "reference fields"
+      );
+      console.log(
+        "[FileHandler DEBUG] First 5 reference fields:",
+        Object.keys(referenceData).slice(0, 5)
+      );
+
+      // Import reference data without triggering full recalculation
+      // (main recalculation happens after target data import)
+      this.updateStateFromImportData(referenceData, 0, true);
+
+      console.log(
+        "[FileHandler DEBUG] Returned from updateStateFromImportData"
+      );
+      this.showStatus(
+        `Reference import complete. ${Object.keys(referenceData).length} reference fields imported.`,
+        "success"
+      );
+    }
+
+    processImportedCSV(csvString, { replaceNotes = false } = {}) {
+      this.showStatus("Parsing standardized CSV data...", "info");
+      const importedData = {};
+      let message = "";
+
+      try {
+        const rows = csvString.split(/\r?\n/).filter(row => row.trim() !== ""); // Split lines and remove empty ones
+
+        // Support legacy (2 rows) and dual-state (3 rows) formats
+        // Headers support both legacy "fieldId" and new "fieldId: Label" formats
+        if (rows.length < 2) {
+          throw new Error(
+            `Expected at least 2 rows, but found ${rows.length}.`
+          );
+        }
+
+        const headerRow = rows[0];
+        const targetValueRow = rows[1]; // Target/Application values
+        const referenceValueRow = rows.length >= 3 ? rows[2] : null; // Reference values (if present)
+
+        // Basic parsing for CSV row, handles quoted fields from our escapeCSV output
+        const parseCSVRow = rowString => {
+          const values = [];
+          let currentVal = "";
+          let inQuotes = false;
+          for (let i = 0; i < rowString.length; i++) {
+            const char = rowString[i];
+            if (char === '"') {
+              if (
+                inQuotes &&
+                i + 1 < rowString.length &&
+                rowString[i + 1] === '"'
+              ) {
+                currentVal += '"'; // Escaped quote
+                i++; // Skip next quote
+              } else {
+                inQuotes = !inQuotes;
+              }
+            } else if (char === "," && !inQuotes) {
+              values.push(currentVal.trim());
+              currentVal = "";
+            } else {
+              currentVal += char;
+            }
+          }
+          values.push(currentVal.trim()); // Add the last value
+          return values;
+        };
+
+        // Parse header row and extract field IDs/paths
+        // Headers may be in format:
+        //   - "semanticPath: Label" (new semantic format, e.g., "building.conditionedFloorArea: Floor Area")
+        //   - "fieldId: Label" (legacy format with labels, e.g., "d_12: Building Name")
+        //   - "fieldId" or "semanticPath" (minimal format without labels)
+        const rawHeaders = parseCSVRow(headerRow).map(header => {
+          // Split on first colon and take the ID/path part
+          const colonIndex = header.indexOf(":");
+          return colonIndex !== -1
+            ? header.substring(0, colonIndex).trim()
+            : header.trim();
+        });
+
+        // Detect format: semantic paths contain ".", legacy IDs contain "_"
+        const firstHeader = rawHeaders[0] || "";
+        const isSemanticFormat = firstHeader.includes(".");
+        const FieldRegistry = window.TEUI?.FieldRegistry;
+
+        // Convert headers to legacy field IDs for StateManager compatibility
+        // If semantic format, translate to legacy IDs
+        // If legacy format, use as-is
+        const fieldIds = rawHeaders.map(header => {
+          if (isSemanticFormat && FieldRegistry) {
+            // Semantic path → legacy ID
+            const legacyId = FieldRegistry.toLegacy(header);
+            if (legacyId) {
+              return legacyId;
+            }
+            // If no mapping found, warn and use original (might be already legacy)
+            if (header.includes("_")) {
+              return header; // Already looks like legacy ID
+            }
+            console.warn(`[FileHandler] No legacy ID found for semantic path: ${header}`);
+            return header;
+          }
+          return header; // Legacy format, use as-is
+        });
+
+        if (isSemanticFormat) {
+          console.log(`[FileHandler] Detected SEMANTIC format CSV (${rawHeaders.length} fields), translating to legacy IDs`);
+        } else {
+          console.log(`[FileHandler] Detected LEGACY format CSV (${rawHeaders.length} fields)`);
+        }
+        const targetValues = parseCSVRow(targetValueRow);
+        const referenceValues = referenceValueRow
+          ? parseCSVRow(referenceValueRow)
+          : null;
+
+        if (fieldIds.length !== targetValues.length) {
+          throw new Error(
+            `Header count (${fieldIds.length}) does not match target value count (${targetValues.length}). CSV may be malformed.`
+          );
+        }
+
+        if (referenceValues && fieldIds.length !== referenceValues.length) {
+          throw new Error(
+            `Header count (${fieldIds.length}) does not match reference value count (${referenceValues.length}). CSV may be malformed.`
+          );
+        }
+
+        // Import target values (unprefixed field IDs)
+        for (let i = 0; i < fieldIds.length; i++) {
+          const fieldId = fieldIds[i];
+          const value = targetValues[i];
+          if (fieldId && value !== undefined) {
+            importedData[fieldId] = value;
+          }
+        }
+
+        // Import reference values (with ref_ prefix)
+        if (referenceValues) {
+          for (let i = 0; i < fieldIds.length; i++) {
+            const fieldId = fieldIds[i];
+            const refValue = referenceValues[i];
+            if (fieldId && refValue !== undefined) {
+              importedData[`ref_${fieldId}`] = refValue;
+            }
+          }
+        }
+
+        // Project notes (the last column) belong to Section 20, not the
+        // StateManager. Every cell under a header is kept above, an empty
+        // one as "", so the key is there exactly when the file has the column.
+        const fileHasNotes = "s18_notes" in importedData;
+        const notes = importedData.s18_notes ?? "";
+        delete importedData.s18_notes;
+        delete importedData.ref_s18_notes;
+
+        if (Object.keys(importedData).length === 0) {
+          this.showStatus(
+            "No valid data found in standardized CSV.",
+            "warning"
+          );
+          return;
+        }
+
+        // A file with the column replaces the notes, an empty cell clearing
+        // them as a new building clears the Capital Budget below. A file
+        // without it was saved before notes travelled in the CSV and could
+        // not carry them: the notes on screen stay, unless the caller says
+        // the file is the whole project (a bundled sample). Below the check
+        // above, so a file that imports nothing changes nothing.
+        if (fileHasNotes || replaceNotes) {
+          window.TEUI.SectionModules.sect20?.setNotes(notes);
+        }
+
+        const targetCount = fieldIds.length;
+        const refCount = referenceValues ? fieldIds.length : 0;
+        message = `Dual-state CSV parsed successfully. ${targetCount} target and ${refCount} reference fields found.`;
+        this.showStatus(message, "info");
+
+        // 🔒 START IMPORT QUARANTINE - Mute listeners to prevent premature calculations
+        console.log(
+          "[FileHandler] 🔒 CSV IMPORT QUARANTINE START - Muting listeners"
+        );
+        window.TEUI.StateManager.muteListeners();
+
+        // Clear Parallel Coordinates Capital Budget data (new building = new costs)
+        console.log(
+          "[FileHandler] Clearing Parallel Coordinates Capital Budget data..."
+        );
+        const pcAxes = [
+          "shw_efficiency",
+          "dwhr_efficiency",
+          "net_gains",
+          "thermal_bridge",
+          "ach50",
+          "aggregate_ground_uvalue",
+          "aggregate_air_uvalue",
+          "window_wall_ratio",
+          "heating_efficiency",
+          "mvhr_efficiency",
+          "tedi",
+          "teli",
+          "ghgi",
+          "teui",
+        ];
+        pcAxes.forEach(axisId => {
+          localStorage.setItem(`pc_capital_budget_${axisId}`, "0");
+        });
+        console.log(
+          "[FileHandler] Capital budgets set to $0.00 for imported building."
+        );
+
+        try {
+          // Reset graph state so stale inputs don't survive the import.
+          // CSV only overwrites fields it contains; without this, graph
+          // inputs from a previous load or initialization persist.
+          const CI = window.TEUI.ComputationIntegration;
+          if (CI?.resetGraphState) {
+            CI.resetGraphState();
+          }
+
+          // Import all data (target + reference)
+          this.updateStateFromImportData(importedData, 0, false);
+          console.log(
+            `[FileHandler] Imported ${targetCount} target + ${refCount} reference values`
+          );
+
+          this.syncPostImportUI();
+        } finally {
+          // 🔓 END IMPORT QUARANTINE - Always unmute, even if import fails
+          window.TEUI.StateManager.unmuteListeners();
+          console.log(
+            "[FileHandler] 🔓 CSV IMPORT QUARANTINE END - Unmuting listeners"
+          );
+        }
+
+        // Trigger clean recalculation with all imported values loaded
+        console.log(
+          "[FileHandler] Triggering post-import calculation with fresh values..."
+        );
+        if (
+          this.calculator &&
+          typeof this.calculator.calculateAll === "function"
+        ) {
+          this.calculator.calculateAll();
+          // calculateAll() handles the complete pipeline:
+          // graph compute → syncToSM → DOMBridge.stampAll → postStamp
+          // No legacy section refreshUI/updateCalculatedDisplayValues needed.
+
+          // Validate SM→graph alignment AFTER calculateAll (which runs
+          // populateReferenceModel) so the reference model is fully populated
+          const CI = window.TEUI.ComputationIntegration;
+          if (CI?.validateGraphInputs) {
+            console.log("[FileHandler] Validating SM→Graph input alignment after calculation...");
+            CI.validateGraphInputs();
+          }
+        }
+
+        this.showStatus(
+          `Import successful. ${targetCount} target and ${refCount} reference fields imported. All calculations updated.`,
+          "success"
+        );
+      } catch (error) {
+        console.error("Error parsing standardized CSV:", error);
+        this.showStatus(
+          `Error parsing standardized CSV: ${error.message}`,
+          "error"
+        );
+      }
+    }
+
+    updateStateFromImportData(
+      importedData,
+      csvSkippedCount = 0,
+      skipRecalculation = false
+    ) {
+      console.log(
+        "[FileHandler DEBUG] updateStateFromImportData CALLED with",
+        Object.keys(importedData).length,
+        "fields, skipRecalculation=",
+        skipRecalculation
+      );
+      console.log(
+        "[FileHandler DEBUG] stateManager exists:",
+        !!this.stateManager,
+        "fieldManager exists:",
+        !!this.fieldManager
+      );
+
+      if (!this.stateManager || !this.fieldManager) {
+        console.error(
+          "[FileHandler ERROR] StateManager or FieldManager not available! stateManager:",
+          !!this.stateManager,
+          "fieldManager:",
+          !!this.fieldManager
+        );
+        this.showStatus("StateManager or FieldManager not available.", "error");
+        return;
+      }
+
+      console.log(
+        "[FileHandler DEBUG] Passed validation checks, starting TWO-PASS import..."
+      );
+      this.showStatus("Updating application state...", "info");
+      let updatedCount = 0;
+      let skippedValidationCount = 0;
+
+      // 🔒 TWO-PASS IMPORT: Ensure control fields imported before dependent fields
+      // Pass 1: Import control fields (d_113, ref_d_113, f_113, ref_f_113, d_116, ref_d_116)
+      // Pass 2: Import all other fields (including j_116, ref_j_116) with conditional logic
+      const controlFields = [
+        "d_113",
+        "ref_d_113",
+        "f_113",
+        "ref_f_113",
+        "d_116",
+        "ref_d_116",
+      ];
+
+      // The cooling choice read as the app now names it (Andy 2026-11-18,
+      // window.TEUI.CoolingSystem): an old file's "Cooling" is the heat pump
+      // cooling on a heat pump, a separate unit otherwise - before PASS 1, whose
+      // dropdown check would reject the old name.
+      const CS = window.TEUI.CoolingSystem;
+      if (CS) {
+        for (const prefix of ["", "ref_"]) {
+          const key = `${prefix}d_116`;
+          if (importedData[key] === undefined || importedData[key] === "")
+            continue;
+          const heating =
+            importedData[`${prefix}d_113`] ??
+            this.stateManager.getValue(`${prefix}d_113`);
+          importedData[key] = CS.normalize(importedData[key], heating);
+        }
+      }
+
+      // S21 F280 Mode (Andy 2026-11-19, per model): a project file without the column takes Off, unless that
+      // model chose an F280 method in the selectors F280 Mode replaced (S03 G.4.3 BASESIMP, S12 B.19.1
+      // AIM-2, 2026-11-19 only; their columns are read here and nowhere else) - it opens On. Here, not in
+      // processImportedCSV, so an Excel workbook (no column) sets it too (Mark, #134), and keyed on d_12 as
+      // the added fields below: a notes-only file (Mark's #127 witness) or a standard's values change nothing
+      for (const p of ["", "ref_"]) {
+        if (importedData[`${p}d_12`] === undefined || `${p}f280_mode` in importedData) continue;
+        const f280 = importedData[`${p}h_25`] === "BASESIMP" || importedData[`${p}d_111`] === "AIM2";
+        importedData[`${p}f280_mode`] = f280 ? "On" : "Off";
+      }
+
+      // Fields added 2026-11-18 that older files lack: the field's own default,
+      // in either model, never the previous project's value. e_12, the 62.1
+      // space type ("" - VentilationRates resolves the occupancy's); l_63 and
+      // m_63, the bedrooms ("" - from the occupants) and dwelling units; g_59,
+      // the latent load's indoor state; e_118, HRV or ERV; l_122, the ERV's
+      // latent recovery; i_122, the latent method. A project file is known by
+      // d_12, its occupancy, which no standard's values carry
+      // (applyReferenceValuesFromStandard comes through here too).
+      const addedDefaults = {
+        e_12: "",
+        l_63: "",
+        m_63: "1",
+        g_59: "F280",
+        e_118: "HRV",
+        l_122: "0",
+        i_122: "F280",
+        // Wombat's own settings (S19 19.1 / 19.RT / 19.W): a file without them takes Wombat's defaults,
+        // never the previous project's - the aspect sets the footprint perimeter BASESIMP takes when
+        // G.4.6 is blank, so a case's F280 figures hung on what was loaded before it (2026-11-20)
+        d_154: "-2.0",
+        d_159: "biplanar",
+        d_160: "show",
+        // The F280 inputs (added 2026-11-19), at their field defaults: a file without them never keeps the
+        // previous house's foundation, perimeter, AIM-2 site and ELA or ATRE, which F280 Mode On would use
+        // and the next export would carry (Mark, #134). S03 G.4.4-G.4.8 (l_25 d_26 h_26 l_26 d_26b), S12
+        // B.19.2-B.19.12 (g_111 ... g_112e), S13 ATRE (l_123).
+        ...Object.fromEntries(
+          ["l_25", "d_26", "h_26", "l_26", "d_26b", "g_111", "d_112", "g_112", "d_112b", "g_112b",
+            "d_112c", "g_112c", "d_112d", "g_112d", "d_112e", "g_112e", "l_123"].map(id => [
+            id,
+            String(this.fieldManager.getField(id)?.defaultValue ?? ""),
+          ])
+        ),
+        // The envelope rows' fields (added 2026-11-20, Openings.addedFields), every one at its own
+        // default: a file without them has no extra rows (area 0), its opaque rows their old types (B.5
+        // facing Average), no L or H - and a row + shows later starts clean, never the previous project's
+        ...Object.fromEntries(
+          window.TEUI.Openings.addedFields().map(id => [
+            id,
+            String(this.fieldManager.getField(id)?.defaultValue ?? ""),
+          ])
+        ),
+      };
+      // The display follows in the model on screen, as an imported value's
+      // does below: stampAll leaves a dropdown and a "" as they were.
+      const onScreen = window.TEUI.ReferenceToggle?.isReferenceMode?.()
+        ? "ref_"
+        : "";
+      for (const prefix of ["", "ref_"]) {
+        if (importedData[`${prefix}d_12`] === undefined) continue;
+        for (const [added, value] of Object.entries(addedDefaults)) {
+          if (importedData[`${prefix}${added}`] !== undefined) continue;
+          this.stateManager.setValue(`${prefix}${added}`, value, "imported");
+          if (prefix === onScreen) {
+            this.fieldManager.updateFieldDisplay(
+              added,
+              value,
+              this.fieldManager.getField(added)
+            );
+          }
+        }
+      }
+
+      // A project file: the opening rows shown are its own (those with an area), not those + showed
+      // before. "Set Values" (no d_12) leaves the rows as they are.
+      if (importedData.d_12 !== undefined) window.TEUI.Openings.resetShown();
+
+      const allEntries = Object.entries(importedData);
+
+      // PASS 1: Control fields
+      console.log("[FileHandler] 🔒 PASS 1: Importing control fields...");
+      allEntries
+        .filter(([fieldId]) => controlFields.includes(fieldId))
+        .forEach(([fieldId, value]) => {
+          // ✅ CRITICAL: Reference fields (ref_*) don't need FieldManager definitions
+          // They share Target DOM elements and are handled by section-level dual-state architecture
+          const isReferenceField = fieldId.startsWith("ref_");
+          const baseFieldId = isReferenceField ? fieldId.substring(4) : fieldId;
+          const fieldDef = this.fieldManager.getField(baseFieldId);
+
+          if (!fieldDef && !isReferenceField) {
+            console.warn(
+              `[P1] Skipping import for unknown fieldId: ${fieldId}`
+            );
+            skippedValidationCount++;
+            return; // Use return to continue to next iteration of forEach
+          }
+
+          let parsedValue = value;
+          let isValid = true;
+
+          try {
+            // PASS 1: Import control fields unconditionally (no j_116 checks - that's Pass 2)
+            // ✅ Reference fields: Store directly in StateManager without validation
+            // Validation was already done by ExcelMapper normalization
+            if (isReferenceField) {
+              this.stateManager.setValue(fieldId, parsedValue, "imported");
+              updatedCount++;
+              return; // Done with this reference field
+            }
+
+            // Target fields: Validate and update DOM
+            // ✅ CRITICAL: Skip validation for S03 location fields (d_19, h_19)
+            // These are S03 dropdown fields, not FieldManager-rendered fields
+            const isS03LocationField = ["d_19", "h_19"].includes(fieldId);
+
+            if (
+              fieldDef.type === "editable" ||
+              fieldDef.type === "year_slider" ||
+              fieldDef.type === "percentage" ||
+              fieldDef.type === "coefficient"
+            ) {
+              const numericValue = window.TEUI.parseNumeric(value, NaN);
+              if (!isNaN(numericValue)) {
+                parsedValue = numericValue.toString();
+              } else if (fieldDef.type !== "editable") {
+                isValid = false;
+              }
+            } else if (fieldDef.type === "dropdown" && !isS03LocationField) {
+              const options = this.fieldManager.getDropdownOptions(
+                fieldDef.dropdownId,
+                { parentValue: null }
+              );
+              const validValues = options.map(opt =>
+                typeof opt === "object" ? String(opt.value) : String(opt)
+              );
+              if (!validValues.includes(String(value))) {
+                isValid = false;
+              }
+            }
+
+            if (isValid) {
+              this.stateManager.setValue(fieldId, parsedValue, "imported");
+              updatedCount++;
+              if (
+                window.TEUI &&
+                window.TEUI.FieldManager &&
+                typeof window.TEUI.FieldManager.updateFieldDisplay ===
+                  "function"
+              ) {
+                try {
+                  window.TEUI.FieldManager.updateFieldDisplay(
+                    fieldId,
+                    parsedValue,
+                    fieldDef
+                  );
+                } catch (e) {
+                  console.error(
+                    `[FileHandler] Error calling FieldManager.updateFieldDisplay for ${fieldId}:`,
+                    e
+                  );
+                }
+              } else {
+                console.warn(
+                  `[FileHandler] TEUI.FieldManager.updateFieldDisplay is not available. UI for ${fieldId} may not update visually.`
+                );
+              }
+            } else {
+              console.warn(
+                `Skipping import for field ${fieldId}: Invalid value "${value}" for type ${fieldDef.type}.`
+              );
+              skippedValidationCount++;
+            }
+          } catch (error) {
+            console.error(
+              `Error processing field ${fieldId} with value "${value}":`,
+              error
+            );
+            skippedValidationCount++;
+            isValid = false; // Ensure isValid is false on error
+          }
+        });
+
+      // PASS 2: All other fields (excluding control fields already imported in Pass 1)
+      console.log(
+        "[FileHandler] 🔓 PASS 2: Importing remaining fields with conditional logic..."
+      );
+      allEntries
+        .filter(([fieldId]) => !controlFields.includes(fieldId))
+        .forEach(([fieldId, value]) => {
+          // ✅ CRITICAL: Reference fields (ref_*) don't need FieldManager definitions
+          // They share Target DOM elements and are handled by section-level dual-state architecture
+          const isReferenceField = fieldId.startsWith("ref_");
+          const baseFieldId = isReferenceField ? fieldId.substring(4) : fieldId;
+          const fieldDef = this.fieldManager.getField(baseFieldId);
+
+          // Stored keys with no field on the page (2026-11-19): d_21o, the CDD override (S03 d_21 shows the
+          // computed CDD; ComputationIntegration routes a typed CDD here)
+          if (!fieldDef && !isReferenceField && STORED_KEYS_WITHOUT_FIELD.includes(fieldId)) {
+            this.stateManager.setValue(fieldId, value, "imported");
+            updatedCount++;
+            return;
+          }
+          if (!fieldDef && !isReferenceField) {
+            console.warn(`Skipping import for unknown fieldId: ${fieldId}`);
+            skippedValidationCount++;
+            return; // Use return to continue to next iteration of forEach
+          }
+
+          let parsedValue = value;
+          let isValid = true;
+
+          try {
+            // ✅ Reference fields: Store directly in StateManager without validation
+            // Validation was already done by ExcelMapper normalization
+            if (isReferenceField) {
+              // ref_j_116 imports whatever the cooling: while the Reference's heat pump cools it is the
+              // Reference's COPc (Andy 2026-11-19, a default, not a lock)
+
+              this.stateManager.setValue(fieldId, parsedValue, "imported");
+              updatedCount++;
+              return; // Done with this reference field
+            }
+
+            // 🔒 CONDITIONAL IMPORT: Same check for Target mode j_116
+            if (fieldId === "j_116" && this.heatpumpCools("")) {
+              console.log(
+                "[FileHandler] ⏭️  Skipping j_116 import (the heat pump cools)"
+              );
+              return;
+            }
+
+            // Target fields: Validate and update DOM
+            // ✅ CRITICAL: Skip validation for S03 location fields (d_19, h_19)
+            // These are S03 dropdown fields, not FieldManager-rendered fields
+            const isS03LocationField = ["d_19", "h_19"].includes(fieldId);
+
+            if (
+              fieldDef.type === "editable" ||
+              fieldDef.type === "year_slider" ||
+              fieldDef.type === "percentage" ||
+              fieldDef.type === "coefficient"
+            ) {
+              const numericValue = window.TEUI.parseNumeric(value, NaN);
+              if (!isNaN(numericValue)) {
+                parsedValue = numericValue.toString();
+              } else if (fieldDef.type !== "editable") {
+                isValid = false;
+              }
+            } else if (fieldDef.type === "dropdown" && !isS03LocationField) {
+              const options = this.fieldManager.getDropdownOptions(
+                fieldDef.dropdownId,
+                { parentValue: null }
+              );
+              const validValues = options.map(opt =>
+                typeof opt === "object" ? String(opt.value) : String(opt)
+              );
+              if (!validValues.includes(String(value))) {
+                isValid = false;
+              }
+            }
+
+            if (isValid) {
+              this.stateManager.setValue(fieldId, parsedValue, "imported");
+              updatedCount++;
+              if (
+                window.TEUI &&
+                window.TEUI.FieldManager &&
+                typeof window.TEUI.FieldManager.updateFieldDisplay ===
+                  "function"
+              ) {
+                try {
+                  window.TEUI.FieldManager.updateFieldDisplay(
+                    fieldId,
+                    parsedValue,
+                    fieldDef
+                  );
+                } catch (e) {
+                  console.error(
+                    `[FileHandler] Error calling FieldManager.updateFieldDisplay for ${fieldId}:`,
+                    e
+                  );
+                }
+              } else {
+                console.warn(
+                  `[FileHandler] TEUI.FieldManager.updateFieldDisplay is not available. UI for ${fieldId} may not update visually.`
+                );
+              }
+            } else {
+              console.warn(
+                `Skipping import for field ${fieldId}: Invalid value "${value}" for type ${fieldDef.type}.`
+              );
+              skippedValidationCount++;
+            }
+          } catch (error) {
+            console.error(
+              `Error processing field ${fieldId} with value "${value}":`,
+              error
+            );
+            skippedValidationCount++;
+            isValid = false; // Ensure isValid is false on error
+          }
+        });
+
+      console.log(
+        `[FileHandler] ✅ TWO-PASS IMPORT COMPLETE: ${updatedCount} fields imported`
+      );
+
+      // Skip recalculation and reference data loading when importing reference fields
+      if (skipRecalculation) {
+        console.log(
+          `[FileHandler] Reference data import complete. ${updatedCount} fields updated. Skipping recalculation.`
+        );
+        return;
+      }
+
+      // AFTER all imported values have been set into StateManager.fields:
+      if (
+        this.stateManager &&
+        typeof this.stateManager.loadReferenceData === "function" &&
+        typeof this.stateManager.getApplicationValue === "function"
+      ) {
+        const finalD13 = this.stateManager.getApplicationValue("d_13");
+        if (finalD13) {
+          console.log(
+            `[FileHandler] All imported values set. Explicitly calling loadReferenceData for standard: ${finalD13}`
+          );
+          this.stateManager.loadReferenceData(finalD13);
+          console.log(`[FileHandler] loadReferenceData finished after import.`);
+        } else {
+          console.warn(
+            "[FileHandler] d_13 not found in imported data or state after import; cannot explicitly load reference data."
+          );
+        }
+      }
+
+
+      console.log(
+        `[FileHandler] Target import complete. ${updatedCount} fields updated. ${csvSkippedCount + skippedValidationCount} rows/fields skipped.`
+      );
+    }
+
+    /**
+     * True while the model's heat pump cools ("Heatpump Heats & Cools", or an
+     * old "Cooling" on a heat pump): M.3.3 is then M.1.3's to show, and a file
+     * neither reads nor writes it. prefix: "" Target, "ref_" Reference.
+     */
+    heatpumpCools(prefix) {
+      const cooling = this.stateManager.getValue(`${prefix}d_116`);
+      const heating = this.stateManager.getValue(`${prefix}d_113`);
+      const CS = window.TEUI.CoolingSystem;
+      if (!CS) return heating === "Heatpump" && cooling !== "No Cooling";
+      return CS.normalize(cooling, heating) === CS.HEATPUMP;
+    }
+
+    /**
+     * Post-import UI fixups: repopulate dropdowns and update field lock states.
+     * Calculator.calculateAll() after import handles: graph compute → syncToSM → stampAll.
+     */
+    syncPostImportUI() {
+      // Sync S03 province/city dropdowns after import
+      // Import sets d_19/h_19 in StateManager but doesn't repopulate city dropdown options
+      const sect03 = window.TEUI?.SectionModules?.sect03;
+      if (sect03?.syncLocationDropdowns) {
+        sect03.syncLocationDropdowns();
+      }
+
+      // S02's 62.1 space type follows the imported occupancy
+      const sect02 = window.TEUI?.SectionModules?.sect02;
+      if (sect02?.syncSpaceTypeDropdown) {
+        sect02.syncSpaceTypeDropdown();
+      }
+
+      // Update field lock states after import — import sets d_113/d_51 via
+      // StateManager.setValue() which bypasses UI event handlers, so we must
+      // explicitly call ghosting/visibility functions.
+
+      // Update S07 field locks based on imported d_51 (SHW system)
+      const sect07 = window.TEUI?.SectionModules?.sect07;
+      if (sect07?.updateSection7Visibility) {
+        const d_51 = this.stateManager.getValue("d_51");
+        const d_49 = this.stateManager.getValue("d_49") || "User Defined";
+        if (d_51) {
+          sect07.updateSection7Visibility(d_49, d_51);
+          console.log(
+            `[FileHandler] S07 field locks updated for d_51="${d_51}", d_49="${d_49}"`
+          );
+        }
+      }
+
+      // Update S13 field locks based on imported d_113 (Heating system)
+      // handleHeatingSystemChangeForGhosting() is NOT mode-aware - it updates shared DOM elements
+      // So we only need to call it once with the Target mode value (fields are shared)
+      const sect13 = window.TEUI?.SectionModules?.sect13;
+      if (sect13?.handleHeatingSystemChangeForGhosting) {
+        const d_113 = this.stateManager.getValue("d_113");
+        if (d_113) {
+          sect13.handleHeatingSystemChangeForGhosting(d_113);
+          console.log(
+            `[FileHandler] S13 field locks updated for d_113="${d_113}"`
+          );
+        }
+      }
+
+      console.log("[FileHandler] Field lock states updated for imported system types");
+      // S10→S11 area bridging now handled by ComputationGraph (TransmissionLossNodes bridge nodes)
+    }
+
+    /**
+     * Apply ReferenceValues from ReferenceValues.js using the proven Import Quarantine pattern
+     * This method is the "Set Values" button's backend - it treats ReferenceValues.js as an
+     * internal import source and applies values using the same pattern as Excel imports.
+     *
+     * @param {string} standard - The standard name (e.g., "PH Classic", "OBC SB10 5.5-6 Z6")
+     * @param {string} targetMode - Either "target" or "reference"
+     */
+    applyReferenceValuesFromStandard(standard, targetMode) {
+      console.log(
+        `[FileHandler] Applying ReferenceValues from "${standard}" to ${targetMode.toUpperCase()} model`
+      );
+
+      // Get reference values for the selected standard
+      const referenceValues = window.TEUI?.ReferenceValues?.[standard];
+      if (!referenceValues) {
+        console.error(
+          `[FileHandler] No ReferenceValues found for standard: "${standard}"`
+        );
+        return;
+      }
+
+      // BUILD IMPORTED DATA OBJECT (like CSV does)
+      // Add ref_ prefix if in Reference mode, otherwise use field as-is
+      const importedData = {};
+      Object.entries(referenceValues).forEach(([fieldId, value]) => {
+        const targetFieldId =
+          targetMode === "reference" ? `ref_${fieldId}` : fieldId;
+        importedData[targetFieldId] = value;
+      });
+
+      // 🔒 PHASE 1: IMPORT QUARANTINE START - Mute listeners
+      window.TEUI.StateManager.muteListeners();
+
+      try {
+        // Write reference values to StateManager (skipRecalculation=true)
+        this.updateStateFromImportData(importedData, 0, true);
+        console.log(
+          `[FileHandler] Applied ${Object.keys(importedData).length} values via updateStateFromImportData`
+        );
+
+        this.syncPostImportUI();
+      } finally {
+        window.TEUI.StateManager.unmuteListeners();
+      }
+
+      // Trigger complete calculation cascade
+      if (
+        this.calculator &&
+        typeof this.calculator.calculateAll === "function"
+      ) {
+        this.calculator.calculateAll();
+        // calculateAll() handles the complete pipeline:
+        // graph compute → syncToSM → DOMBridge.stampAll → postStamp
+        // No legacy section refreshUI/updateCalculatedDisplayValues needed.
+      } else {
+        console.error(
+          "[FileHandler] Calculator.calculateAll() not available - calculations not triggered"
+        );
+      }
+    }
+
+    // --- SAMPLE PROJECT LOADING ---
+
+    async loadSampleProject(project) {
+      const plainName = project.name.replace(/<[^>]*>/g, "");
+      if (!confirm(`Load "${plainName}"? This will replace all current data.`)) {
+        return;
+      }
+
+      // Close the modal
+      const modalEl = document.getElementById("sampleProjectModal");
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+
+      try {
+        this.showStatus(`Loading sample project: ${plainName}...`, "info");
+        const response = await fetch(`src/template/case-studies/${project.file}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch ${project.file}: ${response.status}`);
+        }
+        const csvContent = await response.text();
+        // Most bundled samples have no notes column; the confirm above said
+        // all current data is replaced, so the notes go with it.
+        this.processImportedCSV(csvContent, { replaceNotes: true });
+        this.showStatus(`Sample project "${plainName}" loaded successfully.`, "success");
+      } catch (error) {
+        console.error("[FileHandler] Error loading sample project:", error);
+        this.showStatus(`Error loading sample project: ${error.message}`, "error");
+      }
+    }
+
+    // --- EXPORT LOGIC ---
+
+    exportToCSV() {
+      if (!this.stateManager || !this.fieldManager) {
+        this.showStatus(
+          "StateManager or FieldManager not available for export.",
+          "error"
+        );
+        return;
+      }
+      this.showStatus(
+        "Generating CSV export with Target and Reference data...",
+        "info"
+      );
+
+      try {
+        // Basic CSV escaping (handles commas, quotes, newlines)
+        const escapeCSV = val => {
+          // Ensure string conversion, handle null/undefined
+          let strVal = String(val ?? "");
+
+          // Remove thousands separators (commas) from numeric values before export
+          if (/^-?[\d,]+\.?\d*$/.test(strVal)) {
+            strVal = strVal.replace(/,/g, "");
+          }
+
+          if (
+            strVal.includes(",") ||
+            strVal.includes('"') ||
+            strVal.includes("\n")
+          ) {
+            return `"${strVal.replace(/"/g, '""')}"`;
+          }
+          return strVal;
+        };
+
+        // ✅ EXPLICIT FIELD LIST: Matches Excel import mapping exactly
+        // This ensures perfect round-trip parity (export→import)
+        // Order matches ExcelMapper.excelReportInputMapping definition
+        const userEditableFieldIds = [
+          // Section 02: Building Information
+          "d_12",
+          "e_12",
+          "d_13",
+          "d_14",
+          "d_15",
+          "h_12",
+          "h_13",
+          "h_14",
+          "h_15",
+          "i_16",
+          "i_17",
+          "l_12",
+          "l_13",
+          "l_14",
+          "l_15",
+          "l_16",
+
+          // Section 03: Climate
+          "d_19",
+          "h_19",
+          "h_20",
+          "h_21",
+          "i_21",
+          "m_19",
+          // G.4.4-G.4.8: BASESIMP's inputs (2026-11-19; G.4.3's method is F280 Mode's)
+          "l_25",
+          "d_26",
+          "h_26",
+          "l_26",
+          "d_26b",
+          // l_20 / l_21 are read from the climate station now, not exported
+          "l_24",
+          // d_21o: the user's CDD OVERRIDE only, empty when the city's value stands (2026-11-19, Andy:
+          // "yes"; d_21 itself is the computed CDD - exported, it would pin the city's value). l_22
+          // elevation is not exported: no node reads it and none takes an override (display only).
+          "d_21o",
+
+          // Section 04: Actual Energy
+          "d_27",
+          "d_28",
+          "d_29",
+          "d_30",
+          "d_31",
+          "l_28",
+          "l_29",
+          "l_30",
+          "l_31", // l_27 removed (calculated field)
+          "h_35",
+          "l_33", // the nuclear-waste factor (not exported before 2026-11-19)
+
+          // Section 05: Emissions
+          "d_39",
+          "i_41",
+
+          // Section 06: Renewable Energy
+          "d_44",
+          "d_45",
+          "d_46",
+          "i_44",
+          "k_45",
+          "i_46",
+          "m_43",
+
+          // Section 07: Water Use
+          "d_49",
+          "e_49",
+          "e_50",
+          "d_51",
+          "d_52",
+          "d_53",
+
+          // Section 08: Indoor Air Quality
+          "d_56",
+          "d_57",
+          "d_58",
+          "d_59",
+          "i_59",
+          "g_59",
+
+          // Section 09: Occupant Gains
+          "d_63",
+          "l_63",
+          "m_63",
+          "g_63",
+          "d_64",
+          "d_66",
+          "d_68",
+          "g_67",
+
+          // Section 10: Radiant Gains (31 fields)
+          "d_73",
+          "d_74",
+          "d_75",
+          "d_76",
+          "d_77",
+          "d_78",
+          "e_73",
+          "e_74",
+          "e_75",
+          "e_76",
+          "e_77",
+          "e_78",
+          "f_73",
+          "f_74",
+          "f_75",
+          "f_76",
+          "f_77",
+          "f_78",
+          "g_73",
+          "g_74",
+          "g_75",
+          "g_76",
+          "g_77",
+          "g_78",
+          "h_73",
+          "h_74",
+          "h_75",
+          "h_76",
+          "h_77",
+          "h_78",
+          "d_80",
+
+          // Section 11: Transmission Losses
+          "d_85",
+          "f_85",
+          "d_86",
+          "f_86",
+          "d_87",
+          "f_87",
+          "g_88",
+          "g_89",
+          "g_90",
+          "g_91",
+          "g_92",
+          "g_93",
+          "d_94",
+          "f_94",
+          "d_95",
+          "f_95",
+          "d_96",
+          "d_97",
+
+          // The envelope rows' fields (Openings.addedFields): the door / window rows after the first,
+          // every opaque row's type, facing, L and H, and the opaque rows after the first
+          // (only the opening rows in use: Openings.addedFields' inUse, 2026-11-24)
+          ...window.TEUI.Openings.addedFields({ inUse: true }),
+
+          // Section 12: Volume Metrics
+          "d_103",
+          "g_103",
+          "d_105",
+          "d_108",
+          "g_109",
+          "g_106", // floor-to-floor height (not exported before 2026-11-19)
+          // B.19.2-B.19.12: AIM-2's inputs (2026-11-19; B.19.1's method is F280 Mode's)
+          "g_111",
+          "d_112",
+          "g_112",
+          "d_112b",
+          "g_112b",
+          "d_112c",
+          "g_112c",
+          "d_112d",
+          "g_112d",
+          "d_112e",
+          "g_112e",
+
+          // Section 13: Mechanical Loads
+          "d_113",
+          "f_113",
+          "j_115",
+          "j_116",
+          "d_116",
+          "d_118",
+          "e_118",
+          "g_118",
+          "l_118",
+          "d_119",
+          "l_119",
+          "k_120",
+          "l_122",
+          "i_122",
+          "l_123",
+
+          // Section 21: F280 Mode (Off hides the F280-only inputs; two streams, 2026-11-19) and the F280
+          // form - project, capacities, designer (not exported before 2026-11-19: lost on every save)
+          "f280_mode",
+          "f280_proj_num",
+          "f280_code_ref",
+          "f280_cap_heat",
+          "f280_cap_cool",
+          "f280_dsgn_name",
+          "f280_dsgn_co",
+          "f280_cert_type",
+          "f280_cert_num",
+          "f280_svc_org",
+          "f280_attest",
+
+          // Section 15: Summary
+          "d_142",
+
+          // Section 19: Wombat's own settings (not exported before 2026-11-19; d_150 / d_151 mirror S12,
+          // and since 2026-11-20 d_158 follows S12's storeys)
+          "d_154",
+          "d_159",
+          "d_160",
+        ];
+
+        const targetValues = [];
+        const referenceValues = [];
+
+        // ✅ FIELD PRECISION FORMATTING: Apply specific decimal precision during export
+        // U-values (g_88-g_93): Minimum 3dp for thermal accuracy
+        const uValueFields = ["g_88", "g_89", "g_90", "g_91", "g_92", "g_93", ...window.TEUI.Openings.SLOTS.map(o => `g_${o.s11}`)];
+
+        // Coefficient fields that need 2dp precision
+        const coefficient2dpFields = ["j_115", "j_116"];
+
+        // Format value based on field type
+        const formatExportValue = (fieldId, rawValue) => {
+          if (rawValue === "" || rawValue === null || rawValue === undefined) {
+            return "";
+          }
+
+          // Parse numeric value
+          const numVal = parseFloat(rawValue);
+          if (isNaN(numVal)) {
+            return rawValue; // Return as-is if not numeric
+          }
+
+          // U-values: 3dp MINIMUM (e.g., "0.180", "0.250") - never fewer than stored: toFixed(3) cut
+          // 0.9091 to 0.909 and 1.5625 to 1.563 on every round trip (found 2026-11-19, F280-1)
+          if (uValueFields.includes(fieldId)) {
+            const decimals = (String(rawValue).split(".")[1] || "").length;
+            return decimals > 3 ? String(rawValue) : numVal.toFixed(3);
+          }
+
+          // Coefficients: 2dp (e.g., "0.90", "2.66")
+          if (coefficient2dpFields.includes(fieldId)) {
+            return numVal.toFixed(2);
+          }
+
+          // Default: return as-is (preserves existing precision)
+          return rawValue;
+        };
+
+        // Get values for each field in the explicit list
+        userEditableFieldIds.forEach(fieldId => {
+          // ✅ CONDITIONAL EXPORT: j_116 empty while the heat pump cools - M.3.3
+          // then shows M.1.3, so an import must not overwrite it
+          if (fieldId === "j_116") {
+            if (this.heatpumpCools("")) {
+              targetValues.push("");
+            } else {
+              const targetValue = this.stateManager.getValue(fieldId) ?? "";
+              const formattedTarget = formatExportValue(fieldId, targetValue);
+              targetValues.push(escapeCSV(formattedTarget));
+            }
+
+            // The Reference's M.3.3 always: while its heat pump cools it is the Reference's COPc (the
+            // standard's minimum by default, or the user's - Andy 2026-11-19; it was blanked)
+            const referenceValue = this.stateManager.getValue(`ref_${fieldId}`) ?? "";
+            referenceValues.push(escapeCSV(formatExportValue(fieldId, referenceValue)));
+            return; // Skip normal export logic for j_116
+          }
+
+          // Normal export for all other fields
+          const targetValue = this.stateManager.getValue(fieldId) ?? "";
+          const formattedTarget = formatExportValue(fieldId, targetValue);
+          targetValues.push(escapeCSV(formattedTarget));
+
+          // Get reference value (with ref_ prefix)
+          const refFieldId = `ref_${fieldId}`;
+          const referenceValue = this.stateManager.getValue(refFieldId) ?? "";
+          const formattedReference = formatExportValue(fieldId, referenceValue); // Use base fieldId for formatting rules
+          referenceValues.push(escapeCSV(formattedReference));
+        });
+
+        // Construct CSV content:
+        // Row 1: Combined headers (semanticPath: Natural Language Label) - NEW FORMAT
+        // Row 2: Target/Application values
+        // Row 3: Reference values
+        // Row 4+: [Future] OBC Matrix placeholder
+        //
+        // SEMANTIC PATH MIGRATION (Phase 3):
+        // Headers now use semantic paths (e.g., "building.conditionedFloorArea")
+        // instead of legacy IDs (e.g., "d_12") for better readability and maintainability.
+        // Import auto-detects format and translates legacy IDs if needed.
+        const FieldRegistry = window.TEUI?.FieldRegistry;
+        const headerRow = userEditableFieldIds
+          .map(fieldId => {
+            const fieldDef = this.fieldManager.getField(fieldId);
+            const label = fieldDef?.label || "";
+            // Try to get semantic path, fall back to legacy ID
+            const semanticPath = FieldRegistry?.toSemantic(fieldId) || fieldId;
+            // Format: "semanticPath: Label" or just "semanticPath" if no label
+            const combinedHeader = label ? `${semanticPath}: ${label}` : semanticPath;
+            return escapeCSV(combinedHeader);
+          })
+          .join(",");
+        // Project notes ride as the last column, Target row only (import
+        // splits rows on newlines, so a note's line breaks become spaces)
+        const notes = window.TEUI.SectionModules.sect20?.getNotes() || "";
+        const notesHeader = escapeCSV("s18_notes: Project Notes");
+        const notesCell = escapeCSV(notes.replace(/\r?\n/g, " "));
+        const targetRow = [...targetValues, notesCell].join(",");
+        const referenceRow = [...referenceValues, ""].join(",");
+        const csvContent = [
+          `${headerRow},${notesHeader}`,
+          targetRow,
+          referenceRow,
+        ].join("\n");
+
+        // Future: Add OBC Matrix export here as additional rows (Row 4+)
+        // const obcHeaderRow = "# OBC Matrix Data";
+        // const obcDataRow = "...";
+
+        // Get project name for filename
+        const projectName = this.stateManager.getValue("h_14") || "Project";
+        // Sanitize project name for filename
+        const safeProjectName = projectName.replace(/[^a-z0-9_\-.]/gi, "_");
+        const filename = `TEUIv4011-DualState-${safeProjectName}.csv`;
+
+        console.log(`[CSV Export] Generated filename: ${filename}`);
+        console.log(
+          `[CSV Export] Exported ${userEditableFieldIds.length} fields with combined headers (fieldId: Label format)`
+        );
+
+        // Trigger Download - should work in Safari when called synchronously from click event
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        this.showStatus(
+          "Dual-state CSV export complete with labeled headers.",
+          "success"
+        );
+      } catch (error) {
+        console.error("Error generating CSV export:", error);
+        this.showStatus(`Error during CSV export: ${error.message}`, "error");
+      }
+    }
+
+    // --- OLD / OTHER METHODS ---
+
+    processBuildingCodeData(_workbook) {
+      // Placeholder
+      // console.log('Building code data processing not yet implemented');
+      return null;
+    }
+
+    processScheduleData(_workbook) {
+      // Placeholder
+      // console.log('Schedule data processing not yet implemented');
+      return null;
+    }
+
+    exportToExcel() {
+      // Keep old method for potential full state export?
+      try {
+        this.showStatus(
+          "Preparing full Excel export (legacy method)...",
+          "info"
+        );
+        const currentData = this.stateManager
+          ? this.stateManager.exportValues()
+          : {}; // Export all values
+        const workbook = this.excelMapper
+          ? this.excelMapper.createWorkbook(currentData)
+          : this.fallbackCreateWorkbook(currentData);
+        const excelOutput = XLSX.write(workbook, {
+          bookType: "xlsx",
+          type: "binary",
+        });
+        const blob = this.binaryStringToBlob(excelOutput);
+        const downloadUrl = URL.createObjectURL(blob);
+        const downloadLink = document.createElement("a");
+        downloadLink.href = downloadUrl;
+        downloadLink.download = "TEUI_Full_Export.xlsx";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        this.showStatus("Full Excel export completed", "success");
+      } catch (error) {
+        console.error("Error exporting full Excel:", error);
+        this.showStatus(
+          `Error exporting full Excel: ${error.message}`,
+          "error"
+        );
+      }
+    }
+
+    fallbackCreateWorkbook(data) {
+      // Used by legacy export
+      console.warn("Using fallback Excel creation - limited functionality");
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.aoa_to_sheet([["Field ID", "Value"]]);
+      let row = 1;
+      Object.entries(data).forEach(([id, value]) => {
+        XLSX.utils.sheet_add_aoa(worksheet, [[id, value]], {
+          origin: { r: row++, c: 0 },
+        });
+      });
+      XLSX.utils.book_append_sheet(workbook, worksheet, "TEUI Calculator Data");
+      return workbook;
+    }
+
+    binaryStringToBlob(binaryString) {
+      // Used by legacy export
+      const byteArray = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        byteArray[i] = binaryString.charCodeAt(i) & 0xff;
+      }
+      return new Blob([byteArray], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+    }
+
+    showStatus(message, type) {
+      // console.log(`[FileHandler] ${message}`); // Keep logs minimal
+      const feedbackArea = document.getElementById("feedback-area");
+      if (feedbackArea) {
+        const colors = {
+          info: "#0dcaf0",
+          success: "#198754",
+          warning: "#ffc107",
+          error: "#dc3545",
+        };
+        feedbackArea.textContent = message;
+        feedbackArea.style.color = colors[type] || "#0dcaf0";
+        if (type === "success" || type === "info") {
+          setTimeout(() => {
+            if (feedbackArea.textContent === message) {
+              feedbackArea.textContent = "";
+            }
+          }, 5000);
+        }
+      }
+    }
+  }
+
+  // Initialize when document is ready
+  document.addEventListener("DOMContentLoaded", function () {
+    window.TEUI = window.TEUI || {}; // Ensure namespace
+    window.TEUI.FileHandler = new FileHandler();
+  });
+})(window);

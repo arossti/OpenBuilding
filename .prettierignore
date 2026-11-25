@@ -6,3 +6,5 @@ sample csv exports/
 *.min.js
 *.min.mjs
 sample.pdf
+src/
+climate/

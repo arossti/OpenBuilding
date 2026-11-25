@@ -43,7 +43,7 @@ jobs:
           # Deployable app surface
           cp index.html takeoffeh.html objectivepro.html dependencies.html _site/
           cp obstyles.css _site/
-          cp -r js graphics lib builders _site/
+          cp -r js graphics lib builders src climate _site/
 
           # Runtime data. The BEAM material catalogue (schema/), database.html and
           # the BEAM sample project are BfCA's data: kept in the repo for local use

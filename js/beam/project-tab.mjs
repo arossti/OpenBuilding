@@ -649,7 +649,7 @@ function renderFidelityBadge(fieldId) {
 
 // Sheet IDs become deep links back into TakeOffEh (named-target so the same
 // Parser tab handles successive clicks — see M2 commit). Kept inline here
-// rather than importing from beamweb.mjs to avoid a cross-module cycle.
+// rather than importing from objective4.mjs to avoid a cross-module cycle.
 function renderSheetLinks(sheets) {
   return sheets
     .map((s) => {

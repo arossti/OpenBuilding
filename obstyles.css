@@ -2399,6 +2399,126 @@ html.theme-dark body {
   vertical-align: middle;
 }
 
+/* ── §8b OBJECTIVE's V3 sections, styled per V4 ─────────────────────────────
+   src/styles.css (V3, verbatim) loads first and owns layout and states; this
+   block maps its light theme onto V4's dark tokens, scoped to .op-v3 (each
+   adopted V3 section) so nothing leaks into the page chrome. */
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+}
+.op-v3 {
+  --primary-text: var(--text);
+  --secondary-text: var(--text-dim);
+  --header-bg: var(--bg-panel);
+  --header-text: var(--text);
+  --border-color: var(--border);
+  --hover-bg: rgba(34, 211, 238, 0.06);
+  --table-header-bg: var(--bg-panel);
+  --user-input-color: var(--accent-lit);
+  --user-input-color-rgb: 34, 211, 238;
+  --calculated-value-color: var(--text);
+  --derived-value-color: var(--text);
+  --reference-value-color: #ff8a8a;
+  --reference-value-color-rgb: 255, 138, 138;
+  --target-value-color: var(--accent-lit);
+  --actual-value-color: var(--text);
+  --link-color: var(--accent-lit);
+  border: 0;
+  border-radius: 0;
+  margin: 0;
+  background: transparent;
+  color: var(--text);
+}
+.op-v3 > .section-content {
+  max-height: none;
+  overflow-x: auto;
+}
+.op-v3 .data-table,
+.op-v3 .data-table td,
+.op-v3 .data-table th {
+  background-color: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+.op-v3 .data-table td,
+.op-v3 .data-table th {
+  border-bottom: 1px solid var(--border);
+}
+.op-v3 .data-table tr:hover td {
+  background-color: rgba(34, 211, 238, 0.05);
+}
+.op-v3 .data-table td.section-header,
+.op-v3 .data-table td.section-subheader,
+.op-v3 .data-table tr:has(td.section-subheader) td {
+  background-color: var(--bg-panel);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: pre-line;
+}
+.op-v3 .data-table td.section-header {
+  color: var(--text);
+}
+.op-v3 .id-cell {
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+}
+.op-v3 .unit-label,
+.op-v3 .label-main {
+  color: var(--text-dim);
+}
+.op-v3 .user-input,
+.op-v3 [contenteditable="true"].user-input,
+.op-v3 input.user-input,
+.op-v3 input[type="number"] {
+  background-color: rgba(34, 211, 238, 0.07);
+  color: var(--accent-lit);
+  border-radius: 3px;
+}
+.op-v3 .user-input:not(.user-modified) {
+  color: var(--text-dim);
+  font-style: italic;
+}
+.op-v3 .editing-intent {
+  outline: 1px solid var(--accent-lit) !important;
+}
+.op-v3 .disabled-input,
+.op-v3 .ghosted {
+  color: var(--text-dim) !important;
+  opacity: 0.6;
+}
+.op-v3 select,
+.op-v3 .form-select,
+.op-v3 option,
+.op-v3 input,
+.op-v3 textarea {
+  background-color: var(--bg-panel);
+  color: var(--text);
+  border-color: var(--border);
+}
+.op-v3 .form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a9b4bd' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+}
+.op-v3 .checkmark,
+.op-v3 [data-status="pass"] {
+  color: #4ade80;
+}
+.op-v3 .warning,
+.op-v3 [data-status="fail"] {
+  color: #f87171;
+}
+.op-v3 .card,
+.op-v3 .bg-light,
+.op-v3 .bg-white,
+.op-v3 .table,
+.op-v3 .table td,
+.op-v3 .table th {
+  background-color: transparent !important;
+  color: var(--text);
+  border-color: var(--border);
+}
+
 /* ── Action bar (Import / Export / Reset / Tilt buttons) ─ */
 #beam-action-bar {
   padding: 8px 16px;
