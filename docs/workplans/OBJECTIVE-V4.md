@@ -69,7 +69,10 @@ of OBJECTIVE can do with many shared methods."* v3 stays the live, static/monthl
 
 ### Where to pick up next (cold-start one-liner)
 
-§9.2 P0: the sidebar becomes S01–S21 on `objectivepro.html`; then S11 and S12 first, for the Trust mapping tests.
+**§9.2 P0 on `objectivepro.html`:** ① the S01 heads-up display in the masthead band (S01's three key-value rows,
+~200 px, visible on every section); ② the sidebar becomes S01–S21; ③ every BEAM tab deleted. Then S11 + S12 for
+Andy's Trust / Trust + Verify PDF-mapping tests. Serve: `npm run stage:data` once, then any static server on the
+repo root (e.g. `python3 -m http.server 8795 --bind 127.0.0.1`), open `/objectivepro.html`.
 
 ---
 
@@ -208,8 +211,7 @@ which will remain the V3 deployment)"*. So:
    new wall, as + copies it today), so a re-entered envelope starts with the old assemblies.
 4. **Below-grade walls with windows.** Kept (a walkout basement's windows); recommendation: yes, as now.
 5. **What opens first in v4.** Recommendation: F280-1 hosted (V4-5), not a blank page.
-6. **BEAM's own tabs during the port** (the 12 assembly tabs, REVIEW, RESULTS, Glossary, Energy GHG).
-   Recommendation: fold them into a "BEAM (legacy)" group at P0 and delete each once a section replaces its job.
+6. **The sidebar group names** (§9.2 P0 ②). Recommendation: the seven proposed there.
 
 ---
 
@@ -249,9 +251,18 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
 
 ### 9.2 Phases (recommended)
 
-- **P0 — the scaffold.** The sidebar becomes S01–S21 (grouped; the group names are Andy's), S02 keeps the PROJECT
-  tab, each new tab a placeholder naming its section. BEAM's assembly, review and reference tabs fold into a
-  "BEAM (legacy)" group until the sections replace them. Trust / Trust + Verify keep working on PROJECT.
+**RULED (P0's shape):** Andy 2026-11-25: *"We won't use any BEAM legacy pages. Our sections will replace all of BEAMS. We're just keeping the look and feel of the format as the tabbed, moden menus support a better project organizartion. And gives us wider latitude to format sections as full pages, with S01 acting as the overview/review dashboard. That said, in this narrow but wide header band, that is where we might be able to park our S01 head's up display so the 3 main rows show across any page or section that is active. It may well need 200px or so to read properly, that is a design function, but I feel the dashboard is vital for evaluating performance while ANY section is open. Sure, sidebar next"*
+
+- **P0 — the scaffold.**
+  1. **The S01 heads-up display** in the masthead band (the strip under the OBJECTIVE logo/title, beside Home ·
+     Take Off, Eh! · Database · OBJECTIVE): S01's three main key-value rows, ~200 px tall (a design call), shown
+     whatever section is open. S01's own tab is the full overview/review dashboard.
+  2. **The sidebar becomes S01–S21**, grouped (proposed, Andy's to rename: Project S01–S02 · Climate & Targets
+     S03–S06 · Occupancy & Gains S07–S10 · Envelope S11–S12 · Systems & Results S13–S15 · Outputs S16–S19 · Notes &
+     Compliance S20–S21). S02 is the current PROJECT tab in its current format. Each section is a FULL PAGE.
+  3. **Every BEAM tab is deleted** (the 12 assembly tabs, REVIEW, RESULTS, Glossary, Energy GHG, and their
+     `js/beam/*-tab.mjs`); no legacy group. Keep the look and feel: the tabbed sidebar, the action bar, the dark theme.
+  Trust / Trust + Verify keep working (they fill PROJECT today; P2 retargets them).
 - **P1 — the engine.** OBJECTIVE's core (the state manager, the dual Target / Reference state, the calculation
   graph) moves in unchanged and runs headless behind the page; the CSV import/export too.
 - **P2 — S11 and S12 first**, in the dark theme: they are what Trust / Trust + Verify fill, so the PDF-mapping tests
@@ -262,6 +273,8 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
 
 ### Answered
 
+- **BEAM's tabs: all go, no legacy group; S01 is the dashboard and its HUD rides the masthead.** Andy 2026-11-25: *"We won't use any BEAM legacy pages. Our sections will replace all of BEAMS. We're just keeping the look and feel of the format as the tabbed, moden menus support a better project organizartion. And gives us wider latitude to format sections as full pages, with S01 acting as the overview/review dashboard. That said, in this narrow but wide header band, that is where we might be able to park our S01 head's up display so the 3 main rows show across any page or section that is active. It may well need 200px or so to read properly, that is a design function, but I feel the dashboard is vital for evaluating performance while ANY section is open. Sure, sidebar next"*
+
 - **"Pro" names both.** Andy 2026-11-25: *"Pro refers to both the Web App and the Rust app. Pro=V4. The user may use the app in OSX/Linux, but many users are still PC users, and for them we have the web app. It is not expected to do everything the native rust app can, but it is the concession we make."* Hence the address `objectivepro.html`.
 
 ## Appendix — Changelog
@@ -271,4 +284,5 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
 | 2026-11-25 | andy-rnd `7870a44`, `0684e43` | the plan written in andy-rnd (§3, §4, §7, §8) |
 | 2026-11-25 | `99d5a70` | moved here; §0, §5 and §6 added |
 | 2026-11-25 | `0a318bb` | §0 shipped / remaining; `objectivepro.html`; Assemblies published; §9 the port |
-| 2026-11-25 | this commit | ruled: Pro = v4, the Rust app and the web app |
+| 2026-11-25 | `62cb91a` | ruled: Pro = v4, the Rust app and the web app |
+| 2026-11-25 | this commit | ruled: no BEAM legacy; S01 dashboard + masthead HUD; P0 rewritten; cold-start handoff |
