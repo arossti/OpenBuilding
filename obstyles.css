@@ -2400,8 +2400,9 @@ html.theme-dark body {
 }
 
 /* ── §8b OBJECTIVE's V3 sections, styled per V4 ─────────────────────────────
-   src/styles.css (V3, verbatim) loads first and owns layout and states. Here
-   each V3 section sits in the PROJECT form's card (.bw-asm-group, built by
+   V3's own light stylesheet is not loaded; the behaviour it carried (rows and
+   cells V3 hides, the Sankey overlays, S18's graph heights) is restated at the
+   end of this block. Here each V3 section sits in the PROJECT form's card (.bw-asm-group, built by
    objective4.mjs) and reads like that form (Andy 2026-11-25: "lose the ugly
    grid styling of the V3 and emulate ... the new V4 styling"): no cell grid,
    dim labels, every input and dropdown a sunken V4 box. Scoped to .op-v3. */
@@ -2611,6 +2612,68 @@ body {
 .op-v3 .ref-value,
 .op-v3 .reference-value {
   color: #ff8a8a !important;
+}
+
+/* V3 behaviour (from V3's styles.css): what it hides, and its overlays' frames,
+   in V4 colours. S20 Notes stays visible: V3 hides #notes in its scrolling
+   layout, but here it is its own page. */
+.op-v3 .print-only,
+.op-v3 .section-spacer {
+  display: none;
+}
+.op-v3 .f280-hidden-row {
+  display: none !important;
+}
+.op-v3 .f280-hidden-cell {
+  visibility: hidden;
+}
+#sankeySection16Tooltip {
+  display: none;
+  position: fixed !important;
+  z-index: 10000;
+  background: var(--bg-panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px;
+  max-width: 350px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+  font-size: 12px;
+  pointer-events: none;
+}
+#s16FullscreenContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  z-index: 9999;
+  padding: 20px;
+  box-sizing: border-box;
+  display: none;
+}
+.op-v3 .dependency-graph-container {
+  position: relative;
+}
+.op-v3 .dependency-graph-legend {
+  position: absolute;
+  bottom: 40px;
+  right: 50px;
+  background: var(--bg-panel);
+  color: var(--text);
+  padding: 12px 36px;
+  border-radius: 8px;
+  max-width: 390px;
+  max-height: calc(100% - 80px);
+  overflow-y: auto;
+}
+.op-v3 .parallel-coordinates-container {
+  min-height: 150px;
+}
+.op-v3 .parallel-coordinates-container.activated {
+  height: 650px;
+  padding-bottom: 10px;
 }
 
 /* States */
