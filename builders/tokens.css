@@ -1,0 +1,30 @@
+/* ============================================================================
+   tokens.css — THE design tokens for every OpenBuilding.ca web page
+   ============================================================================
+   One source for the colours and the mono stack that the Builder pages AND the
+   OpenBuilding.ca site share (Andy 2026-11-25: "we should find a smart way to
+   consolidate all of the CSS").
+
+   HOW IT REACHES A PAGE
+   · a Builder page: build_shared.paste_shared() inlines this file ahead of
+     styles.css between the CSS markers (the pages stay standalone files);
+   · the site: publish_builders.py copies it to OpenBuilding's builders/, and
+     obstyles.css @imports it and maps its own names onto these.
+   Every name is prefixed --ob- so neither side's own names collide with it;
+   styles.css and obstyles.css keep their names as aliases.
+
+   THE NEUTRALS are the app's dark chrome (builders/chrome.rs).
+   THE ACCENT IS CYAN ON THE WEB, deliberately unlike the app's blue
+   (Andy 2026-11-25: "the html's cyan so it remains distinct from the rust app").
+   Edit HERE, then rebuild the Builder pages and publish.
+   ------------------------------------------------------------------------ */
+:root{
+  /* neutrals — the app's */
+  --ob-ground:#141416; --ob-win:#1a1a1c; --ob-panel:#232327; --ob-panel-2:#2a2a2e; --ob-input:#2e2e33;
+  --ob-line:#38383d; --ob-line-soft:#2c2c30; --ob-text:#d4d4d8; --ob-dim:#8b8b92; --ob-faint:#5c5c63;
+  /* accent — the web's cyan */
+  --ob-accent:#22d3ee; --ob-accent-deep:#0891b2; --ob-sel:#0e7490; --ob-sel-soft:rgba(34,211,238,.14);
+  /* status */
+  --ob-ref:#e5484d; --ob-ok:#7bb661; --ob-warn:#d8b45a;
+  --ob-mono:"SF Mono",ui-monospace,Menlo,monospace;
+}

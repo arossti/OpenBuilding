@@ -7,6 +7,37 @@
 <style>
   /*CSS-START*/
 /* ============================================================================
+   tokens.css — THE design tokens for every OpenBuilding.ca web page
+   ============================================================================
+   One source for the colours and the mono stack that the Builder pages AND the
+   OpenBuilding.ca site share (Andy 2026-11-25: "we should find a smart way to
+   consolidate all of the CSS").
+
+   HOW IT REACHES A PAGE
+   · a Builder page: build_shared.paste_shared() inlines this file ahead of
+     styles.css between the CSS markers (the pages stay standalone files);
+   · the site: publish_builders.py copies it to OpenBuilding's builders/, and
+     obstyles.css @imports it and maps its own names onto these.
+   Every name is prefixed --ob- so neither side's own names collide with it;
+   styles.css and obstyles.css keep their names as aliases.
+
+   THE NEUTRALS are the app's dark chrome (builders/chrome.rs).
+   THE ACCENT IS CYAN ON THE WEB, deliberately unlike the app's blue
+   (Andy 2026-11-25: "the html's cyan so it remains distinct from the rust app").
+   Edit HERE, then rebuild the Builder pages and publish.
+   ------------------------------------------------------------------------ */
+:root{
+  /* neutrals — the app's */
+  --ob-ground:#141416; --ob-win:#1a1a1c; --ob-panel:#232327; --ob-panel-2:#2a2a2e; --ob-input:#2e2e33;
+  --ob-line:#38383d; --ob-line-soft:#2c2c30; --ob-text:#d4d4d8; --ob-dim:#8b8b92; --ob-faint:#5c5c63;
+  /* accent — the web's cyan */
+  --ob-accent:#22d3ee; --ob-accent-deep:#0891b2; --ob-sel:#0e7490; --ob-sel-soft:rgba(34,211,238,.14);
+  /* status */
+  --ob-ref:#e5484d; --ob-ok:#7bb661; --ob-warn:#d8b45a;
+  --ob-mono:"SF Mono",ui-monospace,Menlo,monospace;
+}
+
+/* ============================================================================
    styles.css — THE BUILDER SURFACES' shared stylesheet (ABCD-BUILDERS.md §4)
    ============================================================================
    One source for what every Builder mockup shares: the TOKENS (colours, the
@@ -28,12 +59,13 @@
    palette and the mockup should read the same numbers, from here.
    ------------------------------------------------------------------------ */
 
-/* ---- tokens ---- */
+/* ---- tokens: the page names, aliased onto tokens.css (the ONE source, inlined just above this
+   file). --blue keeps its name for the pages that read it, but on the web it is the CYAN accent. ---- */
 :root{
-  --ground:#141416; --win:#1a1a1c; --panel:#232327; --panel-2:#2a2a2e; --input:#2e2e33;
-  --line:#38383d; --line-soft:#2c2c30; --text:#d4d4d8; --dim:#8b8b92; --faint:#5c5c63;
-  --blue:#5aa2d8; --sel:#2f5f8f; --sel-soft:rgba(90,162,216,.14); --ref:#e5484d;
-  --ok:#7bb661; --warn:#d8b45a; --mono:"SF Mono",ui-monospace,Menlo,monospace;
+  --ground:var(--ob-ground); --win:var(--ob-win); --panel:var(--ob-panel); --panel-2:var(--ob-panel-2); --input:var(--ob-input);
+  --line:var(--ob-line); --line-soft:var(--ob-line-soft); --text:var(--ob-text); --dim:var(--ob-dim); --faint:var(--ob-faint);
+  --blue:var(--ob-accent); --sel:var(--ob-sel); --sel-soft:var(--ob-sel-soft); --ref:var(--ob-ref);
+  --ok:var(--ob-ok); --warn:var(--ob-warn); --mono:var(--ob-mono);
 }
 *{box-sizing:border-box}
 /* BUGLIST #81 — `hidden` MUST WIN. The UA sheet's [hidden]{display:none} loses to ANY author

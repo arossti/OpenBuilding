@@ -1,3 +1,4 @@
+@import url("builders/tokens.css"); /* THE shared design tokens (--ob-*), published from ABCD.EARTH docs/mockups/tokens.css; the names below alias them */
 /* ══════════════════════════════════════════════════════════════════
    OpenBuilding.ca Design System — single-file style source for the whole app ecosystem
 
@@ -46,8 +47,8 @@
 /* ── Shared Design Tokens ─────────────────────────────── */
 :root {
   /* Brand */
-  --accent: #0891b2;
-  --accent-lit: #22d3ee;
+  --accent: var(--ob-accent-deep);
+  --accent-lit: var(--ob-accent);
   --accent-lt: #d0f4fa;
 
   /* Shared semantic */
@@ -145,12 +146,12 @@
 
 /* ── Dark Theme Tokens ────────────────────────────────── */
 html.theme-dark {
-  --bg: #1a1a1e;
-  --bg-surface: #232328;
-  --bg-panel: #2a2a30;
-  --border: #3a3a42;
-  --text: #e0e0e4;
-  --text-dim: #888890;
+  --bg: var(--ob-win);
+  --bg-surface: var(--ob-panel);
+  --bg-panel: var(--ob-panel-2);
+  --border: var(--ob-line);
+  --text: var(--ob-text);
+  --text-dim: var(--ob-dim);
   --sidebar-w: 240px;
   --toolbar-h: 42px;
   --statusbar-h: 28px;
