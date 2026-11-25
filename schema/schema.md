@@ -95,8 +95,15 @@ entirely. S02 assumes the default data in V3's S02."_); Load Sample is V3's moda
 Studies exactly as V3 does, with F280 sub-rows"_); Open / Save are V3's CSV import / export; Reset is V3's "back to
 the last loaded project". Witness: all 16 case studies, loaded through the modal here and in andy-rnd's V3, give
 2146 / 2146 identical displayed values each.
-**NEXT:** Trust / Trust + Verify retargeted from the deleted BEAM PROJECT fields to S11 + S12 (§9.2 P2; until then
-they write BEAM state nothing shows); the graphics' Activate buttons (S16–S19) unclicked here. Serve:
+**TRUST → S02 / S11 / S12 ✅ 2026-11-25** (Andy: _"S11, S12, and 'Conditioned Area' as the sum in S02 of all
+interior plan spaces"_): `js/beam/pdf-bridge-import.mjs` `V3_TARGETS` — h_15 ← every floor plate (foundation +
+above-grade slabs, building scope); d_85 roof (× pitch); d_86 walls above grade (net of their windows); d_94 walls
+below grade (perimeter × basement height); d_95 slab; d_105 volume (floor plates × S12's g_106). Written as user
+entries, one recalculation; parameters from Take Off, Eh!'s sidebar. Witness (10 × 12 m house, 3 / 2.5 m, 30°):
+240 / 138.56 / 34.5 / 110 / 120 / 648, exact. **Windows are not written** — S11 hosts each in a facing wall and Take
+Off records no facing yet (V4-7).
+**NEXT:** V4-7 (Take Off gives each wall its facing and each window its wall and W × H → S11's hosted rows); the
+graphics' Activate buttons (S16–S19) unclicked here. Serve:
 `python3 schema/scripts/nocache-serve.py 8796` (`npm run stage:data` only for the local Database).
 
 ## 1. Goals

@@ -1,65 +1,64 @@
 // pdf-bridge-import.mjs
-// BEAMweb side of the TakeOffEh bridge. Reads the parser's saved
-// projects from IndexedDB, runs the shared aggregator against the
-// user's current param_* values, and writes resolved dimension values
-// into StateManager with provenance tracked via dimension_sources.
+// OBJECTIVE side of the Take Off, Eh! bridge (Trust / Trust + Verify). Reads the
+// parser's saved projects from IndexedDB, runs the shared aggregator
+// (js/shared/polygon-map.mjs) and writes the results into OBJECTIVE's own
+// fields — V3's StateManager on window.TEUI — then recalculates once.
 //
-// UI flow (see modal in objectivepro.html):
-//   1. User clicks "Import TakeOffEh" → openImportModal()
-//   2. Modal lists saved parser projects; user picks one
-//   3. buildPreview(uuid) aggregates; modal renders a diff table
-//      (current StateManager value vs new value per dim)
-//   4. User toggles which rows to apply, clicks Apply
-//   5. applyImport(projectUuid, selectedDimIds) writes to StateManager
+// Andy 2026-11-25: "S11, S12, and 'Conditioned Area' as the sum in S02 of all
+// interior plan spaces." V3_TARGETS below is that mapping. Windows are not
+// written: S11 hosts each window in a wall that faces a direction, and Take
+// Off, Eh! records no facing yet (roadmap V4-7).
 
-import { StateManager } from "../shared/state-manager.mjs";
 import * as IDB from "../shared/indexed-db-store.mjs";
-import { computeAllDimensions, COMPONENT_TO_DIMENSION } from "../shared/polygon-map.mjs";
+import { computeAllDimensions } from "../shared/polygon-map.mjs";
 
-const VS = StateManager.VALUE_STATES;
+// The geometry parameters the aggregator lifts polygons with, as entered in
+// Take Off, Eh!'s sidebar (the project's params).
+const PARAM_FIELDS = ["param_wall_height_m", "param_basement_height_m", "param_roof_pitch_deg"];
 
-// Params the aggregator needs. Resolved with StateManager as primary source
-// (BEAMweb PROJECT → Geometry Parameters — user's authoritative values) and
-// the Parser-side project.params as fallback (entered in the Parser sidebar
-// before ever opening BEAMweb). Either side can seed the bridge.
-const PARAM_FIELDS = [
-  "param_wall_height_m",
-  "param_basement_height_m",
-  "param_roof_pitch_deg",
-  "param_footing_height_m",
-  "param_footing_width_m"
+// OBJECTIVE field ← aggregated dimension. `dim` names a polygon-map
+// dimension; `volume` multiplies one by V3's own typical floor-to-floor
+// height (S12 g_106).
+export const V3_TARGETS = [
+  {
+    field: "h_15",
+    label: "S02 B.3 Conditioned Area (m\u00b2)",
+    dim: "project_total_floor_area",
+    note: "every interior plan space: foundation + above-grade floor plates"
+  },
+  { field: "d_85", label: "S11 B.4 Roof (m\u00b2)", dim: "dim_roof_surface_area" },
+  {
+    field: "d_86",
+    label: "S11 B.5 Walls above grade (m\u00b2)",
+    dim: "dim_exterior_wall_area",
+    note: "net of the windows drawn in them"
+  },
+  { field: "d_94", label: "S11 B.9 Walls below grade (m\u00b2)", dim: "dim_foundation_wall_area" },
+  { field: "d_95", label: "S11 B.10 Slab (m\u00b2)", dim: "dim_foundation_slab_floor_area" },
+  {
+    field: "d_105",
+    label: "S12 B.13 Conditioned volume (m\u00b3)",
+    volume: "project_total_floor_area",
+    note: "floor plates \u00d7 S12's typical floor-to-floor height"
+  }
 ];
 
-// Dims that render as L × H × W inputs on PROJECT. Their storage keys are
-// `${id}_length` / `${id}_height` / `${id}_width`; `${id}_volume` is CALCULATED
-// from the three children via recomputeVolume. Writing the parent id directly
-// would land in a key nothing reads, so decompose on apply: volume ÷ (H × W)
-// = length, then push H + W from the params. recomputeVolume fires after
-// refreshProjectForm and notifies the auto-fill listener that flows the
-// volume downstream to F&S.
-const LHW_DIMS = {
-  dim_continuous_footings: {
-    heightParam: "param_footing_height_m",
-    widthParam: "param_footing_width_m"
-  },
-  garage_continuous_footings: {
-    heightParam: "param_footing_height_m",
-    widthParam: "param_footing_width_m"
-  }
-};
+function v3() {
+  return window.TEUI || {};
+}
 
 function readParams(project) {
-  const params = {};
   const fromProject = (project && project.projectJson && project.projectJson.params) || {};
+  const params = {};
   for (const key of PARAM_FIELDS) {
-    const fromState = StateManager.getValue(key);
-    if (fromState != null && fromState !== "") {
-      params[key] = fromState;
-    } else if (fromProject[key] != null && fromProject[key] !== "") {
-      params[key] = fromProject[key];
-    }
+    if (fromProject[key] != null && fromProject[key] !== "") params[key] = fromProject[key];
   }
   return params;
+}
+
+function num(v) {
+  const n = Number(String(v ?? "").replace(/,/g, ""));
+  return Number.isFinite(n) ? n : null;
 }
 
 export async function listProjects() {
@@ -71,31 +70,35 @@ export async function buildPreview(projectUuid) {
   if (!project) throw new Error("project not found: " + projectUuid);
   const params = readParams(project);
   const dims = computeAllDimensions({ projectJson: project.projectJson, params });
+  const SM = v3().StateManager;
+  const f2f = num(SM?.getValue("g_106"));
 
-  // Pair each computed dim with its current StateManager value so the UI
-  // can show "before → after" and highlight deltas.
-  const rows = [];
-  for (const [dimId, agg] of Object.entries(dims)) {
-    const current = StateManager.getValue(dimId);
-    const hasNew = agg.value != null;
-    rows.push({
-      dimId,
-      current: current != null && current !== "" ? current : null,
-      computed: hasNew ? roundForDisplay(agg.value, dimId) : null,
-      summary: buildSummary(agg),
+  const rows = V3_TARGETS.map((t) => {
+    const agg = dims[t.dim || t.volume] || { value: null, contributors: [], warnings: [] };
+    let value = agg.value;
+    let summary = buildSummary(agg);
+    if (t.volume && value != null) {
+      if (f2f && f2f > 0) {
+        value = value * f2f;
+        summary = `${summary} \u00d7 ${f2f} m (S12 floor-to-floor)`;
+      } else {
+        value = null;
+        summary = "S12's typical floor-to-floor height (g_106) is blank";
+      }
+    }
+    const current = SM ? num(SM.getValue(t.field)) : null;
+    return {
+      dimId: t.field,
+      label: t.label,
+      current,
+      computed: value != null ? Number(value.toFixed(2)) : null,
+      summary: t.note ? `${t.label}: ${t.note}. ${summary}` : `${t.label}. ${summary}`,
       contributors: agg.contributors || [],
       warnings: agg.warnings || [],
-      hasValue: hasNew,
+      hasValue: value != null,
       missingParams: extractMissingParams(agg),
       assemblyPresets: uniquePresets(agg.contributors || [])
-    });
-  }
-
-  // Sort deterministic — put rows with computed values first so the user
-  // sees the actionable stuff on top.
-  rows.sort((a, b) => {
-    if (a.hasValue !== b.hasValue) return a.hasValue ? -1 : 1;
-    return a.dimId.localeCompare(b.dimId);
+    };
   });
 
   return {
@@ -106,90 +109,22 @@ export async function buildPreview(projectUuid) {
   };
 }
 
-export async function applyImport(projectUuid, dimIdsToApply) {
+// Writes each chosen row into OBJECTIVE as a user entry (so Reset, back to the
+// last loaded project, undoes it), then one full recalculation, as V3's
+// importer does after an import.
+export async function applyImport(projectUuid, fieldIdsToApply) {
   const preview = await buildPreview(projectUuid);
-  const toApplySet = new Set(dimIdsToApply);
+  const T = v3();
+  if (!T.StateManager) throw new Error("OBJECTIVE's engine is not loaded");
+  const chosen = new Set(fieldIdsToApply);
   let applied = 0;
-  const polyIdsByDim = {};
-
-  StateManager.muteListeners();
-  try {
-    // Propagate any Parser-side params into StateManager when BEAMweb's own
-    // values are blank. Keeps PROJECT → Geometry Parameters in sync with the
-    // Parser sidebar without forcing the user to re-type values.
-    const parserParams = (preview.project.projectJson && preview.project.projectJson.params) || {};
-    for (const key of PARAM_FIELDS) {
-      const current = StateManager.getValue(key);
-      if ((current == null || current === "") && parserParams[key] != null && parserParams[key] !== "") {
-        StateManager.setValue(key, String(parserParams[key]), VS.IMPORTED);
-        StateManager.setDimensionSource(key, "pdf:param");
-      }
-    }
-
-    for (const row of preview.rows) {
-      if (!toApplySet.has(row.dimId) || !row.hasValue) continue;
-      const polyIds = row.contributors.flatMap((c) => (c.polygons || []).map((p) => p.id));
-      writeDimValue(row, preview.params);
-      polyIdsByDim[row.dimId] = polyIds;
-      StateManager.setDimensionSource(
-        row.dimId,
-        buildProvenance(projectUuid, polyIds, {
-          summary: row.summary,
-          sheets: collectSheets(row.contributors)
-        })
-      );
-      applied++;
-    }
-  } finally {
-    StateManager.unmuteListeners();
+  for (const row of preview.rows) {
+    if (!chosen.has(row.dimId) || !row.hasValue) continue;
+    T.StateManager.setValue(row.dimId, String(row.computed), "user-modified");
+    applied++;
   }
-
-  return { applied, polyIdsByDim, project: preview.project };
-}
-
-function writeDimValue(row, params) {
-  const lhw = LHW_DIMS[row.dimId];
-  if (!lhw) {
-    StateManager.setValue(row.dimId, String(row.computed), VS.IMPORTED);
-    return;
-  }
-  const H = Number(params[lhw.heightParam]);
-  const W = Number(params[lhw.widthParam]);
-  if (!Number.isFinite(H) || H <= 0 || !Number.isFinite(W) || W <= 0) {
-    // Params missing — fall back to writing the computed volume directly.
-    // recomputeVolume will zero it out on next refresh, but at least the row
-    // persists in state and we have a paper trail. In practice this branch
-    // should not fire because the preview already guards on missing params.
-    StateManager.setValue(`${row.dimId}_volume`, String(row.computed), VS.IMPORTED);
-    return;
-  }
-  const length = row.computed / (H * W);
-  StateManager.setValue(`${row.dimId}_length`, String(Number(length.toFixed(4))), VS.IMPORTED);
-  StateManager.setValue(`${row.dimId}_height`, String(H), VS.IMPORTED);
-  StateManager.setValue(`${row.dimId}_width`, String(W), VS.IMPORTED);
-}
-
-// Provenance is stored as a JSON-encoded envelope on dimension_sources.
-// The envelope lets PROJECT render a rich fidelity badge (summary +
-// clickable sheet refs) without re-reading IndexedDB on every repaint.
-// A plain-string fallback is emitted when the caller lacks rich context
-// (e.g. param-propagation path) — render paths must handle both.
-function buildProvenance(projectUuid, polyIds, extras) {
-  extras = extras || {};
-  const envelope = {
-    type: "takeoffeh",
-    projectUuid,
-    polyIds: Array.isArray(polyIds) ? polyIds : [],
-    summary: extras.summary || "",
-    sheets: Array.isArray(extras.sheets) ? extras.sheets : []
-  };
-  return JSON.stringify(envelope);
-}
-
-function collectSheets(contributors) {
-  const s = new Set();
-  for (const c of contributors || []) for (const sh of c.sheets || []) s.add(sh);
-  return Array.from(s);
+  if (applied && T.Calculator?.calculateAll) T.Calculator.calculateAll();
+  return { applied, project: preview.project };
 }
 
 function buildSummary(agg) {
@@ -223,11 +158,4 @@ function uniquePresets(contributors) {
   const s = new Set();
   for (const c of contributors) for (const p of c.assembly_presets || []) s.add(p);
   return Array.from(s);
-}
-
-function roundForDisplay(value, dimId) {
-  // Volumes to 3 decimal places, everything else to 2.
-  const isVolume = /volume|continuous_footings|columns_piers/.test(dimId);
-  const d = isVolume ? 3 : 2;
-  return Number(value.toFixed(d));
 }

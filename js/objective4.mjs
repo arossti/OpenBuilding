@@ -464,8 +464,9 @@ async function handleImportTakeOffEh() {
   await refreshImportPreview();
 }
 
-// Trust: one-click bulk apply of every computable dim from the most
-// recently saved TakeOffEh project. Skips the review modal entirely.
+// Trust: one-click apply of every computable OBJECTIVE field (S02's
+// Conditioned Area, S11's envelope areas, S12's volume — PdfBridge.V3_TARGETS)
+// from the most recently saved Take Off, Eh! project. Skips the review modal entirely.
 // Trust + Verify (the modal) stays available anytime — users can always
 // re-open it to audit what landed.
 async function handleTrustTakeOffEh() {
@@ -493,7 +494,7 @@ async function handleTrustTakeOffEh() {
   const dimIds = preview.rows.filter((r) => r.hasValue).map((r) => r.dimId);
   if (dimIds.length === 0) {
     setStatus(
-      "Trust: no computable dimensions in the latest Take Off, Eh! session. Tag polygons there first.",
+      "Trust: nothing to import from the latest Take Off, Eh! session. Tag its floor plans, roof, walls and foundation there first.",
       "error"
     );
     return;
@@ -501,7 +502,7 @@ async function handleTrustTakeOffEh() {
   try {
     const result = await PdfBridge.applyImport(project.uuid, dimIds);
     setStatus(
-      `Trust: imported ${result.applied} dimension${result.applied === 1 ? "" : "s"} from ${escapeHtml(project.pdfFileName)} · click Trust + Verify to review`,
+      `Trust: ${result.applied} value${result.applied === 1 ? "" : "s"} into S02 / S11 / S12 from ${escapeHtml(project.pdfFileName)} · Trust + Verify to review`,
       "ready"
     );
   } catch (err) {
@@ -546,14 +547,14 @@ function renderImportBody(preview) {
   const picker = renderImportPicker(project.uuid);
   const paramWarn = paramsComplete
     ? ""
-    : '<div class="bw-pdf-import-warn">One or more geometry parameters are blank on PROJECT. Dimensions depending on those params cannot import until they are filled in — open PROJECT → Geometry Parameters.</div>';
+    : '<div class="bw-pdf-import-warn">One or more geometry parameters (wall height, basement height, roof pitch) are blank in Take Off, Eh!. Rows that need them cannot import until they are entered in its sidebar.</div>';
 
   const hasApplicable = rows.some((r) => r.hasValue);
   if (!hasApplicable) {
     return (
       picker +
       paramWarn +
-      '<p class="bw-pdf-import-empty">No polygons in this project carry component tags that map to BEAMweb dimensions yet. Tag polygons in Take Off, Eh! (foundation slab, exterior wall, interior polyline, etc.) and try again.</p>'
+      '<p class="bw-pdf-import-empty">Nothing in this project maps to OBJECTIVE yet. Tag its floor plans (foundation / above-grade slab), roof plan, exterior walls and perimeter in Take Off, Eh! and try again.</p>'
     );
   }
 
@@ -610,7 +611,7 @@ function renderImportRow(row) {
   return `
     <tr class="${skipped}" data-dim-id="${row.dimId}">
       <td><input type="checkbox" class="bw-pdf-import-row-cb" ${checked} ${disabled} data-dim-id="${row.dimId}" /></td>
-      <td><span class="bw-pdf-import-dim">${escapeHtml(row.dimId)}</span></td>
+      <td><span class="bw-pdf-import-dim">${escapeHtml(row.label || row.dimId)}</span></td>
       <td class="num">${currentStr}</td>
       <td class="num ${deltaClass}">${computedStr}</td>
       <td>${sourceHtml}</td>
@@ -686,12 +687,10 @@ async function applyImportSelection() {
   try {
     const result = await PdfBridge.applyImport(importModalState.activeUuid, dimIds);
     setStatus(
-      `Imported ${result.applied} dimension${result.applied === 1 ? "" : "s"} from Take Off, Eh! · ${escapeHtml(result.project.pdfFileName)}`,
+      `Imported ${result.applied} value${result.applied === 1 ? "" : "s"} into S02 / S11 / S12 from Take Off, Eh! · ${escapeHtml(result.project.pdfFileName)}`,
       "ready"
     );
     closeImportModal();
-    // Refresh the PROJECT tab so the new values render in their inputs AND
-    // LHW fields recompute their _volume (as CALCULATED).
   } catch (err) {
     console.error("[BEAMweb] TakeOffEh import failed:", err);
     setStatus(`Take Off, Eh! import failed: ${err.message}`, "error");
