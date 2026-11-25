@@ -77,8 +77,15 @@ table full size); the sidebar is S01–S21 plus **S22 the Glossary** (Andy: *"we
 include our terms also"* · *"that can form a new section after 21"*), its 15 OBJECTIVE terms chip-marked for Andy to
 correct; every BEAM tab deleted (Footings & Slabs and its helpers, Energy GHG, the xlsx import); Load Sample fills
 PROJECT only. Live: S01, S02, S17, S22; the rest show "arrives in P2/P3".
-**NEXT: P1, the engine** (§9.2). Serve with `npm run stage:data`, then `python3 schema/scripts/nocache-serve.py 8796`
-(a plain http.server lets the browser keep the old module).
+**S01–S21 LIVE ✅ 2026-11-25 (`16babb8`)** (Andy: *"keep adding sections please, as faithful to the values and order
+of the V3 format, but styled per V4"*): V3's engine + sections (`src/`, `climate/`, from andy-rnd `5e0b2f0`) load in
+V3's order; `js/objective-boot.js` stands in for `init.js`; each S-panel adopts its V3 section; `src/styles.css` is
+rethemed by `obstyles.css` §8b. Case 01 gives the full V3 app's key values (190.1 / 93.1 / 93.1 / 49 %). This
+replaces P1–P3's piecemeal port (the spike below stays as the record of why the page code matters).
+**NEXT:** the V4 styling pass section by section (S11's +/− buttons, light cell fills like S12's B.18.2, S16–S19's
+graphics); S02's two forms (V3 Building Information above the BEAM PROJECT form: ❓ which stays); Trust / Trust +
+Verify retargeted from PROJECT to S11 + S12 (§9.2 P2); Load Sample → OBJECTIVE's case studies. Serve:
+`python3 schema/scripts/nocache-serve.py 8796` (`npm run stage:data` only for the local Database).
 
 ## 1. Goals
 
