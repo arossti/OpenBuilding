@@ -14,7 +14,9 @@
     "build:db-fallbacks": "node schema/scripts/build-db-fallbacks.mjs",
     "debug:pdf": "node schema/scripts/debug-pdf-extract.mjs",
     "test:dim-extract": "node schema/scripts/test-dim-extract.mjs",
-    "test:layer-peel": "node schema/scripts/test-layer-peel.mjs"
+    "test:layer-peel": "node schema/scripts/test-layer-peel.mjs",
+    "builders:check": "python3 ../../ABCD.EARTH/artex-osx/docs/mockups/publish_builders.py --to builders --check",
+    "builders:publish": "python3 ../../ABCD.EARTH/artex-osx/docs/mockups/publish_builders.py --to builders"
   },
   "devDependencies": {
     "eslint": "^10.1.0",
