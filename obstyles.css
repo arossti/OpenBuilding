@@ -3220,8 +3220,8 @@ tr.bw-asm-row[hidden],
 }
 /* Footnote cell (TD, distinct from the col-header TH above). The footnote
    is rendered as two spans: a primary status tag (turns purple on
-   `.expired`) and an optional dim-grey suffix for BfCA annotations fused
-   after a `;` — e.g. `Expired 2025 · BfCA BioC calc by mass`. nowrap so
+   `.expired`) and an optional dim-grey suffix for source annotations fused
+   after a `;` — e.g. `Expired 2025 · BioC calc by mass`. nowrap so
    longer combined strings expand the column instead of line-wrapping. */
 .bw-asm-foot {
   font-size: 10px;

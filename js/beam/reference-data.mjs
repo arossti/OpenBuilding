@@ -1,133 +1,8 @@
 /**
- * BEAMweb reference data — inline copies of small, static reference datasets
- * so the app never has to fetch them at runtime and the CSV files can be deleted.
- *
- * Sources (now deleted from docs/csv files from BEAM/):
- *   ENERGY_GHG: 2023 Canadian grid + fuel GHG-intensity factors (13 provinces
- *     and territories, 5 energy sources). Informational reference only.
- *   GLOSSARY:  Embodied carbon glossary. 48 terms and definitions.
- *
- * When we get a newer Canadian National Inventory Report update, bump the
- * numbers in place. Project-level overrides will land in Phase 1 once the
- * state manager is in (user can override any province or add a custom row).
+ * OBJECTIVE 4.0 reference data — the S22 Glossary, inline so the page never
+ * fetches it. OBJECTIVE's own terms first (source: "OBJECTIVE"), then the
+ * embodied-carbon vocabulary.
  */
-
-export const ENERGY_GHG = {
-  units: {
-    electricity: "kgCO2e per kWh",
-    natural_gas: "kgCO2e per m³",
-    oil: "kgCO2e per L",
-    propane: "kgCO2e per L",
-    wood: "kgCO2e per kg"
-  },
-  source: "2023 Canadian grid and fuel GHG intensities (informational reference)",
-  factors: [
-    {
-      province: "Newfoundland and Labrador",
-      electricity_kgco2e_per_kwh: 3.4e-5,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Prince Edward Island",
-      electricity_kgco2e_per_kwh: 0.000276,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Nova Scotia",
-      electricity_kgco2e_per_kwh: 0.00074,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "New Brunswick",
-      electricity_kgco2e_per_kwh: 0.000276,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Quebec",
-      electricity_kgco2e_per_kwh: 1.62e-6,
-      natural_gas_kgco2e_per_m3: 0.001898355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Ontario",
-      electricity_kgco2e_per_kwh: 3.4e-5,
-      natural_gas_kgco2e_per_m3: 0.001899355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Manitoba",
-      electricity_kgco2e_per_kwh: 2.66e-6,
-      natural_gas_kgco2e_per_m3: 0.001897355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Saskatchewan",
-      electricity_kgco2e_per_kwh: 0.000752,
-      natural_gas_kgco2e_per_m3: 0.001840355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Alberta",
-      electricity_kgco2e_per_kwh: 0.000802,
-      natural_gas_kgco2e_per_m3: 0.001939355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "British Columbia",
-      electricity_kgco2e_per_kwh: 1.158e-5,
-      natural_gas_kgco2e_per_m3: 0.001937355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Yukon",
-      electricity_kgco2e_per_kwh: 5.36e-5,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Northwest Territories",
-      electricity_kgco2e_per_kwh: 0.000232,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Nunavut",
-      electricity_kgco2e_per_kwh: 0.000782,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    }
-  ]
-};
 
 export const GLOSSARY = [
   // OBJECTIVE 4.0's own terms (source: "OBJECTIVE"), then the BEAM vocabulary.
@@ -225,11 +100,6 @@ export const GLOSSARY = [
     abbr: "Assemblies",
     full: "Building envelope assemblies",
     desc: "Assembly of building materials to form a wall, floor or roof unit. Can be prefabricated or site-built. May or may not include vapor, air, and water barriers."
-  },
-  {
-    abbr: "BfCA",
-    full: "Builders for Climate Action",
-    desc: "A non-profit division of the Endeavour Centre and the developers of this tool."
   },
   {
     abbr: "Carbon Storage or CO2e Storage",
@@ -367,11 +237,6 @@ export const GLOSSARY = [
     desc: ""
   },
   {
-    abbr: "MCE",
-    full: "Material Carbon Emissions",
-    desc: "MCE is sometimes referred to informally as embodied carbon. MCEs differ from full embodied carbon in that MCEs include only the product-manufacturing stages (A1-A3) of the building lifecycle (with a few exceptions), while embodied carbon includes all phases of the lifecycle except B6 (operational emissions) and B7 (operational water use)."
-  },
-  {
     abbr: "MgO",
     full: "Magnesium Oxide",
     desc: ""
@@ -450,15 +315,5 @@ export const GLOSSARY = [
     abbr: "EC",
     full: "Embodied Carbon",
     desc: "The lifecycle carbon emissions of the building materials.  Includes emissions from all lifecycle phases of the building except for B6 (operational emissions) and B7 (operational water use)."
-  },
-  {
-    abbr: "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources, 2023",
-    full: "",
-    desc: ""
-  },
-  {
-    abbr: "© Sa Majesté le Roi du chef du Canada, représentée par le ministre de Ressources naturelles, 2023",
-    full: "",
-    desc: ""
   }
 ];

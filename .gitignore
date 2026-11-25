@@ -15,7 +15,7 @@ logs/
 /epd-*.json
 
 # Local working notes
-BfCA Server Commands.txt
+*Server Commands.txt
 
 # Local staging of source data into data/ via `npm run stage:data`.
 # Not committed — the Pages workflow does the same copy at deploy time.
@@ -33,7 +33,7 @@ data/beam/
 *.xlsx
 *.xls
 
-# Large external EPD sample sets — local only, never committed (BfCA-shared
+# Large external EPD sample sets — local only, never committed (shared
 # binary dumps). Explicit folder ignore catches .jpg / uppercase .PDF that
 # the extension rules miss.
 docs/PDF References/EPD SAMPLES/BEAM 639 Rows/

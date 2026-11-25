@@ -16,13 +16,8 @@ concurrency:
 
 jobs:
   deploy:
-    # Both remotes have Pages enabled (arossti enabled originally; bfca-labs
-    # enabled 2026-05-11 — same workflow build, identical artifact, separate
-    # Pages sites at arossti.github.io/OpenBuilding/ and bfca-labs.github.io/at/).
-    # Workflow runs on both; each Pages deploy lands on its own remote's site.
-    # Skip on any unrelated fork that pulled this repo down — only the two
-    # canonical OpenBuilding remotes should publish.
-    if: github.repository == 'arossti/OpenBuilding' || github.repository == 'bfca-labs/at'
+    # Publishes arossti.github.io/OpenBuilding/; skipped on any fork.
+    if: github.repository == 'arossti/OpenBuilding'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

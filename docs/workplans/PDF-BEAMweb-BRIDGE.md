@@ -10,7 +10,7 @@
 
 ### Status as of 2026-04-20 (design spec, pre-implementation)
 
-- Design agreed in principle with Andy 2026-04-20 around: (a) per-dim source selector with auto-sync + active-pull semantics, (b) generic component tags + lookup-table translation to dim fields, (c) polyline tool for linear features (interior walls, interior footings) in red, (d) elevation-drawn exterior walls with windows netted as the preferred path for above-grade wall areas, (e) numbered UI labels on quantitative PROJECT inputs, (f) fidelity badge with sheet references, (g) wizard mode shelved (training path via BfCA).
+- Design agreed in principle with Andy 2026-04-20 around: (a) per-dim source selector with auto-sync + active-pull semantics, (b) generic component tags + lookup-table translation to dim fields, (c) polyline tool for linear features (interior walls, interior footings) in red, (d) elevation-drawn exterior walls with windows netted as the preferred path for above-grade wall areas, (e) numbered UI labels on quantitative PROJECT inputs, (f) fidelity badge with sheet references, (g) wizard mode shelved.
 - **No code yet.** Implementation sequenced in §6.
 - **Dependency chain:**
   1. TakeOffEh Step 10 (component taxonomy + polyline type + red stroke + sheet denorm)
@@ -19,21 +19,6 @@
   4. Source selector UI + fidelity badge on each PROJECT dim row
   5. Numbered labels pass (trivial, can land anytime)
 - **Current reality.** TakeOffEh polygons carry `{id, label, vertices, closed, type: area|window, mode: net|add}` per [`polygon-tool.mjs`](../../js/polygon-tool.mjs). No component tag. No depth. `volumes[]` stub exists in [`project-store.mjs`](../../js/project-store.mjs) but empty. Sheet classification (plan/section/elevation) is tracked via [`sheet-classifier.mjs`](../../js/sheet-classifier.mjs) but semantically inert — doesn't influence measurement semantics. See BEAMweb.md §0 Phase 4b entry for audit findings.
-
-### Team feedback — 2026-04-20
-
-Four items from the BfCA team meeting threaded into the spec. Summary + where each one lives:
-
-1. **Stale BEAM workbook + materials DB sources.** The 22 BEAM tab CSVs committed session 3 (`3ea823e`) were fetched from an older workbook URL. Current authoritative URLs are the Google Sheets in the `external-links` footnote below. Refresh pass pending. See §7 **Q27**.
-2. **"EPD Only" filter on Database viewer narrows 821 → 380.** Melanie flagged concern: all 821 entries were informed by EPDs per her review of the import, so the 380 filter number reads like there's missing EPD provenance on ~440 rows. Investigation item — likely a mis-labelled filter criterion (filtering something narrower than "has EPD data"), not a data gap. See §7 **Q28**.
-3. **Biogenic status flags showing `method: none`.** Database viewer's detail pane reads `biogenic_factor=—  carbon_content=— kgC/kg  full_C = — kgCO2e  stored = — kgCO2e` for rows where biogenic carbon is expected (wood, biogenic insulation). Either a data gap (likely resolved by Q27 refresh), a UI rendering bug (reading the wrong field), or an onboarding-friction gap (Melanie may not have seen where biogenic lands in the schema yet). See §7 **Q29**.
-4. **Assembly-preset picker on wall polylines.** Current workflow (BEAM gSheet-style) requires the user to manually tune percentages across framing + cladding + insulation after the picker populates rows. Melanie's ask: when the user draws a wall polyline (red), offer an assembly preset — "Wood 2×4", "Wood 2×6", "Steel stud", etc. — which seeds the downstream F&S-style assembly tab with sensible default percentages the user can still tune. This is a meaningful UX + data addition. See §3.2 (polyline components extended), §5.7 (new preset UX), §6.3 (sequencing), and §7 **Q30** (open design questions).
-
-**External links (non-gitignored — live-only references):**
-- BEAMs workbook: `https://docs.google.com/spreadsheets/d/1LjOpDTjfGQvvfRGCpDb8KkHcUtHzUC5UbvfV-wXy13g/edit?gid=175800287#gid=175800287`
-- BfCA Materials DB: `https://docs.google.com/spreadsheets/d/1-gd2iH7UIoDuEt7gIC35PbgJf2sO5go9IwjkSxue-UA/edit?gid=170425505#gid=170425505`
-
-Record kept here (not in app code) because these are source URLs for upstream refresh, not runtime fetches. When Q27 refresh lands, the committed CSVs in `docs/csv files from BEAM/` and the JSONs in `schema/materials/` update from these sources.
 
 ### Shipped update — 2026-04-22 (PR #11 merged)
 
@@ -516,11 +501,11 @@ On polygon creation/edit, a "Tag" dropdown appears in the measurement panel.
 
 When the user draws a polyline tagged `wall_interior` or a closed polygon tagged `exterior_perimeter`, and `param_wall_height_m` is blank on PROJECT, the TakeOffEh sidebar shows an inline prompt: "Set Wall Height on PROJECT tab" (with a click-through link). Non-blocking — user can draw freely and fill the param later.
 
-### 5.7 Assembly-preset picker on wall polylines (meeting 2026-04-20, Melanie)
+### 5.7 Assembly-preset picker on wall polylines (2026-04-20)
 
 **Problem being solved.** BEAM gSheet's current workflow populates every candidate material in a wall-assembly picker (framing + sheathing + cladding + insulation + barriers + interior finish), each at 0% by default. The user then manually tunes percentages across dozens of rows to describe a single wall assembly. This is a known pain point — same assembly typed repeatedly across projects.
 
-**The preset.** When the user draws a wall polyline (`type: polyline`, `component: wall_interior`) or a perimeter polygon (`type: area`, `component: exterior_perimeter`), the TakeOffEh measurement panel shows a second dropdown below the component tag: **Assembly preset**. Values (v1 catalogue — subject to BfCA team validation, see Q30):
+**The preset.** When the user draws a wall polyline (`type: polyline`, `component: wall_interior`) or a perimeter polygon (`type: area`, `component: exterior_perimeter`), the TakeOffEh measurement panel shows a second dropdown below the component tag: **Assembly preset**. Values (v1 catalogue — to be validated, see Q30):
 
 - Wood 2×4 @ 16" o.c. (light framing)
 - Wood 2×6 @ 16" o.c. (medium framing)
@@ -537,7 +522,7 @@ The preset is carried on the polygon record (`assembly_preset` field per §3.3).
 
 **Default seeding.** Each preset maps to a small table: `{ row_hash → percent }` applied on the assembly tab's first render when the dimension is sourced from `takeoffeh` and the row isn't USER_MODIFIED. Values stay editable — the preset is a seed, not a lock.
 
-Example (illustrative — actual values need Melanie's sign-off; see Q30):
+Example (illustrative — actual values to be validated; see Q30):
 ```
 wood_2x4_16oc:
   - SPF dimension lumber 2x4 → ~12% by volume share
@@ -611,7 +596,7 @@ Deferred from the original Phase 4b.2 scope (re-sequenced into polish or later p
 - Bulk "Use TakeOffEh for all connected dims" action on the PROJECT header.
 - Pitched-roof cavity handling (Q22 resolved).
 
-### 6.6 Phase 4b.5 — Assembly-preset wire-through (meeting 2026-04-20, Melanie)
+### 6.6 Phase 4b.5 — Assembly-preset wire-through (2026-04-20)
 
 - `js/shared/assembly-presets.mjs` (new): `ASSEMBLY_PRESETS` catalogue — preset ID → display label + default `{ row_hash → percent }` seed table. Preset list per §5.7 (subject to Q30 refinement).
 - TakeOffEh measurement panel: second dropdown on `wall_interior` / `exterior_perimeter` polylines — "Assembly preset" (persists to polygon `assembly_preset` field per §3.3).
@@ -623,7 +608,7 @@ Deferred from the original Phase 4b.2 scope (re-sequenced into polish or later p
 - Timber framing volume from polygons (see §1 Non-goals).
 - HOT2000 operational energy (BEAMweb.md §10).
 - Point-type polygons (use small area polygons instead).
-- Wizard mode with animated arrows (BfCA training path — shelved 2026-04-20).
+- Wizard mode with animated arrows (shelved 2026-04-20).
 
 ---
 
@@ -651,115 +636,6 @@ Carrying forward from BEAMweb.md §7 Q19 with updates:
   - (d) **UI impact for (a) only.** None on the Parser side — the Import preview already renders multiple contributors per dim. (b) above is a larger Parser UX change.
 - ✅ **Q25 — Party/Demising wall naming in code.** Shipped. Field ID `dim_party_wall_area`, UI label "Party / Demising Wall Area".
 - ✅ **Q26 — TakeOffEh Step 10 ownership.** Resolved as part of Phase 4b.1 scope (single branch, single PR). Polygon schema + polyline + component dropdown shipped in commit `529e297`.
-
-### Opened by BfCA team meeting (2026-04-20)
-
-- **Q27 — Upstream BEAM + materials DB refresh.** The 22 BEAM tab CSVs in `docs/csv files from BEAM/` and the 821-record `schema/materials/` catalogue were both built from an older workbook URL (session 3, `3ea823e`). Team confirmed the current authoritative sources are:
-  - BEAMs workbook: `https://docs.google.com/spreadsheets/d/1LjOpDTjfGQvvfRGCpDb8KkHcUtHzUC5UbvfV-wXy13g/edit?gid=175800287#gid=175800287`
-  - BfCA materials DB: `https://docs.google.com/spreadsheets/d/1-gd2iH7UIoDuEt7gIC35PbgJf2sO5go9IwjkSxue-UA/edit?gid=170425505#gid=170425505`
-
-  **Proposal:** run a refresh pass as its own focused branch — re-fetch via `schema/scripts/fetch-beam-sheet.py` against the new workbook URL, re-run the importer against the new DB sheet, re-validate, diff the two generations, flag any rows that changed shape or disappeared. The existing F&S parity tests (commit `8bee3f4`) should still pass against the refreshed data — any numerical shifts are meaningful signals that real-world EPD values moved, not regression. Scope ~1 session. Best sequenced **before Phase 4b.2 lands** so the bridge builds against current data.
-
-- **Q28 — "EPD Only" filter on the Database viewer filters 821 → 380.** Melanie flagged concern in the meeting: by her recollection, every one of the 821 records was informed by an underlying EPD — so a filter narrowing to 380 reads like ~440 rows are being mis-labelled as non-EPD.
-
-  **Investigation finding (2026-04-20, post-Q27):** the filter is **heuristic**, not a principled field check. See [`js/database.mjs:238`](../../js/database.mjs#L238):
-
-  ```js
-  if (state.epdOnly) {
-    // index doesn't carry epd.type — fall back to beam_id prefix heuristic.
-    // beam_id starting with uppercase letters = product-specific BEAM codes;
-    // mixed-case short hex ids are the BEAM-average / industry-average set.
-    if (/^[a-z0-9]{6,}$/.test(e.beam_id || "")) return false;
-  }
-  ```
-
-  The filter excludes rows whose `beam_id` is ≥6 lowercase-hex chars (auto-generated IDs for industry / BEAM-average entries). The 380 visible = rows with uppercase/mixed-case beam_ids = **product-specific EPD rows**. The 440 excluded = industry / BEAM-average rows.
-
-  So the filter is actually "exclude averages", not "show rows with EPD data" — both hypotheses in the original Q28 framing were wrong. **Two fix paths for Melanie to choose:**
-  1. **Relabel** the checkbox to match what it does — "Product EPDs only" or "Exclude Industry & BEAM Averages."
-  2. **Make it principled** — add `epd.type` (or a derived `is_product_specific` boolean) to `schema/materials/index.json` and check that instead of the beam_id regex. Heuristics drift; principled fields don't. This is a small index-generator change in `schema/scripts/beam-csv-to-json.mjs`.
-
-  Recommend path 2, but path 1 is a one-line relabel that immediately de-confuses the UI.
-
-- **Q29 — Biogenic status flags reading `method: none` on rows that should carry biogenic carbon.** Database viewer's detail pane shows `biogenic_factor=—  carbon_content=— kgC/kg  full_C = — kgCO2e  stored = — kgCO2e` on wood / biogenic-insulation rows where non-zero values are expected.
-
-  **Investigation finding (2026-04-20, post-Q27):** it's **two issues compounded**, not one.
-
-  *Wood records split across two method states* (per fresh `06-wood.json` after Q27):
-  - 94 of 160 wood records: `method: "wwf_storage_factor"` with populated `biogenic_factor`, `carbon_content_pct_kgc_kg`, `storage_retention_pct`, `carbon_content_kgc_per_unit` inputs.
-  - 66 of 160 wood records: `method: "none"`. Either intentionally non-biogenic (treated timber where the claim is waived) or curation-in-progress — Melanie's call per-row.
-
-  *The Database viewer detail pane ([`js/database.mjs:637-641`](../../js/database.mjs#L637-L641)) reads fields that don't exist in the source data*:
-
-  ```js
-  biogenic   method: ${bg.method || "—"}
-             biogenic_factor=${fmtOr(bg.biogenic_factor, "—")}  carbon_content=${fmtOr(bg.carbon_content_pct_kgc_kg, "—")} kgC/kg
-             full_C   = density × thickness × bio × C × 3.67 = ${fmtOr(bg.full_carbon_kgco2e_per_common_unit, "—")} kgCO₂e
-             stored   = full_C × ${fmtOr(bg.storage_retention_pct, "—")} = ${fmtOr(bg.stored_kgco2e_per_common_unit, "—")} kgCO₂e
-             C/unit   = ${fmtOr(bg.carbon_content_kgc_per_unit, "—")} kgC
-  ```
-
-  The fields `bg.full_carbon_kgco2e_per_common_unit` and `bg.stored_kgco2e_per_common_unit` **don't exist on any record** — the formula is described in `biogenic.notes` text but never computed and stored. So even on the 94 fully-populated wood rows, the `full_C` and `stored` lines render as `—`.
-
-  **Resolution (2026-04-20, after Andy's paste of the BAM002 sheet row):** it was actually **an importer bug, not a source-sheet gap and not a viewer bug**. The BfCA Materials DB sheet DOES carry the stored value — column Z ("Biogenic Storage kgCO₂e/(common unit)") = 12.97 on BAM002. But `schema/scripts/beam-csv-to-json.mjs` at line 316 read **column AB** ("WWF Storage Factor kgCO₂e/kgC" — a different per-kgC factor) thinking it was the stored value. Column AB is blank on BAM002 (and most other rows), so the importer wrote `stored_kgco2e_per_common_unit: null` on every row where the sheet actually had the value in column Z.
-
-  **Fix shipped:** importer now reads **column Z** for `stored_kgco2e_per_common_unit`, and reads AB separately into a newly-populated `wwf_storage_factor_kgco2e_per_kgc` field. Also added a small derivation: when AE (full_C) is blank but Z and AF (storage_retention) are present, compute `full_C = stored / storage_retention` so the per-record block stays internally consistent. Commit carries the importer fix + regenerated `schema/materials/*.json`.
-
-  **Post-fix coverage:** 40 of 160 wood records + 41 of 217 thermal records now carry populated `stored_kgco2e_per_common_unit` (previously zero). 129 records across all 8 groups carry populated `wwf_storage_factor_kgco2e_per_kgc` (the separate column AB). BAM002 specifically: `stored_kgco2e_per_common_unit: 12.97`, `full_carbon_kgco2e_per_common_unit: 14.41`, matching the expected formula output.
-
-  **Residual question for Melanie** (still worth asking — narrower than the original): the 66 wood rows + 192 thermal rows that show `method: none` in the source data — are those intentionally non-biogenic (treated wood products, mineral insulation, etc.) or curation-in-progress?
-
-  **Second residual — column canonicalisation (2026-04-20, surfaced by Andy's sheet-screenshot):** a scan of rows 429-448 in the refreshed DB shows the biogenic-block columns aren't used consistently across rows. Examples:
-  - `HTW000` (Heat Treated Wood / Abodo / Vulcan 20mm): Z blank, AB=18.1665, AE=20.185. Note that 20.185 × 0.9 (storage retention) ≈ 18.17 — so AB on this row plausibly holds the *stored* value despite the header labelling it "WWF Storage Factor kgCO₂e/kgC". HTW002 and HTW003 same pattern.
-  - `HWF000` (HempWood): Z=5.37 populated AND AB=9.72 populated — different numbers, different semantics unclear.
-  - `7d79df` (Hempcrete Cast in-situ / IsoHemp): Z=10.22 AND AE=10.22 — same value in both columns.
-  - Column AA (common unit label) reads `m2` / `m²` / `m2 RSI` / `m2•RSI` / blank across adjacent rows with no stable convention.
-
-  These look like working-notes patterns — values landed in whichever column was convenient at data-entry time, not a broken schema. Chasing this with importer heuristics (try Z, fall back to AE × retention, or AB if units look right) would bake our current row-by-row mind-reading into code and silently drift on every future refresh. The fix belongs source-side: canonicalise what goes in each column so refreshes land cleanly.
-
-  **Ask for Melanie:** a pass over the biogenic columns (X, Y, Z, AA, AB, AC, AD, AE, AF) to enforce a single convention per column per row. Proposed canonical form:
-  - **Z** = `stored` value in kgCO₂e per common unit (always)
-  - **AA** = common-unit label — pick one exact format (e.g. `m²·RSI`) and apply consistently
-  - **AB** = WWF storage factor in kgCO₂e per kgC (if tracked; otherwise blank)
-  - **AE** = full-C value in kgCO₂e per common unit (if the sheet tracks it; otherwise leave blank and let the importer derive `full_C = stored / storage_retention` as it does today)
-  - **X / Y / AF** = biogenic factor, % C content, storage retention — seem consistent already, just spot-check
-  - Rows where only AB or AE carries a value (like HTW00X) should get their values migrated into Z / AE as appropriate, and whichever column isn't the "single source of truth" for a given row should be left blank
-
-  The 21 wood + ~170 thermal rows that still come through null-on-`stored` after our fix will mostly populate automatically once the columns are canonicalised. No BEAMweb code change is required for this cleanup — it's purely a BfCA source-sheet hygiene pass.
-
-- **Q30 — Assembly-preset design questions.** Item 4 from the 2026-04-20 meeting, threaded into §3.2 + §5.7 + §6.6 Phase 4b.5. Open sub-questions:
-  - (a) **Preset catalogue.** Initial list proposed in §5.7 (Wood 2×4 / 2×6 / 2×8, Steel stud 3-5/8 / 6, CMU 8, ICF 6, Other). Is this the right set? Canadian-residential-focused, so what's missing? SIP panels? Passive House wall types? TJI floor joists (different takeoff entirely — belongs to floors, not walls)?
-  - (b) **Default percentages source of truth.** Does BfCA already have an authoritative table mapping assembly → default material mix (e.g. "Wood 2×4 @ 16" o.c." → SPF 12% by volume + drywall 100% one side + batt R-13 100% cavity + vapour barrier 100%)? If yes, grab it; if no, needs a BfCA-side exercise to codify the defaults before we can wire them.
-  - (c) **Multi-preset per dimension.** If user draws three `wall_interior` polylines with different presets, does the resulting Interior Walls assembly tab render three separate picker groups (one per preset) or flatten into a single group with weighted averages? **Proposal:** three separate groups is more faithful to the data and easier to audit; flattening only in the dim total.
-  - (d) **Override the preset after drawing.** Should the user be able to change a polyline's preset later without re-drawing? **Proposal:** yes — same picker accessible via polygon-edit panel. Preset change triggers re-seed on the assembly tab (with USER_MODIFIED rows sticky, as always).
-  - (e) **Exterior walls.** Do exterior walls get presets too (Wood 2×4 + cladding-type combo), or are they manual-tuned given their higher variability? **Lean:** same preset mechanism, larger catalogue — but that multiplies the preset list by cladding type. Maybe two dropdowns for exterior: "framing preset" + "cladding preset"? Design call needed.
-
-### Draft ask for Melanie — EPD provenance semantics (Q28 + Q29 consolidated)
-
-Ready-to-paste message. Pairs the two open concerns (EPD-Only filter narrowing 821 → 380, and 34 of 36 BEAM-Avg rows carrying `null` in `carbon.stated.value_kgco2e`) into one ask because both probe the same underlying question: what does "this row has an EPD" actually mean in the BfCA source sheet?
-
-> **Hi Melanie — two questions on the Materials DB schema that we'd love your steer on before we code around them.**
->
-> **1. EPD-Only filter (Database viewer).** When we tick the "EPD Only" checkbox, the list narrows from 821 to 380 entries. You mentioned in the meeting that every row in the catalogue was informed by an EPD during BfCA's curation, so this 380 number feels too low. Can you help us distinguish:
->   - Does "informed by an EPD" mean the row has its own underlying EPD document (direct provenance — the 380), OR is the 821 inclusive of rows that were *derived* from EPDs (industry averages, BEAM-Avg rows computed from a peer set, extrapolations for related products)?
->   - If the 440 delta is "EPD-derived" rows, the filter is correct but the label is misleading — we'd relabel it to "Direct EPD only" or similar. If instead you expect those 440 rows to carry a direct EPD reference the filter is missing, that points at either a data gap (source sheet) or a code gap (filter checks the wrong field).
->
-> **2. BEAM-Avg rows with null values.** After regenerating from the current DB sheet, 34 of 36 rows flagged as `is_beam_average: true` carry `null` in their stored GWP field. Two rows (XPS BEAM-Avg and one concrete BEAM-Avg) have numeric values populated; the other 34 stay null.
->
->   Runtime we handle this — BEAMweb has a `resolveBeamAverage()` helper that computes the mean of same-subgroup peer GWPs at boot when the stored value is null, so all 36 rows end up with usable numbers. But the data question is:
->   - Is the expectation that a BEAM-Average row has its averaged numeric pre-computed and saved on the row, OR that it stays null and gets computed on demand by consumers?
->   - If "pre-computed and saved" is the intent, are the 34 currently-null rows a curation-in-progress gap (you're working through them manually), or is there a formula column in the sheet that should be filling those in automatically and isn't?
->   - ~~Related: the Database viewer's detail pane shows `biogenic method: none`, `biogenic_factor: —`, `carbon_content: — kgC/kg`, `full_C: — kgCO2e`, `stored: — kgCO2e` on wood and biogenic-insulation rows where we'd expect non-zero values.~~ **Partly resolved 2026-04-20 as an importer bug** — the BfCA Materials DB sheet had the stored value in column Z all along; our importer was reading column AB (WWF Storage Factor) by mistake. Fix shipped; 81 wood + thermal records now carry populated `stored` values. Two narrower residuals for you:
->
->     (a) On the 66 wood + 192 thermal rows that explicitly show `method: none` in the sheet, is that intentional (treated wood, mineral insulation, etc.) or curation-in-progress?
->
->     (b) **The bigger one — column canonicalisation.** Spot-checking rows 429-448 in the refreshed DB (Heat Treated Wood, HempWood, Hempcrete) shows the biogenic-block columns aren't used the same way across rows. Some rows have `stored` in Z as documented; some have it in AB (where the header actually says "WWF Storage Factor kgCO₂e/kgC"); some have the same value in both Z and AE; column AA (common-unit label) alternates between `m2`, `m²`, `m2 RSI`, and `m2•RSI`. We can't fix this in the importer without guessing — "try Z first, else AE × retention, else AB if the units look right" would bake our current row-by-row mind-reading into code and silently drift on every future refresh. Could you do a pass over the biogenic columns to enforce a single convention per column per row? Proposed canonical: **Z** = stored kgCO₂e per common unit; **AA** = one consistent common-unit label (pick one e.g. `m²·RSI`); **AB** = WWF storage factor kgCO₂e per kgC (or blank); **AE** = full-C kgCO₂e per common unit (or blank — the importer derives it from stored/retention when blank). Once that pass lands, the remaining 21 wood + ~170 thermal rows that currently come through null on `stored` should mostly populate themselves via the next refresh, no code change needed on our end.
->
-> Your answer on (1) tells us how to relabel the filter (or whether we have a bug to fix). Your answer on (2) tells us whether BEAMweb should keep computing averages client-side as a permanent fallback, treat them as a temporary stopgap, or rip the code path out and rely on pre-populated values. Thanks!
-
-Andy to relay; answer will drive follow-up commits on Q28 + Q29.
-
----
 
 ## Appendix — implementation sketch
 

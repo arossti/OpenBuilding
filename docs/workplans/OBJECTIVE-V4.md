@@ -30,9 +30,11 @@ commit-push until then. So no PR yet until it is cleaned of BfCA references."*).
 - This plan moved here from andy-rnd (andy-rnd #25 merged, `5e0b2f0`: a pointer there).
 
 **Remaining before a PR**
-- The BfCA references left in data and docs: the BEAM material data (`schema/`, `docs/csv files from BEAM/`,
-  `schema/schema.md`), retired when Materials replaces the Database; the README's history sections.
-- The repo's CLAUDE.md rewrite, with Andy.
+- The BfCA / NRCan / MCE references (Andy 2026-11-25: *"Yes delete all NRC and BfCA and MCE references, we will not
+  use any of that at the end."*): ✅ code, config, CLAUDE.md (rewritten), README, workplans, the Glossary, the three
+  `docs/*(Jacob)/` folders; the IndexedDB store renamed `openbuilding` (a one-time migration carries saved Take Off,
+  Eh! sessions across). ❓ LEFT: the material catalogue itself (`schema/`, `docs/csv files from BEAM/`), BfCA's data
+  — 821 `$schema` links, 264 provenance notes ("BfCA BioC calc by mass"), BfCA ids and names; it feeds `database.html`.
 - ABCD BUGLIST #266, so Assemblies is rebuilt from today's seed.
 
 **Next: the port, §9.**
@@ -270,6 +272,10 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
 - **P2 — S11 and S12 first**, in the dark theme: they are what Trust / Trust + Verify fill, so the PDF-mapping tests
   (Andy, the same evening) can aim at real fields. The bridge's mapping (`js/beam/pdf-bridge-import.mjs`, `polygon-map.mjs`)
   learns S11's rows and S12's volumes.
+- **Foundations read the Section Builder** (Andy 2026-11-25: *"our Section Builder can inform basement styles per
+  F280 requirements (in can read form how a user configures the section builder to determine which
+  basement/footing/foundation style we are dealing with."*): the BEAM Footings & Slabs tab is gone; the foundation's
+  F280 configuration comes from the section the user builds, not a picker.
 - **P3 — the rest**, section by section, each checked against andy-rnd's own tests and case studies (the shared
   computation, §7.1), S01's key values last because they read everything.
 

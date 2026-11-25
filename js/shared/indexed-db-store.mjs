@@ -25,7 +25,11 @@
 // back to cold-start behaviour — IndexedDB isn't load-bearing for the happy
 // path, it's session persistence.
 
-const DB_NAME = "bfca-openbuilding";
+const DB_NAME = "openbuilding";
+// The store's name until 2026-11-25. On first open its records are copied
+// into DB_NAME and it is deleted (migrateLegacy below); drop this constant
+// and the migration once every browser that used it has opened the site.
+const LEGACY_DB_NAME = ["bfca", "openbuilding"].join("-");
 const DB_VERSION = 3;
 const STORE_PROJECTS = "parser-projects";
 const STORE_PDFS = "parser-pdfs";
@@ -61,10 +65,35 @@ function openDB() {
         db.createObjectStore(STORE_EPD_COMMITTED, { keyPath: "id" });
       }
     };
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => migrateLegacy(req.result).then(() => resolve(req.result), reject);
     req.onerror = () => reject(req.error);
   });
   return _dbPromise;
+}
+
+// Copy every record of the legacy-named store into this one, once, then
+// delete the legacy store. Existing records here win (put only what is absent).
+async function migrateLegacy(db) {
+  if (typeof indexedDB.databases !== "function") return;
+  const names = (await indexedDB.databases()).map((d) => d.name);
+  if (!names.includes(LEGACY_DB_NAME)) return;
+  const legacy = await awaitReq(indexedDB.open(LEGACY_DB_NAME));
+  const stores = [...legacy.objectStoreNames].filter((n) => db.objectStoreNames.contains(n));
+  for (const name of stores) {
+    const rows = await awaitReq(legacy.transaction(name, "readonly").objectStore(name).getAll());
+    const tx = db.transaction(name, "readwrite");
+    const store = tx.objectStore(name);
+    for (const row of rows) {
+      const key = store.keyPath ? row[store.keyPath] : undefined;
+      if (key === undefined || (await awaitReq(store.count(key))) === 0) store.put(row);
+    }
+    await new Promise((res, rej) => {
+      tx.oncomplete = res;
+      tx.onerror = () => rej(tx.error);
+    });
+  }
+  legacy.close();
+  indexedDB.deleteDatabase(LEGACY_DB_NAME);
 }
 
 function awaitReq(req) {

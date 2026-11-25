@@ -117,7 +117,7 @@ Every commit passes `npm run test:layer-peel` + `npm run test:dim-extract` + a P
 
 ## 5. Git workflow
 
-- Commit + push to both remotes (`openbuilding` = arossti/OpenBuilding; `origin` = bfca-labs/at mirror) after every meaningful change.
+- Commit + push to `origin` (arossti/OpenBuilding) after every meaningful change.
 - Never push to `main`, never force-push, never `--no-verify`.
 - Commit messages via `git commit -F /tmp/msg.txt` (heredoc-quoting bites on em-dashes).
 - End of branch: PR on `arossti/OpenBuilding`, Andy merges, delete branch on both remotes.

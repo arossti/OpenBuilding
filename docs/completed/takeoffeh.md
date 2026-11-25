@@ -416,7 +416,7 @@ var project = {
 | **ProTakeoff** (GitHub) | No | Manual | Yes | No | Partial | No (Tauri) | Yes (MIT) |
 | **TakeOffEh (ours)** | Heuristic (v1), ML (v3) | Auto + manual | Yes | Yes (v2) | Yes (v4) | Yes | Yes |
 
-**Our differentiator:** Purpose-built for Canadian residential construction documents. Understands OBC Part 9 conventions, NBC sheet numbering, metric/imperial dual units, and integrates with BfCA's embodied carbon workflow. Not trying to be a general-purpose takeoff tool — focused on the area/volume data needed for EC calculations (BEAM, MCE2, wbLCA tools).
+**Our differentiator:** Purpose-built for Canadian residential construction documents. Understands OBC Part 9 conventions, NBC sheet numbering, metric/imperial dual units, and feeds OBJECTIVE's energy and carbon workflow. Not trying to be a general-purpose takeoff tool — focused on the area/volume data needed for EC calculations (OBJECTIVE, wbLCA tools).
 
 ---
 
@@ -724,7 +724,7 @@ at/                              ← repo root is the deployed site (flat since 
 ├── index.html                   ← landing / app directory
 ├── takeoffeh.html               ← TakeOffEh app
 ├── matrix.html                  ← EC Matrix app
-├── database.html                ← BfCA Material Database viewer
+├── database.html                ← Material Database viewer
 ├── beamweb.html                 ← BEAMweb embodied-carbon calculator
 ├── dependencies.html            ← Dev dependency manifest
 ├── obstyles.css               ← single consolidated design system (~5000 lines)

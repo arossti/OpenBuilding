@@ -1014,7 +1014,7 @@ async function handleTrust(sourceFile) {
   }
 
   // Duplicate detection — workplan db-side bug. EPD-Parser candidates
-  // arrive with id=null (beam_id is BfCA-internal per §5.5), so prior
+  // arrive with id=null (beam_id is BEAM-internal per §5.5), so prior
   // logic minted a fresh id every Trust click and re-importing the same
   // EPD created a duplicate row. Now we look for a likely-match against
   // in-session committed records (full-record match on manufacturer +

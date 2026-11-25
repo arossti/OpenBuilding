@@ -1,5 +1,5 @@
 {
-  "name": "bfca-openbuilding",
+  "name": "openbuilding",
   "version": "0.2.0",
   "description": "OpenBuilding.ca — browser-native toolkit for embodied carbon assessment on Canadian construction projects",
   "private": true,
