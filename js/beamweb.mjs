@@ -192,7 +192,7 @@ function renderPanelBody(tab) {
 // Per-tab subtitle and body overrides. Stubs where calcs aren't implemented yet;
 // real content replaces these per phase.
 const PANEL_SUBTITLES = {
-  introduction: "How BEAMweb works · methodology reference · disclaimer",
+  introduction: "About OBJECTIVE 4.0 · what changes · status",
   project: "Project metadata · main-building and garage dimensions · feeds every assembly tab",
   "footings-slabs": "Concrete footings · pads & piers · slabs · rebar · sub-slab insulation · basement flooring",
   "foundation-walls": "Concrete / ICF / earth-based foundation walls + insulation",
@@ -220,33 +220,32 @@ const PANEL_BODIES = {
   introduction: `
     <div class="beam-tbd bw-intro">
       <img src="graphics/objective-logo.svg" alt="OBJECTIVE" class="bw-intro-logo" />
-      <h3>Welcome to BEAMweb</h3>
+      <p class="bw-intro-tagline">the targeted energy use intensity tool</p>
+      <h3>OBJECTIVE 4.0</h3>
       <p class="bw-intro-lede">
-        A browser port of the BEAM embodied carbon calculator, built for Canadian projects.
+        The bridge from OBJECTIVE's annual energy model to dynamic hourly analysis, ASHRAE 140 compliance and the
+        ABCD.EARTH building model.
       </p>
 
-      <h3>How it works</h3>
+      <h3>What 4.0 changes</h3>
       <ul class="bw-intro-list">
-        <li>Enter your project meta and areas on the <strong>PROJECT</strong> tab — or import them from a BEAM workbook or a PDF-Parser project.</li>
-        <li>For each assembly tab (Footings &amp; Slabs through Garage), select the materials you used and the quantities.</li>
-        <li>Material emissions come from the <a href="database.html" class="db-kv-link">OpenBuilding.ca material database</a> — 821 records, full EN 15804+A2 per-stage scope.</li>
-        <li>Review the totals on <strong>REVIEW</strong> + <strong>RESULTS</strong>. Print to PDF for a project report.</li>
+        <li>Every above-grade wall faces a direction.</li>
+        <li>Every window and door sits in a wall, and every skylight in a roof; an opening's area is its width × height.</li>
+        <li>Window overhangs set summer shading by CSA F280 Annex A.</li>
+        <li>The envelope can come straight from a <a href="pdfparser.html" class="db-kv-link">PDF-Parser</a> takeoff: each wall with its facing, each window with its width and height.</li>
+        <li>Files say their version, so a 4.0 project always reopens whole.</li>
       </ul>
 
-      <h3>Status — Phases 0–3 live</h3>
+      <h3>Status: in development</h3>
       <p>
-        State manager, file handler, PROJECT tab, and Footings &amp; Slabs assembly picker are all
-        live with BEAM gSheet parity. The other 11 assembly tabs (Phase 4) and REVIEW / RESULTS
-        (Phase 5) are stubbed and queued.
+        The 4.0 inputs are being rebuilt on this page's layout; the tabs are still the BEAM calculator's for now.
+        OBJECTIVE 3 stays live at
+        <a href="https://objective.openbuilding.ca" class="db-kv-link" target="_blank" rel="noopener">objective.openbuilding.ca</a>.
       </p>
       <p>
-        See <a href="https://github.com/arossti/OpenBuilding/blob/main/docs/workplans/BEAMweb.md" class="db-kv-link" target="_blank" rel="noopener">BEAMweb.md</a> for the workplan and open questions.
-      </p>
-      <p>
-        Data source: <a href="database.html" class="db-kv-link">OpenBuilding.ca Material Database</a>.
-        Companion apps: <a href="pdfparser.html" class="db-kv-link">PDF-Parser</a> (area takeoff),
-        <a href="index.html" class="db-kv-link">app directory</a>,
-        <a href="dependencies.html" class="db-kv-link">dependency manifest</a> (dev).
+        Companion tools: <a href="pdfparser.html" class="db-kv-link">PDF-Parser</a> (area takeoff),
+        <a href="database.html" class="db-kv-link">Material Database</a>,
+        <a href="index.html" class="db-kv-link">all OpenBuilding.ca tools</a>.
       </p>
     </div>
   `,
@@ -767,7 +766,6 @@ async function loadMaterialIndex() {
     const idx = await res.json();
     state.materialCount = idx.count;
     state.materialIndex = idx;
-    document.getElementById("beam-material-count").textContent = `${idx.count.toLocaleString()}-material`;
     document.getElementById("beam-material-source").textContent =
       `materials: ${idx.count} records · sha ${short(idx.generated_from_csv_sha256)}`;
   } catch (err) {

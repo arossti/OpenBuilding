@@ -3188,6 +3188,14 @@ tr.bw-asm-row[hidden],
   filter: brightness(0) invert(1);
   opacity: 0.85;
 }
+.bw-intro-tagline {
+  margin: -8px 0 22px 0;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
 /* Introduction tab: centre-align everything so headings and body text read
    as a single composed block. Headings keep their baseline size; the list
    loses bullets so bullet glyphs don't float offset from the centred text. */
