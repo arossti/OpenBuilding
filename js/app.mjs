@@ -816,7 +816,8 @@ function setMeasureMethod(method) {
 
 function setWindowMode(mode) {
   _windowMode = mode;
-  document.getElementById("window-mode").value = mode;
+  var sel = document.getElementById("window-mode"); // removed 2026-11-25: openings always net
+  if (sel) sel.value = mode;
 }
 
 /* ── Phase 4b.1 — Component tag + assembly preset ────── */
@@ -1020,7 +1021,8 @@ function _handleWindowClick(pt) {
   }
   // Window tool auto-tags as window_opening — the component picker is scoped
   // to measure/polyline tools where classification is ambiguous.
-  var opts = { type: "window", mode: _windowMode, component: "window_opening" };
+  // Openings always net out of their wall (Andy 2026-11-25: "the designed behaviour").
+  var opts = { type: "window", mode: "net", component: "window_opening" };
   if (_measureMethod === "rectangle") {
     _handleGenericRectangleClick(pt, opts);
   } else {
