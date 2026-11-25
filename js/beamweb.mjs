@@ -203,7 +203,8 @@ const PANEL_SUBTITLES = {
   project: "Building information · main-building and garage dimensions",
   transmission: "The envelope: walls by facing, their hosted windows and doors, roofs and their skylights",
   "volume-surface": "Volumes, surface areas and their ratios",
-  "dependency-graph": "Architecture snapshot — Foundation / Coordination / Application modules + registered field edges",
+  "dependency-graph":
+    "Architecture snapshot — Foundation / Coordination / Application modules + registered field edges",
   glossary: `${GLOSSARY.length} terms: OBJECTIVE's own and the building-science vocabulary`
 };
 
@@ -299,8 +300,24 @@ function defaultStub(tab) {
 // names its OBJECTIVE field (data-kv) so the engine stamps it.
 // ──────────────────────────────────────────────────────────────────────
 const KEY_VALUE_ROWS = [
-  { id: "T.1", label: "Lifetime Carbon", unit: "kgCO2e/m\u00b2 · service life", ref: "e_6", target: "h_6", actual: "k_6", pct: "m_6" },
-  { id: "T.2", label: "Annual Carbon", unit: "kgCO2e/m\u00b2/yr", ref: "e_8", target: "h_8", actual: "k_8", pct: "m_8" },
+  {
+    id: "T.1",
+    label: "Lifetime Carbon",
+    unit: "kgCO2e/m\u00b2 · service life",
+    ref: "e_6",
+    target: "h_6",
+    actual: "k_6",
+    pct: "m_6"
+  },
+  {
+    id: "T.2",
+    label: "Annual Carbon",
+    unit: "kgCO2e/m\u00b2/yr",
+    ref: "e_8",
+    target: "h_8",
+    actual: "k_8",
+    pct: "m_8"
+  },
   { id: "T.3", label: "TEUI", unit: "kWh/m\u00b2/yr", ref: "e_10", target: "h_10", actual: "k_10", pct: "m_10" }
 ];
 
@@ -402,10 +419,7 @@ async function handleLoadSample() {
   setStatus(`Loading sample: ${entry.label}…`, "busy");
   try {
     const result = await loadSample(sampleId);
-    setStatus(
-      `Loaded "${result.label}" · ${result.projectFieldCount} PROJECT fields.`,
-      "ready"
-    );
+    setStatus(`Loaded "${result.label}" · ${result.projectFieldCount} PROJECT fields.`, "ready");
   } catch (err) {
     console.error("[load-sample]", err);
     setStatus(
@@ -498,7 +512,10 @@ async function handleTrustTakeOffEh() {
   }
   const dimIds = preview.rows.filter((r) => r.hasValue).map((r) => r.dimId);
   if (dimIds.length === 0) {
-    setStatus("Trust: no computable dimensions in the latest Take Off, Eh! session. Tag polygons there first.", "error");
+    setStatus(
+      "Trust: no computable dimensions in the latest Take Off, Eh! session. Tag polygons there first.",
+      "error"
+    );
     return;
   }
   try {

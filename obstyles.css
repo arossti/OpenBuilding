@@ -1529,7 +1529,9 @@ html.theme-dark body {
   font-weight: 700;
   cursor: pointer;
   vertical-align: middle;
-  transition: background 0.08s, border-color 0.08s;
+  transition:
+    background 0.08s,
+    border-color 0.08s;
 }
 .db-row-remove:hover {
   background: rgba(232, 121, 249, 0.22);
@@ -2295,10 +2297,17 @@ html.theme-dark body {
 
 /* ── S01 heads-up display: the three key-value rows in the masthead, on every
    section (OBJECTIVE-V4.md §9.2 P0). The same table, larger, opens S01. ── */
+/* The header wraps: logo · title · spacer · nav on the first line, the HUD
+   as a full-width second line (Andy 2026-11-25: "We can use the browser's
+   full width"). */
+.beam-header:has(.op-hud) {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
 .op-hud {
-  flex: 1;
+  order: 10;
+  flex: 1 0 100%;
   min-width: 0;
-  margin: 0 20px;
   padding: 6px 12px;
   background: var(--bg-panel);
   border: 1px solid var(--border);
@@ -2373,7 +2382,7 @@ html.theme-dark body {
   margin: 2px 0 0 30px;
   font-size: 11px;
 }
-@media (max-width: 1100px) {
+@media (max-width: 800px) {
   .op-hud .op-kv-unit {
     display: none;
   }
@@ -4144,4 +4153,3 @@ details.dep-details pre {
 .dep-drift li.ok {
   color: #4ade80;
 }
-
