@@ -6,7 +6,7 @@
 // FileHandler.exportJson and parsed by FileHandler.importJson. PROJECT-tab
 // fields (project_*, dim_*, garage_*) live in the JSON; a sample fills
 // PROJECT only (the BEAM assembly tabs are gone). OBJECTIVE's own case
-// studies replace this with the engine (OBJECTIVE-V4.md §9.2 P1).
+// studies replace this with the engine (schema/schema.md §9.2 P1).
 //
 // Catalog of available samples below; UI surfacing is a single button today
 // (Load Sample), with room for a dropdown when more case-study buildings land.

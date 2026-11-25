@@ -2296,7 +2296,7 @@ html.theme-dark body {
 }
 
 /* ── S01 heads-up display: the three key-value rows in the masthead, on every
-   section (OBJECTIVE-V4.md §9.2 P0). The same table, larger, opens S01. ── */
+   section (schema/schema.md §9.2 P0). The same table, larger, opens S01. ── */
 /* The header wraps: logo · title · spacer · nav on the first line, the HUD
    as a full-width second line (Andy 2026-11-25: "We can use the browser's
    full width"). */

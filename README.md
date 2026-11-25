@@ -32,7 +32,7 @@ OpenBuilding.ca material catalogue viewer. 821 EPDs across 8 material groups, fu
 ### OBJECTIVE 4.0 — `/objectivepro.html`
 
 The targeted energy use intensity tool, OBJECTIVE Pro's PC form. OBJECTIVE's sections S01–S21 are being ported in as
-full pages (plan: `docs/workplans/OBJECTIVE-V4.md`); S01's key values (Lifetime Carbon, Annual Carbon, TEUI) ride the
+full pages (roadmap: `schema/schema.md`); S01's key values (Lifetime Carbon, Annual Carbon, TEUI) ride the
 masthead on every section, and S22 is the Glossary. Take Off, Eh! feeds it through Trust / Trust + Verify.
 OBJECTIVE 3 stays live at objective.openbuilding.ca.
 
@@ -84,7 +84,7 @@ OpenBuilding/
 │   ├── materials/                   8 per-group JSON files (03-concrete ... 31-earthwork)
 │   ├── lookups/                     Enum + inference tables
 │   ├── scripts/                     CSV importer + validator
-│   └── schema.md                    What the catalogue is (local only); points at OBJECTIVE-V4.md
+│   └── schema.md                    OBJECTIVE 4.0's roadmap (§0 = the handoff); the rest of schema/ is the local-only catalogue
 ├── docs/
 │   ├── sample.pdf                   TakeOffEh dev fixture (generic name; swapped for a better drawing set at release)
 │   ├── pdf-samples/                 Larger sample PDFs for parser testing (gitignored)
@@ -92,7 +92,6 @@ OpenBuilding/
 │   ├── csv files from BEAM/         22 BEAM workbook tab snapshots
 │   ├── PDF References/              Code references (local PDFs, not committed)
 │   ├── workplans/                   Living workstream specs
-│   │   ├── OBJECTIVE-V4.md          OBJECTIVE 4.0's plan (§0 = the handoff)
 │   │   ├── PDF-BEAMweb-BRIDGE.md    Take Off, Eh! → OBJECTIVE bridge design spec
 │   │   ├── MAGIC.md                 Take Off, Eh! magic-wand workplan
 │   │   └── WORKPLAN-TEMPLATE.md     Template for a new workplan

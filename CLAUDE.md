@@ -11,7 +11,7 @@ OBJECTIVE Pro), **Take Off, Eh!** (area and volume takeoff from drawings), the m
 
 **Scope: Canada.** US codes only where a Canadian standard references them (e.g. ASHRAE 140 for NECB, CSA F280).
 
-**The live plan is [`docs/workplans/OBJECTIVE-V4.md`](docs/workplans/OBJECTIVE-V4.md)** — its §0 is the cold-start
+**The roadmap is [`schema/schema.md`](schema/schema.md)** (OBJECTIVE 4.0; it replaced the BEAM schema) — its §0 is the cold-start
 handoff. New workplans start from `docs/workplans/WORKPLAN-TEMPLATE.md`.
 
 ## Working rules
@@ -30,14 +30,14 @@ handoff. New workplans start from `docs/workplans/WORKPLAN-TEMPLATE.md`.
 
 The workflow stages a clean `_site/` (HTML, CSS, `js/`, `graphics/`, `lib/`, `builders/`, runtime data) and uploads it.
 
-| URL | File | Role |
-|---|---|---|
-| `/` | `index.html` | Landing page / tools directory |
-| `/objectivepro.html` | `objectivepro.html` | OBJECTIVE 4.0: sidebar S01–S21 + S22 Glossary, the S01 key values in the masthead |
-| `/takeoffeh.html` | `takeoffeh.html` | Take Off, Eh! — area + volume takeoff from drawings |
-| (local only) | `database.html` | The BEAM material catalogue viewer (821 records, BfCA data): kept in the repo, never deployed |
-| `/builders/*.html` | `builders/` | Material, Section and Assembly Builders (published from ABCD.EARTH) |
-| `/dependencies.html` | `dependencies.html` | Dev dependency manifest (not nav-linked) |
+| URL                  | File                | Role                                                                                          |
+| -------------------- | ------------------- | --------------------------------------------------------------------------------------------- |
+| `/`                  | `index.html`        | Landing page / tools directory                                                                |
+| `/objectivepro.html` | `objectivepro.html` | OBJECTIVE 4.0: sidebar S01–S21 + S22 Glossary, the S01 key values in the masthead             |
+| `/takeoffeh.html`    | `takeoffeh.html`    | Take Off, Eh! — area + volume takeoff from drawings                                           |
+| (local only)         | `database.html`     | The BEAM material catalogue viewer (821 records, BfCA data): kept in the repo, never deployed |
+| `/builders/*.html`   | `builders/`         | Material, Section and Assembly Builders (published from ABCD.EARTH)                           |
+| `/dependencies.html` | `dependencies.html` | Dev dependency manifest (not nav-linked)                                                      |
 
 ### Styling — one file plus the shared tokens
 
@@ -61,5 +61,5 @@ shared with the Builders (cyan on the web). No per-app `.css` files.
 - Runtime: staged into `data/schema/` (Pages workflow, or `npm run stage:data` locally).
 
 The catalogue, `docs/csv files from BEAM/` (the BEAM workbook's tab exports) and `docs/beam-samples/` are BfCA's
-data: kept in the repo, **never deployed** (Andy 2026-11-25: *"We may use some of the BfCA database later but we'd need
-permission first."*). The site's materials are the Material Builder's, published from ABCD.EARTH.
+data: kept in the repo, **never deployed** (Andy 2026-11-25: _"We may use some of the BfCA database later but we'd need
+permission first."_). The site's materials are the Material Builder's, published from ABCD.EARTH.

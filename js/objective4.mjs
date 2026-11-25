@@ -2,7 +2,7 @@
  * OBJECTIVE 4.0 (objectivepro.html) — app entry + section router.
  *
  * The sidebar is OBJECTIVE's S01–S21 plus S22 the Glossary
- * (docs/workplans/OBJECTIVE-V4.md §9). Live: S01 Key Values, S02 PROJECT,
+ * (schema/schema.md §9). Live: S01 Key Values, S02 PROJECT,
  * S17 Dependency Graph, S22 Glossary; the rest arrive in the port (P2: S11,
  * S12; P3: the others). The S01 heads-up display rides the masthead on every
  * section. The BEAM calculator's tabs are gone (Andy 2026-11-25: no legacy).
@@ -18,7 +18,7 @@ import { loadSample, SAMPLES } from "./beam/sample-loader.mjs";
 import * as PdfBridge from "./beam/pdf-bridge-import.mjs";
 
 // ──────────────────────────────────────────────────────────────────────
-// Section definitions — OBJECTIVE's S01–S21 (OBJECTIVE-V4.md §9.1), plus
+// Section definitions — OBJECTIVE's S01–S21 (schema/schema.md §9.1), plus
 // S22 the Glossary. Grouped for the sidebar; `v3` names the V3 section
 // (#id in objectivepro.html's #op-v3-sections) each panel adopts at boot.
 // ──────────────────────────────────────────────────────────────────────
