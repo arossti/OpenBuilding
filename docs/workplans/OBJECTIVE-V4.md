@@ -51,16 +51,18 @@ commit-push until then. So no PR yet until it is cleaned of BfCA references."*).
 
 ### What OBJECTIVE 4.0 is
 
+**OBJECTIVE Pro = v4, in two forms:** the ABCD.EARTH app (macOS / Linux, native, the whole engine) and this web
+app (for PC users, the concession: a subset). Andy 2026-11-25: *"Pro refers to both the Web App and the Rust app. Pro=V4. The user may use the app in OSX/Linux, but many users are still PC users, and for them we have the web app. It is not expected to do everything the native rust app can, but it is the concession we make."*
+
 Andy 2026-11-25: *"OBJECTIVE pro lives in the ABCD.EARTH desktop app, but this web version extends what the old V3
 of OBJECTIVE can do with many shared methods."* v3 stays the live, static/monthly one-zone modeller on Cloudflare
 (objective.openbuilding.ca); v4 is its web successor here, the bridge to hourly analysis, ASHRAE 140 and ABCD.
 
 ### What it is NOT
 
-- Not the hourly engine or real geometry: those live in the ABCD.EARTH app
-  (`artex-osx/docs/architecture discipline/ABCD-OBJECTIVE-PRO.md` in that repo). ⚠ Andy named this page's address
-  `objectivepro` (2026-11-25: *"it should not be called beamweb in the URI, but OBJECTIVEpro"*), while that doc calls
-  the desktop app OBJECTIVE Pro: ❓ one name or two (§8).
+- Not everything the native app does: the hourly engine and real geometry live in the ABCD.EARTH app
+  (`artex-osx/docs/architecture discipline/ABCD-OBJECTIVE-PRO.md` in that repo); the web app is Pro's PC
+  concession, reached through the shared methods (§6).
 - Not a place to curate materials: the Builders here are read-only (Andy 2026-11-25: *"we do not expect a user to
   curate materials, it is too fraught, as EPD and cost sources are required"*).
 - Not a second copy of any method (§6).
@@ -206,10 +208,7 @@ which will remain the V3 deployment)"*. So:
    new wall, as + copies it today), so a re-entered envelope starts with the old assemblies.
 4. **Below-grade walls with windows.** Kept (a walkout basement's windows); recommendation: yes, as now.
 5. **What opens first in v4.** Recommendation: F280-1 hosted (V4-5), not a blank page.
-6. **One name or two: OBJECTIVE Pro.** The web page's address is `objectivepro.html` (Andy 2026-11-25), and
-   ABCD-OBJECTIVE-PRO calls the desktop app OBJECTIVE Pro. Recommendation: say which is "Pro" before either is
-   public; the page title says OBJECTIVE 4.0 meanwhile.
-7. **BEAM's own tabs during the port** (the 12 assembly tabs, REVIEW, RESULTS, Glossary, Energy GHG).
+6. **BEAM's own tabs during the port** (the 12 assembly tabs, REVIEW, RESULTS, Glossary, Energy GHG).
    Recommendation: fold them into a "BEAM (legacy)" group at P0 and delete each once a section replaces its job.
 
 ---
@@ -261,10 +260,15 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
 - **P3 — the rest**, section by section, each checked against andy-rnd's own tests and case studies (the shared
   computation, §7.1), S01's key values last because they read everything.
 
+### Answered
+
+- **"Pro" names both.** Andy 2026-11-25: *"Pro refers to both the Web App and the Rust app. Pro=V4. The user may use the app in OSX/Linux, but many users are still PC users, and for them we have the web app. It is not expected to do everything the native rust app can, but it is the concession we make."* Hence the address `objectivepro.html`.
+
 ## Appendix — Changelog
 
 | Date | Commit | Change |
 |---|---|---|
 | 2026-11-25 | andy-rnd `7870a44`, `0684e43` | the plan written in andy-rnd (§3, §4, §7, §8) |
 | 2026-11-25 | `99d5a70` | moved here; §0, §5 and §6 added |
-| 2026-11-25 | this commit | §0 shipped / remaining; `objectivepro.html`; Assemblies published; §9 the port |
+| 2026-11-25 | `0a318bb` | §0 shipped / remaining; `objectivepro.html`; Assemblies published; §9 the port |
+| 2026-11-25 | this commit | ruled: Pro = v4, the Rust app and the web app |
