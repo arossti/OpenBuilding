@@ -70,12 +70,8 @@ OpenBuilding/
 │   │   ├── file-handler.mjs         Import / export with quarantine
 │   │   └── html-utils.mjs           HTML escape + helpers
 │   └── beam/                        OBJECTIVE's modules (code name kept until the port)
-│       ├── project-tab.mjs          S02 PROJECT
 │       ├── pdf-bridge-import.mjs    Trust / Trust + Verify from Take Off, Eh!
-│       ├── jurisdictions.mjs        Country / province filter
-│       ├── sample-loader.mjs        Load Sample (fills PROJECT)
-│       ├── reference-data.mjs       S22 Glossary
-│       └── dependency-graph*.mjs    S17 Dependency Graph
+│       └── reference-data.mjs       S22 Glossary
 ├── graphics/                        App logos + iconography
 ├── lib/                             PDF.js 4.9.155 (local ESM build)
 ├── data/                            Gitignored — staged at dev/deploy time
@@ -88,7 +84,7 @@ OpenBuilding/
 ├── docs/
 │   ├── sample.pdf                   TakeOffEh dev fixture (generic name; swapped for a better drawing set at release)
 │   ├── pdf-samples/                 Larger sample PDFs for parser testing (gitignored)
-│   ├── beam-samples/                Load Sample's project JSON (DOE Prototype)
+│   ├── beam-samples/                BEAM's DOE Prototype sample (BfCA data, unused, local only)
 │   ├── csv files from BEAM/         22 BEAM workbook tab snapshots
 │   ├── PDF References/              Code references (local PDFs, not committed)
 │   ├── workplans/                   Living workstream specs

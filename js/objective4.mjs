@@ -13,8 +13,6 @@
 import { GLOSSARY } from "./beam/reference-data.mjs";
 import { StateManager } from "./shared/state-manager.mjs";
 import { esc as escapeHtml } from "./shared/html-utils.mjs";
-import { renderProjectPanel, wireProjectForm, resetProjectTab, refreshProjectForm } from "./beam/project-tab.mjs";
-import { loadSample, SAMPLES } from "./beam/sample-loader.mjs";
 import * as PdfBridge from "./beam/pdf-bridge-import.mjs";
 
 // ──────────────────────────────────────────────────────────────────────
@@ -107,7 +105,6 @@ function boot() {
   wireImportModal();
   wireKeyboard();
   wireGlossarySearch();
-  wireProjectForm();
   setActiveTab(readInitialTabFromHash() || DEFAULT_TAB);
 }
 
@@ -219,14 +216,13 @@ function renderPanelBody(tab) {
 // real content replaces these per phase.
 const PANEL_SUBTITLES = {
   introduction: "The overview: Lifetime Carbon, Annual Carbon and TEUI, Reference · Target · Actual",
-  project: "Building information · main-building and garage dimensions",
+  project: "Building information: occupancy, standards, service life, energy prices and project data",
   transmission: "The envelope: walls by facing, their hosted windows and doors, roofs and their skylights",
   "volume-surface": "Volumes, surface areas and their ratios",
   glossary: `${GLOSSARY.length} terms: OBJECTIVE's own and the building-science vocabulary`
 };
 
 const PANEL_BODIES = {
-  project: renderProjectPanel(),
   introduction: `
     <div class="beam-tbd bw-intro">
       <img src="graphics/objective-logo.svg" alt="OBJECTIVE" class="bw-intro-logo" />
@@ -394,27 +390,18 @@ function wireKeyboard() {
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Action bar — New / Open / Save / Import / Load Sample / Reset Tab.
+// Action bar. Open, Save and Load Sample are V3's: FileHandler wires
+// #import-data-btn / #excel-file-input / #export-data-btn, and fills
+// #sampleProjectModal's list with OBJECTIVE's case studies.
 // ──────────────────────────────────────────────────────────────────────
-const TAB_RESETTERS = {
-  project: { label: "PROJECT", fn: resetProjectTab }
-};
-
-function handleResetActiveTab() {
-  const tab = state.activeTab;
-  const entry = TAB_RESETTERS[tab];
-  if (!entry) {
-    setStatus("Reset arrives with this section in the port.", "busy");
-    setTimeout(() => setStatus(READY_MSG, "ready"), 3000);
-    return;
-  }
-  const ok = window.confirm(
-    `Reset "${entry.label}" to a blank state?\n\n` +
-      `This clears only the inputs on this tab. Other tabs, Take Off, Eh! polygon data, and any saved project file are preserved.`
-  );
-  if (!ok) return;
-  entry.fn();
-  setStatus(`"${entry.label}" reset to blank state.`, "ready");
+// Reset returns every value to the last project loaded or imported (V3's
+// "Reset Imported", StateManager.revertToLastImportedState).
+function handleReset() {
+  const SM = window.TEUI?.StateManager;
+  if (!SM?.revertToLastImportedState) return;
+  if (!window.confirm("Return every value to the last project you loaded or imported?")) return;
+  SM.revertToLastImportedState();
+  setStatus("Values returned to the last loaded project.", "ready");
   setTimeout(() => setStatus(READY_MSG, "ready"), 3000);
 }
 
@@ -429,49 +416,19 @@ function handleNewProject() {
   location.reload();
 }
 
-async function handleLoadSample() {
-  // Single sample today; widen to a dropdown when more case-study buildings land.
-  const sampleId = "single-family-home";
-  const entry = SAMPLES[sampleId];
-  const ok = window.confirm(
-    `Load "${entry.label}"?\n\n` +
-      `This fills PROJECT with the sample's dimensions. ` +
-      `Existing inputs in those fields will be overwritten — Save first if you want to keep your work.`
-  );
-  if (!ok) return;
-  setStatus(`Loading sample: ${entry.label}…`, "busy");
-  try {
-    const result = await loadSample(sampleId);
-    setStatus(`Loaded "${result.label}" · ${result.projectFieldCount} PROJECT fields.`, "ready");
-  } catch (err) {
-    console.error("[load-sample]", err);
-    setStatus(
-      `Load Sample failed: ${err.message}. Run \`npm run stage:data\` to copy sample JSON into data/.`,
-      "error"
-    );
-  }
-}
-
 function wireActionBar() {
   const handlers = {
     "beam-new-project": handleNewProject,
-    "beam-open-project": () => notImplemented("Open project JSON — file-handler import wiring lands next."),
-    "beam-save-project": () => notImplemented("Save project JSON — file-handler export wiring lands next."),
     "beam-import-takeoffeh": handleImportTakeOffEh,
     "beam-trust-takeoffeh": handleTrustTakeOffEh,
-    "beam-load-sample": handleLoadSample,
-    "beam-reset": handleResetActiveTab
+    "beam-reset": handleReset
   };
   for (const [id, fn] of Object.entries(handlers)) {
     const el = document.getElementById(id);
     if (el) el.addEventListener("click", fn);
   }
 }
-const READY_MSG = "Ready · OBJECTIVE 4.0 scaffold · S01, S02, S17, S22 live; the rest arrive in the port";
-function notImplemented(msg) {
-  setStatus(`not yet implemented · ${msg}`, "busy");
-  setTimeout(() => setStatus(READY_MSG, "ready"), 3500);
-}
+const READY_MSG = "Ready · OBJECTIVE 4.0";
 
 // ──────────────────────────────────────────────────────────────────────
 // TakeOffEh import modal
@@ -547,7 +504,6 @@ async function handleTrustTakeOffEh() {
       `Trust: imported ${result.applied} dimension${result.applied === 1 ? "" : "s"} from ${escapeHtml(project.pdfFileName)} · click Trust + Verify to review`,
       "ready"
     );
-    refreshProjectForm();
   } catch (err) {
     console.error("[BEAMweb] Trust apply failed:", err);
     setStatus(`Trust: apply failed · ${err.message}`, "error");
@@ -736,7 +692,6 @@ async function applyImportSelection() {
     closeImportModal();
     // Refresh the PROJECT tab so the new values render in their inputs AND
     // LHW fields recompute their _volume (as CALCULATED).
-    refreshProjectForm();
   } catch (err) {
     console.error("[BEAMweb] TakeOffEh import failed:", err);
     setStatus(`Take Off, Eh! import failed: ${err.message}`, "error");

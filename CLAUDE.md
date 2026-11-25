@@ -48,8 +48,9 @@ shared with the Builders (cyan on the web). No per-app `.css` files.
 ### JS — ES modules, no build
 
 - `js/*.mjs` — Take Off, Eh! core + per-page entries (`app.mjs`, `objective4.mjs` = OBJECTIVE's router, `database.mjs`, …)
-- `js/beam/*.mjs` — OBJECTIVE's modules (`project-tab.mjs` = S02, `pdf-bridge-import.mjs` = Trust / Trust + Verify,
-  `reference-data.mjs` = the Glossary, `dependency-graph*.mjs` = S17). The `beam` code names stay until the port.
+- `js/objective4.mjs` + `js/objective-boot.js` — OBJECTIVE's page: the S01–S22 router and HUD, and V3's start-up.
+  OBJECTIVE itself is V3's code, verbatim, in `src/` (engine, sections S01–S21, case studies) + `climate/`.
+- `js/beam/*.mjs` — `pdf-bridge-import.mjs` (Trust / Trust + Verify) and `reference-data.mjs` (S22 Glossary).
 - `js/shared/*.mjs` — cross-page utilities (`state-manager.mjs`, `file-handler.mjs`, `indexed-db-store.mjs`, …)
 - Global namespace: `window.BEAM.*` (to become OBJECTIVE's `window.TEUI.*` in the port).
 

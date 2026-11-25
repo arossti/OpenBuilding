@@ -2608,6 +2608,36 @@ body {
 .op-v3 button:not(.btn):not(.bw-asm-toggle):hover {
   border-color: var(--accent-lit) !important;
 }
+/* V3's Load Sample modal (#sampleProjectModal), dark. */
+#sampleProjectModal .modal-content {
+  background: var(--bg-surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+#sampleProjectModal .modal-header,
+#sampleProjectModal .modal-footer {
+  border-color: var(--border);
+}
+#sampleProjectModal .btn-close {
+  filter: invert(1);
+}
+#sampleProjectModal .list-group-item {
+  background: var(--bg-panel);
+  color: var(--text);
+  border-color: var(--border);
+}
+#sampleProjectModal .list-group-item:hover {
+  background: rgba(34, 211, 238, 0.1);
+  color: var(--accent-lit);
+}
+#sampleProjectModal .text-muted {
+  color: var(--text-dim) !important;
+}
+#sampleProjectModal .alert-warning {
+  background: rgba(233, 196, 106, 0.12);
+  color: var(--gold);
+  border-color: rgba(233, 196, 106, 0.4);
+}
 /* V3 hard-codes Reference values dark red; on dark, V4's light red. */
 .op-v3 .ref-value,
 .op-v3 .reference-value {

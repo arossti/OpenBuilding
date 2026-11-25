@@ -89,9 +89,14 @@ of the V3 format, but styled per V4"_): V3's engine + sections (`src/`, `climate
 V3's order; `js/objective-boot.js` stands in for `init.js`; each S-panel adopts its V3 section; `src/styles.css` is
 rethemed by `obstyles.css` §8b. Case 01 gives the full V3 app's key values (190.1 / 93.1 / 93.1 / 49 %). This
 replaces P1–P3's piecemeal port (the spike below stays as the record of why the page code matters).
-**NEXT:** the V4 styling pass section by section (S11's +/− buttons, light cell fills like S12's B.18.2, S16–S19's
-graphics); S02's two forms (V3 Building Information above the BEAM PROJECT form: ❓ which stays); Trust / Trust +
-Verify retargeted from PROJECT to S11 + S12 (§9.2 P2); Load Sample → OBJECTIVE's case studies. Serve:
+**V4 STYLING + S02 + LOAD SAMPLE ✅ 2026-11-25:** each section in the PROJECT form's card, no grid, full width
+(Andy); S02 is V3's S02 alone (Andy: _"Everything below project data and any BEAM defaults can be removed from S02
+entirely. S02 assumes the default data in V3's S02."_); Load Sample is V3's modal and loader (Andy: _"loads our Case
+Studies exactly as V3 does, with F280 sub-rows"_); Open / Save are V3's CSV import / export; Reset is V3's "back to
+the last loaded project". Witness: all 16 case studies, loaded through the modal here and in andy-rnd's V3, give
+2146 / 2146 identical displayed values each.
+**NEXT:** Trust / Trust + Verify retargeted from the deleted BEAM PROJECT fields to S11 + S12 (§9.2 P2; until then
+they write BEAM state nothing shows); the graphics' Activate buttons (S16–S19) unclicked here. Serve:
 `python3 schema/scripts/nocache-serve.py 8796` (`npm run stage:data` only for the local Database).
 
 ## 1. Goals
