@@ -41,8 +41,8 @@ jobs:
         # as source, docs/, the .md workplans, dev configs, etc.).
         #
         # database.html reads the OpenBuilding.ca material catalogue from data/schema/
-        # at runtime; BEAMweb assembly tabs fetch picker CSVs from
-        # data/beam/. Local dev runs `npm run stage:data` to produce the
+        # at runtime; objectivepro.html's Load Sample reads
+        # data/beam/samples/. Local dev runs `npm run stage:data` to produce the
         # same data/ layout.
         run: |
           mkdir -p _site/data/schema _site/data/schema/lookups _site/data/beam _site/data/beam/samples
@@ -57,7 +57,6 @@ jobs:
           cp schema/lookups/*.json _site/data/schema/lookups/
           cp schema/material.schema.json _site/data/schema/
           cp schema/sample.json _site/data/schema/
-          cp "docs/csv files from BEAM/Footings & Slabs.csv" _site/data/beam/footings-slabs.csv
           cp docs/beam-samples/*.json _site/data/beam/samples/
           cp docs/sample.pdf _site/data/sample.pdf
 

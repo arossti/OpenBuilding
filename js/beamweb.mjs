@@ -1,79 +1,88 @@
 /**
- * BEAMweb — app entry + tab router.
+ * OBJECTIVE 4.0 (objectivepro.html) — app entry + section router.
  *
- * Live: Introduction, PROJECT, Footings & Slabs, Glossary, Energy GHG.
- * Stubbed: 11 remaining assembly tabs (Phase 4 queue) + REVIEW + RESULTS
- * (Phase 5). Each tab declares its `phase` in BEAM_TABS — matching the
- * BEAMweb.md §6 phase breakdown.
+ * The sidebar is OBJECTIVE's S01–S21 plus S22 the Glossary
+ * (docs/workplans/OBJECTIVE-V4.md §9). Live: S01 Key Values, S02 PROJECT,
+ * S17 Dependency Graph, S22 Glossary; the rest arrive in the port (P2: S11,
+ * S12; P3: the others). The S01 heads-up display rides the masthead on every
+ * section. The BEAM calculator's tabs are gone (Andy 2026-11-25: no legacy).
  *
- * Design: BEAMweb code is ESM (matches TakeOffEh conventions). Vendor JS
- * (Bootstrap, SheetJS) loads as classic script tags on the window. OBJECTIVE
- * patterns (state manager, file handler, cross-app nav) are ported by API
- * shape; no files are copied verbatim.
+ * Code names (beamweb.mjs, js/beam/, window.BEAM) stay until the port.
  */
 
-import { ENERGY_GHG, GLOSSARY } from "./beam/reference-data.mjs";
+import { GLOSSARY } from "./beam/reference-data.mjs";
 import { StateManager } from "./shared/state-manager.mjs";
 import { esc as escapeHtml } from "./shared/html-utils.mjs";
 import { renderProjectPanel, wireProjectForm, resetProjectTab, refreshProjectForm } from "./beam/project-tab.mjs";
-import { renderFootingsSlabsPanel, wireFootingsSlabsTab, resetFootingsSlabsTab } from "./beam/footings-slabs-tab.mjs";
 import { loadSample, SAMPLES } from "./beam/sample-loader.mjs";
 import * as PdfBridge from "./beam/pdf-bridge-import.mjs";
-import { syncProjectToFsBridge } from "./beam/auto-fill.mjs";
 import { renderDependencyGraphPanel, wireDependencyGraphTab } from "./beam/dependency-graph-tab.mjs";
 
 // ──────────────────────────────────────────────────────────────────────
-// Tab definitions
-// Grouped for sidebar display; order is the BEAM workbook order.
-// Each tab declares which phase unlocks its implementation.
+// Section definitions — OBJECTIVE's S01–S21 (OBJECTIVE-V4.md §9.1), plus
+// S22 the Glossary. Grouped for the sidebar; `src` is the andy-rnd module
+// each ports from, `port` the §9.2 phase that brings it in.
 // ──────────────────────────────────────────────────────────────────────
 const BEAM_TABS = [
   {
     group: "Project",
     tabs: [
-      { id: "introduction", num: 1, label: "Introduction", phase: 0 },
-      { id: "project", num: 2, label: "PROJECT", phase: 2 }
+      { id: "introduction", num: 1, label: "Key Values", port: "live" },
+      { id: "project", num: 2, label: "PROJECT", port: "live" }
     ]
   },
   {
-    group: "Below-grade",
+    group: "Climate & Targets",
     tabs: [
-      { id: "footings-slabs", num: 3, label: "Footings & Slabs", phase: 3 },
-      { id: "foundation-walls", num: 4, label: "Foundation Walls", phase: 4 }
+      { id: "climate", num: 3, label: "Climate Calculations", port: "P3" },
+      { id: "actual-target", num: 4, label: "Actual vs. Target Energy & Carbon", port: "P3" },
+      { id: "emissions", num: 5, label: "CO2e Emissions", port: "P3" },
+      { id: "renewables", num: 6, label: "Renewable Energy", port: "P3" }
     ]
   },
   {
-    group: "Structure",
+    group: "Occupancy & Gains",
     tabs: [
-      { id: "structural-elements", num: 5, label: "Structural Elements", phase: 4 },
-      { id: "exterior-walls", num: 6, label: "Exterior Walls", phase: 4 },
-      { id: "party-walls", num: 7, label: "Party Walls", phase: 4 },
-      { id: "cladding", num: 8, label: "Cladding", phase: 4 },
-      { id: "windows", num: 9, label: "Windows", phase: 4 },
-      { id: "interior-walls", num: 10, label: "Interior Walls", phase: 4 },
-      { id: "floors", num: 11, label: "Floors", phase: 4 },
-      { id: "ceilings", num: 12, label: "Ceilings", phase: 4 },
-      { id: "roof", num: 13, label: "Roof", phase: 4 },
-      { id: "garage", num: 14, label: "Garage", phase: 4 }
+      { id: "water", num: 7, label: "Water Use", port: "P3" },
+      { id: "iaq", num: 8, label: "Indoor Air Quality", port: "P3" },
+      { id: "occupant-gains", num: 9, label: "Occupant + Internal Gains", port: "P3" },
+      { id: "radiant-gains", num: 10, label: "Radiant Gains", port: "P3" }
     ]
   },
   {
-    group: "Review + Outputs",
+    group: "Envelope",
     tabs: [
-      { id: "review", num: 15, label: "REVIEW", phase: 5 },
-      { id: "results", num: 16, label: "RESULTS", phase: 5 },
-      { id: "glossary", num: 17, label: "Glossary", phase: 0 }
+      { id: "transmission", num: 11, label: "Transmission Losses", port: "P2" },
+      { id: "volume-surface", num: 12, label: "Volume and Surface Metrics", port: "P2" }
+    ]
+  },
+  {
+    group: "Systems & Results",
+    tabs: [
+      { id: "mechanical", num: 13, label: "Mechanical Loads", port: "P3" },
+      { id: "tedi-teli", num: 14, label: "TEDI & TELI", port: "P3" },
+      { id: "teui", num: 15, label: "TEUI", port: "P3" }
+    ]
+  },
+  {
+    group: "Outputs",
+    tabs: [
+      { id: "sankey", num: 16, label: "Sankey Diagram", port: "P3" },
+      { id: "dependency-graph", num: 17, label: "Dependency Graph", port: "live" },
+      { id: "optimize", num: 18, label: "Optimize", port: "P3" },
+      { id: "wombat", num: 19, label: "WOMBAT — 3D Thermal Topology", port: "P3" }
+    ]
+  },
+  {
+    group: "Notes & Compliance",
+    tabs: [
+      { id: "notes", num: 20, label: "Notes & Debug", port: "P3" },
+      { id: "f280", num: 21, label: "CSA F280 Compliance", port: "P3" }
     ]
   },
   {
     group: "Reference",
-    tabs: [
-      // Not in BEAM; BEAMweb adds it as informational reference.
-      { id: "energy-ghg", num: 18, label: "Energy GHG", phase: 0 },
-      // Developer/meta view of the state-architecture graph. Stub today
-      // (scaffolding for the OBJECTIVE-style port, see BEAMweb.md §8).
-      { id: "dependency-graph", num: 19, label: "Dependency Graph", phase: 0 }
-    ]
+    tabs: [{ id: "glossary", num: 22, label: "Glossary", port: "live" }]
   }
 ];
 
@@ -96,12 +105,12 @@ function boot() {
   StateManager.loadState();
   renderSidebar();
   renderContentShell();
+  renderHud(); // after the panels: S01 holds the full table
   wireActionBar();
   wireImportModal();
   wireKeyboard();
   wireGlossarySearch();
   wireProjectForm();
-  wireFootingsSlabsTab(); // fires async fetch for data/beam/footings-slabs.csv
   wireDependencyGraphTab();
   setActiveTab(readInitialTabFromHash() || DEFAULT_TAB);
   loadMaterialIndex();
@@ -142,8 +151,8 @@ function renderSidebar() {
       const btn = document.createElement("button");
       btn.className = "beam-tab-button";
       btn.dataset.tabId = tab.id;
-      btn.innerHTML = `<span class="beam-tab-num">${String(tab.num).padStart(2, "0")}</span>${escapeHtml(tab.label)}`;
-      btn.title = `Tab ${tab.num} — unlocks in Phase ${tab.phase}`;
+      btn.innerHTML = `<span class="beam-tab-num">S${pad2(tab.num)}</span>${escapeHtml(tab.label)}`;
+      btn.title = tab.port === "live" ? `S${pad2(tab.num)}` : `S${pad2(tab.num)} · arrives in the port, ${tab.port}`;
       btn.addEventListener("click", () => setActiveTab(tab.id));
       frag.appendChild(btn);
     }
@@ -167,23 +176,21 @@ function renderContentShell() {
   content.replaceChildren(frag);
 }
 
-// Tabs whose `phase` number reflects a SHIPPED phase rather than a queued one.
-// New tab pills should say "Phase N · live" for these; everything else is
-// "Unlocks Phase N".
-const SHIPPED_PHASES = new Set([0, 1, 2, 3]);
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
 
 function renderPanelBody(tab) {
-  const isShipped = SHIPPED_PHASES.has(tab.phase);
-  const phaseCls = isShipped ? "ready" : "";
-  const phaseLabel = isShipped ? `Phase ${tab.phase} · live` : `Unlocks Phase ${tab.phase}`;
+  const live = tab.port === "live";
+  const badge = live ? "live" : `arrives in ${tab.port}`;
   const body = PANEL_BODIES[tab.id] || defaultStub(tab);
   return `
     <div class="beam-panel-header">
       <h2 class="beam-panel-title">
-        Tab ${String(tab.num).padStart(2, "0")} · ${escapeHtml(tab.label)}
-        <span class="beam-panel-phase ${phaseCls}">${phaseLabel}</span>
+        S${pad2(tab.num)} · ${escapeHtml(tab.label)}
+        <span class="beam-panel-phase ${live ? "ready" : ""}">${badge}</span>
       </h2>
-      <div class="beam-panel-subtitle">${escapeHtml(PANEL_SUBTITLES[tab.id] || "Assembly tab — curated material list per BEAM methodology.")}</div>
+      <div class="beam-panel-subtitle">${escapeHtml(PANEL_SUBTITLES[tab.id] || "")}</div>
     </div>
     ${body}
   `;
@@ -192,32 +199,19 @@ function renderPanelBody(tab) {
 // Per-tab subtitle and body overrides. Stubs where calcs aren't implemented yet;
 // real content replaces these per phase.
 const PANEL_SUBTITLES = {
-  introduction: "About OBJECTIVE 4.0 · what changes · status",
-  project: "Project metadata · main-building and garage dimensions · feeds every assembly tab",
-  "footings-slabs": "Concrete footings · pads & piers · slabs · rebar · sub-slab insulation · basement flooring",
-  "foundation-walls": "Concrete / ICF / earth-based foundation walls + insulation",
-  "structural-elements": "Steel, heavy timber, framing lumber — posts, beams, joists",
-  "exterior-walls": "Framing, sheathing, cavity + continuous insulation, WRB",
-  "party-walls": "Fire- + acoustic-separation walls between dwellings",
-  cladding: "Exterior finishes — brick, fibre cement, siding, stucco",
-  windows: "Double + triple pane glazing units",
-  "interior-walls": "Framing, drywall, interior finishes (cladding doubled for both faces)",
-  floors: "Floor framing, subfloor, cavity insulation, flooring finishes",
-  ceilings: "Ceiling framing + cladding",
-  roof: "Roof framing, decking, roof insulation, roofing membrane",
-  garage: "Garage components — excluded from whole-building totals by default",
-  review: "Inputs sanity-check · area/volume reconciliation · warnings",
-  results: "Project EC total · per-component breakdown · operational + embodied summary",
-  glossary: `${GLOSSARY.length} terms and definitions from the BEAM workbook`,
-  "energy-ghg": `Province-by-province GHG intensities for operational energy (reference only)`,
-  "dependency-graph": "Architecture snapshot — Foundation / Coordination / Application modules + registered field edges"
+  introduction: "The overview: Lifetime Carbon, Annual Carbon and TEUI, Reference · Target · Actual",
+  project: "Building information · main-building and garage dimensions",
+  transmission: "The envelope: walls by facing, their hosted windows and doors, roofs and their skylights",
+  "volume-surface": "Volumes, surface areas and their ratios",
+  "dependency-graph": "Architecture snapshot — Foundation / Coordination / Application modules + registered field edges",
+  glossary: `${GLOSSARY.length} terms: OBJECTIVE's own and the building-science vocabulary`
 };
 
 const PANEL_BODIES = {
   project: renderProjectPanel(),
-  "footings-slabs": renderFootingsSlabsPanel(),
   "dependency-graph": renderDependencyGraphPanel(),
   introduction: `
+    <div id="op-kv-dashboard" class="op-kv-dashboard"></div>
     <div class="beam-tbd bw-intro">
       <img src="graphics/objective-logo.svg" alt="OBJECTIVE" class="bw-intro-logo" />
       <p class="bw-intro-tagline">the targeted energy use intensity tool</p>
@@ -238,7 +232,8 @@ const PANEL_BODIES = {
 
       <h3>Status: in development</h3>
       <p>
-        The 4.0 inputs are being rebuilt on this page's layout; the tabs are still the BEAM calculator's for now.
+        OBJECTIVE's sections are coming across one by one into the sidebar (S01–S21), each as a full page;
+        the key values above, and in the band at the top of every section, fill in once the engine arrives.
         OBJECTIVE 3 stays live at
         <a href="https://objective.openbuilding.ca" class="db-kv-link" target="_blank" rel="noopener">objective.openbuilding.ca</a>.
       </p>
@@ -249,8 +244,7 @@ const PANEL_BODIES = {
       </p>
     </div>
   `,
-  glossary: renderGlossaryPanel(),
-  "energy-ghg": renderEnergyGhgPanel()
+  glossary: renderGlossaryPanel()
 };
 
 function renderGlossaryPanel() {
@@ -259,7 +253,7 @@ function renderGlossaryPanel() {
   const rows = GLOSSARY.map((t, i) => {
     const showFull = t.full && t.full !== t.abbr ? `<span class="beam-ref-dim">${escapeHtml(t.full)}</span>` : "";
     return `<tr data-glossary-idx="${i}">
-      <td class="beam-ref-term"><strong>${escapeHtml(t.abbr)}</strong>${showFull ? "<br>" + showFull : ""}</td>
+      <td class="beam-ref-term"><strong>${escapeHtml(t.abbr)}</strong>${t.source ? ` <span class="op-gl-src">${escapeHtml(t.source)}</span>` : ""}${showFull ? "<br>" + showFull : ""}</td>
       <td class="beam-ref-desc">${escapeHtml(t.desc) || '<span class="beam-ref-dim">—</span>'}</td>
     </tr>`;
   }).join("");
@@ -285,84 +279,53 @@ function renderGlossaryPanel() {
   `;
 }
 
-function renderEnergyGhgPanel() {
-  const rows = ENERGY_GHG.factors
-    .map(
-      (f) => `
-    <tr>
-      <td class="beam-ref-term">${escapeHtml(f.province)}</td>
-      <td class="num">${formatFactor(f.electricity_kgco2e_per_kwh)}</td>
-      <td class="num">${formatFactor(f.natural_gas_kgco2e_per_m3)}</td>
-      <td class="num">${formatFactor(f.oil_kgco2e_per_l)}</td>
-      <td class="num">${formatFactor(f.propane_kgco2e_per_l)}</td>
-      <td class="num">${formatFactor(f.wood_kgco2e_per_kg)}</td>
-    </tr>
-  `
-    )
-    .join("");
-  return `
-    <div class="beam-ref-pane">
-      <div class="beam-ref-intro">
-        <p>
-          Province-by-province GHG intensity factors for operational energy sources. BEAMweb multiplies these against
-          your PROJECT-tab energy inputs to compute operational emissions; per-fuel values are shown here for transparency.
-        </p>
-        <p class="beam-ref-dim">
-          This tab is informational reference only. When the Phase 1 state manager lands, projects will be able to override any cell here to use a newer Canadian grid-intensity figure.
-        </p>
-      </div>
-      <table class="beam-ref-table">
-        <thead>
-          <tr>
-            <th style="width: 220px">Province / Territory</th>
-            <th class="num" title="Electricity · ${escapeHtml(ENERGY_GHG.units.electricity)}">Electricity</th>
-            <th class="num" title="Natural Gas · ${escapeHtml(ENERGY_GHG.units.natural_gas)}">Natural Gas</th>
-            <th class="num" title="Oil · ${escapeHtml(ENERGY_GHG.units.oil)}">Oil</th>
-            <th class="num" title="Propane · ${escapeHtml(ENERGY_GHG.units.propane)}">Propane</th>
-            <th class="num" title="Wood · ${escapeHtml(ENERGY_GHG.units.wood)}">Wood</th>
-          </tr>
-          <tr class="beam-ref-subhead">
-            <th></th>
-            <th class="num">${escapeHtml(ENERGY_GHG.units.electricity)}</th>
-            <th class="num">${escapeHtml(ENERGY_GHG.units.natural_gas)}</th>
-            <th class="num">${escapeHtml(ENERGY_GHG.units.oil)}</th>
-            <th class="num">${escapeHtml(ENERGY_GHG.units.propane)}</th>
-            <th class="num">${escapeHtml(ENERGY_GHG.units.wood)}</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-      <p class="beam-ref-footer">Source: ${escapeHtml(ENERGY_GHG.source)}.</p>
-    </div>
-  `;
-}
-
-function formatFactor(v) {
-  if (v == null) return '<span class="beam-ref-dim">—</span>';
-  if (v === 0) return "0";
-  // Use exponential for very small, fixed for normal range
-  if (Math.abs(v) < 0.0001) return v.toExponential(2);
-  return v.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
-}
-
 function defaultStub(tab) {
   return `
     <div class="beam-tbd">
       <div class="beam-tbd-icon"><i class="bi bi-hourglass-split"></i></div>
-      <h3>Implementation pending · Phase ${tab.phase}</h3>
-      <p>This tab follows the standard BEAM assembly-tab pattern:</p>
-      <ul>
-        <li>Pre-curated candidate material list (subset of the <a href="database.html" class="db-kv-link">OpenBuilding.ca material database</a>)</li>
-        <li>User toggles <code>SELECT</code> and enters <code>QUANTITY</code> per row</li>
-        <li>Section-level config (thickness, R-value, framing spacing) above each sub-category</li>
-        <li>Per-row net kgCO2e emissions computed from <code>material.carbon.common.value_kgco2e × quantity × %</code></li>
-        <li>Tab subtotal rolls into project total on <code>RESULTS</code></li>
-      </ul>
-      <p style="margin-top: 14px;">
-        Awaiting BEAM CSV exports (with formulas) from the unlocked workbook.
+      <h3>Arrives in the port · ${escapeHtml(tab.port)}</h3>
+      <p>
+        S${pad2(tab.num)} ${escapeHtml(tab.label)} comes across from OBJECTIVE as a full page, its fields and
+        calculations unchanged. Until then OBJECTIVE 3 has it at
+        <a href="https://objective.openbuilding.ca" class="db-kv-link" target="_blank" rel="noopener">objective.openbuilding.ca</a>.
       </p>
     </div>
   `;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// S01 heads-up display — the three key-value rows, in the masthead on every
+// section (Andy 2026-11-25). Values arrive with the engine (P1); each cell
+// names its OBJECTIVE field (data-kv) so the engine stamps it.
+// ──────────────────────────────────────────────────────────────────────
+const KEY_VALUE_ROWS = [
+  { id: "T.1", label: "Lifetime Carbon", unit: "kgCO2e/m\u00b2 · service life", ref: "e_6", target: "h_6", actual: "k_6", pct: "m_6" },
+  { id: "T.2", label: "Annual Carbon", unit: "kgCO2e/m\u00b2/yr", ref: "e_8", target: "h_8", actual: "k_8", pct: "m_8" },
+  { id: "T.3", label: "TEUI", unit: "kWh/m\u00b2/yr", ref: "e_10", target: "h_10", actual: "k_10", pct: "m_10" }
+];
+
+function keyValuesTable(cls) {
+  const cell = (f) => `<td class="num"><span data-kv="${f}">\u2014</span></td>`;
+  const rows = KEY_VALUE_ROWS.map(
+    (r) => `<tr>
+      <th scope="row"><span class="op-kv-id">${r.id}</span>${escapeHtml(r.label)}<span class="op-kv-unit">${escapeHtml(r.unit)}</span></th>
+      ${cell(r.ref)}${cell(r.target)}${cell(r.actual)}${cell(r.pct)}
+    </tr>`
+  ).join("");
+  return `<table class="${cls}">
+    <thead><tr><th></th><th class="num">Reference</th><th class="num">Target</th><th class="num">Actual</th><th class="num">%</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function renderHud() {
+  const hud = document.getElementById("op-hud");
+  if (!hud) return;
+  hud.innerHTML = keyValuesTable("op-kv-table op-kv-hud");
+  hud.title = "S01 Key Values · the values arrive with the engine (port P1)";
+  hud.addEventListener("click", () => setActiveTab("introduction"));
+  const dash = document.getElementById("op-kv-dashboard");
+  if (dash) dash.innerHTML = keyValuesTable("op-kv-table op-kv-full");
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -394,16 +357,15 @@ function wireKeyboard() {
 // Action bar — New / Open / Save / Import / Load Sample / Reset Tab.
 // ──────────────────────────────────────────────────────────────────────
 const TAB_RESETTERS = {
-  project: { label: "PROJECT", fn: resetProjectTab },
-  "footings-slabs": { label: "Footings & Slabs", fn: resetFootingsSlabsTab }
+  project: { label: "PROJECT", fn: resetProjectTab }
 };
 
 function handleResetActiveTab() {
   const tab = state.activeTab;
   const entry = TAB_RESETTERS[tab];
   if (!entry) {
-    setStatus(`Reset not yet wired for "${tab}" tab — coming with Phase 4.`, "busy");
-    setTimeout(() => setStatus("Shell ready · cold-start blank state · Phase 3", "ready"), 3000);
+    setStatus("Reset arrives with this section in the port.", "busy");
+    setTimeout(() => setStatus(READY_MSG, "ready"), 3000);
     return;
   }
   const ok = window.confirm(
@@ -433,7 +395,7 @@ async function handleLoadSample() {
   const entry = SAMPLES[sampleId];
   const ok = window.confirm(
     `Load "${entry.label}"?\n\n` +
-      `This populates PROJECT and assembly tabs with the BEAM workbook reference values. ` +
+      `This fills PROJECT with the sample's dimensions. ` +
       `Existing inputs in those fields will be overwritten — Save first if you want to keep your work.`
   );
   if (!ok) return;
@@ -441,7 +403,7 @@ async function handleLoadSample() {
   try {
     const result = await loadSample(sampleId);
     setStatus(
-      `Loaded "${result.label}" · ${result.projectFieldCount} PROJECT fields · ${result.fsFieldCount} F&S sample writes.`,
+      `Loaded "${result.label}" · ${result.projectFieldCount} PROJECT fields.`,
       "ready"
     );
   } catch (err) {
@@ -458,7 +420,6 @@ function wireActionBar() {
     "beam-new-project": handleNewProject,
     "beam-open-project": () => notImplemented("Open project JSON — file-handler import wiring lands next."),
     "beam-save-project": () => notImplemented("Save project JSON — file-handler export wiring lands next."),
-    "beam-import-xlsx": () => notImplemented("Import xlsx — needs excel-mapper (Phase 6; SheetJS already loaded)."),
     "beam-import-takeoffeh": handleImportTakeOffEh,
     "beam-trust-takeoffeh": handleTrustTakeOffEh,
     "beam-load-sample": handleLoadSample,
@@ -469,7 +430,7 @@ function wireActionBar() {
     if (el) el.addEventListener("click", fn);
   }
 }
-const READY_MSG = "Ready · cold-start blank state · Phase 3 (Footings & Slabs live)";
+const READY_MSG = "Ready · OBJECTIVE 4.0 scaffold · S01, S02, S17, S22 live; the rest arrive in the port";
 function notImplemented(msg) {
   setStatus(`not yet implemented · ${msg}`, "busy");
   setTimeout(() => setStatus(READY_MSG, "ready"), 3500);
@@ -547,7 +508,6 @@ async function handleTrustTakeOffEh() {
       "ready"
     );
     refreshProjectForm();
-    syncProjectToFsBridge();
   } catch (err) {
     console.error("[BEAMweb] Trust apply failed:", err);
     setStatus(`Trust: apply failed · ${err.message}`, "error");
@@ -735,11 +695,8 @@ async function applyImportSelection() {
     );
     closeImportModal();
     // Refresh the PROJECT tab so the new values render in their inputs AND
-    // LHW fields recompute their _volume (as CALCULATED). Then push the
-    // updated PROJECT state into F&S via the bridge's imperative sync — the
-    // auto-fill listeners did not fire during applyImport's muted batch.
+    // LHW fields recompute their _volume (as CALCULATED).
     refreshProjectForm();
-    syncProjectToFsBridge();
   } catch (err) {
     console.error("[BEAMweb] TakeOffEh import failed:", err);
     setStatus(`Take Off, Eh! import failed: ${err.message}`, "error");

@@ -4,17 +4,15 @@
 // A sample is a flat-dict JSON file at data/beam/samples/<slug>.json that
 // follows BEAMweb's project-export shape — the same format produced by
 // FileHandler.exportJson and parsed by FileHandler.importJson. PROJECT-tab
-// fields (project_*, dim_*, garage_*) live in the JSON. Per-assembly-tab
-// SELECT/qty/pct values come from the BEAM CSV snapshots already staged
-// under data/beam/ — no need to duplicate that data into the sample JSON.
+// fields (project_*, dim_*, garage_*) live in the JSON; a sample fills
+// PROJECT only (the BEAM assembly tabs are gone). OBJECTIVE's own case
+// studies replace this with the engine (OBJECTIVE-V4.md §9.2 P1).
 //
 // Catalog of available samples below; UI surfacing is a single button today
 // (Load Sample), with room for a dropdown when more case-study buildings land.
 
 import { FileHandler } from "../shared/file-handler.mjs";
-import { loadSampleIntoFootingsSlabs, refreshFootingsSlabsTab } from "./footings-slabs-tab.mjs";
 import { refreshProjectForm } from "./project-tab.mjs";
-import { syncProjectToFsBridge } from "./auto-fill.mjs";
 
 export const SAMPLES = {
   "single-family-home": {
@@ -37,26 +35,12 @@ export async function loadSample(sampleId = "single-family-home") {
   //    listeners muted while writing, FileHandler unmutes at the end).
   FileHandler.importJson(data);
 
-  // 3) FileHandler quarantine muted listeners during import, so the
-  //    auto-fill bridge didn't fire. Manually re-sync now so DERIVED
-  //    F&S qtys reflect the freshly imported PROJECT values.
-  syncProjectToFsBridge();
-
-  // 4) Apply assembly-tab sample selections from the parsed CSV. SELECT'd
-  //    rows get IMPORTED state, which beats the DERIVED qty just written
-  //    by the auto-fill bridge — i.e., the BEAM workbook's per-row qty
-  //    wins for selected materials, while unselected rows in target
-  //    groups still mirror the PROJECT auto-fill value.
-  const fsCount = loadSampleIntoFootingsSlabs();
-
-  // 5) Sync visible inputs to the new state.
+  // 3) Sync visible inputs to the new state.
   refreshProjectForm();
-  refreshFootingsSlabsTab();
 
   return {
     sampleId,
     label: entry.label,
-    projectFieldCount: Object.keys(data.fields || data).length,
-    fsFieldCount: fsCount
+    projectFieldCount: Object.keys(data.fields || data).length
   };
 }

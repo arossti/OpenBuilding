@@ -2293,6 +2293,103 @@ html.theme-dark body {
   cursor: default;
 }
 
+/* ── S01 heads-up display: the three key-value rows in the masthead, on every
+   section (OBJECTIVE-V4.md §9.2 P0). The same table, larger, opens S01. ── */
+.op-hud {
+  flex: 1;
+  min-width: 0;
+  margin: 0 20px;
+  padding: 6px 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.op-hud:hover {
+  border-color: var(--accent-lit);
+}
+.op-kv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font);
+  color: var(--text);
+}
+.op-kv-table th,
+.op-kv-table td {
+  padding: 2px 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+.op-kv-table .num {
+  text-align: right;
+}
+.op-kv-table thead th {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+}
+.op-kv-table tbody th {
+  font-size: 13px;
+  font-weight: 600;
+}
+.op-kv-table tbody td {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-lit);
+}
+.op-kv-id {
+  display: inline-block;
+  width: 30px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.op-kv-unit {
+  margin-left: 8px;
+  font-size: 10px;
+  font-weight: normal;
+  color: var(--text-dim);
+}
+.op-kv-dashboard {
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.op-kv-full tbody th {
+  font-size: 16px;
+  padding: 8px 10px;
+}
+.op-kv-full tbody td {
+  font-size: 26px;
+  padding: 8px 10px;
+}
+.op-kv-full .op-kv-unit {
+  display: block;
+  margin: 2px 0 0 30px;
+  font-size: 11px;
+}
+@media (max-width: 1100px) {
+  .op-hud .op-kv-unit {
+    display: none;
+  }
+}
+.op-gl-src {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: 1px solid var(--accent-lit);
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: var(--accent-lit);
+  vertical-align: middle;
+}
+
 /* ── Action bar (Import / Export / Reset / Tilt buttons) ─ */
 #beam-action-bar {
   padding: 8px 16px;

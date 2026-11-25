@@ -69,12 +69,14 @@ of OBJECTIVE can do with many shared methods."* v3 stays the live, static/monthl
 
 ### Where to pick up next (cold-start one-liner)
 
-**§9.2 P0 on `objectivepro.html`:** ① the S01 heads-up display in the masthead band (S01's three key-value rows,
-~200 px, visible on every section); ② the sidebar becomes S01–S21; ③ every BEAM tab deleted. Then S11 + S12 for
-Andy's Trust / Trust + Verify PDF-mapping tests. Serve: `npm run stage:data` once, then any static server on the
-repo root (e.g. `python3 -m http.server 8795 --bind 127.0.0.1`), open `/objectivepro.html`.
-
----
+**P0 ✅ 2026-11-25 (laptop):** the S01 heads-up display rides the masthead (T.1 / T.2 / T.3 × Reference · Target ·
+Actual · %, each cell tagged `data-kv="e_6"` … for the engine to stamp; a click opens S01, which carries the same
+table full size); the sidebar is S01–S21 plus **S22 the Glossary** (Andy: *"we should keep the glossary but expand to
+include our terms also"* · *"that can form a new section after 21"*), its 15 OBJECTIVE terms chip-marked for Andy to
+correct; every BEAM tab deleted (Footings & Slabs and its helpers, Energy GHG, the xlsx import); Load Sample fills
+PROJECT only. Live: S01, S02, S17, S22; the rest show "arrives in P2/P3".
+**NEXT: P1, the engine** (§9.2). Serve with `npm run stage:data`, then `python3 schema/scripts/nocache-serve.py 8796`
+(a plain http.server lets the browser keep the old module).
 
 ## 1. Goals
 
@@ -278,6 +280,8 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
 - **"Pro" names both.** Andy 2026-11-25: *"Pro refers to both the Web App and the Rust app. Pro=V4. The user may use the app in OSX/Linux, but many users are still PC users, and for them we have the web app. It is not expected to do everything the native rust app can, but it is the concession we make."* Hence the address `objectivepro.html`.
 
 ## Appendix — Changelog
+
+- 2026-11-25: P0 shipped on `ob-landing-cleanup` (HUD, S01–S22 sidebar, BEAM tabs deleted, Glossary = S22).
 
 | Date | Commit | Change |
 |---|---|---|

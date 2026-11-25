@@ -130,6 +130,97 @@ export const ENERGY_GHG = {
 };
 
 export const GLOSSARY = [
+  // OBJECTIVE 4.0's own terms (source: "OBJECTIVE"), then the BEAM vocabulary.
+  {
+    abbr: "TEUI",
+    full: "Total Energy Use Intensity",
+    desc: "A building's total annual energy use per m² of conditioned floor area, kWh/m²/yr. Key value T.3; worked out in S15.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "TEDI",
+    full: "Thermal Energy Demand Intensity",
+    desc: "The annual space-heating energy the envelope and ventilation demand, per m² of conditioned floor area, before the heating system's efficiency, kWh/m²/yr. S14.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Lifetime Carbon",
+    full: "Lifetime emissions intensity (T.1)",
+    desc: "Embodied carbon spread over the service life, plus a year's operational emissions, per m² of floor area.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Annual Carbon",
+    full: "Annual operational emissions intensity (T.2)",
+    desc: "A year's operational greenhouse-gas emissions per m² of floor area, kgCO2e/m²/yr.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Reference",
+    full: "Reference building",
+    desc: "The same building built to the chosen reference standard. OBJECTIVE works it out beside the design, so every key value has a 100 % baseline.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Target",
+    full: "Targeted (design) building",
+    desc: "The building as designed, from the values entered; its key values are read against the Reference.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Actual",
+    full: "Actual (utility bills)",
+    desc: "The building's measured performance, worked out from its utility bills when the project's use type is Utility Bills.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Facing",
+    full: "Wall orientation",
+    desc: "The compass direction a wall faces. In 4.0 every above-grade wall has one, and its windows' solar gains follow it.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Hosted opening",
+    full: "Window, door or skylight in its host",
+    desc: "In 4.0 a window or door sits in a named wall, and a skylight in a roof: its area is its width × height, it faces the way its wall faces, and the wall's area is net of it.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Overhang H / D",
+    full: "Shading device height and depth",
+    desc: "H is the overhang's height above the window head, D its projection from the wall. Together they set the window's summer shading by CSA F280 Annex A.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "CSA F280",
+    full: "Required capacity of residential space heating and cooling appliances",
+    desc: "The Canadian standard for sizing a house's heating and cooling equipment from its design heat loss and heat gain. S21.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "ASHRAE 140",
+    full: "Method of test for building energy simulation programs",
+    desc: "The standard test suite an hourly energy model is checked against; 4.0's bridge to hourly analysis aims at it.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "AIM-2",
+    full: "Alberta Infiltration Model",
+    desc: "The air-leakage model OBJECTIVE uses: it turns a measured airtightness into infiltration under wind and stack effect.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "BASESIMP",
+    full: "Basement heat-loss correlations",
+    desc: "The correlations OBJECTIVE uses for the heat lost through basements and slabs to the ground.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "WOMBAT",
+    full: "3D Thermal Topology (S19)",
+    desc: "S19's 3D view of the thermal envelope, drawn from the section inputs.",
+    source: "OBJECTIVE"
+  },
   {
     abbr: "Assemblies",
     full: "Building envelope assemblies",
