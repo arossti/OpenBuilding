@@ -1,11 +1,11 @@
 // pdf-bridge-import.mjs
-// BEAMweb side of the PDF-Parser bridge. Reads the parser's saved
+// BEAMweb side of the TakeOffEh bridge. Reads the parser's saved
 // projects from IndexedDB, runs the shared aggregator against the
 // user's current param_* values, and writes resolved dimension values
 // into StateManager with provenance tracked via dimension_sources.
 //
 // UI flow (see modal in beamweb.html):
-//   1. User clicks "Import PDF-Parser" → openImportModal()
+//   1. User clicks "Import TakeOffEh" → openImportModal()
 //   2. Modal lists saved parser projects; user picks one
 //   3. buildPreview(uuid) aggregates; modal renders a diff table
 //      (current StateManager value vs new value per dim)
@@ -177,7 +177,7 @@ function writeDimValue(row, params) {
 function buildProvenance(projectUuid, polyIds, extras) {
   extras = extras || {};
   const envelope = {
-    type: "pdf-parser",
+    type: "takeoffeh",
     projectUuid,
     polyIds: Array.isArray(polyIds) ? polyIds : [],
     summary: extras.summary || "",

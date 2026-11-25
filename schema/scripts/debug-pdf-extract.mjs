@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * PDF-Parser debug harness.
+ * TakeOffEh debug harness.
  *
  * Dumps the raw signals the browser app sees so algorithm iteration can
  * happen against actual extracted data instead of screenshot round-trips.

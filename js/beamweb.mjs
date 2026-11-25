@@ -6,7 +6,7 @@
  * (Phase 5). Each tab declares its `phase` in BEAM_TABS — matching the
  * BEAMweb.md §6 phase breakdown.
  *
- * Design: BEAMweb code is ESM (matches PDF-Parser conventions). Vendor JS
+ * Design: BEAMweb code is ESM (matches TakeOffEh conventions). Vendor JS
  * (Bootstrap, SheetJS) loads as classic script tags on the window. OBJECTIVE
  * patterns (state manager, file handler, cross-app nav) are ported by API
  * shape; no files are copied verbatim.
@@ -232,7 +232,7 @@ const PANEL_BODIES = {
         <li>Every above-grade wall faces a direction.</li>
         <li>Every window and door sits in a wall, and every skylight in a roof; an opening's area is its width × height.</li>
         <li>Window overhangs set summer shading by CSA F280 Annex A.</li>
-        <li>The envelope can come straight from a <a href="pdfparser.html" class="db-kv-link">PDF-Parser</a> takeoff: each wall with its facing, each window with its width and height.</li>
+        <li>The envelope can come straight from <a href="takeoffeh.html" class="db-kv-link">Take Off, Eh!</a>: each wall with its facing, each window with its width and height.</li>
         <li>Files say their version, so a 4.0 project always reopens whole.</li>
       </ul>
 
@@ -243,7 +243,7 @@ const PANEL_BODIES = {
         <a href="https://objective.openbuilding.ca" class="db-kv-link" target="_blank" rel="noopener">objective.openbuilding.ca</a>.
       </p>
       <p>
-        Companion tools: <a href="pdfparser.html" class="db-kv-link">PDF-Parser</a> (area takeoff),
+        Companion tools: <a href="takeoffeh.html" class="db-kv-link">Take Off, Eh!</a> (area takeoff),
         <a href="database.html" class="db-kv-link">Material Database</a>,
         <a href="index.html" class="db-kv-link">all OpenBuilding.ca tools</a>.
       </p>
@@ -409,7 +409,7 @@ function handleResetActiveTab() {
   }
   const ok = window.confirm(
     `Reset "${entry.label}" to a blank state?\n\n` +
-      `This clears only the inputs on this tab. Other tabs, PDF-Parser polygon data, and any saved project file are preserved.`
+      `This clears only the inputs on this tab. Other tabs, Take Off, Eh! polygon data, and any saved project file are preserved.`
   );
   if (!ok) return;
   entry.fn();
@@ -460,8 +460,8 @@ function wireActionBar() {
     "beam-open-project": () => notImplemented("Open project JSON — file-handler import wiring lands next."),
     "beam-save-project": () => notImplemented("Save project JSON — file-handler export wiring lands next."),
     "beam-import-xlsx": () => notImplemented("Import xlsx — needs excel-mapper (Phase 6; SheetJS already loaded)."),
-    "beam-import-pdf-parser": handleImportPdfParser,
-    "beam-trust-pdf-parser": handleTrustPdfParser,
+    "beam-import-takeoffeh": handleImportTakeOffEh,
+    "beam-trust-takeoffeh": handleTrustTakeOffEh,
     "beam-load-sample": handleLoadSample,
     "beam-reset": handleResetActiveTab
   };
@@ -477,9 +477,9 @@ function notImplemented(msg) {
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// PDF-Parser import modal
+// TakeOffEh import modal
 // ──────────────────────────────────────────────────────────────────────
-// Reads saved PDF-Parser projects from IndexedDB, runs the bridge aggregator
+// Reads saved TakeOffEh projects from IndexedDB, runs the bridge aggregator
 // against the user's current param_* values, and previews the proposed
 // changes in a modal. Only rows the user checks are written on Apply.
 
@@ -489,20 +489,20 @@ const importModalState = {
   preview: null
 };
 
-async function handleImportPdfParser() {
+async function handleImportTakeOffEh() {
   openImportModal();
   try {
     importModalState.projects = await PdfBridge.listProjects();
   } catch (err) {
-    console.error("[BEAMweb] failed to read PDF-Parser projects:", err);
+    console.error("[BEAMweb] failed to read TakeOffEh projects:", err);
     renderImportEmpty(
-      "Could not read saved PDF-Parser projects from IndexedDB. Open the PDF-Parser tab, load a PDF, then try again."
+      "Could not read saved Take Off, Eh! projects from IndexedDB. Open the Take Off, Eh! tab, load a PDF, then try again."
     );
     return;
   }
   if (importModalState.projects.length === 0) {
     renderImportEmpty(
-      "No PDF-Parser projects found. Open the PDF-Parser tab, load a drawing, tag some polygons, then return here."
+      "No Take Off, Eh! projects found. Open the Take Off, Eh! tab, load a drawing, tag some polygons, then return here."
     );
     return;
   }
@@ -511,20 +511,20 @@ async function handleImportPdfParser() {
 }
 
 // Trust: one-click bulk apply of every computable dim from the most
-// recently saved PDF-Parser project. Skips the review modal entirely.
+// recently saved TakeOffEh project. Skips the review modal entirely.
 // Trust + Verify (the modal) stays available anytime — users can always
 // re-open it to audit what landed.
-async function handleTrustPdfParser() {
+async function handleTrustTakeOffEh() {
   let projects;
   try {
     projects = await PdfBridge.listProjects();
   } catch (err) {
-    console.error("[BEAMweb] Trust: failed to read PDF-Parser projects:", err);
-    setStatus("Trust: could not read PDF-Parser sessions from IndexedDB.", "error");
+    console.error("[BEAMweb] Trust: failed to read TakeOffEh projects:", err);
+    setStatus("Trust: could not read Take Off, Eh! sessions from IndexedDB.", "error");
     return;
   }
   if (projects.length === 0) {
-    setStatus("Trust: no saved PDF-Parser session found. Use PDF-Parser first.", "error");
+    setStatus("Trust: no saved Take Off, Eh! session found. Use Take Off, Eh! first.", "error");
     return;
   }
   const project = projects[0];
@@ -538,7 +538,7 @@ async function handleTrustPdfParser() {
   }
   const dimIds = preview.rows.filter((r) => r.hasValue).map((r) => r.dimId);
   if (dimIds.length === 0) {
-    setStatus("Trust: no computable dimensions in the latest PDF-Parser session. Tag polygons there first.", "error");
+    setStatus("Trust: no computable dimensions in the latest Take Off, Eh! session. Tag polygons there first.", "error");
     return;
   }
   try {
@@ -561,7 +561,7 @@ function openImportModal() {
   document.getElementById("bw-pdf-import-apply").disabled = true;
   document.getElementById("bw-pdf-import-hint").textContent = "";
   document.getElementById("bw-pdf-import-body").innerHTML =
-    '<p class="bw-pdf-import-empty">Loading saved PDF-Parser projects\u2026</p>';
+    '<p class="bw-pdf-import-empty">Loading saved Take Off, Eh! projects\u2026</p>';
 }
 
 function closeImportModal() {
@@ -598,7 +598,7 @@ function renderImportBody(preview) {
     return (
       picker +
       paramWarn +
-      '<p class="bw-pdf-import-empty">No polygons in this project carry component tags that map to BEAMweb dimensions yet. Tag polygons in PDF-Parser (foundation slab, exterior wall, interior polyline, etc.) and try again.</p>'
+      '<p class="bw-pdf-import-empty">No polygons in this project carry component tags that map to BEAMweb dimensions yet. Tag polygons in Take Off, Eh! (foundation slab, exterior wall, interior polyline, etc.) and try again.</p>'
     );
   }
 
@@ -669,7 +669,7 @@ function collectSheets(contributors) {
   return Array.from(s);
 }
 
-// Render sheet IDs as deep links into the PDF-Parser app. target="pdf-parser-tab"
+// Render sheet IDs as deep links into the TakeOffEh app. target="takeoffeh-tab"
 // is a named browsing-context so the same Parser tab gets navigated and focused
 // when the user clicks multiple sheet refs — avoids a new tab per click.
 // Parser reads #sheet=X on load and on hashchange; see _applySheetHash in app.mjs.
@@ -677,7 +677,7 @@ function renderSheetLinks(sheets) {
   return sheets
     .map((s) => {
       const encoded = encodeURIComponent(s);
-      return `<a href="pdfparser.html#sheet=${encoded}" target="pdf-parser-tab" class="bw-sheet-link">${escapeHtml(s)}</a>`;
+      return `<a href="takeoffeh.html#sheet=${encoded}" target="takeoffeh-tab" class="bw-sheet-link">${escapeHtml(s)}</a>`;
     })
     .join(", ");
 }
@@ -731,7 +731,7 @@ async function applyImportSelection() {
   try {
     const result = await PdfBridge.applyImport(importModalState.activeUuid, dimIds);
     setStatus(
-      `Imported ${result.applied} dimension${result.applied === 1 ? "" : "s"} from PDF-Parser · ${escapeHtml(result.project.pdfFileName)}`,
+      `Imported ${result.applied} dimension${result.applied === 1 ? "" : "s"} from Take Off, Eh! · ${escapeHtml(result.project.pdfFileName)}`,
       "ready"
     );
     closeImportModal();
@@ -742,8 +742,8 @@ async function applyImportSelection() {
     refreshProjectForm();
     syncProjectToFsBridge();
   } catch (err) {
-    console.error("[BEAMweb] PDF-Parser import failed:", err);
-    setStatus(`PDF-Parser import failed: ${err.message}`, "error");
+    console.error("[BEAMweb] TakeOffEh import failed:", err);
+    setStatus(`Take Off, Eh! import failed: ${err.message}`, "error");
   }
 }
 
@@ -772,7 +772,7 @@ async function loadMaterialIndex() {
     console.warn("BEAMweb: material index unreachable:", err);
     document.getElementById("beam-material-source").textContent =
       `materials: index.json unreachable · run 'npm run stage:data' locally`;
-    setStatus("Material catalogue not staged — run `npm run stage:data` in PDF-Parser/", "error");
+    setStatus("Material catalogue not staged — run `npm run stage:data` in the repo root", "error");
   }
 }
 function short(sha) {

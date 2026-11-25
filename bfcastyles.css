@@ -3,7 +3,7 @@
 
    ## Activation
    Set html classes to opt in to theme + app scope:
-     <html class="theme-dark app-pdfparser">   PDF-Parser
+     <html class="theme-dark app-takeoffeh">   TakeOffEh
      <html class="theme-dark app-database">    Database viewer
      <html class="theme-dark app-beamweb">     BEAMweb
      <html class="theme-dark app-deps">        Dependencies manifest
@@ -14,7 +14,7 @@
      §2  Shared tokens — always applied (brand, typography, status palette)
      §3  Shared header — dark-chrome bar used by every app
      §4  Theme: dark — dark-theme variables + body baseline
-     §5  APP: PDF-Parser (area takeoff)
+     §5  APP: TakeOffEh (area takeoff)
      §7  APP: Database (material catalogue viewer)
      §8  APP: BEAMweb (embodied carbon calculator)
      §9  APP: Landing (app directory)
@@ -65,7 +65,7 @@
   --font-body: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-mono: "Courier New", Courier, monospace;
 
-  /* Aliases (PDF-Parser uses --font, Matrix uses --font-body) */
+  /* Aliases (TakeOffEh uses --font, Matrix uses --font-body) */
   --font: var(--font-body);
 
   /* Status palette (shared by Matrix card/flow views) */
@@ -82,7 +82,7 @@
 }
 
 /* ── Shared Header Bar (dark chrome) ──────────────────── */
-/* Used by both PDF-Parser toolbar and Matrix site-header  */
+/* Used by both TakeOffEh toolbar and Matrix site-header  */
 .site-header,
 #toolbar {
   background: #232328;
@@ -140,7 +140,7 @@
 }
 
 /* ═════════════════════════════════════════════════════════════
-   §4  THEME: dark  +  baseline (used by PDF-Parser / Database / BEAMweb / Deps / Landing)
+   §4  THEME: dark  +  baseline (used by TakeOffEh / Database / BEAMweb / Deps / Landing)
    ═════════════════════════════════════════════════════════════ */
 
 /* ── Dark Theme Tokens ────────────────────────────────── */
@@ -1986,7 +1986,7 @@ html.theme-dark body {
 
 /* §7 — EPD-Parser pending-changes panel + Trust + Verify modal.
    Bridge between EPD-Parser (producer) and the Database viewer (consumer)
-   per Database.md §4–§5. UX wording mirrors the existing PDF-Parser → BEAM
+   per Database.md §4–§5. UX wording mirrors the existing TakeOffEh → BEAM
    bridge so muscle-memory transfers (js/beamweb.mjs:519). */
 
 .db-pending-panel {
@@ -3226,7 +3226,7 @@ tr.bw-asm-row[hidden],
   margin: 6px 0;
 }
 
-/* ── PDF-Parser import modal ─────────────────────────────────── */
+/* ── TakeOffEh import modal ─────────────────────────────────── */
 
 #bw-pdf-import-backdrop {
   display: none;

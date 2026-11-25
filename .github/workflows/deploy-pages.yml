@@ -48,7 +48,7 @@ jobs:
           mkdir -p _site/data/schema _site/data/schema/lookups _site/data/beam _site/data/beam/samples
 
           # Deployable app surface
-          cp index.html pdfparser.html database.html beamweb.html dependencies.html _site/
+          cp index.html takeoffeh.html database.html beamweb.html dependencies.html _site/
           cp bfcastyles.css _site/
           cp -r js graphics lib _site/
 

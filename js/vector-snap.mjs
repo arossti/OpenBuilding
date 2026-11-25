@@ -1,5 +1,5 @@
 /**
- * PDF-Parser — Vector Geometry Extraction & Snap
+ * TakeOffEh — Vector Geometry Extraction & Snap
  */
 
 import * as Loader from "./pdf-loader.mjs";

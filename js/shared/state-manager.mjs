@@ -34,7 +34,7 @@ const listeners = new Map();
 // value came from when it was not typed by the user: "pdf:<poly_id>" for a
 // single-polygon import, "pdf:sum:<id>+<id>" for an aggregated import. Once
 // the user overrides, the importer must clear (or set to "user") so the
-// provenance badge in the UI stops claiming the value came from PDF-Parser.
+// provenance badge in the UI stops claiming the value came from TakeOffEh.
 // Bridge spec §3.3: persisted in exported JSON as a parallel top-level map.
 const dimensionSources = new Map();
 
@@ -299,8 +299,8 @@ const ARCHITECTURAL_NODES = [
     group: "Foundation",
     type: "module",
     architecturalLayer: "Foundation",
-    label: "PDF-Parser ProjectStore",
-    description: "PDF-Parser polygons + params, IndexedDB backed"
+    label: "Take Off, Eh! ProjectStore",
+    description: "Take Off, Eh! polygons + params, IndexedDB backed"
   },
   {
     id: "FOUNDATION-MaterialsIndex",

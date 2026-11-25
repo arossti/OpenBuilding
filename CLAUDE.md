@@ -26,7 +26,7 @@ Deployed from repo root via GitHub Actions (`.github/workflows/deploy-pages.yml`
 | URL | File | Role |
 |---|---|---|
 | `/` | `index.html` | Landing page / app directory (4 cards + deps link) |
-| `/pdfparser.html` | `pdfparser.html` | PDF-Parser — area + volume takeoff from drawings |
+| `/takeoffeh.html` | `takeoffeh.html` | TakeOffEh — area + volume takeoff from drawings |
 | `/database.html` | `database.html` | BfCA material database viewer (821 records) |
 | `/beamweb.html` | `beamweb.html` | BEAMweb — embodied carbon calculator (Phase 3 live) |
 | `/dependencies.html` | `dependencies.html` | Dev dependency manifest (not nav-linked) |
@@ -35,7 +35,7 @@ Deployed from repo root via GitHub Actions (`.github/workflows/deploy-pages.yml`
 
 `bfcastyles.css` (~5000 lines) is the single source of truth for every app's styles. Rules are section/app-scoped via html classes:
 
-- `<html class="theme-dark app-pdfparser">` — PDF-Parser
+- `<html class="theme-dark app-takeoffeh">` — TakeOffEh
 - `<html class="theme-dark app-database">` — Database viewer
 - `<html class="theme-dark app-beamweb">` — BEAMweb
 - `<html class="theme-dark app-deps">` — Dependency manifest
@@ -45,7 +45,7 @@ No per-app `.css` files — if you find yourself creating one, add rules to `bfc
 
 ### JS — ES modules, no build
 
-- `js/*.mjs` — PDF-Parser core + per-app entries (`app.mjs`, `beamweb.mjs`, `database.mjs`, `polygon-tool.mjs`, `scale-manager.mjs`, ...)
+- `js/*.mjs` — TakeOffEh core + per-app entries (`app.mjs`, `beamweb.mjs`, `database.mjs`, `polygon-tool.mjs`, `scale-manager.mjs`, ...)
 - `js/beam/*.mjs` — BEAMweb-internal modules (`project-tab.mjs`, `footings-slabs-tab.mjs`, `materials-db.mjs`, `auto-fill.mjs`, ...)
 - `js/beam/shared/*.mjs` — BEAMweb-scoped helpers (`formatters.mjs`)
 - `js/shared/*.mjs` — cross-app utilities (`state-manager.mjs`, `file-handler.mjs`, `html-utils.mjs`)
@@ -110,7 +110,7 @@ No build tools, no framework. Opens directly via a local server (`npm run serve`
 
 | File | Content |
 |---|---|
-| `bfcastyles.css` | Shared design system — BEAMweb in §8, PDF-Parser in §5, Database in §7, Landing in §9, Deps in §10 |
+| `bfcastyles.css` | Shared design system — BEAMweb in §8, TakeOffEh in §5, Database in §7, Landing in §9, Deps in §10 |
 | `docs/PDF References/Building application flow chart Part 9.pdf` | Reference flowchart for building permit process (prescriptive / performance / EnerGuide paths) |
 | `docs/PDF References/Embodied Carbon Tool DB Comparison Report (Priopta).pdf` | 227-page NRC-funded tool comparison report |
 | `docs/PDF References/Navigating Part 9 Building Codes and Municipal Permitting Frameworks.docx` | Part 9 permitting guidance |

@@ -1,5 +1,5 @@
 // indexed-db-store.mjs
-// Shared IndexedDB persistence for cross-tab workflows. PDF-Parser writes
+// Shared IndexedDB persistence for cross-tab workflows. TakeOffEh writes
 // projects + PDF blobs; BEAMweb reads them to flow polygon takeoffs into
 // PROJECT dimensions. EPD-Parser writes pending material-record changes;
 // the Database viewer reads them and applies Trust / Trust + Verify decisions.
@@ -7,7 +7,7 @@
 //
 // Four object stores:
 //   - parser-projects: { uuid, pdfFileName, pdfPageCount, projectJson, updatedAt }
-//       Full PDF-Parser ProjectStore JSON, indexed by uuid.
+//       Full TakeOffEh ProjectStore JSON, indexed by uuid.
 //   - parser-pdfs:     { uuid, blob }
 //       The original PDF bytes so a returning user doesn't re-drop the file.
 //   - epd-pending-changes: { source_file, state, candidate_record, audit_meta, ... }

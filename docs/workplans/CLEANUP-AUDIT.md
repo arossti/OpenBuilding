@@ -26,9 +26,9 @@ Everything else is either clean, intentionally stubbed, or flagged as out-of-sco
 
 `js/shared/state-manager.mjs` is imported by **every** BEAMweb module that touches state (`beamweb.mjs`, `project-tab.mjs`, `footings-slabs-tab.mjs`, `auto-fill.mjs`, `file-handler.mjs`). No parallel state store, no app-local shims bypassing it.
 
-**PDF-Parser's `project-store.mjs` is a separate concern by design** — it holds polygon geometry (vertices, sheet_id, closed flags), not BEAMweb PROJECT field values. The two-store model is what Phase 4b.2's bridge will connect: `project-store` polygon change → bridge aggregates → `StateManager.setValue()` for dimension values.
+**TakeOffEh's `project-store.mjs` is a separate concern by design** — it holds polygon geometry (vertices, sheet_id, closed flags), not BEAMweb PROJECT field values. The two-store model is what Phase 4b.2's bridge will connect: `project-store` polygon change → bridge aggregates → `StateManager.setValue()` for dimension values.
 
-So: **one StateManager; PDF-Parser has its own shrine for geometry-specific state; the bridge is how they talk.** Already the architecture you described. Zero consolidation work needed.
+So: **one StateManager; TakeOffEh has its own shrine for geometry-specific state; the bridge is how they talk.** Already the architecture you described. Zero consolidation work needed.
 
 ### State-key provenance is already implicit
 
@@ -72,7 +72,7 @@ Spot-checked 5 modules (`assembly-csv-parser`, `footings-slabs-tab`, `project-ta
 
 **Fix:** one-line token change — `--font-head: "Helvetica Neue", Helvetica, Arial, sans-serif`. Propagates via the token everywhere. Zero inline `font-family: Georgia` usages to track down.
 
-**Risk:** very low. Visual regression test across all 5 apps (landing, pdfparser, matrix, database, beamweb) takes ~5 min.
+**Risk:** very low. Visual regression test across all 5 apps (landing, takeoffeh, matrix, database, beamweb) takes ~5 min.
 
 **Alternative you may want:** introduce a new token `--font-ui-heavy` if we want a distinct heavy-weight sans (e.g. `"Inter", "Helvetica Neue", sans-serif` with font-weight 700) for UI headings, separate from body text. Slightly more deliberate but adds a dependency. I'd start with the minimal swap.
 
@@ -100,7 +100,7 @@ Current total: **5,028 lines** ([`bfcastyles.css`](../../bfcastyles.css); CLAUDE
 |---|---|---|
 | §1 Foundation (reset + tokens + header) | 106 | Lean. |
 | §4 Dark theme + baseline | 889 | Token declarations + layout skeleton (mostly unavoidable). |
-| §5 PDF-Parser | 1,013 | Viewer, toolbar, polygon panel, scale UI, summary table. Domain-specific. |
+| §5 TakeOffEh | 1,013 | Viewer, toolbar, polygon panel, scale UI, summary table. Domain-specific. |
 | **§6 Matrix** | **1,885** | **Largest.** Card layout + actor lens + flow-view prep + status / phase strips. |
 | §7 Database | 711 | Search, table, filters, collapsible rows. |
 | §8 BEAMweb | 984 | Tab layout + assembly picker + PROJECT form + action bar. |
@@ -111,7 +111,7 @@ Current total: **5,028 lines** ([`bfcastyles.css`](../../bfcastyles.css); CLAUDE
 
 1. **Status / phase bars** (~60 lines) — `.c-none`, `.c-vol`, `.c-cond`, `.c-emerg`, `.c-mand` tokens exist at §2, but the visual styles are re-applied in §6 (Matrix cards) + §8 (BEAMweb assembly status bars). Extract a `.status-pill-{level}` utility at foundation level.
 2. **Data tables** (~80 lines) — §6 Matrix and §7 Database both style tables (borders, hover, zebra). Extract `.data-table` + `.data-table-row` utilities.
-3. **Form inputs + dropdowns** (~50 lines) — §8 BEAMweb picker inputs, §7 Database search inputs, §5 PDF-Parser scale input all repeat similar input styling. Consolidate `.bw-input` / `.bw-dropdown` at foundation.
+3. **Form inputs + dropdowns** (~50 lines) — §8 BEAMweb picker inputs, §7 Database search inputs, §5 TakeOffEh scale input all repeat similar input styling. Consolidate `.bw-input` / `.bw-dropdown` at foundation.
 4. **Collapsible / expandable sections** (~40 lines) — Implemented 4× across §5, §6, §7, §8. Extract `.expandable-section` + `.toggle-button` utilities.
 5. **Scrollbar + scroll-shadow patterns** (~25 lines) — Repeated in viewer + database list + BEAMweb panels. Define `.scrollable-panel` once.
 
@@ -147,7 +147,7 @@ No `.test.js` / `.spec.js` in the codebase. `schema/scripts/validate.mjs` is the
 
 No file watcher; users must manually refresh the browser after edits. Low friction today (one user, small team). Worth revisiting if the team grows or session tempo increases. `vite` or `esbuild --watch` would drop in cleanly.
 
-### PDF-Parser polygon schema migration
+### TakeOffEh polygon schema migration
 
 When Step 10 adds `component` / `depth_m` / `sheet_id` / `sheet_class` to the polygon record, projects saved before Step 10 will lack those fields. Bridge should treat missing fields as "untagged" and surface them in the fidelity badge ("3 polygons · 0 tagged") so the user knows to re-tag, rather than silently skip. Document in Phase 4b.2 cold-start.
 

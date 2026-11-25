@@ -1,5 +1,5 @@
 /**
- * PDF-Parser — Schedule / Table Extraction
+ * TakeOffEh — Schedule / Table Extraction
  */
 
 import * as Loader from "./pdf-loader.mjs";

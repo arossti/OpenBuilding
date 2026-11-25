@@ -1,8 +1,8 @@
-# PDF-Parser ↔ BEAMweb Bridge — workplan + design spec
+# TakeOffEh ↔ BEAMweb Bridge — workplan + design spec
 
-> **Cross-app bridge: PDF-Parser polygons → BEAMweb PROJECT dimensions.** This is the Phase 4b detailed spec scoped in [BEAMweb.md §6](./BEAMweb.md) + [§7 Q19](./BEAMweb.md). Read BEAMweb.md §0, §5.1, and §7 Q19 first for the parent-workstream context (state model, flat-dict project JSON, source precedence).
+> **Cross-app bridge: TakeOffEh polygons → BEAMweb PROJECT dimensions.** This is the Phase 4b detailed spec scoped in [BEAMweb.md §6](./BEAMweb.md) + [§7 Q19](./BEAMweb.md). Read BEAMweb.md §0, §5.1, and §7 Q19 first for the parent-workstream context (state model, flat-dict project JSON, source precedence).
 >
-> **Status:** Phase 4b.2 (bridge MVP) shipped on `PDF-Bridge` branch, 2026-04-21. End-to-end flow working: Parser persists to IndexedDB, BEAMweb reads + aggregates, "Import from PDF-Parser" modal previews and writes dims. See [§0 Shipped update](#shipped-update--2026-04-21) for the commit list and architectural deltas from the original spec.
+> **Status:** Phase 4b.2 (bridge MVP) shipped on `PDF-Bridge` branch, 2026-04-21. End-to-end flow working: Parser persists to IndexedDB, BEAMweb reads + aggregates, "Import from TakeOffEh" modal previews and writes dims. See [§0 Shipped update](#shipped-update--2026-04-21) for the commit list and architectural deltas from the original spec.
 
 ---
 
@@ -13,12 +13,12 @@
 - Design agreed in principle with Andy 2026-04-20 around: (a) per-dim source selector with auto-sync + active-pull semantics, (b) generic component tags + lookup-table translation to dim fields, (c) polyline tool for linear features (interior walls, interior footings) in red, (d) elevation-drawn exterior walls with windows netted as the preferred path for above-grade wall areas, (e) numbered UI labels on quantitative PROJECT inputs, (f) fidelity badge with sheet references, (g) wizard mode shelved (training path via BfCA).
 - **No code yet.** Implementation sequenced in §6.
 - **Dependency chain:**
-  1. PDF-Parser Step 10 (component taxonomy + polyline type + red stroke + sheet denorm)
+  1. TakeOffEh Step 10 (component taxonomy + polyline type + red stroke + sheet denorm)
   2. BEAMweb PROJECT "geometry parameters" concept (new `param_*` fields)
   3. Shared bridge module `js/shared/polygon-map.mjs`
   4. Source selector UI + fidelity badge on each PROJECT dim row
   5. Numbered labels pass (trivial, can land anytime)
-- **Current reality.** PDF-Parser polygons carry `{id, label, vertices, closed, type: area|window, mode: net|add}` per [`polygon-tool.mjs`](../../js/polygon-tool.mjs). No component tag. No depth. `volumes[]` stub exists in [`project-store.mjs`](../../js/project-store.mjs) but empty. Sheet classification (plan/section/elevation) is tracked via [`sheet-classifier.mjs`](../../js/sheet-classifier.mjs) but semantically inert — doesn't influence measurement semantics. See BEAMweb.md §0 Phase 4b entry for audit findings.
+- **Current reality.** TakeOffEh polygons carry `{id, label, vertices, closed, type: area|window, mode: net|add}` per [`polygon-tool.mjs`](../../js/polygon-tool.mjs). No component tag. No depth. `volumes[]` stub exists in [`project-store.mjs`](../../js/project-store.mjs) but empty. Sheet classification (plan/section/elevation) is tracked via [`sheet-classifier.mjs`](../../js/sheet-classifier.mjs) but semantically inert — doesn't influence measurement semantics. See BEAMweb.md §0 Phase 4b entry for audit findings.
 
 ### Team feedback — 2026-04-20
 
@@ -52,13 +52,13 @@ Phase 4b is now **~95% shipped**. PR #11 (merge commit `49c35b4`) closed out the
 | `403b8c9` | Ruler click no longer edits polygon edges (broadens the polyline-tool guard to cover ruler) |
 | `07dd8a0` | Calibrate click no longer edits polygon edges (symmetric fix) |
 | `990ae94` | **M1** — Trust + Trust + Verify split (one-click bulk, modal always available post-import) |
-| `4631169` | **M2** — Sheet deep-links (`pdfparser.html#sheet=A-101` + `target="pdf-parser-tab"` named window so successive clicks reuse the same Parser tab, not spawn a new one per click) |
+| `4631169` | **M2** — Sheet deep-links (`takeoffeh.html#sheet=A-101` + `target="takeoffeh-tab"` named window so successive clicks reuse the same Parser tab, not spawn a new one per click) |
 | `a8e5045` | **M3** — Fidelity badge under every imported PROJECT dim + param (JSON envelope, clickable sheet refs, auto-clears on USER_MODIFIED) |
 | `a539c79` | **M4** — `depth_m` per polygon + Summary Table inline input + `dim_columns_piers_pads_volume` aggregator (Phase 4b.3 done) |
 | `944c720` | **M5** — Q23 garage scope: per-polygon `scope` field ("building" \| "garage"), two-pass scope-partitioned aggregator, 8 specs extended with `garageTargetDim` / `garageDim` counterparts |
-| `804882f` | Docs: `docs/pdf-parser.md` → `docs/completed/pdf-parser.md` (new `completed/` folder convention) |
+| `804882f` | Docs: `docs/takeoffeh.md` → `docs/completed/takeoffeh.md` (new `completed/` folder convention) |
 | `cf8552f` | Docs: `docs/pdf-resources/` → `docs/pdf-samples/` (ends the visual collision with `docs/PDF References/`) |
-| `5b10897` | PDF-Parser: restore path skips zero-byte PDF blobs + drops the orphan record (fixes `InvalidPDFException` on boot) |
+| `5b10897` | TakeOffEh: restore path skips zero-byte PDF blobs + drops the orphan record (fixes `InvalidPDFException` on boot) |
 
 ---
 
@@ -73,15 +73,15 @@ Phase 4b.0 through 4b.2 shipped on `PDF-Bridge` (merged to `main` as PR #1, 2026
 | Commit | Scope |
 |---|---|
 | `f93217d` | Phase 4b.0 — numbered labels on 30 quantitative PROJECT inputs |
-| `529e297` | Phase 4b.1 — PDF-Parser polygon schema + polyline type + component-tag picker |
+| `529e297` | Phase 4b.1 — TakeOffEh polygon schema + polyline type + component-tag picker |
 | `f07181b` | Phase 4b.1 — BEAMweb `param_*` fields + `dimension_sources` map |
 | `cd0b2a2` | Summary Table + CSV: Type + Tag columns on every row |
 | `5e9e22d` | Summary Table + CSV: Preset column |
-| `f907888` | IndexedDB autosave + cross-session restore in PDF-Parser |
+| `f907888` | IndexedDB autosave + cross-session restore in TakeOffEh |
 | `74f6108` | `target="_blank"` on inter-app nav (side-by-side tab workflow) |
 | `9efed2d` | Phase 4b.2 — bridge aggregator (`polygon-map.mjs`) + BEAMweb import modal |
 | `2e8c31d` | 0.00→— fix; sheet-title fallback to classification; inline Tag + Preset selects |
-| `3367bf8` | PDF-Parser sidebar Geometry Parameters panel + bridge fallback to Parser params |
+| `3367bf8` | TakeOffEh sidebar Geometry Parameters panel + bridge fallback to Parser params |
 | `f4e590d` | Cross-feeds: one polygon serves multiple dims (slab area + slab perimeter) |
 | `a49d02d` | Polyline-tool hit-test guard + workplan doc update |
 
@@ -95,17 +95,17 @@ Phase 4b.0 through 4b.2 shipped on `PDF-Bridge` (merged to `main` as PR #1, 2026
 
 **Architectural deltas from the original spec:**
 
-- **Cross-tab persistence via IndexedDB** was not in the original spec. Added to solve the "reload PDF every time you switch apps" problem. Stores full project JSON + PDF blob keyed by uuid. Doubles as the cross-tab bus — BEAMweb reads PDF-Parser's saved projects directly from the same origin's DB, no BroadcastChannel or postMessage needed.
+- **Cross-tab persistence via IndexedDB** was not in the original spec. Added to solve the "reload PDF every time you switch apps" problem. Stores full project JSON + PDF blob keyed by uuid. Doubles as the cross-tab bus — BEAMweb reads TakeOffEh's saved projects directly from the same origin's DB, no BroadcastChannel or postMessage needed.
 - **Multi-tab workflow (`target="_blank"`)** replaces the implicit single-tab assumption. Each app lives in its own tab so the Parser can stay alive with a loaded PDF while BEAMweb pulls takeoffs next door.
 - **Parser-side Geometry Parameters panel.** The original spec put `param_*` inputs only on BEAMweb's PROJECT tab. Shipped mirror on the Parser sidebar so drawing-adjacent scalars (wall height, roof pitch, footing dims) can be entered without context-switching. Values write to `project.params` in IndexedDB; BEAMweb reads them as a fallback when its own StateManager params are blank.
 - **Cross-feeds**, new: one polygon feeds multiple dims. `slab_foundation` polygon's area → foundation slab + below-grade + total floor; same polygon's perimeter → foundation wall (× basement height) + continuous footings (× H × W). `slab_above_grade` polygon's perimeter is a fallback for exterior wall area when no elevation walls are drawn. Explicit tags (`exterior_perimeter`, `wall_exterior`) supersede implicit cross-feeds when present. See §3.6.
-- **Manual Import button instead of auto-reflow.** Original spec (§2.2, §2.4, Q21) described a "source selector pill per dim" with auto-reflow on polygon change. Shipped: a single "Import from PDF-Parser" button in BEAMweb's action bar that opens a preview modal with per-dim checkboxes. User explicitly applies selected rows. Simpler, predictable, no dialogs asking to overwrite USER_MODIFIED values mid-session. Per-dim source pills can still land later if the single-button model proves limiting.
+- **Manual Import button instead of auto-reflow.** Original spec (§2.2, §2.4, Q21) described a "source selector pill per dim" with auto-reflow on polygon change. Shipped: a single "Import from TakeOffEh" button in BEAMweb's action bar that opens a preview modal with per-dim checkboxes. User explicitly applies selected rows. Simpler, predictable, no dialogs asking to overwrite USER_MODIFIED values mid-session. Per-dim source pills can still land later if the single-button model proves limiting.
 - **Inline Tag + Preset re-editing.** Summary Table rows now render Tag and Preset as `<select>` cells that re-classify a polygon in place. User-friendlier than "pick polygon on the plan to edit its tag."
 
 **What's shipped since the 2026-04-21 entry (all on `main` via PR #11):**
 
 - ✅ **Fidelity badge** on PROJECT dims + params (commit `a8e5045`) — JSON envelope provenance, clickable sheet refs, auto-clears on USER_MODIFIED.
-- ✅ **Clickable sheet deep-links** (commit `4631169`) — `pdfparser.html#sheet=X` protocol + `target="pdf-parser-tab"` named window for no-tab-mania.
+- ✅ **Clickable sheet deep-links** (commit `4631169`) — `takeoffeh.html#sheet=X` protocol + `target="takeoffeh-tab"` named window for no-tab-mania.
 - ✅ **`depth_m` + pad/pier volume** (commit `a539c79`) — Phase 4b.3 complete.
 - ✅ **Cross-app bulk action** (commit `990ae94`) — Trust button = one-click bulk import; Trust + Verify = the existing modal, available anytime.
 - ✅ **Q23 garage scope** (commit `944c720`) — per-polygon scope boolean, scope-aware aggregator, 8 specs extended with `garageTargetDim` / `garageDim`.
@@ -120,7 +120,7 @@ Phase 4b.0 through 4b.2 shipped on `PDF-Bridge` (merged to `main` as PR #1, 2026
 
 ### What the bridge does
 
-A user draws polygons in PDF-Parser across plan views, elevations, and (future) sections. Each polygon carries a `component` tag picked at measurement time. The bridge aggregates matching polygons across sheets and flows derived values into BEAMweb PROJECT dimension fields via `StateManager.setValue(fieldId, value, VALUE_STATES.DERIVED)`, with the per-dim source set to `pdf-parser`. User manual edits (USER_MODIFIED) override; the selector can be toggled to re-flow on demand.
+A user draws polygons in TakeOffEh across plan views, elevations, and (future) sections. Each polygon carries a `component` tag picked at measurement time. The bridge aggregates matching polygons across sheets and flows derived values into BEAMweb PROJECT dimension fields via `StateManager.setValue(fieldId, value, VALUE_STATES.DERIVED)`, with the per-dim source set to `takeoffeh`. User manual edits (USER_MODIFIED) override; the selector can be toggled to re-flow on demand.
 
 Some dimensions derive directly from polygons (slab area = Σ plan polygons tagged `slab_foundation`). Some need a project-level parameter the user enters manually on PROJECT (e.g., `param_wall_height_m` converts perimeter/polyline length into wall area). Some need Step 10's per-polygon depth (pad/pier volumes). A few stay manual forever (timber framing volume — not a takeoff concept).
 
@@ -133,7 +133,7 @@ Some dimensions derive directly from polygons (slab area = Σ plan polygons tagg
 
 ### Where to pick up next (cold-start one-liner, 2026-04-22)
 
-PR #11 is merged (`main` at `49c35b4`). Active branch is **`Magic-Wand-Polish`** — branched clean off post-merge `main`, empty of commits. **Bridge work is substantially done**; the branch exists to return to the PDF-Parser **Magic-Wand auto-detect polish pass** that was the original intent before bridge work consumed the prior session. See the handoff prompt that spawned this session for Magic-Wand-specific context.
+PR #11 is merged (`main` at `49c35b4`). Active branch is **`Magic-Wand-Polish`** — branched clean off post-merge `main`, empty of commits. **Bridge work is substantially done**; the branch exists to return to the TakeOffEh **Magic-Wand auto-detect polish pass** that was the original intent before bridge work consumed the prior session. See the handoff prompt that spawned this session for Magic-Wand-specific context.
 
 Remaining bridge-concern items are all either data-tasks, gated on other work, or low-priority UX polish:
 
@@ -149,9 +149,9 @@ For the actual **Magic-Wand Polish** direction (what `Magic-Wand-Polish` the bra
 
 ## 1. Goals
 
-1. **Automate what's automatable.** A user should produce most of PROJECT's 13+ Building Dimension inputs from PDF-Parser polygons + a short list of project-level parameters, without re-entering numbers.
+1. **Automate what's automatable.** A user should produce most of PROJECT's 13+ Building Dimension inputs from TakeOffEh polygons + a short list of project-level parameters, without re-entering numbers.
 2. **Be honest about the 2D→3D gap.** Dimensions that can't be derived (timber volume, roof surface without pitch, etc.) show "Manual" as the source clearly — no silent defaults, no guessed values.
-3. **Allow clean swapping between sources.** Per-dim picker for Imported / PDF-Parser / Manual. Re-flow on demand.
+3. **Allow clean swapping between sources.** Per-dim picker for Imported / TakeOffEh / Manual. Re-flow on demand.
 4. **Preserve user edits.** USER_MODIFIED stays sticky; source re-selection shows a confirmation before overriding.
 5. **Stay within the flat-dict project JSON contract** ([BEAMweb.md §5.1](./BEAMweb.md)). Add fields, don't restructure.
 6. **Leverage sheet classification as a semantic signal.** Sheet class informs which derivation path fires (elevation-drawn wall_exterior → surface area direct; plan-drawn exterior_perimeter → × param_wall_height_m fallback).
@@ -159,7 +159,7 @@ For the actual **Magic-Wand Polish** direction (what `Magic-Wand-Polish` the bra
 ### Non-goals
 
 - Perfect round-tripping of every BEAM workbook dimension.
-- Non-polygonal measurement workflows (dimension strings, annotations — PDF-Parser doesn't produce them).
+- Non-polygonal measurement workflows (dimension strings, annotations — TakeOffEh doesn't produce them).
 - Multi-building projects (one project = one building, per the existing app-wide assumption).
 - Timber framing volume from drawings — it's a discrete-element tally, not a takeoff. Stays manual or lands as line items on the Structural Elements assembly tab.
 
@@ -175,7 +175,7 @@ Four source states per PROJECT dimension:
 |---|---|---|
 | `unset` | Cold-start or post-Reset — no value + no source declared | Grey pill, "Select Source" |
 | `imported` | Value came from Load Sample or a workbook import | Blue pill, "Imported" |
-| `pdf-parser` | Value came from the bridge aggregating tagged polygons | Cyan pill, "PDF-Parser · {detail}" |
+| `takeoffeh` | Value came from the bridge aggregating tagged polygons | Cyan pill, "TakeOffEh · {detail}" |
 | `manual` | User typed it | Amber pill, "Manual" |
 
 Source lives in a new StateManager map, **distinct from the existing `VALUE_STATES` enum**. VALUE_STATES remains the precedence authority (tracks the provenance of a single write — DERIVED vs USER_MODIFIED vs IMPORTED vs CALCULATED). Source is the user's declared preference for where this dim should get its value from. They inform each other but play different roles.
@@ -183,7 +183,7 @@ Source lives in a new StateManager map, **distinct from the existing `VALUE_STAT
 **New StateManager API:**
 
 ```js
-StateManager.getDimensionSource(fieldId)       // "unset" | "imported" | "pdf-parser" | "manual"
+StateManager.getDimensionSource(fieldId)       // "unset" | "imported" | "takeoffeh" | "manual"
 StateManager.setDimensionSource(fieldId, src)  // sets + fires "source-change" event
 ```
 
@@ -198,7 +198,7 @@ Source + value persist together in the project JSON via a parallel map:
     "param_wall_height_m": "2.7"
   },
   "dimension_sources": {
-    "dim_foundation_slab_floor_area": "pdf-parser",
+    "dim_foundation_slab_floor_area": "takeoffeh",
     "param_wall_height_m": "manual"
   }
 }
@@ -211,9 +211,9 @@ The per-dim source toggle is both display + action:
 - **Reading** — reflects whichever source last wrote the value. Auto-syncs:
   - User types in the input → selector flips to Manual
   - Load Sample fires → selector flips to Imported (for every dim the sample touches)
-  - PDF-Parser polygon change fires → selector stays PDF-Parser (if already set) or does nothing (if on Manual/Imported)
+  - TakeOffEh polygon change fires → selector stays TakeOffEh (if already set) or does nothing (if on Manual/Imported)
 - **Writing** — picking a source *triggers a re-flow from that source*:
-  - `pdf-parser` → bridge pulls current polygon state, overwrites dim (after confirm if USER_MODIFIED)
+  - `takeoffeh` → bridge pulls current polygon state, overwrites dim (after confirm if USER_MODIFIED)
   - `imported` → if a loaded project JSON has a value, re-apply; else no-op
   - `manual` → unlocks the input; value stays where it was; next keystroke writes
   - `unset` → clears the dim value + source state
@@ -224,14 +224,14 @@ This "last-touched source wins" precedence ([Q19a resolved](./BEAMweb.md)) keeps
 
 - **Reset Tab** (existing action on PROJECT) clears all dim values + sets all dim sources → `unset`.
 - Reset does NOT touch:
-  - PDF-Parser polygon state (lives in the PDF-Parser app's own StateManager scope / project-store)
+  - TakeOffEh polygon state (lives in the TakeOffEh app's own StateManager scope / project-store)
   - Last-loaded workbook quarantine
-- User re-selects `pdf-parser` or `imported` after Reset → data flows back in fresh. This is how a user can "rollback PROJECT edits without losing the drawing work."
+- User re-selects `takeoffeh` or `imported` after Reset → data flows back in fresh. This is how a user can "rollback PROJECT edits without losing the drawing work."
 
 ### 2.4 Cross-app state flow
 
 ```
-[ PDF-Parser polygons ]        ← drawn by user with sheet class + component tag
+[ TakeOffEh polygons ]        ← drawn by user with sheet class + component tag
          │
          ▼  polygon-change event
 [ js/shared/polygon-map.mjs ]  ← aggregates by component tag, applies params, emits dim values
@@ -244,8 +244,8 @@ This "last-touched source wins" precedence ([Q19a resolved](./BEAMweb.md)) keeps
 ```
 
 Bridge runs on:
-- Explicit user action (source toggle → `pdf-parser`, bulk "Use PDF-Parser for all" action)
-- PDF-Parser polygon change event (debounced ~500ms)
+- Explicit user action (source toggle → `takeoffeh`, bulk "Use TakeOffEh for all" action)
+- TakeOffEh polygon change event (debounced ~500ms)
 - Parameter change event (user edits `param_wall_height_m` → re-derives any dim that multiplies by it)
 
 Bridge does NOT run on:
@@ -266,7 +266,7 @@ Some dimensions need a value that no polygon can provide. These get new `param_*
 | `param_footing_height_m` | Continuous Footing Height | m | continuous_footings_volume |
 | `param_footing_width_m` | Continuous Footing Width | m | continuous_footings_volume |
 
-**Key property**: parameters are always `manual` source only — no takeoff path. They render as **required inputs when any dependent dim is sourced from PDF-Parser polyline/perimeter**. Blank param + perimeter polygon = bridge emits a "needs `param_wall_height_m`" fidelity badge instead of a value, making the missing input obvious rather than silently defaulting to 0.
+**Key property**: parameters are always `manual` source only — no takeoff path. They render as **required inputs when any dependent dim is sourced from TakeOffEh polyline/perimeter**. Blank param + perimeter polygon = bridge emits a "needs `param_wall_height_m`" fidelity badge instead of a value, making the missing input obvious rather than silently defaulting to 0.
 
 ---
 
@@ -332,7 +332,7 @@ Polyline polygons tagged `wall_interior` (and, by extension, any perimeter polyg
 - `sheet_class` — denormalized from [`sheet-classifier.mjs`](../../js/sheet-classifier.mjs)
 - `assembly_preset` — optional, null by default; populated for `wall_interior` / `wall_exterior` / `exterior_perimeter` / `wall_party` when the user picks a preset from §5.7 (`wood_2x4`, `wood_2x6`, `steel_stud_3_5`, etc.). Seeds the Phase 4 assembly tab's picker-row percentages; user can still tune.
 
-Sheet denormalization makes polygon records self-contained — the bridge doesn't need to reach back into PDF-Parser's sheet map at aggregation time.
+Sheet denormalization makes polygon records self-contained — the bridge doesn't need to reach back into TakeOffEh's sheet map at aggregation time.
 
 ### 3.4 Sheet-class awareness (finally semantic)
 
@@ -348,14 +348,14 @@ The bridge uses `sheet_class` to pick the right derivation path and to validate 
 | `wall_interior` polyline on `elevation` | Flag error (polylines only on plans for v1) |
 | `roof_plan` on plan sheet | Valid |
 
-Validation surfaces as a subtle banner in the PDF-Parser UI next to the offending polygon, plus a "X polygons have placement issues" banner on the PROJECT source-selector if unresolved. Non-blocking — user can ignore.
+Validation surfaces as a subtle banner in the TakeOffEh UI next to the offending polygon, plus a "X polygons have placement issues" banner on the PROJECT source-selector if unresolved. Non-blocking — user can ignore.
 
 ### 3.5 Fallback visibility (Andy's ask)
 
 When the bridge falls back from a preferred path to a secondary path, the fidelity badge shows it explicitly:
 
-- Preferred (elevations present): `PDF-Parser · 4 elevation polygons · A-301, A-302, A-303, A-304`
-- Fallback (elevations absent, plan perimeter used): `PDF-Parser · plan perimeter × param_wall_height_m · A-101 · ⚠ elevations preferred`
+- Preferred (elevations present): `TakeOffEh · 4 elevation polygons · A-301, A-302, A-303, A-304`
+- Fallback (elevations absent, plan perimeter used): `TakeOffEh · plan perimeter × param_wall_height_m · A-101 · ⚠ elevations preferred`
 
 The `⚠ elevations preferred` inline warning makes the fallback visible, not silent.
 
@@ -425,29 +425,29 @@ One per dim row on PROJECT. Compact pill group at the right of the input. Render
 
 ```
 ┌────────────────────────────────────┬──────────┬────┬──────────────────────────────┐
-│ 9. FOUNDATION SLAB/FLOOR AREA      │ 110.40   │ m² │ [▾ PDF-Parser · 1 plan]      │
+│ 9. FOUNDATION SLAB/FLOOR AREA      │ 110.40   │ m² │ [▾ TakeOffEh · 1 plan]      │
 └────────────────────────────────────┴──────────┴────┴──────────────────────────────┘
 ```
 
 Pill colour + text by state:
 - `unset` — grey pill, "Select Source"
 - `imported` — blue pill, "Imported"
-- `pdf-parser` — cyan pill, "PDF-Parser · {summary}"
+- `takeoffeh` — cyan pill, "TakeOffEh · {summary}"
 - `manual` — amber pill, "Manual"
 
-Dropdown entries: all four states, with current marked. Picking a state that requires re-flow (e.g., pdf-parser) and that would overwrite USER_MODIFIED fires a small confirm dialog ("This will overwrite your manual edit — continue?").
+Dropdown entries: all four states, with current marked. Picking a state that requires re-flow (e.g., takeoffeh) and that would overwrite USER_MODIFIED fires a small confirm dialog ("This will overwrite your manual edit — continue?").
 
 ### 5.2 Fidelity badge
 
-Secondary caption under the dim input when source is `pdf-parser`, listing what fired.
+Secondary caption under the dim input when source is `takeoffeh`, listing what fired.
 
 Examples:
-- `PDF-Parser · 4 elevation polygons · A-301, A-302, A-303, A-304`
-- `PDF-Parser · plan perimeter × 2.7m (wall height param) · A-101 · ⚠ elevations preferred`
-- `PDF-Parser · Σ 12 pad polygons · A-101`
-- `PDF-Parser · needs param_wall_height_m`
+- `TakeOffEh · 4 elevation polygons · A-301, A-302, A-303, A-304`
+- `TakeOffEh · plan perimeter × 2.7m (wall height param) · A-101 · ⚠ elevations preferred`
+- `TakeOffEh · Σ 12 pad polygons · A-101`
+- `TakeOffEh · needs param_wall_height_m`
 
-**Sheet refs are clickable** (Andy's ask — #9 refinement): click `A-301` → opens PDF-Parser to that sheet in a new tab / the other app window. Cross-app deep link via URL fragment: `pdfparser.html#sheet=A-301`.
+**Sheet refs are clickable** (Andy's ask — #9 refinement): click `A-301` → opens TakeOffEh to that sheet in a new tab / the other app window. Cross-app deep link via URL fragment: `takeoffeh.html#sheet=A-301`.
 
 ### 5.3 Numbered labels (display only, no field ID change)
 
@@ -495,16 +495,16 @@ Construction Year + Project Name / Address / Country / Province / Building Type 
 
 **Total: 30 numbered quantitative inputs.** Now visible at a glance = "how many things we need to count or get from the Parser."
 
-### 5.4 Polyline tool button (PDF-Parser)
+### 5.4 Polyline tool button (TakeOffEh)
 
-New button next to the area-polygon tool in the PDF-Parser toolbar. Red stroke. Shortcut: `l` (for length).
+New button next to the area-polygon tool in the TakeOffEh toolbar. Red stroke. Shortcut: `l` (for length).
 
 **Label:** "Trace Length"
 **Tooltip:** "For interior walls, interior footings, and other linear features. Draws open polylines, measures length only."
 
 Implementation: extend [`polygon-tool.mjs`](../../js/polygon-tool.mjs) to accept `type: polyline`; reuse the vertex-drawing logic; skip closure; label measurement output "length" (m/ft) instead of "perimeter".
 
-### 5.5 Component tag picker (PDF-Parser)
+### 5.5 Component tag picker (TakeOffEh)
 
 On polygon creation/edit, a "Tag" dropdown appears in the measurement panel.
 
@@ -514,13 +514,13 @@ On polygon creation/edit, a "Tag" dropdown appears in the measurement panel.
 
 ### 5.6 Wall-height param prompt ergonomics
 
-When the user draws a polyline tagged `wall_interior` or a closed polygon tagged `exterior_perimeter`, and `param_wall_height_m` is blank on PROJECT, the PDF-Parser sidebar shows an inline prompt: "Set Wall Height on PROJECT tab" (with a click-through link). Non-blocking — user can draw freely and fill the param later.
+When the user draws a polyline tagged `wall_interior` or a closed polygon tagged `exterior_perimeter`, and `param_wall_height_m` is blank on PROJECT, the TakeOffEh sidebar shows an inline prompt: "Set Wall Height on PROJECT tab" (with a click-through link). Non-blocking — user can draw freely and fill the param later.
 
 ### 5.7 Assembly-preset picker on wall polylines (meeting 2026-04-20, Melanie)
 
 **Problem being solved.** BEAM gSheet's current workflow populates every candidate material in a wall-assembly picker (framing + sheathing + cladding + insulation + barriers + interior finish), each at 0% by default. The user then manually tunes percentages across dozens of rows to describe a single wall assembly. This is a known pain point — same assembly typed repeatedly across projects.
 
-**The preset.** When the user draws a wall polyline (`type: polyline`, `component: wall_interior`) or a perimeter polygon (`type: area`, `component: exterior_perimeter`), the PDF-Parser measurement panel shows a second dropdown below the component tag: **Assembly preset**. Values (v1 catalogue — subject to BfCA team validation, see Q30):
+**The preset.** When the user draws a wall polyline (`type: polyline`, `component: wall_interior`) or a perimeter polygon (`type: area`, `component: exterior_perimeter`), the TakeOffEh measurement panel shows a second dropdown below the component tag: **Assembly preset**. Values (v1 catalogue — subject to BfCA team validation, see Q30):
 
 - Wood 2×4 @ 16" o.c. (light framing)
 - Wood 2×6 @ 16" o.c. (medium framing)
@@ -535,7 +535,7 @@ The preset is carried on the polygon record (`assembly_preset` field per §3.3).
 1. Derives the dimension value (length × height → m² as before).
 2. **Passes the preset name through to the downstream assembly tab** (Interior Walls, Exterior Walls, Party Walls when those Phase 4 tabs port) so the picker rows open with sensible defaults rather than every row at 0%.
 
-**Default seeding.** Each preset maps to a small table: `{ row_hash → percent }` applied on the assembly tab's first render when the dimension is sourced from `pdf-parser` and the row isn't USER_MODIFIED. Values stay editable — the preset is a seed, not a lock.
+**Default seeding.** Each preset maps to a small table: `{ row_hash → percent }` applied on the assembly tab's first render when the dimension is sourced from `takeoffeh` and the row isn't USER_MODIFIED. Values stay editable — the preset is a seed, not a lock.
 
 Example (illustrative — actual values need Melanie's sign-off; see Q30):
 ```
@@ -551,7 +551,7 @@ wood_2x4_16oc:
 
 **Why this lives on the polyline, not on the PROJECT tab.** Wall assemblies in residential construction vary by location (exterior walls one build-up, party walls another, interior walls yet another). Per-polygon tagging is finer-grained than per-dimension and matches how drawings actually describe assemblies.
 
-**Preset catalogue location.** Proposed: a new file `js/shared/assembly-presets.mjs` (or similar) exports `ASSEMBLY_PRESETS`, a data table mapping preset IDs → display label + the default row-seed table. Lives in `js/shared/` because both PDF-Parser (picker UI) and BEAMweb (assembly tabs) consume it.
+**Preset catalogue location.** Proposed: a new file `js/shared/assembly-presets.mjs` (or similar) exports `ASSEMBLY_PRESETS`, a data table mapping preset IDs → display label + the default row-seed table. Lives in `js/shared/` because both TakeOffEh (picker UI) and BEAMweb (assembly tabs) consume it.
 
 **Scope implication.** This is a non-trivial addition that interacts with Phase 4 (the actual Interior Walls / Exterior Walls / Party Walls assembly tabs — none of which have ported yet). Until those tabs port, the preset is metadata on the polyline that nothing downstream consumes. Sequenced in §6.3 (carried on polygons Phase 4b.1) + §6 new Phase 4b.5 (wire to assembly tabs once they port).
 
@@ -563,9 +563,9 @@ wood_2x4_16oc:
 
 - **Numbered labels** (§5.3) — one label-string change per field in `project-tab.mjs`. No behavior impact, no risk. Shipped as a standalone commit alongside the Q25 Party → Party / Demising label update.
 
-### 6.2 Phase 4b.1 — Foundation (PDF-Parser Step 10 minimal + PROJECT params) (**✅ shipped** 2026-04-20)
+### 6.2 Phase 4b.1 — Foundation (TakeOffEh Step 10 minimal + PROJECT params) (**✅ shipped** 2026-04-20)
 
-**PDF-Parser side (commit `529e297`):**
+**TakeOffEh side (commit `529e297`):**
 - ✅ Added `component`, `depth_m`, `sheet_id`, `sheet_class`, `assembly_preset` fields to the polygon schema in [`project-store.mjs`](../../js/project-store.mjs).
 - ✅ Added polyline (`type: polyline`) support to [`polygon-tool.mjs`](../../js/polygon-tool.mjs) with red stroke + length-only measurement + Enter-to-finalize flow.
 - ✅ Added component tag dropdown to the toolbar, context-switched per tool. Assembly preset dropdown appears for wall-type components.
@@ -581,7 +581,7 @@ wood_2x4_16oc:
 - ✅ Cross-tab persistence via IndexedDB (`js/shared/indexed-db-store.mjs`), ProjectStore autosave, auto-restore on Parser init. (commit `f907888`)
 - ✅ `target="_blank"` on cross-app nav so apps stay alive in separate tabs. (commit `74f6108`)
 - ✅ Built [`js/beam/pdf-bridge-import.mjs`](../../js/beam/pdf-bridge-import.mjs) — reads Parser projects from IndexedDB, runs aggregator, returns preview with diff rows, applies selected rows via `StateManager.setValue` + `setDimensionSource`. (commit `9efed2d`)
-- ✅ Import from PDF-Parser modal: project picker when multiple sessions, param-missing warning banner, per-dim checkbox table showing current vs computed, source column with contributing polygons + sheets + assembly presets + warnings. Apply writes through and refreshes PROJECT tab. (commit `9efed2d`)
+- ✅ Import from TakeOffEh modal: project picker when multiple sessions, param-missing warning banner, per-dim checkbox table showing current vs computed, source column with contributing polygons + sheets + assembly presets + warnings. Apply writes through and refreshes PROJECT tab. (commit `9efed2d`)
 - ✅ Display fixes: `0.00→—` when required param missing, classification fallback for junk sheet titles, inline Tag + Preset selects in Summary Table. (commit `2e8c31d`)
 - ✅ Parser-side Geometry Parameters panel in sidebar; bridge reads Parser params as fallback when StateManager is blank; Apply back-fills StateManager from Parser params. (commit `3367bf8`)
 - ✅ Cross-feeds: implicit perimeter derivations so a single slab polygon feeds foundation wall + continuous footings alongside the slab area it was drawn for. Supersedes-logic preserves user's explicit traces. (commit `f4e590d`)
@@ -608,13 +608,13 @@ Deferred from the original Phase 4b.2 scope (re-sequenced into polish or later p
 
 - Cross-app deep links from fidelity badge sheet refs (§5.2 click-through).
 - Polygon-placement validation rules per §3.4 — non-blocking warnings.
-- Bulk "Use PDF-Parser for all connected dims" action on the PROJECT header.
+- Bulk "Use TakeOffEh for all connected dims" action on the PROJECT header.
 - Pitched-roof cavity handling (Q22 resolved).
 
 ### 6.6 Phase 4b.5 — Assembly-preset wire-through (meeting 2026-04-20, Melanie)
 
 - `js/shared/assembly-presets.mjs` (new): `ASSEMBLY_PRESETS` catalogue — preset ID → display label + default `{ row_hash → percent }` seed table. Preset list per §5.7 (subject to Q30 refinement).
-- PDF-Parser measurement panel: second dropdown on `wall_interior` / `exterior_perimeter` polylines — "Assembly preset" (persists to polygon `assembly_preset` field per §3.3).
+- TakeOffEh measurement panel: second dropdown on `wall_interior` / `exterior_perimeter` polylines — "Assembly preset" (persists to polygon `assembly_preset` field per §3.3).
 - Bridge passes `assembly_preset` through to the downstream Phase 4 assembly tab (Interior Walls / Exterior Walls / Party Walls) when those ship. Assembly tab seeds row percentages from the preset on first render — editable, not locked.
 - **Gated on:** the actual Phase 4 assembly tab ports (Interior Walls, Exterior Walls, Party Walls — §6 Phase 4 queue in BEAMweb.md). Until then, the preset is captured on the polygon but downstream is a no-op. Metadata-only in the interim is fine — preserves user intent for when tabs port.
 
@@ -634,7 +634,7 @@ Carrying forward from BEAMweb.md §7 Q19 with updates:
 - ✅ **Q19a (precedence)** — resolved: last-touched source wins; USER_MODIFIED is sticky; explicit source toggle overrides with confirm.
 - ✅ **Q19b (aggregation)** — resolved: sum, with fidelity badge showing "N polygons · total" so user can audit.
 - ✅ **Q19c (taxonomy mapping)** — resolved: generic component tags + lookup table (§3.2 + §4).
-- ✅ **Q19d (reset semantics)** — resolved: §2.3 — Reset Tab clears PROJECT, preserves PDF-Parser polygon state, user re-selects source to re-flow.
+- ✅ **Q19d (reset semantics)** — resolved: §2.3 — Reset Tab clears PROJECT, preserves TakeOffEh polygon state, user re-selects source to re-flow.
 - ✅ **Q19e (JSON persistence)** — resolved: yes, `dimension_sources` map alongside `fields` in the project JSON.
 
 ### New questions opened by this spec
@@ -650,7 +650,7 @@ Carrying forward from BEAMweb.md §7 Q19 with updates:
   - (c) **Supersedes semantics.** Each new cross-feed declares its own `supersededBy` list so user-explicit tags always win. Review the lattice at the same time — if tag A supersedes B and B supersedes C, is A→C implicit? Currently no; the mapping is flat. Formalise if/when users want transitive supersedes.
   - (d) **UI impact for (a) only.** None on the Parser side — the Import preview already renders multiple contributors per dim. (b) above is a larger Parser UX change.
 - ✅ **Q25 — Party/Demising wall naming in code.** Shipped. Field ID `dim_party_wall_area`, UI label "Party / Demising Wall Area".
-- ✅ **Q26 — PDF-Parser Step 10 ownership.** Resolved as part of Phase 4b.1 scope (single branch, single PR). Polygon schema + polyline + component dropdown shipped in commit `529e297`.
+- ✅ **Q26 — TakeOffEh Step 10 ownership.** Resolved as part of Phase 4b.1 scope (single branch, single PR). Polygon schema + polyline + component dropdown shipped in commit `529e297`.
 
 ### Opened by BfCA team meeting (2026-04-20)
 
@@ -767,7 +767,7 @@ Andy to relay; answer will drive follow-up commits on Q28 + Q29.
 
 ```js
 // Single source of truth for component → dimension mappings.
-// Lives in js/shared/ because BEAMweb and PDF-Parser both consume it.
+// Lives in js/shared/ because BEAMweb and TakeOffEh both consume it.
 
 export const COMPONENT_TO_DIMENSION = {
   slab_foundation: {
@@ -836,7 +836,7 @@ export function aggregateFromPolygons({ polygons, params, targetDimId, scope = "
 
 export function computeAllDimensions({ polygons, params }) {
   // Loop every target dim, call aggregateFromPolygons, return flat map.
-  // Used by the bulk "Use PDF-Parser for all" action.
+  // Used by the bulk "Use TakeOffEh for all" action.
 }
 ```
 
@@ -845,7 +845,7 @@ export function computeAllDimensions({ polygons, params }) {
 ```js
 // Renders the per-dim source pill + dropdown.
 // Listens for StateManager dimension-source changes; re-renders on change.
-// Fires bridge.refreshDimension(dimId) when user picks pdf-parser.
+// Fires bridge.refreshDimension(dimId) when user picks takeoffeh.
 
 export function renderSourcePill(dimId) { /* ... */ }
 export function wireSourceSelector(panel) { /* ... */ }
@@ -857,14 +857,14 @@ export function wireSourceSelector(panel) { /* ... */ }
 - Prepend numbered labels per §5.3.
 - Render source pill alongside each dim input via `renderSourcePill(f.id)` in `renderDimRow` / `renderInfoRow`.
 
-### `polygon-tool.mjs` (modifications, PDF-Parser Step 10)
+### `polygon-tool.mjs` (modifications, TakeOffEh Step 10)
 
 - Add `type: polyline` branch to drawing logic — vertex collection unchanged, closure skipped, stroke red.
 - Add component tag dropdown to measurement panel, options filtered by current type + sheet class.
 - Add optional depth input for `pad_pier` (Step 10b).
 - Persist new fields (`component`, `sheet_id`, `sheet_class`, `depth_m`) to project store.
 
-### `project-store.mjs` (modifications, PDF-Parser)
+### `project-store.mjs` (modifications, TakeOffEh)
 
 - Polygon schema extended with new fields.
 - Denormalize sheet metadata at save.

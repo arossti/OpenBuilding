@@ -1,5 +1,5 @@
 /**
- * PDF-Parser — PDF Loading & Page Rendering
+ * TakeOffEh — PDF Loading & Page Rendering
  * Wraps PDF.js 4.x ESM API.
  */
 

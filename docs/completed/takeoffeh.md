@@ -1,4 +1,4 @@
-# PDF-Parser — Construction Document Area & Volume Extraction Tool
+# TakeOffEh — Construction Document Area & Volume Extraction Tool
 
 ## Purpose
 
@@ -34,10 +34,10 @@ The reference document (`2024.09.09 _ Issued for Permit (B-Frame 4.4 M&K).pdf`) 
 
 ### Multi-file HTML app with local JS modules
 
-- `index.html` — PDF-Parser app shell (links `bfcastyles.css` + `pdfparser.css`)
+- `index.html` — TakeOffEh app shell (links `bfcastyles.css` + `takeoffeh.css`)
 - `matrix.html` — EC Matrix app (links `bfcastyles.css` + `matrix.css`)
 - `bfcastyles.css` — shared design system (reset, brand tokens, header, logo, nav)
-- `pdfparser.css` — PDF-Parser dark-theme styles
+- `takeoffeh.css` — TakeOffEh dark-theme styles
 - `matrix.css` — EC Matrix light-theme styles
 - `js/` — 10 vanilla JS ESM modules (`.mjs`)
 - `lib/` — PDF.js 4.9.155 ESM build (local copy, no CDN dependency)
@@ -65,7 +65,7 @@ No Fabric.js, Konva.js, or other canvas abstraction needed for v1. Raw Canvas 2D
 
 ### JS Module Structure
 
-All modules attach to the `PP` (PDF-Parser) global namespace. Load order matters.
+All modules attach to the `PP` (TakeOffEh) global namespace. Load order matters.
 
 | File | Module | Purpose |
 |---|---|---|
@@ -414,7 +414,7 @@ var project = {
 | **EasyTakeoffs** | No | Auto + manual | Yes | No | No | Yes (browser) | No |
 | **pdf-takeoff** (GitHub) | No | Manual | Basic | No | No | Yes | Yes (MIT) |
 | **ProTakeoff** (GitHub) | No | Manual | Yes | No | Partial | No (Tauri) | Yes (MIT) |
-| **PDF-Parser (ours)** | Heuristic (v1), ML (v3) | Auto + manual | Yes | Yes (v2) | Yes (v4) | Yes | Yes |
+| **TakeOffEh (ours)** | Heuristic (v1), ML (v3) | Auto + manual | Yes | Yes (v2) | Yes (v4) | Yes | Yes |
 
 **Our differentiator:** Purpose-built for Canadian residential construction documents. Understands OBC Part 9 conventions, NBC sheet numbering, metric/imperial dual units, and integrates with BfCA's embodied carbon workflow. Not trying to be a general-purpose takeoff tool — focused on the area/volume data needed for EC calculations (BEAM, MCE2, wbLCA tools).
 
@@ -523,12 +523,12 @@ var project = {
 
 - [x] **CSS refactor** — split monolithic `bfcastyles.css` into 3-file architecture:
   - `bfcastyles.css` (shared foundation: reset, brand tokens, header, logo, nav button)
-  - `pdfparser.css` (dark theme: viewer, toolbar, sidebar, measure panel, scale panel, feedback dialogues)
+  - `takeoffeh.css` (dark theme: viewer, toolbar, sidebar, measure panel, scale panel, feedback dialogues)
   - `matrix.css` (light theme: cards, phases, flow model, legends, actor lens, persona chips)
 - [x] Extracted 1,418 lines of inline CSS from `matrix.html` into `matrix.css`
 - [x] Matrix logo switched from inline style to shared `.header-logo` class
 - [x] **Default measurement method changed to Rectangle** (more frequently used than Polygon)
-- [x] Scale feedback dialogue CSS + HTML added to PDF-Parser
+- [x] Scale feedback dialogue CSS + HTML added to TakeOffEh
 
 ### Step 8 — Window/Opening Measurement & Netting ✅ (2026-03-28)
 
@@ -614,7 +614,7 @@ A2.1,NET TOTAL,,,,,42.53,,457.87,
 | `js/polygon-tool.mjs` | `type`/`mode` on polygon, `pointInPolygon`, `centroid`, `buildAssociationMap`, net-area cache in `draw` |
 | `js/app.mjs` | Window tool, generic click handlers, association-based measurement panel with expandable rows |
 | `index.html` | Window button + Net/Add dropdown + W key hint |
-| `pdfparser.css` | Window-mode dropdown, `.wall-toggle`, `.detail-row`, `.net-label` styles |
+| `takeoffeh.css` | Window-mode dropdown, `.wall-toggle`, `.detail-row`, `.net-label` styles |
 | `js/project-store.mjs` | Persist type/mode, hierarchical CSV with Gross/Net columns |
 
 ### Step 9 — Summary Table & Project Management ✅ (2026-03-28)
@@ -722,7 +722,7 @@ A2.1,NET TOTAL,,,,,42.53,,457.87,
 ```
 at/                              ← repo root is the deployed site (flat since 2026-04-20)
 ├── index.html                   ← landing / app directory
-├── pdfparser.html               ← PDF-Parser app
+├── takeoffeh.html               ← TakeOffEh app
 ├── matrix.html                  ← EC Matrix app
 ├── database.html                ← BfCA Material Database viewer
 ├── beamweb.html                 ← BEAMweb embodied-carbon calculator
@@ -745,7 +745,7 @@ at/                              ← repo root is the deployed site (flat since 
 │   ├── vector-snap.mjs          ← vector geometry + snap
 │   ├── schedule-parser.mjs      ← table extraction
 │   ├── project-store.mjs        ← data model + export
-│   ├── app.mjs                  ← PDF-Parser main controller + UI
+│   ├── app.mjs                  ← TakeOffEh main controller + UI
 │   ├── beamweb.mjs, database.mjs  ← BEAMweb + Database viewer entries
 │   ├── shared/                  ← cross-app utilities (StateManager, FileHandler, html-utils)
 │   └── beam/                    ← BEAMweb internals + beam/shared/formatters
@@ -753,9 +753,9 @@ at/                              ← repo root is the deployed site (flat since 
 ├── schema/                      ← material-catalogue source of truth
 ├── logs/                        ← gitignored dev pasteboard
 └── docs/
-    ├── sample.pdf               ← PDF-Parser dev fixture
+    ├── sample.pdf               ← TakeOffEh dev fixture
     ├── pdf-resources/           ← larger sample PDFs (gitignored)
-    ├── pdf-parser.md            ← this workplan
+    ├── takeoffeh.md            ← this workplan
     ├── matrix/                  ← Matrix docs (ARCHITECTURE / TRIAGE / ec_matrix_v2)
     ├── beam-samples/            ← DOE Prototype project JSONs
     ├── csv files from BEAM/     ← 22 BEAM workbook snapshots
@@ -769,7 +769,7 @@ Version tracking is via git commits, not step-numbered files.
 
 ## Tablet / Mobile Compatibility
 
-The PDF-Parser is **desktop-first** — designed for mouse + keyboard workflows (scroll-wheel zoom, middle-click pan, keyboard shortcuts). However, many construction professionals review drawings on tablets (iPad, Android tablets) at job sites or in meetings.
+The TakeOffEh is **desktop-first** — designed for mouse + keyboard workflows (scroll-wheel zoom, middle-click pan, keyboard shortcuts). However, many construction professionals review drawings on tablets (iPad, Android tablets) at job sites or in meetings.
 
 ### Current State (Tablet)
 
@@ -815,5 +815,5 @@ The PDF-Parser is **desktop-first** — designed for mouse + keyboard workflows 
 2. **Multi-building sites:** Part 3 projects may have multiple buildings. Support in Phase 1?
    - Recommendation: No — Phase 1 assumes single building. Multi-building is a Phase 2+ concern.
 
-3. **Integration with EC tools:** Should PDF-Parser output feed directly into BEAM/MCE2 input formats?
+3. **Integration with EC tools:** Should TakeOffEh output feed directly into BEAM/MCE2 input formats?
    - Recommendation: Yes, as a Phase 4 feature. For now, CSV export is sufficient.

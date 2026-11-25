@@ -104,7 +104,7 @@ After the schema bump, run `node schema/scripts/validate.mjs --all` against the 
 
 ## 4. UI changes in `database.html`
 
-The two-button **Trust** / **Trust + Verify** pattern from the existing PDF-Parser → BEAM bridge ([`js/beamweb.mjs:519`](../../js/beamweb.mjs#L519), [`beamweb.html:90-103`](../../beamweb.html#L90-L103)) carries over directly. Same UX shape, same status-message wording, same affordances. Users coming from BEAMweb's PDF-Parser import see an identical flow on the database side.
+The two-button **Trust** / **Trust + Verify** pattern from the existing TakeOffEh → BEAM bridge ([`js/beamweb.mjs:519`](../../js/beamweb.mjs#L519), [`beamweb.html:90-103`](../../beamweb.html#L90-L103)) carries over directly. Same UX shape, same status-message wording, same affordances. Users coming from BEAMweb's TakeOffEh import see an identical flow on the database side.
 
 | Component | Behavior |
 |---|---|
@@ -120,7 +120,7 @@ No new color palette or component primitives — reuse the existing chip / statu
 
 ## 5. Trust / Trust + Verify — the two button paths
 
-Modeled directly on the BEAM flow ([`js/beamweb.mjs:519`](../../js/beamweb.mjs#L519) `handleTrustPdfParser`).
+Modeled directly on the BEAM flow ([`js/beamweb.mjs:519`](../../js/beamweb.mjs#L519) `handleTrustTakeOffEh`).
 
 ### Trust — one-click commit, no review modal
 
@@ -268,7 +268,7 @@ The audit produces a one-paragraph finding + the smallest patch that gets the fi
 | **D2 — Index.json builder audit** | Audit + fix per §9. | `index.json` excludes hidden / deprecated / flagged-for-deletion records. |
 | **D3 — Per-row action UI** | Kebab menu + Edit / Replace from EPD / Flag for deletion / Restore actions on each row in `database.html`. Manual edits route through `pending_changes`. | Click any action → entry appears in the pending queue with the right shape. |
 | **D4 — Pending-changes queue panel** | Toolbar counter + collapsible top-of-viewer panel listing pending entries. Reads the shared `pending_changes` IndexedDB table written by EPD-Parser. | EPD-Parser hand-off → entry visible in DB-viewer pending panel within ≤1 s. |
-| **D5 — Trust / Trust + Verify** | The §5 UIs. Toolbar Trust + per-row Trust for one-click commit (mirrors BEAMweb's `handleTrustPdfParser`). Trust + Verify opens side-by-side diff (refresh) or new-entry form (new). Commit writes to `committed_patches`. | Both pathways produce a valid `committed_patches` row; UX status messages match BEAMweb's wording. |
+| **D5 — Trust / Trust + Verify** | The §5 UIs. Toolbar Trust + per-row Trust for one-click commit (mirrors BEAMweb's `handleTrustTakeOffEh`). Trust + Verify opens side-by-side diff (refresh) or new-entry form (new). Commit writes to `committed_patches`. | Both pathways produce a valid `committed_patches` row; UX status messages match BEAMweb's wording. |
 | **D6 — Flagged-for-deletion review tab** | Dedicated view per §4. Restore action wires through. | Team can review every flagged record and selectively restore. |
 | **D7 — Patch export + apply-patch script** | Toolbar "Export patch" downloads `patch-{ISO-date}.json`; new `schema/scripts/apply-patch.mjs` Node script ingests it, applies to `schema/materials/<group>.json`, regenerates `index.json`, validates. | End-to-end: drop EPD → hand off → DB review → commit → export → apply → git commit → records updated. |
 
@@ -299,11 +299,11 @@ The audit produces a one-paragraph finding + the smallest patch that gets the fi
 - **`npm run serve`** — already in place; the DB viewer is at `database.html` on the same port.
 - **`npm run validate`** — invokes `schema/scripts/validate.mjs --all`. Run after any schema bump or patch-apply.
 - **`npm run apply-patch -- <patch-file>`** — new (D7). Applies a patch JSON to `schema/materials/`, regenerates `index.json`, validates.
-- **Playwright MCP** — same `pdf-parser-tab` named-tab pattern; verifies the EPD-Parser → hand-off → DB-viewer commit flow end-to-end.
+- **Playwright MCP** — same `takeoffeh-tab` named-tab pattern; verifies the EPD-Parser → hand-off → DB-viewer commit flow end-to-end.
 
 ## Git workflow
 
-Same as PDF-Parser ([`MAGIC.md`](MAGIC.md) §5) and EPD-Parser:
+Same as TakeOffEh ([`MAGIC.md`](MAGIC.md) §5) and EPD-Parser:
 
 - Feature branch off `main` once D0 starts.
 - Commit + push to both remotes (`openbuilding` = arossti/OpenBuilding; `origin` = bfca-labs mirror).

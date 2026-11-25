@@ -1,6 +1,6 @@
-# PDF-Parser Magic-Wand Polish — workplan (MAGIC.md)
+# TakeOffEh Magic-Wand Polish — workplan (MAGIC.md)
 
-> Polish pass on the PDF-Parser magic-wand (auto-detect) path. Dimension-string calibration with declared-vs-detected scale cross-check, shrink-wrap building-outline detection that handles CAD's "walls as parallel strokes" convention, interactive edge-scrub refinement, and bidirectional Oculus offset. Branch: `Magic-Wand-Oculus` (successor to merged PR #12 + PR #13). Started 2026-04-22.
+> Polish pass on the TakeOffEh magic-wand (auto-detect) path. Dimension-string calibration with declared-vs-detected scale cross-check, shrink-wrap building-outline detection that handles CAD's "walls as parallel strokes" convention, interactive edge-scrub refinement, and bidirectional Oculus offset. Branch: `Magic-Wand-Oculus` (successor to merged PR #12 + PR #13). Started 2026-04-22.
 
 ---
 
@@ -33,7 +33,7 @@
 - [`js/polygon-tool.mjs`](../../js/polygon-tool.mjs) — polygon record holds `_shrinkCandidates` when placed by Auto-Detect. Edge-drag API: `edgeOrientation`, `startEdgeDrag` / `moveEdgeDrag` / `endEdgeDrag`. Oculus: `_offsetOneStep(direction)` shared helper, `tightenOneStep` / `loosenOneStep` wrappers. `findDetectedPolyIdx` locates the page's auto-detected polygon.
 - [`js/sheet-classifier.mjs`](../../js/sheet-classifier.mjs) — classifies each page as `plan` / `elevation` / `section` / `site` / `other`. Used by the scope gate and by AT auto-tag.
 - [`js/app.mjs`](../../js/app.mjs) — `autoDetect` / `_placeDetectedOutline` / `_autoTagFromPage` wire it all together. `_offsetOculus(direction)` wraps tighten/loosen with status-bar feedback.
-- [`pdfparser.html`](../../pdfparser.html) — toolbar buttons: Auto-Cal (`bi-stars`, `A`), Auto-Detect (`bi-magic`, `D`), Oculus contract (`bi-arrows-angle-contract`, `O`), Oculus expand (`bi-arrows-angle-expand`, no keybind).
+- [`takeoffeh.html`](../../takeoffeh.html) — toolbar buttons: Auto-Cal (`bi-stars`, `A`), Auto-Detect (`bi-magic`, `D`), Oculus contract (`bi-arrows-angle-contract`, `O`), Oculus expand (`bi-arrows-angle-expand`, no keybind).
 
 ### What remains
 
@@ -110,7 +110,7 @@ Every commit passes `npm run test:layer-peel` + `npm run test:dim-extract` + a P
 
 - **`npm run debug:pdf -- <pdf> --page N --what all --out /tmp/foo.json`** — CLI harness. Dumps text items + operator list + classifier output. Primary loop for text-side and geometry-side primitives.
 - **`npm run serve`** — no-cache dev server on port 8000. Required for reliable Playwright runs.
-- **Playwright MCP** at user scope, named tab `pdf-parser-tab`. DOM-level verification.
+- **Playwright MCP** at user scope, named tab `takeoffeh-tab`. DOM-level verification.
 - **Sample PDFs**:
   - [`docs/sample.pdf`](../sample.pdf) — 26 pages, Calgary DP/BP (imperial). Canonical plan: p9 (FOUNDATION PLAN, `3/16"=1'-0"`). Canonical elevation: p5 (EAST ELEVATION). Classifier output confirms p9–p12 + p14–p16 are plans, p5–p8 + p25 are elevations, p13 + p17 + p20 + p26 are sections, p3 + p4 are site, rest other.
   - [`docs/pdf-samples/sample-metric.pdf`](../pdf-samples/sample-metric.pdf) — ArchiCad metric. Canonical plan: p4 (A2.43, 1:48) and p6 (A2.45, 1:50). Catches pdfjs v4 per-glyph text fragmentation bugs that v5-based fixture tests miss.
@@ -126,7 +126,7 @@ Every commit passes `npm run test:layer-peel` + `npm run test:dim-extract` + a P
 
 ## 6. Lessons for the successor agent
 
-Carry-over knowledge that's still load-bearing. Read before touching anything in the PDF-Parser path.
+Carry-over knowledge that's still load-bearing. Read before touching anything in the TakeOffEh path.
 
 **pdfjs version handling is the #1 trap.** The browser vendors `lib/pdf.min.mjs` @ **4.9.155**; npm `pdfjs-dist` @ **5.6.205** is used by node scripts. Two observable differences:
 

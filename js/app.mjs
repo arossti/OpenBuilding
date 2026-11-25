@@ -1,5 +1,5 @@
 /**
- * PDF-Parser — Application Controller
+ * TakeOffEh — Application Controller
  * Main entry point. Wires all modules together.
  */
 
@@ -81,7 +81,7 @@ var _redoOrder = [];
 /* ── Boot ─────────────────────────────────────────────── */
 
 function init() {
-  console.log("[PDF-Parser] Booting v" + VERSION);
+  console.log("[TakeOffEh] Booting v" + VERSION);
 
   els.fileInput = document.getElementById("file-input");
   els.dropZone = document.getElementById("drop-zone");
@@ -99,7 +99,7 @@ function init() {
   Viewer.init("viewer-container", "pdf-canvas", "overlay-canvas");
 
   // Sheet deep-link: listen for hash changes so the same Parser tab can be
-  // re-targeted by successive BEAMweb sheet clicks (target="pdf-parser-tab").
+  // re-targeted by successive BEAMweb sheet clicks (target="takeoffeh-tab").
   window.addEventListener("hashchange", function () {
     _applySheetHash();
   });
@@ -129,13 +129,13 @@ function init() {
   _renderParamsPanel();
 
   setStatus("Ready — drop a PDF or click Browse", "ready");
-  console.log("[PDF-Parser] Ready");
+  console.log("[TakeOffEh] Ready");
 
   // Attempt to restore the most recent session from IndexedDB. Silent no-op
   // if nothing is persisted yet. Status message updates on success.
   _tryRestoreLastSession().then(function (restored) {
     if (!restored) return;
-    console.log("[PDF-Parser] Restore initiated from IndexedDB");
+    console.log("[TakeOffEh] Restore initiated from IndexedDB");
   });
 }
 
@@ -194,7 +194,7 @@ function loadSample() {
 
 function loadPdf(buffer, fileName, opts) {
   opts = opts || {};
-  console.log("[PDF-Parser] Loading:", fileName, "(" + (buffer.byteLength / 1048576).toFixed(1) + " MB)");
+  console.log("[TakeOffEh] Loading:", fileName, "(" + (buffer.byteLength / 1048576).toFixed(1) + " MB)");
 
   Loader.reset();
   PolygonTool.reset();
@@ -214,14 +214,14 @@ function loadPdf(buffer, fileName, opts) {
 
   Loader.loadFromBuffer(buffer)
     .then(function (result) {
-      console.log("[PDF-Parser] Loaded:", result.pageCount, "pages");
+      console.log("[TakeOffEh] Loaded:", result.pageCount, "pages");
       ProjectStore.initFromPdf(fileName, result.pageCount);
       // Persist PDF bytes for cross-session restore — skipped in the restore
       // path since the bytes are already in IndexedDB.
       if (!opts.skipBlobPersist) {
         var pdfBlob = new Blob([buffer], { type: "application/pdf" });
         ProjectStore.setPdfBytes(pdfBlob).catch(function (err) {
-          console.warn("[PDF-Parser] PDF blob persistence failed:", err);
+          console.warn("[TakeOffEh] PDF blob persistence failed:", err);
         });
       }
 
@@ -301,7 +301,7 @@ function loadPdf(buffer, fileName, opts) {
               if (schedData) {
                 ProjectStore.setRoomSchedule(schedData.rooms);
                 console.log(
-                  "[PDF-Parser] Room schedule on page",
+                  "[Take Off, Eh!] Room schedule on page",
                   schedData.pageNum,
                   "—",
                   schedData.rooms.length,
@@ -369,7 +369,7 @@ function _tryRestoreLastSession() {
       });
     })
     .catch(function (err) {
-      console.warn("[PDF-Parser] restore failed:", err);
+      console.warn("[TakeOffEh] restore failed:", err);
       return false;
     });
 }
@@ -395,7 +395,7 @@ function _findPageBySheetId(sheetId) {
  * Read the URL hash. If it encodes #sheet=X, jump to the page whose
  * sheetId matches. Returns true if we navigated, false if the hash was
  * absent or did not resolve. BEAMweb's Import modal + fidelity badges
- * emit these links with target="pdf-parser-tab" so subsequent clicks
+ * emit these links with target="takeoffeh-tab" so subsequent clicks
  * reuse the same Parser tab rather than spawning new ones.
  */
 function _applySheetHash() {
@@ -2708,7 +2708,7 @@ function _capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-// Assembly-preset option set. Mirrors the toolbar select in pdfparser.html —
+// Assembly-preset option set. Mirrors the toolbar select in takeoffeh.html —
 // kept inline here so re-classifying from the Summary Table doesn't require
 // fishing the option list out of the DOM.
 var ASSEMBLY_PRESET_OPTIONS = [
@@ -3231,11 +3231,11 @@ function _startSummaryLabelEdit(cell, pageNum, polyIdx) {
 /* ── Export ────────────────────────────────────────────── */
 
 function exportCSV() {
-  ProjectStore.download(ProjectStore.measurementsToCSV(), "pdf-parser-measurements.csv", "text/csv");
+  ProjectStore.download(ProjectStore.measurementsToCSV(), "takeoffeh-measurements.csv", "text/csv");
 }
 
 function exportJSON() {
-  ProjectStore.download(ProjectStore.toJSON(), "pdf-parser-project.json", "application/json");
+  ProjectStore.download(ProjectStore.toJSON(), "takeoffeh-project.json", "application/json");
 }
 
 /* ── JSON Import ──────────────────────────────────────── */
@@ -3298,7 +3298,7 @@ function _importJsonFile(file) {
     }
 
     if (!data.pages || !data.pageCount) {
-      setStatus("Import failed: not a PDF-Parser project file", "error");
+      setStatus("Import failed: not a Take Off, Eh! project file", "error");
       return;
     }
 

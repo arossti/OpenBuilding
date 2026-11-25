@@ -1,5 +1,5 @@
 /**
- * PDF-Parser — Polygon Measurement Tool
+ * TakeOffEh — Polygon Measurement Tool
  */
 
 import * as Viewer from "./canvas-viewer.mjs";

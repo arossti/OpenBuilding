@@ -1,5 +1,5 @@
 /**
- * PDF-Parser — Configuration & Constants
+ * TakeOffEh — Configuration & Constants
  */
 
 export var VERSION = "0.1.0";

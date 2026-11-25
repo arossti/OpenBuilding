@@ -10,7 +10,7 @@ Five browser-native apps plus a dev dependency manifest, all deployed via GitHub
 
 App directory with cards linking to each tool.
 
-### PDF-Parser — `/pdfparser.html`
+### TakeOffEh — `/takeoffeh.html`
 
 Client-side tool for extracting area and volume data from construction document PDFs. Loads a PDF, identifies architectural plans, and lets users measure areas with polygon or rectangle tools — purpose-built for the area/volume inputs needed by BEAM and wbLCA tools.
 
@@ -43,13 +43,13 @@ Flat layout — the repo root is the deployed site. The Pages workflow stages a 
 ```
 at/
 ├── index.html                       Landing — app directory
-├── pdfparser.html                   PDF-Parser — area + volume takeoff
+├── takeoffeh.html                   TakeOffEh — area + volume takeoff
 ├── database.html                    Material Database viewer
 ├── beamweb.html                     BEAMweb — embodied carbon calculator
 ├── dependencies.html                Dev dependency manifest
 ├── bfcastyles.css                   Single consolidated design system (~5000 lines)
 ├── js/                              ESM modules (vanilla JS, no build step)
-│   ├── app.mjs                      PDF-Parser bootstrap
+│   ├── app.mjs                      TakeOffEh bootstrap
 │   ├── polygon-tool.mjs             Polygon + window measurement
 │   ├── scale-manager.mjs            Scale detection + calibration
 │   ├── pdf-loader.mjs               PDF.js integration
@@ -57,7 +57,7 @@ at/
 │   ├── vector-snap.mjs              Vertex snap to PDF vectors
 │   ├── sheet-classifier.mjs         Plan / section / elevation inference
 │   ├── schedule-parser.mjs          Schedule extraction (in progress)
-│   ├── project-store.mjs            PDF-Parser project persistence
+│   ├── project-store.mjs            TakeOffEh project persistence
 │   ├── config.mjs                   App constants
 │   ├── beamweb.mjs                  BEAMweb app entry + tab router
 │   ├── database.mjs                 Database viewer entry
@@ -86,7 +86,7 @@ at/
 │   ├── scripts/                     CSV importer + validator + BEAM sheet fetcher
 │   └── schema.md                    Workplan + lineage
 ├── docs/
-│   ├── sample.pdf                   PDF-Parser dev fixture (generic name; swapped for a better drawing set at release)
+│   ├── sample.pdf                   TakeOffEh dev fixture (generic name; swapped for a better drawing set at release)
 │   ├── pdf-samples/                 Larger sample PDFs for parser testing (gitignored)
 │   ├── beam-samples/                Sample BEAMweb project JSONs (DOE Prototype)
 │   ├── csv files from BEAM/         22 BEAM workbook tab snapshots
@@ -99,7 +99,7 @@ at/
 │   │   ├── PDF-BEAMweb-BRIDGE.md    Phase 4b cross-app bridge design spec
 │   │   └── CLEANUP-AUDIT.md         Pre-Phase-4b codebase audit (2026-04-20)
 │   └── completed/                   Shipped workplans kept briefly for reference, then bulk-deleted
-│       └── pdf-parser.md            PDF-Parser workplan (Steps 1–10 + PDF-Bridge phases all shipped)
+│       └── takeoffeh.md            TakeOffEh workplan (Steps 1–10 + PDF-Bridge phases all shipped)
 ├── CCI-tables-20241121/             CCI construction classification taxonomy
 ├── package.json                     npm tooling (ESLint + Prettier) + stage:data
 ├── eslint.config.mjs, .prettierrc, .prettierignore
@@ -123,7 +123,7 @@ npm run format       # Prettier on CSS/HTML/JS
 
 ## Context
 
-This work is part of the NRCan Codes Accelerator Fund (CAF), with a near-term focus on combined operational and embodied carbon analysis for Part 9 and Part 3 buildings. The four apps are complementary: **EC Matrix** maps *what* EC requirements apply; **PDF-Parser** extracts the *area and volume data*; the **Material Database** is the EPD catalogue those areas multiply against; **BEAMweb** is the calculation surface that ties it all together into a project-level embodied carbon total.
+This work is part of the NRCan Codes Accelerator Fund (CAF), with a near-term focus on combined operational and embodied carbon analysis for Part 9 and Part 3 buildings. The four apps are complementary: **EC Matrix** maps *what* EC requirements apply; **TakeOffEh** extracts the *area and volume data*; the **Material Database** is the EPD catalogue those areas multiply against; **BEAMweb** is the calculation surface that ties it all together into a project-level embodied carbon total.
 
 ## Scope
 

@@ -1,5 +1,5 @@
 /**
- * PDF-Parser — Scale Manager
+ * TakeOffEh — Scale Manager
  *
  * Three scale states per page:
  *   1. PENDING  — auto-detected from title block, unconfirmed (amber ?)

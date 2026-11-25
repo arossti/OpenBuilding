@@ -19,7 +19,7 @@
 - **Last commit at time of writing**: `f82094c` — Phase 1.5 Database viewer + detail-pane clip fix.
 - **Phase 1 status**: All technical acceptance criteria met. PR ready to open on `arossti/OpenBuilding`.
 - **Phase 1.5 status**: Database viewer shipped — stakeholder-facing tabular browser at `database.html`, proves the catalogue consumption pattern and will become live on Pages once the PR merges.
-- **Next phase**: Phase 3 (PDF-Parser material picker) is unblocked and recommended next. Phase 2 (EPD PDF parser) waits on a sample EPD PDF from the user.
+- **Next phase**: Phase 3 (TakeOffEh material picker) is unblocked and recommended next. Phase 2 (EPD PDF parser) waits on a sample EPD PDF from the user.
 
 ### Recommended next action
 
@@ -109,7 +109,7 @@ python3 -c "import csv; r=list(csv.reader(open('../docs/csv files from BEAM/BEAM
 Define a canonical JSON record for a single material that serves multiple consumers in one structure:
 
 - **BEAM / wbLCA tools** — embodied carbon + full impact category analysis
-- **PDF-Parser** — material picker for volumetric takeoff (volume × material → EC)
+- **TakeOffEh** — material picker for volumetric takeoff (volume × material → EC)
 - **BIM / rendering tools** (e.g., ABCD.EARTH) — shader properties, texture refs, base colour
 - **Future tools** — cost estimation, fire compliance, thermal modelling, code-compliance checks
 
@@ -164,7 +164,7 @@ Priority ordering. Each phase is independently valuable; later phases depend on 
 
 **Goal**: Interim stakeholder-facing HTML viewer for the full 821-record catalogue so BfCA / NRCan / AIBC can review the schema choices in a real UI before committing further down the pipeline. Lets teams see the empty per-stage slots and understand what the EPD parser (Phase 2) will fill.
 
-- [x] **`database.html`** — standalone page, dark theme, reuses `bfcastyles.css` (Database styles live in §7 of the consolidated stylesheet). Shared header nav across PDF-Parser / Matrix / Database / BEAMweb.
+- [x] **`database.html`** — standalone page, dark theme, reuses `bfcastyles.css` (Database styles live in §7 of the consolidated stylesheet). Shared header nav across TakeOffEh / Matrix / Database / BEAMweb.
 - [x] **Main table**: sortable columns (BEAM ID, Display Name, Division, Material, GWP, functional unit, typical elements), sticky header, live search, division chips with per-division counts, EPD-only toggle.
 - [x] **Expanded row detail** (accordion, collapsed by default; Carbon Calc Graph opens by default): Identity & Classification, Manufacturer & Provenance, Physical Properties, Carbon Calc Graph (ASCII flow diagram of BEAM's audit trail), Impacts per-stage matrix, EPD/Methodology/Code Compliance, Raw JSON.
 - [x] **Per-stage matrix**: 10 categories × (Total + 17 stages), horizontal scroll, sticky first column + total column, per-cell source tag (beam_derived / epd_direct) for provenance at a glance.
@@ -182,32 +182,32 @@ Priority ordering. Each phase is independently valuable; later phases depend on 
 - Output: JSON patch (new record, or diff against existing) with `source: "epd_direct"` on every impact value.
 - Human-in-the-loop: low-confidence fields flagged for manual review before merge.
 
-### Phase 3 — PDF-Parser material picker
+### Phase 3 — TakeOffEh material picker
 
-**Goal**: Wire the materials database into the PDF-Parser so users can associate measured polygons with materials for volumetric takeoff.
+**Goal**: Wire the materials database into the TakeOffEh so users can associate measured polygons with materials for volumetric takeoff.
 
 - Prerequisite: Phase 1 complete ✅ (`materials/index.json` is shipped).
-- Prior art: Phase 1.5 Database viewer proves the fetch + lazy-load + filter pattern works in a dark-theme module within PDF-Parser.
-- Integrates with the existing PDF-Parser Volumetric Takeoff feature (Step 10 in `docs/pdf-parser.md`).
+- Prior art: Phase 1.5 Database viewer proves the fetch + lazy-load + filter pattern works in a dark-theme module within TakeOffEh.
+- Integrates with the existing TakeOffEh Volumetric Takeoff feature (Step 10 in `docs/takeoffeh.md`).
 - Tasks:
-  - Fetch `materials/index.json` at PDF-Parser boot
+  - Fetch `materials/index.json` at TakeOffEh boot
   - Material picker UI — CSI division filter + `typical_elements` filter + full-text search over `display_name`
   - On selection: lazy-fetch the relevant `materials/NN-*.json` and store the full record in the project state
-  - Extend PDF-Parser project JSON export to include material references per polygon
+  - Extend TakeOffEh project JSON export to include material references per polygon
   - Compute EC: polygon area (m²) × depth (m) → volume (m³) × density (kg/m³) × GWP (kgCO2e/kg) = kgCO2e
   - Display per-material subtotal and project total in the Summary Table modal
 
 ### Phase 4 — BEAM app port
 
-**Goal**: Port BEAM's Excel-based calculation engine to a JS web app sharing infrastructure with PDF-Parser.
+**Goal**: Port BEAM's Excel-based calculation engine to a JS web app sharing infrastructure with TakeOffEh.
 
 - Prerequisite: Phase 1 complete. Phase 3 recommended (establishes integration pattern).
 - User flagged: "We will need to update/enhance or create a filehandler and statemanager files, which I do not think we have explicitly created yet."
 - Sub-phases:
-  - **4a. Shared infra**: Create `shared/filehandler.mjs` and `shared/statemanager.mjs` used by both PDF-Parser and BEAM app. Project files are JSON, same format both apps can read. PDF-Parser project JSON extends BEAM project JSON (materials map + polygon area/depth refs).
+  - **4a. Shared infra**: Create `shared/filehandler.mjs` and `shared/statemanager.mjs` used by both TakeOffEh and BEAM app. Project files are JSON, same format both apps can read. TakeOffEh project JSON extends BEAM project JSON (materials map + polygon area/depth refs).
   - **4b. Material picker UI**: reuse from Phase 3.
   - **4c. BEAM calc engine**: port the operational + embodied carbon calculations from BEAM's Excel model. Requires domain study of BEAM v3.
-  - **4d. Integrated UI**: web app that can load a saved PDF-Parser project AND a saved BEAM project and run the calcs end-to-end.
+  - **4d. Integrated UI**: web app that can load a saved TakeOffEh project AND a saved BEAM project and run the calcs end-to-end.
 
 ### Phase 5 — IFC interop
 
@@ -705,7 +705,7 @@ Projected size: ~100 KB for 1000 records. 8 fields per record for picker display
 | `gwp_kgco2e` | `impacts.gwp_kgco2e.value` | Preview number in the picker |
 | `functional_unit` | `impacts.functional_unit` | Preview unit label |
 
-#### Load pattern for the PDF-Parser material picker
+#### Load pattern for the TakeOffEh material picker
 
 ```
 1. App boot:      fetch materials/index.json         (~30 KB gz, once, cached)
@@ -820,7 +820,7 @@ diff -r materials /tmp/verify-materials
 The per-material schema (this document) captures *intensity* values — kgCO2e per functional unit. A project file needs a *calculation graph* that composes those intensities with quantities to produce a total EC figure:
 
 ```
-polygon (from PDF-Parser)
+polygon (from TakeOffEh)
    ├─ area_m2                            measured on the drawing
    ├─ depth_m                            user-entered or derived
    ├─ material_ref → materials/XX.json   picked from catalogue
@@ -852,7 +852,7 @@ Why a graph (not a flat list):
 - A project file is a small JSON of graph nodes + edges + material-id references, not a snapshot of the catalogue
 - Two projects using the same material see the same numbers; updating the material cascades to both on next open
 
-Scoping: not a Phase 1 deliverable. Phase 1 ships the intensity-only material records. Phase 3 (PDF-Parser material picker) introduces the first use of material refs in project state. Phase 4 (BEAM.js port) is where the calc graph lands formally.
+Scoping: not a Phase 1 deliverable. Phase 1 ships the intensity-only material records. Phase 3 (TakeOffEh material picker) introduces the first use of material refs in project state. Phase 4 (BEAM.js port) is where the calc graph lands formally.
 
 ---
 
@@ -880,7 +880,7 @@ Scoping: not a Phase 1 deliverable. Phase 1 ships the intensity-only material re
 ## Appendix B — Changelog
 
 - **2026-04-18 `f82094c`** — Database viewer fix: removed 620px max-height cap on detail pane that clipped the impact matrix at 7 of 10 categories.
-- **2026-04-18 `b40ac44`** — Phase 1.5 Database viewer shipped: `database.html` + `js/database.mjs` (styles in `bfcastyles.css` §7). Sortable + filterable table, expandable row detail with full 10×18 per-stage impact matrix (horizontal scroll), carbon calc graph as ASCII flow diagram, raw JSON inspector. Data staged into `data/schema/` via `npm run stage:data` (local) or workflow step (Pages). Nav cross-links added across PDF-Parser / Matrix / Database. *(Paths updated post-flatten 2026-04-20; originally all under `PDF-Parser/`.)*
+- **2026-04-18 `b40ac44`** — Phase 1.5 Database viewer shipped: `database.html` + `js/database.mjs` (styles in `bfcastyles.css` §7). Sortable + filterable table, expandable row detail with full 10×18 per-stage impact matrix (horizontal scroll), carbon calc graph as ASCII flow diagram, raw JSON inspector. Data staged into `data/schema/` via `npm run stage:data` (local) or workflow step (Pages). Nav cross-links added across TakeOffEh / Matrix / Database. *(Paths updated post-flatten 2026-04-20; originally all under `TakeOffEh/`.)*
 - **2026-04-18 `e66e513`** — CI fix: gated the Pages deploy job to `arossti/OpenBuilding` only (bfca-labs/at is private, no Pages site → 404). Cosmetic failure noise on the private mirror now suppressed.
 - **2026-04-18 `009a9c5`** — Sparse-by-default serialization. Per-material records omit null scalar leaves and empty sub-objects. 15 top-level object blocks, `impacts.<category>.total` (as `{value, source}`), `impacts.<category>.by_stage`, and all arrays stay present for safe traversal. Full template structure remains documented in `sample.json` and `material.schema.json`. Size: per-record ~13 KB → ~4 KB, batch 18 MB → 4.3 MB (76% reduction). Validator relaxed (required arrays pruned to structural members only; additionalProperties:false and enums/patterns unchanged); 822/822 records still pass.
 - **2026-04-18 `c71ef7d`** — Added `material.schema.json` (JSON Schema Draft 2020-12) and `scripts/validate.mjs` (zero-dep walker).

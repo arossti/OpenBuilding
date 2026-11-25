@@ -1,11 +1,11 @@
 // polygon-map.mjs
-// Shared bridge logic between PDF-Parser polygons and BEAMweb PROJECT
+// Shared bridge logic between TakeOffEh polygons and BEAMweb PROJECT
 // dimensions. Pure data + pure functions — no DOM, no I/O — so both
 // sides can consume without tangling dependencies.
 //
 // Consumers:
 //   - BEAMweb's pdf-bridge-import.mjs uses `computeAllDimensions` to run
-//     the full aggregation when the user clicks "Import from PDF-Parser".
+//     the full aggregation when the user clicks "Import from TakeOffEh".
 //   - Future inline fidelity badges (spec §5.2) call `aggregateOne` for a
 //     single dim so the badge can describe what fed it.
 //
@@ -219,7 +219,7 @@ function pitchFactor(pitchDeg) {
 }
 
 // ── Polygon flattening ──────────────────────────────────
-// Accepts a PDF-Parser project JSON (the shape ProjectStore.toJSON() emits)
+// Accepts a TakeOffEh project JSON (the shape ProjectStore.toJSON() emits)
 // and returns a flat list of { measurement, page, depth_m, component,
 // sheet_class, children[] }. Children are the window polygons nested inside
 // a wall polygon — attached here so sumNetArea has what it needs.
