@@ -269,6 +269,21 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
   Trust / Trust + Verify keep working (they fill PROJECT today; P2 retargets them).
 - **P1 — the engine.** OBJECTIVE's core (the state manager, the dual Target / Reference state, the calculation
   graph) moves in unchanged and runs headless behind the page; the CSV import/export too.
+  **Spike 2026-11-25 (laptop), andy-rnd `main` `5e0b2f0`, case 01 Three Feathers Terrace:**
+  - The graph runs headless: andy-rnd's 70 core + node scripts (its `index.html` order, no `Section*.js`, no
+    `init.js`; ~2.8 MB, 0.8 MB of it `ClimateValues.js`) initialise, and `FileHandler.processImportedCSV` imports
+    once `SectionModules.sect20.setNotes` is stubbed (FileHandler calls it for Project Notes).
+  - **Reference matches the full app exactly** (e_6 22.7 · e_8 9.7 · e_10 190.1).
+  - **Target does not:** h_10 89.4 headless vs 93.1 in the full app (h_6 11.5 vs 11.6, h_8 4.6 vs 4.7). Loading the
+    `Section*.js` modules without rendering changes nothing. The inputs that differ are ones the full app derives
+    through its page code after an import: `e_12` (sub-type, "Auditorium seating area" vs empty), `d_16` (350 vs
+    345.82), `i_63` (3650 vs 4380), `i_49` / `i_50` (1 839 600 vs 58 400) — dropdown cascades and defaults that run in
+    the DOM (FileHandler's `syncPostImportUI`, the sections' handlers), not in the graph.
+  - The % column (m_6, m_8, m_10) is S01's page code, not the graph (headless gives "0%" / "N/A").
+  - **So P1 is: copy the engine in, then find each page-side derivation and move it into the graph (or call it
+    headless), until case 01's every value matches the full app; then all 13 cases.** The witness is that diff
+    (StateManager `exportState()` of the full app vs headless, after the same CSV), zero non-`ref_` differences.
+
 - **P2 — S11 and S12 first**, in the dark theme: they are what Trust / Trust + Verify fill, so the PDF-mapping tests
   (Andy, the same evening) can aim at real fields. The bridge's mapping (`js/beam/pdf-bridge-import.mjs`, `polygon-map.mjs`)
   learns S11's rows and S12's volumes.
