@@ -4,7 +4,7 @@
 // user's current param_* values, and writes resolved dimension values
 // into StateManager with provenance tracked via dimension_sources.
 //
-// UI flow (see modal in beamweb.html):
+// UI flow (see modal in objectivepro.html):
 //   1. User clicks "Import TakeOffEh" → openImportModal()
 //   2. Modal lists saved parser projects; user picks one
 //   3. buildPreview(uuid) aggregates; modal renders a diff table

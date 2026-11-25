@@ -28,7 +28,7 @@ Client-side tool for extracting area and volume data from construction document 
 
 OpenBuilding.ca material catalogue viewer. 821 EPDs across 8 material groups, full EN 15804+A2 per-stage impact scope, sortable + searchable + filterable by group / country / lifecycle stage. Collapsible group sections mirror the assembly-tab structure in BEAMweb.
 
-### BEAMweb — `/beamweb.html`
+### BEAMweb — `/objectivepro.html`
 
 Browser port of the BEAM embodied-carbon calculator. Phase 3 live: PROJECT metadata + dimension form with source-selectable inputs, plus the first live assembly picker (Footings & Slabs, 16 groups × 658 materials, gSheet parity-validated on every row tested). Reads per-unit GWP factors directly from the same BfCA materials catalogue as the Database viewer. Phases 4+ queued: 11 remaining assembly tabs (Windows → Garage) + REVIEW + RESULTS.
 
@@ -45,7 +45,7 @@ at/
 ├── index.html                       Landing — app directory
 ├── takeoffeh.html                   TakeOffEh — area + volume takeoff
 ├── database.html                    Material Database viewer
-├── beamweb.html                     BEAMweb — embodied carbon calculator
+├── objectivepro.html                     BEAMweb — embodied carbon calculator
 ├── dependencies.html                Dev dependency manifest
 ├── obstyles.css                   Single consolidated design system (~5000 lines)
 ├── js/                              ESM modules (vanilla JS, no build step)

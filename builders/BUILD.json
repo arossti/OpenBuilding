@@ -1,11 +1,17 @@
 {
-  "built_at": "2026-11-25T14:02:28",
-  "abcd_commit": "8292330c7",
+  "built_at": "2026-11-25T14:18:58",
+  "abcd_commit": "f61bccf14",
   "source": "ABCD.EARTH artex-osx/docs/mockups (publish_builders.py)",
   "pages": [
     "material-builder.html",
     "section-builder.html"
   ],
+  "snapshots": {
+    "assembly-builder.html": {
+      "as_committed": "75363d206 2026-10-22",
+      "why": "BUGLIST #266 \u2014 rebuilt from today's seed it disagrees with the app; the committed build (its 2026-10-22 seed) agrees with the app's fold fixture on all 115 assemblies (Andy 2026-11-25: port it now)"
+    }
+  },
   "seed": {
     "materials.json": "3f91235a40565f9e",
     "prices.json": "ba53c905a84f897b",

@@ -13,18 +13,29 @@
 
 ## 0. Cold-start handoff (read this first)
 
-### Status as of 2026-11-25 (the landing cleanup, branch `ob-landing-cleanup`)
+### Status as of 2026-11-25 evening (branch `ob-landing-cleanup`, pushed, no PR)
 
-- **This repo** is becoming OpenBuilding.ca's tools site (GitHub Pages). On `ob-landing-cleanup`, pushed, **no PR**
-  (Andy: *"No deploy intil we have all of our pieces in place, we can just commit-push until then. So no PR yet
-  until it is cleaned of BfCA references."*): the EC Matrix, EPD-Parser and CCLIMB deleted; BfCA branding replaced
-  by OpenBuilding.ca; the BEAM page re-badged **OBJECTIVE 4.0** (its layout becomes v4's inputs); the PDF-Parser
-  renamed **Take Off, Eh!** (`takeoffeh.html`, code name `TakeOffEh`); the Materials and Section Builders published
-  from ABCD.EARTH into `builders/` (§5.2).
-- **v4 itself** is FROZEN at andy-rnd `main` `5e66c43`; nothing of V4-1+ is built (§4).
-- **What remains before a PR**: the BfCA references left in data and docs (the BEAM material data in `schema/` and
-  `docs/csv files from BEAM/`, retired when Materials replaces the Database; README/CLAUDE.md history), the CLAUDE.md
-  rewrite with Andy, the shared `tokens.css` (§6, the accent ❓), the Assemblies card (ABCD BUGLIST #266).
+No deploy until the pieces are in place (Andy: *"No deploy intil we have all of our pieces in place, we can just
+commit-push until then. So no PR yet until it is cleaned of BfCA references."*). Only a push to `main` redeploys Pages.
+
+**Shipped on the branch**
+- The EC Matrix, EPD-Parser and CCLIMB deleted (pages, code, CSS, docs); BfCA branding → OpenBuilding.ca; the
+  BfCA-era workplans deleted (`WORKPLAN-TEMPLATE.md` keeps their format); `bfcastyles.css` → `obstyles.css`.
+- Logos as SVG: the OpenBuilding house (`graphics/ob-*.svg`) and OBJECTIVE (`graphics/objective-*.svg`, Quicksand).
+- The PDF-Parser → **Take Off, Eh!** (`takeoffeh.html`, code name `TakeOffEh`).
+- The BEAM page → **OBJECTIVE 4.0** at **`objectivepro.html`** (was `beamweb.html`); its Introduction describes v4.
+- The Builders from ABCD.EARTH in `builders/` (§5.2): Materials and Section Builder from today's seed; Assemblies as
+  a snapshot of 2026-10-22 (ABCD BUGLIST #266), which passes the app's own cross-check.
+- One set of design tokens for every web page, cyan on the web (§6).
+- This plan moved here from andy-rnd (andy-rnd #25 merged, `5e0b2f0`: a pointer there).
+
+**Remaining before a PR**
+- The BfCA references left in data and docs: the BEAM material data (`schema/`, `docs/csv files from BEAM/`,
+  `schema/schema.md`), retired when Materials replaces the Database; the README's history sections.
+- The repo's CLAUDE.md rewrite, with Andy.
+- ABCD BUGLIST #266, so Assemblies is rebuilt from today's seed.
+
+**Next: the port, §9.**
 
 ### The plan's status as written (andy-rnd, 2026-11-25)
 
@@ -46,16 +57,17 @@ of OBJECTIVE can do with many shared methods."* v3 stays the live, static/monthl
 
 ### What it is NOT
 
-- Not OBJECTIVE Pro: the hourly engine and real geometry live in the ABCD.EARTH app
-  (`artex-osx/docs/architecture discipline/ABCD-OBJECTIVE-PRO.md` in that repo).
+- Not the hourly engine or real geometry: those live in the ABCD.EARTH app
+  (`artex-osx/docs/architecture discipline/ABCD-OBJECTIVE-PRO.md` in that repo). ⚠ Andy named this page's address
+  `objectivepro` (2026-11-25: *"it should not be called beamweb in the URI, but OBJECTIVEpro"*), while that doc calls
+  the desktop app OBJECTIVE Pro: ❓ one name or two (§8).
 - Not a place to curate materials: the Builders here are read-only (Andy 2026-11-25: *"we do not expect a user to
   curate materials, it is too fraught, as EPD and cost sources are required"*).
 - Not a second copy of any method (§6).
 
 ### Where to pick up next (cold-start one-liner)
 
-Finish the BfCA cleanup on `ob-landing-cleanup` (§0 above), then move the v4 code in from andy-rnd (§7.2) when Andy
-reopens v4.
+§9.2 P0: the sidebar becomes S01–S21 on `objectivepro.html`; then S11 and S12 first, for the Trust mapping tests.
 
 ---
 
@@ -125,8 +137,8 @@ under their wall (`sample csv exports/pdf-parser-measurements.csv`). Two additio
 | Take Off, Eh! | `takeoffeh.html` | live (the PDF-Parser renamed) |
 | Materials | `builders/material-builder.html` | published, read-only |
 | Material Database | `database.html` | kept for its look until Materials replaces it (Andy) |
-| OBJECTIVE | `beamweb.html` | v4 Alpha: the BEAM layout, being repurposed as v4's inputs |
-| Assemblies | — | planned: the Assembly Builder, after ABCD BUGLIST #266 |
+| OBJECTIVE | `objectivepro.html` (was `beamweb.html`) | v4 Alpha: the BEAM layout, being repurposed as v4's inputs (§9) |
+| Assemblies | `builders/assembly-builder.html` | published as a snapshot of 2026-10-22 (ABCD BUGLIST #266) |
 | Section Builder | `builders/section-builder.html` | published |
 
 ### 5.2 The Builders are build output from ABCD.EARTH
@@ -194,12 +206,65 @@ which will remain the V3 deployment)"*. So:
    new wall, as + copies it today), so a re-entered envelope starts with the old assemblies.
 4. **Below-grade walls with windows.** Kept (a walkout basement's windows); recommendation: yes, as now.
 5. **What opens first in v4.** Recommendation: F280-1 hosted (V4-5), not a blank page.
+6. **One name or two: OBJECTIVE Pro.** The web page's address is `objectivepro.html` (Andy 2026-11-25), and
+   ABCD-OBJECTIVE-PRO calls the desktop app OBJECTIVE Pro. Recommendation: say which is "Pro" before either is
+   public; the page title says OBJECTIVE 4.0 meanwhile.
+7. **BEAM's own tabs during the port** (the 12 assembly tabs, REVIEW, RESULTS, Glossary, Energy GHG).
+   Recommendation: fold them into a "BEAM (legacy)" group at P0 and delete each once a section replaces its job.
 
 ---
+
+## 9. The port: OBJECTIVE's sections into `objectivepro.html`
+
+Andy 2026-11-25: *"I am personally keep to port the OBJECTIVE v4 RND methods and data into the new dark-mode
+[page] … We will keep the 'PROJECT' tab, but the masthead menu and sections will then accord to our S03-S21, where S1
+shoudl remain the intro page but will incorporate S01 somehow, and S02 is the Project tab with its current format."*
+This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `main` `5e0b2f0` (`src/sections/`,
+`src/core/`, ~24 k lines); the code moves here, it is not linked.
+
+### 9.1 The section map (the sidebar becomes this)
+
+| Tab | OBJECTIVE section | andy-rnd lines | Notes |
+|---|---|---|---|
+| S01 | Introduction + **Key Values** | 789 | the intro page, carrying S01's key values |
+| S02 | **PROJECT** = Building Information | 1,069 | the current PROJECT tab's format, S02's fields |
+| S03 | Climate Calculations | 1,507 | |
+| S04 | Actual vs. Target Energy & Carbon | 918 | |
+| S05 | CO2e Emissions | 533 | |
+| S06 | Renewable Energy | 306 | |
+| S07 | Water Use | 736 | |
+| S08 | Indoor Air Quality | 408 | |
+| S09 | Occupant + Internal Gains | 1,062 | |
+| S10 | Radiant Gains | 1,491 | windows; V4-2 reads S11 |
+| S11 | Transmission Losses | 2,508 | **the envelope: Trust / Trust + Verify's target** (V4-1, V4-2, V4-7) |
+| S12 | Volume and Surface Metrics | 1,205 | **Trust's second target** (volumes) |
+| S13 | Mechanical Loads | 1,730 | |
+| S14 | TEDI & TELI | 515 | |
+| S15 | TEUI | 862 | |
+| S16 | Sankey Diagram | 2,067 + 453 | |
+| S17 | Dependency Graph | 27 | already here: the BEAM page's Dependency Graph tab came from OBJECTIVE |
+| S18 | Optimize | 26 | |
+| S19 | WOMBAT — 3D Thermal Topology | 2,059 | |
+| S20 | Notes & Debug | 1,188 | |
+| S21 | CSA F280 Compliance | 1,921 | |
+
+### 9.2 Phases (recommended)
+
+- **P0 — the scaffold.** The sidebar becomes S01–S21 (grouped; the group names are Andy's), S02 keeps the PROJECT
+  tab, each new tab a placeholder naming its section. BEAM's assembly, review and reference tabs fold into a
+  "BEAM (legacy)" group until the sections replace them. Trust / Trust + Verify keep working on PROJECT.
+- **P1 — the engine.** OBJECTIVE's core (the state manager, the dual Target / Reference state, the calculation
+  graph) moves in unchanged and runs headless behind the page; the CSV import/export too.
+- **P2 — S11 and S12 first**, in the dark theme: they are what Trust / Trust + Verify fill, so the PDF-mapping tests
+  (Andy, the same evening) can aim at real fields. The bridge's mapping (`js/beam/pdf-bridge-import.mjs`, `polygon-map.mjs`)
+  learns S11's rows and S12's volumes.
+- **P3 — the rest**, section by section, each checked against andy-rnd's own tests and case studies (the shared
+  computation, §7.1), S01's key values last because they read everything.
 
 ## Appendix — Changelog
 
 | Date | Commit | Change |
 |---|---|---|
 | 2026-11-25 | andy-rnd `7870a44`, `0684e43` | the plan written in andy-rnd (§3, §4, §7, §8) |
-| 2026-11-25 | this commit | moved here; §0, §5 and §6 added |
+| 2026-11-25 | `99d5a70` | moved here; §0, §5 and §6 added |
+| 2026-11-25 | this commit | §0 shipped / remaining; `objectivepro.html`; Assemblies published; §9 the port |

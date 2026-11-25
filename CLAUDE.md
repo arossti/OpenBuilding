@@ -28,7 +28,7 @@ Deployed from repo root via GitHub Actions (`.github/workflows/deploy-pages.yml`
 | `/` | `index.html` | Landing page / app directory (4 cards + deps link) |
 | `/takeoffeh.html` | `takeoffeh.html` | TakeOffEh — area + volume takeoff from drawings |
 | `/database.html` | `database.html` | BfCA material database viewer (821 records) |
-| `/beamweb.html` | `beamweb.html` | BEAMweb — embodied carbon calculator (Phase 3 live) |
+| `/objectivepro.html` | `objectivepro.html` | BEAMweb — embodied carbon calculator (Phase 3 live) |
 | `/dependencies.html` | `dependencies.html` | Dev dependency manifest (not nav-linked) |
 
 ### Styling — single consolidated file
