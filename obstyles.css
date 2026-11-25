@@ -2400,23 +2400,31 @@ html.theme-dark body {
 }
 
 /* ── §8b OBJECTIVE's V3 sections, styled per V4 ─────────────────────────────
-   src/styles.css (V3, verbatim) loads first and owns layout and states; this
-   block maps its light theme onto V4's dark tokens, scoped to .op-v3 (each
-   adopted V3 section) so nothing leaks into the page chrome. */
+   src/styles.css (V3, verbatim) loads first and owns layout and states. Here
+   each V3 section sits in the PROJECT form's card (.bw-asm-group, built by
+   objective4.mjs) and reads like that form (Andy 2026-11-25: "lose the ugly
+   grid styling of the V3 and emulate ... the new V4 styling"): no cell grid,
+   dim labels, every input and dropdown a sunken V4 box. Scoped to .op-v3. */
 body {
   font-family: var(--font-body);
   color: var(--text);
 }
+.op-v3-card {
+  margin-bottom: 20px;
+}
+.op-v3-card > .bw-asm-group-body {
+  padding: 6px 8px 10px;
+}
 .op-v3 {
   --primary-text: var(--text);
   --secondary-text: var(--text-dim);
-  --header-bg: var(--bg-panel);
+  --header-bg: transparent;
   --header-text: var(--text);
   --border-color: var(--border);
-  --hover-bg: rgba(34, 211, 238, 0.06);
-  --table-header-bg: var(--bg-panel);
-  --user-input-color: var(--accent-lit);
-  --user-input-color-rgb: 34, 211, 238;
+  --hover-bg: transparent;
+  --table-header-bg: transparent;
+  --user-input-color: var(--text);
+  --user-input-color-rgb: 226, 232, 240;
   --calculated-value-color: var(--text);
   --derived-value-color: var(--text);
   --reference-value-color: #ff8a8a;
@@ -2424,81 +2432,192 @@ body {
   --target-value-color: var(--accent-lit);
   --actual-value-color: var(--text);
   --link-color: var(--accent-lit);
+  --base-font-size: 13px;
   border: 0;
   border-radius: 0;
   margin: 0;
   background: transparent;
   color: var(--text);
+  font-size: 13px;
 }
 .op-v3 > .section-content {
   max-height: none;
   overflow-x: auto;
 }
-.op-v3 .data-table,
-.op-v3 .data-table td,
-.op-v3 .data-table th {
-  background-color: transparent;
-  color: var(--text);
-  border-color: var(--border);
+
+/* The table keeps V3's rows and columns; the grid goes. */
+.op-v3 .data-table {
+  width: 100% !important; /* Andy: "take full advantage of 100% of available browser width" */
+  border-collapse: separate;
+  border-spacing: 6px 5px;
+  font-size: 13px;
 }
 .op-v3 .data-table td,
 .op-v3 .data-table th {
-  border-bottom: 1px solid var(--border);
+  background: transparent !important;
+  border: 0 !important;
+  color: var(--text);
+  padding: 4px 6px;
+  vertical-align: middle;
+  line-height: 1.35;
 }
 .op-v3 .data-table tr:hover td {
-  background-color: rgba(34, 211, 238, 0.05);
+  background: transparent !important;
 }
+
+/* The header row: column captions, small and dim, like the form's labels. */
 .op-v3 .data-table td.section-header,
 .op-v3 .data-table td.section-subheader,
 .op-v3 .data-table tr:has(td.section-subheader) td {
-  background-color: var(--bg-panel);
-  color: var(--text-dim);
-  font-size: 11px;
+  color: var(--text-dim) !important;
+  font-size: 10px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   white-space: pre-line;
-}
-.op-v3 .data-table td.section-header {
-  color: var(--text);
+  padding-bottom: 2px;
 }
 .op-v3 .id-cell {
   font-family: var(--font-mono);
-  color: var(--text-dim);
+  font-size: 11px;
+  color: var(--text-dim) !important;
 }
-.op-v3 .unit-label,
-.op-v3 .label-main {
-  color: var(--text-dim);
+.op-v3 .description-cell,
+.op-v3 .label-main,
+.op-v3 .unit-label {
+  color: var(--text-dim) !important;
+  font-size: 12px;
+  font-weight: 500;
 }
-.op-v3 .user-input,
-.op-v3 [contenteditable="true"].user-input,
-.op-v3 input.user-input,
-.op-v3 input[type="number"] {
-  background-color: rgba(34, 211, 238, 0.07);
-  color: var(--accent-lit);
+
+/* Every editable value is a V4 input box (.bw-input). */
+.op-v3 td.user-input,
+.op-v3 td.editable,
+.op-v3 [contenteditable="true"],
+.op-v3 input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+.op-v3 textarea {
+  background: var(--bg-sunken, rgba(0, 0, 0, 0.2)) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 3px;
+  padding: 4px 8px !important;
+  font-family: var(--font-body);
+  font-style: normal;
 }
 .op-v3 .user-input:not(.user-modified) {
-  color: var(--text-dim);
-  font-style: italic;
+  color: var(--text-dim) !important;
 }
-.op-v3 .editing-intent {
-  outline: 1px solid var(--accent-lit) !important;
+.op-v3 .editing-intent,
+.op-v3 [contenteditable="true"]:focus,
+.op-v3 input:focus,
+.op-v3 textarea:focus {
+  outline: none !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent-lt);
 }
+
+/* Dropdowns are V4 selects (.bw-select). */
+.op-v3 select,
+.op-v3 .form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--bg-sunken, rgba(0, 0, 0, 0.2)) !important;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M0 0l5 6 5-6z' fill='%2394a3b8'/></svg>") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 10px 6px !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 3px;
+  padding: 4px 24px 4px 8px;
+  font-size: 12px;
+  min-height: 28px;
+}
+.op-v3 select:focus,
+.op-v3 .form-select:focus {
+  outline: none;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent-lt);
+}
+.op-v3 option {
+  background: var(--bg-panel);
+  color: var(--text);
+}
+.op-v3 input[type="range"] {
+  accent-color: var(--accent-lit);
+}
+.op-v3 .btn-outline-secondary,
+.op-v3 .btn-light,
+.op-v3 .btn-secondary {
+  background: var(--bg-panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+/* Light panels V3's scripts inject with inline styles (S16's controls and
+   placeholder, S17's placeholder, S20's notes and QC report, S01's gauge
+   tracks): dark surfaces, V4 borders. */
+.op-v3 .teui-loading-placeholder,
+.op-v3 .sankey-controls-wrapper,
+.op-v3 .sankey-control-button,
+.op-v3 .qc-output,
+.op-v3 [style*="background: rgb(24"],
+.op-v3 [style*="background: rgb(25"],
+.op-v3 [style*="background-color: rgb(24"],
+.op-v3 [style*="background-color: rgb(25"],
+.op-v3 [style*="background: white"],
+.op-v3 [style*="background-color: white"],
+.op-v3 [style*="background: #f"],
+.op-v3 [style*="background-color: #f"] {
+  background: var(--bg-panel) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.op-v3 .linear-gauge-container {
+  background: var(--border) !important;
+}
+.op-v3 [style*="border: 1px solid #eee"],
+.op-v3 [style*="border: 1px solid rgb(238"],
+.op-v3 .dependency-graph-container,
+.op-v3 .parallel-coordinates-container {
+  border-color: var(--border) !important;
+  background: var(--bg-panel);
+}
+.op-v3 .btn-primary,
+.op-v3 .btn-info {
+  background: var(--accent);
+  border-color: var(--accent-lit);
+  color: #fff;
+}
+.op-v3 .btn-primary:hover,
+.op-v3 .btn-info:hover {
+  background: var(--accent-lit);
+}
+/* V3's plain buttons (S11's + skylight / + window / + door, its +/−):
+   V4 action buttons, small. */
+.op-v3 button:not(.btn):not(.bw-asm-toggle) {
+  background: var(--bg-panel) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 3px;
+  font-size: 11px;
+  padding: 1px 6px;
+  cursor: pointer;
+}
+.op-v3 button:not(.btn):not(.bw-asm-toggle):hover {
+  border-color: var(--accent-lit) !important;
+}
+/* V3 hard-codes Reference values dark red; on dark, V4's light red. */
+.op-v3 .ref-value,
+.op-v3 .reference-value {
+  color: #ff8a8a !important;
+}
+
+/* States */
 .op-v3 .disabled-input,
 .op-v3 .ghosted {
   color: var(--text-dim) !important;
-  opacity: 0.6;
-}
-.op-v3 select,
-.op-v3 .form-select,
-.op-v3 option,
-.op-v3 input,
-.op-v3 textarea {
-  background-color: var(--bg-panel);
-  color: var(--text);
-  border-color: var(--border);
-}
-.op-v3 .form-select {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a9b4bd' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+  opacity: 0.55;
 }
 .op-v3 .checkmark,
 .op-v3 [data-status="pass"] {

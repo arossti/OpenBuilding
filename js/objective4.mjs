@@ -171,11 +171,33 @@ function renderContentShell() {
     // V3's section goes first, under the panel header (S01: above the intro;
     // S02: above the PROJECT form).
     const v3 = tab.v3 && document.getElementById(tab.v3);
-    if (v3) panel.querySelector(".beam-panel-header").after(v3);
+    if (v3) panel.querySelector(".beam-panel-header").after(v3Card(tab, v3));
     frag.appendChild(panel);
   }
   content.replaceChildren(frag);
   document.getElementById("op-v3-sections")?.remove();
+}
+
+// A V3 section in the V4 card the PROJECT form uses (.bw-asm-group): a
+// collapsible header naming the section, V3's table as the body.
+function v3Card(tab, v3) {
+  const card = document.createElement("section");
+  card.className = "bw-asm-group op-v3-card";
+  card.innerHTML = `
+    <header class="bw-asm-group-header">
+      <button class="bw-asm-toggle" type="button" aria-expanded="true">\u25BC</button>
+      <h3 class="bw-asm-group-name">S${pad2(tab.num)} ${escapeHtml(tab.label)}</h3>
+    </header>
+    <div class="bw-asm-group-body"></div>`;
+  card.querySelector(".bw-asm-group-body").appendChild(v3);
+  card.querySelector(".bw-asm-group-header").addEventListener("click", () => {
+    const body = card.querySelector(".bw-asm-group-body");
+    const btn = card.querySelector(".bw-asm-toggle");
+    body.hidden = !body.hidden;
+    btn.textContent = body.hidden ? "\u25B6" : "\u25BC";
+    btn.setAttribute("aria-expanded", String(!body.hidden));
+  });
+  return card;
 }
 
 function pad2(n) {

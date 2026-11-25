@@ -15,6 +15,7 @@ App directory with cards linking to each tool.
 Client-side tool for extracting area and volume data from construction document PDFs. Loads a PDF, identifies architectural plans, and lets users measure areas with polygon or rectangle tools — purpose-built for the area/volume inputs needed by OBJECTIVE and wbLCA tools.
 
 **Key features:**
+
 - PDF.js 4.x viewer with CAD-style controls (scroll-zoom at cursor, middle-click pan)
 - Three-state scale workflow: auto-detect → accept → verify (empirical two-point calibration)
 - Polygon + rectangle area measurement with vertex snap to PDF vector geometry
@@ -83,7 +84,7 @@ OpenBuilding/
 │   ├── materials/                   8 per-group JSON files (03-concrete ... 31-earthwork)
 │   ├── lookups/                     Enum + inference tables
 │   ├── scripts/                     CSV importer + validator
-│   └── schema.md                    Workplan + lineage
+│   └── schema.md                    What the catalogue is (local only); points at OBJECTIVE-V4.md
 ├── docs/
 │   ├── sample.pdf                   TakeOffEh dev fixture (generic name; swapped for a better drawing set at release)
 │   ├── pdf-samples/                 Larger sample PDFs for parser testing (gitignored)
@@ -120,7 +121,7 @@ npm run format       # Prettier on CSS/HTML/JS
 
 ## Context
 
-The tools are complementary: **Take Off, Eh!** extracts the *area and volume data* from drawings; **OBJECTIVE** turns
+The tools are complementary: **Take Off, Eh!** extracts the _area and volume data_ from drawings; **OBJECTIVE** turns
 the envelope and systems into energy and carbon; the **Material Database** and the **Builders** hold the materials and
 assemblies those areas multiply against. The native ABCD.EARTH app is OBJECTIVE Pro's full form.
 
