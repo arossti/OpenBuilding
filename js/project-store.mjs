@@ -293,8 +293,8 @@ export function measurementsToCSV() {
           [
             sheetLabel,
             '"  ' + cm.label + '"',
-            "window",
-            cm.component || "window_opening",
+            cm.type || "window",
+            cm.component || (cm.type || "window") + "_opening",
             cm.assembly_preset || "",
             cm.mode || "net",
             cm.areaM2 !== null ? cm.areaM2.toFixed(2) : "",
@@ -315,8 +315,8 @@ export function measurementsToCSV() {
         [
           sheetLabel,
           '"' + om.label + ' (unassociated)"',
-          "window",
-          om.component || "window_opening",
+          om.type || "window",
+          om.component || (om.type || "window") + "_opening",
           om.assembly_preset || "",
           om.mode || "net",
           om.areaM2 !== null ? om.areaM2.toFixed(2) : "",

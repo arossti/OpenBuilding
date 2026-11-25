@@ -11,6 +11,8 @@ import {
   AREA_EDGE,
   AREA_FILL,
   WIN_EDGE,
+  DOOR_EDGE,
+  DOOR_FILL,
   WIN_FILL
 } from "./config.mjs";
 import * as Loader from "./pdf-loader.mjs";
@@ -739,6 +741,7 @@ function _handleOverlayClick(e) {
 
   if (_currentTool === "measure") _handleMeasureClick(pt);
   else if (_currentTool === "window") _handleWindowClick(pt);
+  else if (_currentTool === "door") _handleDoorClick(pt);
   else if (_currentTool === "polyline") _handlePolylineClick(pt);
   else if (_currentTool === "calibrate") _handleCalibrateClick(pt);
   else if (_currentTool === "ruler") _handleRulerClick(pt);
@@ -1025,6 +1028,20 @@ function _handleWindowClick(pt) {
   }
 }
 
+// Door tool: an opening like a window, tagged door_opening. Doors nest in
+// their wall and net out of it, and reach OBJECTIVE's S11 door rows.
+function _handleDoorClick(pt) {
+  if (!ScaleManager.isCalibrated(_currentPage) && !PolygonTool.isDrawing() && !_rectStart) {
+    setStatus("No confirmed scale. Press S to set scale first, or measurements will be uncalibrated.", "error");
+  }
+  var opts = { type: "door", mode: "net", component: "door_opening" };
+  if (_measureMethod === "rectangle") {
+    _handleGenericRectangleClick(pt, opts);
+  } else {
+    _handleGenericPolygonClick(pt, opts);
+  }
+}
+
 function _handlePolylineClick(pt) {
   if (!ScaleManager.isCalibrated(_currentPage) && !PolygonTool.isDrawing()) {
     setStatus("No confirmed scale. Press S to set scale first, or measurements will be uncalibrated.", "error");
@@ -1044,7 +1061,7 @@ function _handlePolylineClick(pt) {
 
 function _onPolygonComplete(opts) {
   var type = opts && opts.type;
-  var label = type === "window" ? "Window" : type === "polyline" ? "Polyline" : "Area";
+  var label = type === "window" ? "Window" : type === "door" ? "Door" : type === "polyline" ? "Polyline" : "Area";
   setStatus(label + " measured" + (ScaleManager.isCalibrated(_currentPage) ? "" : " (uncalibrated)"), "ready");
   _refreshMeasurements();
   ProjectStore.savePolygons(_currentPage, PolygonTool.getPolygons(_currentPage));
@@ -1212,6 +1229,7 @@ function _handleOverlayMouseMove(e) {
   if (
     _currentTool === "measure" ||
     _currentTool === "window" ||
+    _currentTool === "door" ||
     _currentTool === "calibrate" ||
     _currentTool === "ruler"
   ) {
@@ -1226,7 +1244,11 @@ function _handleOverlayMouseMove(e) {
   }
 
   // Rubber-band rectangle preview
-  if (_rectStart && (_currentTool === "measure" || _currentTool === "window") && _measureMethod === "rectangle") {
+  if (
+    _rectStart &&
+    (_currentTool === "measure" || _currentTool === "window" || _currentTool === "door") &&
+    _measureMethod === "rectangle"
+  ) {
     _rectCurrent = _snapTarget ? { x: _snapTarget.x, y: _snapTarget.y } : pt;
     Viewer.requestRedraw();
     return;
@@ -1445,8 +1467,9 @@ function _drawRectPreview(ctx) {
   var h = Math.abs(p2.y - p1.y);
 
   var isWin = _currentTool === "window";
-  var edgeCol = isWin ? WIN_EDGE : AREA_EDGE;
-  var fillCol = isWin ? WIN_FILL : AREA_FILL;
+  var isDoor = _currentTool === "door";
+  var edgeCol = isDoor ? DOOR_EDGE : isWin ? WIN_EDGE : AREA_EDGE;
+  var fillCol = isDoor ? DOOR_FILL : isWin ? WIN_FILL : AREA_FILL;
 
   ctx.save();
   ctx.strokeStyle = edgeCol;
@@ -1678,6 +1701,9 @@ function _bindKeyboard() {
         break;
       case "w":
         setTool("window");
+        break;
+      case "e":
+        setTool("door");
         break;
       case "p":
         setTool("polyline");
@@ -2724,10 +2750,10 @@ var ASSEMBLY_PRESET_OPTIONS = [
 ];
 
 function _renderTagSelect(polyType, polyIdx, pageNum, currentValue, small) {
-  if (polyType === "window") {
-    // Windows are auto-tagged; keep static.
+  if (polyType === "window" || polyType === "door") {
+    // Openings are auto-tagged; keep static.
     var sizeAttr = small ? " style='font-size:10px;'" : "";
-    return "<td class='tag-cell'" + sizeAttr + ">" + (currentValue || "window_opening") + "</td>";
+    return "<td class='tag-cell'" + sizeAttr + ">" + (currentValue || polyType + "_opening") + "</td>";
   }
   var toolKey = polyType === "polyline" ? "polyline" : "measure";
   var opts = COMPONENT_OPTIONS[toolKey] || [];
@@ -2955,8 +2981,8 @@ function _renderSummaryTable() {
             " " +
             cm.label +
             "</td>";
-          html += "<td class='type-cell' style='font-size:10px;'>window</td>";
-          html += _renderTagSelect("window", child.polyIdx, pageNum, cm.component, true);
+          html += "<td class='type-cell' style='font-size:10px;'>" + (cm.type || "window") + "</td>";
+          html += _renderTagSelect(cm.type || "window", child.polyIdx, pageNum, cm.component, true);
           html += _renderScopeSelect(child.polyIdx, pageNum, cm.scope, true);
           html += _renderPresetSelect(cm.component, child.polyIdx, pageNum, cm.assembly_preset, true);
           if (cm.areaM2 !== null) {
@@ -2998,8 +3024,8 @@ function _renderSummaryTable() {
         "' title='Click to rename'>" +
         om.label +
         " (unassociated)</td>";
-      html += "<td class='type-cell'>window</td>";
-      html += _renderTagSelect("window", assoc.orphanWindows[o].polyIdx, pageNum, om.component, false);
+      html += "<td class='type-cell'>" + (om.type || "window") + "</td>";
+      html += _renderTagSelect(om.type || "window", assoc.orphanWindows[o].polyIdx, pageNum, om.component, false);
       html += _renderScopeSelect(assoc.orphanWindows[o].polyIdx, pageNum, om.scope, false);
       html += _renderPresetSelect(om.component, assoc.orphanWindows[o].polyIdx, pageNum, om.assembly_preset, false);
       if (om.areaM2 !== null) {

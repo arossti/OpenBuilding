@@ -255,7 +255,7 @@ export function flattenProjectPolygons(projectJson) {
 
     // Second pass — attach windows to containing wall polygons.
     const walls = polys.filter((p) => (p.type || "area") === "area" && p.closed);
-    const windows = polys.filter((p) => p.type === "window" && p.closed);
+    const windows = polys.filter((p) => (p.type === "window" || p.type === "door") && p.closed);
     for (const win of windows) {
       const owner = findEnclosingWall(win, walls);
       if (owner) {
