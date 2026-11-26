@@ -5109,6 +5109,11 @@ body.reference-mode .op-v3 input:disabled {
   cursor: not-allowed;
 }
 
+/* V3's print-only elements: hidden on screen */
+.print-only {
+  display: none;
+}
+
 /* ── §8d OBJECTIVE in print: the browser's own Print makes the report ───────
    (Andy 2026-11-26: "We lean 100% on the browser's print functions. Nothing fancy.") The page's chrome is
    left out, the one page of cards flows over as many sheets as it needs, and the neutrals are re-pointed
@@ -5197,5 +5202,63 @@ body.reference-mode .op-v3 input:disabled {
   body.reference-mode #beam-content::before {
     position: static;
     margin: 0 0 12px;
+  }
+
+  /* The last page: V3's disclaimer, its rules verbatim (andy-rnd src/styles.css) */
+  #print-disclaimer-page {
+    display: block !important;
+    page-break-before: always; /* Start on new page after sections */
+    /* No page-break-after - allow footer to follow on same page if it fits */
+    padding: 0.75in 0.5in;
+    max-width: 100%;
+  }
+
+  .disclaimer-content h2 {
+    font-size: 20pt;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    text-align: center;
+    color: #000;
+  }
+
+  .disclaimer-content h3 {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    color: #000;
+  }
+
+  .disclaimer-content .disclaimer-date {
+    font-size: 9pt;
+    font-style: italic;
+    text-align: center;
+    margin-bottom: 1em;
+    color: #666;
+  }
+
+  .disclaimer-content p {
+    font-size: 10pt;
+    line-height: 1.6;
+    margin-bottom: 0.8em;
+    color: #000;
+    text-align: justify;
+  }
+
+  .disclaimer-content .disclaimer-text {
+    font-size: 10pt;
+    line-height: 1.6;
+    margin-bottom: 1em;
+  }
+
+  .disclaimer-content hr {
+    margin: 1.2em 0;
+    border: none;
+    border-top: 2px solid #ccc;
+  }
+
+  .disclaimer-content a {
+    color: #0066cc;
+    text-decoration: underline;
   }
 }

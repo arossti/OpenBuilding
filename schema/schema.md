@@ -68,6 +68,9 @@ in andy-rnd for the V3 page.
      launch only S01 is open; the sidebar opens a section and it stays open until closed. Every section has a
      subtitle (`PANEL_SUBTITLES`, Claude's wording, Andy's to edit). Print shows every section, open or collapsed
      on screen (Bootstrap's `[hidden]` is `!important`, so the print rule is too). S20 is out of print only.
+   - **The printed disclaimer:** V3's `#print-disclaimer-page` and its print rules, copied verbatim from andy-rnd
+     (585 words, checked identical), is the report's last page(s); it differs from the modal's text, as in V3.
+     The default case prints on 11 landscape pages: 9 of sections, 2 of disclaimer, licence and credits.
 2. **THE OPENING BUILDER on the splash page.** `index.html`'s last tile slot (bottom right, beside Section Builder) is
    empty: add the Opening Builder from ABCD.EARTH (`artex-osx/docs/mockups/opening-builder.html`) through
    `publish_builders.py` (add it to `PAGES`, or to `SNAPSHOTS` if it cannot be rebuilt from today's seed; its cost
