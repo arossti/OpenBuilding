@@ -51,6 +51,8 @@ shared with the Builders (cyan on the web). No per-app `.css` files.
 - `js/objective4.mjs` + `js/objective-boot.js` — OBJECTIVE's page: the S01–S22 router and HUD, and V3's start-up.
   OBJECTIVE itself is V3's code, verbatim, in `src/` (engine, sections S01–S21, case studies) + `climate/`.
 - `js/beam/*.mjs` — `pdf-bridge-import.mjs` (Trust / Trust + Verify) and `reference-data.mjs` (S22 Glossary).
+- `js/objective-builders.mjs` — the Builders inside OBJECTIVE: S11's row IDs open the Assembly Builder in a popup;
+  Apply Selected writes the row's RSI (roadmap §10).
 - `js/shared/*.mjs` — cross-page utilities (`state-manager.mjs`, `file-handler.mjs`, `indexed-db-store.mjs`, …)
 - Global namespace: `window.BEAM.*` (to become OBJECTIVE's `window.TEUI.*` in the port).
 
