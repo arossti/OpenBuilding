@@ -47,14 +47,14 @@ window.TEUI.SectionModules.sect04 = (function () {
         e: { content: "UNITS", classes: ["section-subheader"] },
         f: { content: "ACTUAL NET", classes: ["section-subheader"] },
         g: {
-          content: "E.1 EMISSIONS\nkgCO2e/yr",
+          content: "E.1 EMISSIONS\n(kgCO2e/yr)",
           classes: ["section-subheader"],
         },
         h: { content: "TARGET ENERGY", classes: ["section-subheader"] },
         i: { content: "UNITS", classes: ["section-subheader"] },
         j: { content: "TARGET NET", classes: ["section-subheader"] },
         k: {
-          content: "E.1 EMISSIONS\nkgCO2e/yr",
+          content: "E.1 EMISSIONS\n(kgCO2e/yr)",
           classes: ["section-subheader"],
         },
         l: { content: "EMISSION FACTORS", classes: ["section-subheader"] },
