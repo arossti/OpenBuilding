@@ -21,8 +21,8 @@
 ### ▶ START HERE (handoff 2026-11-26 evening, laptop) — written for a cold start after a /clear
 
 **Written 2026-11-26 late afternoon (laptop) for tonight's arc, after a /clear.** **LIVE: `main` after PR #27**
-(B5; this handoff is its last commit), deployed to https://arossti.github.io/OpenBuilding/. No branch is open:
-**cut a fresh one from `main` for tonight's arc** (Andy names it, or name it for item 1 below). Everything Andy
+(B5; this handoff is its last commit), deployed to https://arossti.github.io/OpenBuilding/. **Tonight's branch is
+`Reference-Independence`**, cut from that `main` and pushed: this note is its first commit, nothing is built on it. Everything Andy
 asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and bring a list. **Tonight: plan REMAINS
 1 – 6 with Andy before building** (he said: _"we can plan 1-6 for tonight's arc after a clear"_).
 
@@ -72,9 +72,15 @@ asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and brin
 3. **ABCD BUGLIST #266** (item 5): until it is fixed the Assembly Builder here is the 2026-10-22 library, 115
    assemblies, with the old blue accent and month-old baked HFT.
 4. **A light mode** (item 6, second tier).
-5. **From §10, none started, each on Andy's word:** isotherms baked for the Section and Opening Builders (never
-   built; ABCD.EARTH work: a fixture written by the app's solver, as `hft-fixture.json` is for assemblies); whether
-   an opening's W × H and an SHGC come across with its U; whether S05's E.3.5 may be chosen as E.3.2's source.
+5. **From §10, RULED by Andy 2026-11-26 (_"Yes on 2/3"_), none started:**
+   - **YES — isotherms baked for the Section and Opening Builders** (never built; ABCD.EARTH work: a fixture written
+     by the app's solver, as `hft-fixture.json` is for assemblies, and an Isothermal View in each page).
+   - **YES — an opening's W × H and an SHGC come across with its U** on Apply Selected. The message already carries
+     `w_mm` and `h_mm`; they would go to the row's W and H (`dl_`, `dh_`) and its S10 twin's area, as
+     `pdf-bridge-import.mjs` `writeEnvelope` does. The Opening Builder computes NO SHGC today: that is ABCD.EARTH
+     work first, then S10's SHGC.
+   - **NEVER — E.3.5 as E.3.2's source.** Andy: _"E.3.5 should never be chosen as E.3.2's source because
+     Typology-based caps are set by Standards like Toronto's TGS4, etc."_ E.3.5 stays a row that nothing reads.
 6. **The port's own open items**, §8 and §9.2, unchanged today.
 
 Local servers (they die on reboot): `python3 schema/scripts/nocache-serve.py 8831` here, `node test/static-server.cjs 8791`
