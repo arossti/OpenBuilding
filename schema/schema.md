@@ -97,7 +97,7 @@ the last loaded project". Witness: all 16 case studies, loaded through the modal
 2146 / 2146 identical displayed values each.
 **TRUST → S02 / S11 / S12 ✅ 2026-11-25** (Andy: _"S11, S12, and 'Conditioned Area' as the sum in S02 of all
 interior plan spaces"_): `js/beam/pdf-bridge-import.mjs` `V3_TARGETS` — h*15 ← every floor plate (foundation +
-above-grade slabs, building scope); d*85 roof (× pitch); d_86 walls above grade (net of their windows); d_94 walls
+above-grade slabs, building scope); d*85 roof (× pitch); d*86 walls above grade (net of their windows); d_94 walls
 below grade (perimeter × basement height); d_95 slab; d_105 volume (floor plates × S12's g_106). Written as user
 entries, one recalculation; parameters from Take Off, Eh!'s sidebar. Witness (10 × 12 m house, 3 / 2.5 m, 30°):
 240 / 138.56 / 34.5 / 110 / 120 / 648, exact. **Windows are not written** — S11 hosts each in a facing wall and Take
@@ -105,11 +105,13 @@ Off records no facing yet (V4-7).
 **V4-7 STATUS 2026-11-25 late (laptop, Andy at 99 % usage):** ✅ Take Off, Eh! Door tool [E] (orange, door glyph; an
 opening like a window). ✅ Facing per elevation sheet (sheet panel dropdown, title as hint, stored `page.facing`).
 ✅ Trust writes S11's walls by confirmed facing (B.5 / B.87a–i, gross area; witness West 36.00 m², TEUI recomputes).
-⚠ **Openings NOT written yet:** writing `ch*`/`dl*`/`dh*`/`d\_`into S11's window and door rows left the old case's
-areas in place (the engine resynced them) and the key values blank. NEXT: trace how Section11.js's`applyOpeningGeometry` turns W × H into the opening's area in the graph and call that path (or set the graph input),
-then write every window and door in its own row (Andy: *"they need to be calculated individually, row by row, to
-comply with ASHRAE 140"_). `envelopeByFacing()` in pdf-bridge-import.mjs already lists them.
-**TONIGHT — the Reference model** (Andy: _"note Reference Model in the workplan so we can port that later tonight"_):
+✅ **Openings written, each in its own row** (Andy: *"calculated individually, row by row, to comply with ASHRAE 140"*;
+*"add doors to the Trust process"*): host, W, H, qty on the S11 row; area (W × H) and facing on its S10 twin, as
+Section11.js `applyOpeningGeometry` does. Witness: West wall + 2 windows + 1 door, North wall + 1 window → rows
+B.7.0 / B.8.1 / B.8.2 hosted in 86, B.8.3 in 87a, areas 1.89 / 1.5 / 1.08 / 1.44, facings West / North.
+⚠ **OPEN:** on that 4-opening fixture S01's m_10 (Actual vs Target %, the default case is Utility Bills) reads
+"Unavailable" though h_10 = 82.8; single-opening and door-only runs give 49 %. Trace before relying on Trust's %.
+**TONIGHT — the Reference model** (Andy: *"note Reference Model in the workplan so we can port that later tonight"_):
 V3's Target / Reference toggle (`src/core/ReferenceToggle.js`, its header button and `body.viewing-reference-inputs`
 styles) onto objectivepro.html, the HUD and every section showing Reference values when toggled, and S16's Sankey
 following it (below).

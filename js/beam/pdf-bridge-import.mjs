@@ -188,7 +188,7 @@ export async function buildPreview(projectUuid) {
         ? env.facings
             .map((f) => `${f.facing}: wall ${f.wall.toFixed(2)} m\u00b2, ${f.openings.length} opening(s)`)
             .join(" \u00b7 ") +
-          ` \u2014 walls written by facing; ${nWin} window(s) and ${nDoor} door(s) found, not yet written (each will take its own row).`
+          ` \u2014 ${nWin} window(s) and ${nDoor} door(s), each in its own row, hosted in its wall.`
         : "No wall has a facing yet: set each in Take Off, Eh!'s summary table.") +
       (env.unconfirmed.length ? ` Not imported (no facing set): ${env.unconfirmed.join(", ")}.` : ""),
     contributors: [],
@@ -261,21 +261,43 @@ function uniquePresets(contributors) {
   return Array.from(s);
 }
 
-// S11 from the confirmed facings: one wall row per facing (gross area; S11
-// nets out what it hosts). Openings are NOT written yet: writing hosts and
-// W × H into S11's opening rows left the engine's areas stale and the key
-// values blank (2026-11-25 witness); the opening path through the graph is
-// the next step (schema/schema.md §0). Returns the count written.
+// S11 from the walls' facings: one wall row per facing (gross area; S11 nets
+// out what it hosts), then every window and every door in its own row, hosted
+// in its facing's wall — ASHRAE 140 shades window by window (Andy 2026-11-25).
+// Written the way S11 itself does it (Section11.js applyOpeningGeometry): the
+// host, W, H and quantity on the S11 row; the area (W × H) and the facing on
+// its S10 twin, which is where an opening's area lives. Every opening row is
+// cleared first. Returns the count written.
 function writeEnvelope(SM, env) {
   const set = (id, v) => SM.setValue(id, String(v), "user-modified");
+  const OPEN = (window.TEUI && window.TEUI.Openings && window.TEUI.Openings.ALL) || [];
   let n = 0;
   WALL_ROWS.forEach((r) => set(`d_${r}`, 0));
+  for (const o of OPEN) {
+    set(`ch_${o.s11}`, "");
+    set(`dl_${o.s11}`, "");
+    set(`dh_${o.s11}`, "");
+    set(`dq_${o.s11}`, 1);
+    set(`d_${o.s10}`, 0);
+  }
+  const free = { window: OPEN.filter((o) => o.kind === "window"), door: OPEN.filter((o) => o.kind === "door") };
   env.facings.slice(0, WALL_ROWS.length).forEach((f, i) => {
     const wallRow = WALL_ROWS[i];
     set(`c_${wallRow}`, "walls");
     set(`cf_${wallRow}`, f.facing);
     set(`d_${wallRow}`, f.wall.toFixed(2));
     n++;
+    for (const op of f.openings) {
+      const o = free[op.kind] && free[op.kind].shift();
+      if (!o) continue; // more openings than S11 has rows of that kind
+      set(`ch_${o.s11}`, wallRow);
+      set(`dl_${o.s11}`, op.w);
+      set(`dh_${o.s11}`, op.h);
+      set(`dq_${o.s11}`, 1);
+      set(`d_${o.s10}`, +(op.w * op.h).toFixed(4));
+      set(`e_${o.s10}`, f.facing);
+      n++;
+    }
   });
   return n;
 }
