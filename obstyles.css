@@ -5185,6 +5185,17 @@ body.reference-mode .op-v3 td.id-cell.op-asm-btn {
   letter-spacing: 0;
   color: var(--accent-lit);
 }
+/* S05's row of its own: the embodied carbon of the assemblies applied in S11 (B5) */
+.op-v3 tr.op-carbon-row td[data-op-field="asm_carbon_status"] {
+  color: var(--text-dim);
+  font-size: 10px;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.op-v3 tr.op-carbon-row.op-carbon-complete td[data-op-field="asm_carbon_status"] {
+  color: var(--accent-lit);
+}
 #op-builder-modal {
   position: fixed;
   inset: 0;

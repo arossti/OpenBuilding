@@ -178,6 +178,7 @@ function decorate() {
     }
     fitChip(chip);
   }
+  renderCarbon();
 }
 
 // The name takes only the room its row has: S11's table is laid out to fit its card (a 1440 px window), and a
@@ -194,6 +195,83 @@ function fitChip(chip) {
   const room = Math.floor(chip.getBoundingClientRect().width - over);
   if (room >= 40) chip.style.maxWidth = `${room}px`;
   else chip.style.display = "none";
+}
+
+// ── B5: S05's embodied carbon from the applied assemblies ─────────────
+// A row of its own under E.3.4 (Andy 2026-11-26: "a new field in S05 that holds this running tally and sum when
+// done... so it does not interfere with current behaviour and defaults"): Σ (assembly carbon intensity × the
+// row's net area) over S11's opaque rows, as MT CO2e and per m² of the floor area S05's own E.3.3 divides by
+// (d_106). A RUNNING TALLY while some rows in use have no assembly, THE SUM when every one has. It is read by
+// nothing: E.3.4's typed value and E.3.2's choice stand as they were. Fossil A1-A3, as the Builder's ECI.
+const CARBON_ROW = "E.3.5";
+const num = (v) => {
+  const n = parseFloat(String(v ?? "").replace(/,/g, ""));
+  return Number.isFinite(n) ? n : 0;
+};
+function tallyCarbon() {
+  const O = T().Openings;
+  const SM = T().StateManager;
+  let kg = 0;
+  let inUse = 0;
+  let covered = 0;
+  for (const o of O.OPAQUE) {
+    // the area every calculation reads: as entered, net of the openings the row hosts (Section11.js)
+    const hosted = O.ALL.filter((r) => String(SM.getValue(`ch_${r.s11}`) || "") === String(o.s11));
+    const net = num(SM.getValue(`d_${o.s11}`)) - hosted.reduce((sum, r) => sum + num(SM.getValue(`d_${r.s10}`)), 0);
+    if (!(net > 0)) continue;
+    inUse++;
+    const link = linkOf(o.s11);
+    if (!link || !Number.isFinite(link.eci)) continue;
+    covered++;
+    kg += link.eci * net;
+  }
+  const floor = num(SM.getValue("d_106"));
+  return { kg, inUse, covered, perM2: floor > 0 ? kg / floor : null };
+}
+function renderCarbon() {
+  const anchor = document.querySelector('#emissions [data-field-id="i_41"]');
+  const after = anchor && anchor.closest("tr");
+  if (!after || !T().Openings || !T().StateManager) return;
+  let tr = after.parentNode.querySelector(`tr[data-id="${CARBON_ROW}"]`);
+  if (!tr) {
+    tr = document.createElement("tr");
+    tr.dataset.id = CARBON_ROW;
+    tr.className = "op-carbon-row";
+    tr.innerHTML = `<td class="col-a"></td><td class="col-b id-cell"></td>
+      <td class="col-c description-cell">Embodied Carbon of Applied Assemblies (A1-3)</td>
+      <td class="col-d calculated-value" data-op-field="asm_carbon_total"></td><td class="col-e">MT CO2e</td>
+      <td class="col-f label-prefix">${CARBON_ROW}</td><td class="col-g label-main">From S11's Assemblies (A1-3)</td>
+      <td class="col-h"></td><td class="col-i calculated-value" data-op-field="asm_carbon_intensity"></td>
+      <td class="col-j" colspan="5" data-op-field="asm_carbon_status"></td>`;
+    tr.title =
+      "Σ (assembly embodied carbon × the row's net area) over S11's opaque rows, fossil A1-A3, as the Assembly " +
+      "Builder gives it. Shown beside E.3.4; nothing reads it.";
+    after.after(tr);
+  }
+  const set = (field, text) => {
+    const el = tr.querySelector(`[data-op-field="${field}"]`);
+    if (el.textContent !== text) el.textContent = text;
+  };
+  if (isReference()) {
+    set("asm_carbon_total", "\u2014");
+    set("asm_carbon_intensity", "\u2014");
+    set("asm_carbon_status", "the Target's assemblies");
+    return;
+  }
+  const t = tallyCarbon();
+  const fmt = (n, d) => n.toLocaleString("en-CA", { minimumFractionDigits: d, maximumFractionDigits: d });
+  set("asm_carbon_total", t.covered ? fmt(t.kg / 1000, 2) : "\u2014");
+  set("asm_carbon_intensity", t.covered && t.perM2 !== null ? fmt(t.perM2, 2) : "\u2014");
+  const rows = `${t.covered} of ${t.inUse} opaque row${t.inUse === 1 ? "" : "s"}`;
+  set(
+    "asm_carbon_status",
+    !t.covered
+      ? "no assembly applied in S11 yet"
+      : t.covered < t.inUse
+        ? `kgCO2e/m\u00b2 · running tally: ${rows}`
+        : `kgCO2e/m\u00b2 · sum: all ${t.inUse} opaque row${t.inUse === 1 ? "" : "s"}`
+  );
+  tr.classList.toggle("op-carbon-complete", t.covered > 0 && t.covered === t.inUse);
 }
 
 function onActivate(e) {
@@ -242,6 +320,14 @@ export function initBuilders() {
         decorate();
       });
     }).observe(host, { childList: true, subtree: true });
+    // S05's row follows: V3 re-renders S05 too, an area edit restamps S11 (seen above), the model on screen changes
+    const s05 = document.getElementById("emissions");
+    if (s05) new window.MutationObserver(() => renderCarbon()).observe(s05, { childList: true, subtree: true });
+    new window.MutationObserver(() => renderCarbon()).observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+    host.addEventListener("focusout", () => setTimeout(renderCarbon, 50));
     decorate();
   };
   start();

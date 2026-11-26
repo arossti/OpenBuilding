@@ -20,16 +20,78 @@
 
 ### ▶ START HERE (handoff 2026-11-26 evening, laptop) — written for a cold start after a /clear
 
-**LIVE: `main` `7507a70` (PR #23), deployed to https://arossti.github.io/OpenBuilding/.** **This branch is `OnePage`**
-(Andy named it), cut from that `main`: the one page is built (below), Andy smoked it 2026-11-26 and gave the word
-to merge it as PR #24 (merged, `204fd95`). **The branch now is `Styling-Tweaks`** (cut 2026-11-26 from that `main`):
-done on it so far are the printed report's footer of logos (V3's, `.op-print-footer`, with `graphics/ob-mark.svg`
-and `graphics/oaa-logo.png`) and PENDING 2, the Opening Builder. Andy is writing the next list of styling changes
-for this branch; no PR until that list is done.
-Local servers (they die on reboot): `python3 schema/scripts/nocache-serve.py 8822` here, `node test/static-server.cjs 8791`
+**Written 2026-11-26 late afternoon (laptop) for tonight's arc, after a /clear.** **LIVE: `main` after PR #27**
+(B5; this handoff is its last commit), deployed to https://arossti.github.io/OpenBuilding/. No branch is open:
+**cut a fresh one from `main` for tonight's arc** (Andy names it, or name it for item 1 below). Everything Andy
+asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and bring a list. **Tonight: plan REMAINS
+1 – 6 with Andy before building** (he said: _"we can plan 1-6 for tonight's arc after a clear"_).
+
+**How to work here (a cold start needs these):**
+
+- This repo's `CLAUDE.md`: a merge to `main` redeploys Pages, so merge only on Andy's word in the session; one
+  branch = one PR. The memory for this work is `~/.claude/projects/-Users-andrewthomson-Documents-OpenBuilding/memory`
+  (its `MEMORY.md`); 2026-11-26 was run from the ABCD.EARTH window, so that memory was not updated today.
+- **Three repos, all under `~/Documents`:** `OpenBuilding/OpenBuilding` (this one: the site); `OpenBuilding/andy-rnd`
+  (V3, the parity reference and where Playwright is installed); `ABCD.EARTH` (the Builders' SOURCE,
+  `artex-osx/docs/mockups/`: edit a Builder page THERE on a branch, its pre-push gate runs ~5 min, PR to
+  `arossti/ARTexplorer-private`, then `npm run builders:publish` here AFTER the commit so `BUILD.json` names it).
+- **Serve and test:** `test/witness/README.md` (new today) has the servers, the five probes and what each must
+  show. After a big CSS/JS change use a new port: Chrome caches stale modules.
+- **The Builder computes, OBJECTIVE receives** (§10.2): never derive an RSI, U or carbon figure from layers here.
+
+**REMAINS, in order** (Andy's numbering for tonight; the older detail of 2 – 4 is in the items further down):
+
+1. **REFERENCE / TARGET INDEPENDENCE — the first thing to fix.** Andy 2026-11-26: _"because of our Ref/Target
+   independence rule, a user can and may set a different assembly in the Reference model or the Target as a
+   comparison. Often users will set AS-IS values for renovavation models, and then the target model only adds to
+   that, or in other cases we may wish to test a high carbon steel or concrete building as the reference model
+   against a Target model that is all mass timbe (low carbon) to compare the tow - so be sure we did not block that
+   with reference model reads or locked assemblies in S10 or S11."_
+   - ⚠ **WE DID BLOCK IT, in today's own code** (measured before this handoff): V3 itself does not. In Reference
+     mode S11's `f_85`, `f_86`, `f_94`, `g_89` and `d_86` are `contenteditable="true"` and a typed value goes to
+     `ref_<field>`. The block is three `isReference()` guards in `js/objective-builders.mjs`: `onActivate` (the row
+     IDs do nothing in Reference mode), the `focusout` handler (a typed value does not clear the link), and
+     `renderCarbon` (E.3.5 shows a dash); and `obstyles.css` §8e greys the IDs under `body.reference-mode`.
+   - **What it needs:** every read and write in that module by the model on screen: the link `ref_ca_<row>`
+     beside `ca_<row>`, the value `ref_f_<row>` / `ref_g_<row>`, the areas and hosts in `tallyCarbon`
+     (`ref_d_`, `ref_ch_`), the type in `openBuilder` (`ref_c_<row>`), `decorate`'s name chip and tooltip, and
+     E.3.5 showing the Reference's own tally in Reference mode (so the two can be compared). V3's own pattern for
+     "the value in the mode on screen" is `getModeValue` in `Section11.js`. Then the file: `exportToCSV` already
+     writes `ref_<id>` for every listed id, so `Openings.addedFields`' in-use test must also see `ref_ca_`;
+     `FileHandler`'s `isStoredKeyWithoutField` branch is taken only for non-`ref_` keys today, so read how a
+     `ref_` key without a field is stored before assuming it round-trips. Witness: apply one assembly in Target and
+     a different one in Reference on the same row; each mode shows its own name, RSI and E.3.5; save, reload, both
+     return; Copy from Target carries the Target's across.
+   - **S19 (Andy, same message):** _"Presently S19 shows whatever in Reference mode as was set in Target, they
+     should maintain independence, whatever a user may have changed on the Reference or target side inputs."_
+     WOMBAT must draw the model on screen.
+   - Also here: S21 (Andy: _"may show the Reference model vs. Target model, I have not considered that case yet"_,
+     ❓ his); andy-rnd's `ghostedReference`, `referenceDefaults` and `hoverOnScreenModel` behaviours checked on this
+     page; and a read through S10 and S11 for anything else that reads the Target's value while Reference is shown.
+2. **m_10 "Unavailable"** after Trust on a 4-opening fixture (item 4 below, ⚠ OPEN).
+3. **ABCD BUGLIST #266** (item 5): until it is fixed the Assembly Builder here is the 2026-10-22 library, 115
+   assemblies, with the old blue accent and month-old baked HFT.
+4. **A light mode** (item 6, second tier).
+5. **From §10, none started, each on Andy's word:** isotherms baked for the Section and Opening Builders (never
+   built; ABCD.EARTH work: a fixture written by the app's solver, as `hft-fixture.json` is for assemblies); whether
+   an opening's W × H and an SHGC come across with its U; whether S05's E.3.5 may be chosen as E.3.2's source.
+6. **The port's own open items**, §8 and §9.2, unchanged today.
+
+Local servers (they die on reboot): `python3 schema/scripts/nocache-serve.py 8831` here, `node test/static-server.cjs 8791`
 in andy-rnd for the V3 page.
 
 **SHIPPED 2026-11-26 (all merged):**
+
+- **PR #24 — OnePage**: every section a card in one container, one + / − for all, the sidebar scrolls, the browser
+  prints the report (landscape, V3's disclaimer page and footer of logos last); the launch modal and the yellow
+  Disclaimer button; only S01 open at launch; a subtitle on every section. Detail: item 1 below.
+- **PR #25 — Styling-Tweaks**: the print footer's logos; the Opening Builder on the homepage; the Section Builder's
+  plan fills (ABCD.EARTH #1032). Detail: item 2 below.
+- **PR #27 — §10 B5**: S05's E.3.5, the embodied carbon of the assemblies applied in S11, in a row of its own
+  (running tally, then the sum); `test/witness/` and this handoff.
+- **PR #26 — the Builders inside OBJECTIVE, §10 B1–B4**: S11's row IDs open the Assembly Builder (opaque rows) or the
+  Opening Builder (doors, windows, skylights) in a popup; Apply Selected writes the row's RSI or U; what was applied
+  is saved with the project; the button row's project name is S02's B.2 (ABCD.EARTH #1033, #1034). Detail: §10.
 
 - **PR #22 — the V4 table format** (`obstyles.css` §8b; captions in `src/sections`): a row is one line, an input box a
   fixed 28 px, S11 fits a 1440 px window with its Surface (°C) column in view and its dropdowns grow past that, the
@@ -46,7 +108,7 @@ in andy-rnd for the V3 page.
   header captions with bracketed units (`src/sections/*.js`), and `Section16.js` `initializeEventHandlers` wiring once.
   A third since (§10 B3): `ca_<row>` in `src/core/Openings.js` `addedFields` and `src/core/FileHandler.js`.
 
-**PENDING, in order:**
+**The day's items as they were worked** (✅ = shipped; the unticked ones are REMAINS, above):
 
 1. **ONEPAGE — ✅ PR #24, smoked by Andy.** Andy 2026-11-26: *"each page gets a S18
    title which is then duplicated in the radiused, collapsible header ... We will keep the radiused, collapsible
@@ -77,8 +139,7 @@ in andy-rnd for the V3 page.
      The default case prints on 11 landscape pages: 9 of sections, 2 of disclaimer, licence and credits.
    - **The modal is wide** (up to 1280 px, tight spacing) so its whole text shows without scrolling: measured in
      WebKit at 1920×1080 down to 1024×768.
-2. **THE OPENING BUILDER on the splash page — ✅ on `Styling-Tweaks`.** `publish_builders.py` (ABCD.EARTH branch
-   `Opening-Builder-Publish`, `2b240a8a6`, waiting for its merge there) has it in `PAGES`: rebuilt from today's seed,
+2. **THE OPENING BUILDER on the splash page — ✅ PR #25.** `publish_builders.py` (ABCD.EARTH #1032, merged) has it in `PAGES`: rebuilt from today's seed,
    its six-face witness passing (33 certified sides), `openings.json` in the seed stamp. `builders/opening-builder.html`
    is published and `index.html`'s sixth tile opens it (13 openings).
 3. **Reference remainders:** S19's own Reference display; S21 (Andy: *"may show the Reference model vs. Target model,
@@ -92,10 +153,8 @@ in andy-rnd for the V3 page.
    §8c follow. Check then: the Sankey's forced-light labels, the input box's sunken fill, the slider track, Reference
    red on white.
 
-7. **THE BUILDERS INSIDE OBJECTIVE** (branch `Builders-In-OBJECTIVE`, Andy 2026-11-26): the Assembly Builder as a popup from
-   S11's row IDs, Apply Selected writing the row's RSI; then the Opening Builder for windows; then S05's embodied
-   carbon. **The plan is §10. B1–B4 are built and in PR #26** (both Builders as popups, Apply Selected, saved with
-   the project); **B5, S05's embodied carbon in its own new field, is next**, on Andy's word.
+7. **THE BUILDERS INSIDE OBJECTIVE — ✅ B1–B4 in PR #26; B5 in PR #27.** The plan and what was built
+   are §10.
 
 **What is where:** OBJECTIVE = V3's engine + sections verbatim in `src/` + `climate/` (from andy-rnd `5e0b2f0`);
 `js/objective4.mjs` (router, HUD, cards), `js/objective-boot.js` (V3's init.js start-up), `obstyles.css` §8b (V4
@@ -449,7 +508,8 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
 > carbon in S05 can later be calculated from the Sum of the embodied carbon of all assemblies multiplied by their
 > area."_
 
-**Status 2026-11-26: B1 – B4 are built (PR #26); B5 (S05's embodied carbon, in its own new field) is next, on Andy's word.** Andy answered §10.6 (all four as recommended) and said to go on B1.
+**Status 2026-11-26: B1 – B5 are merged (PRs #26, #27), Andy-smoked. ⚠ All of it is TARGET-ONLY today: the
+Reference model cannot take an assembly, which breaks Reference / Target independence (§0 REMAINS 1).** Andy answered §10.6 (all four as recommended) and said to go on B1.
 
 ### 10.1 What is there today (read from the code, 2026-11-26)
 
@@ -538,17 +598,25 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
   (B.8.5) rows' IDs are buttons too; Apply writes the U-value into `g_<row>` (3 decimals) and the row's product
   into `ca_<row>` (`id, name, cls, u, basis, uw_computed, uw_certified, w, h, edited`), saved and restored as an
   assembly's is. **Which U:** the certificate's Uw where the product has one (`basis: "certified"`), else the
-  Builder's computed Uw (`"computed"`: its frame is a solid first pass); the ID's tooltip says which. ❓ Andy's to
-  confirm. **Not applied:** the opening's W × H and any SHGC (the Builder computes none); S10 is untouched.
+  Builder's computed Uw (`"computed"`: its frame is a solid first pass); the ID's tooltip says which. **RULED**, Andy
+  2026-11-26: _"Yes Product Uw or if not available our calculated value."_ **Not applied:** the opening's W × H and any SHGC (the Builder computes none); S10 is untouched.
   Witnessed in WebKit: B.8.1 → Window, B.7.0 → Door, B.8.5 → Skylight, each opening unscrolled; EnerSign primus
   writes 0.600 (certified; computed 0.638), a skylight with no certificate its computed 1.394; save, typed U,
   reload and reopen behave; the assembly rows still open the Assembly Builder; parity 2146 / 2146.
-- **B5 — S05's embodied carbon from the assemblies.** Σ (assembly carbon intensity × the row's area) over S11's rows,
-  divided by the conditioned area, shown in a **new field of its own in S05** (Andy 2026-11-26: _"we should consider a
-  new field in S05 that holds this running tally and sum when done... so it does not interfere with current
-  behaviour and defaults"_): the running tally with the count of rows it covers, the sum when every opaque row has
-  an assembly. `i_41` and `d_39` keep today's behaviour and defaults; whether the new field can later be chosen as
-  the source is Andy's to say. Later, by his word.
+- **B5 — S05's embodied carbon from the assemblies — ✅ BUILT** (`js/objective-builders.mjs` `tallyCarbon` /
+  `renderCarbon`; branch `S05-Assembly-Carbon`). A row of its own under E.3.4, **E.3.5 "From S11's Assemblies
+  (A1-3)"** (Andy 2026-11-26: _"we should consider a new field in S05 that holds this running tally and sum when
+  done... so it does not interfere with current behaviour and defaults"_): Σ (assembly carbon intensity × the row's
+  NET area, as entered less the openings it hosts) over S11's opaque rows, shown as MT CO2e and as kgCO2e/m² of
+  `d_106`, the floor area E.3.3 itself divides by. Beside it: "running tally: n of m opaque rows" while a row in
+  use (net area > 0) has no assembly, "sum: all m opaque rows" when every one has. Fossil A1–A3, as the Builder's
+  ECI; openings carry no carbon figure and are not in it. **Nothing reads it**: it is not a StateManager field, it
+  is not saved (it follows from the rows' saved assemblies), and E.3.4's typed `i_41`, `d_39` and `d_40` are
+  untouched. In Reference mode it shows a dash (the assemblies are the Target's).
+  Witnessed in WebKit on case 01: slab alone 56.86 MT / 50.29 kgCO2e/m², "1 of 3"; roof + wall + slab 124.62 /
+  110.22, "sum: all 3" (26.02 × 1304.07 + 47.965 × 705.27 + 51.648 × 1100.93, over 1130.63 m²); a window hosted in
+  the wall takes its 81.14 m² off (120.73 / 106.78); `i_41` 345.82 and `d_40` 390.99 unchanged throughout; another
+  project clears it.
 
 ### 10.4 Witnesses
 
