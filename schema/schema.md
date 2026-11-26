@@ -518,6 +518,11 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
   the room the row has so S11's table keeps its width (the full name is the ID's tooltip). An RSI typed by hand
   clears `ca_<row>` (read when the cell is left). **Saved with the project:** `Openings.addedFields` lists `ca_<row>`
   for a row that has one, and `FileHandler` restores it (`isStoredKeyWithoutField`); a project without it clears it.
+  - **After Andy's first smoke (same day):** the popup is 1000 px wide and the Builder's embed mode is a fixed
+    frame (title bar never scrolls, list and editor scroll on their own, compact sizes, no provenance strip): it
+    opens at the top, and a 3-layer slab fits a 970 px window without scrolling. **The button row's project name
+    is S02's B.2** (`h_14`): `wireProjectName` in `objective4.mjs` mirrors V3's cell and writes an edit back
+    through V3's own handler.
   - ⚠ Two things measured on the way: a typed edit in V3 does NOT notify a `StateManager.addListener` on that field
     (the value and the recalculation are right; only the listener is silent), and WebKit reports the HOST page as
     the `source` of the Builder's cancel message, so `onMessage` checks the origin and that the popup is open, not

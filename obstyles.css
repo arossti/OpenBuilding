@@ -3144,6 +3144,18 @@ body {
   border: 1px solid var(--border);
   border-radius: 4px;
 }
+input.beam-project-name {
+  width: 240px;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+input.beam-project-name::placeholder {
+  color: var(--text-dim);
+}
+input.beam-project-name:focus {
+  outline: none;
+  border-color: var(--accent-lit);
+}
 .beam-project-name.dirty::after {
   content: "●";
   color: var(--gold);
@@ -5186,7 +5198,7 @@ body.reference-mode .op-v3 td.id-cell.op-asm-btn {
   display: none;
 }
 .op-builder-frame {
-  width: min(1400px, calc(100vw - 48px));
+  width: min(1000px, calc(100vw - 48px));
   height: calc(100vh - 48px);
   border: 1px solid var(--border);
   border-radius: 10px;

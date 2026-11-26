@@ -428,10 +428,37 @@ button:hover{background:#333338}
   #embed-apply, #embed-cancel { display: none; }
   html.embed body { padding: 0; gap: 0; display: block; }
   html.embed .embed-hide { display: none !important; }
-  html.embed .window { max-width: none; min-height: 100vh; border: none; border-radius: 0; box-shadow: none; overflow: visible; }
-  /* the title bar holds Apply Selected: it stays in view however far the frame is scrolled */
-  html.embed .titlebar { position: sticky; top: 0; z-index: 20; background: var(--win); }
-  html.embed .asm-row, html.embed .asm-group { scroll-margin-top: 52px; }
+  /* The palette IS the frame: the title bar (Apply Selected) never scrolls; the library list and the editor
+     scroll each on its own, so the frame opens at the top however far down the list the row's group is. */
+  html.embed, html.embed body { height: 100%; overflow: hidden; }
+  html.embed .window { max-width: none; height: 100vh; display: flex; flex-direction: column; border: none; border-radius: 0; box-shadow: none; }
+  html.embed .titlebar { flex: none; }
+  html.embed .body { flex: 1; min-height: 0; }
+  html.embed .list-col { width: 250px; min-height: 0; }
+  html.embed .asm-list { max-height: none; min-height: 0; }
+  html.embed .editor { overflow-y: auto; padding: 10px 14px 12px; }
+  /* COMPACT, at the host's sizes (OBJECTIVE's S11: 12 px text, one-line rows; Andy 2026-11-26: "if your
+     dropdowns and modal's text matched the CSS sizes for S11 ... the whole modal might just fit with no
+     scrolling"): a shorter section drawing, tighter rows. */
+  html.embed body { font-size: 12px; }
+  html.embed .bstack { height: 150px; }
+  html.embed .bwrap { padding: 30px 0; }
+  html.embed .pv-box { padding: 8px 10px 8px; }
+  html.embed .pv-banner { margin-bottom: 8px; }
+  html.embed input[type="text"], html.embed select, html.embed input[type="number"] { padding: 2px 6px; font-size: 12px; }
+  html.embed .seg button { padding: 3px 10px; }
+  html.embed label.fld, html.embed .rowline .fld { margin-bottom: 6px; }
+  html.embed .sect-head { margin: 2px 0 4px; }
+  html.embed table.layers td { padding: 1px 6px; }
+  html.embed tr.noterow td { padding: 0 6px 2px; }
+  html.embed tr.total td { padding-top: 4px; }
+  html.embed tr.metric td { padding-top: 0; padding-bottom: 0; line-height: 1.35; }
+  html.embed .asm-row { padding-top: 3px; padding-bottom: 3px; }
+  html.embed .asm-row .chip { height: 22px; }
+  html.embed table.layers tr.total td, html.embed table.layers tr.metric td,
+  html.embed table.layers tr.total td.num { font-size: 12px; }
+  /* the provenance strip and the page's own footer line are the standalone page's: the popup is for choosing */
+  html.embed .prov, html.embed .win-foot { display: none; }
   html.embed .titlebar .dots, html.embed .titlebar .close,
   html.embed #lib-export, html.embed #lib-import, html.embed #lib-cancel, html.embed #reset { display: none; }
   html.embed #embed-apply, html.embed #embed-cancel { display: inline-flex; }
@@ -3026,8 +3053,10 @@ wx_w1f_1xgypsum_13_89_w_stud	29.77	0	2	0.4243	0.4383	2.974
     let i = pick ? assemblies.findIndex(a => a.id === pick) : -1;
     if (i < 0 && group) { const k = displayOrder(assemblies).find(k => groupPrefix(assemblies[k]) === group); if (k !== undefined) i = k; }
     if (i >= 0 && i !== selIdx) { selIdx = i; renderAll(); }
-    const row = document.querySelector("#asm-list .asm-row.sel");
-    if (row) { const g = pick ? null : row.previousElementSibling; (g && g.classList.contains("asm-group") ? g : row).scrollIntoView({ block: "start" }); }
+    // only the LIST scrolls to the row (a picked assembly) or to its group's heading; the frame itself stays at the top
+    const list = $("asm-list"), row = list.querySelector(".asm-row.sel");
+    if (row) { const g = pick ? null : row.previousElementSibling, to = g && g.classList.contains("asm-group") ? g : row;
+      list.scrollTop += to.getBoundingClientRect().top - list.getBoundingClientRect().top - (pick ? 40 : 0); }
     $("embed-apply").addEventListener("click", () => {
       const msg = embedMessage();
       // HFT reads the app's own solve; where it has none there is no number to send, and no other method's is sent in its place

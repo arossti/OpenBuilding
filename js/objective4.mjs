@@ -112,6 +112,41 @@ function boot() {
   setActiveTab(readInitialTabFromHash() || DEFAULT_TAB);
   showDisclaimerOnFirstLaunch();
   initBuilders();
+  wireProjectName();
+}
+
+// The project's name in the button row IS S02's B.2 (h_14): each follows the other (Andy 2026-11-26). The row's
+// field mirrors V3's own cell, as the HUD mirrors S01; an edit here is written into that cell and handed to
+// V3's own edit handler, so it is stored exactly as an edit made in S02.
+function wireProjectName() {
+  const input = document.getElementById("beam-project-name");
+  const section = document.getElementById("buildingInfo");
+  if (!input || !section) return;
+  const cell = () => section.querySelector('[data-field-id="h_14"]');
+  const follow = () => {
+    const c = cell();
+    if (!c || document.activeElement === input) return;
+    const name = c.textContent.trim();
+    if (input.value !== name) input.value = name;
+  };
+  new window.MutationObserver(follow).observe(section, { subtree: true, childList: true, characterData: true });
+  section.addEventListener("input", follow);
+  input.addEventListener("change", () => {
+    const c = cell();
+    if (!c) return;
+    const name = input.value.trim();
+    c.focus();
+    c.textContent = name;
+    c.dispatchEvent(new window.Event("input", { bubbles: true }));
+    c.blur();
+    const SM = window.TEUI?.StateManager;
+    if (SM && SM.getValue("h_14") !== name) SM.setValue("h_14", name, "user-modified");
+    input.value = name;
+  });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") input.blur();
+  });
+  follow();
 }
 
 // "Using this calculator" (V3's disclaimer modal): shown on the first launch, and from the masthead's
