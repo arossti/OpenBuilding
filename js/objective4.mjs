@@ -396,6 +396,22 @@ function wireKeyboard() {
 // ──────────────────────────────────────────────────────────────────────
 // Reset returns every value to the last project loaded or imported (V3's
 // "Reset Imported", StateManager.revertToLastImportedState).
+// The model on screen (the Reference Port): V3's ReferenceToggle switches every section, the engine restamps
+// the values and the inputs; the body's .reference-mode class (set there) carries the whole Reference look.
+function showModel(mode) {
+  const RT = window.TEUI && window.TEUI.ReferenceToggle;
+  if (!RT || !RT.switchMode) return;
+  RT.switchMode(mode);
+  syncModelToggle();
+}
+function syncModelToggle() {
+  const RT = window.TEUI && window.TEUI.ReferenceToggle;
+  const mode = RT && RT.getCurrentMode ? RT.getCurrentMode() : "target";
+  const pill = document.getElementById("op-model-switch");
+  if (pill) pill.checked = mode === "reference";
+  document.querySelectorAll(".op-model-label").forEach((l) => l.classList.toggle("active", l.dataset.model === mode));
+}
+
 function handleReset() {
   const SM = window.TEUI?.StateManager;
   if (!SM?.revertToLastImportedState) return;
@@ -421,12 +437,19 @@ function wireActionBar() {
     "beam-new-project": handleNewProject,
     "beam-import-takeoffeh": handleImportTakeOffEh,
     "beam-trust-takeoffeh": handleTrustTakeOffEh,
-    "beam-reset": handleReset
+    "beam-reset": handleReset,
+    "op-model-target": () => showModel("target"),
+    "op-model-reference": () => showModel("reference")
   };
   for (const [id, fn] of Object.entries(handlers)) {
     const el = document.getElementById(id);
     if (el) el.addEventListener("click", fn);
   }
+  const pill = document.getElementById("op-model-switch");
+  if (pill) pill.addEventListener("change", () => showModel(pill.checked ? "reference" : "target"));
+  // V3's own switches (S01's Key Values toggle, a file import) change the mode too: follow the body's class
+  syncModelToggle();
+  new window.MutationObserver(syncModelToggle).observe(document.body, { attributes: true, attributeFilter: ["class"] });
 }
 const READY_MSG = "Ready · OBJECTIVE 4.0";
 

@@ -1545,6 +1545,12 @@ window.TEUI.SectionModules.sect16 = (function () {
 
     const activateBtn = document.getElementById("s16ActivateBtn");
     // console.warn("S16 LOG: #s16ActivateBtn in initializeEventHandlers (result of getElementById):", activateBtn);
+    // ONCE per set of buttons (OBJECTIVE 4.0, 2026-11-26): a page that renders the section twice attached every
+    // handler twice, so one click on Cooling or Show Emissions toggled the view there and straight back.
+    if (activateBtn) {
+      if (activateBtn.dataset.s16Wired) return;
+      activateBtn.dataset.s16Wired = "1";
+    }
 
     const emissionsBtn = document.getElementById("s16ToggleEmissionsBtn");
     const spacingBtn = document.getElementById("s16ToggleSpacingBtn");
