@@ -4757,3 +4757,131 @@ details.dep-details pre {
 .dep-drift li.ok {
   color: #4ade80;
 }
+
+/* ── §8c The model on screen: Target is cyan, Reference is red ──────────────
+   V3 reddens every frame in Reference mode (Andy 2026-11-26: "it is obvious to the user because the styling for
+   all frames goes red. We need to consider a nice way to do that in the dark theme of V4"). Here one class does
+   it, body.reference-mode (set by V3's ReferenceToggle): below the masthead the accent itself turns red, so
+   every card, header band, active tab, focus ring and slider dot follows, and a band names the model. The
+   masthead's key values keep their own colours: they show both models at once. */
+.op-model-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.op-model-label {
+  background: transparent;
+  border: 0;
+  padding: 0 2px;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-family: var(--font);
+  cursor: pointer;
+}
+.op-model-label:hover {
+  color: var(--text);
+}
+.op-model-label.active[data-model="target"] {
+  color: var(--ob-accent);
+  font-weight: 600;
+}
+.op-model-label.active[data-model="reference"] {
+  color: #ff8a8a;
+  font-weight: 600;
+}
+/* The pill switch outside a section (ARTexplorer's, as §8b's checkbox): lit cyan at Target, red at Reference */
+input.op-pill {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  width: 36px;
+  height: 18px;
+  border-radius: 9px;
+  background: #14181d;
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.5),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.07),
+    0 0 0 1px rgba(34, 211, 238, 0.3);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin: 0;
+  transition: all 0.15s ease-out;
+}
+input.op-pill::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, var(--ob-accent) 0, var(--ob-accent) 2.5px, transparent 2.5px),
+    linear-gradient(145deg, #555c67, #454b54);
+  box-shadow:
+    2px 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 6px rgba(34, 211, 238, 0.5);
+  transition: all 0.2s ease-out;
+}
+input.op-pill:checked {
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.5),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.07),
+    0 0 0 1px rgba(255, 107, 107, 0.45);
+}
+input.op-pill:checked::before {
+  left: 20px;
+  background:
+    radial-gradient(circle at center, #ff8a8a 0, #ff8a8a 2.5px, transparent 2.5px),
+    linear-gradient(145deg, #555c67, #454b54);
+  box-shadow:
+    2px 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 6px rgba(255, 107, 107, 0.6);
+}
+.op-reference-menu {
+  font-size: 12px;
+}
+
+body.reference-mode #beam-main {
+  --accent: #dc2626;
+  --accent-lit: #ff8a8a;
+  --accent-lt: rgba(255, 138, 138, 0.25);
+  --target-value-color: #ff8a8a;
+}
+body.reference-mode #beam-sidebar {
+  border-right-color: rgba(255, 107, 107, 0.45);
+}
+body.reference-mode .beam-tab-button:hover {
+  background: rgba(255, 107, 107, 0.1);
+}
+body.reference-mode .beam-tab-button.active {
+  background: rgba(255, 107, 107, 0.18);
+}
+body.reference-mode #beam-content .bw-asm-group {
+  border-color: rgba(255, 107, 107, 0.45);
+}
+body.reference-mode #beam-content .bw-asm-group-header {
+  background: rgba(220, 38, 38, 0.16);
+  border-bottom-color: rgba(255, 107, 107, 0.45);
+}
+body.reference-mode .op-v3 input[type="range"]::-webkit-slider-thumb {
+  box-shadow:
+    2px 2px 5px rgba(0, 0, 0, 0.5),
+    inset 0 0 6px rgba(255, 107, 107, 0.35);
+}
+/* the band that says so, pinned to the top of the section pane */
+body.reference-mode #beam-content::before {
+  content: "REFERENCE MODEL  ·  the same building at the reference standard";
+  display: block;
+  position: sticky;
+  top: -16px;
+  z-index: 5;
+  margin: -16px -14px 12px;
+  padding: 5px 14px;
+  background: #7f1d1d;
+  color: #fecaca;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid rgba(255, 107, 107, 0.6);
+}

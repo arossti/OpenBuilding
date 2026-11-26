@@ -59,6 +59,20 @@ styling of V3's markup). Trust = `js/beam/pdf-bridge-import.mjs` (`V3_TARGETS`, 
      Reference values (`--reference-value-color`, #ff8a8a); the sidebar's active tab and the toggle itself in the
      same red instead of cyan; a thin red rule under the masthead with the word REFERENCE; locked (standard-set)
      cells ghosted as V3's `.reference-locked`. Cyan = Target, red = Reference, nothing else changes colour.
+   - **✅ 2026-11-26, first cut (shown to Andy by screenshot, his word pending):** the button row carries
+     Target · a pill switch · Reference (ARTexplorer's pill, lit cyan at Target and red at Reference) and a Copy
+     from Target menu (Geometry · Geometry + Code · All Inputs, V3's three mirrors by their own ids). The switch
+     calls `ReferenceToggle.switchMode`; `js/objective4.mjs` `syncModelToggle` follows the body's class, so V3's
+     own switches move the pill too. The look is `obstyles.css` §8c, all from `body.reference-mode`: below the
+     masthead the accent tokens turn red (cards, header bands, the active tab, focus rings, slider dots) and a
+     red band reads REFERENCE MODEL. The masthead's key values keep their colours (they show both models).
+     Checked in WebKit on case 01: S11's roof RSI 9.35 → 5.3 and its heat loss 76 517 → 116 626 kWh, and back.
+   - **Per section (Andy 2026-11-26):** S16 and S19 *"get their own display of the Reference model"*; S18 already
+     draws both (its two lines, red and blue); S20 Notes & Debug *"is for our internal use, it will hide with the
+     final build"* and needs nothing; S21 *"may show the Reference model vs. Target model, I have not considered
+     that case yet"* — ❓ open, Andy's.
+   - **Still to do:** the HUD marks which model the sections show; V3's ghosting of standard-set cells
+     (`.reference-locked`) restyled for the dark theme; S16 and S19 in Reference mode; the witnesses below.
    - **Witnesses:** andy-rnd's `ghostedReference`, `referenceDefaults` and `hoverOnScreenModel` specs describe the
      behaviour to match; the 2146-value parity probe run in Reference mode on both pages.
 2. **m_10 "Unavailable"** after Trust on a 4-opening fixture (block below, ⚠ OPEN).
