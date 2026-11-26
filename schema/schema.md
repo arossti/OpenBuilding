@@ -22,7 +22,10 @@
 
 **LIVE: `main` `7507a70` (PR #23), deployed to https://arossti.github.io/OpenBuilding/.** **This branch is `OnePage`**
 (Andy named it), cut from that `main`: the one page is built (below), Andy smoked it 2026-11-26 and gave the word
-to merge it as PR #24. The next arc is PENDING 2, on a fresh branch from `main`.
+to merge it as PR #24 (merged, `204fd95`). **The branch now is `Styling-Tweaks`** (cut 2026-11-26 from that `main`):
+done on it so far are the printed report's footer of logos (V3's, `.op-print-footer`, with `graphics/ob-mark.svg`
+and `graphics/oaa-logo.png`) and PENDING 2, the Opening Builder. Andy is writing the next list of styling changes
+for this branch; no PR until that list is done.
 Local servers (they die on reboot): `python3 schema/scripts/nocache-serve.py 8822` here, `node test/static-server.cjs 8791`
 in andy-rnd for the V3 page.
 
@@ -73,11 +76,10 @@ in andy-rnd for the V3 page.
      The default case prints on 11 landscape pages: 9 of sections, 2 of disclaimer, licence and credits.
    - **The modal is wide** (up to 1280 px, tight spacing) so its whole text shows without scrolling: measured in
      WebKit at 1920×1080 down to 1024×768.
-2. **THE OPENING BUILDER on the splash page.** `index.html`'s last tile slot (bottom right, beside Section Builder) is
-   empty: add the Opening Builder from ABCD.EARTH (`artex-osx/docs/mockups/opening-builder.html`) through
-   `publish_builders.py` (add it to `PAGES`, or to `SNAPSHOTS` if it cannot be rebuilt from today's seed; its cost
-   disclaimer is an older copy than the shared one — Andy's to settle), then `npm run builders:publish` and a tile
-   like the other Builders'.
+2. **THE OPENING BUILDER on the splash page — ✅ on `Styling-Tweaks`.** `publish_builders.py` (ABCD.EARTH branch
+   `Opening-Builder-Publish`, `2b240a8a6`, waiting for its merge there) has it in `PAGES`: rebuilt from today's seed,
+   its six-face witness passing (33 certified sides), `openings.json` in the seed stamp. `builders/opening-builder.html`
+   is published and `index.html`'s sixth tile opens it (13 openings).
 3. **Reference remainders:** S19's own Reference display; S21 (Andy: *"may show the Reference model vs. Target model,
    I have not considered that case yet"* — ❓ his); andy-rnd's `ghostedReference`, `referenceDefaults` and
    `hoverOnScreenModel` behaviours checked on this page.
