@@ -93,7 +93,7 @@ in andy-rnd for the V3 page.
 
 7. **THE BUILDERS INSIDE OBJECTIVE** (branch `Builders-In-OBJECTIVE`, Andy 2026-11-26): the Assembly Builder as a popup from
    S11's row IDs, Apply Selected writing the row's RSI; then the Opening Builder for windows; then S05's embodied
-   carbon. **The plan is §10; nothing of it is built.** Start at B1 (ABCD.EARTH's page), after §10.6's questions.
+   carbon. **The plan is §10. B1 (the Builder's embed mode) is built and published; B2 is next**, on this branch.
 
 **What is where:** OBJECTIVE = V3's engine + sections verbatim in `src/` + `climate/` (from andy-rnd `5e0b2f0`);
 `js/objective4.mjs` (router, HUD, cards), `js/objective-boot.js` (V3's init.js start-up), `obstyles.css` §8b (V4
@@ -447,7 +447,7 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
 > carbon in S05 can later be calculated from the Sum of the embodied carbon of all assemblies multiplied by their
 > area."_
 
-Nothing in this section is built. It is the plan for Andy to read; the phases are each a commit or a PR, in order.
+**Status 2026-11-26: B1 is built; B2 is next.** Andy answered §10.6 (all four as recommended) and said to go on B1.
 
 ### 10.1 What is there today (read from the code, 2026-11-26)
 
@@ -494,11 +494,17 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
 
 ### 10.3 Phases
 
-- **B1 — the Assembly Builder's embed mode (ABCD.EARTH, then publish).** `?embed=1` shows the `.window` alone, filling
-  the frame: no intro, no notes, no disclaimer. `&group=Wa` opens the library scrolled to that group, its first
-  assembly selected; `&pick=<assembly id>` selects one by id (the row's current assembly, when it has one). In embed
-  mode the title bar gains **Apply Selected**, which posts the message above for the selected assembly as the page
-  shows it (its RSI method included), and **cancel** closes the popup. Outside embed mode the page is unchanged.
+- **B1 — the Assembly Builder's embed mode — ✅ BUILT** (ABCD.EARTH branch `Assembly-Builder-Embed`, `f3035dbdc`;
+  published here in `builders/assembly-builder.html`). `?embed=1` shows the `.window` alone, filling the frame.
+  `&group=Wa` opens the library at that group's first assembly; `&pick=<assembly id>` selects one by id. The title
+  bar shows **Apply Selected** and **cancel** in place of export / import / cancel / reset. Apply posts, to its own
+  origin only:
+  `{ type: "ob-builder-apply", kind: "assembly", id, name, group, cls, rsi_eff, u_eff, rsi_method, eci_kgco2e_m2,
+  bio_kgco2e_m2, thickness_mm, edited }`; cancel posts `{ type: "ob-builder-cancel" }`. Where HFT has no result for
+  the assembly nothing is sent and the page says to choose NBC or ISO 6946. Without `?embed` the page is unchanged.
+  Witnessed in WebKit through this site: Ra, Wa, Fa, Wg and Fg open at their group with only the palette visible,
+  the posted values equal the ones shown, and the standalone page still agrees with the app on all 115 assemblies.
+  `window.__embedMessage()` returns what Apply would send, for B3's witness.
 - **B2 — the popup and the buttons (this repo).** A new `js/objective-builders.mjs`, so V3's `src/` stays verbatim:
   one modal holding the iframe, sized to the window. Each opaque row's ID cell (B.4, B.5, B.9, B.10 and the added
   rows) becomes a button, by delegation on S11's table, that opens the Builder at the row's group.
@@ -510,7 +516,11 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
   `opening-builder.html`; the opening rows' ID cells (B.7, B.8) become buttons; Apply writes the U-value (`g_<row>`).
   What else an opening should carry across (SHGC to S10, width × height) is read from that page before this is built.
 - **B5 — S05's embodied carbon from the assemblies.** Σ (assembly carbon intensity × the row's area) over S11's rows,
-  divided by the conditioned area, offered as S05's Modelled Value (`i_41`). Later, by Andy's word.
+  divided by the conditioned area, shown in a **new field of its own in S05** (Andy 2026-11-26: _"we should consider a
+  new field in S05 that holds this running tally and sum when done... so it does not interfere with current
+  behaviour and defaults"_): the running tally with the count of rows it covers, the sum when every opaque row has
+  an assembly. `i_41` and `d_39` keep today's behaviour and defaults; whether the new field can later be chosen as
+  the source is Andy's to say. Later, by his word.
 
 ### 10.4 Witnesses
 
@@ -527,16 +537,16 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
   library's (115 assemblies), and its baked HFT results are a month older than the app's.
 - A row's assembly is a new thing for a project file to hold. Until 10.6 ❓1 is answered it lives for the session only.
 
-### 10.6 Open questions (each with a recommendation)
+### 10.6 Answered (Andy 2026-11-26: yes to all four)
 
-1. ❓ **Does the saved project keep each row's assembly** (id, name, method)? Recommended: yes, as added fields in the
-   4.0 file (§4's version stamp exists for this); an older file opens with none.
-2. ❓ **Which value for below grade?** S11's B.9 and B.10 take an RSI and OBJECTIVE applies the ground itself.
-   Recommended: the Builder's Effective RSI of the assembly alone, no ground added in the Builder.
-3. ❓ **An assembly the user edited in the Builder** (it keeps edits in the browser): may it be applied? Recommended:
-   yes, the message carries what the page shows; the row's name is marked "edited".
-4. ❓ **B5's partial sum**: when some rows have no assembly. Recommended: show the sum with the count of rows it
-   covers, and leave `i_41` typed until every opaque row has one.
+1. **The saved project keeps each row's assembly** (id, name, method), as added fields in the 4.0 file; an older file
+   opens with none.
+2. **Below grade, the Builder's Effective RSI of the assembly alone** is applied; OBJECTIVE adds the ground as it does
+   today.
+3. **An assembly the user edited in the Builder may be applied**: the message carries what the page shows (`edited:
+   true`) and the row's name is marked "edited".
+4. **B5's partial sum** is shown with the count of rows it covers, in its own new S05 field (10.3 B5), so the typed
+   `i_41` and today's defaults are untouched.
 
 ## Appendix — Changelog
 

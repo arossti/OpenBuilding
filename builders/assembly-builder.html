@@ -421,6 +421,18 @@ button:hover{background:#333338}
   .note .sec { color: var(--blue); }
   .note .q { color: var(--warn); }
   @media (max-width: 760px) { .body { flex-direction: column; } .list-col { width: 100%; border-right: none; border-bottom: 1px solid var(--line); } .asm-list { max-height: 260px; } .costpanel { grid-template-columns: 1fr; } }
+
+  /* ---------- EMBED MODE (?embed=1) — the palette alone, filling a host page's popup frame. OBJECTIVE opens it
+     from S11's rows (OpenBuilding schema/schema.md §10 B1): no caption, notes or disclaimer, the library's own
+     file buttons give way to Apply Selected / cancel. Without ?embed the page is unchanged. ---------- */
+  #embed-apply, #embed-cancel { display: none; }
+  html.embed body { padding: 0; gap: 0; display: block; }
+  html.embed .embed-hide { display: none !important; }
+  html.embed .window { max-width: none; min-height: 100vh; border: none; border-radius: 0; box-shadow: none; }
+  html.embed .titlebar .dots, html.embed .titlebar .close,
+  html.embed #lib-export, html.embed #lib-import, html.embed #lib-cancel, html.embed #reset { display: none; }
+  html.embed #embed-apply, html.embed #embed-cancel { display: inline-flex; }
+  html.embed #embed-apply { background: var(--blue); border-color: var(--blue); color: #101014; font-weight: 600; padding: 3px 12px; }
 </style>
 
 <p class="caption"><b>Assembly Builder — reading THE library.</b>
@@ -437,6 +449,8 @@ The window is live: pick one of the seeded assemblies, switch its element class,
       <button type="button" id="lib-import" title="Load an assemblies JSON — the app's file or a sidecar — read-only; nothing on disk changes">import</button><input type="file" id="lib-import-file" accept="application/json,.json" hidden>
       <button type="button" id="lib-cancel" title="Revert to the last export (this session)">cancel</button>
       <button type="button" id="reset" title="Forget the edits saved in this browser and start from the seed defaults">reset</button>
+      <button type="button" id="embed-apply" title="Send this assembly's effective RSI, U-value and embodied carbon to the page that opened the Builder">Apply Selected</button>
+      <button type="button" id="embed-cancel" title="Close the Builder; nothing is applied">cancel</button>
     </div>
     <div class="close">✕</div>
   </div>
@@ -2986,9 +3000,44 @@ wx_w1f_1xgypsum_13_89_w_stud	29.77	0	2	0.4243	0.4383	2.974
       + `— ${bad.slice(0, 4).join(" · ")}${bad.length > 4 ? " · …" : ""}`;
   }
 
+
+  /* ---------- EMBED MODE (?embed=1[&group=Wa][&pick=<assembly id>]) ----------
+     THE BUILDER COMPUTES, THE HOST RECEIVES (OpenBuilding schema/schema.md §10): the host never re-derives an RSI
+     or a carbon figure from layers. Apply Selected posts ONE message for the assembly as this page shows it, by
+     the RSI method chosen here; `pick` selects an assembly by id, else `group` (the name prefix: Ra · Wa · Fa ·
+     Wg · Fg …) opens the library at that group's first assembly. Same origin only. */
+  const EMBED = new URLSearchParams(location.search);
+  const hostOrigin = location.origin === "null" ? "*" : location.origin;
+  function embedMessage() {
+    const a = assemblies[selIdx], live = liveAsm(a), mx = metrics(live, false);
+    return { type: "ob-builder-apply", kind: "assembly", id: a.id || null, name: a.name, group: groupPrefix(a), cls: a.cls,
+      rsi_eff: mx.rsiEff, u_eff: 1 / mx.rsiEff, rsi_method: rsiMethod,
+      eci_kgco2e_m2: mx.eciFossil, bio_kgco2e_m2: mx.bio, thickness_mm: total(live),
+      edited: !a.id || SEED_SIG[a.id] !== asmSig(a) };
+  }
+  function applyEmbed() {
+    if (!EMBED.has("embed")) return;
+    document.documentElement.classList.add("embed");
+    [...document.body.children].forEach(c => { if (!c.classList.contains("window") && c.tagName !== "SCRIPT") c.classList.add("embed-hide"); });
+    const pick = EMBED.get("pick"), group = EMBED.get("group");
+    let i = pick ? assemblies.findIndex(a => a.id === pick) : -1;
+    if (i < 0 && group) { const k = displayOrder(assemblies).find(k => groupPrefix(assemblies[k]) === group); if (k !== undefined) i = k; }
+    if (i >= 0 && i !== selIdx) { selIdx = i; renderAll(); }
+    const row = document.querySelector("#asm-list .asm-row.sel");
+    if (row) { const g = pick ? null : row.previousElementSibling; (g && g.classList.contains("asm-group") ? g : row).scrollIntoView({ block: "start" }); }
+    $("embed-apply").addEventListener("click", () => {
+      const msg = embedMessage();
+      // HFT reads the app's own solve; where it has none there is no number to send, and no other method's is sent in its place
+      if (!Number.isFinite(msg.rsi_eff)) { window.alert("HFT has no result for this assembly as it stands. Choose NBC or ISO 6946, then Apply Selected."); return; }
+      window.parent.postMessage(msg, hostOrigin);
+    });
+    $("embed-cancel").addEventListener("click", () => window.parent.postMessage({ type: "ob-builder-cancel" }, hostOrigin));
+  }
+  window.__embedMessage = embedMessage;   // the witness reads what Apply would send
+
   if (EMBEDDED_MATERIALS) {
     boot(EMBEDDED_MATERIALS, EMBEDDED_ASSEMBLIES, "embedded at build (build_assembly_builder.py)");
-    restoreSaved(); histReset();
+    restoreSaved(); applyEmbed(); histReset();
   } else {
     // LINKED MODE — the three seed files beside the page. materials.json is REQUIRED;
     // assemblies.json and fill_tiles.json degrade (no assemblies / flat bands) rather than
@@ -3001,7 +3050,7 @@ wx_w1f_1xgypsum_13_89_w_stud	29.77	0	2	0.4243	0.4383	2.974
       .then(([m, a, t]) => {
         if (t && t.materials) { TILES = t.materials; PEN_MM_TO_PX = t.pen_mm_to_px || 3.75; }
         boot(m, a, "fetched beside this page" + (t ? "" : " — fill_tiles.json missing, bands draw flat"));
-        restoreSaved(); histReset();
+        restoreSaved(); applyEmbed(); histReset();
       })
       .catch(err => { $("store-line").textContent = "Could not load materials.json beside this page (" + err + ") — build with the library embedded, or serve the seed files alongside."; });
   }
