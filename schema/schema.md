@@ -22,7 +22,8 @@
 
 **Written 2026-11-26 late afternoon (laptop) for tonight's arc, after a /clear.** **LIVE: `main` after PR #27**
 (B5; this handoff is its last commit), deployed to https://arossti.github.io/OpenBuilding/. **Tonight's branch is
-`Reference-Independence`**, cut from that `main` and pushed: this note is its first commit, nothing is built on it. Everything Andy
+`Reference-Independence`**, cut from that `main` and pushed: the Builders' Reference / Target independence is BUILT on
+it (REMAINS 1, first bullet) and not yet smoked by Andy or merged. Continue on this branch; no PR is open. Everything Andy
 asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and bring a list. **Tonight: plan REMAINS
 1 – 6 with Andy before building** (he said: _"we can plan 1-6 for tonight's arc after a clear"_).
 
@@ -41,33 +42,33 @@ asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and brin
 
 **REMAINS, in order** (Andy's numbering for tonight; the older detail of 2 – 4 is in the items further down):
 
-1. **REFERENCE / TARGET INDEPENDENCE — the first thing to fix.** Andy 2026-11-26: _"because of our Ref/Target
-   independence rule, a user can and may set a different assembly in the Reference model or the Target as a
-   comparison. Often users will set AS-IS values for renovavation models, and then the target model only adds to
-   that, or in other cases we may wish to test a high carbon steel or concrete building as the reference model
-   against a Target model that is all mass timbe (low carbon) to compare the tow - so be sure we did not block that
-   with reference model reads or locked assemblies in S10 or S11."_
-   - ⚠ **WE DID BLOCK IT, in today's own code** (measured before this handoff): V3 itself does not. In Reference
-     mode S11's `f_85`, `f_86`, `f_94`, `g_89` and `d_86` are `contenteditable="true"` and a typed value goes to
-     `ref_<field>`. The block is three `isReference()` guards in `js/objective-builders.mjs`: `onActivate` (the row
-     IDs do nothing in Reference mode), the `focusout` handler (a typed value does not clear the link), and
-     `renderCarbon` (E.3.5 shows a dash); and `obstyles.css` §8e greys the IDs under `body.reference-mode`.
-   - **What it needs:** every read and write in that module by the model on screen: the link `ref_ca_<row>`
-     beside `ca_<row>`, the value `ref_f_<row>` / `ref_g_<row>`, the areas and hosts in `tallyCarbon`
-     (`ref_d_`, `ref_ch_`), the type in `openBuilder` (`ref_c_<row>`), `decorate`'s name chip and tooltip, and
-     E.3.5 showing the Reference's own tally in Reference mode (so the two can be compared). V3's own pattern for
-     "the value in the mode on screen" is `getModeValue` in `Section11.js`. Then the file: `exportToCSV` already
-     writes `ref_<id>` for every listed id, so `Openings.addedFields`' in-use test must also see `ref_ca_`;
-     `FileHandler`'s `isStoredKeyWithoutField` branch is taken only for non-`ref_` keys today, so read how a
-     `ref_` key without a field is stored before assuming it round-trips. Witness: apply one assembly in Target and
-     a different one in Reference on the same row; each mode shows its own name, RSI and E.3.5; save, reload, both
-     return; Copy from Target carries the Target's across.
-   - **S19 (Andy, same message):** _"Presently S19 shows whatever in Reference mode as was set in Target, they
-     should maintain independence, whatever a user may have changed on the Reference or target side inputs."_
-     WOMBAT must draw the model on screen.
-   - Also here: S21 (Andy: _"may show the Reference model vs. Target model, I have not considered that case yet"_,
-     ❓ his); andy-rnd's `ghostedReference`, `referenceDefaults` and `hoverOnScreenModel` behaviours checked on this
-     page; and a read through S10 and S11 for anything else that reads the Target's value while Reference is shown.
+1. **REFERENCE / TARGET INDEPENDENCE.** Andy 2026-11-26: _"because of our Ref/Target independence rule, a user can
+   and may set a different assembly in the Reference model or the Target as a comparison. Often users will set
+   AS-IS values for renovavation models, and then the target model only adds to that, or in other cases we may wish
+   to test a high carbon steel or concrete building as the reference model against a Target model that is all mass
+   timbe (low carbon) to compare the tow - so be sure we did not block that with reference model reads or locked
+   assemblies in S10 or S11."_
+   - **✅ THE BUILDERS — BUILT on `Reference-Independence`, to be smoked by Andy** (he asked for it the same day:
+     _"Let's fix it now"_). It had been blocked by today's own code, not by V3 (S11's Reference cells are editable).
+     Now `js/objective-builders.mjs` reads and writes THE MODEL ON SCREEN (`pre()` / `getM` / `setM`, V3's `ref_`
+     prefix): a row's assembly is `ca_<row>` in the Target and `ref_ca_<row>` in the Reference, Apply writes
+     `f_` / `g_` or `ref_f_` / `ref_g_`, the row IDs are live in both models, a typed value clears that model's
+     link only, and S05's E.3.5 is each model's own tally. Saved and restored for both (`Openings.addedFields`
+     lists a row when EITHER model has one; a `ref_` key imports without a field). **Copy from Target**
+     (`followMirror`): V3's mirror copies only the fields FieldManager lists, so where it carried the Target's value
+     across the Target's assembly follows, and a Reference row whose value is no longer its assembly's forgets it.
+     Also changed: an applied RSI is stored at 2 decimals, as the Builder shows it and as V3 stores a typed one.
+     Witness `test/witness/builders-reference.cjs`: Target `Wa | R36 2x6` (RSI 5.72, E.3.5 29.92 kgCO2e/m²) against
+     Reference `Wa | 203mm Concrete` (0.25, 48.81) on B.5, and a certified window against an aluminium one on
+     B.8.1; another project clears both, the saved file returns both, Copy from Target → All Inputs carries the
+     Target's across. The other three Builders witnesses and parity (2146 / 2146) still pass.
+   - **STILL OPEN — S19 (Andy, same message):** _"Presently S19 shows whatever in Reference mode as was set in
+     Target, they should maintain independence, whatever a user may have changed on the Reference or target side
+     inputs."_ WOMBAT must draw the model on screen.
+   - **STILL OPEN:** S21 (Andy: _"may show the Reference model vs. Target model, I have not considered that case
+     yet"_, ❓ his); andy-rnd's `ghostedReference`, `referenceDefaults` and `hoverOnScreenModel` behaviours checked
+     on this page; a read through S10 and S11 for anything else that reads the Target's value while Reference is
+     shown (the Builders code no longer does).
 2. **m_10 "Unavailable"** after Trust on a 4-opening fixture (item 4 below, ⚠ OPEN).
 3. **ABCD BUGLIST #266** (item 5): until it is fixed the Assembly Builder here is the 2026-10-22 library, 115
    assemblies, with the old blue accent and month-old baked HFT.
@@ -514,8 +515,9 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
 > carbon in S05 can later be calculated from the Sum of the embodied carbon of all assemblies multiplied by their
 > area."_
 
-**Status 2026-11-26: B1 – B5 are merged (PRs #26, #27), Andy-smoked. ⚠ All of it is TARGET-ONLY today: the
-Reference model cannot take an assembly, which breaks Reference / Target independence (§0 REMAINS 1).** Andy answered §10.6 (all four as recommended) and said to go on B1.
+**Status 2026-11-26: B1 – B5 are merged (PRs #26, #27), Andy-smoked. On `Reference-Independence` (not merged) the
+Builders work in BOTH models, each row holding one assembly per model (§0 REMAINS 1); where B2 – B5 below say
+"inert in Reference mode", "a dash" or 4 decimals, that branch supersedes them.** Andy answered §10.6 (all four as recommended) and said to go on B1.
 
 ### 10.1 What is there today (read from the code, 2026-11-26)
 

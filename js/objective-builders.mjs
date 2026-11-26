@@ -9,6 +9,11 @@
  * Openings.addedFields).
  *
  * THE BUILDER COMPUTES, OBJECTIVE RECEIVES: no RSI, U or carbon figure is derived from layers here.
+ *
+ * REFERENCE AND TARGET ARE INDEPENDENT (Andy 2026-11-26: "a user can and may set a different assembly in the
+ * Reference model or the Target as a comparison"): everything here reads and writes THE MODEL ON SCREEN, V3's
+ * own ref_ prefix (Section11.js getModeValue). A row has one assembly per model; S05's E.3.5 is each model's
+ * own. Copy from Target carries the Target's assembly across wherever it carried the Target's value.
  */
 
 // S11's element type (c_<row>) → the Assembly Builder's library group (the name prefix)
@@ -33,12 +38,16 @@ const valueField = (o) => `${isOpaque(o) ? "f" : "g"}_${o.s11}`;
 const linkValue = (o, link) => (isOpaque(o) ? link.rsi : link.u);
 const builderName = (o) => (isOpaque(o) ? "Assembly Builder" : "Opening Builder");
 const isReference = () => !!T().ReferenceToggle?.isReferenceMode?.();
+// the model on screen: "" for the Target, "ref_" for the Reference (V3's StateManager prefix)
+const pre = () => (isReference() ? "ref_" : "");
+const getM = (id, p = pre()) => T().StateManager.getValue(p + id);
+const setM = (id, value, p = pre()) => T().StateManager.setValue(p + id, value, "user-modified");
 
 // What Apply left on a row, or null. An assembly: { id, name, group, method, rsi, eci, bio, t, edited };
 // an opening: { id, name, cls, u, basis ("certified" | "computed"), uw_computed, uw_certified, w, h, edited }
-function linkOf(s11) {
+function linkOf(s11, p = pre()) {
   try {
-    return JSON.parse(T().StateManager.getValue(`ca_${s11}`) || "null");
+    return JSON.parse(getM(`ca_${s11}`, p) || "null");
   } catch {
     return null;
   }
@@ -63,8 +72,7 @@ function modal() {
   return el;
 }
 function openBuilder(o) {
-  const SM = T().StateManager;
-  const group = isOpaque(o) ? GROUP_OF[SM.getValue(`c_${o.s11}`) || o.type] || "Wa" : CLASS_OF[o.kind] || "Window";
+  const group = isOpaque(o) ? GROUP_OF[getM(`c_${o.s11}`) || o.type] || "Wa" : CLASS_OF[o.kind] || "Window";
   const link = linkOf(o.s11);
   const q = new window.URLSearchParams({ embed: "1", group });
   if (link && link.id) q.set("pick", link.id);
@@ -91,11 +99,10 @@ function onMessage(e) {
   if (e.data.type === "ob-builder-cancel") return closeBuilder();
   if (e.data.type !== "ob-builder-apply") return;
   const m = e.data;
-  const SM = T().StateManager;
   let link, value;
   if (m.kind === "assembly" && isOpaque(openRow)) {
     if (!Number.isFinite(m.rsi_eff) || m.rsi_eff <= 0) return;
-    value = +m.rsi_eff.toFixed(4);
+    value = +m.rsi_eff.toFixed(2); // as the Builder shows it, and as V3 stores a typed RSI
     link = {
       id: m.id,
       name: m.name,
@@ -128,8 +135,8 @@ function onMessage(e) {
     };
   } else return;
   // the link first: a link whose value is the one being written is kept
-  SM.setValue(`ca_${openRow.s11}`, JSON.stringify(link), "user-modified");
-  SM.setValue(valueField(openRow), String(value), "user-modified");
+  setM(`ca_${openRow.s11}`, JSON.stringify(link));
+  setM(valueField(openRow), value.toFixed(isOpaque(openRow) ? 2 : 3));
   if (T().Calculator?.calculateAll) T().Calculator.calculateAll();
   closeBuilder();
   decorate();
@@ -210,14 +217,13 @@ const num = (v) => {
 };
 function tallyCarbon() {
   const O = T().Openings;
-  const SM = T().StateManager;
   let kg = 0;
   let inUse = 0;
   let covered = 0;
   for (const o of O.OPAQUE) {
     // the area every calculation reads: as entered, net of the openings the row hosts (Section11.js)
-    const hosted = O.ALL.filter((r) => String(SM.getValue(`ch_${r.s11}`) || "") === String(o.s11));
-    const net = num(SM.getValue(`d_${o.s11}`)) - hosted.reduce((sum, r) => sum + num(SM.getValue(`d_${r.s10}`)), 0);
+    const hosted = O.ALL.filter((r) => String(getM(`ch_${r.s11}`) || "") === String(o.s11));
+    const net = num(getM(`d_${o.s11}`)) - hosted.reduce((sum, r) => sum + num(getM(`d_${r.s10}`)), 0);
     if (!(net > 0)) continue;
     inUse++;
     const link = linkOf(o.s11);
@@ -225,7 +231,7 @@ function tallyCarbon() {
     covered++;
     kg += link.eci * net;
   }
-  const floor = num(SM.getValue("d_106"));
+  const floor = num(getM("d_106")) || num(getM("d_106", ""));
   return { kg, inUse, covered, perM2: floor > 0 ? kg / floor : null };
 }
 function renderCarbon() {
@@ -252,12 +258,6 @@ function renderCarbon() {
     const el = tr.querySelector(`[data-op-field="${field}"]`);
     if (el.textContent !== text) el.textContent = text;
   };
-  if (isReference()) {
-    set("asm_carbon_total", "\u2014");
-    set("asm_carbon_intensity", "\u2014");
-    set("asm_carbon_status", "the Target's assemblies");
-    return;
-  }
   const t = tallyCarbon();
   const fmt = (n, d) => n.toLocaleString("en-CA", { minimumFractionDigits: d, maximumFractionDigits: d });
   set("asm_carbon_total", t.covered ? fmt(t.kg / 1000, 2) : "\u2014");
@@ -274,10 +274,21 @@ function renderCarbon() {
   tr.classList.toggle("op-carbon-complete", t.covered > 0 && t.covered === t.inUse);
 }
 
+function followMirror() {
+  for (const o of builderRows()) {
+    const refValue = getM(valueField(o), "ref_");
+    const target = linkOf(o.s11, "");
+    const ref = linkOf(o.s11, "ref_");
+    if (target && sameRsi(refValue, linkValue(o, target))) setM(`ca_${o.s11}`, JSON.stringify(target), "ref_");
+    else if (ref && !sameRsi(refValue, linkValue(o, ref))) setM(`ca_${o.s11}`, "", "ref_");
+  }
+  decorate();
+}
+
 function onActivate(e) {
   if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return;
   const cell = e.target.closest && e.target.closest(`#${SECTION} td.id-cell.op-asm-btn`);
-  if (!cell || isReference()) return; // the Reference's rows are the standard's
+  if (!cell) return;
   const o = rowOf(cell.closest("tr"));
   if (!o) return;
   e.preventDefault();
@@ -301,15 +312,25 @@ export function initBuilders() {
     host.addEventListener("focusout", (e) => {
       const cell = e.target.closest && e.target.closest('td[data-field-id^="f_"], td[data-field-id^="g_"]');
       const o = cell && rowOf(cell.closest("tr"));
-      if (!o || isReference() || cell.dataset.fieldId !== valueField(o)) return;
+      if (!o || cell.dataset.fieldId !== valueField(o)) return;
+      const p = pre(); // the model the cell was typed in
       setTimeout(() => {
-        const link = linkOf(o.s11);
-        if (!link || sameRsi(SM.getValue(valueField(o)), linkValue(o, link))) return;
-        SM.setValue(`ca_${o.s11}`, "", "user-modified");
+        const link = linkOf(o.s11, p);
+        if (!link || sameRsi(getM(valueField(o), p), linkValue(o, link))) return;
+        setM(`ca_${o.s11}`, "", p);
         decorate();
       }, 0);
     });
-    for (const o of builderRows()) SM.addListener(`ca_${o.s11}`, decorate);
+    for (const o of builderRows()) {
+      SM.addListener(`ca_${o.s11}`, decorate);
+      SM.addListener(`ref_ca_${o.s11}`, decorate);
+    }
+    // Copy from Target (V3's mirror: the fields FieldManager lists, so not ca_): where it carried the Target's
+    // value into the Reference, the Target's assembly goes with it; a Reference row whose value is no longer its
+    // assembly's forgets it.
+    for (const id of ["mirrorGeometryBtn", "mirrorGeometryPlusCodeBtn", "mirrorAllInputsBtn"]) {
+      document.getElementById(id)?.addEventListener("click", () => setTimeout(followMirror, 400));
+    }
     // V3 re-renders S11's rows (a second render at start-up, + and −, a type change): keep them decorated
     let queued = false;
     new window.MutationObserver(() => {
@@ -323,7 +344,8 @@ export function initBuilders() {
     // S05's row follows: V3 re-renders S05 too, an area edit restamps S11 (seen above), the model on screen changes
     const s05 = document.getElementById("emissions");
     if (s05) new window.MutationObserver(() => renderCarbon()).observe(s05, { childList: true, subtree: true });
-    new window.MutationObserver(() => renderCarbon()).observe(document.body, {
+    // the model on screen changed: each row shows that model's own assembly
+    new window.MutationObserver(() => decorate()).observe(document.body, {
       attributes: true,
       attributeFilter: ["class"]
     });
