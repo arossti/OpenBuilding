@@ -596,7 +596,7 @@
    *     (dl_, dh_, S11's L and H columns) and its quantity (dq_); a window also its overhang's H and D
    *     (eh_, ed_);
    *   - every opaque row: its type (c_), an above-grade row's facing (cf_), L and H (dl_, dh_); a row
-   *     after the first also its area and RSI.
+   *     after the first also its area and RSI; its assembly (ca_, OBJECTIVE 4.0), when it has one.
    * { inUse: true } (the export): a door / window row after the first only when it is in use - an area
    * or a host in either model - so forty window rows do not make every file forty rows wide.
    */
@@ -616,6 +616,9 @@
         `dl_${o.s11}`,
         `dh_${o.s11}`,
         ...(isSlot(o) ? [`d_${o.s11}`, `f_${o.s11}`] : []),
+        // its assembly, as the Assembly Builder's Apply Selected left it (OBJECTIVE 4.0, schema.md
+        // §10 B3): saved only for a row that has one
+        ...(!onlyInUse || window.TEUI.StateManager?.getValue(`ca_${o.s11}`) ? [`ca_${o.s11}`] : []),
       ]),
     ];
   }

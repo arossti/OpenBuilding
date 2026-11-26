@@ -14,6 +14,7 @@ import { GLOSSARY } from "./beam/reference-data.mjs";
 import { StateManager } from "./shared/state-manager.mjs";
 import { esc as escapeHtml } from "./shared/html-utils.mjs";
 import * as PdfBridge from "./beam/pdf-bridge-import.mjs";
+import { initBuilders } from "./objective-builders.mjs";
 
 // ──────────────────────────────────────────────────────────────────────
 // Section definitions — OBJECTIVE's S01–S21 (schema/schema.md §9.1), plus
@@ -110,6 +111,7 @@ function boot() {
   syncToggleAll();
   setActiveTab(readInitialTabFromHash() || DEFAULT_TAB);
   showDisclaimerOnFirstLaunch();
+  initBuilders();
 }
 
 // "Using this calculator" (V3's disclaimer modal): shown on the first launch, and from the masthead's

@@ -428,7 +428,10 @@ button:hover{background:#333338}
   #embed-apply, #embed-cancel { display: none; }
   html.embed body { padding: 0; gap: 0; display: block; }
   html.embed .embed-hide { display: none !important; }
-  html.embed .window { max-width: none; min-height: 100vh; border: none; border-radius: 0; box-shadow: none; }
+  html.embed .window { max-width: none; min-height: 100vh; border: none; border-radius: 0; box-shadow: none; overflow: visible; }
+  /* the title bar holds Apply Selected: it stays in view however far the frame is scrolled */
+  html.embed .titlebar { position: sticky; top: 0; z-index: 20; background: var(--win); }
+  html.embed .asm-row, html.embed .asm-group { scroll-margin-top: 52px; }
   html.embed .titlebar .dots, html.embed .titlebar .close,
   html.embed #lib-export, html.embed #lib-import, html.embed #lib-cancel, html.embed #reset { display: none; }
   html.embed #embed-apply, html.embed #embed-cancel { display: inline-flex; }

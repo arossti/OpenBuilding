@@ -10,6 +10,9 @@
 
   // Keys the house CSV carries that have no field on the page: d_21o, the CDD override (2026-11-19)
   const STORED_KEYS_WITHOUT_FIELD = ["d_21o"];
+  // ... and an opaque S11 row's assembly, ca_<row> (OBJECTIVE 4.0, schema.md §10 B3: the Assembly Builder's
+  // Apply Selected), listed by Openings.addedFields
+  const isStoredKeyWithoutField = id => STORED_KEYS_WITHOUT_FIELD.includes(id) || /^ca_\w+$/.test(id);
 
   // A "CSA F280 Review Format" row (reviewOf) sits indented under its Part 9 house: the same case with the
   // Target run as an F280 annual model (S21 F280 Mode On, BASESIMP + AIM-2, the house's foundation and AIM-2
@@ -836,7 +839,7 @@
 
           // Stored keys with no field on the page (2026-11-19): d_21o, the CDD override (S03 d_21 shows the
           // computed CDD; ComputationIntegration routes a typed CDD here)
-          if (!fieldDef && !isReferenceField && STORED_KEYS_WITHOUT_FIELD.includes(fieldId)) {
+          if (!fieldDef && !isReferenceField && isStoredKeyWithoutField(fieldId)) {
             this.stateManager.setValue(fieldId, value, "imported");
             updatedCount++;
             return;
