@@ -60,35 +60,54 @@ function shoelace(v) {
   return Math.abs(a) / 2;
 }
 
-// Walls, windows and doors from every elevation sheet whose facing the user
-// confirmed in Take Off, Eh! (page.facing). Each opening is kept on its own —
-// ASHRAE 140 shades window by window (Andy 2026-11-25).
+function inside(pt, v) {
+  let c = false;
+  for (let i = 0, j = v.length - 1; i < v.length; j = i++) {
+    if (v[i].y > pt.y !== v[j].y > pt.y && pt.x < ((v[j].x - v[i].x) * (pt.y - v[i].y)) / (v[j].y - v[i].y) + v[i].x)
+      c = !c;
+  }
+  return c;
+}
+
+// Walls, windows and doors by facing. A wall's facing is set on the wall in
+// Take Off's summary table; its windows and doors (inside it) share it. Each
+// opening is kept on its own — ASHRAE 140 shades window by window.
 export function envelopeByFacing(projectJson) {
   const byFacing = new Map();
   const unconfirmed = [];
   for (const page of (projectJson && projectJson.pages) || []) {
-    if (page.classification !== "elevation") continue;
     const upm = page.calibration && page.calibration.pdfUnitsPerMetre;
     const polys = (page.polygons || []).filter((p) => p.closed && p.scope !== "garage");
-    if (!polys.length || !upm) continue;
-    if (!page.facing) {
-      unconfirmed.push(`page ${page.pageNum}${page.sheetTitle ? " (" + page.sheetTitle + ")" : ""}`);
-      continue;
-    }
-    const f = byFacing.get(page.facing) || { facing: page.facing, wall: 0, openings: [] };
-    for (const p of polys) {
-      const t = p.type || "area";
-      if (t === "area" && (!p.component || p.component === "wall_exterior"))
-        f.wall += shoelace(p.vertices) / (upm * upm);
-      if (t === "window" || t === "door") {
-        const xs = p.vertices.map((v) => v.x);
-        const ys = p.vertices.map((v) => v.y);
-        const w = (Math.max(...xs) - Math.min(...xs)) / upm;
-        const h = (Math.max(...ys) - Math.min(...ys)) / upm;
-        f.openings.push({ kind: t, label: p.label, w: Number(w.toFixed(3)), h: Number(h.toFixed(3)) });
+    if (!upm) continue;
+    const walls = polys.filter(
+      (p) =>
+        (p.type || "area") === "area" &&
+        (p.component === "wall_exterior" || (!p.component && page.classification === "elevation"))
+    );
+    for (const w of walls) {
+      if (!w.facing) {
+        unconfirmed.push(`${w.label || "wall"} on page ${page.pageNum}`);
+        continue;
       }
+      const f = byFacing.get(w.facing) || { facing: w.facing, wall: 0, openings: [] };
+      f.wall += shoelace(w.vertices) / (upm * upm);
+      for (const o of polys.filter((p) => p.type === "window" || p.type === "door")) {
+        const c = {
+          x: o.vertices.reduce((a, v) => a + v.x, 0) / o.vertices.length,
+          y: o.vertices.reduce((a, v) => a + v.y, 0) / o.vertices.length
+        };
+        if (!inside(c, w.vertices)) continue;
+        const xs = o.vertices.map((v) => v.x);
+        const ys = o.vertices.map((v) => v.y);
+        f.openings.push({
+          kind: o.type,
+          label: o.label,
+          w: Number(((Math.max(...xs) - Math.min(...xs)) / upm).toFixed(3)),
+          h: Number(((Math.max(...ys) - Math.min(...ys)) / upm).toFixed(3))
+        });
+      }
+      byFacing.set(w.facing, f);
     }
-    byFacing.set(page.facing, f);
   }
   return { facings: [...byFacing.values()].filter((f) => f.wall > 0), unconfirmed };
 }
@@ -170,7 +189,7 @@ export async function buildPreview(projectUuid) {
             .map((f) => `${f.facing}: wall ${f.wall.toFixed(2)} m\u00b2, ${f.openings.length} opening(s)`)
             .join(" \u00b7 ") +
           ` \u2014 walls written by facing; ${nWin} window(s) and ${nDoor} door(s) found, not yet written (each will take its own row).`
-        : "No elevation sheet has a confirmed facing: set each one in Take Off, Eh!.") +
+        : "No wall has a facing yet: set each in Take Off, Eh!'s summary table.") +
       (env.unconfirmed.length ? ` Not imported (no facing set): ${env.unconfirmed.join(", ")}.` : ""),
     contributors: [],
     warnings: [],

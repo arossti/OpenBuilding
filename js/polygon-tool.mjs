@@ -288,7 +288,8 @@ export function getMeasurement(pageNum, polyIdx) {
     sheet_id: poly.sheet_id || null,
     sheet_class: poly.sheet_class || null,
     assembly_preset: poly.assembly_preset || null,
-    scope: poly.scope === "garage" ? "garage" : "building"
+    scope: poly.scope === "garage" ? "garage" : "building",
+    facing: poly.facing || null
   };
 
   if (poly.type === "polyline") {
@@ -330,6 +331,7 @@ export function getMeasurement(pageNum, polyIdx) {
     areaPdf: areaPdf,
     perimPdf: perimPdf,
     calibrated: calibrated,
+    facing: bridge.facing,
     component: bridge.component,
     depth_m: bridge.depth_m,
     sheet_id: bridge.sheet_id,
@@ -573,6 +575,14 @@ export function componentCarriesDepth(component) {
 // Per-polygon scope override: "building" or "garage". Anything else
 // (null, undefined, "") normalises to "building" so legacy polygons
 // round-trip without code changes elsewhere.
+// A wall's facing (North … NorthWest), set in Take Off's summary table. Its
+// windows and doors take the same facing (they nest in it).
+export function setFacing(pageNum, polyIdx, facing) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) return;
+  polys[polyIdx].facing = facing || null;
+}
+
 export function setScope(pageNum, polyIdx, scope) {
   var polys = _polygons[pageNum];
   if (!polys || !polys[polyIdx]) return;

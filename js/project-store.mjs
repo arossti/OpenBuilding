@@ -63,15 +63,6 @@ export function setClassifications(classResults) {
   _touch();
 }
 
-// An elevation sheet's facing (North … NorthWest), confirmed by the user.
-// OBJECTIVE's Trust hosts that sheet's walls, windows and doors in S11 by it.
-export function setFacing(pageNum, facing) {
-  var page = _project.pages[pageNum - 1];
-  if (!page) return;
-  page.facing = facing || null;
-  _touch();
-}
-
 export function savePolygons(pageNum, polygons) {
   var page = _project.pages[pageNum - 1];
   if (page) {

@@ -1790,52 +1790,29 @@ function _highlightThumb(pageNum) {
 
 /* ── Info panels ──────────────────────────────────────── */
 
-// Facing of an elevation sheet: the user confirms it (Andy 2026-11-25: verify IN
-// Take Off). The title's direction is offered as a hint, never stored unasked.
+// Facing of a wall, set in the summary table beside its tag (Andy 2026-11-25:
+// "Since the table already presents a surface to the user to tag the wall ...
+// any windows a given wall hosts are included in the same orientation").
 var FACINGS = ["North", "NorthEast", "East", "SouthEast", "South", "SouthWest", "West", "NorthWest"];
-function _facingFromTitle(title) {
-  var t = String(title || "")
-    .toLowerCase()
-    .replace(/[^a-z]+/g, " ");
-  var combos = [
-    ["north east", "NorthEast"],
-    ["northeast", "NorthEast"],
-    ["south east", "SouthEast"],
-    ["southeast", "SouthEast"],
-    ["south west", "SouthWest"],
-    ["southwest", "SouthWest"],
-    ["north west", "NorthWest"],
-    ["northwest", "NorthWest"]
-  ];
-  for (var i = 0; i < combos.length; i++) if (t.indexOf(combos[i][0]) >= 0) return combos[i][1];
-  var singles = [
-    ["north", "North"],
-    ["south", "South"],
-    ["east", "East"],
-    ["west", "West"]
-  ];
-  for (var j = 0; j < singles.length; j++) if (new RegExp("\\b" + singles[j][0] + "\\b").test(t)) return singles[j][1];
-  return null;
-}
-function _facingSelectHtml(pageData) {
-  var hint = _facingFromTitle(pageData.sheetTitle);
-  var cur = pageData.facing || "";
-  var opts = "<option value=''>" + (hint ? "Facing? (title: " + hint + ")" : "Facing? (set it)") + "</option>";
+function _renderFacingSelect(polyIdx, pageNum, current, isWall) {
+  if (!isWall) return "<td class='facing-cell'></td>";
+  var html =
+    "<td class='facing-cell'><select class='summary-facing-select bw-inline-select' data-poly-idx='" +
+    polyIdx +
+    "' data-page-num='" +
+    pageNum +
+    "'><option value=''>\u2014</option>";
   for (var i = 0; i < FACINGS.length; i++) {
-    opts +=
-      "<option value='" + FACINGS[i] + "'" + (cur === FACINGS[i] ? " selected" : "") + ">" + FACINGS[i] + "</option>";
+    html +=
+      "<option value='" +
+      FACINGS[i] +
+      "'" +
+      (current === FACINGS[i] ? " selected" : "") +
+      ">" +
+      FACINGS[i] +
+      "</option>";
   }
-  return (
-    "<br><select class='facing-select' title='This elevation faces… (OBJECTIVE hosts its walls, windows and doors by it)' onchange='PP.setFacing(" +
-    pageData.pageNum +
-    ", this.value)'>" +
-    opts +
-    "</select>"
-  );
-}
-function setFacing(pageNum, facing) {
-  ProjectStore.setFacing(pageNum, facing);
-  setStatus(facing ? "Facing set: " + facing : "Facing cleared", "ready");
+  return html + "</select></td>";
 }
 
 function _updateSheetInfo(pageData) {
@@ -1846,7 +1823,6 @@ function _updateSheetInfo(pageData) {
   var html = "<strong>" + (pageData.sheetId || "\u2014") + "</strong>";
   html += " <span class='sheet-class tag-" + pageData.classification + "'>" + pageData.classification + "</span>";
   if (pageData.sheetTitle) html += "<br>" + pageData.sheetTitle;
-  if (pageData.classification === "elevation") html += _facingSelectHtml(pageData);
 
   // Scale badge — three states
   var pageNum = pageData.pageNum;
@@ -2898,7 +2874,7 @@ function _renderSummaryTable() {
   var project = ProjectStore.getProject();
   var html = "<table><thead><tr>";
   html += "<th>Sheet</th><th>Label</th>";
-  html += "<th>Type</th><th>Tag</th><th>Scope</th><th>Preset</th>";
+  html += "<th>Type</th><th>Tag</th><th>Scope</th><th>Facing</th><th>Preset</th>";
   html += "<th>Gross m\u00B2</th><th>Net m\u00B2</th>";
   html += "<th>Gross ft\u00B2</th><th>Net ft\u00B2</th>";
   html += "<th>Depth m</th>";
@@ -2937,7 +2913,7 @@ function _renderSummaryTable() {
     hasAnyData = true;
 
     // Sheet header row
-    html += "<tr class='summary-sheet-row'><td colspan='13'>" + sheetLabel + tail + "</td></tr>";
+    html += "<tr class='summary-sheet-row'><td colspan='14'>" + sheetLabel + tail + "</td></tr>";
 
     var pageGrossM2 = 0,
       pageNetM2 = 0,
@@ -2995,6 +2971,9 @@ function _renderSummaryTable() {
       html += "<td class='type-cell'>area</td>";
       html += _renderTagSelect("area", wall.polyIdx, pageNum, wm.component, false);
       html += _renderScopeSelect(wall.polyIdx, pageNum, wm.scope, false);
+      var wallIsExterior =
+        wm.component === "wall_exterior" || (ProjectStore.getPage(pageNum) || {}).classification === "elevation";
+      html += _renderFacingSelect(wall.polyIdx, pageNum, wm.facing, wallIsExterior);
       html += _renderPresetSelect(wm.component, wall.polyIdx, pageNum, wm.assembly_preset, false);
       if (wm.areaM2 !== null) {
         html += "<td class='num'>" + wm.areaM2.toFixed(2) + "</td>";
@@ -3035,6 +3014,8 @@ function _renderSummaryTable() {
           html += "<td class='type-cell' style='font-size:10px;'>" + (cm.type || "window") + "</td>";
           html += _renderTagSelect(cm.type || "window", child.polyIdx, pageNum, cm.component, true);
           html += _renderScopeSelect(child.polyIdx, pageNum, cm.scope, true);
+          html +=
+            "<td class='facing-cell' style='font-size:10px;'>" + (wm.facing ? "\u21b3 " + wm.facing : "") + "</td>";
           html += _renderPresetSelect(cm.component, child.polyIdx, pageNum, cm.assembly_preset, true);
           if (cm.areaM2 !== null) {
             html += "<td class='num' style='font-size:10px;'>" + cPrefix + cm.areaM2.toFixed(2) + "</td>";
@@ -3078,6 +3059,7 @@ function _renderSummaryTable() {
       html += "<td class='type-cell'>" + (om.type || "window") + "</td>";
       html += _renderTagSelect(om.type || "window", assoc.orphanWindows[o].polyIdx, pageNum, om.component, false);
       html += _renderScopeSelect(assoc.orphanWindows[o].polyIdx, pageNum, om.scope, false);
+      html += "<td class='facing-cell'></td>";
       html += _renderPresetSelect(om.component, assoc.orphanWindows[o].polyIdx, pageNum, om.assembly_preset, false);
       if (om.areaM2 !== null) {
         html += "<td class='num'>" + oPrefix + om.areaM2.toFixed(2) + "</td><td class='num'></td>";
@@ -3114,6 +3096,7 @@ function _renderSummaryTable() {
       html += "<td class='type-cell'>polyline</td>";
       html += _renderTagSelect("polyline", ple.polyIdx, pageNum, pm.component, false);
       html += _renderScopeSelect(ple.polyIdx, pageNum, pm.scope, false);
+      html += "<td class='facing-cell'></td>";
       html += _renderPresetSelect(pm.component, ple.polyIdx, pageNum, pm.assembly_preset, false);
       html += "<td class='num' colspan='4'>\u2014</td>";
       html += _renderDepthInput(pm.component, ple.polyIdx, pageNum, pm.depth_m, false);
@@ -3130,7 +3113,7 @@ function _renderSummaryTable() {
     // Page subtotal — only meaningful when the page has area measurements.
     if (assoc.walls.length > 1 || assoc.orphanWindows.length > 0) {
       html += "<tr class='summary-total-row'><td></td><td>" + sheetLabel + " Total</td>";
-      html += "<td colspan='4'></td>";
+      html += "<td colspan='5'></td>";
       html += "<td class='num'>" + pageGrossM2.toFixed(2) + "</td>";
       html += "<td class='num'>" + pageNetM2.toFixed(2) + "</td>";
       html += "<td class='num'>" + pageGrossFt2.toFixed(2) + "</td>";
@@ -3147,7 +3130,7 @@ function _renderSummaryTable() {
   // Grand total
   if (hasAnyData) {
     html += "<tr class='summary-grand-total'><td></td><td>Grand Total</td>";
-    html += "<td colspan='4'></td>";
+    html += "<td colspan='5'></td>";
     html += "<td class='num'>" + grandGrossM2.toFixed(2) + "</td>";
     html += "<td class='num'>" + grandNetM2.toFixed(2) + "</td>";
     html += "<td class='num'>" + grandGrossFt2.toFixed(2) + "</td>";
@@ -3240,6 +3223,18 @@ function _renderSummaryTable() {
   // to the garage_* dim counterpart via polygon-map's two-scope aggregator.
   // No re-render needed: only the polygon record changes, visible columns
   // (Tag/Preset/Depth) are unaffected.
+  var facingSelects = panel.querySelectorAll(".summary-facing-select");
+  for (var fs = 0; fs < facingSelects.length; fs++) {
+    facingSelects[fs].addEventListener("change", function () {
+      var idx = parseInt(this.dataset.polyIdx, 10);
+      var pg = parseInt(this.dataset.pageNum, 10);
+      PolygonTool.setFacing(pg, idx, this.value);
+      ProjectStore.savePolygons(pg, PolygonTool.getPolygons(pg));
+      setStatus(this.value ? "Facing set: " + this.value + " (its windows and doors too)" : "Facing cleared", "ready");
+      _renderSummaryTable();
+    });
+  }
+
   var scopeSelects = panel.querySelectorAll(".summary-scope-select");
   for (var ss = 0; ss < scopeSelects.length; ss++) {
     scopeSelects[ss].addEventListener("change", function () {
@@ -3450,7 +3445,6 @@ window.PP = {
   // Measure method
   setMeasureMethod: setMeasureMethod,
   setWindowMode: setWindowMode,
-  setFacing: setFacing,
   // Phase 4b.1 — component tag + assembly preset
   setComponentTag: setComponentTag,
   setAssemblyPreset: setAssemblyPreset,
