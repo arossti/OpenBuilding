@@ -1055,8 +1055,9 @@ html.theme-dark body {
   top: 0;
   background: var(--bg-panel);
 }
-#summary-content th:first-child,
-#summary-content th:nth-child(2) {
+/* Sheet … Preset are text / dropdown columns: headers align left over their
+   cells; the measurement columns stay right-aligned. */
+#summary-content th:nth-child(-n + 7) {
   text-align: left;
 }
 #summary-content td {

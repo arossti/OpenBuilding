@@ -2443,7 +2443,7 @@ function _autoTagFromPage(pageNum, textItems) {
       return { component: "slab_above_grade", scope: scope, preset: null };
     }
   } else if (cls === "elevation") {
-    return { component: "wall_exterior", scope: scope, preset: "wood_2x6" };
+    return { component: "wall_exterior", scope: scope, preset: null };
   }
   return { component: null, scope: scope, preset: null };
 }
@@ -2727,6 +2727,7 @@ function _ppmToRatio(ppm) {
 
 function openSummaryTable() {
   if (!Loader.isLoaded()) return;
+  _loadAssemblyLib();
   _renderSummaryTable();
   document.getElementById("summary-backdrop").classList.add("visible");
   document.getElementById("summary-panel").classList.add("visible");
@@ -2843,29 +2844,69 @@ function _renderDepthInput(component, polyIdx, pageNum, currentDepth, small) {
   return html;
 }
 
+// Presets are the Assembly Builder's assemblies (Andy 2026-11-25), read from
+// the published snapshot builders/assembly-builder.html (between its
+// /*ASM-START*/ … /*ASM-END*/ markers) once, when the summary first opens.
+var _assemblyLib = null;
+function _loadAssemblyLib() {
+  if (_assemblyLib) return;
+  _assemblyLib = [];
+  fetch("builders/assembly-builder.html")
+    .then(function (r) {
+      return r.ok ? r.text() : "";
+    })
+    .then(function (html) {
+      var m = html.match(/\/\*ASM-START\*\/([\s\S]*?)\/\*ASM-END\*\//);
+      if (!m) return;
+      var lib = JSON.parse(m[1].trim().replace(/;$/, ""));
+      _assemblyLib = (lib.assemblies || []).map(function (a) {
+        return { id: a.id, name: a.name, cls: a["class"], exposure: a.exposure };
+      });
+      var panel = document.getElementById("summary-panel");
+      if (panel && panel.classList.contains("visible")) _renderSummaryTable();
+    })
+    .catch(function (e) {
+      console.warn("[TakeOffEh] assembly library unavailable:", e);
+    });
+}
+function _escAttr(v) {
+  return String(v).replace(/&/g, "&amp;").replace(/'/g, "&#39;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+function _presetOptionsFor(component) {
+  var lib = _assemblyLib || [];
+  var pick = function (cls, exposure) {
+    return lib.filter(function (a) {
+      return a.cls === cls && (!exposure || a.exposure === exposure);
+    });
+  };
+  if (component === "wall_exterior") return pick("Wall", "outside");
+  if (component === "wall_interior") return pick("Wall", "inside");
+  if (component === "wall_party") return pick("Wall");
+  if (component === "exterior_perimeter") return pick("Foundation");
+  return [];
+}
+
 function _renderPresetSelect(component, polyIdx, pageNum, currentPreset, small) {
   var sizeAttr = small ? " style='font-size:10px;'" : "";
   if (!PolygonTool.componentCarriesPreset(component)) {
     return "<td class='preset-cell'" + sizeAttr + ">\u2014</td>";
   }
+  var opts = _presetOptionsFor(component);
+  var cur = currentPreset || "";
   var html = "<td class='preset-cell'" + sizeAttr + ">";
   html +=
     "<select class='summary-preset-select bw-inline-select' data-poly-idx='" +
     polyIdx +
     "' data-page-num='" +
     pageNum +
-    "'>";
-  for (var i = 0; i < ASSEMBLY_PRESET_OPTIONS.length; i++) {
-    var sel = ASSEMBLY_PRESET_OPTIONS[i].value === (currentPreset || "") ? " selected" : "";
-    html +=
-      "<option value='" +
-      ASSEMBLY_PRESET_OPTIONS[i].value +
-      "'" +
-      sel +
-      ">" +
-      ASSEMBLY_PRESET_OPTIONS[i].label +
-      "</option>";
+    "'><option value=''>(no assembly)</option>";
+  var found = false;
+  for (var i = 0; i < opts.length; i++) {
+    var sel = opts[i].id === cur ? " selected" : "";
+    if (sel) found = true;
+    html += "<option value='" + _escAttr(opts[i].id) + "'" + sel + ">" + _escAttr(opts[i].name) + "</option>";
   }
+  if (cur && !found) html += "<option value='" + _escAttr(cur) + "' selected>(legacy: " + _escAttr(cur) + ")</option>";
   html += "</select></td>";
   return html;
 }
