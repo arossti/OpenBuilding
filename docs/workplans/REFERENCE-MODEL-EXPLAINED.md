@@ -138,16 +138,25 @@ will read as unavailable until the required inputs are in.
 
 ## Still open
 
-1. Is the choice saved in the project file? Andy: _"not sure. We don't want to box a user in. But they may wish
-   to save a partially completed model."_ Claude's recommendation: save it as a label only. It names what the
-   Reference is when the file reopens and locks nothing; the user changes it from the same menu.
-2. **S04's bills are held per model today, and the Actual column reads the Target's** (run on the page
-   2026-11-26: a bill of 500,000 typed on the Reference side left Actual at 93.1). S.2 (Targeted Use / Utility
-   Bills) is per model too: the default project has the Target at Utility Bills and the Reference at Targeted
-   Use. Andy's answer 3 puts a renovation's bills on the Reference side, where Actual does not read them. His
-   to rule: one set of bills for the project, or Actual reads the side that holds them.
-3. Seen on the way: after a switch to Reference and back, S04's bill shows without its thousands separators
-   (132938 for 132,938.00). Display only.
+- Is the choice saved in the project file? Andy: _"not sure. We don't want to box a user in. But they may wish
+  to save a partially completed model."_ Claude's recommendation: save it as a label only. It names what the
+  Reference is when the file reopens and locks nothing; the user changes it from the same menu.
+
+## Utility bills and S.2 (Andy 2026-11-26)
+
+- **Bills stay per model, not shared.** Andy: _"not shared bills, in the case of a reference model that is the
+  base case for a renovation, and the Target carries the post renovation utility bills, which should match
+  target if the use designed carefully."_ So in a renovation the Reference holds the bills from before, and the
+  Target the bills from after.
+- **Today S01's Actual column reads the Target's bills only**, on both sides (run on the page: a bill of
+  500,000 typed on the Reference side left Actual at 93.1).
+- **A feature to consider, renovations only: two Actuals in S01**, one from each model's bills. Andy: _"it might
+  be an idea to add a new feature in S01 that shows 2 actuals, depending on the type of project we have (only
+  renos would show this)."_ It hangs on the Guide Me answer "B. The building as it stands". Not scheduled.
+- **S.2 (Targeted Use / Utility Bills) is already one per model.** Run on the page: changed on the Target's
+  side it left the Reference's, and the other way round. Actual follows the Target's S.2 only.
+- **The hide rule, then:** S04's Actual columns hide in Easy mode when the model on screen is at Targeted Use.
+  They can show on one side and hide on the other.
 
 ## Easy and Expert modes, and Guide Me (Andy 2026-11-26)
 

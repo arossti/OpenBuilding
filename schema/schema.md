@@ -90,6 +90,14 @@ asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and brin
    - **Left as it is:** an opening's H (`dh_` + its row) is still class G (the Reference takes the Target's when
      its own is empty); no failure seen.
    - **RULED (Andy 2026-11-26, "yes"):** Trust writes the Target only, and says so: both buttons' hovers, the status line and the Trust + Verify modal's title name the Target model.
+   - **Also on this branch (Andy's smoke, 2026-11-26 night):**
+     - **A typed number keeps its format across a model switch.** `DOMBridge.stampInputsForMode` stamped the
+       stored value raw, so 48 inputs on the default project changed after a switch (S04's bill 132,938.00 →
+       132938, a U-value 0.900 → 0.9, $0.1300 → 0.13). It now formats as `stampAll` does.
+     - **S21 rounds its mirrored numbers for display** (`Section21.js` `displayText`): a U-value at 3 places,
+       any other number at no more than 2. The graph and the saved file keep the full value. So S21's U-values
+       and its long decimals no longer match V3's page character for character.
+     - Witness `test/witness/display-format.cjs`.
 3. **ABCD BUGLIST #266** (item 5): until it is fixed the Assembly Builder here is the 2026-10-22 library, 115
    assemblies, with the old blue accent and month-old baked HFT.
 4. **A light mode** (item 6, second tier).
@@ -136,6 +144,8 @@ in andy-rnd for the V3 page.
   A third since (§10 B3): `ca_<row>` in `src/core/Openings.js` `addedFields` and `src/core/FileHandler.js`.
   A fourth (REMAINS 1): S19's own inputs per model, `src/sections/Section19.js` and `src/core/wombatRender.js`.
   A fifth (REMAINS 2): the host input's class in `src/sections/nodes/TransmissionLossNodes.js`.
+  A sixth: display formats, `src/core/ui/DOMBridge.js` `stampInputsForMode` and `src/sections/Section21.js`
+  `displayText`.
 
 **The day's items as they were worked** (✅ = shipped; the unticked ones are REMAINS, above):
 

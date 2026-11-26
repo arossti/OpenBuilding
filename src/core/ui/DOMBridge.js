@@ -434,7 +434,18 @@
       const value = state.getValueForModel(modelId, semanticPath);
       if (value === undefined || value === null) continue;
 
-      FM.updateFieldDisplay(legacyId, String(value), fieldDef);
+      // A typed number shows as stampAll shows it (FORMAT: 132,938.00, a U-value's 3 places, $0.1300), not
+      // as it is stored: a model switch left 48 inputs raw on the default project (132938, 0.9, 1304.07)
+      let display = String(value);
+      if (fieldDef.type === "editable" || fieldDef.type === "number") {
+        const formatType = FORMAT[legacyId] || "number-2dp-comma";
+        const n = window.TEUI.parseNumeric?.(value, NaN);
+        if (!["raw", "condensation", "integer-percent"].includes(formatType) && Number.isFinite(n)) {
+          display = window.TEUI.formatNumber(n, formatType);
+        }
+      }
+
+      FM.updateFieldDisplay(legacyId, display, fieldDef);
       stamped++;
     }
 

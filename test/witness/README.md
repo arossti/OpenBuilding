@@ -20,6 +20,7 @@ Run from this repo's root; `<out>` is any folder for screenshots:
     node test/witness/builders-reference.cjs <out> # a row's assembly per model: Reference / Target independence
     node test/witness/s19-reference.cjs <out>      # S19's roof type, aspect and windows per model
     node test/witness/host-per-model.cjs           # Trust's 4-opening write: the Reference still computes
+    node test/witness/display-format.cjs           # typed numbers across a model switch; S21's rounding
     ../andy-rnd/node_modules/.bin/playwright test --config=test/witness/v3-reference/pw.config.cjs
 
 What each must show:
@@ -41,3 +42,5 @@ What each must show:
 - `host-per-model.cjs`: after Trust's write the Reference reads 190.1 with no hosts, the Target 82.8 and
   m_10 `49%` (it read `Unavailable`); the reloaded file shows the same; Copy from Target → All Inputs gives
   the Reference the Target's four hosts.
+- `display-format.cjs`: `Target changed by a round trip: 0 | Reference: 0` and `long decimals shown: 0` on the
+  default project and on case 03 (F280); S04's bill reads `132,938.00`, S21's wall U `0.149`.
