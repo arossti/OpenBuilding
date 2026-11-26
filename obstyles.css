@@ -2689,8 +2689,132 @@ body {
   background: var(--bg-panel);
   color: var(--text);
 }
+/* Sliders and toggles, from ARTexplorer's art.css (the ABCD web app's "HiFi" controls; Andy 2026-11-26:
+   "excellent CSS for the toggles and sliders we can steal"), in the web's cyan: a recessed track, a dark
+   thumb with a lit dot; a checkbox is a pill switch whose thumb lights when on. */
 .op-v3 input[type="range"] {
-  accent-color: var(--accent-lit);
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: #14181d !important; /* the box rule above paints every input */
+  border: 0 !important;
+  padding: 0 !important;
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.5),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.07);
+  cursor: pointer;
+  outline: none;
+  margin: 6px 4px;
+  vertical-align: middle;
+}
+/* Bootstrap's .form-range paints its own light track: ours shows through instead */
+.op-v3 input[type="range"]::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 6px;
+  border-radius: 3px;
+}
+.op-v3 input[type="range"]::-moz-range-track {
+  background: transparent;
+  height: 6px;
+}
+.op-v3 input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background:
+    radial-gradient(circle at center, var(--accent-lit) 0, var(--accent-lit) 3px, transparent 3px),
+    linear-gradient(145deg, #3a3f46, #2a2e34);
+  box-shadow:
+    2px 2px 5px rgba(0, 0, 0, 0.5),
+    -1px -1px 2px rgba(255, 255, 255, 0.03),
+    inset 0 0 6px rgba(34, 211, 238, 0.3);
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  margin-top: -5px; /* centred on the 6 px track */
+}
+.op-v3 input[type="range"]::-webkit-slider-thumb:hover {
+  background:
+    radial-gradient(circle at center, #67e8f9 0, #67e8f9 3px, transparent 3px),
+    linear-gradient(145deg, #444a52, #32373e);
+}
+.op-v3 input[type="range"]::-webkit-slider-thumb:active {
+  background: radial-gradient(circle at center, #a5f3fc 0, #a5f3fc 3px, transparent 3px), #14181d;
+  box-shadow:
+    inset 1px 1px 3px rgba(0, 0, 0, 0.5),
+    0 0 8px rgba(103, 232, 249, 0.5);
+}
+.op-v3 input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background:
+    radial-gradient(circle at center, var(--accent-lit) 0, var(--accent-lit) 3px, transparent 3px),
+    linear-gradient(145deg, #3a3f46, #2a2e34);
+  box-shadow:
+    2px 2px 5px rgba(0, 0, 0, 0.5),
+    inset 0 0 6px rgba(34, 211, 238, 0.3);
+  cursor: pointer;
+}
+/* a slider the model sets (a window's overhang): the dot goes dark */
+.op-v3 input[type="range"]:disabled {
+  cursor: default;
+}
+.op-v3 input[type="range"]:disabled::-webkit-slider-thumb {
+  background: linear-gradient(145deg, #3a3f46, #2a2e34);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+.op-v3 input[type="range"]:disabled::-moz-range-thumb {
+  background: linear-gradient(145deg, #3a3f46, #2a2e34);
+}
+.op-v3 input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  width: 32px;
+  height: 16px;
+  border-radius: 8px;
+  background: #14181d;
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.5),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.07);
+  cursor: pointer;
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin: 0 6px 0 2px;
+  transition: all 0.15s ease-out;
+}
+.op-v3 input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #505762, #40464f);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease-out;
+}
+.op-v3 input[type="checkbox"]:checked {
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.5),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.07),
+    0 0 0 1px rgba(34, 211, 238, 0.3);
+}
+.op-v3 input[type="checkbox"]:checked::before {
+  left: 18px;
+  background:
+    radial-gradient(circle at center, var(--accent-lit) 0, var(--accent-lit) 2px, transparent 2px),
+    linear-gradient(145deg, #555c67, #454b54);
+  box-shadow:
+    2px 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 6px rgba(34, 211, 238, 0.5);
 }
 .op-v3 .btn-outline-secondary,
 .op-v3 .btn-light,
