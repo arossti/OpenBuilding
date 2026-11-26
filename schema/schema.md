@@ -18,81 +18,74 @@
 
 ## 0. Cold-start handoff (read this first)
 
-### ▶ START HERE (handoff 2026-11-26, laptop)
+### ▶ START HERE (handoff 2026-11-26 evening, laptop) — written for a cold start after a /clear
 
-**LIVE: `main` `6ee071a` (PR #22), deployed to https://arossti.github.io/OpenBuilding/.** `objectivepro.html` renders
-S01–S22 on V3's engine; all 16 Load Sample cases (12 + the 4 CSA F280 Review Format rows) show 2146 / 2146 values
-identical to andy-rnd's V3 page (2026-11-26, WebKit). **This branch is `Reference-Port`**, cut from that `main`
-(it replaces `objective-reference-model`, whose two roadmap commits it carries).
+**LIVE: `main` `7507a70` (PR #23), deployed to https://arossti.github.io/OpenBuilding/.** **This branch is `OnePage`**
+(Andy named it), cut from that `main`; this handoff is its first commit and nothing of OnePage is built yet.
+Local servers (they die on reboot): `python3 schema/scripts/nocache-serve.py 8822` here, `node test/static-server.cjs 8791`
+in andy-rnd for the V3 page.
 
-**Done 2026-11-26:**
+**SHIPPED 2026-11-26 (all merged):**
 
-- **V4-5 ✅ F280-1 hosted** (andy-rnd #26 merged, `74bd575`): §4. The F280 harness and its cases stay in andy-rnd.
-- **PR #22 ✅ the V4 table format** (`obstyles.css` §8b; captions in `src/sections`): a row is one line (a row's
-  controls side by side, an input box a fixed 28 px), S11 fits a 1440 px window with its Surface (°C) column in
-  view and its dropdowns grow past that, the sidebar's S01–S22 show without scrolling, every header's unit is in
-  brackets in its own case, + and − side by side, and the sliders and pill toggles are ARTexplorer's (`art.css`)
-  in cyan. ⚠ `src/sections/*.js` now differs from andy-rnd by its header captions only (51 strings): a section
-  file copied over from andy-rnd again must keep them.
+- **PR #22 — the V4 table format** (`obstyles.css` §8b; captions in `src/sections`): a row is one line, an input box a
+  fixed 28 px, S11 fits a 1440 px window with its Surface (°C) column in view and its dropdowns grow past that, the
+  sidebar's S01–S22 show without scrolling, every header's unit in brackets in its own case, + and − side by side,
+  ARTexplorer's sliders and pill toggles (`artex-web/art.css`) in cyan.
+- **PR #23 — the Reference Port**: Target · pill · Reference in the button row and a Copy from Target menu
+  (`objectivepro.html`, `js/objective4.mjs` `showModel` / `syncModelToggle`, driving V3's `ReferenceToggle.switchMode`);
+  the Reference look is `obstyles.css` §8c, all from `body.reference-mode` (the accent below the masthead turns red, a
+  band names the model, locked cells are ghosted); S16's Cooling and Show Emissions work in both models; S18's and
+  S19's control rows are one line; the Sankey's labels are light. The HUD and Key Values take no marker (they show
+  both models, as S18 does).
+- **V4-5 — F280-1 hosted** (andy-rnd #26, `74bd575`): §4. The F280 harness and cases stay in andy-rnd.
+- ⚠ **`src/` now differs from andy-rnd `5e0b2f0`** in two ways, both to keep if a file is copied over again: the 51
+  header captions with bracketed units (`src/sections/*.js`), and `Section16.js` `initializeEventHandlers` wiring once.
+
+**PENDING, in order:**
+
+1. **ONEPAGE (this branch).** Andy 2026-11-26: *"each page gets a S18 title which is then duplicated in the radiused,
+   collapsible header ... We will keep the radiused, collapsible headers, add the subheader text to them ... then we
+   can move ALL collapsable header sections into one container instead of each one getting its own container. Then it
+   will function like V3, where we can toggle ALL sections On/Off with the same +/- button to the far right of the
+   main header, and then the masthead menu will just anchor scroll to the relevant section. This will let us use the
+   browser's print function to print all sections, like our V3 does, as a formatted report. We lean 100% on the
+   browser's print functions. Nothing fancy."*
+   - **Today:** `js/objective4.mjs` builds one `.beam-tab-panel` per section (only the active one shown), each with a
+     page title + subtitle (`.beam-panel-header` from `renderPanelBody` and `PANEL_SUBTITLES`, e.g. S11's "The envelope: walls by facing, their hosted windows and
+     doors, roofs and their skylights") above a card (`v3Card`, `.bw-asm-group.op-v3-card`) whose radiused, collapsible header
+     repeats the title.
+   - **Build:** (a) drop the page title; move each subtitle INTO its card's collapsible header, beside the name;
+     (b) ONE container holding all 22 cards in order, all present in the page; (c) a + / − at the far right of the
+     main header (the button row) expanding / collapsing every card at once, each card's own arrow still working;
+     (d) the sidebar's S01–S22 become anchors that scroll to their card (and open it if collapsed); the active tab
+     follows the scroll; (e) print: a small `@media print` block only — the masthead, button row and sidebar hidden,
+     cards unclipped, no page break inside a row — and the browser's own Print does the rest (V3's rule, and the
+     memory note "the browser's own print; measure in WebKit").
+   - **Watch:** sections that draw on activation (S16, S17, S18, S19) must still size themselves when all are in one
+     scroll; S20 hides in the final build; `body.reference-mode`'s band is pinned to the pane's top; the S01–S22
+     heights with everything open (S11 alone is ~1500 px with a hosted case).
+   - **Witness:** the 2146-value parity probe (all 16 Load Sample cases, this page vs andy-rnd's), which reads every
+     `[data-field-id]` whatever the layout; a print-to-PDF page count in WebKit.
+2. **THE OPENING BUILDER on the splash page.** `index.html`'s last tile slot (bottom right, beside Section Builder) is
+   empty: add the Opening Builder from ABCD.EARTH (`artex-osx/docs/mockups/opening-builder.html`) through
+   `publish_builders.py` (add it to `PAGES`, or to `SNAPSHOTS` if it cannot be rebuilt from today's seed; its cost
+   disclaimer is an older copy than the shared one — Andy's to settle), then `npm run builders:publish` and a tile
+   like the other Builders'.
+3. **Reference remainders:** S19's own Reference display; S21 (Andy: *"may show the Reference model vs. Target model,
+   I have not considered that case yet"* — ❓ his); andy-rnd's `ghostedReference`, `referenceDefaults` and
+   `hoverOnScreenModel` behaviours checked on this page.
+4. **m_10 "Unavailable"** after Trust on a 4-opening fixture (block below, ⚠ OPEN).
+5. **ABCD BUGLIST #266**, so the Assembly Builder is rebuilt from today's seed.
+6. **SECOND TIER — a LIGHT MODE** (Andy 2026-11-26: *"switches the screen to white, and the headers to black/grey like
+   the V3 (for familiarity). Dark/Light mode can be another header toggle."*): a second pill in the button row, one
+   body class re-pointing the tokens (`tokens.css` neutrals; `obstyles.css` `--bg-*`, `--text*`, `--border`), so §8b /
+   §8c follow. Check then: the Sankey's forced-light labels, the input box's sunken fill, the slider track, Reference
+   red on white.
 
 **What is where:** OBJECTIVE = V3's engine + sections verbatim in `src/` + `climate/` (from andy-rnd `5e0b2f0`);
 `js/objective4.mjs` (router, HUD, cards), `js/objective-boot.js` (V3's init.js start-up), `obstyles.css` §8b (V4
 styling of V3's markup). Trust = `js/beam/pdf-bridge-import.mjs` (`V3_TARGETS`, `envelopeByFacing`,
 `writeEnvelope`). Take Off, Eh! = `js/app.mjs` (Door tool [E], the summary table's Facing + Preset columns).
-
-**NEXT, in order:**
-
-1. **THE REFERENCE PORT (this branch).** Andy 2026-11-26: *"finish the port with the Reference model UI, and a
-   toggle in the header's button row to toggle them back and forth like V3. When V3 goes into Reference mode it is
-   obvious to the user because the styling for all frames goes red. We need to consider a nice way to do that in
-   the dark theme of V4."*
-   - **Already here:** `src/core/ReferenceToggle.js` is loaded and initialized by `js/objective-boot.js`; it sets
-     `body.viewing-reference-inputs` / `.reference-mode` and re-stamps every section from the Reference model.
-     The engine computes both models (the HUD's Reference column already reads it).
-   - **To build:** (a) a Target / Reference toggle in the button row (New · Open · Save · Trust … Reset), driving
-     `ReferenceToggle` as V3's header button does; (b) V3's Reference menu beside it (Mirror All Inputs, Mirror
-     Geometry, the standard's defaults) as far as V3 offers it; (c) the HUD marks which model the sections show;
-     (d) THE LOOK, below; (e) S16's Sankey follows the toggle (item 3).
-   - **The look in the dark theme (to settle with Andy before styling; V3's rules are `body.viewing-reference-inputs`
-     in andy-rnd `src/styles.css`, about line 1660):** V3 reddens every frame, header and tab. Candidates here, all
-     driven by that one body class: the cards' borders and header bands in the Reference red already used for
-     Reference values (`--reference-value-color`, #ff8a8a); the sidebar's active tab and the toggle itself in the
-     same red instead of cyan; a thin red rule under the masthead with the word REFERENCE; locked (standard-set)
-     cells ghosted as V3's `.reference-locked`. Cyan = Target, red = Reference, nothing else changes colour.
-   - **✅ 2026-11-26, first cut (shown to Andy by screenshot, his word pending):** the button row carries
-     Target · a pill switch · Reference (ARTexplorer's pill, lit cyan at Target and red at Reference) and a Copy
-     from Target menu (Geometry · Geometry + Code · All Inputs, V3's three mirrors by their own ids). The switch
-     calls `ReferenceToggle.switchMode`; `js/objective4.mjs` `syncModelToggle` follows the body's class, so V3's
-     own switches move the pill too. The look is `obstyles.css` §8c, all from `body.reference-mode`: below the
-     masthead the accent tokens turn red (cards, header bands, the active tab, focus rings, slider dots) and a
-     red band reads REFERENCE MODEL. The masthead's key values keep their colours (they show both models).
-     Checked in WebKit on case 01: S11's roof RSI 9.35 → 5.3 and its heat loss 76 517 → 116 626 kWh, and back.
-   - **Per section (Andy 2026-11-26):** S16 and S19 *"get their own display of the Reference model"*; S18 already
-     draws both (its two lines, red and blue); S20 Notes & Debug *"is for our internal use, it will hide with the
-     final build"* and needs nothing; S21 *"may show the Reference model vs. Target model, I have not considered
-     that case yet"* — ❓ open, Andy's.
-   - **✅ 2026-11-26, second pass:** S16's Cooling and Show Emissions work in both models (the handlers were
-     attached twice here, so a click toggled and toggled back: `Section16.js` `initializeEventHandlers` now wires
-     once; Target 6 775 / Reference 13 834 kg CO2e on case 01). S18's and S19's control rows are one line as V3's
-     (buttons, legend, the view buttons at the right; Activate padded). Reference mode ghosts
-     `.reference-locked` / `.disabled-input` / `.ghosted` cells: dim italic, a dashed box, not typable. The HUD
-     and Key Values take no marker (Andy: they already show both models, as S18 does).
-   - **✅ 2026-11-26, verified in WebKit (case 01):** the ghosting (S03 `d_21` in Reference mode: dim italic,
-     dashed box, not editable; 20 such cells across S03, S07, S09, S12, S13, S19, S21); S18 activated, its six
-     buttons, legend and view buttons on ONE line at 1440 px; Copy from Target — Geometry copies the roof's area
-     and leaves its RSI, Geometry + Code re-stamps the standard's RSI, All Inputs copies the RSI too. The
-     Sankey's labels are light on the dark ground.
-   - **Still to do:** S19 in Reference mode; S21 (Andy's ❓); the witnesses below.
-   - **SECOND TIER, not today's path — a LIGHT MODE** (Andy 2026-11-26: *"we should consider a light mode for the
-     entire app also that switches the screen to white, and the headers to black/grey like the V3 (for
-     familiarity). Dark/Light mode can be another header toggle."*): a second pill in the button row; one class
-     on the body re-points the tokens (`tokens.css` neutrals, `obstyles.css` `--bg-*`, `--text*`, `--border`),
-     so §8b / §8c follow without new rules. To check when built: the Sankey's label colour (forced light in
-     dark), the input box's sunken fill, the slider track, and Reference red on white.
-   - **Witnesses:** andy-rnd's `ghostedReference`, `referenceDefaults` and `hoverOnScreenModel` specs describe the
-     behaviour to match; the 2146-value parity probe run in Reference mode on both pages.
-2. **m_10 "Unavailable"** after Trust on a 4-opening fixture (block below, ⚠ OPEN).
-3. **S16 Sankey** views (block below).
 
 **Witnesses to re-run after any change** (Playwright, fresh context each): (a) all 16 case studies through Load
 Sample vs andy-rnd's V3 page — 2146 / 2146 displayed values each; (b) the Trust fixtures in this file's §0 blocks.
@@ -187,7 +180,7 @@ Section11.js `applyOpeningGeometry` does. Witness: West wall + 2 windows + 1 doo
 B.7.0 / B.8.1 / B.8.2 hosted in 86, B.8.3 in 87a, areas 1.89 / 1.5 / 1.08 / 1.44, facings West / North.
 ⚠ **OPEN:** on that 4-opening fixture S01's m_10 (Actual vs Target %, the default case is Utility Bills) reads
 "Unavailable" though h_10 = 82.8; single-opening and door-only runs give 49 %. Trace before relying on Trust's %.
-**TONIGHT — the Reference model** (Andy: _"note Reference Model in the workplan so we can port that later tonight"_):
+**✅ SHIPPED 2026-11-26 (PR #23) — the Reference model** (Andy: _"note Reference Model in the workplan so we can port that later tonight"_):
 V3's Target / Reference toggle (`src/core/ReferenceToggle.js`, its header button and `body.viewing-reference-inputs`
 styles) onto objectivepro.html, the HUD and every section showing Reference values when toggled, and S16's Sankey
 following it (below).
@@ -198,7 +191,7 @@ need it set); stored on the page (`page.facing`). Trust then writes S11 from con
 facing (B.5, B.87a–i: type walls, facing, GROSS area — S11 nets its hosted openings), every window on that sheet
 hosted in that row (`ch_`= the row key) with its W × H from the polygon (identical sizes grouped into`dq\_`), all 40
 window rows cleared first. A sheet with no confirmed facing is listed in Trust + Verify, never guessed.
-**ALSO OPEN — S16 Sankey** (Andy: *"Various buttons on S16 do not reproduce the expected graphs for cooling,
+**✅ SHIPPED 2026-11-26 (PR #23) — S16 Sankey** (Andy: *"Various buttons on S16 do not reproduce the expected graphs for cooling,
 emissions, etc. That will need to get properly ported at some point - and should show reference mode when
 reference model is toggled."*): the Cooling / Show Emissions / Energy Balance views, the Reference model's flows,
 and dark-legible labels; this page has no Target / Reference toggle yet (V3's ReferenceToggle). Serve:
