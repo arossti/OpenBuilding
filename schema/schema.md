@@ -58,12 +58,16 @@ in andy-rnd for the V3 page.
      it (`setActiveTab`); scrolling marks the card at the top (`updateActiveFromScroll`); a page opened at `#section`
      returns to it once the sections above have filled in. Print is `obstyles.css` §8d, one `@media print` block, as
      V3: landscape, 0.25 in margins, ink on white with colour kept, the chrome, buttons, the S01 intro and S20 Notes
-     left out, the page scaled 0.8 to the sheet's width, a collapsed card printing as its header alone.
+     left out, the page scaled 0.8 to the sheet's width.
    - **Witnessed:** parity 2146 / 2146 on all 16 cases (WebKit, this page vs andy-rnd's); S16–S19 activate at full
      width inside the one scroll; the default case prints on 9 landscape Letter pages (Chrome's PDF), and in WebKit's
      print rendering nothing runs off a 1008 px sheet.
-   - **Left open:** only five sections have a subtitle (S01, S02, S11, S12, S22): the other seventeen are Andy's to
-     word. S20 is out of print only; it still shows on screen.
+   - **After Andy's first look (same day):** S01's introduction moved into `#disclaimerModal` ("Using this
+     calculator", V3's modal and its disclaimer text at 4.0), shown on the first launch (`localStorage`
+     `objective4DisclaimerSeen`, as V3's `disclaimerSeen`) and from the masthead's yellow Disclaimer button. On
+     launch only S01 is open; the sidebar opens a section and it stays open until closed. Every section has a
+     subtitle (`PANEL_SUBTITLES`, Claude's wording, Andy's to edit). Print shows every section, open or collapsed
+     on screen (Bootstrap's `[hidden]` is `!important`, so the print rule is too). S20 is out of print only.
 2. **THE OPENING BUILDER on the splash page.** `index.html`'s last tile slot (bottom right, beside Section Builder) is
    empty: add the Opening Builder from ABCD.EARTH (`artex-osx/docs/mockups/opening-builder.html`) through
    `publish_builders.py` (add it to `PAGES`, or to `SNAPSHOTS` if it cannot be rebuilt from today's seed; its cost

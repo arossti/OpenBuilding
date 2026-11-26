@@ -105,8 +105,21 @@ function boot() {
   wireImportModal();
   wireKeyboard();
   wireGlossarySearch();
+  // On launch only S01 is open (Andy 2026-11-26); the sidebar opens a section, and it stays open until closed.
+  for (const card of document.querySelectorAll(".op-v3-card")) setCardOpen(card, card.dataset.tabId === DEFAULT_TAB);
   syncToggleAll();
   setActiveTab(readInitialTabFromHash() || DEFAULT_TAB);
+  showDisclaimerOnFirstLaunch();
+}
+
+// "Using this calculator" (V3's disclaimer modal): shown on the first launch, and from the masthead's
+// yellow Disclaimer button after that.
+const DISCLAIMER_SEEN = "objective4DisclaimerSeen";
+function showDisclaimerOnFirstLaunch() {
+  const el = document.getElementById("disclaimerModal");
+  if (!el || !window.bootstrap) return;
+  el.addEventListener("hidden.bs.modal", () => localStorage.setItem(DISCLAIMER_SEEN, "true"));
+  if (!localStorage.getItem(DISCLAIMER_SEEN)) new window.bootstrap.Modal(el).show();
 }
 
 function wireGlossarySearch() {
@@ -228,45 +241,29 @@ function pad2(n) {
 const PANEL_SUBTITLES = {
   introduction: "The overview: Lifetime Carbon, Annual Carbon and TEUI, Reference · Target · Actual",
   project: "Building information: occupancy, standards, service life, energy prices and project data",
+  climate: "The weather station, degree days, design temperatures and the ground",
+  "actual-target": "Utility bills against the Target, by fuel: energy, emissions and primary energy",
+  emissions: "Operational carbon (B6) each year and over the service life; embodied carbon (A1-3)",
+  renewables: "Photovoltaics, wind, offsite renewables and the loads kept out of the TEUI",
+  water: "Water use, hot water demand, its system and drain water heat recovery",
+  iaq: "Radon, CO2, TVOC and indoor humidity against guidance limits",
+  "occupant-gains": "Occupants, plug, lighting and equipment loads, and the heat they give off",
+  "radiant-gains": "Solar gains through each window and door: orientation, SHGC and shading",
   transmission: "The envelope: walls by facing, their hosted windows and doors, roofs and their skylights",
   "volume-surface": "Volumes, surface areas and their ratios",
+  mechanical: "Heating, cooling and ventilation systems, their efficiencies and their loads",
+  "tedi-teli": "Thermal energy demand and loss intensities, heating and cooling",
+  teui: "Total energy use: the TEUI, peak loads, energy cost and the reduction from Reference",
+  sankey: "Where the energy goes: the building's flows as a diagram",
+  "dependency-graph": "Which value depends on which: every field and its links",
+  optimize: "The paths between the Reference and Target configurations",
+  wombat: "The building's thermal topology, drawn in 3D",
+  notes: "Project notes and the QC report",
+  f280: "Residential heat loss and heat gain to CSA F280, with the designer's certification",
   glossary: `${GLOSSARY.length} terms: OBJECTIVE's own and the building-science vocabulary`
 };
 
 const PANEL_BODIES = {
-  introduction: `
-    <div class="beam-tbd bw-intro">
-      <img src="graphics/objective-logo.svg" alt="OBJECTIVE" class="bw-intro-logo" />
-      <p class="bw-intro-tagline">the targeted energy use intensity tool</p>
-      <h3>OBJECTIVE 4.0</h3>
-      <p class="bw-intro-lede">
-        The bridge from OBJECTIVE's annual energy model to dynamic hourly analysis, ASHRAE 140 compliance and the
-        ABCD.EARTH building model.
-      </p>
-
-      <h3>What 4.0 changes</h3>
-      <ul class="bw-intro-list">
-        <li>Every above-grade wall faces a direction.</li>
-        <li>Every window and door sits in a wall, and every skylight in a roof; an opening's area is its width × height.</li>
-        <li>Window overhangs set summer shading by CSA F280 Annex A.</li>
-        <li>The envelope can come straight from <a href="takeoffeh.html" class="db-kv-link">Take Off, Eh!</a>: each wall with its facing, each window with its width and height.</li>
-        <li>Files say their version, so a 4.0 project always reopens whole.</li>
-      </ul>
-
-      <h3>Status: in development</h3>
-      <p>
-        OBJECTIVE's sections are coming across one by one into the sidebar (S01–S21), each as a full page;
-        the key values above, and in the band at the top of every section, fill in once the engine arrives.
-        OBJECTIVE 3 stays live at
-        <a href="https://objective.openbuilding.ca" class="db-kv-link" target="_blank" rel="noopener">objective.openbuilding.ca</a>.
-      </p>
-      <p>
-        Companion tools: <a href="takeoffeh.html" class="db-kv-link">Take Off, Eh!</a> (area takeoff),
-        <a href="builders/material-builder.html" class="db-kv-link">Materials</a>,
-        <a href="index.html" class="db-kv-link">all OpenBuilding.ca tools</a>.
-      </p>
-    </div>
-  `,
   glossary: renderGlossaryPanel()
 };
 

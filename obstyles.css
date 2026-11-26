@@ -2879,6 +2879,66 @@ body {
 .op-v3 button:not(.btn):not(.bw-asm-toggle):hover {
   border-color: var(--accent-lit) !important;
 }
+/* "Using this calculator" (#disclaimerModal): V3's disclaimer modal, dark, with its yellow header and the
+   masthead's yellow Disclaimer button. */
+#disclaimerModal .modal-content {
+  background: var(--bg-surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  line-height: 1.5;
+}
+#disclaimerModal .modal-header {
+  background: rgba(233, 196, 106, 0.18);
+  border-color: var(--border);
+}
+#disclaimerModal .modal-footer {
+  border-color: var(--border);
+}
+#disclaimerModal .btn-close {
+  filter: invert(1);
+}
+#disclaimerModal .bw-intro {
+  padding: 8px 16px 4px;
+}
+#disclaimerModal .bw-intro-logo {
+  width: 180px;
+}
+#disclaimerModal h3 {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 700;
+  margin: 16px 0 6px;
+}
+.op-disclaimer-alert {
+  margin: 8px 0 16px;
+  padding: 10px 14px;
+  border: 1px solid var(--gold);
+  border-radius: 5px;
+  background: rgba(233, 196, 106, 0.12);
+  color: var(--gold);
+}
+.op-disclaimer-alert a {
+  color: var(--gold);
+  font-weight: 700;
+}
+.op-disclaimer-list {
+  margin: 0 0 12px;
+  padding-left: 20px;
+}
+.op-disclaimer-tools {
+  color: var(--text-dim);
+}
+.beam-nav .nav-btn.op-disclaimer-btn {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #1a1a1c;
+  font-weight: 600;
+  cursor: pointer;
+}
+.beam-nav .nav-btn.op-disclaimer-btn:hover {
+  filter: brightness(1.1);
+}
 /* V3's Load Sample modal (#sampleProjectModal), dark. */
 #sampleProjectModal .modal-content {
   background: var(--bg-surface);
@@ -5052,7 +5112,7 @@ body.reference-mode .op-v3 input:disabled {
 /* ── §8d OBJECTIVE in print: the browser's own Print makes the report ───────
    (Andy 2026-11-26: "We lean 100% on the browser's print functions. Nothing fancy.") The page's chrome is
    left out, the one page of cards flows over as many sheets as it needs, and the neutrals are re-pointed
-   to ink on white. A collapsed card prints as its header alone. As V3: landscape with narrow margins,
+   to ink on white. Every section prints, open or collapsed on screen. As V3: landscape with narrow margins,
    colour kept (it is data), buttons and Notes & Debug left out. The sections are laid out for a 1440 px
    window, so the page is scaled to fit the sheet's width. */
 @media print {
@@ -5103,7 +5163,8 @@ body.reference-mode .op-v3 input:disabled {
   .app-beamweb #beam-status-bar,
   .app-beamweb #bw-pdf-import-backdrop,
   .app-beamweb #bw-pdf-import-modal,
-  .app-beamweb .bw-intro {
+  .app-beamweb .modal,
+  .app-beamweb .modal-backdrop {
     display: none !important;
   }
   .app-beamweb #beam-content {
@@ -5113,6 +5174,10 @@ body.reference-mode .op-v3 input:disabled {
   }
   .app-beamweb #beam-content .bw-asm-group {
     overflow: visible;
+  }
+  /* every section prints, open or collapsed on screen */
+  .app-beamweb .op-v3-card > .bw-asm-group-body[hidden] {
+    display: block !important; /* over Bootstrap's [hidden] */
   }
   .app-beamweb .bw-asm-group-header {
     break-after: avoid;

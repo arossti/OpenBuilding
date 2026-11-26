@@ -40,6 +40,16 @@
         <div class="beam-spacer"></div>
         <div id="op-hud" class="op-hud" role="region" aria-label="S01 key values"></div>
         <nav class="beam-nav">
+          <button
+            type="button"
+            class="nav-btn op-disclaimer-btn"
+            id="disclaimerBtn"
+            data-bs-toggle="modal"
+            data-bs-target="#disclaimerModal"
+            title="Using this calculator: what 4.0 is, and the disclaimer"
+          >
+            &#9432; Disclaimer
+          </button>
           <a href="index.html" class="nav-btn" target="_blank" rel="noopener" title="App directory / home">Home</a>
           <a href="takeoffeh.html" class="nav-btn" target="_blank" rel="noopener" title="PDF takeoff + area extraction"
             >Take Off, Eh!</a
@@ -363,6 +373,93 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── "Using this calculator": V3's disclaimer modal, with 4.0's introduction. Shown on the first launch
+           (objective4.mjs) and from the masthead's Disclaimer button. -->
+      <div
+        class="modal fade"
+        id="disclaimerModal"
+        tabindex="-1"
+        aria-labelledby="disclaimerModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="disclaimerModalLabel">Using this calculator</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="bw-intro">
+                <img src="graphics/objective-logo.svg" alt="OBJECTIVE" class="bw-intro-logo" />
+                <p class="bw-intro-tagline">the targeted energy use intensity tool</p>
+                <h3>OBJECTIVE 4.0</h3>
+                <p class="bw-intro-lede">
+                  The bridge from OBJECTIVE's annual energy model to dynamic hourly analysis, ASHRAE 140 compliance and
+                  the ABCD.EARTH building model.
+                </p>
+              </div>
+
+              <div class="op-disclaimer-alert" role="alert">
+                <strong>&#9888;&#65039; DEMO ONLY</strong> - OBJECTIVE 4.0 is under active development and debugging.
+                <strong>DO NOT USE for real projects yet.</strong> For production work, OBJECTIVE 3 stays live at
+                <a href="https://objective.openbuilding.ca" target="_blank" rel="noopener">objective.openbuilding.ca</a
+                >.
+              </div>
+
+              <p>
+                This tool helps you calculate the Total Energy Use Intensity (TEUI) &amp; Thermal Energy Demand
+                Intensity (TEDI) of a building or home using its own proprietary methods.
+              </p>
+              <p>
+                Enter your information. Default values from an A2 Event Centre exist to speed up the process, but you
+                must over-write them with relevant values from your own project. Results will be calculated
+                automatically.
+              </p>
+
+              <h3 class="op-disclaimer-h">What 4.0 changes</h3>
+              <ul class="op-disclaimer-list">
+                <li>Every above-grade wall faces a direction.</li>
+                <li>
+                  Every window and door sits in a wall, and every skylight in a roof; an opening's area is its width ×
+                  height.
+                </li>
+                <li>Window overhangs set summer shading by CSA F280 Annex A.</li>
+                <li>
+                  The envelope can come straight from <a href="takeoffeh.html" class="db-kv-link">Take Off, Eh!</a>:
+                  each wall with its facing, each window with its width and height.
+                </li>
+                <li>Files say their version, so a 4.0 project always reopens whole.</li>
+              </ul>
+              <hr />
+              <p>
+                <strong>Disclaimer:</strong> OBJECTIVE 4.0 is software IN DEVELOPMENT. IT IS NOT YET COMPLETE! As such
+                it is not fit for any purpose, and is meant for demonstration only. Our team has made every effort to
+                have OBJECTIVE's Targeted Energy Use match real-world values by reviewing a wide range of actual
+                building types and their utility bills, but <strong>no</strong> energy model can accurately predict
+                energy use due to hundreds of influences beyond the ability to model, among other things, exact weather
+                in a given year, user behaviours, or actual commissioned equipment or envelope efficiencies. This
+                modelling tool aims to set Targets in a way that is consistent with measured results, but our experience
+                has shown that with correct use, we can arrive at values very close to real-world, utility-bill values
+                for total energy use. 'Accuracy of results' has been our primary focus, not 'similarity of methods' to
+                other energy modelling tools.
+              </p>
+              <p>
+                Only for Canadian projects. If you are interested in a localization for your own country, please contact
+                OBJECTIVE support at andy@openbuilding.ca
+              </p>
+              <p class="op-disclaimer-tools">
+                Companion tools: <a href="takeoffeh.html" class="db-kv-link">Take Off, Eh!</a> (area takeoff),
+                <a href="builders/material-builder.html" class="db-kv-link">Materials</a>,
+                <a href="index.html" class="db-kv-link">all OpenBuilding.ca tools</a>.
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="beam-action-btn primary" data-bs-dismiss="modal">Got it</button>
             </div>
           </div>
         </div>
