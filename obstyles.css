@@ -2879,6 +2879,94 @@ body {
 .op-v3 button:not(.btn):not(.bw-asm-toggle):hover {
   border-color: var(--accent-lit) !important;
 }
+/* "Using this calculator" (#disclaimerModal): V3's disclaimer modal, dark, with its yellow header and the
+   masthead's yellow Disclaimer button. */
+#disclaimerModal .modal-content {
+  background: var(--bg-surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  line-height: 1.5;
+}
+#disclaimerModal .modal-header {
+  background: rgba(233, 196, 106, 0.18);
+  border-color: var(--border);
+}
+#disclaimerModal .modal-footer {
+  border-color: var(--border);
+}
+#disclaimerModal .btn-close {
+  filter: invert(1);
+}
+/* Wide, so the whole text shows without scrolling on most windows (Andy 2026-11-26) */
+#disclaimerModal .op-disclaimer-dialog {
+  max-width: min(1280px, calc(100vw - 48px));
+  margin-top: 12px;
+  margin-bottom: 12px;
+  min-height: calc(100% - 24px);
+}
+#disclaimerModal .modal-header,
+#disclaimerModal .modal-footer {
+  padding: 8px 16px;
+}
+#disclaimerModal .modal-body {
+  padding: 10px 20px 6px;
+}
+#disclaimerModal .modal-body p {
+  margin-bottom: 8px;
+}
+#disclaimerModal hr {
+  margin: 8px 0;
+}
+#disclaimerModal .bw-intro {
+  padding: 0 16px;
+}
+#disclaimerModal .bw-intro-logo {
+  width: 110px;
+  margin-bottom: 12px;
+}
+#disclaimerModal .bw-intro-tagline {
+  font-size: 14px;
+  margin: -4px 0 8px;
+}
+#disclaimerModal .bw-intro-lede {
+  margin: 4px 0 8px;
+}
+#disclaimerModal h3 {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 700;
+  margin: 8px 0 4px;
+}
+.op-disclaimer-alert {
+  margin: 6px 0 10px;
+  padding: 8px 14px;
+  border: 1px solid var(--gold);
+  border-radius: 5px;
+  background: rgba(233, 196, 106, 0.12);
+  color: var(--gold);
+}
+.op-disclaimer-alert a {
+  color: var(--gold);
+  font-weight: 700;
+}
+.op-disclaimer-list {
+  margin: 0 0 8px;
+  padding-left: 20px;
+}
+.op-disclaimer-tools {
+  color: var(--text-dim);
+}
+.beam-nav .nav-btn.op-disclaimer-btn {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #1a1a1c;
+  font-weight: 600;
+  cursor: pointer;
+}
+.beam-nav .nav-btn.op-disclaimer-btn:hover {
+  filter: brightness(1.1);
+}
 /* V3's Load Sample modal (#sampleProjectModal), dark. */
 #sampleProjectModal .modal-content {
   background: var(--bg-surface);
@@ -3154,27 +3242,30 @@ body {
   background: var(--bg);
 }
 
-.beam-tab-panel {
-  display: none;
+/* The one page: every section's card in one container (objective4.mjs sectionCard) */
+.op-onepage {
+  display: flex;
+  flex-direction: column;
 }
-.beam-tab-panel.active {
-  display: block;
+.op-v3-card {
+  scroll-margin-top: 0;
 }
-
-.beam-panel-header {
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 10px;
-  margin-bottom: 16px;
+body.reference-mode .op-v3-card {
+  scroll-margin-top: 28px; /* clear of the pinned REFERENCE MODEL band */
 }
-.beam-panel-title {
-  font-family: var(--font-head);
-  font-size: 20px;
-  color: var(--text);
-  margin: 0 0 4px 0;
-}
-.beam-panel-subtitle {
-  font-size: 12px;
+.op-card-subtitle {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 11px;
   color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#op-toggle-all {
+  min-width: 28px;
+  justify-content: center;
+  font-weight: 700;
 }
 .beam-panel-phase {
   display: inline-block;
@@ -5044,4 +5135,158 @@ body.reference-mode .op-v3 select:disabled,
 body.reference-mode .op-v3 input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* V3's print-only elements: hidden on screen */
+.print-only {
+  display: none;
+}
+
+/* ── §8d OBJECTIVE in print: the browser's own Print makes the report ───────
+   (Andy 2026-11-26: "We lean 100% on the browser's print functions. Nothing fancy.") The page's chrome is
+   left out, the one page of cards flows over as many sheets as it needs, and the neutrals are re-pointed
+   to ink on white. Every section prints, open or collapsed on screen. As V3: landscape with narrow margins,
+   colour kept (it is data), buttons and Notes & Debug left out. The sections are laid out for a 1440 px
+   window, so the page is scaled to fit the sheet's width. */
+@media print {
+  @page {
+    size: landscape;
+    margin: 0.25in;
+  }
+  .app-beamweb .op-onepage {
+    zoom: 0.8;
+  }
+  .app-beamweb #beam-content * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .app-beamweb #beam-content button,
+  .app-beamweb #beam-content .beam-ref-controls,
+  .app-beamweb #beam-panel-notes {
+    display: none !important;
+  }
+  html.app-beamweb {
+    --ob-ground: #fff;
+    --ob-win: #fff;
+    --ob-panel: #fff;
+    --ob-panel-2: #f4f4f5;
+    --ob-input: #fff;
+    --ob-line: #b4b4bb;
+    --ob-line-soft: #d4d4d8;
+    --ob-text: #18181b;
+    --ob-dim: #52525b;
+    --ob-faint: #71717a;
+    --ob-accent: #0e7490;
+  }
+  html.app-beamweb,
+  html.app-beamweb body {
+    height: auto;
+    overflow: visible;
+    background: #fff;
+  }
+  .app-beamweb #beam-app,
+  .app-beamweb #beam-main {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+  .app-beamweb .beam-header,
+  .app-beamweb #beam-action-bar,
+  .app-beamweb #beam-sidebar,
+  .app-beamweb #beam-status-bar,
+  .app-beamweb #bw-pdf-import-backdrop,
+  .app-beamweb #bw-pdf-import-modal,
+  .app-beamweb .modal,
+  .app-beamweb .modal-backdrop {
+    display: none !important;
+  }
+  .app-beamweb #beam-content {
+    overflow: visible;
+    padding: 0;
+    background: #fff;
+  }
+  .app-beamweb #beam-content .bw-asm-group {
+    overflow: visible;
+  }
+  /* every section prints, open or collapsed on screen */
+  .app-beamweb .op-v3-card > .bw-asm-group-body[hidden] {
+    display: block !important; /* over Bootstrap's [hidden] */
+  }
+  .app-beamweb .bw-asm-group-header {
+    break-after: avoid;
+  }
+  .app-beamweb .op-v3 tr {
+    break-inside: avoid;
+  }
+  /* S19's drawing is 900 px wide beside its controls: let its viewBox scale it to the sheet */
+  .app-beamweb .wombat-svg-wrapper {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .app-beamweb .wombat-svg-wrapper svg {
+    max-width: 100%;
+    height: auto;
+  }
+  body.reference-mode #beam-content::before {
+    position: static;
+    margin: 0 0 12px;
+  }
+
+  /* The last page: V3's disclaimer, its rules verbatim (andy-rnd src/styles.css) */
+  #print-disclaimer-page {
+    display: block !important;
+    page-break-before: always; /* Start on new page after sections */
+    /* No page-break-after - allow footer to follow on same page if it fits */
+    padding: 0.75in 0.5in;
+    max-width: 100%;
+  }
+
+  .disclaimer-content h2 {
+    font-size: 20pt;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    text-align: center;
+    color: #000;
+  }
+
+  .disclaimer-content h3 {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    color: #000;
+  }
+
+  .disclaimer-content .disclaimer-date {
+    font-size: 9pt;
+    font-style: italic;
+    text-align: center;
+    margin-bottom: 1em;
+    color: #666;
+  }
+
+  .disclaimer-content p {
+    font-size: 10pt;
+    line-height: 1.6;
+    margin-bottom: 0.8em;
+    color: #000;
+    text-align: justify;
+  }
+
+  .disclaimer-content .disclaimer-text {
+    font-size: 10pt;
+    line-height: 1.6;
+    margin-bottom: 1em;
+  }
+
+  .disclaimer-content hr {
+    margin: 1.2em 0;
+    border: none;
+    border-top: 2px solid #ccc;
+  }
+
+  .disclaimer-content a {
+    color: #0066cc;
+    text-decoration: underline;
+  }
 }

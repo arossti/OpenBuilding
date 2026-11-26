@@ -40,6 +40,16 @@
         <div class="beam-spacer"></div>
         <div id="op-hud" class="op-hud" role="region" aria-label="S01 key values"></div>
         <nav class="beam-nav">
+          <button
+            type="button"
+            class="nav-btn op-disclaimer-btn"
+            id="disclaimerBtn"
+            data-bs-toggle="modal"
+            data-bs-target="#disclaimerModal"
+            title="Using this calculator: what 4.0 is, and the disclaimer"
+          >
+            &#9432; Disclaimer
+          </button>
           <a href="index.html" class="nav-btn" target="_blank" rel="noopener" title="App directory / home">Home</a>
           <a href="takeoffeh.html" class="nav-btn" target="_blank" rel="noopener" title="PDF takeoff + area extraction"
             >Take Off, Eh!</a
@@ -163,6 +173,17 @@
         </div>
 
         <span class="beam-project-name" id="beam-project-name">(untitled project)</span>
+
+        <!-- Every section at once (V3's + / −): − collapses them all, + expands them all -->
+        <button
+          class="beam-action-btn"
+          id="op-toggle-all"
+          type="button"
+          aria-expanded="true"
+          title="Collapse every section"
+        >
+          &minus;
+        </button>
 
         <!-- Hidden file inputs -->
         <input type="file" id="excel-file-input" accept=".csv,.xlsx,.xls" hidden />
@@ -357,6 +378,93 @@
         </div>
       </div>
 
+      <!-- ── "Using this calculator": V3's disclaimer modal, with 4.0's introduction. Shown on the first launch
+           (objective4.mjs) and from the masthead's Disclaimer button. -->
+      <div
+        class="modal fade"
+        id="disclaimerModal"
+        tabindex="-1"
+        aria-labelledby="disclaimerModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered op-disclaimer-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="disclaimerModalLabel">Using this calculator</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="bw-intro">
+                <img src="graphics/objective-logo.svg" alt="OBJECTIVE" class="bw-intro-logo" />
+                <p class="bw-intro-tagline">the targeted energy use intensity tool</p>
+                <h3>OBJECTIVE 4.0</h3>
+                <p class="bw-intro-lede">
+                  The bridge from OBJECTIVE's annual energy model to dynamic hourly analysis, ASHRAE 140 compliance and
+                  the ABCD.EARTH building model.
+                </p>
+              </div>
+
+              <div class="op-disclaimer-alert" role="alert">
+                <strong>&#9888;&#65039; DEMO ONLY</strong> - OBJECTIVE 4.0 is under active development and debugging.
+                <strong>DO NOT USE for real projects yet.</strong> For production work, OBJECTIVE 3 stays live at
+                <a href="https://objective.openbuilding.ca" target="_blank" rel="noopener">objective.openbuilding.ca</a
+                >.
+              </div>
+
+              <p>
+                This tool helps you calculate the Total Energy Use Intensity (TEUI) &amp; Thermal Energy Demand
+                Intensity (TEDI) of a building or home using its own proprietary methods.
+              </p>
+              <p>
+                Enter your information. Default values from an A2 Event Centre exist to speed up the process, but you
+                must over-write them with relevant values from your own project. Results will be calculated
+                automatically.
+              </p>
+
+              <h3 class="op-disclaimer-h">What 4.0 changes</h3>
+              <ul class="op-disclaimer-list">
+                <li>Every above-grade wall faces a direction.</li>
+                <li>
+                  Every window and door sits in a wall, and every skylight in a roof; an opening's area is its width ×
+                  height.
+                </li>
+                <li>Window overhangs set summer shading by CSA F280 Annex A.</li>
+                <li>
+                  The envelope can come straight from <a href="takeoffeh.html" class="db-kv-link">Take Off, Eh!</a>:
+                  each wall with its facing, each window with its width and height.
+                </li>
+                <li>Files say their version, so a 4.0 project always reopens whole.</li>
+              </ul>
+              <hr />
+              <p>
+                <strong>Disclaimer:</strong> OBJECTIVE 4.0 is software IN DEVELOPMENT. IT IS NOT YET COMPLETE! As such
+                it is not fit for any purpose, and is meant for demonstration only. Our team has made every effort to
+                have OBJECTIVE's Targeted Energy Use match real-world values by reviewing a wide range of actual
+                building types and their utility bills, but <strong>no</strong> energy model can accurately predict
+                energy use due to hundreds of influences beyond the ability to model, among other things, exact weather
+                in a given year, user behaviours, or actual commissioned equipment or envelope efficiencies. This
+                modelling tool aims to set Targets in a way that is consistent with measured results, but our experience
+                has shown that with correct use, we can arrive at values very close to real-world, utility-bill values
+                for total energy use. 'Accuracy of results' has been our primary focus, not 'similarity of methods' to
+                other energy modelling tools.
+              </p>
+              <p>
+                Only for Canadian projects. If you are interested in a localization for your own country, please contact
+                OBJECTIVE support at andy@openbuilding.ca
+              </p>
+              <p class="op-disclaimer-tools">
+                Companion tools: <a href="takeoffeh.html" class="db-kv-link">Take Off, Eh!</a> (area takeoff),
+                <a href="builders/material-builder.html" class="db-kv-link">Materials</a>,
+                <a href="index.html" class="db-kv-link">all OpenBuilding.ca tools</a>.
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="beam-action-btn primary" data-bs-dismiss="modal">Got it</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ── Main: tabs sidebar + content panel ──────────── -->
       <div id="beam-main">
         <nav id="beam-sidebar">
@@ -364,8 +472,77 @@
         </nav>
 
         <section id="beam-content">
-          <!-- Tab panels rendered by objective4.mjs. One active at a time. -->
+          <!-- The one page: every section's card, rendered by objective4.mjs -->
         </section>
+      </div>
+
+      <!-- The print-only disclaimer page: V3's, verbatim (andy-rnd index.html #print-disclaimer-page). Hidden on
+           screen; the last page of the printed report (obstyles.css §8d). -->
+      <div id="print-disclaimer-page" class="print-only">
+        <div class="disclaimer-content">
+          <h2>DISCLAIMER</h2>
+
+          <p class="disclaimer-date">
+            <em>Disclaimer last updated: April 2025. Subject to change without notice.</em>
+          </p>
+
+          <p class="disclaimer-text">
+            <strong>Use at Your Own Risk:</strong> OpenBuilding, including its directors, advisors, and volunteers,
+            makes no guarantees and assumes no legal responsibility for the accuracy, completeness, or usefulness of
+            this tool. We have made reasonable efforts to review and ensure that the information provided is factually
+            correct, comprehensive, and up-to-date. However, this tool and any related content should not be used as a
+            substitute for the expertise of a licensed architect or engineer. Always consult a knowledgeable
+            professional before using this tool to inform decisions. This tool is designed to assist with evaluating
+            energy and carbon targets during early-stage design only, and it is not a substitute for professional
+            engineering or architectural services. Information in this tool may change and is not intended to cover all
+            possible building types, system designs, building codes, standards, or occupancy scenarios. The absence of
+            warnings does not imply that this tool is accurate, compliant with standards, effective, or appropriate for
+            every situation. Energy simulation or performance compliance methods cannot guarantee that a finished
+            building will meet proposed targets due to factors beyond the control of any software, including user
+            behavior, construction methods, site conditions, and climate variability. For example, weather data alone,
+            over a 5-year period for the same Canadian location, can affect actual TEUI by up to 40%. Tools like
+            OBJECTIVE are not intended to predict actual performance but to help set targets over a baseline or
+            reference case. As stated in an Informative Note from ASHRAE Standard 90.1-2013, "...actual experience will
+            differ from these calculations due to variations such as occupancy, building operation and maintenance,
+            weather, energy use not covered by this standard, changes in energy rates between design of the building and
+            occupancy, and precision of the calculation tool." Load calculations provided by a Mechanical Consultant
+            take precedence over those generated by this tool. Architectural energy performance outputs should serve
+            only as a reference for mechanical loads and to support data tables from Building Codes. Users must verify
+            that any data in the 'Reference Values' section of this tool conforms to the most current and relevant
+            sections of applicable building codes. We have provided some limited sample reference values to demonstrate
+            how this section is intended to function but it is neither an exhaustive or complete list as there are
+            simply far too many variables to add for every type of building occupancy and type, for every province in
+            Canada. Building codes, standards, and professional regulations vary by province and territory. Users are
+            responsible for ensuring compliance with local requirements. This tool is intended for use by licensed
+            professionals with the requisite insurance to undertake professional design activities in their respective
+            jurisdiction in Canada. Use of this tool constitutes an acknowledgment that the user meets these
+            qualifications and agrees to the terms of use stated here and agreed upon during download.
+          </p>
+
+          <hr />
+
+          <h3>License</h3>
+          <p>
+            Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International<br />
+            (CC BY-NC-ND 4.0)
+          </p>
+          <p>© OpenBuilding, Inc., 2025</p>
+          <p>
+            This work is licensed for non-commercial use only. See LICENSE for full terms.<br />
+            Supported by the Ontario Association of Architects (OAA).
+          </p>
+
+          <hr />
+
+          <h3>Credits</h3>
+          <p>
+            <strong>Created by:</strong> Andy Thomson, OAA, OpenBuilding, Inc. <strong>Contributors:</strong> Mark H
+            Pavlidis, OpenBuilding, Inc. <strong>Mentors, Advisors & Peer Review:</strong> Evelyne Bouchard, OAQ, CPHD |
+            Pamela DeMelo, P.Eng. | INVISIJ Architects | Dr. Ted Kesik, P.Eng | Joanne McCallum, OAA, FRAIC | Stephen
+            Pope, OAA, FRAIC | Sheena Sharp, OAA, MRAIC | Tandem Architecture | Grant Walkin, P.Eng | John Peterson,
+            OAA, MRAIC | McCallum Sather Architects | MJMA | Thomson Architecture, Inc.
+          </p>
+        </div>
       </div>
 
       <!-- Sidebar results footer — floats above tabs on large screens; for now kept as a simple status row in the status bar -->

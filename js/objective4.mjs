@@ -105,7 +105,21 @@ function boot() {
   wireImportModal();
   wireKeyboard();
   wireGlossarySearch();
+  // On launch only S01 is open (Andy 2026-11-26); the sidebar opens a section, and it stays open until closed.
+  for (const card of document.querySelectorAll(".op-v3-card")) setCardOpen(card, card.dataset.tabId === DEFAULT_TAB);
+  syncToggleAll();
   setActiveTab(readInitialTabFromHash() || DEFAULT_TAB);
+  showDisclaimerOnFirstLaunch();
+}
+
+// "Using this calculator" (V3's disclaimer modal): shown on the first launch, and from the masthead's
+// yellow Disclaimer button after that.
+const DISCLAIMER_SEEN = "objective4DisclaimerSeen";
+function showDisclaimerOnFirstLaunch() {
+  const el = document.getElementById("disclaimerModal");
+  if (!el || !window.bootstrap) return;
+  el.addEventListener("hidden.bs.modal", () => localStorage.setItem(DISCLAIMER_SEEN, "true"));
+  if (!localStorage.getItem(DISCLAIMER_SEEN)) new window.bootstrap.Modal(el).show();
 }
 
 function wireGlossarySearch() {
@@ -153,109 +167,103 @@ function renderSidebar() {
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Content — render one panel per tab. Hidden until activated.
+// Content — ONE page: every section is a card in one container, all present
+// (Andy 2026-11-26, as V3: the sidebar scrolls to a card, one + / − in the
+// button row opens or closes them all, and the browser's Print prints the lot).
 // ──────────────────────────────────────────────────────────────────────
 function renderContentShell() {
   const content = document.getElementById("beam-content");
-  const frag = document.createDocumentFragment();
-  for (const tab of FLAT_TABS) {
-    const panel = document.createElement("div");
-    panel.className = "beam-tab-panel";
-    panel.id = `beam-panel-${tab.id}`;
-    panel.innerHTML = renderPanelBody(tab);
-    // Adopt the V3 section (FieldManager renders into its .section-content on
-    // DOMContentLoaded, which this module runs before).
-    // V3's section goes first, under the panel header (S01: above the intro;
-    // S02: above the PROJECT form).
-    const v3 = tab.v3 && document.getElementById(tab.v3);
-    if (v3) panel.querySelector(".beam-panel-header").after(v3Card(tab, v3));
-    frag.appendChild(panel);
-  }
-  content.replaceChildren(frag);
+  const page = document.createElement("div");
+  page.className = "op-onepage";
+  for (const tab of FLAT_TABS) page.appendChild(sectionCard(tab));
+  content.replaceChildren(page);
   document.getElementById("op-v3-sections")?.remove();
 }
 
-// A V3 section in the V4 card the PROJECT form uses (.bw-asm-group): a
-// collapsible header naming the section, V3's table as the body.
-function v3Card(tab, v3) {
+// A section's card (.bw-asm-group, the PROJECT form's): a radiused, collapsible
+// header carrying the section's name and its subtitle, and a body holding V3's
+// section (FieldManager renders into its .section-content on DOMContentLoaded,
+// which this module runs before) and then anything of the page's own.
+function sectionCard(tab) {
   const card = document.createElement("section");
   card.className = "bw-asm-group op-v3-card";
+  card.id = `beam-panel-${tab.id}`;
+  card.dataset.tabId = tab.id;
+  const sub = PANEL_SUBTITLES[tab.id];
   card.innerHTML = `
     <header class="bw-asm-group-header">
       <button class="bw-asm-toggle" type="button" aria-expanded="true">\u25BC</button>
       <h3 class="bw-asm-group-name">S${pad2(tab.num)} ${escapeHtml(tab.label)}</h3>
+      ${sub ? `<span class="op-card-subtitle">${escapeHtml(sub)}</span>` : ""}
     </header>
-    <div class="bw-asm-group-body"></div>`;
-  card.querySelector(".bw-asm-group-body").appendChild(v3);
+    <div class="bw-asm-group-body">${PANEL_BODIES[tab.id] || ""}</div>`;
+  const v3 = tab.v3 && document.getElementById(tab.v3);
+  if (v3) card.querySelector(".bw-asm-group-body").prepend(v3);
   card.querySelector(".bw-asm-group-header").addEventListener("click", () => {
-    const body = card.querySelector(".bw-asm-group-body");
-    const btn = card.querySelector(".bw-asm-toggle");
-    body.hidden = !body.hidden;
-    btn.textContent = body.hidden ? "\u25B6" : "\u25BC";
-    btn.setAttribute("aria-expanded", String(!body.hidden));
+    setCardOpen(card, card.querySelector(".bw-asm-group-body").hidden);
+    syncToggleAll();
   });
   return card;
+}
+
+function setCardOpen(card, open) {
+  const body = card.querySelector(".bw-asm-group-body");
+  const btn = card.querySelector(".bw-asm-toggle");
+  body.hidden = !open;
+  btn.textContent = open ? "\u25BC" : "\u25B6";
+  btn.setAttribute("aria-expanded", String(open));
+}
+
+// The + / − at the far right of the button row: − closes every card, + opens them all.
+function anyCardOpen() {
+  return [...document.querySelectorAll(".op-v3-card > .bw-asm-group-body")].some((b) => !b.hidden);
+}
+function syncToggleAll() {
+  const btn = document.getElementById("op-toggle-all");
+  if (!btn) return;
+  const open = anyCardOpen();
+  btn.textContent = open ? "\u2212" : "+";
+  btn.title = open ? "Collapse every section" : "Expand every section";
+  btn.setAttribute("aria-expanded", String(open));
+}
+function toggleAllCards() {
+  const open = !anyCardOpen();
+  for (const card of document.querySelectorAll(".op-v3-card")) setCardOpen(card, open);
+  syncToggleAll();
+  scrollToCard(state.activeTab); // the section being read stays at the top
 }
 
 function pad2(n) {
   return String(n).padStart(2, "0");
 }
 
-function renderPanelBody(tab) {
-  const body = PANEL_BODIES[tab.id] || "";
-  return `
-    <div class="beam-panel-header">
-      <h2 class="beam-panel-title">S${pad2(tab.num)} · ${escapeHtml(tab.label)}</h2>
-      <div class="beam-panel-subtitle">${escapeHtml(PANEL_SUBTITLES[tab.id] || "")}</div>
-    </div>
-    ${body}
-  `;
-}
-
-// Per-tab subtitle and body overrides. Stubs where calcs aren't implemented yet;
-// real content replaces these per phase.
+// Per-section subtitle (shown in the card's header, beside the name) and the page's own body, under V3's.
 const PANEL_SUBTITLES = {
   introduction: "The overview: Lifetime Carbon, Annual Carbon and TEUI, Reference · Target · Actual",
   project: "Building information: occupancy, standards, service life, energy prices and project data",
+  climate: "The weather station, degree days, design temperatures and the ground",
+  "actual-target": "Utility bills against the Target, by fuel: energy, emissions and primary energy",
+  emissions: "Operational carbon (B6) each year and over the service life; embodied carbon (A1-3)",
+  renewables: "Photovoltaics, wind, offsite renewables and the loads kept out of the TEUI",
+  water: "Water use, hot water demand, its system and drain water heat recovery",
+  iaq: "Radon, CO2, TVOC and indoor humidity against guidance limits",
+  "occupant-gains": "Occupants, plug, lighting and equipment loads, and the heat they give off",
+  "radiant-gains": "Solar gains through each window and door: orientation, SHGC and shading",
   transmission: "The envelope: walls by facing, their hosted windows and doors, roofs and their skylights",
   "volume-surface": "Volumes, surface areas and their ratios",
+  mechanical: "Heating, cooling and ventilation systems, their efficiencies and their loads",
+  "tedi-teli": "Thermal energy demand and loss intensities, heating and cooling",
+  teui: "Total energy use: the TEUI, peak loads, energy cost and the reduction from Reference",
+  sankey: "Where the energy goes: the building's flows as a diagram",
+  "dependency-graph": "Which value depends on which: every field and its links",
+  optimize: "The paths between the Reference and Target configurations",
+  wombat: "The building's thermal topology, drawn in 3D",
+  notes: "Project notes and the QC report",
+  f280: "Residential heat loss and heat gain to CSA F280, with the designer's certification",
   glossary: `${GLOSSARY.length} terms: OBJECTIVE's own and the building-science vocabulary`
 };
 
 const PANEL_BODIES = {
-  introduction: `
-    <div class="beam-tbd bw-intro">
-      <img src="graphics/objective-logo.svg" alt="OBJECTIVE" class="bw-intro-logo" />
-      <p class="bw-intro-tagline">the targeted energy use intensity tool</p>
-      <h3>OBJECTIVE 4.0</h3>
-      <p class="bw-intro-lede">
-        The bridge from OBJECTIVE's annual energy model to dynamic hourly analysis, ASHRAE 140 compliance and the
-        ABCD.EARTH building model.
-      </p>
-
-      <h3>What 4.0 changes</h3>
-      <ul class="bw-intro-list">
-        <li>Every above-grade wall faces a direction.</li>
-        <li>Every window and door sits in a wall, and every skylight in a roof; an opening's area is its width × height.</li>
-        <li>Window overhangs set summer shading by CSA F280 Annex A.</li>
-        <li>The envelope can come straight from <a href="takeoffeh.html" class="db-kv-link">Take Off, Eh!</a>: each wall with its facing, each window with its width and height.</li>
-        <li>Files say their version, so a 4.0 project always reopens whole.</li>
-      </ul>
-
-      <h3>Status: in development</h3>
-      <p>
-        OBJECTIVE's sections are coming across one by one into the sidebar (S01–S21), each as a full page;
-        the key values above, and in the band at the top of every section, fill in once the engine arrives.
-        OBJECTIVE 3 stays live at
-        <a href="https://objective.openbuilding.ca" class="db-kv-link" target="_blank" rel="noopener">objective.openbuilding.ca</a>.
-      </p>
-      <p>
-        Companion tools: <a href="takeoffeh.html" class="db-kv-link">Take Off, Eh!</a> (area takeoff),
-        <a href="builders/material-builder.html" class="db-kv-link">Materials</a>,
-        <a href="index.html" class="db-kv-link">all OpenBuilding.ca tools</a>.
-      </p>
-    </div>
-  `,
   glossary: renderGlossaryPanel()
 };
 
@@ -365,21 +373,50 @@ function renderHud() {
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Tab routing
+// Section routing — the sidebar's S01–S22 are anchors into the one page: a
+// click opens the card and scrolls to it; scrolling marks the card at the top.
 // ──────────────────────────────────────────────────────────────────────
-function setActiveTab(tabId) {
-  if (!FLAT_TABS.some((t) => t.id === tabId)) tabId = DEFAULT_TAB;
+let spyQuietUntil = 0; // a jump's own scroll events do not re-mark the sidebar
+let pendingAnchor = null; // the #section the page was opened at, until the page has filled in above it
+
+function markActive(tabId) {
+  if (state.activeTab === tabId && document.querySelector(".beam-tab-button.active")) return;
   state.activeTab = tabId;
   for (const btn of document.querySelectorAll(".beam-tab-button")) {
-    btn.classList.toggle("active", btn.dataset.tabId === tabId);
-  }
-  for (const panel of document.querySelectorAll(".beam-tab-panel")) {
-    panel.classList.toggle("active", panel.id === `beam-panel-${tabId}`);
+    const on = btn.dataset.tabId === tabId;
+    btn.classList.toggle("active", on);
+    if (on) btn.scrollIntoView({ block: "nearest" });
   }
   if (location.hash !== `#${tabId}`) {
     history.replaceState(null, "", `#${tabId}`);
   }
-  document.getElementById("beam-content").scrollTop = 0;
+}
+function setActiveTab(tabId) {
+  if (!FLAT_TABS.some((t) => t.id === tabId)) tabId = DEFAULT_TAB;
+  const card = document.getElementById(`beam-panel-${tabId}`);
+  if (card.querySelector(".bw-asm-group-body").hidden) {
+    setCardOpen(card, true);
+    syncToggleAll();
+  }
+  scrollToCard(tabId);
+  markActive(tabId);
+}
+function scrollToCard(tabId) {
+  spyQuietUntil = Date.now() + 200;
+  if (tabId === DEFAULT_TAB) document.getElementById("beam-content").scrollTop = 0;
+  else document.getElementById(`beam-panel-${tabId}`).scrollIntoView({ block: "start" });
+}
+// The active section is the last card whose top has reached the top of the pane.
+function updateActiveFromScroll() {
+  if (Date.now() < spyQuietUntil || pendingAnchor) return;
+  const content = document.getElementById("beam-content");
+  const line = content.getBoundingClientRect().top + 60;
+  let current = DEFAULT_TAB;
+  for (const card of content.querySelectorAll(".op-v3-card")) {
+    if (card.getBoundingClientRect().top > line) break;
+    current = card.dataset.tabId;
+  }
+  markActive(current);
 }
 function readInitialTabFromHash() {
   const id = (location.hash || "").replace(/^#/, "");
@@ -387,6 +424,36 @@ function readInitialTabFromHash() {
 }
 function wireKeyboard() {
   window.addEventListener("hashchange", () => setActiveTab(readInitialTabFromHash() || state.activeTab));
+  const content = document.getElementById("beam-content");
+  let queued = false;
+  content.addEventListener(
+    "scroll",
+    () => {
+      if (queued) return;
+      queued = true;
+      window.requestAnimationFrame(() => {
+        queued = false;
+        updateActiveFromScroll();
+      });
+    },
+    { passive: true }
+  );
+  // A page opened at #section: the sections above it fill in after boot (V3's renders, then the default
+  // case), so return to the anchor once they have, unless the reader has moved on.
+  const opened = readInitialTabFromHash();
+  if (opened && opened !== DEFAULT_TAB) {
+    pendingAnchor = opened;
+    const release = () => (pendingAnchor = null);
+    for (const ev of ["wheel", "touchmove", "keydown", "pointerdown"]) {
+      document.addEventListener(ev, release, { passive: true, once: true });
+    }
+    for (const ms of [800, 2600]) {
+      setTimeout(() => {
+        if (pendingAnchor) scrollToCard(pendingAnchor);
+        if (ms === 2600) release();
+      }, ms);
+    }
+  }
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -438,6 +505,7 @@ function wireActionBar() {
     "beam-import-takeoffeh": handleImportTakeOffEh,
     "beam-trust-takeoffeh": handleTrustTakeOffEh,
     "beam-reset": handleReset,
+    "op-toggle-all": toggleAllCards,
     "op-model-target": () => showModel("target"),
     "op-model-reference": () => showModel("reference")
   };
