@@ -21,8 +21,8 @@
 ### ▶ START HERE (handoff 2026-11-26 evening, laptop) — written for a cold start after a /clear
 
 **LIVE: `main` `7507a70` (PR #23), deployed to https://arossti.github.io/OpenBuilding/.** **This branch is `OnePage`**
-(Andy named it), cut from that `main`: the one page is BUILT here (2026-11-26, below) and waits for Andy's look and
-the merge.
+(Andy named it), cut from that `main`: the one page is built (below), Andy smoked it 2026-11-26 and gave the word
+to merge it as PR #24. The next arc is PENDING 2, on a fresh branch from `main`.
 Local servers (they die on reboot): `python3 schema/scripts/nocache-serve.py 8822` here, `node test/static-server.cjs 8791`
 in andy-rnd for the V3 page.
 
@@ -44,7 +44,7 @@ in andy-rnd for the V3 page.
 
 **PENDING, in order:**
 
-1. **ONEPAGE (this branch) — ✅ BUILT, to be smoked by Andy and merged.** Andy 2026-11-26: *"each page gets a S18
+1. **ONEPAGE — ✅ PR #24, smoked by Andy.** Andy 2026-11-26: *"each page gets a S18
    title which is then duplicated in the radiused, collapsible header ... We will keep the radiused, collapsible
    headers, add the subheader text to them ... then we can move ALL collapsable header sections into one container
    instead of each one getting its own container. Then it will function like V3, where we can toggle ALL sections
@@ -71,6 +71,8 @@ in andy-rnd for the V3 page.
    - **The printed disclaimer:** V3's `#print-disclaimer-page` and its print rules, copied verbatim from andy-rnd
      (585 words, checked identical), is the report's last page(s); it differs from the modal's text, as in V3.
      The default case prints on 11 landscape pages: 9 of sections, 2 of disclaimer, licence and credits.
+   - **The modal is wide** (up to 1280 px, tight spacing) so its whole text shows without scrolling: measured in
+     WebKit at 1920×1080 down to 1024×768.
 2. **THE OPENING BUILDER on the splash page.** `index.html`'s last tile slot (bottom right, beside Section Builder) is
    empty: add the Opening Builder from ABCD.EARTH (`artex-osx/docs/mockups/opening-builder.html`) through
    `publish_builders.py` (add it to `PAGES`, or to `SNAPSHOTS` if it cannot be rebuilt from today's seed; its cost

@@ -2898,21 +2898,49 @@ body {
 #disclaimerModal .btn-close {
   filter: invert(1);
 }
+/* Wide, so the whole text shows without scrolling on most windows (Andy 2026-11-26) */
+#disclaimerModal .op-disclaimer-dialog {
+  max-width: min(1280px, calc(100vw - 48px));
+  margin-top: 12px;
+  margin-bottom: 12px;
+  min-height: calc(100% - 24px);
+}
+#disclaimerModal .modal-header,
+#disclaimerModal .modal-footer {
+  padding: 8px 16px;
+}
+#disclaimerModal .modal-body {
+  padding: 10px 20px 6px;
+}
+#disclaimerModal .modal-body p {
+  margin-bottom: 8px;
+}
+#disclaimerModal hr {
+  margin: 8px 0;
+}
 #disclaimerModal .bw-intro {
-  padding: 8px 16px 4px;
+  padding: 0 16px;
 }
 #disclaimerModal .bw-intro-logo {
-  width: 180px;
+  width: 110px;
+  margin-bottom: 12px;
+}
+#disclaimerModal .bw-intro-tagline {
+  font-size: 14px;
+  margin: -4px 0 8px;
+}
+#disclaimerModal .bw-intro-lede {
+  margin: 4px 0 8px;
 }
 #disclaimerModal h3 {
   font-family: var(--font-head);
   font-size: 14px;
   font-weight: 700;
-  margin: 16px 0 6px;
+  margin: 8px 0 4px;
 }
 .op-disclaimer-alert {
-  margin: 8px 0 16px;
-  padding: 10px 14px;
+  margin: 6px 0 10px;
+  padding: 8px 14px;
   border: 1px solid var(--gold);
   border-radius: 5px;
   background: rgba(233, 196, 106, 0.12);
@@ -2923,7 +2951,7 @@ body {
   font-weight: 700;
 }
 .op-disclaimer-list {
-  margin: 0 0 12px;
+  margin: 0 0 8px;
   padding-left: 20px;
 }
 .op-disclaimer-tools {
