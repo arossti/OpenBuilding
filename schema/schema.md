@@ -22,8 +22,8 @@
 
 **Written 2026-11-26 late afternoon (laptop) for tonight's arc, after a /clear.** **LIVE: `main` after PR #27**
 (B5; this handoff is its last commit), deployed to https://arossti.github.io/OpenBuilding/. **Tonight's branch is
-`Reference-Independence`**, cut from that `main` and pushed: the Builders' Reference / Target independence is BUILT on
-it (REMAINS 1, first bullet) and not yet smoked by Andy or merged. Continue on this branch; no PR is open. Everything Andy
+`Reference-Independence`**, cut from that `main` and pushed: the Builders' AND S19's Reference / Target independence
+are BUILT on it (REMAINS 1) and not yet smoked by Andy or merged. Continue on this branch; no PR is open. Everything Andy
 asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and bring a list. **Tonight: plan REMAINS
 1 – 6 with Andy before building** (he said: _"we can plan 1-6 for tonight's arc after a clear"_).
 
@@ -62,13 +62,24 @@ asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and brin
      Reference `Wa | 203mm Concrete` (0.25, 48.81) on B.5, and a certified window against an aluminium one on
      B.8.1; another project clears both, the saved file returns both, Copy from Target → All Inputs carries the
      Target's across. The other three Builders witnesses and parity (2146 / 2146) still pass.
-   - **STILL OPEN — S19 (Andy, same message):** _"Presently S19 shows whatever in Reference mode as was set in
-     Target, they should maintain independence, whatever a user may have changed on the Reference or target side
-     inputs."_ WOMBAT must draw the model on screen.
+   - **✅ S19 — BUILT on `Reference-Independence` (2026-11-26 night), to be smoked by Andy.** Andy, same message:
+     _"Presently S19 shows whatever in Reference mode as was set in Target, they should maintain independence,
+     whatever a user may have changed on the Reference or target side inputs."_ What was wrong (V3's code, so
+     andy-rnd has it too): the aspect slider's handler wrote `d_154` whatever the model, so an edit in the
+     Reference moved the Target's footprint; Roof type and Windows are not graph inputs, so a model switch left
+     the other model's choice showing in the dropdowns; `wombatRender.js` read the Target's Windows show / hide
+     for both drawings. Now `Section19.js` writes the model on screen (`onScreenKey`) and `stampOwnControls`
+     restamps the two dropdowns on a switch and after each stamp; the drawing itself already solved per model.
+     Witness `test/witness/s19-reference.cjs`: the Reference takes a hip roof, aspect 2 and hidden windows; the
+     Target keeps its gable, −2 and windows, its SVG identical to the byte; the saved file returns both.
+   - **✅ CHECKED, nothing to change:** andy-rnd's `ghostedReference`, `referenceDefaults` and
+     `hoverOnScreenModel` specs pass on this page (8 / 8; adapted to its start-up and kept in
+     `test/witness/v3-reference/`). S10, S11 and `Openings.js` read through: every state read and write there
+     goes through the mode-aware helper or is a deliberate both-models write.
    - **STILL OPEN:** S21 (Andy: _"may show the Reference model vs. Target model, I have not considered that case
-     yet"_, ❓ his); andy-rnd's `ghostedReference`, `referenceDefaults` and `hoverOnScreenModel` behaviours checked
-     on this page; a read through S10 and S11 for anything else that reads the Target's value while Reference is
-     shown (the Builders code no longer does).
+     yet"_, ❓ his). ❓ Trust (`js/beam/pdf-bridge-import.mjs` `writeEnvelope`) writes the Target only, whatever
+     model is on screen: a takeoff is the building as designed, so Claude's recommendation is to leave it and
+     say so in its dialog; Andy's call.
 2. **m_10 "Unavailable"** after Trust on a 4-opening fixture (item 4 below, ⚠ OPEN).
 3. **ABCD BUGLIST #266** (item 5): until it is fixed the Assembly Builder here is the 2026-10-22 library, 115
    assemblies, with the old blue accent and month-old baked HFT.
@@ -114,16 +125,17 @@ in andy-rnd for the V3 page.
 - ⚠ **`src/` now differs from andy-rnd `5e0b2f0`** in two ways, both to keep if a file is copied over again: the 51
   header captions with bracketed units (`src/sections/*.js`), and `Section16.js` `initializeEventHandlers` wiring once.
   A third since (§10 B3): `ca_<row>` in `src/core/Openings.js` `addedFields` and `src/core/FileHandler.js`.
+  A fourth (REMAINS 1): S19's own inputs per model, `src/sections/Section19.js` and `src/core/wombatRender.js`.
 
 **The day's items as they were worked** (✅ = shipped; the unticked ones are REMAINS, above):
 
-1. **ONEPAGE — ✅ PR #24, smoked by Andy.** Andy 2026-11-26: *"each page gets a S18
+1. **ONEPAGE — ✅ PR #24, smoked by Andy.** Andy 2026-11-26: _"each page gets a S18
    title which is then duplicated in the radiused, collapsible header ... We will keep the radiused, collapsible
    headers, add the subheader text to them ... then we can move ALL collapsable header sections into one container
    instead of each one getting its own container. Then it will function like V3, where we can toggle ALL sections
    On/Off with the same +/- button to the far right of the main header, and then the masthead menu will just anchor
    scroll to the relevant section. This will let us use the browser's print function to print all sections, like our
-   V3 does, as a formatted report. We lean 100% on the browser's print functions. Nothing fancy."*
+   V3 does, as a formatted report. We lean 100% on the browser's print functions. Nothing fancy."_
    - **What is there:** `js/objective4.mjs` `renderContentShell` builds ONE `.op-onepage` holding 22 cards
      (`sectionCard`: the radiused, collapsible header carries the name and, where `PANEL_SUBTITLES` has one, the
      subtitle; the page title is gone). `#op-toggle-all` at the far right of the button row is − (collapse all) / +
@@ -149,13 +161,13 @@ in andy-rnd for the V3 page.
 2. **THE OPENING BUILDER on the splash page — ✅ PR #25.** `publish_builders.py` (ABCD.EARTH #1032, merged) has it in `PAGES`: rebuilt from today's seed,
    its six-face witness passing (33 certified sides), `openings.json` in the seed stamp. `builders/opening-builder.html`
    is published and `index.html`'s sixth tile opens it (13 openings).
-3. **Reference remainders:** S19's own Reference display; S21 (Andy: *"may show the Reference model vs. Target model,
-   I have not considered that case yet"* — ❓ his); andy-rnd's `ghostedReference`, `referenceDefaults` and
+3. **Reference remainders:** S19's own Reference display; S21 (Andy: _"may show the Reference model vs. Target model,
+   I have not considered that case yet"_ — ❓ his); andy-rnd's `ghostedReference`, `referenceDefaults` and
    `hoverOnScreenModel` behaviours checked on this page.
 4. **m_10 "Unavailable"** after Trust on a 4-opening fixture (block below, ⚠ OPEN).
 5. **ABCD BUGLIST #266**, so the Assembly Builder is rebuilt from today's seed.
-6. **SECOND TIER — a LIGHT MODE** (Andy 2026-11-26: *"switches the screen to white, and the headers to black/grey like
-   the V3 (for familiarity). Dark/Light mode can be another header toggle."*): a second pill in the button row, one
+6. **SECOND TIER — a LIGHT MODE** (Andy 2026-11-26: _"switches the screen to white, and the headers to black/grey like
+   the V3 (for familiarity). Dark/Light mode can be another header toggle."_): a second pill in the button row, one
    body class re-pointing the tokens (`tokens.css` neutrals; `obstyles.css` `--bg-*`, `--text*`, `--border`), so §8b /
    §8c follow. Check then: the Sankey's forced-light labels, the input box's sunken fill, the slider track, Reference
    red on white.
@@ -324,7 +336,7 @@ whole and only a v3 file takes V4-3's path.
 re-expressed in V4 form - walls by facing (Table G.1.8 a)), every window and door hosted with W × H × count, each
 window's overhang O and drop D, the app's own Annex A on each. It holds Annex J: loss 11 684 W (99.1 %), gain 7362 W
 (100.6 %), and the 8.3.8 turns, which now turn the walls and everything hosted in them, read 99.4–102.0 % of
-Annex J's change (93.7–95.8 % before). Andy 2026-11-26: *"V3 will just ignore fields it does not have in the .CSV format"*. Other case studies are re-entered from their drawings as Andy has time; until then the Load Sample Projects
+Annex J's change (93.7–95.8 % before). Andy 2026-11-26: _"V3 will just ignore fields it does not have in the .CSV format"_. Other case studies are re-entered from their drawings as Andy has time; until then the Load Sample Projects
 list shows only the v4 ones.
 
 **V4-6 — say it is 4.0.** The header and the CSV both read OBJECTIVE 4.0.
@@ -554,13 +566,13 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
 
 **Type to group** (which part of the library the Builder opens at):
 
-| S11 type (`c_<row>`)            | Assembly Builder group  |
-| ------------------------------- | ----------------------- |
-| Roof                            | `Ra` Roof Exterior      |
-| Wall above grade                | `Wa` Wall Exterior      |
-| Exposed floor                   | `Fa` Floor Exterior     |
-| Wall below grade (conditioned)  | `Wg` Wall Foundation    |
-| Slab (conditioned)              | `Fg` Floor on Ground    |
+| S11 type (`c_<row>`)           | Assembly Builder group |
+| ------------------------------ | ---------------------- |
+| Roof                           | `Ra` Roof Exterior     |
+| Wall above grade               | `Wa` Wall Exterior     |
+| Exposed floor                  | `Fa` Floor Exterior    |
+| Wall below grade (conditioned) | `Wg` Wall Foundation   |
+| Slab (conditioned)             | `Fg` Floor on Ground   |
 
 ### 10.3 Phases
 
@@ -570,7 +582,7 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
   bar shows **Apply Selected** and **cancel** in place of export / import / cancel / reset. Apply posts, to its own
   origin only:
   `{ type: "ob-builder-apply", kind: "assembly", id, name, group, cls, rsi_eff, u_eff, rsi_method, eci_kgco2e_m2,
-  bio_kgco2e_m2, thickness_mm, edited }`; cancel posts `{ type: "ob-builder-cancel" }`. Where HFT has no result for
+bio_kgco2e_m2, thickness_mm, edited }`; cancel posts `{ type: "ob-builder-cancel" }`. Where HFT has no result for
   the assembly nothing is sent and the page says to choose NBC or ISO 6946. Without `?embed` the page is unchanged.
   Witnessed in WebKit through this site: Ra, Wa, Fa, Wg and Fg open at their group with only the palette visible,
   the posted values equal the ones shown, and the standalone page still agrees with the app on all 115 assemblies.
@@ -602,7 +614,7 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
 - **B4 — windows, doors and skylights open the Opening Builder — ✅ BUILT.** `opening-builder.html` has the same embed
   mode (ABCD.EARTH `1e2b30ab1`): `?embed=1&group=Window|Door|Skylight&pick=<opening id>`; its Apply posts
   `{ type: "ob-builder-apply", kind: "opening", id, name, cls, uw_computed, ug_computed, uf_computed, uw_certified,
-  certified_by, w_mm, h_mm, edited }`. In `js/objective-builders.mjs` the door (B.7), window (B.8) and skylight
+certified_by, w_mm, h_mm, edited }`. In `js/objective-builders.mjs` the door (B.7), window (B.8) and skylight
   (B.8.5) rows' IDs are buttons too; Apply writes the U-value into `g_<row>` (3 decimals) and the row's product
   into `ca_<row>` (`id, name, cls, u, basis, uw_computed, uw_certified, w, h, edited`), saved and restored as an
   assembly's is. **Which U:** the certificate's Uw where the product has one (`basis: "certified"`), else the
@@ -648,7 +660,7 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
 2. **Below grade, the Builder's Effective RSI of the assembly alone** is applied; OBJECTIVE adds the ground as it does
    today.
 3. **An assembly the user edited in the Builder may be applied**: the message carries what the page shows (`edited:
-   true`) and the row's name is marked "edited".
+true`) and the row's name is marked "edited".
 4. **B5's partial sum** is shown with the count of rows it covers, in its own new S05 field (10.3 B5), so the typed
    `i_41` and today's defaults are untouched.
 

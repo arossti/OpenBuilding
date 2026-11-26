@@ -18,6 +18,8 @@ Run from this repo's root; `<out>` is any folder for screenshots:
     node test/witness/builders-opening.cjs <out>   # §10 B4: B.8.1, B.7.0, B.8.5
     node test/witness/builders-carbon.cjs <out>    # §10 B5: S05's E.3.5 against a hand sum
     node test/witness/builders-reference.cjs <out> # a row's assembly per model: Reference / Target independence
+    node test/witness/s19-reference.cjs <out>      # S19's roof type, aspect and windows per model
+    ../andy-rnd/node_modules/.bin/playwright test --config=test/witness/v3-reference/pw.config.cjs
 
 What each must show:
 
@@ -30,3 +32,8 @@ What each must show:
   name, value and S05 E.3.5; another project clears both; the saved file brings both back; a U typed in the
   Reference clears the Reference's product only; Copy from Target → All Inputs carries the Target's across.
 - A page opened fresh shows the launch modal once; the scripts set `objective4DisclaimerSeen` to skip it.
+- `s19-reference.cjs <out>`: `target drawing unchanged: true | target controls unchanged: true` after the
+  Reference takes a hip roof, aspect 2 and hidden windows, then `reload returns both drawings: true true`.
+- `v3-reference/`: andy-rnd's `ghostedReference`, `referenceDefaults` and `hoverOnScreenModel` specs, changed
+  only to open this page (wait for the graph, expand every section, load the 02 sample V3 auto-loads):
+  `8 passed`.
