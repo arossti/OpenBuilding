@@ -5177,12 +5177,13 @@ body.reference-mode .op-v3 input:disabled {
     --ob-dim: #52525b;
     --ob-faint: #71717a;
     --ob-accent: #0e7490;
+    color-scheme: light; /* or the sheet's margins print dark with backgrounds on */
   }
   html.app-beamweb,
   html.app-beamweb body {
     height: auto;
     overflow: visible;
-    background: #fff;
+    background: #fff !important; /* the sheet's margins too, when backgrounds print */
   }
   .app-beamweb #beam-app,
   .app-beamweb #beam-main {
@@ -5288,5 +5289,27 @@ body.reference-mode .op-v3 input:disabled {
   .disclaimer-content a {
     color: #0066cc;
     text-decoration: underline;
+  }
+  /* The footer under the disclaimer: V3's line of logos */
+  .op-print-footer {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 0 0.5in;
+    padding-top: 0.4in;
+    border-top: 1px solid #dee2e6;
+    font-size: 9pt;
+    color: #6c757d;
+    break-inside: avoid;
+  }
+  .op-print-footer img {
+    height: 60px;
+  }
+  .op-print-footer .bi-github {
+    font-size: 50px;
+    line-height: 1;
+    color: #6c757d;
   }
 }
