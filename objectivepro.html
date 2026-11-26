@@ -164,6 +164,17 @@
 
         <span class="beam-project-name" id="beam-project-name">(untitled project)</span>
 
+        <!-- Every section at once (V3's + / −): − collapses them all, + expands them all -->
+        <button
+          class="beam-action-btn"
+          id="op-toggle-all"
+          type="button"
+          aria-expanded="true"
+          title="Collapse every section"
+        >
+          &minus;
+        </button>
+
         <!-- Hidden file inputs -->
         <input type="file" id="excel-file-input" accept=".csv,.xlsx,.xls" hidden />
         <input type="file" id="beam-file-takeoffeh" accept=".json" hidden />
@@ -364,7 +375,7 @@
         </nav>
 
         <section id="beam-content">
-          <!-- Tab panels rendered by objective4.mjs. One active at a time. -->
+          <!-- The one page: every section's card, rendered by objective4.mjs -->
         </section>
       </div>
 

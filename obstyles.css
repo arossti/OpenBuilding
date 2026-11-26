@@ -3154,27 +3154,30 @@ body {
   background: var(--bg);
 }
 
-.beam-tab-panel {
-  display: none;
+/* The one page: every section's card in one container (objective4.mjs sectionCard) */
+.op-onepage {
+  display: flex;
+  flex-direction: column;
 }
-.beam-tab-panel.active {
-  display: block;
+.op-v3-card {
+  scroll-margin-top: 0;
 }
-
-.beam-panel-header {
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 10px;
-  margin-bottom: 16px;
+body.reference-mode .op-v3-card {
+  scroll-margin-top: 28px; /* clear of the pinned REFERENCE MODEL band */
 }
-.beam-panel-title {
-  font-family: var(--font-head);
-  font-size: 20px;
-  color: var(--text);
-  margin: 0 0 4px 0;
-}
-.beam-panel-subtitle {
-  font-size: 12px;
+.op-card-subtitle {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 11px;
   color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#op-toggle-all {
+  min-width: 28px;
+  justify-content: center;
+  font-weight: 700;
 }
 .beam-panel-phase {
   display: inline-block;
@@ -5044,4 +5047,90 @@ body.reference-mode .op-v3 select:disabled,
 body.reference-mode .op-v3 input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ── §8d OBJECTIVE in print: the browser's own Print makes the report ───────
+   (Andy 2026-11-26: "We lean 100% on the browser's print functions. Nothing fancy.") The page's chrome is
+   left out, the one page of cards flows over as many sheets as it needs, and the neutrals are re-pointed
+   to ink on white. A collapsed card prints as its header alone. As V3: landscape with narrow margins,
+   colour kept (it is data), buttons and Notes & Debug left out. The sections are laid out for a 1440 px
+   window, so the page is scaled to fit the sheet's width. */
+@media print {
+  @page {
+    size: landscape;
+    margin: 0.25in;
+  }
+  .app-beamweb .op-onepage {
+    zoom: 0.8;
+  }
+  .app-beamweb #beam-content * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .app-beamweb #beam-content button,
+  .app-beamweb #beam-content .beam-ref-controls,
+  .app-beamweb #beam-panel-notes {
+    display: none !important;
+  }
+  html.app-beamweb {
+    --ob-ground: #fff;
+    --ob-win: #fff;
+    --ob-panel: #fff;
+    --ob-panel-2: #f4f4f5;
+    --ob-input: #fff;
+    --ob-line: #b4b4bb;
+    --ob-line-soft: #d4d4d8;
+    --ob-text: #18181b;
+    --ob-dim: #52525b;
+    --ob-faint: #71717a;
+    --ob-accent: #0e7490;
+  }
+  html.app-beamweb,
+  html.app-beamweb body {
+    height: auto;
+    overflow: visible;
+    background: #fff;
+  }
+  .app-beamweb #beam-app,
+  .app-beamweb #beam-main {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+  .app-beamweb .beam-header,
+  .app-beamweb #beam-action-bar,
+  .app-beamweb #beam-sidebar,
+  .app-beamweb #beam-status-bar,
+  .app-beamweb #bw-pdf-import-backdrop,
+  .app-beamweb #bw-pdf-import-modal,
+  .app-beamweb .bw-intro {
+    display: none !important;
+  }
+  .app-beamweb #beam-content {
+    overflow: visible;
+    padding: 0;
+    background: #fff;
+  }
+  .app-beamweb #beam-content .bw-asm-group {
+    overflow: visible;
+  }
+  .app-beamweb .bw-asm-group-header {
+    break-after: avoid;
+  }
+  .app-beamweb .op-v3 tr {
+    break-inside: avoid;
+  }
+  /* S19's drawing is 900 px wide beside its controls: let its viewBox scale it to the sheet */
+  .app-beamweb .wombat-svg-wrapper {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .app-beamweb .wombat-svg-wrapper svg {
+    max-width: 100%;
+    height: auto;
+  }
+  body.reference-mode #beam-content::before {
+    position: static;
+    margin: 0 0 12px;
+  }
 }

@@ -21,7 +21,8 @@
 ### ▶ START HERE (handoff 2026-11-26 evening, laptop) — written for a cold start after a /clear
 
 **LIVE: `main` `7507a70` (PR #23), deployed to https://arossti.github.io/OpenBuilding/.** **This branch is `OnePage`**
-(Andy named it), cut from that `main`; this handoff is its first commit and nothing of OnePage is built yet.
+(Andy named it), cut from that `main`: the one page is BUILT here (2026-11-26, below) and waits for Andy's look and
+the merge.
 Local servers (they die on reboot): `python3 schema/scripts/nocache-serve.py 8822` here, `node test/static-server.cjs 8791`
 in andy-rnd for the V3 page.
 
@@ -43,29 +44,26 @@ in andy-rnd for the V3 page.
 
 **PENDING, in order:**
 
-1. **ONEPAGE (this branch).** Andy 2026-11-26: *"each page gets a S18 title which is then duplicated in the radiused,
-   collapsible header ... We will keep the radiused, collapsible headers, add the subheader text to them ... then we
-   can move ALL collapsable header sections into one container instead of each one getting its own container. Then it
-   will function like V3, where we can toggle ALL sections On/Off with the same +/- button to the far right of the
-   main header, and then the masthead menu will just anchor scroll to the relevant section. This will let us use the
-   browser's print function to print all sections, like our V3 does, as a formatted report. We lean 100% on the
-   browser's print functions. Nothing fancy."*
-   - **Today:** `js/objective4.mjs` builds one `.beam-tab-panel` per section (only the active one shown), each with a
-     page title + subtitle (`.beam-panel-header` from `renderPanelBody` and `PANEL_SUBTITLES`, e.g. S11's "The envelope: walls by facing, their hosted windows and
-     doors, roofs and their skylights") above a card (`v3Card`, `.bw-asm-group.op-v3-card`) whose radiused, collapsible header
-     repeats the title.
-   - **Build:** (a) drop the page title; move each subtitle INTO its card's collapsible header, beside the name;
-     (b) ONE container holding all 22 cards in order, all present in the page; (c) a + / − at the far right of the
-     main header (the button row) expanding / collapsing every card at once, each card's own arrow still working;
-     (d) the sidebar's S01–S22 become anchors that scroll to their card (and open it if collapsed); the active tab
-     follows the scroll; (e) print: a small `@media print` block only — the masthead, button row and sidebar hidden,
-     cards unclipped, no page break inside a row — and the browser's own Print does the rest (V3's rule, and the
-     memory note "the browser's own print; measure in WebKit").
-   - **Watch:** sections that draw on activation (S16, S17, S18, S19) must still size themselves when all are in one
-     scroll; S20 hides in the final build; `body.reference-mode`'s band is pinned to the pane's top; the S01–S22
-     heights with everything open (S11 alone is ~1500 px with a hosted case).
-   - **Witness:** the 2146-value parity probe (all 16 Load Sample cases, this page vs andy-rnd's), which reads every
-     `[data-field-id]` whatever the layout; a print-to-PDF page count in WebKit.
+1. **ONEPAGE (this branch) — ✅ BUILT, to be smoked by Andy and merged.** Andy 2026-11-26: *"each page gets a S18
+   title which is then duplicated in the radiused, collapsible header ... We will keep the radiused, collapsible
+   headers, add the subheader text to them ... then we can move ALL collapsable header sections into one container
+   instead of each one getting its own container. Then it will function like V3, where we can toggle ALL sections
+   On/Off with the same +/- button to the far right of the main header, and then the masthead menu will just anchor
+   scroll to the relevant section. This will let us use the browser's print function to print all sections, like our
+   V3 does, as a formatted report. We lean 100% on the browser's print functions. Nothing fancy."*
+   - **What is there:** `js/objective4.mjs` `renderContentShell` builds ONE `.op-onepage` holding 22 cards
+     (`sectionCard`: the radiused, collapsible header carries the name and, where `PANEL_SUBTITLES` has one, the
+     subtitle; the page title is gone). `#op-toggle-all` at the far right of the button row is − (collapse all) / +
+     (expand all), and keeps the section being read at the top. The sidebar's S01–S22 scroll to their card and open
+     it (`setActiveTab`); scrolling marks the card at the top (`updateActiveFromScroll`); a page opened at `#section`
+     returns to it once the sections above have filled in. Print is `obstyles.css` §8d, one `@media print` block, as
+     V3: landscape, 0.25 in margins, ink on white with colour kept, the chrome, buttons, the S01 intro and S20 Notes
+     left out, the page scaled 0.8 to the sheet's width, a collapsed card printing as its header alone.
+   - **Witnessed:** parity 2146 / 2146 on all 16 cases (WebKit, this page vs andy-rnd's); S16–S19 activate at full
+     width inside the one scroll; the default case prints on 9 landscape Letter pages (Chrome's PDF), and in WebKit's
+     print rendering nothing runs off a 1008 px sheet.
+   - **Left open:** only five sections have a subtitle (S01, S02, S11, S12, S22): the other seventeen are Andy's to
+     word. S20 is out of print only; it still shows on screen.
 2. **THE OPENING BUILDER on the splash page.** `index.html`'s last tile slot (bottom right, beside Section Builder) is
    empty: add the Opening Builder from ABCD.EARTH (`artex-osx/docs/mockups/opening-builder.html`) through
    `publish_builders.py` (add it to `PAGES`, or to `SNAPSHOTS` if it cannot be rebuilt from today's seed; its cost
