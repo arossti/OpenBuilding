@@ -18,12 +18,30 @@
 
 ## 0. Cold-start handoff (read this first)
 
-### Status as of 2026-11-25 evening (branch `ob-landing-cleanup`, pushed, no PR)
+### ▶ START HERE (handoff 2026-11-25 night, laptop)
 
-No deploy until the pieces are in place (Andy: _"No deploy intil we have all of our pieces in place, we can just
-commit-push until then. So no PR yet until it is cleaned of BfCA references."_). Only a push to `main` redeploys Pages.
+**SHIPPED + LIVE: PR #21, merge `188169c`, deployed to https://arossti.github.io/OpenBuilding/** (Andy's word).
+Live smoke: `objectivepro.html` renders S01–S22, the key values equal V3 (190.1 / 93.1 / 93.1 / 49 %), no errors.
+This branch, `objective-reference-model`, is cut from that `main` for the next arc (pushed, no PR).
 
-**Shipped on the branch**
+**What is where:** OBJECTIVE = V3's engine + sections verbatim in `src/` + `climate/` (from andy-rnd `5e0b2f0`);
+`js/objective4.mjs` (router, HUD, cards), `js/objective-boot.js` (V3's init.js start-up), `obstyles.css` §8b (V4
+styling of V3's markup). Trust = `js/beam/pdf-bridge-import.mjs` (`V3_TARGETS`, `envelopeByFacing`,
+`writeEnvelope`). Take Off, Eh! = `js/app.mjs` (Door tool [E], the summary table's Facing + Preset columns).
+
+**NEXT, in order:**
+
+1. **The Reference model** (block below, "TONIGHT"): V3's Target / Reference toggle on this page; HUD + sections +
+   S16 follow it.
+2. **m_10 "Unavailable"** after Trust on a 4-opening fixture (block below, ⚠ OPEN).
+3. **S16 Sankey** views (block below).
+
+**Witnesses to re-run after any change** (Playwright, fresh context each): (a) all 16 case studies through Load
+Sample vs andy-rnd's V3 page — 2146 / 2146 displayed values each; (b) the Trust fixtures in this file's §0 blocks.
+Serve: `python3 schema/scripts/nocache-serve.py <NEW port>` — after big CSS/JS changes use a new port (Chrome
+cached stale copies on 8796, Andy saw a narrow page). andy-rnd for comparison: `node test/static-server.cjs 8811`.
+
+**Shipped in PR #21 (earlier the same day)**
 
 - The EC Matrix, EPD-Parser and CCLIMB deleted (pages, code, CSS, docs); BfCA branding → OpenBuilding.ca; the
   BfCA-era workplans deleted (`WORKPLAN-TEMPLATE.md` keeps their format); `bfcastyles.css` → `obstyles.css`.
@@ -105,13 +123,13 @@ Off records no facing yet (V4-7).
 **V4-7 STATUS 2026-11-25 late (laptop, Andy at 99 % usage):** ✅ Take Off, Eh! Door tool [E] (orange, door glyph; an
 opening like a window). ✅ Facing per elevation sheet (sheet panel dropdown, title as hint, stored `page.facing`).
 ✅ Trust writes S11's walls by confirmed facing (B.5 / B.87a–i, gross area; witness West 36.00 m², TEUI recomputes).
-✅ **Openings written, each in its own row** (Andy: *"calculated individually, row by row, to comply with ASHRAE 140"*;
-*"add doors to the Trust process"*): host, W, H, qty on the S11 row; area (W × H) and facing on its S10 twin, as
+✅ **Openings written, each in its own row** (Andy: *"calculated individually, row by row, to comply with ASHRAE 140"_;
+_"add doors to the Trust process"_): host, W, H, qty on the S11 row; area (W × H) and facing on its S10 twin, as
 Section11.js `applyOpeningGeometry` does. Witness: West wall + 2 windows + 1 door, North wall + 1 window → rows
 B.7.0 / B.8.1 / B.8.2 hosted in 86, B.8.3 in 87a, areas 1.89 / 1.5 / 1.08 / 1.44, facings West / North.
 ⚠ **OPEN:** on that 4-opening fixture S01's m_10 (Actual vs Target %, the default case is Utility Bills) reads
 "Unavailable" though h_10 = 82.8; single-opening and door-only runs give 49 %. Trace before relying on Trust's %.
-**TONIGHT — the Reference model** (Andy: *"note Reference Model in the workplan so we can port that later tonight"_):
+**TONIGHT — the Reference model** (Andy: _"note Reference Model in the workplan so we can port that later tonight"_):
 V3's Target / Reference toggle (`src/core/ReferenceToggle.js`, its header button and `body.viewing-reference-inputs`
 styles) onto objectivepro.html, the HUD and every section showing Reference values when toggled, and S16's Sankey
 following it (below).
