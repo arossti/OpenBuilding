@@ -972,7 +972,11 @@ const hexOf = c => { const h=v=>Math.round(Math.max(0,Math.min(1,v))*255).toStri
 const TILES = (RAW_TILES && RAW_TILES.materials) || {};
 const PEN_MM_TO_PX = (RAW_TILES && RAW_TILES.pen_mm_to_px) || 3.75;
 const BATT_Y_MIN_MM = -32, BATT_Y_MAX_MM = 92;
-const usedPat = new Map();                    // id → {m, tl, tf, sc}, rebuilt with every drawing
+let usedPat = new Map();                      // id → {m, tl, tf, sc}, rebuilt with every drawing
+/* Each drawing's pattern ids carry its own prefix. The section and the plan are two <svg> in one document:
+   with the same ids, the plan's url(#…) resolved to the SECTION's patterns, and a pattern inside a hidden
+   sheet paints nothing, so the plan drew no material fills (Andy 2026-11-26). */
+let PAT_NS = "";
 /* fill for a layer. ctx = {u: run direction, up: pattern-y direction (toward the band's
    top — outward for walls/roofs/fdn, toward the top face for floors), o: the point where
    pattern y = 0 sits (the band-bottom face), t: thickness mm} */
@@ -985,11 +989,11 @@ function fillFor(m, ctx){
     const y0 = tl.batt_fit ? BATT_Y_MIN_MM*sc : 0;
     const o = [ctx.o[0]-y0*ctx.up[0], ctx.o[1]-y0*ctx.up[1]];
     tf = `matrix(${(ctx.u[0]*sc).toFixed(6)} ${(ctx.u[1]*sc).toFixed(6)} ${(ctx.up[0]*sc).toFixed(6)} ${(ctx.up[1]*sc).toFixed(6)} ${o[0].toFixed(3)} ${o[1].toFixed(3)})`;
-    id = "f_"+m.id.replace(/[^a-z0-9_]/gi,"_")+"_"+usedPat.size;     // one def per LAYER — its frame is its own
+    id = "f_"+PAT_NS+m.id.replace(/[^a-z0-9_]/gi,"_")+"_"+usedPat.size;     // one def per LAYER — its frame is its own
   } else {
     const [rc,rs] = tl.flattened ? [1,0] : tl.rot;
     tf = `matrix(${rc} ${-rs} ${rs} ${rc} 0 0)`;                       // §2.8: pattern x → rc·u − rs·v, pattern y → rs·u + rc·v
-    id = "f_"+m.id.replace(/[^a-z0-9_]/gi,"_");                       // one def per MATERIAL — the tiling law
+    id = "f_"+PAT_NS+m.id.replace(/[^a-z0-9_]/gi,"_");                       // one def per MATERIAL — the tiling law
   }
   if (!usedPat.has(id)) usedPat.set(id, {m, tl, tf, sc});
   return "url(#"+id+")";
@@ -2584,6 +2588,7 @@ function renderPlan(){
     t.style.fontSize=px(o.size||10)+"px"; t.style.fontWeight=o.weight||400; t.style.fontFamily="-apple-system,BlinkMacSystemFont,system-ui,sans-serif";
     if(o.spacing) t.style.letterSpacing=px(o.spacing*10)+"px"; t.textContent=s; return t; };
   const showFill=$("t-fill").checked;
+  const sectionPat = usedPat; usedPat = new Map(); PAT_NS = "plan_";      // the plan's own patterns, under its own ids
 
   drawStack({ el, asm:A, showFill, WPP, along:p=>p[0], members:true, role:"pa", cls:"Wall", third: T && PT.wall==="pa" ? T.at : null,
     pointAt:(a,dd)=>[a,-dd], frame:(d0,d1,t)=>({u:[1,0], up:[0,-1], o:[0,-d0], t}),
@@ -2647,6 +2652,7 @@ function renderPlan(){
     (joinMode==="knife" ? "knife — drag the nodes" : joinMode==="mitre" ? ("mitre, "+(corrMode==="abs"?"absolute":"proportional")) : "run-through by rank")
     + ` · A ${A.name} (${tA.toFixed(1)}) × B ${B.name} (${tB.toFixed(1)})`;
   buildDefs(defs, WPP); host.appendChild(svg);
+  usedPat = sectionPat; PAT_NS = "";
   window.__planJogs = {jogs, tA, tB, nameA:A.name, nameB:B.name,
     shared: dA.filter(d=>dB.some(e=>Math.abs(d-e)<1e-6)).length,
     k: kn, dA, dB, lattice:(dA.length*dB.length)};
