@@ -19,6 +19,7 @@ Run from this repo's root; `<out>` is any folder for screenshots:
     node test/witness/builders-carbon.cjs <out>    # §10 B5: S05's E.3.5 against a hand sum
     node test/witness/builders-reference.cjs <out> # a row's assembly per model: Reference / Target independence
     node test/witness/s19-reference.cjs <out>      # S19's roof type, aspect and windows per model
+    node test/witness/host-per-model.cjs           # Trust's 4-opening write: the Reference still computes
     ../andy-rnd/node_modules/.bin/playwright test --config=test/witness/v3-reference/pw.config.cjs
 
 What each must show:
@@ -37,3 +38,6 @@ What each must show:
 - `v3-reference/`: andy-rnd's `ghostedReference`, `referenceDefaults` and `hoverOnScreenModel` specs, changed
   only to open this page (wait for the graph, expand every section, load the 02 sample V3 auto-loads):
   `8 passed`.
+- `host-per-model.cjs`: after Trust's write the Reference reads 190.1 with no hosts, the Target 82.8 and
+  m_10 `49%` (it read `Unavailable`); the reloaded file shows the same; Copy from Target → All Inputs gives
+  the Reference the Target's four hosts.

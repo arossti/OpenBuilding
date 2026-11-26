@@ -630,7 +630,7 @@ async function handleTrustTakeOffEh() {
   try {
     const result = await PdfBridge.applyImport(project.uuid, dimIds);
     setStatus(
-      `Trust: ${result.applied} value${result.applied === 1 ? "" : "s"} into S02 / S11 / S12 from ${escapeHtml(project.pdfFileName)} · Trust + Verify to review`,
+      `Trust: ${result.applied} value${result.applied === 1 ? "" : "s"} into the Target's S02 / S11 / S12 from ${escapeHtml(project.pdfFileName)} · Trust + Verify to review`,
       "ready"
     );
   } catch (err) {

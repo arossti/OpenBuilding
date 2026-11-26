@@ -170,7 +170,12 @@
           id: `transmissionLoss.${id}.host`,
           legacyId: `ch_${row}`,
           section: "S11",
-          classification: "G",
+          // per model, never the Target's: "" is a host's own value (No host), and an input left empty in
+          // the Reference otherwise takes the Target's. Shared, a Target opening hosted in a wall the
+          // Reference holds at another area left that wall no area at all, and the Reference went
+          // Unavailable (S01 m_10 after Trust, 2026-11-26)
+          classification: "C",
+          copyToReference: false,
           label: `${label} Host (S11 row)`,
           defaultValue: ""
         });

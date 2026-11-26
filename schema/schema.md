@@ -77,10 +77,19 @@ asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and brin
      `test/witness/v3-reference/`). S10, S11 and `Openings.js` read through: every state read and write there
      goes through the mode-aware helper or is a deliberate both-models write.
    - **STILL OPEN:** S21 (Andy: _"may show the Reference model vs. Target model, I have not considered that case
-     yet"_, ❓ his). ❓ Trust (`js/beam/pdf-bridge-import.mjs` `writeEnvelope`) writes the Target only, whatever
-     model is on screen: a takeoff is the building as designed, so Claude's recommendation is to leave it and
-     say so in its dialog; Andy's call.
-2. **m_10 "Unavailable"** after Trust on a 4-opening fixture (item 4 below, ⚠ OPEN).
+     yet"_, ❓ his).
+2. **✅ `m_10` "Unavailable" after Trust — FIXED on `Reference-Independence` (2026-11-26 night), to be smoked.**
+   - **What it was:** the REFERENCE went Unavailable (`e_10`; `m_10` inherits it). An opening's host (`ch_` + its
+     row) left empty in the Reference took the Target's, so Trust's Target-only write hosted the Reference's
+     159 m² South window in a wall the Reference holds at 0 m², and that wall had no area left.
+   - **The fix:** the host is per model (`TransmissionLossNodes.js`: class C, `copyToReference: false`), as S11's
+     dropdown and `Openings.add` already treat it.
+   - **Witness** `test/witness/host-per-model.cjs`: after the write the Reference is 190.1 with no hosts, the
+     Target 82.8, `m_10` 49 %; the saved file returns each model's hosts; Copy from Target → All Inputs carries
+     them across. Parity 2146 / 2146.
+   - **Left as it is:** an opening's H (`dh_` + its row) is still class G (the Reference takes the Target's when
+     its own is empty); no failure seen.
+   - **RULED (Andy 2026-11-26, "yes"):** Trust writes the Target only, and says so: both buttons' hovers, the status line and the Trust + Verify modal's title name the Target model.
 3. **ABCD BUGLIST #266** (item 5): until it is fixed the Assembly Builder here is the 2026-10-22 library, 115
    assemblies, with the old blue accent and month-old baked HFT.
 4. **A light mode** (item 6, second tier).
@@ -126,6 +135,7 @@ in andy-rnd for the V3 page.
   header captions with bracketed units (`src/sections/*.js`), and `Section16.js` `initializeEventHandlers` wiring once.
   A third since (§10 B3): `ca_<row>` in `src/core/Openings.js` `addedFields` and `src/core/FileHandler.js`.
   A fourth (REMAINS 1): S19's own inputs per model, `src/sections/Section19.js` and `src/core/wombatRender.js`.
+  A fifth (REMAINS 2): the host input's class in `src/sections/nodes/TransmissionLossNodes.js`.
 
 **The day's items as they were worked** (✅ = shipped; the unticked ones are REMAINS, above):
 
@@ -164,7 +174,7 @@ in andy-rnd for the V3 page.
 3. **Reference remainders:** S19's own Reference display; S21 (Andy: _"may show the Reference model vs. Target model,
    I have not considered that case yet"_ — ❓ his); andy-rnd's `ghostedReference`, `referenceDefaults` and
    `hoverOnScreenModel` behaviours checked on this page.
-4. **m_10 "Unavailable"** after Trust on a 4-opening fixture (block below, ⚠ OPEN).
+4. **m_10 "Unavailable"** after Trust on a 4-opening fixture: ✅ fixed, REMAINS 2 above.
 5. **ABCD BUGLIST #266**, so the Assembly Builder is rebuilt from today's seed.
 6. **SECOND TIER — a LIGHT MODE** (Andy 2026-11-26: _"switches the screen to white, and the headers to black/grey like
    the V3 (for familiarity). Dark/Light mode can be another header toggle."_): a second pill in the button row, one
@@ -271,7 +281,7 @@ opening like a window). ✅ Facing per elevation sheet (sheet panel dropdown, ti
 _"add doors to the Trust process"_): host, W, H, qty on the S11 row; area (W × H) and facing on its S10 twin, as
 Section11.js `applyOpeningGeometry` does. Witness: West wall + 2 windows + 1 door, North wall + 1 window → rows
 B.7.0 / B.8.1 / B.8.2 hosted in 86, B.8.3 in 87a, areas 1.89 / 1.5 / 1.08 / 1.44, facings West / North.
-⚠ **OPEN:** on that 4-opening fixture S01's m_10 (Actual vs Target %, the default case is Utility Bills) reads
+✅ **FIXED 2026-11-26 night (REMAINS 2 in §0: the host is per model).** As found: on that 4-opening fixture S01's m_10 (Actual vs Target %, the default case is Utility Bills) reads
 "Unavailable" though h_10 = 82.8; single-opening and door-only runs give 49 %. Trace before relying on Trust's %.
 **✅ SHIPPED 2026-11-26 (PR #23) — the Reference model** (Andy: _"note Reference Model in the workplan so we can port that later tonight"_):
 V3's Target / Reference toggle (`src/core/ReferenceToggle.js`, its header button and `body.viewing-reference-inputs`
