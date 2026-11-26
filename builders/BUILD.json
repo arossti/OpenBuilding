@@ -1,10 +1,11 @@
 {
-  "built_at": "2026-11-25T14:18:58",
-  "abcd_commit": "f61bccf14",
+  "built_at": "2026-11-26T11:39:41",
+  "abcd_commit": "f696dd9d5",
   "source": "ABCD.EARTH artex-osx/docs/mockups (publish_builders.py)",
   "pages": [
     "material-builder.html",
-    "section-builder.html"
+    "section-builder.html",
+    "opening-builder.html"
   ],
   "snapshots": {
     "assembly-builder.html": {
@@ -17,6 +18,7 @@
     "prices.json": "ba53c905a84f897b",
     "assemblies.json": "995c2dcf5b5a0c69",
     "junctions.json": "377a5052186a905d",
-    "fill_tiles.json": "7ee08656769a1eb3"
+    "fill_tiles.json": "7ee08656769a1eb3",
+    "openings.json": "b6ba1881b077fab9"
   }
 }
