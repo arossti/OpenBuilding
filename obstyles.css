@@ -2474,10 +2474,32 @@ body {
   color: var(--text-dim) !important;
   font-size: 10px;
   font-weight: 600;
-  text-transform: uppercase;
+  /* as written, never forced to capitals: a unit keeps its case, (m) not (M), (kWh/m²) (Andy 2026-11-26) */
+  text-transform: none;
   letter-spacing: 0.04em;
   white-space: pre-line;
   padding-bottom: 2px;
+}
+/* S11's captions each read on one line (a caption's own line break kept), and L and H are one size. */
+.op-v3#envelopeTransmissionLosses .data-table td.section-header,
+.op-v3#envelopeTransmissionLosses .data-table td.section-subheader,
+#envelopeTransmissionLosses .op-v3 .data-table td.section-subheader {
+  white-space: pre;
+}
+#envelopeTransmissionLosses td[data-field-id^="dl_"],
+#envelopeTransmissionLosses td[data-field-id^="dh_"] {
+  width: 62px;
+  min-width: 62px;
+}
+.op-v3 .data-table td.description-cell select.opening-host {
+  margin-left: 6px;
+}
+/* A group's + and − sit side by side. */
+.op-v3 .expandable-controls {
+  display: inline-flex;
+  flex-direction: row;
+  gap: 3px;
+  white-space: nowrap;
 }
 .op-v3 .id-cell {
   font-family: var(--font-mono);
