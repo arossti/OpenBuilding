@@ -89,6 +89,10 @@ in andy-rnd for the V3 page.
    §8c follow. Check then: the Sankey's forced-light labels, the input box's sunken fill, the slider track, Reference
    red on white.
 
+7. **THE BUILDERS INSIDE OBJECTIVE** (branch `Builders-In-OBJECTIVE`, Andy 2026-11-26): the Assembly Builder as a popup from
+   S11's row IDs, Apply Selected writing the row's RSI; then the Opening Builder for windows; then S05's embodied
+   carbon. **The plan is §10; nothing of it is built.** Start at B1 (ABCD.EARTH's page), after §10.6's questions.
+
 **What is where:** OBJECTIVE = V3's engine + sections verbatim in `src/` + `climate/` (from andy-rnd `5e0b2f0`);
 `js/objective4.mjs` (router, HUD, cards), `js/objective-boot.js` (V3's init.js start-up), `obstyles.css` §8b (V4
 styling of V3's markup). Trust = `js/beam/pdf-bridge-import.mjs` (`V3_TARGETS`, `envelopeByFacing`,
@@ -428,6 +432,109 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
 - **BEAM's tabs: all go, no legacy group; S01 is the dashboard and its HUD rides the masthead.** Andy 2026-11-25: _"We won't use any BEAM legacy pages. Our sections will replace all of BEAMS. We're just keeping the look and feel of the format as the tabbed, moden menus support a better project organizartion. And gives us wider latitude to format sections as full pages, with S01 acting as the overview/review dashboard. That said, in this narrow but wide header band, that is where we might be able to park our S01 head's up display so the 3 main rows show across any page or section that is active. It may well need 200px or so to read properly, that is a design function, but I feel the dashboard is vital for evaluating performance while ANY section is open. Sure, sidebar next"_
 
 - **"Pro" names both.** Andy 2026-11-25: _"Pro refers to both the Web App and the Rust app. Pro=V4. The user may use the app in OSX/Linux, but many users are still PC users, and for them we have the web app. It is not expected to do everything the native rust app can, but it is the concession we make."_ Hence the address `objectivepro.html`.
+
+## 10. The Builders inside OBJECTIVE (branch `Builders-In-OBJECTIVE`)
+
+> Andy 2026-11-26: _"Builders accessible as model popups from within the OBJECTIVE V4 app. We can use the ID fields in
+> S11 as buttons, ie. you see where we have B.9 and B.10? Wall Below Grade and Slab Conditioned? Those can become
+> buttons and when the Assembly Builder opens there, in the frame I show here in the screenshot without the notes and
+> disclaimers surrounding the full HTML, and it will open to the relevant section, so slabs to floors, walls to wall
+> exterior, etc."_ · _"When the user then sets 'Apply Selected' for the wall or floor assembly, then the effective
+> calculated value then replaces the manually entered one default one for the selected assembly. As a follow-on,
+> Windows can do the same thing, but instead they will open the Opening Builder. Further to all of that, embodied
+> carbon in S05 can later be calculated from the Sum of the embodied carbon of all assemblies multiplied by their
+> area."_
+
+Nothing in this section is built. It is the plan for Andy to read; the phases are each a commit or a PR, in order.
+
+### 10.1 What is there today (read from the code, 2026-11-26)
+
+- **S11's opaque rows** (`src/sections/Section11.js`, `src/core/Openings.js`): B.4 Roof, B.5 Wall above grade, B.6
+  Exposed floor and up to 9 more above grade; B.9 Wall below grade, B.10 Slab and up to 4 more below. Each row's ID
+  cell is plain text. Its type is the `c_<row>` dropdown (`roof` · `walls` · `exposedFloor` · `wallsBelowGrade` ·
+  `slabOnGrade`). **The RSI (`f_<row>`) is the typed input**; the U-value (`g_<row>`) and R-value follow from it.
+- **S11's opening rows** (B.7 doors, B.8 windows, skylights): here the **U-value (`g_<row>`) is the typed input**.
+- **The Assembly Builder** (`builders/assembly-builder.html`, published from ABCD.EARTH): the framed tool is one
+  `<div class="window">`; the notes (`.notes`) and the cost disclaimer (`.cost-disclaimer`) are its siblings below
+  it. The library is grouped by each assembly's name prefix in the house order: `Ra` Roof Exterior · `Rx` · `Fi` ·
+  `Wx` · `Wi` · `Wa` Wall Exterior · `Wg` Wall Foundation · `Fa` Floor Exterior · `Fg` Floor on Ground · `Ftg` ·
+  `Lg`. For the selected assembly it shows Effective RSI (`#f-rsi-eff`), Effective U (`#f-u-eff`), Embodied Carbon
+  Intensity in kgCO2e/m² (`#f-eci`), the biogenic line and the total thickness, by the chosen RSI method (NBC ·
+  ISO 6946 · HFT, the last from baked results). It reads no URL parameter and sends no message today.
+- **It is a snapshot** (ABCD BUGLIST #266): the page as committed 2026-10-22 with that day's seed, published as
+  committed. Its script can still be edited at the source; only a re-seed is blocked.
+- **The Opening Builder** (`builders/opening-builder.html`) is rebuilt from today's seed on every publish.
+- **S05**: `d_39` chooses the embodied-carbon source; with "Modelled Value" it reads `i_41` (kgCO2e/m²), which is
+  typed today.
+
+### 10.2 The design
+
+**One rule: the Builder computes, OBJECTIVE receives.** OBJECTIVE never re-derives an RSI or a carbon figure from
+layers; it takes the number the Builder shows, with the assembly's id and name beside it. The Builders stay build
+output from ABCD.EARTH (§5.2): everything the Builder pages need is added at their source and published.
+
+**The message.** The Builder runs in an `<iframe>` on the same origin and posts one message to its parent:
+
+    { type: "ob-builder-apply", kind: "assembly" | "opening", id, name, group,
+      rsi_eff, u_eff, rsi_method, eci_kgco2e_m2, bio_kgco2e_m2, thickness_mm }
+
+(an opening sends its own values instead: 10.3 B4). OBJECTIVE accepts it only from its own origin.
+
+**Type to group** (which part of the library the Builder opens at):
+
+| S11 type (`c_<row>`)            | Assembly Builder group  |
+| ------------------------------- | ----------------------- |
+| Roof                            | `Ra` Roof Exterior      |
+| Wall above grade                | `Wa` Wall Exterior      |
+| Exposed floor                   | `Fa` Floor Exterior     |
+| Wall below grade (conditioned)  | `Wg` Wall Foundation    |
+| Slab (conditioned)              | `Fg` Floor on Ground    |
+
+### 10.3 Phases
+
+- **B1 — the Assembly Builder's embed mode (ABCD.EARTH, then publish).** `?embed=1` shows the `.window` alone, filling
+  the frame: no intro, no notes, no disclaimer. `&group=Wa` opens the library scrolled to that group, its first
+  assembly selected; `&pick=<assembly id>` selects one by id (the row's current assembly, when it has one). In embed
+  mode the title bar gains **Apply Selected**, which posts the message above for the selected assembly as the page
+  shows it (its RSI method included), and **cancel** closes the popup. Outside embed mode the page is unchanged.
+- **B2 — the popup and the buttons (this repo).** A new `js/objective-builders.mjs`, so V3's `src/` stays verbatim:
+  one modal holding the iframe, sized to the window. Each opaque row's ID cell (B.4, B.5, B.9, B.10 and the added
+  rows) becomes a button, by delegation on S11's table, that opens the Builder at the row's group.
+- **B3 — Apply Selected.** The message writes `rsi_eff` into the row's `f_<row>` as a user edit (through V3's
+  StateManager, so the graph recomputes U, heat loss and the rest), and the row remembers its assembly (id, name,
+  method, carbon intensity) and shows the name beside its type. Typing an RSI by hand afterwards clears the link:
+  the typed value wins. In Reference mode the buttons are inert, as the cells are.
+- **B4 — windows, doors and skylights open the Opening Builder.** The same embed mode and message in
+  `opening-builder.html`; the opening rows' ID cells (B.7, B.8) become buttons; Apply writes the U-value (`g_<row>`).
+  What else an opening should carry across (SHGC to S10, width × height) is read from that page before this is built.
+- **B5 — S05's embodied carbon from the assemblies.** Σ (assembly carbon intensity × the row's area) over S11's rows,
+  divided by the conditioned area, offered as S05's Modelled Value (`i_41`). Later, by Andy's word.
+
+### 10.4 Witnesses
+
+- The 2146-value parity probe stays 2146 / 2146 on all 16 cases while no assembly has been applied.
+- Playwright: click B.9 → the Builder opens in its frame alone, at Wall Foundation; Apply Selected → `f_94` shows the
+  Builder's Effective RSI and `g_94` its U-value; the row shows the assembly's name; a typed RSI clears it.
+- The Assembly Builder's own cross-check (115 assemblies against the app's fold fixture) still passes after B1.
+
+### 10.5 Costs and risks, named
+
+- The Assembly Builder is 2.6 MB and the Opening Builder 1.3 MB: each loads once, on the first click, and is cached.
+  They are not loaded with OBJECTIVE itself.
+- The Assembly Builder is the 2026-10-22 snapshot until ABCD BUGLIST #266 is fixed: the values applied are that
+  library's (115 assemblies), and its baked HFT results are a month older than the app's.
+- A row's assembly is a new thing for a project file to hold. Until 10.6 ❓1 is answered it lives for the session only.
+
+### 10.6 Open questions (each with a recommendation)
+
+1. ❓ **Does the saved project keep each row's assembly** (id, name, method)? Recommended: yes, as added fields in the
+   4.0 file (§4's version stamp exists for this); an older file opens with none.
+2. ❓ **Which value for below grade?** S11's B.9 and B.10 take an RSI and OBJECTIVE applies the ground itself.
+   Recommended: the Builder's Effective RSI of the assembly alone, no ground added in the Builder.
+3. ❓ **An assembly the user edited in the Builder** (it keeps edits in the browser): may it be applied? Recommended:
+   yes, the message carries what the page shows; the row's name is marked "edited".
+4. ❓ **B5's partial sum**: when some rows have no assembly. Recommended: show the sum with the count of rows it
+   covers, and leave `i_41` typed until every opaque row has one.
 
 ## Appendix — Changelog
 
