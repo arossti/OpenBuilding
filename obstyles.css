@@ -4802,6 +4802,33 @@ details.dep-details pre {
   align-items: center;
   margin-left: auto;
 }
+/* S18 once activated carries six buttons, the legend and four view buttons: it stays one line at 1440 px */
+.op-v3 .parallel-coordinates-controls {
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+.op-v3 .parallel-coordinates-controls .btn-sm {
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+.op-v3 .parallel-coordinates-controls #s18ActivateBtn {
+  min-width: 0;
+  margin-right: 2px;
+}
+.op-v3 .parallel-coordinates-controls .pc-legend-container {
+  gap: 10px;
+  margin: 0 4px;
+  padding-left: 8px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.op-v3 .parallel-coordinates-controls .pc-line-legend,
+.op-v3 .parallel-coordinates-controls .pc-node-legend {
+  gap: 8px;
+}
+.op-v3 .parallel-coordinates-controls .pc-node-legend {
+  padding-left: 8px;
+}
 .op-v3 .wombat-controls > span {
   color: var(--text-dim) !important;
   font-size: 12px !important;
@@ -4857,6 +4884,12 @@ details.dep-details pre {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/* The Sankey's labels read on the dark ground (V3 draws them black for its white page). */
+.op-v3 #sankeyDiagram svg text,
+#sankeyDiagram svg text {
+  fill: #e2e8f0 !important;
 }
 
 /* ── §8c The model on screen: Target is cyan, Reference is red ──────────────

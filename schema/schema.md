@@ -77,8 +77,18 @@ styling of V3's markup). Trust = `js/beam/pdf-bridge-import.mjs` (`V3_TARGETS`, 
      (buttons, legend, the view buttons at the right; Activate padded). Reference mode ghosts
      `.reference-locked` / `.disabled-input` / `.ghosted` cells: dim italic, a dashed box, not typable. The HUD
      and Key Values take no marker (Andy: they already show both models, as S18 does).
-   - **Still to do:** see the ghosting on a case that locks cells (not yet looked at); S19 in Reference mode;
-     S21 (Andy's ❓); the three Copy from Target items clicked; the witnesses below.
+   - **✅ 2026-11-26, verified in WebKit (case 01):** the ghosting (S03 `d_21` in Reference mode: dim italic,
+     dashed box, not editable; 20 such cells across S03, S07, S09, S12, S13, S19, S21); S18 activated, its six
+     buttons, legend and view buttons on ONE line at 1440 px; Copy from Target — Geometry copies the roof's area
+     and leaves its RSI, Geometry + Code re-stamps the standard's RSI, All Inputs copies the RSI too. The
+     Sankey's labels are light on the dark ground.
+   - **Still to do:** S19 in Reference mode; S21 (Andy's ❓); the witnesses below.
+   - **SECOND TIER, not today's path — a LIGHT MODE** (Andy 2026-11-26: *"we should consider a light mode for the
+     entire app also that switches the screen to white, and the headers to black/grey like the V3 (for
+     familiarity). Dark/Light mode can be another header toggle."*): a second pill in the button row; one class
+     on the body re-points the tokens (`tokens.css` neutrals, `obstyles.css` `--bg-*`, `--text*`, `--border`),
+     so §8b / §8c follow without new rules. To check when built: the Sankey's label colour (forced light in
+     dark), the input box's sunken fill, the slider track, and Reference red on white.
    - **Witnesses:** andy-rnd's `ghostedReference`, `referenceDefaults` and `hoverOnScreenModel` specs describe the
      behaviour to match; the 2146-value parity probe run in Reference mode on both pages.
 2. **m_10 "Unavailable"** after Trust on a 4-opening fixture (block below, ⚠ OPEN).
