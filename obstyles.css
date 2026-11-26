@@ -2604,16 +2604,18 @@ body {
 .op-v3 .data-table td.description-cell .form-select {
   display: inline-block;
   width: auto;
-  max-width: 112px;
+  /* tight at a 1440 px window, where S11 just fits; past that the dropdowns breathe into the name column's
+     spare width (Andy 2026-11-26), up to their full labels */
+  max-width: clamp(112px, calc(112px + (100vw - 1440px) * 0.6), 290px);
   vertical-align: middle;
   margin: 0 2px 0 0;
 }
 .op-v3 .data-table td.description-cell select.opaque-facing,
 .op-v3 .data-table td.description-cell select.opening-qty {
-  max-width: 46px;
+  max-width: clamp(46px, calc(46px + (100vw - 1440px) * 0.1), 64px);
 }
 .op-v3 .data-table td.description-cell select.opening-host {
-  max-width: 128px;
+  max-width: clamp(128px, calc(128px + (100vw - 1440px) * 0.6), 230px);
 }
 .op-v3 .data-table td.description-cell select {
   padding-right: 20px;
