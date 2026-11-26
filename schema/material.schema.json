@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://bfca.ca/schemas/material-v1.json",
-  "title": "BfCA Material Record (v1.1)",
-  "description": "Canonical JSON record for one material. Shared by BEAM.js, PDF-Parser material picker, ABCD.EARTH renderer, future cost/fire/code-compliance consumers. Every consumer reads only the fields it needs; producers emit the full schema-complete shape with nulls where unavailable. See schema.md for the design rationale.",
+  "title": "OpenBuilding.ca Material Record (v1.1)",
+  "description": "Canonical JSON record for one material. Shared by BEAM.js, TakeOffEh material picker, ABCD.EARTH renderer, future cost/fire/code-compliance consumers. Every consumer reads only the fields it needs; producers emit the full schema-complete shape with nulls where unavailable. See schema.md for the design rationale.",
   "type": "object",
   "required": ["$schema", "schema_version", "id", "external_refs", "naming", "manufacturer", "status", "classification", "rendering", "physical", "carbon", "impacts", "cost", "fire", "code_compliance", "epd", "methodology", "provenance"],
   "_note_validation": "Records are sparse-by-default: scalar null leaves are omitted from emitted JSON. This schema's `required` lists only include structurally-necessary keys (outer shape, impact blocks, arrays that must exist). Nullable scalars are optional but type-checked when present. sample.json remains schema-complete as a human-readable template; per-material records in materials/*.json are sparse.",
@@ -10,7 +10,7 @@
 
   "$defs": {
     "iso3166_alpha3_or_scope": {
-      "description": "ISO 3166-1 alpha-3 country code, or BfCA scope marker (EU, GLB)",
+      "description": "ISO 3166-1 alpha-3 country code, or OpenBuilding.ca scope marker (EU, GLB)",
       "type": "string",
       "pattern": "^[A-Z]{2,3}$"
     },

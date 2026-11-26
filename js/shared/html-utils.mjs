@@ -2,7 +2,7 @@
 // App-agnostic HTML helpers used by any module that templates markup
 // via string concatenation. Consolidated from four near-identical copies
 // (`esc` in beam/project-tab.mjs + beam/footings-slabs-tab.mjs;
-// `escapeHtml` in beamweb.mjs + database.mjs) that had drifted in null-
+// `escapeHtml` in objective4.mjs + database.mjs) that had drifted in null-
 // handling but not in output.
 //
 // Canonical export name is `esc` (short, predominant in beam/* modules).

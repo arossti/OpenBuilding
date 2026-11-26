@@ -1,5 +1,5 @@
 /**
- * PDF-Parser — Geometry Walk (pure, version-agnostic)
+ * TakeOffEh — Geometry Walk (pure, version-agnostic)
  *
  * Shared walk over a pdf.js operator list. Produces line segments,
  * endpoints, and closed paths in canvas-space (PDF points, viewport-

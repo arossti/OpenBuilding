@@ -1,5 +1,5 @@
 /**
- * PDF-Parser — Dimension-String Extraction
+ * TakeOffEh — Dimension-String Extraction
  *
  * Parses dimension callouts from a page's text items, pairs each callout
  * with its annotated line segment, and scores the pairing so the wand /

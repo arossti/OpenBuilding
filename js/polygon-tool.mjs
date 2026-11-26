@@ -1,5 +1,5 @@
 /**
- * PDF-Parser — Polygon Measurement Tool
+ * TakeOffEh — Polygon Measurement Tool
  */
 
 import * as Viewer from "./canvas-viewer.mjs";
@@ -11,6 +11,8 @@ import {
   AREA_EDGE,
   AREA_FILL,
   WIN_EDGE,
+  DOOR_EDGE,
+  DOOR_FILL,
   WIN_FILL,
   POLYLINE_EDGE
 } from "./config.mjs";
@@ -21,12 +23,19 @@ var _activePolyId = null,
 var _colorIdx = 0,
   _nextId = 1,
   _nextWinId = 1,
+  _nextDoorId = 1,
   _nextLineId = 1;
 var _undoStack = []; // snapshots for undo
 var _redoStack = [];
 var _onUndoPushCallback = null;
 
 /** Register a callback invoked whenever polygon undo state is pushed. */
+// Openings — windows and doors — nest in the wall that contains them and net
+// out of its area. A door is a window in every way but its tag and colour.
+export function isOpening(type) {
+  return type === "window" || type === "door";
+}
+
 export function onUndoPush(fn) {
   _onUndoPushCallback = fn;
 }
@@ -84,6 +93,9 @@ export function startPolygon(pageNum, label, opts) {
   if (type === "window") {
     defaultLabel = "Window " + _nextWinId++;
     id = "win_" + Date.now();
+  } else if (type === "door") {
+    defaultLabel = "Door " + _nextDoorId++;
+    id = "door_" + Date.now();
   } else if (type === "polyline") {
     defaultLabel = "Line " + _nextLineId++;
     id = "line_" + Date.now();
@@ -226,7 +238,7 @@ export function buildAssociationMap(pageNum) {
     var m = getMeasurement(pageNum, i);
     if (!m) continue;
     var entry = { measurement: m, polyIdx: i, vertices: polys[i].vertices };
-    if (polys[i].type === "window") {
+    if (isOpening(polys[i].type)) {
       windowEntries.push(entry);
     } else {
       entry.children = [];
@@ -276,7 +288,8 @@ export function getMeasurement(pageNum, polyIdx) {
     sheet_id: poly.sheet_id || null,
     sheet_class: poly.sheet_class || null,
     assembly_preset: poly.assembly_preset || null,
-    scope: poly.scope === "garage" ? "garage" : "building"
+    scope: poly.scope === "garage" ? "garage" : "building",
+    facing: poly.facing || null
   };
 
   if (poly.type === "polyline") {
@@ -318,6 +331,7 @@ export function getMeasurement(pageNum, polyIdx) {
     areaPdf: areaPdf,
     perimPdf: perimPdf,
     calibrated: calibrated,
+    facing: bridge.facing,
     component: bridge.component,
     depth_m: bridge.depth_m,
     sheet_id: bridge.sheet_id,
@@ -377,9 +391,10 @@ function _drawPoly(ctx, poly) {
 
   // Edge colour: cyan for areas, gold for windows, red for polylines (no fill).
   var isWindow = poly.type === "window";
+  var isDoor = poly.type === "door";
   var isPolyline = poly.type === "polyline";
-  var edgeColor = isPolyline ? POLYLINE_EDGE : isWindow ? WIN_EDGE : AREA_EDGE;
-  var fillColor = isWindow ? WIN_FILL : AREA_FILL;
+  var edgeColor = isPolyline ? POLYLINE_EDGE : isDoor ? DOOR_EDGE : isWindow ? WIN_EDGE : AREA_EDGE;
+  var fillColor = isDoor ? DOOR_FILL : isWindow ? WIN_FILL : AREA_FILL;
   ctx.strokeStyle = edgeColor;
   ctx.lineWidth = 3;
 
@@ -470,7 +485,7 @@ function _drawPoly(ctx, poly) {
 
     // Line 2: metric measurement — cyan for areas, gold for windows, red for polylines.
     ctx.font = "20px Helvetica Neue, sans-serif";
-    ctx.fillStyle = isPolyline ? POLYLINE_EDGE : isWindow ? WIN_EDGE : AREA_EDGE;
+    ctx.fillStyle = isPolyline ? POLYLINE_EDGE : isDoor ? DOOR_EDGE : isWindow ? WIN_EDGE : AREA_EDGE;
     var y2 = y1 + 24;
     ctx.fillText(line2, center.x, y2);
 
@@ -560,6 +575,14 @@ export function componentCarriesDepth(component) {
 // Per-polygon scope override: "building" or "garage". Anything else
 // (null, undefined, "") normalises to "building" so legacy polygons
 // round-trip without code changes elsewhere.
+// A wall's facing (North … NorthWest), set in Take Off's summary table. Its
+// windows and doors take the same facing (they nest in it).
+export function setFacing(pageNum, polyIdx, facing) {
+  var polys = _polygons[pageNum];
+  if (!polys || !polys[polyIdx]) return;
+  polys[polyIdx].facing = facing || null;
+}
+
 export function setScope(pageNum, polyIdx, scope) {
   var polys = _polygons[pageNum];
   if (!polys || !polys[polyIdx]) return;
@@ -1028,6 +1051,7 @@ export function reset() {
   _colorIdx = 0;
   _nextId = 1;
   _nextWinId = 1;
+  _nextDoorId = 1;
   _nextLineId = 1;
   _undoStack = [];
   _redoStack = [];
@@ -1060,14 +1084,17 @@ export function loadPolygons(pageNum, polygons) {
   // Update counters to avoid ID collisions
   var areaCount = 0,
     winCount = 0,
+    doorCount = 0,
     lineCount = 0;
   for (var i = 0; i < _polygons[pageNum].length; i++) {
     var t = _polygons[pageNum][i].type;
     if (t === "window") winCount++;
+    else if (t === "door") doorCount++;
     else if (t === "polyline") lineCount++;
     else areaCount++;
   }
   if (areaCount >= _nextId) _nextId = areaCount + 1;
   if (winCount >= _nextWinId) _nextWinId = winCount + 1;
+  if (doorCount >= _nextDoorId) _nextDoorId = doorCount + 1;
   if (lineCount >= _nextLineId) _nextLineId = lineCount + 1;
 }

@@ -1,5 +1,5 @@
 /**
- * PDF-Parser — Canvas Viewer (CAD-style controls)
+ * TakeOffEh — Canvas Viewer (CAD-style controls)
  *
  * Architecture:
  *   - #viewer-wrap: viewport (clips content, receives wheel/mouse events)

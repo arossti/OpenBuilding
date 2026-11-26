@@ -461,7 +461,7 @@ function buildRecord({ row, rowIndex, lookups, warnings, csvSha256 }) {
       "density": {
         // Raw value + units from the BEAM source spreadsheet — verbatim,
         // no conversion. Units string preserves the source intent so that
-        // BEAMweb / CCLIMB assembly math can interpret per-area, per-linear,
+        // BEAMweb assembly math can interpret per-area, per-linear,
         // or per-volume values appropriately at consumption time.
         "value": density,
         "units": densityUnits,

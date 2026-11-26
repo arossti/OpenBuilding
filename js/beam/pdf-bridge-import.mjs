@@ -1,65 +1,133 @@
 // pdf-bridge-import.mjs
-// BEAMweb side of the PDF-Parser bridge. Reads the parser's saved
-// projects from IndexedDB, runs the shared aggregator against the
-// user's current param_* values, and writes resolved dimension values
-// into StateManager with provenance tracked via dimension_sources.
+// OBJECTIVE side of the Take Off, Eh! bridge (Trust / Trust + Verify). Reads the
+// parser's saved projects from IndexedDB, runs the shared aggregator
+// (js/shared/polygon-map.mjs) and writes the results into OBJECTIVE's own
+// fields — V3's StateManager on window.TEUI — then recalculates once.
 //
-// UI flow (see modal in beamweb.html):
-//   1. User clicks "Import PDF-Parser" → openImportModal()
-//   2. Modal lists saved parser projects; user picks one
-//   3. buildPreview(uuid) aggregates; modal renders a diff table
-//      (current StateManager value vs new value per dim)
-//   4. User toggles which rows to apply, clicks Apply
-//   5. applyImport(projectUuid, selectedDimIds) writes to StateManager
+// Andy 2026-11-25: "S11, S12, and 'Conditioned Area' as the sum in S02 of all
+// interior plan spaces." V3_TARGETS below is that mapping. Windows are not
+// written: S11 hosts each window in a wall that faces a direction, and Take
+// Off, Eh! records no facing yet (roadmap V4-7).
 
-import { StateManager } from "../shared/state-manager.mjs";
 import * as IDB from "../shared/indexed-db-store.mjs";
-import { computeAllDimensions, COMPONENT_TO_DIMENSION } from "../shared/polygon-map.mjs";
+import { computeAllDimensions } from "../shared/polygon-map.mjs";
 
-const VS = StateManager.VALUE_STATES;
+// The geometry parameters the aggregator lifts polygons with, as entered in
+// Take Off, Eh!'s sidebar (the project's params).
+const PARAM_FIELDS = ["param_wall_height_m", "param_basement_height_m", "param_roof_pitch_deg"];
 
-// Params the aggregator needs. Resolved with StateManager as primary source
-// (BEAMweb PROJECT → Geometry Parameters — user's authoritative values) and
-// the Parser-side project.params as fallback (entered in the Parser sidebar
-// before ever opening BEAMweb). Either side can seed the bridge.
-const PARAM_FIELDS = [
-  "param_wall_height_m",
-  "param_basement_height_m",
-  "param_roof_pitch_deg",
-  "param_footing_height_m",
-  "param_footing_width_m"
+// OBJECTIVE field ← aggregated dimension. `dim` names a polygon-map
+// dimension; `volume` multiplies one by V3's own typical floor-to-floor
+// height (S12 g_106).
+export const V3_TARGETS = [
+  {
+    field: "h_15",
+    label: "S02 B.3 Conditioned Area (m\u00b2)",
+    dim: "project_total_floor_area",
+    note: "every interior plan space: foundation + above-grade floor plates"
+  },
+  { field: "d_85", label: "S11 B.4 Roof (m\u00b2)", dim: "dim_roof_surface_area" },
+  {
+    field: "d_86",
+    label: "S11 B.5 Walls above grade (m\u00b2)",
+    dim: "dim_exterior_wall_area",
+    note: "net of the windows drawn in them"
+  },
+  { field: "d_94", label: "S11 B.9 Walls below grade (m\u00b2)", dim: "dim_foundation_wall_area" },
+  { field: "d_95", label: "S11 B.10 Slab (m\u00b2)", dim: "dim_foundation_slab_floor_area" },
+  {
+    field: "d_105",
+    label: "S12 B.13 Conditioned volume (m\u00b3)",
+    volume: "project_total_floor_area",
+    note: "floor plates \u00d7 S12's typical floor-to-floor height"
+  }
 ];
 
-// Dims that render as L × H × W inputs on PROJECT. Their storage keys are
-// `${id}_length` / `${id}_height` / `${id}_width`; `${id}_volume` is CALCULATED
-// from the three children via recomputeVolume. Writing the parent id directly
-// would land in a key nothing reads, so decompose on apply: volume ÷ (H × W)
-// = length, then push H + W from the params. recomputeVolume fires after
-// refreshProjectForm and notifies the auto-fill listener that flows the
-// volume downstream to F&S.
-const LHW_DIMS = {
-  dim_continuous_footings: {
-    heightParam: "param_footing_height_m",
-    widthParam: "param_footing_width_m"
-  },
-  garage_continuous_footings: {
-    heightParam: "param_footing_height_m",
-    widthParam: "param_footing_width_m"
-  }
-};
+// S11's rows (V3 keys): ten wall rows, forty window rows, twelve door rows.
+const sfx = (base, n) =>
+  Array.from(
+    { length: n },
+    (_, i) => base + (i < 26 ? "abcdefghijklmnopqrstuvwxyz"[i] : "a" + "abcdefghijklmnopqrstuvwxyz"[i - 26])
+  );
+const WALL_ROWS = ["86", ...sfx("87", 9)];
 
-function readParams(project) {
-  const params = {};
-  const fromProject = (project && project.projectJson && project.projectJson.params) || {};
-  for (const key of PARAM_FIELDS) {
-    const fromState = StateManager.getValue(key);
-    if (fromState != null && fromState !== "") {
-      params[key] = fromState;
-    } else if (fromProject[key] != null && fromProject[key] !== "") {
-      params[key] = fromProject[key];
+function shoelace(v) {
+  let a = 0;
+  for (let i = 0; i < v.length; i++) {
+    const j = (i + 1) % v.length;
+    a += v[i].x * v[j].y - v[j].x * v[i].y;
+  }
+  return Math.abs(a) / 2;
+}
+
+function inside(pt, v) {
+  let c = false;
+  for (let i = 0, j = v.length - 1; i < v.length; j = i++) {
+    if (v[i].y > pt.y !== v[j].y > pt.y && pt.x < ((v[j].x - v[i].x) * (pt.y - v[i].y)) / (v[j].y - v[i].y) + v[i].x)
+      c = !c;
+  }
+  return c;
+}
+
+// Walls, windows and doors by facing. A wall's facing is set on the wall in
+// Take Off's summary table; its windows and doors (inside it) share it. Each
+// opening is kept on its own — ASHRAE 140 shades window by window.
+export function envelopeByFacing(projectJson) {
+  const byFacing = new Map();
+  const unconfirmed = [];
+  for (const page of (projectJson && projectJson.pages) || []) {
+    const upm = page.calibration && page.calibration.pdfUnitsPerMetre;
+    const polys = (page.polygons || []).filter((p) => p.closed && p.scope !== "garage");
+    if (!upm) continue;
+    const walls = polys.filter(
+      (p) =>
+        (p.type || "area") === "area" &&
+        (p.component === "wall_exterior" || (!p.component && page.classification === "elevation"))
+    );
+    for (const w of walls) {
+      if (!w.facing) {
+        unconfirmed.push(`${w.label || "wall"} on page ${page.pageNum}`);
+        continue;
+      }
+      const f = byFacing.get(w.facing) || { facing: w.facing, wall: 0, openings: [] };
+      f.wall += shoelace(w.vertices) / (upm * upm);
+      for (const o of polys.filter((p) => p.type === "window" || p.type === "door")) {
+        const c = {
+          x: o.vertices.reduce((a, v) => a + v.x, 0) / o.vertices.length,
+          y: o.vertices.reduce((a, v) => a + v.y, 0) / o.vertices.length
+        };
+        if (!inside(c, w.vertices)) continue;
+        const xs = o.vertices.map((v) => v.x);
+        const ys = o.vertices.map((v) => v.y);
+        f.openings.push({
+          kind: o.type,
+          label: o.label,
+          w: Number(((Math.max(...xs) - Math.min(...xs)) / upm).toFixed(3)),
+          h: Number(((Math.max(...ys) - Math.min(...ys)) / upm).toFixed(3))
+        });
+      }
+      byFacing.set(w.facing, f);
     }
   }
+  return { facings: [...byFacing.values()].filter((f) => f.wall > 0), unconfirmed };
+}
+
+function v3() {
+  return window.TEUI || {};
+}
+
+function readParams(project) {
+  const fromProject = (project && project.projectJson && project.projectJson.params) || {};
+  const params = {};
+  for (const key of PARAM_FIELDS) {
+    if (fromProject[key] != null && fromProject[key] !== "") params[key] = fromProject[key];
+  }
   return params;
+}
+
+function num(v) {
+  const n = Number(String(v ?? "").replace(/,/g, ""));
+  return Number.isFinite(n) ? n : null;
 }
 
 export async function listProjects() {
@@ -71,31 +139,64 @@ export async function buildPreview(projectUuid) {
   if (!project) throw new Error("project not found: " + projectUuid);
   const params = readParams(project);
   const dims = computeAllDimensions({ projectJson: project.projectJson, params });
+  const SM = v3().StateManager;
+  const f2f = num(SM?.getValue("g_106"));
 
-  // Pair each computed dim with its current StateManager value so the UI
-  // can show "before → after" and highlight deltas.
-  const rows = [];
-  for (const [dimId, agg] of Object.entries(dims)) {
-    const current = StateManager.getValue(dimId);
-    const hasNew = agg.value != null;
-    rows.push({
-      dimId,
-      current: current != null && current !== "" ? current : null,
-      computed: hasNew ? roundForDisplay(agg.value, dimId) : null,
-      summary: buildSummary(agg),
+  const rows = V3_TARGETS.map((t) => {
+    const agg = dims[t.dim || t.volume] || { value: null, contributors: [], warnings: [] };
+    let value = agg.value;
+    let summary = buildSummary(agg);
+    if (t.volume && value != null) {
+      if (f2f && f2f > 0) {
+        value = value * f2f;
+        summary = `${summary} \u00d7 ${f2f} m (S12 floor-to-floor)`;
+      } else {
+        value = null;
+        summary = "S12's typical floor-to-floor height (g_106) is blank";
+      }
+    }
+    const current = SM ? num(SM.getValue(t.field)) : null;
+    return {
+      dimId: t.field,
+      label: t.label,
+      current,
+      computed: value != null ? Number(value.toFixed(2)) : null,
+      summary: t.note ? `${t.label}: ${t.note}. ${summary}` : `${t.label}. ${summary}`,
       contributors: agg.contributors || [],
       warnings: agg.warnings || [],
-      hasValue: hasNew,
+      hasValue: value != null,
       missingParams: extractMissingParams(agg),
       assemblyPresets: uniquePresets(agg.contributors || [])
-    });
-  }
+    };
+  });
 
-  // Sort deterministic — put rows with computed values first so the user
-  // sees the actionable stuff on top.
-  rows.sort((a, b) => {
-    if (a.hasValue !== b.hasValue) return a.hasValue ? -1 : 1;
-    return a.dimId.localeCompare(b.dimId);
+  const env = envelopeByFacing(project.projectJson);
+  if (env.facings.length) {
+    const i86 = rows.findIndex((r) => r.dimId === "d_86");
+    if (i86 >= 0) rows.splice(i86, 1);
+  }
+  const nWin = env.facings.reduce((n, f) => n + f.openings.filter((o) => o.kind === "window").length, 0);
+  const nDoor = env.facings.reduce((n, f) => n + f.openings.filter((o) => o.kind === "door").length, 0);
+  const wallTotal = env.facings.reduce((a, f) => a + f.wall, 0);
+  rows.push({
+    dimId: "s11_envelope",
+    label: "S11 walls, windows, doors by facing",
+    current: null,
+    computed: env.facings.length ? Number(wallTotal.toFixed(2)) : null,
+    summary:
+      (env.facings.length
+        ? env.facings
+            .map((f) => `${f.facing}: wall ${f.wall.toFixed(2)} m\u00b2, ${f.openings.length} opening(s)`)
+            .join(" \u00b7 ") +
+          ` \u2014 ${nWin} window(s) and ${nDoor} door(s), each in its own row, hosted in its wall.`
+        : "No wall has a facing yet: set each in Take Off, Eh!'s summary table.") +
+      (env.unconfirmed.length ? ` Not imported (no facing set): ${env.unconfirmed.join(", ")}.` : ""),
+    contributors: [],
+    warnings: [],
+    hasValue: env.facings.length > 0,
+    missingParams: [],
+    assemblyPresets: [],
+    envelope: env
   });
 
   return {
@@ -106,90 +207,25 @@ export async function buildPreview(projectUuid) {
   };
 }
 
-export async function applyImport(projectUuid, dimIdsToApply) {
+// Writes each chosen row into OBJECTIVE as a user entry (so Reset, back to the
+// last loaded project, undoes it), then one full recalculation, as V3's
+// importer does after an import.
+export async function applyImport(projectUuid, fieldIdsToApply) {
   const preview = await buildPreview(projectUuid);
-  const toApplySet = new Set(dimIdsToApply);
+  const T = v3();
+  if (!T.StateManager) throw new Error("OBJECTIVE's engine is not loaded");
+  const chosen = new Set(fieldIdsToApply);
   let applied = 0;
-  const polyIdsByDim = {};
-
-  StateManager.muteListeners();
-  try {
-    // Propagate any Parser-side params into StateManager when BEAMweb's own
-    // values are blank. Keeps PROJECT → Geometry Parameters in sync with the
-    // Parser sidebar without forcing the user to re-type values.
-    const parserParams = (preview.project.projectJson && preview.project.projectJson.params) || {};
-    for (const key of PARAM_FIELDS) {
-      const current = StateManager.getValue(key);
-      if ((current == null || current === "") && parserParams[key] != null && parserParams[key] !== "") {
-        StateManager.setValue(key, String(parserParams[key]), VS.IMPORTED);
-        StateManager.setDimensionSource(key, "pdf:param");
-      }
-    }
-
-    for (const row of preview.rows) {
-      if (!toApplySet.has(row.dimId) || !row.hasValue) continue;
-      const polyIds = row.contributors.flatMap((c) => (c.polygons || []).map((p) => p.id));
-      writeDimValue(row, preview.params);
-      polyIdsByDim[row.dimId] = polyIds;
-      StateManager.setDimensionSource(
-        row.dimId,
-        buildProvenance(projectUuid, polyIds, {
-          summary: row.summary,
-          sheets: collectSheets(row.contributors)
-        })
-      );
+  for (const row of preview.rows) {
+    if (!chosen.has(row.dimId) || !row.hasValue) continue;
+    if (row.dimId === "s11_envelope") applied += writeEnvelope(T.StateManager, row.envelope);
+    else {
+      T.StateManager.setValue(row.dimId, String(row.computed), "user-modified");
       applied++;
     }
-  } finally {
-    StateManager.unmuteListeners();
   }
-
-  return { applied, polyIdsByDim, project: preview.project };
-}
-
-function writeDimValue(row, params) {
-  const lhw = LHW_DIMS[row.dimId];
-  if (!lhw) {
-    StateManager.setValue(row.dimId, String(row.computed), VS.IMPORTED);
-    return;
-  }
-  const H = Number(params[lhw.heightParam]);
-  const W = Number(params[lhw.widthParam]);
-  if (!Number.isFinite(H) || H <= 0 || !Number.isFinite(W) || W <= 0) {
-    // Params missing — fall back to writing the computed volume directly.
-    // recomputeVolume will zero it out on next refresh, but at least the row
-    // persists in state and we have a paper trail. In practice this branch
-    // should not fire because the preview already guards on missing params.
-    StateManager.setValue(`${row.dimId}_volume`, String(row.computed), VS.IMPORTED);
-    return;
-  }
-  const length = row.computed / (H * W);
-  StateManager.setValue(`${row.dimId}_length`, String(Number(length.toFixed(4))), VS.IMPORTED);
-  StateManager.setValue(`${row.dimId}_height`, String(H), VS.IMPORTED);
-  StateManager.setValue(`${row.dimId}_width`, String(W), VS.IMPORTED);
-}
-
-// Provenance is stored as a JSON-encoded envelope on dimension_sources.
-// The envelope lets PROJECT render a rich fidelity badge (summary +
-// clickable sheet refs) without re-reading IndexedDB on every repaint.
-// A plain-string fallback is emitted when the caller lacks rich context
-// (e.g. param-propagation path) — render paths must handle both.
-function buildProvenance(projectUuid, polyIds, extras) {
-  extras = extras || {};
-  const envelope = {
-    type: "pdf-parser",
-    projectUuid,
-    polyIds: Array.isArray(polyIds) ? polyIds : [],
-    summary: extras.summary || "",
-    sheets: Array.isArray(extras.sheets) ? extras.sheets : []
-  };
-  return JSON.stringify(envelope);
-}
-
-function collectSheets(contributors) {
-  const s = new Set();
-  for (const c of contributors || []) for (const sh of c.sheets || []) s.add(sh);
-  return Array.from(s);
+  if (applied && T.Calculator?.calculateAll) T.Calculator.calculateAll();
+  return { applied, project: preview.project };
 }
 
 function buildSummary(agg) {
@@ -225,9 +261,43 @@ function uniquePresets(contributors) {
   return Array.from(s);
 }
 
-function roundForDisplay(value, dimId) {
-  // Volumes to 3 decimal places, everything else to 2.
-  const isVolume = /volume|continuous_footings|columns_piers/.test(dimId);
-  const d = isVolume ? 3 : 2;
-  return Number(value.toFixed(d));
+// S11 from the walls' facings: one wall row per facing (gross area; S11 nets
+// out what it hosts), then every window and every door in its own row, hosted
+// in its facing's wall — ASHRAE 140 shades window by window (Andy 2026-11-25).
+// Written the way S11 itself does it (Section11.js applyOpeningGeometry): the
+// host, W, H and quantity on the S11 row; the area (W × H) and the facing on
+// its S10 twin, which is where an opening's area lives. Every opening row is
+// cleared first. Returns the count written.
+function writeEnvelope(SM, env) {
+  const set = (id, v) => SM.setValue(id, String(v), "user-modified");
+  const OPEN = (window.TEUI && window.TEUI.Openings && window.TEUI.Openings.ALL) || [];
+  let n = 0;
+  WALL_ROWS.forEach((r) => set(`d_${r}`, 0));
+  for (const o of OPEN) {
+    set(`ch_${o.s11}`, "");
+    set(`dl_${o.s11}`, "");
+    set(`dh_${o.s11}`, "");
+    set(`dq_${o.s11}`, 1);
+    set(`d_${o.s10}`, 0);
+  }
+  const free = { window: OPEN.filter((o) => o.kind === "window"), door: OPEN.filter((o) => o.kind === "door") };
+  env.facings.slice(0, WALL_ROWS.length).forEach((f, i) => {
+    const wallRow = WALL_ROWS[i];
+    set(`c_${wallRow}`, "walls");
+    set(`cf_${wallRow}`, f.facing);
+    set(`d_${wallRow}`, f.wall.toFixed(2));
+    n++;
+    for (const op of f.openings) {
+      const o = free[op.kind] && free[op.kind].shift();
+      if (!o) continue; // more openings than S11 has rows of that kind
+      set(`ch_${o.s11}`, wallRow);
+      set(`dl_${o.s11}`, op.w);
+      set(`dh_${o.s11}`, op.h);
+      set(`dq_${o.s11}`, 1);
+      set(`d_${o.s10}`, +(op.w * op.h).toFixed(4));
+      set(`e_${o.s10}`, f.facing);
+      n++;
+    }
+  });
+  return n;
 }

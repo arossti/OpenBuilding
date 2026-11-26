@@ -1,6 +1,6 @@
-# BfCA OpenBuilding — Embodied Carbon Assessment Framework
+# OpenBuilding.ca — Browser Tools for Canadian Buildings
 
-Research, prototyping, and tooling for embodied carbon (EC) assessment in Canadian construction, developed by [Builders for Climate Action](https://www.buildersforclimateaction.org/) (BfCA).
+Research, prototyping, and tooling for Canadian buildings: PDF takeoff, a material database, and OBJECTIVE, by OpenBuilding.ca.
 
 ## Live Tools
 
@@ -10,11 +10,12 @@ Five browser-native apps plus a dev dependency manifest, all deployed via GitHub
 
 App directory with cards linking to each tool.
 
-### PDF-Parser — `/pdfparser.html`
+### TakeOffEh — `/takeoffeh.html`
 
-Client-side tool for extracting area and volume data from construction document PDFs. Loads a PDF, identifies architectural plans, and lets users measure areas with polygon or rectangle tools — purpose-built for the area/volume inputs needed by BEAM and wbLCA tools.
+Client-side tool for extracting area and volume data from construction document PDFs. Loads a PDF, identifies architectural plans, and lets users measure areas with polygon or rectangle tools — purpose-built for the area/volume inputs needed by OBJECTIVE and wbLCA tools.
 
 **Key features:**
+
 - PDF.js 4.x viewer with CAD-style controls (scroll-zoom at cursor, middle-click pan)
 - Three-state scale workflow: auto-detect → accept → verify (empirical two-point calibration)
 - Polygon + rectangle area measurement with vertex snap to PDF vector geometry
@@ -24,24 +25,16 @@ Client-side tool for extracting area and volume data from construction document 
 - Ruler tool with tick marks and dual-unit labels
 - Unified undo/redo (polygons + rulers), JSON project save/load/import, CSV export
 
-### EC Matrix — `/matrix.html`
-
-Interactive reference mapping roles, responsibilities, tools, standards, and compliance requirements for EC assessments across Canadian building types, sizes, jurisdictions, and project phases. Aligned to NBC/NECB 2025 Draft.
-
-**Key features:**
-- Card view with 6-phase status strip (None → Voluntary → Conditional → Emerging → Mandatory)
-- Flow model view (horizontal phase-to-phase with statutory/EC/voluntary tracks)
-- Actor lens mode (dims irrelevant phases, highlights selected role's involvement)
-- 2025 code updates panel, PT equivalents, standards tooltips, BEM glossary
-- Persona quick-filter chips for common role scenarios
-
 ### Material Database — `/database.html`
 
-BfCA material catalogue viewer. 821 EPDs across 8 material groups, full EN 15804+A2 per-stage impact scope, sortable + searchable + filterable by group / country / lifecycle stage. Collapsible group sections mirror the assembly-tab structure in BEAMweb.
+OpenBuilding.ca material catalogue viewer. 821 EPDs across 8 material groups, full EN 15804+A2 per-stage impact scope, sortable + searchable + filterable by group / country / lifecycle stage. Collapsible sections by material group.
 
-### BEAMweb — `/beamweb.html`
+### OBJECTIVE 4.0 — `/objectivepro.html`
 
-Browser port of the BEAM embodied-carbon calculator. Phase 3 live: PROJECT metadata + dimension form with source-selectable inputs, plus the first live assembly picker (Footings & Slabs, 16 groups × 658 materials, gSheet parity-validated on every row tested). Reads per-unit GWP factors directly from the same BfCA materials catalogue as the Database viewer. Phases 4+ queued: 11 remaining assembly tabs (Windows → Garage) + REVIEW + RESULTS.
+The targeted energy use intensity tool, OBJECTIVE Pro's PC form. OBJECTIVE's sections S01–S21 are being ported in as
+full pages (roadmap: `schema/schema.md`); S01's key values (Lifetime Carbon, Annual Carbon, TEUI) ride the
+masthead on every section, and S22 is the Glossary. Take Off, Eh! feeds it through Trust / Trust + Verify.
+OBJECTIVE 3 stays live at objective.openbuilding.ca.
 
 ### Dev Dependencies — `/dependencies.html`
 
@@ -52,16 +45,15 @@ Dependency manifest with ESM import-graph drift detector. Not nav-linked — for
 Flat layout — the repo root is the deployed site. The Pages workflow stages a clean `_site/` from these files and uploads that as the artifact.
 
 ```
-at/
+OpenBuilding/
 ├── index.html                       Landing — app directory
-├── pdfparser.html                   PDF-Parser — area + volume takeoff
-├── matrix.html                      EC Matrix — compliance grid
+├── takeoffeh.html                   TakeOffEh — area + volume takeoff
 ├── database.html                    Material Database viewer
-├── beamweb.html                     BEAMweb — embodied carbon calculator
+├── objectivepro.html                OBJECTIVE 4.0
 ├── dependencies.html                Dev dependency manifest
-├── bfcastyles.css                   Single consolidated design system (~5000 lines)
+├── obstyles.css                   Single consolidated design system (~5000 lines)
 ├── js/                              ESM modules (vanilla JS, no build step)
-│   ├── app.mjs                      PDF-Parser bootstrap
+│   ├── app.mjs                      TakeOffEh bootstrap
 │   ├── polygon-tool.mjs             Polygon + window measurement
 │   ├── scale-manager.mjs            Scale detection + calibration
 │   ├── pdf-loader.mjs               PDF.js integration
@@ -69,25 +61,17 @@ at/
 │   ├── vector-snap.mjs              Vertex snap to PDF vectors
 │   ├── sheet-classifier.mjs         Plan / section / elevation inference
 │   ├── schedule-parser.mjs          Schedule extraction (in progress)
-│   ├── project-store.mjs            PDF-Parser project persistence
+│   ├── project-store.mjs            TakeOffEh project persistence
 │   ├── config.mjs                   App constants
-│   ├── beamweb.mjs                  BEAMweb app entry + tab router
+│   ├── objective4.mjs                  OBJECTIVE entry + section router (S01–S22, the key-values HUD)
 │   ├── database.mjs                 Database viewer entry
 │   ├── shared/                      Cross-app utilities
 │   │   ├── state-manager.mjs        Centralised state + listeners + autosave
 │   │   ├── file-handler.mjs         Import / export with quarantine
 │   │   └── html-utils.mjs           HTML escape + helpers
-│   └── beam/                        BEAMweb-specific modules
-│       ├── project-tab.mjs, footings-slabs-tab.mjs
-│       ├── materials-db.mjs         GWP + unit-conversion lookups
-│       ├── auto-fill.mjs            PROJECT → F&S quantity bridge
-│       ├── jurisdictions.mjs        Country / province filter
-│       ├── assembly-csv-parser.mjs  Generic assembly-tab CSV parser
-│       ├── sample-loader.mjs        Load Sample (DOE Prototype) - candidate for filehandler consolidation
-│       ├── workbook-mapper.mjs      Workbook → state mapper (Phase 1 stub)
-│       ├── reference-data.mjs       Glossary + Energy GHG tables
-│       └── shared/
-│           └── formatters.mjs       fmtKg / fmtQty display formatters
+│   └── beam/                        OBJECTIVE's modules (code name kept until the port)
+│       ├── pdf-bridge-import.mjs    Trust / Trust + Verify from Take Off, Eh!
+│       └── reference-data.mjs       S22 Glossary
 ├── graphics/                        App logos + iconography
 ├── lib/                             PDF.js 4.9.155 (local ESM build)
 ├── data/                            Gitignored — staged at dev/deploy time
@@ -95,24 +79,20 @@ at/
 │   ├── material.schema.json         Draft 2020-12 validator
 │   ├── materials/                   8 per-group JSON files (03-concrete ... 31-earthwork)
 │   ├── lookups/                     Enum + inference tables
-│   ├── scripts/                     CSV importer + validator + BEAM sheet fetcher
-│   └── schema.md                    Workplan + lineage
+│   ├── scripts/                     CSV importer + validator
+│   └── schema.md                    OBJECTIVE 4.0's roadmap (§0 = the handoff); the rest of schema/ is the local-only catalogue
 ├── docs/
-│   ├── sample.pdf                   PDF-Parser dev fixture (generic name; swapped for a better drawing set at release)
+│   ├── sample.pdf                   TakeOffEh dev fixture (generic name; swapped for a better drawing set at release)
 │   ├── pdf-samples/                 Larger sample PDFs for parser testing (gitignored)
-│   ├── matrix/                      EC Matrix docs (ARCHITECTURE, TRIAGE, data model)
-│   ├── beam-samples/                Sample BEAMweb project JSONs (DOE Prototype)
+│   ├── beam-samples/                BEAM's DOE Prototype sample (BfCA data, unused, local only)
 │   ├── csv files from BEAM/         22 BEAM workbook tab snapshots
-│   ├── PDF References/              Vancouver EC guides, NRC reports, code references
-│   ├── regulatory (Jacob)/          Legacy regulatory research (archived)
-│   ├── ifc (Jacob)/                 Legacy IFC exploration
-│   ├── cost (Jacob)/                Legacy cost-data research
+│   ├── PDF References/              Code references (local PDFs, not committed)
 │   ├── workplans/                   Living workstream specs
-│   │   ├── BEAMweb.md               BEAMweb workstream spec + changelog
-│   │   ├── PDF-BEAMweb-BRIDGE.md    Phase 4b cross-app bridge design spec
-│   │   └── CLEANUP-AUDIT.md         Pre-Phase-4b codebase audit (2026-04-20)
+│   │   ├── PDF-BEAMweb-BRIDGE.md    Take Off, Eh! → OBJECTIVE bridge design spec
+│   │   ├── MAGIC.md                 Take Off, Eh! magic-wand workplan
+│   │   └── WORKPLAN-TEMPLATE.md     Template for a new workplan
 │   └── completed/                   Shipped workplans kept briefly for reference, then bulk-deleted
-│       └── pdf-parser.md            PDF-Parser workplan (Steps 1–10 + PDF-Bridge phases all shipped)
+│       └── takeoffeh.md            TakeOffEh workplan (Steps 1–10 + PDF-Bridge phases all shipped)
 ├── CCI-tables-20241121/             CCI construction classification taxonomy
 ├── package.json                     npm tooling (ESLint + Prettier) + stage:data
 ├── eslint.config.mjs, .prettierrc, .prettierignore
@@ -127,7 +107,7 @@ All apps load as ES modules and require a local server:
 
 ```bash
 npm install          # ESLint + Prettier (one-time)
-npm run stage:data   # Copy schema/materials + BEAM CSVs + sample projects into data/ (gitignored) — needed for Database viewer + BEAMweb
+npm run stage:data   # Copy schema/materials + BEAM CSVs + sample projects into data/ (gitignored) — needed for the Database viewer + OBJECTIVE
 npm run serve        # python3 -m http.server 8000 — open http://localhost:8000/
 npm run lint         # ESLint check
 npm run lint:fix     # ESLint auto-fix (includes Prettier)
@@ -136,16 +116,14 @@ npm run format       # Prettier on CSS/HTML/JS
 
 ## Context
 
-This work is part of the NRCan Codes Accelerator Fund (CAF), with a near-term focus on combined operational and embodied carbon analysis for Part 9 and Part 3 buildings. The four apps are complementary: **EC Matrix** maps *what* EC requirements apply; **PDF-Parser** extracts the *area and volume data*; the **Material Database** is the EPD catalogue those areas multiply against; **BEAMweb** is the calculation surface that ties it all together into a project-level embodied carbon total.
+The tools are complementary: **Take Off, Eh!** extracts the _area and volume data_ from drawings; **OBJECTIVE** turns
+the envelope and systems into energy and carbon; the **Material Database** and the **Builders** hold the materials and
+assemblies those areas multiply against. The native ABCD.EARTH app is OBJECTIVE Pro's full form.
 
 ## Scope
 
 **Canada only.** No US codes, ICC, or ASHRAE references unless explicitly referenced by a Canadian standard.
 
-## Collaborators
+## Maintainer
 
-Maintained by **Andy Thomson** (Thomson Architecture Inc.) in collaboration with BfCA.
-
-## About BfCA
-
-[Builders for Climate Action](https://www.buildersforclimateaction.org/) (BfCA) is a Canadian organization working to reduce carbon emissions in the built environment through research, tools, and education. BfCA develops [BEAM](https://www.buildersforclimateaction.org/beam.html) — an embodied carbon assessment tool for Canadian residential buildings.
+Maintained by **Andy Thomson** (Thomson Architecture Inc.) for OpenBuilding.ca.

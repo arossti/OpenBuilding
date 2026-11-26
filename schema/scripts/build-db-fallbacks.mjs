@@ -298,7 +298,7 @@ async function main() {
 
   const output = {
     _note:
-      "BfCA db-fallbacks: reference-grade material defaults for fields that aren't typically published in EPDs (density, thermal conductivity, heat capacity, embodied energy, embodied carbon). Used as fallback only when the EPD itself is silent. Every value applied at runtime carries source: 'generic_default' so users see what came from the EPD vs the catalogue. Generated from db-fallbacks.source.xml — re-run schema/scripts/build-db-fallbacks.mjs after editing.",
+      "OpenBuilding.ca db-fallbacks: reference-grade material defaults for fields that aren't typically published in EPDs (density, thermal conductivity, heat capacity, embodied energy, embodied carbon). Used as fallback only when the EPD itself is silent. Every value applied at runtime carries source: 'generic_default' so users see what came from the EPD vs the catalogue. Generated from db-fallbacks.source.xml — re-run schema/scripts/build-db-fallbacks.mjs after editing.",
     _schema_version: 1,
     _source_xml_sha256: sourceSha,
     _generated_at: new Date().toISOString(),

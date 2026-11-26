@@ -1,5 +1,5 @@
 /**
- * PDF-Parser — Shrink-Wrap (layer-peel classification)
+ * TakeOffEh — Shrink-Wrap (layer-peel classification)
  *
  * Pure module. Given a page's segments + text items + page size, peels
  * sheet-border geometry off the segment list and reports the drawing-

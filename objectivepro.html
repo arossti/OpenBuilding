@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en" class="theme-dark app-beamweb">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OBJECTIVE 4.0 — the targeted energy use intensity tool (OpenBuilding.ca)</title>
+    <link rel="icon" type="image/svg+xml" href="graphics/ob-favicon.svg" />
+    <link rel="icon" type="image/png" href="graphics/ob-logo-sm.png" />
+    <meta
+      name="description"
+      content="OBJECTIVE 4.0, the targeted energy use intensity tool: in development. Hosted walls and windows, Take Off, Eh! envelope import, the bridge to hourly analysis and ASHRAE 140."
+    />
+
+    <!-- CSS: single consolidated file (obstyles.css holds shared + per-app rules scoped by html class). Bootstrap only here, for modals/dropdowns. -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="obstyles.css" />
+
+    <!-- Vendor JS — classic script tags. BEAMweb's own code is ES modules. -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Dependency-graph stack — deferred + dormant. Only the Dependency Graph
+         tab reaches for these, and even there they sit idle until the user
+         clicks Activate. Kept here so the URLs match OBJECTIVE's pin-points
+         and we're not chasing version drift when the full graph ports. -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
+  </head>
+  <body>
+    <div id="beam-app">
+      <!-- ── Header ───────────────────────────────────────── -->
+      <header class="site-header beam-header">
+        <img src="graphics/objective-mark.svg" alt="OBJECTIVE" class="header-logo" />
+        <div class="beam-title-block">
+          <h1 class="beam-title">
+            OBJECTIVE
+            <span style="font-size: 12px; font-weight: normal; color: var(--text-dim)">· 4.0 · in development</span>
+          </h1>
+          <span class="beam-subtitle">the targeted energy use intensity tool</span>
+        </div>
+        <div class="beam-spacer"></div>
+        <div id="op-hud" class="op-hud" role="region" aria-label="S01 key values"></div>
+        <nav class="beam-nav">
+          <a href="index.html" class="nav-btn" target="_blank" rel="noopener" title="App directory / home">Home</a>
+          <a href="takeoffeh.html" class="nav-btn" target="_blank" rel="noopener" title="PDF takeoff + area extraction"
+            >Take Off, Eh!</a
+          >
+          <a
+            href="builders/material-builder.html"
+            class="nav-btn"
+            target="_blank"
+            rel="noopener"
+            title="Materials — the OpenBuilding.ca material library"
+            >Materials</a
+          >
+          <a href="objectivepro.html" class="nav-btn active" aria-current="page" title="Current app">OBJECTIVE</a>
+        </nav>
+      </header>
+
+      <!-- ── Action bar ──────────────────────────────────── -->
+      <div id="beam-action-bar">
+        <!-- Import / Export dropdown (Bootstrap-powered) -->
+        <div class="btn-group" role="group">
+          <button
+            class="beam-action-btn primary"
+            id="beam-new-project"
+            title="Start a fresh project (clears current state)"
+          >
+            <i class="bi bi-file-earmark-plus"></i> New
+          </button>
+        </div>
+
+        <div class="btn-group" role="group">
+          <button class="beam-action-btn" id="import-data-btn" title="Open an OBJECTIVE project (CSV or Excel)">
+            <i class="bi bi-folder2-open"></i> Open
+          </button>
+          <button class="beam-action-btn" id="export-data-btn" title="Save this project as CSV (Target and Reference)">
+            <i class="bi bi-download"></i> Save
+          </button>
+        </div>
+
+        <div class="beam-action-sep"></div>
+
+        <div class="btn-group" role="group">
+          <button
+            class="beam-action-btn"
+            id="beam-trust-takeoffeh"
+            title="Trust: apply every dimension Take Off, Eh! can compute, no review step (uses the most recently saved parser session)"
+          >
+            <i class="bi bi-lightning-charge"></i> Trust
+          </button>
+          <button
+            class="beam-action-btn"
+            id="beam-import-takeoffeh"
+            title="Trust + Verify: open the review modal to pick which dimensions to import (available any time, even after a Trust apply)"
+          >
+            <i class="bi bi-file-earmark-ruled"></i> Trust + Verify
+          </button>
+        </div>
+
+        <div class="beam-action-sep"></div>
+
+        <button
+          class="beam-action-btn"
+          id="beam-load-sample"
+          data-bs-toggle="modal"
+          data-bs-target="#sampleProjectModal"
+          title="Load one of OBJECTIVE's case studies"
+        >
+          <i class="bi bi-folder-symlink"></i> Load Sample
+        </button>
+        <button
+          class="beam-action-btn"
+          id="beam-reset"
+          title="Return every value to the last project you loaded or imported"
+        >
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+
+        <span class="beam-project-name" id="beam-project-name">(untitled project)</span>
+
+        <!-- Hidden file inputs -->
+        <input type="file" id="excel-file-input" accept=".csv,.xlsx,.xls" hidden />
+        <input type="file" id="beam-file-takeoffeh" accept=".json" hidden />
+      </div>
+
+      <!-- ── Import from TakeOffEh modal ──────────────────── -->
+      <div id="bw-pdf-import-backdrop"></div>
+      <div id="bw-pdf-import-modal">
+        <div class="bw-pdf-import-header">
+          <span class="bw-pdf-import-title">Import from Take Off, Eh!</span>
+          <button class="bw-pdf-import-close" id="bw-pdf-import-close" title="Close">&times;</button>
+        </div>
+        <div class="bw-pdf-import-body" id="bw-pdf-import-body">
+          <p class="bw-pdf-import-empty">Loading saved Take Off, Eh! projects…</p>
+        </div>
+        <div class="bw-pdf-import-footer">
+          <span class="bw-pdf-import-hint" id="bw-pdf-import-hint"></span>
+          <span class="spacer"></span>
+          <button class="beam-action-btn" id="bw-pdf-import-cancel">Cancel</button>
+          <button class="beam-action-btn primary" id="bw-pdf-import-apply" disabled>Apply selected</button>
+        </div>
+      </div>
+
+      <!-- ── OBJECTIVE's sections S01–S21, verbatim from V3 (andy-rnd index.html @ 5e0b2f0): each
+           .section-content is what FieldManager renders into. objective4.mjs moves each into its S-panel. -->
+      <div id="op-v3-sections" hidden>
+        <div id="keyValues" class="section op-v3">
+          <div class="section-content">
+            <!-- Key Values content will be generated by FieldManager using Section01.js -->
+            <div data-render-section="keyValues"></div>
+          </div>
+        </div>
+        <div id="buildingInfo" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="buildingInfo"></div>
+          </div>
+        </div>
+        <div id="climateCalculations" class="section op-v3">
+          <div class="section-content">
+            <!-- Rendered section content will be inserted here -->
+            <div data-render-section="climateCalculations"></div>
+          </div>
+        </div>
+        <div id="actualTargetEnergy" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="actualTargetEnergy"></div>
+          </div>
+        </div>
+        <div id="emissions" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="emissions"></div>
+          </div>
+        </div>
+        <div id="onSiteEnergy" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="onSiteEnergy"></div>
+          </div>
+        </div>
+        <div id="waterUse" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="waterUse"></div>
+          </div>
+        </div>
+        <div id="indoorAirQuality" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="indoorAirQuality"></div>
+          </div>
+        </div>
+        <div id="occupantInternalGains" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="occupantInternalGains"></div>
+          </div>
+        </div>
+        <div id="envelopeRadiantGains" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="envelopeRadiantGains"></div>
+          </div>
+        </div>
+        <div id="envelopeTransmissionLosses" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="envelopeTransmissionLosses"></div>
+          </div>
+        </div>
+        <div id="volumeSurfaceMetrics" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="volumeSurfaceMetrics"></div>
+          </div>
+        </div>
+        <div id="mechanicalLoads" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="mechanicalLoads"></div>
+          </div>
+        </div>
+        <div id="tediSummary" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="tediSummary"></div>
+          </div>
+        </div>
+        <div id="teuiSummary" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="teuiSummary"></div>
+          </div>
+        </div>
+        <div id="sankeyDiagram" class="section op-v3" data-section-id="section16">
+          <div class="section-content">
+            <!-- This is the target for Section16.js to inject its dynamic content -->
+            <div id="section16ContentTarget" style="width: 100%"></div>
+          </div>
+        </div>
+        <div id="dependencyDiagram" class="section op-v3">
+          <div class="section-content">
+            <!-- Containers for Dependency Graph Components -->
+            <div class="dependency-graph-controls-wrapper mb-3"></div>
+            <!-- Wrapper for filters/controls -->
+            <div class="dependency-graph-info-wrapper mb-3"></div>
+            <!-- Wrapper for info panel -->
+            <div class="dependency-graph-container" style="width: 100%; border: 1px solid #eee">
+              <!-- SVG will be injected here by 4011-Dependency.js -->
+            </div>
+          </div>
+        </div>
+        <div id="parallelCoordinates" class="section op-v3">
+          <div class="section-content">
+            <!-- Controls wrapper - ParallelCoordinates.js will inject controls here -->
+            <div class="parallel-coordinates-controls-wrapper mb-3"></div>
+
+            <!-- Info wrapper - ParallelCoordinates.js will inject info panel here -->
+            <div class="parallel-coordinates-info-wrapper mb-3"></div>
+
+            <!-- Graph container - ParallelCoordinates.js will inject SVG and placeholder here -->
+            <div class="parallel-coordinates-container" style="width: 100%; border: 1px solid #eee">
+              <!-- SVG and placeholder will be injected here by ParallelCoordinates.js -->
+            </div>
+          </div>
+        </div>
+        <div id="wombat" class="section op-v3">
+          <div class="section-content">
+            <!-- Activation controls (injected by Section19.js) -->
+            <div class="wombat-controls-wrapper mb-3"></div>
+
+            <!-- Canvas layout: Left controls, Right 3D view -->
+            <div class="wombat-canvas-container" style="display: flex; gap: 20px; align-items: flex-start">
+              <!-- Left: Future controls (aspect ratio slider, etc.) -->
+              <div style="flex: 0 0 300px">
+                <div data-render-section="wombat"></div>
+              </div>
+
+              <!-- Right: SVG container for 3D visualization -->
+              <div class="wombat-svg-wrapper">
+                <svg id="wombat-svg" width="900" height="600" viewBox="0 0 900 600"></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="notes" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="notes"></div>
+          </div>
+        </div>
+        <div id="f280Compliance" class="section op-v3">
+          <div class="section-content">
+            <div data-render-section="f280Compliance"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- V3's Load Sample modal, verbatim (andy-rnd index.html @ 5e0b2f0); FileHandler fills its list. -->
+      <div
+        class="modal fade"
+        id="sampleProjectModal"
+        tabindex="-1"
+        aria-labelledby="sampleProjectModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="sampleProjectModalLabel">Load Sample Project</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="alert alert-warning mb-3" role="alert">
+                Loading a sample project will <strong>replace all current data</strong>.
+              </div>
+              <div id="sample-project-list" class="list-group"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Main: tabs sidebar + content panel ──────────── -->
+      <div id="beam-main">
+        <nav id="beam-sidebar">
+          <!-- S01–S22, populated by objective4.mjs from BEAM_TABS -->
+        </nav>
+
+        <section id="beam-content">
+          <!-- Tab panels rendered by objective4.mjs. One active at a time. -->
+        </section>
+      </div>
+
+      <!-- Sidebar results footer — floats above tabs on large screens; for now kept as a simple status row in the status bar -->
+
+      <!-- ── Status bar ──────────────────────────────────── -->
+      <div id="beam-status-bar">
+        <span id="beam-status-msg" class="status-ready">Ready · OBJECTIVE 4.0 scaffold</span>
+        <span class="beam-spacer"></span>
+        <span class="beam-build-tag"
+          >build: OBJECTIVE 4.0 dev ·
+          <a href="dependencies.html" style="color: var(--text-dim); text-decoration: none" title="Dependency manifest"
+            >deps</a
+          ></span
+        >
+      </div>
+    </div>
+
+    <!-- OBJECTIVE's engine + sections (V3, verbatim, classic scripts in V3's order) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.4/dagre-d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="src/core/AppendixE.js"></script>
+    <script src="src/core/StateManager.js"></script>
+    <script src="src/core/QCMonitor.js"></script>
+    <script src="src/core/Openings.js"></script>
+    <script src="src/core/ReferenceValues.js"></script>
+    <script src="src/core/VentilationRates.js"></script>
+    <script src="src/core/BasesimpData.js"></script>
+    <script src="src/core/Basesimp.js"></script>
+    <script src="src/core/F280Weather.js"></script>
+    <script src="src/core/Aim2Data.js"></script>
+    <script src="src/core/Aim2.js"></script>
+    <script src="src/core/ReferenceManager.js"></script>
+    <script src="src/core/ToggleUISync.js"></script>
+    <script src="src/core/ReferenceToggle.js"></script>
+    <script src="src/core/FieldManager.js"></script>
+    <script src="src/core/SectionIntegrator.js"></script>
+    <script src="src/core/Calculator.js"></script>
+    <script src="src/core/ExcelMapper.js"></script>
+    <script src="src/core/FileHandler.js"></script>
+    <script src="src/core/TooltipManager.js"></script>
+    <script src="src/core/Dependency.js"></script>
+    <script src="src/core/ZenMaster.js"></script>
+    <script src="src/core/Clock.js"></script>
+    <script src="src/core/ClimateValues.js"></script>
+    <script src="src/core/ClimateStations.js"></script>
+    <script src="src/core/ClimateStation.js"></script>
+    <script src="src/core/CoolingISO52016.js"></script>
+    <script src="src/core/Cooling.js"></script>
+    <script src="src/core/pcConfig.js"></script>
+    <script src="src/core/pcFinancials.js"></script>
+    <script src="src/core/pcOptimization.js"></script>
+    <script src="src/core/pcRendering.js"></script>
+    <script src="src/core/ParallelCoordinates.js"></script>
+    <script src="src/core/wombatRender.js"></script>
+    <script src="src/core/wombatWindows.js"></script>
+    <script src="src/core/computation/types.js"></script>
+    <script src="src/core/computation/ComputationGraph.js"></script>
+    <script src="src/core/computation/IncrementalEngine.js"></script>
+    <script src="src/core/computation/FieldRegistry.js"></script>
+    <script src="src/sections/nodes/ClimateNodes.js"></script>
+    <script src="src/sections/nodes/BuildingInfoNodes.js"></script>
+    <script src="src/sections/nodes/MechanicalNodes.js"></script>
+    <script src="src/sections/nodes/SpaceHeatingNodes.js"></script>
+    <script src="src/sections/nodes/WaterHeatingNodes.js"></script>
+    <script src="src/sections/nodes/RenewableNodes.js"></script>
+    <script src="src/sections/nodes/EnergyNodes.js"></script>
+    <script src="src/sections/nodes/AirQualityNodes.js"></script>
+    <script src="src/sections/nodes/ForestryNodes.js"></script>
+    <script src="src/sections/nodes/EmissionsNodes.js"></script>
+    <script src="src/sections/nodes/OccupancyNodes.js"></script>
+    <script src="src/sections/nodes/InternalGainsNodes.js"></script>
+    <script src="src/sections/nodes/RadiantGainsNodes.js"></script>
+    <script src="src/sections/nodes/TransmissionLossNodes.js"></script>
+    <script src="src/sections/nodes/VolumeMetricsNodes.js"></script>
+    <script src="src/sections/nodes/VentilationNodes.js"></script>
+    <script src="src/sections/nodes/CoolingNodes.js"></script>
+    <script src="src/sections/nodes/ComplianceNodes.js"></script>
+    <script src="src/sections/nodes/SectionComplianceNodes.js"></script>
+    <script src="src/sections/nodes/F280ComplianceNodes.js"></script>
+    <script src="src/sections/nodes/KeyValuesNodes.js"></script>
+    <script src="src/core/model/ModelMetadata.js"></script>
+    <script src="src/core/model/MultiModelState.js"></script>
+    <script src="src/core/model/MultiModelEngine.js"></script>
+    <script src="src/core/model/ModelOperations.js"></script>
+    <script src="src/core/computation/LegacyAdapter.js"></script>
+    <script src="src/core/ui/DOMBridge.js"></script>
+    <script src="src/core/computation/ComputationIntegration.js"></script>
+    <script src="src/sections/Section01.js"></script>
+    <script src="src/sections/Section02.js"></script>
+    <script src="src/sections/Section03.js"></script>
+    <script src="src/sections/Section04.js"></script>
+    <script src="src/sections/Section05.js"></script>
+    <script src="src/sections/Section06.js"></script>
+    <script src="src/sections/Section07.js"></script>
+    <script src="src/sections/Section08.js"></script>
+    <script src="src/sections/Section09.js"></script>
+    <script src="src/sections/Section10.js"></script>
+    <script src="src/sections/Section11.js"></script>
+    <script src="src/sections/Section12.js"></script>
+    <script src="src/sections/Section13.js"></script>
+    <script src="src/sections/Section14.js"></script>
+    <script src="src/sections/Section15.js"></script>
+    <script src="src/sections/Section16.js"></script>
+    <script src="src/sections/Section16C.js"></script>
+    <script src="src/sections/Section17.js"></script>
+    <script src="src/sections/Section18.js"></script>
+    <script src="src/sections/Section19.js"></script>
+    <script src="src/sections/Section20.js"></script>
+    <script src="src/sections/Section21.js"></script>
+    <script src="js/objective-boot.js"></script>
+    <script type="module" src="js/objective4.mjs"></script>
+  </body>
+</html>

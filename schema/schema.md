@@ -1,890 +1,364 @@
-# BfCA Materials Database — Workplan & Schema Specification
+# OBJECTIVE 4.0 — the roadmap (OpenBuilding.ca)
 
-> **This document is the canonical plan AND the design spec AND a cold-start handoff for new agents picking up the work.** Read the Cold-Start section first if you're joining fresh.
+> **The roadmap for OBJECTIVE 4.0 (OBJECTIVE Pro on the web) and the OpenBuilding.ca tools around it, with the
+> cold-start handoff.** Read section 0 first. This document replaces the BEAM materials schema that used to live at
+> this path (Andy 2026-11-25: _"our OBJECTIVE workplan replaces the BEAM schema entirely. It will be our roadmap
+> document for V4"_); that schema is in git history. Moved here from andy-rnd `docs/OBJECTIVE-V4.md` (andy-rnd keeps
+> a pointer) by way of `docs/workplans/`. Sections 3, 4, 7 and 8 are the andy-rnd plan as written; 0, 5, 6 and 9 are new.
+>
+> The rest of `schema/` is the BEAM material catalogue `database.html` reads: BfCA's data, kept in the repo for local
+> use and never deployed (Andy: _"We may use some of the BfCA database later but we'd need permission first."_).
+
+> Andy 2026-11-25: _"V3 is the upgrade with F280. V4 is the bridge to dynamic hourly analysis and ABCD integration
+> and ASHRAE 140 compliance."_ and _"My preference is in V4.0, not to offer the complex support of non-oriented walls
+> and non-hosted windows."_ This is the plan for him to read before anything is built. Nothing below is built yet
+> except what §1 lists.
 
 ---
 
 ## 0. Cold-start handoff (read this first)
 
-### Status as of 2026-04-18 (revised, session 2 — Phase 1 complete)
+### Status as of 2026-11-25 evening (branch `ob-landing-cleanup`, pushed, no PR)
 
-- **Design**: locked in — 20 top-level blocks, **`impacts` expanded to heavy per-stage structure (10 categories × 17 EN 15804+A2 stages, 340 impact slots/record)**, snake_case, schema-complete/nullable
-- **Sample record**: current at [`schema/sample.json`](./sample.json) — BEAM `LAM011` (Nordic X-Lam CLT 3½"), `id = "lam011"` (lowercased BEAM ID), `external_refs.beam_id = "LAM011"`
-- **Source data**: cleaned & committed at [`docs/csv files from BEAM/BEAM Database-DUMP.csv`](../docs/csv%20files%20from%20BEAM/BEAM%20Database-DUMP.csv) — 826 lines (1 header + 825 data rows), Excel-row ↔ CSV-line alignment verified. (Lives under `docs/` with all other BEAM reference exports; the importer's `CSV_PATH` resolves there.)
-- **Formal validator**: [`schema/material.schema.json`](./material.schema.json) — JSON Schema Draft 2020-12, full 20-block coverage with enums and per-stage impact_block `$def`. Zero-dep Node walker at `scripts/validate.mjs`.
-- **Importer**: [`schema/scripts/beam-csv-to-json.mjs`](./scripts/beam-csv-to-json.mjs) — single-row + batch modes, RFC-4180 parser, recursive arithmetic formula evaluator, IFERROR fallback extraction, country/CSI/element inference via lookups.
-- **Batch output**: [`schema/materials/`](./materials) — 821 records across 8 CSI divisions (03/04/05/06/07/08/09/31), `index.json` picker catalogue, `import-report.json` manual-review flags.
-- **Lookups**: [`schema/lookups/`](./lookups) — country-codes, csi-divisions, material-type-to-csi, display-name-keywords, typical-elements, lifecycle-stages.
-- **Branch**: `schema` on both remotes (`origin` = bfca-labs/at, `openbuilding` = arossti/OpenBuilding)
-- **Last commit at time of writing**: `f82094c` — Phase 1.5 Database viewer + detail-pane clip fix.
-- **Phase 1 status**: All technical acceptance criteria met. PR ready to open on `arossti/OpenBuilding`.
-- **Phase 1.5 status**: Database viewer shipped — stakeholder-facing tabular browser at `database.html`, proves the catalogue consumption pattern and will become live on Pages once the PR merges.
-- **Next phase**: Phase 3 (PDF-Parser material picker) is unblocked and recommended next. Phase 2 (EPD PDF parser) waits on a sample EPD PDF from the user.
+No deploy until the pieces are in place (Andy: _"No deploy intil we have all of our pieces in place, we can just
+commit-push until then. So no PR yet until it is cleaned of BfCA references."_). Only a push to `main` redeploys Pages.
 
-### Recommended next action
+**Shipped on the branch**
 
-**Phase 1 + 1.5 shipped and merged to `main`.** Active workstream has pivoted to [`BEAMweb.md`](../docs/workplans/BEAMweb.md) (now under `docs/workplans/`) — a full JS port of the BEAM (Google Sheets) embodied-carbon calculator that will eventually consume this schema directly. The originally-planned Phase 3 standalone material picker has been folded into BEAMweb as one of its UI components.
+- The EC Matrix, EPD-Parser and CCLIMB deleted (pages, code, CSS, docs); BfCA branding → OpenBuilding.ca; the
+  BfCA-era workplans deleted (`WORKPLAN-TEMPLATE.md` keeps their format); `bfcastyles.css` → `obstyles.css`.
+- Logos as SVG: the OpenBuilding house (`graphics/ob-*.svg`) and OBJECTIVE (`graphics/objective-*.svg`, Quicksand).
+- The PDF-Parser → **Take Off, Eh!** (`takeoffeh.html`, code name `TakeOffEh`).
+- The BEAM page → **OBJECTIVE 4.0** at **`objectivepro.html`** (was `beamweb.html`); its Introduction describes v4.
+- The Builders from ABCD.EARTH in `builders/` (§5.2): Materials and Section Builder from today's seed; Assemblies as
+  a snapshot of 2026-10-22 (ABCD BUGLIST #266), which passes the app's own cross-check.
+- One set of design tokens for every web page, cyan on the web (§6).
+- This plan moved here from andy-rnd (andy-rnd #25 merged, `5e0b2f0`: a pointer there).
 
-**Parity-then-migrate plan (locked 2026-04-18 session 3).** BEAMweb first ships matching the BEAM workbook's per-row emissions values exactly — using the precomputed NET/GROSS columns baked into the Google Sheet, not the full materials JSON DB. This keeps the initial port low-risk: same inputs produce the same outputs, which is the bar the BfCA team needs to clear before endorsing a web replacement for a tool their users already trust.
+**Remaining before a PR**
 
-Once BfCA validates functional parity against the gSheet on a canonical project, BEAMweb switches over to consuming [`schema/materials/`](./materials) directly. That migration is the moment BEAMweb stops being a spreadsheet port and becomes a more capable tool: the 10 impact categories × 17 EN 15804+A2 stages this schema already carries become surfaceable in BEAMweb's REVIEW / RESULTS tabs, even though the BEAM workbook only reports GWP. EPDs authored by the Phase 2 parser flow in the same way. Until parity is validated, the schema stays stable and the DB sits ready but unconnected from the live app.
+- The BfCA / NRCan / MCE references (Andy 2026-11-25: _"Yes delete all NRC and BfCA and MCE references, we will not
+  use any of that at the end."_): ✅ code, config, CLAUDE.md (rewritten), README, workplans, the Glossary, the three
+  `docs/*(Jacob)/` folders; the IndexedDB store renamed `openbuilding` (a one-time migration carries saved Take Off,
+  Eh! sessions across). ❓ LEFT: the material catalogue itself (`schema/`, `docs/csv files from BEAM/`), BfCA's data
+  — 821 `$schema` links, 264 provenance notes ("BfCA BioC calc by mass"), BfCA ids and names; it feeds `database.html`.
+- ABCD BUGLIST #266, so Assemblies is rebuilt from today's seed.
 
-Schema work resumes when:
-- The EPD parser (Phase 2) is ready to populate `impacts.*.by_stage` slots — blocked on a sample EPD PDF from the user.
-- BEAMweb clears the parity gate and we wire the DB into its calc engine (Phase 4 in BEAMweb's plan; promotes this schema from "reference" to "runtime consumer").
-- IFC interop (Phase 5), Canadian context extensions (Phase 6), or schema PDF deliverable (Phase 7) are prioritised.
+**Next: the port, §9.**
 
-### Project context (required reading)
+### The plan's status as written (andy-rnd, 2026-11-25)
 
-Memory files at `/Users/andrewthomson/.claude/projects/<path-hash>/memory/MEMORY.md` carry:
-- Scope: **Canada only.** No US codes/ICC/ASHRAE unless explicitly referenced by a Canadian standard (e.g., TRACI 2.1).
-- Always surface **BEAM** and **MCE²** as tools when discussing EC/wbLCA assessments.
-- User is a senior architect (Andy Thomson, Thomson Architecture Inc.) — be terse, opinionated, and correct.
-- Collaborator: Jacob Racusin (BfCA) — his initial-commit folders are at `docs/*(Jacob)/` and are stale reference material.
+- **v3** = objective PR #134 at `071f25a`: the live site plus the F280 package, nothing else (#134 was reset there
+  2026-11-25 after the hosting had been pushed onto it; Mark told on #134).
+- **v4's start** = andy-rnd `main`: S11 hosting (#23, `d12c8d2`) and its polish (#24). Both still let a window sit
+  in no wall and a wall face "Average"; v4 takes those away (§2).
+- **FROZEN** (Andy 2026-11-25: _"We'll freeze V4 where it is now on RND"_): nothing of V4-1+ is built until he
+  reopens it. Its state is andy-rnd #24 (`s11-hosting-polish`), served at http://127.0.0.1:8791 on the laptop.
+- **The fastest way in is the PDF-Parser** (Andy 2026-11-25: _"the PDF parser becomes the fastest input method
+  available to us"_): see V4-7. **The repos combine** and v4 deploys to GitHub Pages: §4. The OpenBuilding repo's code is Andy's / OpenBuilding's to reuse here.
+- **NEXT when reopened:** Andy's porting workplan, then §5's answers, then V4-1.
 
-### Git workflow (strict)
+### What OBJECTIVE 4.0 is
 
-1. Work on a feature branch (currently `schema`).
-2. Commit + push to **both** remotes every time:
-   ```bash
-   git push origin <branch> && git push openbuilding <branch>
-   ```
-3. When ready to deploy: PR on `arossti/OpenBuilding` → user merges → GitHub Pages auto-deploys from `main`.
-4. After merge: rebase local `main`, delete feature branch both sides (`git push <remote> --delete <branch>`), prune, create next feature branch.
-5. Commit messages via heredoc; avoid apostrophes in messages (break bash heredocs). Prefer `--file=-` with a `<<'MSG'` block when message contains special chars.
-6. **Never** push to `main` directly. **Never** force-push. **Never** skip hooks.
+**OBJECTIVE Pro = v4, in two forms:** the ABCD.EARTH app (macOS / Linux, native, the whole engine) and this web
+app (for PC users, the concession: a subset). Andy 2026-11-25: _"Pro refers to both the Web App and the Rust app. Pro=V4. The user may use the app in OSX/Linux, but many users are still PC users, and for them we have the web app. It is not expected to do everything the native rust app can, but it is the concession we make."_
 
-### Critical file inventory
+Andy 2026-11-25: _"OBJECTIVE pro lives in the ABCD.EARTH desktop app, but this web version extends what the old V3
+of OBJECTIVE can do with many shared methods."_ v3 stays the live, static/monthly one-zone modeller on Cloudflare
+(objective.openbuilding.ca); v4 is its web successor here, the bridge to hourly analysis, ASHRAE 140 and ABCD.
 
-| Path | Purpose |
-|---|---|
-| `schema/schema.md` | **This file.** Workplan + design spec + agent handoff |
-| `schema/sample.json` | Canonical full-template reference record (LAM011 CLT, schema-complete) |
-| `docs/csv files from BEAM/BEAM Database-DUMP.csv` | Cleaned BEAM source data — 826 lines, Excel row = CSV line. Consumed by `schema/scripts/beam-csv-to-json.mjs` (hardcoded `CSV_PATH`). |
-| `schema/materials.json` | Pre-existing ABCD.EARTH schema — donor of rendering hints only |
-| `schema/material.schema.json` | ✅ JSON Schema Draft 2020-12 validator |
-| `schema/lookups/*.json` | ✅ 6 files — country-codes, csi-divisions, material-type-to-csi, display-name-keywords, typical-elements, lifecycle-stages |
-| `schema/scripts/beam-csv-to-json.mjs` | ✅ Node ESM importer (single-row + batch modes, formula evaluator, IFERROR extractor) |
-| `schema/scripts/validate.mjs` | ✅ Zero-dep Node walker for `material.schema.json` |
-| `schema/materials/index.json` | ✅ Lightweight picker catalogue (821 entries × 8 fields, ~290 KB pretty) |
-| `schema/materials/NN-<slug>.json` | ✅ Per-CSI-division sparse records (8 files: 03–09, 31) |
-| `schema/materials/import-report.json` | ✅ Manual-review flags (unresolved divisions, blank IDs) |
-| `database.html` | ✅ Phase 1.5 — stakeholder viewer for the full catalogue |
-| `js/database.mjs` | ✅ Database viewer logic (sortable table, lazy per-group fetch, expandable detail with full per-stage matrix). Styles live in `bfcastyles.css` §7. |
+### What it is NOT
 
-### Known gotchas / lossy-import hazards
+- Not everything the native app does: the hourly engine and real geometry live in the ABCD.EARTH app
+  (`artex-osx/docs/architecture discipline/ABCD-OBJECTIVE-PRO.md` in that repo); the web app is Pro's PC
+  concession, reached through the shared methods (§6).
+- Not a place to curate materials: the Builders here are read-only (Andy 2026-11-25: _"we do not expect a user to
+  curate materials, it is too fraught, as EPD and cost sources are required"_).
+- Not a second copy of any method (§6).
 
-See §6.2 for full table. Headline items:
-- **Excel date serials** are mixed with year-integers in the same column. Rule: if `n < 3000` → year; else Excel serial (epoch 1899-12-30).
-- **Formula cells** survive in the CSV as literal formula strings (e.g., `=Q545/11.249`, `=IFERROR(DUMMYFUNCTION("..."), "fallback")`). The importer must either evaluate against the referenced columns in the same row or extract the IFERROR fallback string.
-- **Country codes** are free-text (`"US & CA"`, `"CAN"`) → must map to ISO 3166-1 alpha-3 arrays.
-- **Column AA and AC misplaced values** — BEAM's sheet has some column labels placed in data rows (e.g., LAM011 col AC = `"m2 at 3.5\""` instead of a number). Detect & null.
-- **337 rows have blank `Material Type`** — display-name CSI prefixes (`"05 | ..."`) do **not** exist in the cleaned CSV (verified session 2, 0 of 825 rows). Derive division from keyword scan of `Display Name` (e.g., `"Cedar Siding"` → 06, `"Brick, Clay"` → 04, `"Concrete"` → 03). Fallback to `null` with a manual-review flag in the import report.
-- **LAM011 canonical test values**: Stated EPD = 69.96 kgCO2e/m³, density = 456 kg/m³, thickness = 0.09 m, units/m² = 11.249, biogenic factor = 0.9897, carbon content = 0.5, storage retention = 0.9. Common GWP = 6.22 kgCO2e per m² at 3.5".
+### Where to pick up next (cold-start one-liner)
 
-### Don'ts
+**P0 ✅ 2026-11-25 (laptop):** the S01 heads-up display rides the masthead (T.1 / T.2 / T.3 × Reference · Target ·
+Actual · %, each cell tagged `data-kv="e_6"` … for the engine to stamp; a click opens S01, which carries the same
+table full size); the sidebar is S01–S21 plus **S22 the Glossary** (Andy: _"we should keep the glossary but expand to
+include our terms also"_ · _"that can form a new section after 21"_), its 15 OBJECTIVE terms chip-marked for Andy to
+correct; every BEAM tab deleted (Footings & Slabs and its helpers, Energy GHG, the xlsx import); Load Sample fills
+PROJECT only. Live: S01, S02, S17, S22; the rest show "arrives in P2/P3".
+**S01–S21 LIVE ✅ 2026-11-25 (`16babb8`)** (Andy: _"keep adding sections please, as faithful to the values and order
+of the V3 format, but styled per V4"_): V3's engine + sections (`src/`, `climate/`, from andy-rnd `5e0b2f0`) load in
+V3's order; `js/objective-boot.js` stands in for `init.js`; each S-panel adopts its V3 section; `src/styles.css` is
+rethemed by `obstyles.css` §8b. Case 01 gives the full V3 app's key values (190.1 / 93.1 / 93.1 / 49 %). This
+replaces P1–P3's piecemeal port (the spike below stays as the record of why the page code matters).
+**V4 STYLING + S02 + LOAD SAMPLE ✅ 2026-11-25:** each section in the PROJECT form's card, no grid, full width
+(Andy); S02 is V3's S02 alone (Andy: _"Everything below project data and any BEAM defaults can be removed from S02
+entirely. S02 assumes the default data in V3's S02."_); Load Sample is V3's modal and loader (Andy: _"loads our Case
+Studies exactly as V3 does, with F280 sub-rows"_); Open / Save are V3's CSV import / export; Reset is V3's "back to
+the last loaded project". Witness: all 16 case studies, loaded through the modal here and in andy-rnd's V3, give
+2146 / 2146 identical displayed values each.
+**TRUST → S02 / S11 / S12 ✅ 2026-11-25** (Andy: _"S11, S12, and 'Conditioned Area' as the sum in S02 of all
+interior plan spaces"_): `js/beam/pdf-bridge-import.mjs` `V3_TARGETS` — h*15 ← every floor plate (foundation +
+above-grade slabs, building scope); d*85 roof (× pitch); d*86 walls above grade (net of their windows); d_94 walls
+below grade (perimeter × basement height); d_95 slab; d_105 volume (floor plates × S12's g_106). Written as user
+entries, one recalculation; parameters from Take Off, Eh!'s sidebar. Witness (10 × 12 m house, 3 / 2.5 m, 30°):
+240 / 138.56 / 34.5 / 110 / 120 / 648, exact. **Windows are not written** — S11 hosts each in a facing wall and Take
+Off records no facing yet (V4-7).
+**V4-7 STATUS 2026-11-25 late (laptop, Andy at 99 % usage):** ✅ Take Off, Eh! Door tool [E] (orange, door glyph; an
+opening like a window). ✅ Facing per elevation sheet (sheet panel dropdown, title as hint, stored `page.facing`).
+✅ Trust writes S11's walls by confirmed facing (B.5 / B.87a–i, gross area; witness West 36.00 m², TEUI recomputes).
+✅ **Openings written, each in its own row** (Andy: *"calculated individually, row by row, to comply with ASHRAE 140"*;
+*"add doors to the Trust process"*): host, W, H, qty on the S11 row; area (W × H) and facing on its S10 twin, as
+Section11.js `applyOpeningGeometry` does. Witness: West wall + 2 windows + 1 door, North wall + 1 window → rows
+B.7.0 / B.8.1 / B.8.2 hosted in 86, B.8.3 in 87a, areas 1.89 / 1.5 / 1.08 / 1.44, facings West / North.
+⚠ **OPEN:** on that 4-opening fixture S01's m_10 (Actual vs Target %, the default case is Utility Bills) reads
+"Unavailable" though h_10 = 82.8; single-opening and door-only runs give 49 %. Trace before relying on Trust's %.
+**TONIGHT — the Reference model** (Andy: *"note Reference Model in the workplan so we can port that later tonight"_):
+V3's Target / Reference toggle (`src/core/ReferenceToggle.js`, its header button and `body.viewing-reference-inputs`
+styles) onto objectivepro.html, the HUD and every section showing Reference values when toggled, and S16's Sankey
+following it (below).
+**NEXT — V4-7, the facing confirmed IN Take Off, Eh!** (Andy 2026-11-25: _"maybe we let the user verify IN TakeOff -
+West Elevation? Confirm..."_). Design: each elevation sheet carries a **Facing** (N / NE / E / SE / S / SW / W / NW),
+pre-filled from its title ("WEST ELEVATION" → West) and confirmed or set by the user (FRONT / REAR / LEFT / RIGHT
+need it set); stored on the page (`page.facing`). Trust then writes S11 from confirmed sheets only: one wall row per
+facing (B.5, B.87a–i: type walls, facing, GROSS area — S11 nets its hosted openings), every window on that sheet
+hosted in that row (`ch_`= the row key) with its W × H from the polygon (identical sizes grouped into`dq\_`), all 40
+window rows cleared first. A sheet with no confirmed facing is listed in Trust + Verify, never guessed.
+**ALSO OPEN — S16 Sankey** (Andy: *"Various buttons on S16 do not reproduce the expected graphs for cooling,
+emissions, etc. That will need to get properly ported at some point - and should show reference mode when
+reference model is toggled."*): the Cooling / Show Emissions / Energy Balance views, the Reference model's flows,
+and dark-legible labels; this page has no Target / Reference toggle yet (V3's ReferenceToggle). Serve:
+`python3 schema/scripts/nocache-serve.py 8796` (`npm run stage:data` only for the local Database).
 
-- Don't rename top-level schema blocks without updating `sample.json`, the Full Field Inventory (§5.1), and the IFC alignment table (§5.4) in the same commit.
-- Don't embed numeric field IDs in the JSON data (use path strings + short block codes from §5.2).
-- Don't add comments (`//`) to `sample.json` — strict JSON only. Use `_prefixed` sibling fields for annotations.
-- Don't commit large binaries — `*.pdf`, `*.docx`, `*.xlsx` are gitignored except `docs/sample.pdf`.
-- Don't add `Co-Authored-By: Claude Sonnet` — use the model tag shown in the active environment (currently Opus 4.7).
+## 1. Goals
 
-### Verification commands (quick sanity checks)
+1. OBJECTIVE 4.0 on the web: every wall faces somewhere, every window sits in a wall (§4), on the BEAM page's layout.
+2. The envelope from drawings: Take Off, Eh! → v4's S11 (V4-7).
+3. OpenBuilding.ca's tools on one site, each method kept in one place (§6).
 
-```bash
-cd schema
-# sample.json structurally valid
-python3 -c "import json; d=json.load(open('sample.json')); assert len(d.keys())==20; print('OK')"
-# carbon math reconciles
-python3 -c "import json; d=json.load(open('sample.json')); assert d['carbon']['common']['value_kgco2e']==6.22; print('OK')"
-# CSV Excel-row correspondence (source CSV now lives under docs/)
-python3 -c "import csv; r=list(csv.reader(open('../docs/csv files from BEAM/BEAM Database-DUMP.csv'))); assert r[1][0]=='2c53be'; assert r[544][0]=='LAM011'; print('OK')"
-```
+## 2. Reference sources
 
----
+CSA F280-12 and ASHRAE 140 (the compliance targets); NBC 2025 / NECB; the OBJECTIVE v3 codebase
+(openbuilding-ca/objective) and andy-rnd; the ABCD.EARTH seed (materials, prices, assemblies, junctions).
 
-## 1. Goal
+## 3. Already built (andy-rnd #23, #24)
 
-Define a canonical JSON record for a single material that serves multiple consumers in one structure:
+- S11 hosts doors and windows: a wall's + window / + door (a roof's + skylight), the openings listed under it, a −
+  per row; W × H × quantity sets the S10 area; the wall's area is net of what it hosts.
+- Window overhangs: S10's "Overhang: above / depth" set the summer % by F280 Annex A (the plain shaded fraction);
+  F280's peak gain puts only that share back at north's 93 W/m².
+- The CSV writes only the opening rows in use.
 
-- **BEAM / wbLCA tools** — embodied carbon + full impact category analysis
-- **PDF-Parser** — material picker for volumetric takeoff (volume × material → EC)
-- **BIM / rendering tools** (e.g., ABCD.EARTH) — shader properties, texture refs, base colour
-- **Future tools** — cost estimation, fire compliance, thermal modelling, code-compliance checks
+## 4. What v4 changes (each a PR, in this order)
 
-Each record carries everything needed to place it in a wbLCA calc, pick it in a UI, and render it in 3D. Consumers read only the fields they need.
+**V4-1 — every above-grade wall has a facing.** "Average" leaves the wall facing list; a new wall row starts North
+and must be turned. Roofs, exposed floors, walls below grade and slabs keep no facing. A wall is what an F280
+Table 3 facing and ASHRAE 140's surfaces need.
 
-### 1.1 Source inputs
+**V4-2 — every opening sits in a wall (or a skylight in a roof).**
 
-| Source | Rows / size | Purpose |
-|---|---|---|
-| `docs/csv files from BEAM/BEAM Database-DUMP.csv` | 826 lines / 825 data rows (cleaned) | BEAM's legacy 65-column materials data — primary import. Colocated with the other MCE²/BEAM workbook-tab exports. |
-| `schema/materials.json` | 33 records | ABCD.EARTH's existing schema — donor of rendering hints (base_color, metallic, roughness, texture, has_grain) |
-| Future EPD PDFs | — | ISO 21930 / EN 15804 Type III declarations — Phase 2 target |
+- S11: an opening row exists only under its host. The doors' and windows' own group +/− and the "No host" choice
+  go; a wall's + window / + door is the one way in, its row − the one way out.
+- S10: a window row's area and orientation are read from S11 (not typable); SHGC, winter % and summer % (by hand,
+  or from its overhang) stay in S10. S10 lists the rows under their wall's name ("in B.5.2").
+- The wall's net area is what every calculation reads (as now).
 
----
+**V4-3 — a v3 file opens in v4 without its envelope.** A v3 CSV has walls entered net and windows by orientation
+with no wall, and nothing in it says which window is in which wall, so it cannot be converted. v4 imports
+everything else (location, occupancy, systems, S12–S18, notes) and leaves S10's and S11's envelope rows empty,
+with a banner: _"Envelope from an OBJECTIVE 3 file: enter its walls and windows. Open it in OBJECTIVE 3 to see
+it as it was."_ (a link to the live site). Assembly RSIs and U-values: ❓ §5.
 
-## 2. Phase plan
+**V4-4 — the file says its version.** A v4 CSV carries `objective_version` = 4, so a later v4 opens its own files
+whole and only a v3 file takes V4-3's path.
 
-Priority ordering. Each phase is independently valuable; later phases depend on earlier ones in the ways noted.
+**V4-5 — the cases.** F280-1 re-expressed with its windows hosted and their overhangs (the old phase D): it must
+hold `test/f280-results.json` (±1 W; the folded slider equals the plain fraction plus the north credit, so it
+can). Other case studies are re-entered from their drawings as Andy has time; until then the Load Sample Projects
+list shows only the v4 ones.
 
-### Phase 0 — Complete ✅
+**V4-6 — say it is 4.0.** The header and the CSV both read OBJECTIVE 4.0.
 
-- [x] Schema design locked in (20 blocks, 143 leaf fields)
-- [x] Design decisions documented with rationale (§4.1)
-- [x] Canonical sample record hand-authored (`sample.json` — LAM011)
-- [x] BEAM CSV cleaned (trailing garbage removed, embedded newlines flattened, Excel row alignment)
-- [x] Full field inventory documented (§5.1)
-- [x] Field reference codes adopted (§5.2)
-- [x] File size projected & module splitting strategy decided (§6.1)
-- [x] IFC alignment mapped (§5.4)
-- [x] `docs/`, `schema/`, workstream consolidation complete (see parent repo)
+**V4-7 — the envelope comes in from the PDF-Parser** (arossti/OpenBuilding `pdfparser.html`). It already measures
+walls on the drawings with their windows attached and reports each wall gross and net; its CSV nests the windows
+under their wall (`sample csv exports/pdf-parser-measurements.csv`). Two additions there, then one import here:
 
-### Phase 1 — JSON database port — Complete ✅
+- the parser's export gains each wall's **facing** (a user picks it per elevation sheet) and each window's **W × H**
+  (from the rectangle it already draws; today it exports the area only);
+- v4 imports that file into S11: one wall row per wall (facing, area), its windows hosted under it (W × H). A v3
+  project's drawings re-measured this way is how an old project reaches v4 (V4-3).
+- With the repos combined (§4), the import can read the parser's own data directly; the file stays the contract.
 
-**Goal**: Emit the full catalogue as validated per-CSI-division JSON files + a lightweight index. This unblocks all downstream work.
+## 5. The site around it
 
-- [x] **`schema/material.schema.json`** — JSON Schema Draft 2020-12 validator with `impact_block` / `impact_value` `$defs`. Relaxed to sparse-aware (scalar leaves optional, structural blocks required, `additionalProperties:false` everywhere; enums/patterns/types enforced).
-- [x] **`schema/lookups/country-codes.json`** — 21 BEAM free-text values → ISO 3166-1 alpha-3 arrays (incl. `"US & CA"` → `["USA","CAN"]`, `"EU"`/`"GLB"` retained as scope markers).
-- [x] **`schema/lookups/csi-divisions.json`** — 15 MasterFormat 2020 divisions with category slugs.
-- [x] **`schema/lookups/material-type-to-csi.json`** — all 90 observed BEAM material types mapped.
-- [x] **`schema/lookups/display-name-keywords.json`** — 45 fallback keyword patterns for the 337 blank-material-type rows (no unresolved rows after full scan).
-- [x] **`schema/lookups/typical-elements.json`** — enum + `material_type_defaults` + `product_subtype_overrides` (CLT, Glulam, LVL, I-joist, OSB).
-- [x] **`schema/lookups/lifecycle-stages.json`** — 17 EN 15804+A2 stages with groups + common-scope shortcuts (cradle_to_gate, cradle_to_grave, cradle_to_cradle).
-- [x] **`schema/scripts/beam-csv-to-json.mjs`** — Node ESM importer with RFC-4180 parser, recursive arithmetic formula evaluator (handles the AB=AE*AF chain where AE is itself a formula), IFERROR fallback extraction, Excel-serial-vs-year date heuristic, CSI inference via material_type primary + keyword fallback, density dual-unit, biogenic-method derivation, sparse emission via `prune()` + `normalize()`.
-- [x] **`schema/materials/NN-<slug>.json`** — 8 files emitted: `03-concrete.json` (205), `04-masonry.json` (42), `05-metals.json` (93), `06-wood.json` (160), `07-thermal.json` (217), `08-openings.json` (16), `09-finishes.json` (83), `31-earthwork.json` (5). Total 821 records.
-- [x] **`schema/materials/index.json`** — 8 fields per entry (id, beam_id, display_name, category, division_prefix, typical_elements, gwp_kgco2e, functional_unit). ~290 KB pretty.
-- [x] **Validation**: 822/822 records pass (`node scripts/validate.mjs --all`).
-- [x] **Sparse-by-default**: per-record 13 KB → 4 KB (−68%), batch 18 MB → 4.3 MB (−76%), ~1.2 MB gzipped.
-- [x] **Deployment gate**: `.github/workflows/deploy-pages.yml` now skips on `bfca-labs/at` (no Pages site), runs only on `arossti/OpenBuilding`.
-- [x] **Commit milestone**: PR on `arossti/OpenBuilding` → `main` pending user merge.
+### 5.1 The start page (`index.html`)
 
-### Phase 1.5 — Database viewer — Complete ✅
+| Card              | Page                                     | State                                                           |
+| ----------------- | ---------------------------------------- | --------------------------------------------------------------- |
+| Take Off, Eh!     | `takeoffeh.html`                         | live (the PDF-Parser renamed)                                   |
+| Materials         | `builders/material-builder.html`         | published, read-only                                            |
+| Material Database | `database.html`                          | kept for its look until Materials replaces it (Andy)            |
+| OBJECTIVE         | `objectivepro.html` (was `beamweb.html`) | v4 Alpha: the BEAM layout, being repurposed as v4's inputs (§9) |
+| Assemblies        | `builders/assembly-builder.html`         | published as a snapshot of 2026-10-22 (ABCD BUGLIST #266)       |
+| Section Builder   | `builders/section-builder.html`          | published                                                       |
 
-**Goal**: Interim stakeholder-facing HTML viewer for the full 821-record catalogue so BfCA / NRCan / AIBC can review the schema choices in a real UI before committing further down the pipeline. Lets teams see the empty per-stage slots and understand what the EPD parser (Phase 2) will fill.
+### 5.2 The Builders are build output from ABCD.EARTH
 
-- [x] **`database.html`** — standalone page, dark theme, reuses `bfcastyles.css` (Database styles live in §7 of the consolidated stylesheet). Shared header nav across PDF-Parser / Matrix / Database / BEAMweb.
-- [x] **Main table**: sortable columns (BEAM ID, Display Name, Division, Material, GWP, functional unit, typical elements), sticky header, live search, division chips with per-division counts, EPD-only toggle.
-- [x] **Expanded row detail** (accordion, collapsed by default; Carbon Calc Graph opens by default): Identity & Classification, Manufacturer & Provenance, Physical Properties, Carbon Calc Graph (ASCII flow diagram of BEAM's audit trail), Impacts per-stage matrix, EPD/Methodology/Code Compliance, Raw JSON.
-- [x] **Per-stage matrix**: 10 categories × (Total + 17 stages), horizontal scroll, sticky first column + total column, per-cell source tag (beam_derived / epd_direct) for provenance at a glance.
-- [x] **Data staging**: `npm run stage:data` at repo root copies `schema/` outputs into `data/schema/`. Pages workflow does the same copy into `_site/data/schema/` before upload. Staged dir gitignored to avoid doubling ~4 MB of committed data.
-- [x] **Local test**: all resources 200 via `npm run serve`; Node syntax clean; 821 entries load.
+`builders/` is written by ABCD.EARTH `artex-osx/docs/mockups/publish_builders.py --to <this repo>/builders` and is
+never edited here. `builders/BUILD.json` stamps the ABCD commit and a hash of each seed file; `--check` reports a
+stale copy. A re-seed or a page fix is made in ABCD.EARTH and published again (ABCD-BUILDERS §7.0, ruled 2026-09-15:
+_"B sounds like the right shape, a public API would be a gong-show."_).
 
-### Phase 2 — EPD PDF parser
+**The link (Andy 2026-11-25: _"Provided we keep a link so new data from ABCD can feed the web deployment."_)**:
+new data in ABCD.EARTH's seed reaches the site by ONE command, run from either repo:
 
-**Goal**: Build a parser that ingests ISO 21930 / EN 15804 Type III EPD PDFs and emits schema-conformant records or patches to existing records.
+    npm run builders:check      # here: is builders/ behind ABCD's seed? (exit 1 = stale)
+    npm run builders:publish    # here: rebuild from ABCD's seed into builders/, then commit builders/
 
-- Prerequisite: Phase 1 complete (need real records to diff new EPD data against).
-- Prerequisite: User shares a sample EPD PDF (pending as of 2026-04-18 afternoon).
-- Approach: reuse PDF.js from `lib/` for PDF rendering and text extraction.
-- Section mapping already documented in §5.5 — EPD "Declared unit" → `carbon.stated.{value_kgco2e, per_unit}`, etc.
-- Output: JSON patch (new record, or diff against existing) with `source: "epd_direct"` on every impact value.
-- Human-in-the-loop: low-confidence fields flagged for manual review before merge.
+Both call `../../ABCD.EARTH/artex-osx/docs/mockups/publish_builders.py` (the two repos are siblings under the same
+paths on both Macs). It publishes from ABCD's CURRENT checkout, so publish from `main` (the stamp names the commit).
+A publish also re-seeds ABCD's own Section Builder page in place; commit that there.
 
-### Phase 3 — PDF-Parser material picker
+## 6. Shared methods — one copy each
 
-**Goal**: Wire the materials database into the PDF-Parser so users can associate measured polygons with materials for volumetric takeoff.
+Every method lives in ONE place; this table names it and how it reaches the other product. Where a method runs in
+two engines (the app's Rust, a page's JavaScript), the app writes its answers to a fixture and the page checks itself
+against it, so a drift shows on the page before it ships (that check found ABCD BUGLIST #266).
 
-- Prerequisite: Phase 1 complete ✅ (`materials/index.json` is shipped).
-- Prior art: Phase 1.5 Database viewer proves the fetch + lazy-load + filter pattern works in a dark-theme module within PDF-Parser.
-- Integrates with the existing PDF-Parser Volumetric Takeoff feature (Step 10 in `docs/pdf-parser.md`).
-- Tasks:
-  - Fetch `materials/index.json` at PDF-Parser boot
-  - Material picker UI — CSI division filter + `typical_elements` filter + full-text search over `display_name`
-  - On selection: lazy-fetch the relevant `materials/NN-*.json` and store the full record in the project state
-  - Extend PDF-Parser project JSON export to include material references per polygon
-  - Compute EC: polygon area (m²) × depth (m) → volume (m³) × density (kg/m³) × GWP (kgCO2e/kg) = kgCO2e
-  - Display per-material subtotal and project total in the Summary Table modal
+| Method                                            | Its one copy                                            | Reaches the other product by                                           | Witness                                                                                 |
+| ------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Material library: λ, ρ, carbon lines, EPD sources | ABCD.EARTH `seed/materials.json`                        | `publish_builders.py` → `builders/`                                    | `BUILD.json` seed hash, `--check`                                                       |
+| Price book                                        | ABCD.EARTH `seed/prices.json`                           | the same                                                               | the same                                                                                |
+| Assembly fold: RSI, carbon, cost per m²           | ABCD.EARTH Rust (`builders/assemblies.rs`)              | the Assembly Builder page's JavaScript fold                            | the app's fold and HFT fixtures; **#266 open**                                          |
+| Cost markup chain (40/40/20)                      | ABCD.EARTH `CostPolicy` (labour 1.0, P&O 0.5, tax 0.13) | the pages' defaults                                                    | the fold fixture (#266 found the 0.2)                                                   |
+| Junction sections                                 | ABCD.EARTH `seed/junctions.json`                        | the Section Builder page                                               | ❓ none yet                                                                             |
+| F280, BASESIMP, AIM-2, ISO 52016 cooling          | the OBJECTIVE web codebase (v3 and v4 share it, §7.1)   | ported into Pro by ABCD-OBJECTIVE-PRO                                  | Excel-computed fixtures (`test/basesimp.test.cjs`, `aim2.test.cjs`) and the F280 tables |
+| Hourly energy balance (8760 h)                    | ABCD.EARTH (ABCD-OBJECTIVE-PRO §4.6)                    | ❓ how v4 reaches it is open                                           | —                                                                                       |
+| Envelope takeoff                                  | Take Off, Eh! (this repo)                               | its CSV into v4's S11 (V4-7)                                           | `sample csv exports/takeoffeh-measurements.csv`                                         |
+| Design tokens (colours, fonts)                    | ❓ proposed: ABCD.EARTH `docs/mockups/tokens.css`       | published beside the Builders; `obstyles.css` maps its names onto them | —                                                                                       |
 
-### Phase 4 — BEAM app port
+## 7. Where things live
 
-**Goal**: Port BEAM's Excel-based calculation engine to a JS web app sharing infrastructure with PDF-Parser.
+### 7.1 What stays shared with v3
 
-- Prerequisite: Phase 1 complete. Phase 3 recommended (establishes integration pattern).
-- User flagged: "We will need to update/enhance or create a filehandler and statemanager files, which I do not think we have explicitly created yet."
-- Sub-phases:
-  - **4a. Shared infra**: Create `shared/filehandler.mjs` and `shared/statemanager.mjs` used by both PDF-Parser and BEAM app. Project files are JSON, same format both apps can read. PDF-Parser project JSON extends BEAM project JSON (materials map + polygon area/depth refs).
-  - **4b. Material picker UI**: reuse from Phase 3.
-  - **4c. BEAM calc engine**: port the operational + embodied carbon calculations from BEAM's Excel model. Requires domain study of BEAM v3.
-  - **4d. Integrated UI**: web app that can load a saved PDF-Parser project AND a saved BEAM project and run the calcs end-to-end.
+The computation graph, every section outside S10/S11, F280, BASESIMP, AIM-2 and the cooling engine are one
+codebase. A v3 fix lands on objective `main` and is merged into andy-rnd `main`. v4-only code (§2) never goes to
+v3.
 
-### Phase 5 — IFC interop
+### 7.2 Where v4 lives (RULED, Andy 2026-11-25)
 
-**Goal**: Bidirectional IfcMaterial read/write. See §5.4 for full field mapping.
+_"We will combine the repos so I can deploy all for testing to the remote gh pages site (not the cloudflare site
+which will remain the V3 deployment)"_. So:
 
-- `schema/ifc/ifc-import.md` — rules for parsing `IfcMaterial` + standard Psets (`Pset_MaterialCommon`, `Pset_MaterialThermal`) into our schema.
-- `schema/ifc/ifc-export.md` — rules for emitting IFC-conformant materials + custom `Pset_BfCA_EPDProvenance` for fields IFC doesn't natively model.
-- `schema/ifc/pset_bfca_epd_provenance.json` — formal custom Pset definition.
-- Integrates with the `ifc/` workstream (currently archived as `docs/ifc (Jacob)/` pending work resumption).
-- Test fixture: round-trip a material through IFC (export → import → verify no data loss on overlapping fields).
+- **v3** stays on Cloudflare Pages (objective.openbuilding.ca, from the objective repo); nothing about it changes.
+- **v4** moves INTO arossti/OpenBuilding with the PDF-Parser and the other OpenBuilding tools, and deploys for
+  testing on GitHub Pages (arossti.github.io/OpenBuilding), whose landing page is being repurposed for OpenBuilding's
+  tools (a later session; Andy walks the agent through what is deleted).
+- That repo is PUBLIC: what moves from andy-rnd becomes public with it (as objective already is).
 
-### Phase 6 — Canadian context extensions
+## 8. Open questions
 
-**Goal**: Populate the `cost`, `fire`, `code_compliance` blocks with Canadian data.
+### Still open (each with a recommendation)
 
-- Cost per unit (CAD/m³, CAD/m², CAD/kg, CAD/unit) — requires external data source (RSMeans Canada, Altus Group, BCA indices).
-- Fire ratings: FRR hours, combustibility (NBC Part 3.1.5), ULC listings, flame/smoke per CAN/ULC-S102.
-- NBC Part 9 / Part 3 suitability: manual review per material type.
-- VBBL s.10.4 + COV Appendix II: cross-reference with BfCA/COV documentation.
-
-### Phase 7 — Team PDF deliverable
-
-**Goal**: Render `schema.md` as a stakeholder-shareable PDF with tree diagram and full field list.
-
-- Low effort, can run anytime: `pandoc schema.md -o schema.pdf --toc --pdf-engine=xelatex`
-- Consider adding a Mermaid tree diagram of the 20-block structure for visual impact.
-- Low priority relative to Phases 1-4; parallel track for team comms.
-
----
-
-## 3. Design decisions (locked in 2026-04-18)
-
-| Decision | Choice | Rationale |
-|---|---|---|
-| Primary key | `id = lowercase(beam_id)` top-level; `beam_id` preserved case-exact inside `external_refs` | BEAM IDs are already stable, unique, collision-free. Lowercasing keeps URL/path/JSON-key form consistent; the case-exact BEAM ID stays for spreadsheet legacy lookup. JSON DB is not user-facing — display names are. |
-| Null vs missing | **Sparse-by-default for per-material records; schema-complete for the canonical template** — `materials/*.json` records emit only populated fields (null scalars and empty sub-objects dropped). `sample.json` and `material.schema.json` carry the full template structure as the human/machine reference. Consumers use `?.` + nullish coalescing. EPD parser (Phase 2) consults the template to know what fields to probe for, then emits only what it finds. | Per-record size drops ~70% (13 KB → 4 KB), batch 18 MB → 4.3 MB, files become readable. The old "schema-complete everywhere" principle made diffs verbose (`null → value`) and turned per-stage impact blocks into 170-null walls per record. Sparse makes presence semantic: a stage key appears when the EPD reports it. |
-| Structural preservation rules | **Arrays always present** (`[]` when empty — preserves `.forEach` safety). **15 top-level object blocks always present** (`{}` when empty — consumers can traverse the outer shape without existence checks). **`impacts.<category>.total` always present as `{value, source}`** (consumers find the aggregate slot by name). **`impacts.<category>.by_stage` always present** (may be empty `{}`). Everything else omittable. | Balances sparsity with safe traversal. Preserves the outer shape that loops expect, trims the inner noise. |
-| Arrays | Always `[]` when empty, never `null` | `.forEach` safe |
-| Unit convention | **Unit in field name** (`density_kg_m3`, `gwp_kgco2e`) | Self-documenting; survives flattening to CSV/BigQuery |
-| Variable-unit fields | Paired `functional_unit` string (e.g., `carbon.common.per_functional_unit`) | BEAM's "common unit" is per-material (m², m³, kg, linear m) — can't bake into field name |
-| `carbon` vs `impacts` | **Separate blocks** | `carbon` preserves BEAM's audit trail (stated → conversion → common → biogenic, flat); `impacts` is the harmonised wbLCA view with full ISO per-stage breakdown |
-| `impacts` lifecycle scope | **Heavy** — each category carries `total` + `by_stage` object covering all 17 EN 15804+A2 stages (A1–A5, B1–B7, C1–C4, D), every stage a `{value, source}` pair | BEAM.js is a richer app than the BEAM spreadsheet; future EPDs increasingly report A4–D. Schema-complete per-stage slots make EPD parsing a direct table-copy and keep the source discriminator at stage granularity for audit |
-| Case | snake_case everywhere | Normalised from BEAM's mixed casing |
-| Dates | ISO 8601 strings; raw Excel serials preserved in `provenance.original_beam_added_or_modified_serial` | Round-trip audit |
-| Country codes | ISO 3166-1 alpha-3 arrays (`"US & CA"` → `["USA","CAN"]`) | Unambiguous; tool-friendly |
-| Biogenic method | Explicit enum `method: "wwf_storage_factor" \| "en_15804_negative_a1" \| "none"` | Makes the calculation methodology auditable; EPD parser fills later |
-
-### 3.1 Record structure (20 top-level keys)
-
-```
-$schema, schema_version, id,
-external_refs, naming, manufacturer, notes, source_notes, status,
-classification, rendering,
-physical, carbon, impacts,
-cost, fire, code_compliance,
-epd, methodology, provenance
-```
-
-See [`sample.json`](./sample.json) for the fully-populated example (BEAM LAM011 — Nordic X-Lam CLT 3½").
-
-### 3.2 Sub-object purposes
-
-| Block | Purpose |
-|---|---|
-| `external_refs` | Stable external IDs: `beam_id`, `beam_csv_row_index`, future `mce2_id`, `ec3_id`, `ifc_material_guid` |
-| `naming` | Human-readable names: display_name, short_name, material_name, product_brand_name |
-| `manufacturer` | Who makes it: name, country_code (ISO alpha-3), specifications, website |
-| `status` | Curation flags: listed, do_not_list, is_industry_average, is_beam_average, visibility |
-| `classification` | Taxonomy: CSI division, category slug, material/product type + subtype, `typical_elements[]` enum |
-| `rendering` | Shader hints: base_color RGBA, metallic, roughness, texture, has_grain |
-| `physical` | Material science: density (dual-unit), thermal props, dimensions, mass, moisture, `additional_factor` |
-| `carbon` | BEAM's GWP audit trail: stated → conversion → common → biogenic (full calculation graph) |
-| `impacts` | Harmonised wbLCA view: GWP + eutrophication + acidification + ... (each `{value, source}`) |
-| `cost` | Future: CAD/unit, year, geography, source |
-| `fire` | Future: FRR, combustibility, ULC listing, flame/smoke ratings |
-| `code_compliance` | Future: NBC Part 9/3, VBBL s.10.4, COV Appendix II acceptance |
-| `epd` | Provenance: id, type, owner, prepared_by, program, validation, dates, URL |
-| `methodology` | LCA method, standards, PCR, software, LCI database, lifecycle scope (A1–D stages) |
-| `provenance` | Geography, dates, import metadata with CSV row index for round-trip audit |
+1. ~~The address~~: ruled, §4 (GitHub Pages in arossti/OpenBuilding).
+2. **The Reference model's openings.** Today a host is per model (Target and Reference each choose). In v4 the
+   Reference is the same building to code minimums, so recommendation: **the Reference's walls and openings are
+   the Target's** (geometry mirrored, its RSIs, U-values and SHGCs its own, as "Mirror Geometry" does today).
+3. **A v3 file's RSIs and U-values.** Recommendation: kept on the TYPE (the first wall's RSI is offered to every
+   new wall, as + copies it today), so a re-entered envelope starts with the old assemblies.
+4. **Below-grade walls with windows.** Kept (a walkout basement's windows); recommendation: yes, as now.
+5. **What opens first in v4.** Recommendation: F280-1 hosted (V4-5), not a blank page.
+6. **The sidebar group names** (§9.2 P0 ②). Recommendation: the seven proposed there.
 
 ---
 
-## 4. Calculation audit — how `carbon` captures BEAM's math
-
-BEAM encodes three calculation passes. The schema preserves each explicitly so a consumer can verify the arithmetic (or a future EPD parser can populate each step from an EPD PDF):
-
-```
-carbon.stated       →  raw EPD declaration: "69.96 kgCO2e per m³"
-carbon.conversion   →  functional unit conversion: "divide by 11.249 units/m² = 0.0889× multiplier"
-carbon.common       →  result: "6.22 kgCO2e per m² at 3.5″"
-carbon.biogenic     →  sequestration math: density × thickness × biogenic_factor × carbon_content × 3.67
-                       then × storage_retention (0.9) for long-term stored CO2e
-```
-
-The CO₂:C molar ratio (44/12 ≈ 3.67) is preserved as `carbon.biogenic.co2_to_c_molar_ratio` — constant but explicit.
-
-### 4.1 Worked example (LAM011 — use as Phase 1 importer test target)
-
-| Step | Value | Source |
-|---|---|---|
-| `carbon.stated.value_kgco2e` | `69.96` | BEAM col Q (Stated EPD kgCO2e / unit) |
-| `carbon.stated.per_unit` | `"m3"` | BEAM col R |
-| Units/m² (internal) | `11.249` | BEAM col S formula `=Q545/11.249` (derived from 3.5" thickness: 1/0.0889) |
-| `carbon.conversion.factor` | `0.088897` | = 1 / 11.249 |
-| `carbon.common.value_kgco2e` | `6.22` | = 69.96 / 11.249 |
-| `carbon.common.per_functional_unit` | `"m2 at 3.5\""` | BEAM col T |
-| Density | `456 kg/m³` | BEAM col AG |
-| Thickness | `0.09 m` | BEAM col AI (3.5" rounded) |
-| Biogenic factor | `0.9897` | BEAM col X |
-| Carbon content | `0.5` kgC/kg | BEAM col Y |
-| Storage retention | `0.9` | BEAM col AF |
-| `carbon.biogenic.full_carbon_kgco2e_per_common_unit` | `74.53` | = 456 × 0.09 × 0.9897 × 0.5 × 3.67 |
-| `carbon.biogenic.stored_kgco2e_per_common_unit` | `67.08` | = 74.53 × 0.9 |
-| `carbon.biogenic.carbon_content_kgc_per_unit` | `20.31` | = 456 × 0.09 × 0.9897 × 0.5 (without CO2/C ratio) |
-
----
-
-## 5. Specification reference
-
-### 5.1 Full field inventory (shareable with team)
-
-Every leaf field the schema defines, grouped by top-level block. Type hints: `str`, `num`, `bool`, `str[]`, `num[4]`, `ISO-3166-1α3`, `enum(...)`. All fields are nullable unless marked required.
-
-#### Top-level identity
-| Field | Type | Notes |
-|---|---|---|
-| `$schema` | str | URL to JSON Schema definition (aspirational) |
-| `schema_version` | num | Integer, bumped on breaking changes |
-| `id` | str | **Required.** Slug primary key (e.g., `clt_nordic_xlam_3_5in`) |
-| `notes` | str | Free-form user commentary |
-| `source_notes` | str | Import-time annotations (e.g., "BfCA BioC calc by mass") |
-
-#### `external_refs` — cross-catalogue IDs
-| Field | Type |
-|---|---|
-| `beam_id` | str — BEAM CSV column A |
-| `beam_csv_row_index` | num — 1-based, for round-trip audit |
-| `mce2_id` | str — future |
-| `ec3_id` | str — future, EC3 database |
-| `ifc_material_guid` | str — future, IFC IfcMaterial GUID |
-
-#### `naming`
-| Field | Type |
-|---|---|
-| `display_name` | str — long form with manufacturer/spec |
-| `short_name` | str — UI-friendly |
-| `material_name` | str — generic (e.g., "Cross Laminated Timber") |
-| `product_brand_name` | str — product line (e.g., "X-Lam") |
-
-#### `manufacturer`
-| Field | Type |
-|---|---|
-| `name` | str |
-| `country_code` | ISO-3166-1α3 |
-| `specifications` | str — free-form |
-| `website` | str URL |
-
-#### `status`
-| Field | Type |
-|---|---|
-| `listed` | bool |
-| `do_not_list` | bool |
-| `is_industry_average` | bool |
-| `is_beam_average` | bool |
-| `visibility` | enum(`public`, `hidden`, `deprecated`) |
-
-#### `classification`
-| Field | Type |
-|---|---|
-| `division_prefix` | str — CSI 2-digit (e.g., `"06"`) |
-| `division_name` | str — CSI division name |
-| `category` | str — slug (`06_wood`) |
-| `csi_masterformat` | str — full CSI code |
-| `uniformat_level2` | str — future |
-| `material_type` | str — BEAM generic |
-| `material_subtype` | str |
-| `product_type` | str |
-| `product_subtype` | str |
-| `typical_elements` | str[] — enum (foundation, slab, wall_exterior, …) |
-
-#### `rendering` — shader hints
-| Field | Type |
-|---|---|
-| `base_color` | num[4] — RGBA floats 0-1 |
-| `metallic` | num 0-1 |
-| `roughness` | num 0-1 |
-| `texture` | str path |
-| `has_grain` | bool |
-
-#### `physical`
-| Field | Type |
-|---|---|
-| `density.value_kg_m3` | num |
-| `density.value_lb_ft3` | num — derived from kg_m3 × 0.06243 |
-| `density.source` | enum(`epd`, `estimated`, `materials_science`) |
-| `thermal.conductivity_w_mk` | num |
-| `thermal.resistance_per_inch_rsi` | num |
-| `thermal.r_value_per_inch_imperial` | num |
-| `thermal.heat_capacity_j_kgk` | num |
-| `moisture_content_pct` | num |
-| `mass_per_unit_kg` | num |
-| `dimensions.length_m` | num |
-| `dimensions.width_m` | num |
-| `dimensions.depth_m` | num |
-| `dimensions.unit_volume_m3` | num |
-| `dimensions.units_per_m2` | num |
-| `additional_factor.value` | num |
-| `additional_factor.units` | str |
-| `additional_factor.description` | str |
-
-#### `carbon.stated` — raw EPD declaration
-| Field | Type |
-|---|---|
-| `value_kgco2e` | num |
-| `per_unit` | str — declared unit (m³, kg, m², etc.) |
-| `source` | enum(`epd`, `industry_average`, `estimated`) |
-| `lifecycle_stages` | str[] — EN 15804 stages reported |
-
-#### `carbon.conversion` — declared → functional unit
-| Field | Type |
-|---|---|
-| `to_common_unit` | str |
-| `factor` | num — multiplier |
-| `factor_formula` | str |
-| `factor_source` | enum(`physical_dimensions`, `mass_density`, `explicit_epd`, `manual`) |
-| `notes` | str |
-
-#### `carbon.common` — harmonised functional-unit result
-| Field | Type |
-|---|---|
-| `value_kgco2e` | num |
-| `per_functional_unit` | str |
-| `metric_unit_label` | str |
-| `imperial_unit_label` | str |
-
-#### `carbon.biogenic` — sequestration math
-| Field | Type |
-|---|---|
-| `gwp_bio_from_epd_kgco2e_per_common_unit` | num |
-| `carbon_content_pct_kgc_kg` | num |
-| `biogenic_factor` | num |
-| `storage_retention_pct` | num 0-1 |
-| `wwf_storage_factor_kgco2e_per_kgc` | num |
-| `stored_kgco2e_per_common_unit` | num |
-| `full_carbon_kgco2e_per_common_unit` | num |
-| `carbon_content_kgc_per_unit` | num |
-| `co2_to_c_molar_ratio` | num (constant 3.67) |
-| `method` | enum(`wwf_storage_factor`, `en_15804_negative_a1`, `none`) |
-| `notes` | str |
-
-#### `impacts` — harmonised wbLCA view (heavy, per-stage)
-| Field | Type |
-|---|---|
-| `functional_unit` | str |
-| `<category>.total` | `{ value: num, source: enum(epd_direct \| beam_derived \| industry_average \| estimated) }` — aggregate over stages declared in `carbon.stated.lifecycle_stages` |
-| `<category>.by_stage.<stage>` | `{ value: num, source: enum(...) }` — one entry per stage in `["A1","A2","A3","A4","A5","B1","B2","B3","B4","B5","B6","B7","C1","C2","C3","C4","D"]` |
-
-Where `<category>` ∈ {`gwp_kgco2e`, `gwp_bio_kgco2e`, `eutrophication_kgneq`, `acidification_kgso2eq`, `ozone_depletion_kgcfc11eq`, `smog_kgo3eq`, `abiotic_depletion_fossil_mj`, `water_consumption_m3`, `primary_energy_nonrenewable_mj`, `primary_energy_renewable_mj`}.
-
-Shape: 10 categories × (1 total + 17 stages) × 2 fields = **340 impact slots** per material record. BEAM imports populate `<category>.total` only; `by_stage` slots stay null until EPD parser (Phase 2) walks the EPD table.
-
-#### `cost` (future)
-`unit`, `cad_per_unit`, `year`, `geography`, `source`
-
-#### `fire` (future)
-`frr_hours`, `combustibility` (enum `non_combustible | combustible | fr_treated`), `ulc_listing`, `flame_spread_rating`, `smoke_developed_rating`
-
-#### `code_compliance` (future, BfCA-specific)
-`nbc_part_9_suitable`, `nbc_part_3_suitable`, `vbbl_s10_4_accepted`, `cov_appendix_ii_listed`
-
-#### `epd` — provenance
-| Field | Type |
-|---|---|
-| `id` | str |
-| `type` | enum(`product_specific`, `industry_average`, `generic`, `beam_average`) |
-| `owner` | str |
-| `prepared_by` | str |
-| `program_operator` | str |
-| `validation.type` | enum(`internal`, `external`) |
-| `validation.agent` | str |
-| `publication_date` | ISO date |
-| `expiry_date` | ISO date |
-| `product_service_life_years` | num |
-| `source_document_url` | str |
-| `footnote` | str |
-
-#### `methodology`
-| Field | Type |
-|---|---|
-| `standards` | str[] |
-| `pcr_guidelines` | str |
-| `lca_method` | str (e.g., `TRACI 2.1`) |
-| `lca_software` | str |
-| `lci_database` | str |
-| `lifecycle_scope.stages_included` | str[] |
-| `lifecycle_scope.cutoff_rule_pct` | num |
-| `lifecycle_scope.allocation_method` | enum(`mass`, `economic`, `system_expansion`) |
-
-#### `provenance`
-| Field | Type |
-|---|---|
-| `countries_of_manufacture` | ISO-3166-1α3[] |
-| `markets_of_applicability` | ISO-3166-1α3[] |
-| `data_added_or_modified` | ISO date |
-| `original_beam_added_or_modified_serial` | num — Excel serial preserved |
-| `source_notes` | str |
-| `import_metadata.imported_from` | str |
-| `import_metadata.import_date` | ISO date |
-| `import_metadata.beam_csv_row_index` | num |
-| `import_metadata.beam_csv_sha256` | str — hash of source CSV |
-
-### 5.2 Field reference codes (for docs & conversation)
-
-To talk about fields tersely in PRs, chat, and issues without embedding numeric IDs in the JSON itself, use these short block prefixes. Documentation convention only — the JSON on disk stays clean.
-
-| Code | Block | Full path prefix |
-|---|---|---|
-| `TOP` | top-level identity | `$schema`, `schema_version`, `id`, `notes`, `source_notes` |
-| `EXT` | cross-catalogue IDs | `external_refs.*` |
-| `NAM` | naming | `naming.*` |
-| `MFR` | manufacturer | `manufacturer.*` |
-| `STS` | curation status | `status.*` |
-| `CLS` | classification | `classification.*` |
-| `RND` | rendering hints | `rendering.*` |
-| `PHD` | physical density | `physical.density.*` |
-| `PHT` | physical thermal | `physical.thermal.*` |
-| `PHM` | physical dimensions | `physical.dimensions.*` |
-| `PHA` | physical additional factor | `physical.additional_factor.*` |
-| `PHX` | physical misc (moisture, mass) | `physical.{moisture_content_pct, mass_per_unit_kg}` |
-| `CST` | carbon stated | `carbon.stated.*` |
-| `CCN` | carbon conversion | `carbon.conversion.*` |
-| `CCM` | carbon common (harmonised) | `carbon.common.*` |
-| `CBG` | carbon biogenic | `carbon.biogenic.*` |
-| `IMP` | impacts (wbLCA) | `impacts.*` |
-| `CSTS` | cost (future) | `cost.*` |
-| `FIR` | fire (future) | `fire.*` |
-| `CCL` | code compliance (future) | `code_compliance.*` |
-| `EPD` | EPD provenance | `epd.*` |
-| `MTH` | methodology | `methodology.*` + `methodology.lifecycle_scope.*` |
-| `PRV` | provenance | `provenance.*` |
-| `IMT` | provenance import metadata | `provenance.import_metadata.*` |
-
-Example usage: "`CBG.storage_retention_pct` needs to be clamped to 0–1 in the importer" or "UI filter should check `CLS.typical_elements` for `wall_exterior`."
-
-### 5.3 Field count by domain
-
-| Domain | Fields | Populated in LAM011 sample |
-|---|---|---|
-| Top-level identity (`$schema`, `schema_version`, `id`, `notes`, `source_notes`) | 5 | 4 |
-| `external_refs` | 5 | 2 |
-| `naming` + `manufacturer` | 8 | 6 |
-| `status` | 5 | 5 |
-| `classification` | 10 | 7 |
-| `rendering` | 5 | 5 (invented defaults) |
-| `physical` (density + thermal + dimensions + additional_factor) | 14 | 7 |
-| `carbon` (stated + conversion + common + biogenic) | 20 | 17 |
-| `impacts` (10 × `{value, source}` + `functional_unit`) | 21 | 3 (GWP only) |
-| `cost` / `fire` / `code_compliance` | 14 | 1 (combustibility) |
-| `epd` + `methodology` + `provenance` | 27 | 17 |
-| Structural sub-object keys | 9 | 9 |
-| **Total leaf fields** | **143** | **88 populated, 55 null** |
-
-### 5.4 IFC (Industry Foundation Classes) alignment
-
-IFC / ISO 16739 is the open BIM data exchange standard. Our schema is a **superset** of typical IFC material data — we can absorb IFC on import and emit IFC-compatible material entities on export. Phase 5 delivers this.
-
-#### Our schema → IFC 4.x mapping
-
-| Our field | IFC 4.x entity / property set |
-|---|---|
-| `id` | `IfcMaterial.Name` (or `.GlobalId` for `IfcMaterial` in IFC 4.3) |
-| `external_refs.ifc_material_guid` | `IfcMaterial.GlobalId` — the natural cross-reference |
-| `naming.material_name` | `IfcMaterial.Name` |
-| `naming.display_name` | `IfcMaterial.Description` |
-| `classification.category` | `IfcMaterial.Category` |
-| `classification.csi_masterformat` | `IfcClassificationReference` relationship (via `IfcRelAssociatesClassification`) |
-| `physical.density.value_kg_m3` | `Pset_MaterialCommon.MassDensity` |
-| `physical.thermal.conductivity_w_mk` | `Pset_MaterialThermal.ThermalConductivity` |
-| `physical.thermal.heat_capacity_j_kgk` | `Pset_MaterialThermal.SpecificHeatCapacity` |
-| `physical.moisture_content_pct` | `Pset_MaterialHygroscopic` (partial) |
-| `rendering.base_color` | `IfcSurfaceStyleRendering.DiffuseColour` (or PBR in IFC 4.3) |
-| `rendering.metallic`, `roughness` | IFC 4.3 PBR: `IfcSurfaceStyleRendering` extensions (MetalnessRoughness model) |
-| `rendering.texture` | `IfcSurfaceTexture` |
-| `fire.combustibility` | `Pset_MaterialCombustion` (partial) + building-element-level Psets |
-| `fire.frr_hours` | `Pset_BuildingElementProxyFireHazardProperties` (element-bound, not material-bound in IFC) |
-| `impacts.*` (GWP, EP, AP, ODP, POCP, ADP, etc.) | `IfcEnvironmentalImpactValue` (IFC 4.0+) with `ImpactCategoryEnum` + `IfcLifeCycleStage` — **direct structural match** |
-| `carbon.stated.lifecycle_stages[]` | `IfcLifeCycleStage` enum on `IfcEnvironmentalImpactValue` — same A1–D taxonomy |
-| `epd.*` (full EPD provenance) | No native IFC entity — emitted as custom `IfcPropertySet` (e.g., `Pset_BfCA_EPDProvenance`) |
-| `methodology.*` | No native IFC entity — custom Pset |
-| `code_compliance.*` | No native IFC entity — custom Pset or `IfcRelAssociatesApproval` |
-| `carbon.biogenic.*` | Partial alignment with `IfcEnvironmentalImpactValue.Category = BIOGENICCARBONEQUIVALENT` (IFC 4.3+); detailed math fields are custom |
-
-#### Observations
-
-1. **Strong alignment on physical properties**: `physical` block maps cleanly onto IFC's standard Psets. An IFC importer can populate these without custom schemas.
-2. **Strong alignment on impact categories**: IFC 4.0+ `IfcEnvironmentalImpactValue` with `ImpactCategoryEnum` and `LifeCycleStage` uses the same EN 15804 taxonomy as our `impacts` block and `lifecycle_stages` enum. The industry is converging on these names.
-3. **Schema gaps vs. IFC**: IFC has richer mechanical and optical properties (`Pset_MaterialMechanical`, `Pset_MaterialOptical`) that we don't yet model. When imported from IFC, stash in forward-compat `physical.mechanical.*` / `physical.optical.*` blocks.
-4. **IFC gaps vs. our schema**: IFC has no native representation for EPD provenance chain, BEAM's explicit conversion math, BfCA-specific code compliance, or detailed biogenic storage methodology. On export these become custom `Pset_BfCA_*` property sets attached via `IfcRelDefinesByProperties`.
-
-### 5.5 EPD parser implications
-
-The schema *structure* mirrors ISO 21930 / EN 15804 EPD document sections. Phase 2 parser walks an EPD PDF and populates:
-
-- EPD "Declared unit" → `carbon.stated.{value_kgco2e, per_unit}`
-- EPD "Functional unit" → `carbon.common.per_functional_unit` + `impacts.functional_unit`
-- EPD "Reference service life" → `epd.product_service_life_years`
-- EPD "Lifecycle modules" → `carbon.stated.lifecycle_stages[]` + `methodology.lifecycle_scope.stages_included[]`
-- EPD "Allocation procedure" → `methodology.lifecycle_scope.allocation_method`
-- EPD impact table rows → `impacts.{gwp, eutrophication, acidification, ...}.value` with `source: "epd_direct"`
-- EPD "Biogenic carbon" row (EN 15804+A2) → `carbon.biogenic.gwp_bio_from_epd_kgco2e_per_common_unit`
-- EPD registration # → `epd.id`; program operator → `epd.program_operator`; verifier → `epd.validation.agent`
-
-The `source` discriminator (`"epd_direct" | "beam_derived" | "industry_average" | "estimated" | null`) on impact values distinguishes parsed-from-EPD numbers from BEAM-derived ones — important for data quality audits.
-
----
-
-## 6. Implementation guidance
-
-### 6.1 File size & module splitting
-
-#### Size projections (sparse-by-default, schema v1.1)
-
-Measured from committed `materials/*.json` (821 records):
-
-| Metric | Full schema-complete (old) | Sparse (current) | Reduction |
-|---|---|---|---|
-| Per-record pretty-printed | ~13 KB | ~4 KB | ~68% |
-| 821-record batch pretty-printed | 18 MB | 4.3 MB | ~76% |
-| `materials/index.json` | 290 KB | 290 KB | 0% (index was always lean) |
-| Gzipped batch (estimated) | ~4 MB | ~1.2 MB | ~70% |
-
-Sample.json (the canonical full template) remains schema-complete at ~21 KB because it's documentation, not data.
-
-#### Split strategy: CSI MasterFormat for files, UNIFORMAT as in-record filter
-
-| Question | Taxonomy | Role |
-|---|---|---|
-| *What material is this?* (steel, concrete, wood) | **CSI MasterFormat** — 50 divisions, ~15 have entries in BEAM | **File-level split** — one JSON per CSI division |
-| *Where does it go in the building?* (foundation, wall, roof, floor) | **UNIFORMAT II** — A/B/C/D/E/F/G elemental groupings | **In-record filter** via existing `classification.typical_elements[]` |
-
-**Why CSI wins for file organisation:**
-- BEAM's Display Names already prefix with CSI division (`"05 | Steel Panel"`, `"06 | Plywood"`) — the split is free.
-- Each material belongs to **exactly one** CSI division (concrete is always 03, never "also 06"). UNIFORMAT would force duplicating materials.
-- CSI aligns with how specs are written and how trades are organised on site.
-
-**Why UNIFORMAT stays in `typical_elements[]`:**
-- Already in the schema; no new scheme needed.
-- A record can be searchable across multiple element types simultaneously (`["floor", "roof_deck", "wall_shear"]` for CLT).
-- Clients filter client-side: "show me division-06 materials where `typical_elements` includes `wall_exterior`."
-
-#### Recommended file layout
-
-```
-schema/                           As committed in PR
-├── material.schema.json          Draft 2020-12 validator (sparse-aware)
-├── sample.json                   LAM011 full-template reference (schema-complete)
-│   (source CSV moved to docs/csv files from BEAM/BEAM Database-DUMP.csv — see that folder for all BEAM workbook-tab exports)
-├── materials.json                ABCD.EARTH donor schema (rendering hints only)
-├── schema.md                     This document
-├── lookups/                      Enum + inference lookups
-│   ├── country-codes.json        21 BEAM free-text → ISO 3166-1 alpha-3 arrays
-│   ├── csi-divisions.json        15 MasterFormat 2020 codes + category slugs
-│   ├── material-type-to-csi.json 90 BEAM material types → 2-digit CSI prefix
-│   ├── display-name-keywords.json 45 fallback patterns (ordered specific-first)
-│   ├── typical-elements.json     Enum + material_type defaults + product_subtype overrides
-│   └── lifecycle-stages.json     17 EN 15804+A2 stages + common-scope shortcuts
-├── scripts/
-│   ├── beam-csv-to-json.mjs      Node ESM importer (single-row + batch)
-│   └── validate.mjs              Zero-dep JSON Schema walker
-└── materials/                    Sparse emitted catalogue (821 records)
-    ├── index.json                Picker catalogue (8 fields per entry, ~290 KB)
-    ├── import-report.json        Manual-review flags
-    ├── 03-concrete.json          205 records (incl. rebar → 03)
-    ├── 04-masonry.json            42 records (brick, stone, earth-based)
-    ├── 05-metals.json             93 records (steel, aluminum, composite beams)
-    ├── 06-wood.json              160 records (CLT, glulam, sheathing, fibre, bamboo)
-    ├── 07-thermal.json           217 records (insulation, barriers, roofing, siding)
-    ├── 08-openings.json           16 records (double/triple pane, wood+alu frames)
-    ├── 09-finishes.json           83 records (gypsum, flooring, carpet, tiles)
-    └── 31-earthwork.json           5 records (aggregate, ground screw, ICF webbing)
-```
-
-#### `materials/index.json` — what's in it
-
-Projected size: ~100 KB for 1000 records. 8 fields per record for picker display and filtering:
-
-| Field | Source full-record path | Purpose in index |
-|---|---|---|
-| `id` | `id` | Primary key; used to fetch full record |
-| `beam_id` | `external_refs.beam_id` | Cross-reference |
-| `display_name` | `naming.display_name` | UI list label |
-| `category` | `classification.category` | Group header (`06_wood`) |
-| `division_prefix` | `classification.division_prefix` | Which per-division file to fetch |
-| `typical_elements` | `classification.typical_elements` | UNIFORMAT filter axis |
-| `gwp_kgco2e` | `impacts.gwp_kgco2e.value` | Preview number in the picker |
-| `functional_unit` | `impacts.functional_unit` | Preview unit label |
-
-#### Load pattern for the PDF-Parser material picker
-
-```
-1. App boot:      fetch materials/index.json         (~30 KB gz, once, cached)
-2. Picker open:   render list from index             (no network)
-3. User filters:  "division 06 + typical_element=wall_exterior"
-                  → fetch materials/06-wood.json     (~300 KB gz, once per division, cached)
-4. User picks X:  full record already in memory      (no extra fetch)
-```
-
-### 6.2 Fields that can't be mapped from BEAM
-
-Null at import time; fill manually or in later phases:
-
-- `external_refs.mce2_id`, `ec3_id`, `ifc_material_guid` → null
-- `naming.short_name` → derive from display_name manually
-- `classification.typical_elements` → small per-material-type lookup table (Phase 1.4)
-- `rendering.*` → fuzzy-match ABCD.EARTH by material_type; default per category when missing
-- `physical.density.value_lb_ft3` → computed (kg_m3 × 0.06243)
-- `physical.thermal.heat_capacity_j_kgk` → null; future materials-science lookup
-- `carbon.biogenic.method` → derive: biogenic fields populated → `"wwf_storage_factor"`, else `"none"`
-- `impacts.*` (non-GWP) → null; EPD parser (Phase 2) fills
-- `cost.*`, `fire.*` (except combustibility), `code_compliance.*` → null; Phase 6 fills
-- `methodology.lifecycle_scope.cutoff_rule_pct`, `allocation_method` → null; EPD parser (Phase 2) fills
-
-### 6.3 Fields that are lossy to port from BEAM
-
-| BEAM column | Handling |
-|---|---|
-| Excel date serials (mix of year integers and day-count serials) | If value < 3000 → treat as year; if > 30000 → Excel serial → ISO date; preserve raw in `provenance.original_beam_added_or_modified_serial` |
-| Formula cells (`=Q545/11.249`, `=IFERROR(DUMMYFUNCTION(...))`) | Evaluate or reconstruct from referenced columns; extract fallback strings from IFERROR arguments |
-| `Footnote` column (IFERROR with conditional expired-status prose) | Parse out the final quoted fallback; split on `;` → structured flags |
-| Sparse `CSI MasterFormat` (~0.4% populated) | Port as-is; no synthesis. Infer `division_prefix` from Display Name instead |
-| Free-text country strings (`"US & CA"`) | ISO 3166-1 alpha-3 arrays via lookup table (Phase 1.2); log misses |
-| Polymorphic `Addn'l factors` + units | Keep as `physical.additional_factor.{value, units, description}`; flag in schema |
-| Duplicate `Common Unit: kgCO2e / _` columns (T and AA) | Rename to distinct paths: `carbon.common.per_functional_unit` vs biogenic-local context |
-| Whitespace + non-breaking spaces in `EPD ID` values | `.trim()` on import |
-| Blank `Material Type` (337 rows) | Infer from Display Name prefix (`"05 | ..."`) or leave for manual review |
-
----
-
-## 7. Verification
-
-### 7.1 sample.json regression checks
-
-```bash
-cd schema
-python3 -c "import json; d=json.load(open('sample.json')); assert len(d.keys())==20; print('20 top-level keys ✓')"
-python3 -c "import json; d=json.load(open('sample.json')); assert d['carbon']['common']['value_kgco2e']==6.22; print('carbon.common.value_kgco2e=6.22 ✓')"
-python3 -c "import json; d=json.load(open('sample.json')); assert d['external_refs']['beam_id']=='LAM011'; print('beam_id=LAM011 ✓')"
-python3 -c "import json; d=json.load(open('sample.json')); assert d['provenance']['countries_of_manufacture']==['CAN']; print('ISO alpha-3 ✓')"
-```
-
-### 7.2 CSV integrity checks
-
-```bash
-cd schema
-# Row 1 is header, row 2 is '2c53be', row 545 is LAM011, row 826 is XPS002
-CSV="../docs/csv files from BEAM/BEAM Database-DUMP.csv"
-python3 -c "
-import csv
-r = list(csv.reader(open('$CSV')))
-assert r[0][0] == 'ID'
-assert r[1][0] == '2c53be'
-assert r[544][0] == 'LAM011'
-assert r[825][0] == 'XPS002'
-print('CSV row alignment ✓')
-"
-# Raw lines == logical rows (no embedded newlines drift)
-python3 -c "
-import csv
-with open('$CSV') as f: raw = sum(1 for _ in f)
-with open('$CSV', newline='') as f: logical = sum(1 for _ in csv.reader(f))
-assert raw == logical == 826
-print(f'raw=logical={raw} ✓')
-"
-```
-
-### 7.3 Phase 1 acceptance criteria
-
-- [x] `material.schema.json` validates `sample.json` with zero errors — 1/1 passes
-- [x] `scripts/beam-csv-to-json.mjs` processes LAM011 and output diff-matches `sample.json` structurally — 5 documented acceptable diffs (annotations, hand-authored refinements, telemetry)
-- [x] Full batch produces 821 records across 8 per-division files (03/04/05/06/07/08/09/31)
-- [x] Every emitted record passes JSON Schema validation — 822/822 pass via `node scripts/validate.mjs --all`
-- [x] `materials/index.json` has correct shape (8 fields per entry); size is ~290 KB pretty-printed (exceeds the original 150 KB target but acceptable — minify for production delivery if needed)
-- [x] Import report identifies all skipped/problem rows by CSV row number
-- [ ] Phase 1 PR merges cleanly to `main`; GitHub Pages deploy succeeds — **PR open, user to merge**
-
-### 7.4 Phase 1 verification commands (post-import)
-
-```bash
-cd schema
-
-# Full validation: sample.json + every per-division file (822 records)
-node scripts/validate.mjs --all
-
-# Single-row regression test: LAM011 round-trip vs sample.json
-node scripts/beam-csv-to-json.mjs --row LAM011 --diff
-
-# Batch re-run (should produce identical output to what's committed)
-node scripts/beam-csv-to-json.mjs --all --out-dir /tmp/verify-materials
-
-# Compare committed output vs re-run (all records structural match)
-diff -r materials /tmp/verify-materials
-```
-
----
-
-## Appendix A1 — Future: project-level calculation graph
-
-**Stub — parked for Phase 4 (BEAM.js app port).**
-
-The per-material schema (this document) captures *intensity* values — kgCO2e per functional unit. A project file needs a *calculation graph* that composes those intensities with quantities to produce a total EC figure:
-
-```
-polygon (from PDF-Parser)
-   ├─ area_m2                            measured on the drawing
-   ├─ depth_m                            user-entered or derived
-   ├─ material_ref → materials/XX.json   picked from catalogue
-   └─ node type: {wall, floor, roof, opening, …}
-        │
-        ▼
-  volume_m3 = area × depth
-        │
-        ▼
-  mass_kg = volume × density_kg_m3       from material.physical.density
-        │
-        ▼
-  ec_kgco2e = <lookup via material.carbon.common or impacts.gwp_kgco2e.total>
-        │
-        ▼
-  project_total = Σ node.ec + operational + transport + etc.
-```
-
-Why a graph (not a flat list):
-- **Dependencies propagate** — edit a window polygon's area → net wall area of containing wall updates → wall EC recomputes → project total updates. Same for density, thickness, and material swaps.
-- **Provenance chain** — every final number has a traceable lineage back to a polygon, a material record, an EPD. Good for audits, BfCA peer review, and the forthcoming Vancouver QP attestation workflow.
-- **What-if analysis** — "swap all studs from #2 SPF to LSL" becomes a single-node substitution; the graph recomputes downstream in O(affected edges).
-- **Operational + embodied unification** — the same graph can absorb operational energy results from energy modelling tools and compose them with embodied totals into whole-building lifecycle carbon.
-
-**Prior art to consult** — the team's **OBJECTIVE energy model** app uses a robust dependency graph for operational energy calculations. Before designing the BEAM.js graph, review OBJECTIVE's node model, edge semantics, dirty-flag propagation, and UI conventions. Target: a consistent calc-graph mental model across both tools so a practitioner switching between them doesn't retrain.
-
-**Interop with the material schema** — material records must remain *pure intensity data* (no quantities, no project context). The graph references materials by `id` and multiplies through at evaluation time. Keeping the two concerns separate means:
-- Material DB can be versioned independently (new EPDs, corrections, additions)
-- A project file is a small JSON of graph nodes + edges + material-id references, not a snapshot of the catalogue
-- Two projects using the same material see the same numbers; updating the material cascades to both on next open
-
-Scoping: not a Phase 1 deliverable. Phase 1 ships the intensity-only material records. Phase 3 (PDF-Parser material picker) introduces the first use of material refs in project state. Phase 4 (BEAM.js port) is where the calc graph lands formally.
-
----
-
-## Appendix A — Key values to memorise
-
-| | |
-|---|---|
-| LAM011 CSV row | `545` |
-| LAM011 Stated EPD | `69.96 kgCO2e/m³` |
-| LAM011 density | `456 kg/m³` |
-| LAM011 thickness | `0.09 m` (3.5") |
-| LAM011 units/m² | `11.249` |
-| LAM011 conversion factor | `1/11.249 ≈ 0.0889` |
-| LAM011 biogenic factor | `0.9897` |
-| LAM011 carbon content | `0.5 kgC/kg` |
-| LAM011 storage retention | `0.9` |
-| LAM011 common GWP | `6.22 kgCO2e per m² at 3.5"` |
-| LAM011 full biogenic C | `74.53 kgCO2e` per common unit |
-| LAM011 stored biogenic C | `67.08 kgCO2e` per common unit |
-| CO2:C molar ratio | `3.67` (= 44/12) |
-| First data row | Excel row 2, `2c53be` (Aggregate / NRMCA) |
-| Last data row | Excel row 826, `XPS002` |
-| Internal blank rows | 424, 425, 427, 428 (preserved per BEAM source) |
-
-## Appendix B — Changelog
-
-- **2026-04-18 `f82094c`** — Database viewer fix: removed 620px max-height cap on detail pane that clipped the impact matrix at 7 of 10 categories.
-- **2026-04-18 `b40ac44`** — Phase 1.5 Database viewer shipped: `database.html` + `js/database.mjs` (styles in `bfcastyles.css` §7). Sortable + filterable table, expandable row detail with full 10×18 per-stage impact matrix (horizontal scroll), carbon calc graph as ASCII flow diagram, raw JSON inspector. Data staged into `data/schema/` via `npm run stage:data` (local) or workflow step (Pages). Nav cross-links added across PDF-Parser / Matrix / Database. *(Paths updated post-flatten 2026-04-20; originally all under `PDF-Parser/`.)*
-- **2026-04-18 `e66e513`** — CI fix: gated the Pages deploy job to `arossti/OpenBuilding` only (bfca-labs/at is private, no Pages site → 404). Cosmetic failure noise on the private mirror now suppressed.
-- **2026-04-18 `009a9c5`** — Sparse-by-default serialization. Per-material records omit null scalar leaves and empty sub-objects. 15 top-level object blocks, `impacts.<category>.total` (as `{value, source}`), `impacts.<category>.by_stage`, and all arrays stay present for safe traversal. Full template structure remains documented in `sample.json` and `material.schema.json`. Size: per-record ~13 KB → ~4 KB, batch 18 MB → 4.3 MB (76% reduction). Validator relaxed (required arrays pruned to structural members only; additionalProperties:false and enums/patterns unchanged); 822/822 records still pass.
-- **2026-04-18 `c71ef7d`** — Added `material.schema.json` (JSON Schema Draft 2020-12) and `scripts/validate.mjs` (zero-dep walker).
-- **2026-04-18 `6d5a999`** — Phase 1 pipeline shipped: `scripts/beam-csv-to-json.mjs` importer (recursive formula evaluator, IFERROR extractor, CSI inference), 6 lookup files, 821-record batch across 8 CSI divisions, `materials/index.json`, `import-report.json`. `impacts.*` expanded to heavy per-stage structure: each category carries `total` + `by_stage` object over all 17 EN 15804+A2 stages. Top-level `id` changed from display-derived slug to lowercased BEAM ID (`clt_nordic_xlam_3_5in` → `lam011`); `external_refs.beam_id` preserves case-exact. Added Appendix A1 on future project-level calc graph (deferred to Phase 4 / BEAM.js app; defer to OBJECTIVE energy model's graph conventions).
-- **2026-04-18 `0489ed5`** — Full workplan + cold-start agent handoff committed.
-- **2026-04-18 `0714485`** — BEAM CSV cleaned (truncated trailing 753 garbage rows, flattened embedded newlines). Excel row ↔ CSV line alignment now guaranteed.
-- **2026-04-18 `228eafb`** — Initial schema design package committed: `BEAM Database-DUMP.csv`, `materials.json` (ABCD.EARTH donor), `sample.json`, `schema.md` v1.
+## 9. The port: OBJECTIVE's sections into `objectivepro.html`
+
+Andy 2026-11-25: _"I am personally keep to port the OBJECTIVE v4 RND methods and data into the new dark-mode
+[page] … We will keep the 'PROJECT' tab, but the masthead menu and sections will then accord to our S03-S21, where S1
+shoudl remain the intro page but will incorporate S01 somehow, and S02 is the Project tab with its current format."_
+This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `main` `5e0b2f0` (`src/sections/`,
+`src/core/`, ~24 k lines); the code moves here, it is not linked.
+
+### 9.1 The section map (the sidebar becomes this)
+
+| Tab | OBJECTIVE section                  | andy-rnd lines | Notes                                                                  |
+| --- | ---------------------------------- | -------------- | ---------------------------------------------------------------------- |
+| S01 | Introduction + **Key Values**      | 789            | the intro page, carrying S01's key values                              |
+| S02 | **PROJECT** = Building Information | 1,069          | the current PROJECT tab's format, S02's fields                         |
+| S03 | Climate Calculations               | 1,507          |                                                                        |
+| S04 | Actual vs. Target Energy & Carbon  | 918            |                                                                        |
+| S05 | CO2e Emissions                     | 533            |                                                                        |
+| S06 | Renewable Energy                   | 306            |                                                                        |
+| S07 | Water Use                          | 736            |                                                                        |
+| S08 | Indoor Air Quality                 | 408            |                                                                        |
+| S09 | Occupant + Internal Gains          | 1,062          |                                                                        |
+| S10 | Radiant Gains                      | 1,491          | windows; V4-2 reads S11                                                |
+| S11 | Transmission Losses                | 2,508          | **the envelope: Trust / Trust + Verify's target** (V4-1, V4-2, V4-7)   |
+| S12 | Volume and Surface Metrics         | 1,205          | **Trust's second target** (volumes)                                    |
+| S13 | Mechanical Loads                   | 1,730          |                                                                        |
+| S14 | TEDI & TELI                        | 515            |                                                                        |
+| S15 | TEUI                               | 862            |                                                                        |
+| S16 | Sankey Diagram                     | 2,067 + 453    |                                                                        |
+| S17 | Dependency Graph                   | 27             | already here: the BEAM page's Dependency Graph tab came from OBJECTIVE |
+| S18 | Optimize                           | 26             |                                                                        |
+| S19 | WOMBAT — 3D Thermal Topology       | 2,059          |                                                                        |
+| S20 | Notes & Debug                      | 1,188          |                                                                        |
+| S21 | CSA F280 Compliance                | 1,921          |                                                                        |
+
+### 9.2 Phases (recommended)
+
+**RULED (P0's shape):** Andy 2026-11-25: _"We won't use any BEAM legacy pages. Our sections will replace all of BEAMS. We're just keeping the look and feel of the format as the tabbed, moden menus support a better project organizartion. And gives us wider latitude to format sections as full pages, with S01 acting as the overview/review dashboard. That said, in this narrow but wide header band, that is where we might be able to park our S01 head's up display so the 3 main rows show across any page or section that is active. It may well need 200px or so to read properly, that is a design function, but I feel the dashboard is vital for evaluating performance while ANY section is open. Sure, sidebar next"_
+
+- **P0 — the scaffold.**
+  1. **The S01 heads-up display** in the masthead band (the strip under the OBJECTIVE logo/title, beside Home ·
+     Take Off, Eh! · Database · OBJECTIVE): S01's three main key-value rows, ~200 px tall (a design call), shown
+     whatever section is open. S01's own tab is the full overview/review dashboard.
+  2. **The sidebar becomes S01–S21**, grouped (proposed, Andy's to rename: Project S01–S02 · Climate & Targets
+     S03–S06 · Occupancy & Gains S07–S10 · Envelope S11–S12 · Systems & Results S13–S15 · Outputs S16–S19 · Notes &
+     Compliance S20–S21). S02 is the current PROJECT tab in its current format. Each section is a FULL PAGE.
+  3. **Every BEAM tab is deleted** (the 12 assembly tabs, REVIEW, RESULTS, Glossary, Energy GHG, and their
+     `js/beam/*-tab.mjs`); no legacy group. Keep the look and feel: the tabbed sidebar, the action bar, the dark theme.
+     Trust / Trust + Verify keep working (they fill PROJECT today; P2 retargets them).
+- **P1 — the engine.** OBJECTIVE's core (the state manager, the dual Target / Reference state, the calculation
+  graph) moves in unchanged and runs headless behind the page; the CSV import/export too.
+  **Spike 2026-11-25 (laptop), andy-rnd `main` `5e0b2f0`, case 01 Three Feathers Terrace:**
+  - The graph runs headless: andy-rnd's 70 core + node scripts (its `index.html` order, no `Section*.js`, no
+    `init.js`; ~2.8 MB, 0.8 MB of it `ClimateValues.js`) initialise, and `FileHandler.processImportedCSV` imports
+    once `SectionModules.sect20.setNotes` is stubbed (FileHandler calls it for Project Notes).
+  - **Reference matches the full app exactly** (e_6 22.7 · e_8 9.7 · e_10 190.1).
+  - **Target does not:** h_10 89.4 headless vs 93.1 in the full app (h_6 11.5 vs 11.6, h_8 4.6 vs 4.7). Loading the
+    `Section*.js` modules without rendering changes nothing. The inputs that differ are ones the full app derives
+    through its page code after an import: `e_12` (sub-type, "Auditorium seating area" vs empty), `d_16` (350 vs
+    345.82), `i_63` (3650 vs 4380), `i_49` / `i_50` (1 839 600 vs 58 400) — dropdown cascades and defaults that run in
+    the DOM (FileHandler's `syncPostImportUI`, the sections' handlers), not in the graph.
+  - The % column (m_6, m_8, m_10) is S01's page code, not the graph (headless gives "0%" / "N/A").
+  - **So P1 is: copy the engine in, then find each page-side derivation and move it into the graph (or call it
+    headless), until case 01's every value matches the full app; then all 13 cases.** The witness is that diff
+    (StateManager `exportState()` of the full app vs headless, after the same CSV), zero non-`ref_` differences.
+
+- **P2 — S11 and S12 first**, in the dark theme: they are what Trust / Trust + Verify fill, so the PDF-mapping tests
+  (Andy, the same evening) can aim at real fields. The bridge's mapping (`js/beam/pdf-bridge-import.mjs`, `polygon-map.mjs`)
+  learns S11's rows and S12's volumes.
+- **Foundations read the Section Builder** (Andy 2026-11-25: _"our Section Builder can inform basement styles per
+  F280 requirements (in can read form how a user configures the section builder to determine which
+  basement/footing/foundation style we are dealing with."_): the BEAM Footings & Slabs tab is gone; the foundation's
+  F280 configuration comes from the section the user builds, not a picker.
+- **P3 — the rest**, section by section, each checked against andy-rnd's own tests and case studies (the shared
+  computation, §7.1), S01's key values last because they read everything.
+
+### Answered
+
+- **BEAM's tabs: all go, no legacy group; S01 is the dashboard and its HUD rides the masthead.** Andy 2026-11-25: _"We won't use any BEAM legacy pages. Our sections will replace all of BEAMS. We're just keeping the look and feel of the format as the tabbed, moden menus support a better project organizartion. And gives us wider latitude to format sections as full pages, with S01 acting as the overview/review dashboard. That said, in this narrow but wide header band, that is where we might be able to park our S01 head's up display so the 3 main rows show across any page or section that is active. It may well need 200px or so to read properly, that is a design function, but I feel the dashboard is vital for evaluating performance while ANY section is open. Sure, sidebar next"_
+
+- **"Pro" names both.** Andy 2026-11-25: _"Pro refers to both the Web App and the Rust app. Pro=V4. The user may use the app in OSX/Linux, but many users are still PC users, and for them we have the web app. It is not expected to do everything the native rust app can, but it is the concession we make."_ Hence the address `objectivepro.html`.
+
+## Appendix — Changelog
+
+- 2026-11-25: P0 shipped on `ob-landing-cleanup` (HUD, S01–S22 sidebar, BEAM tabs deleted, Glossary = S22).
+
+| Date       | Commit                        | Change                                                                                |
+| ---------- | ----------------------------- | ------------------------------------------------------------------------------------- |
+| 2026-11-25 | andy-rnd `7870a44`, `0684e43` | the plan written in andy-rnd (§3, §4, §7, §8)                                         |
+| 2026-11-25 | `99d5a70`                     | moved here; §0, §5 and §6 added                                                       |
+| 2026-11-25 | `0a318bb`                     | §0 shipped / remaining; `objectivepro.html`; Assemblies published; §9 the port        |
+| 2026-11-25 | `62cb91a`                     | ruled: Pro = v4, the Rust app and the web app                                         |
+| 2026-11-25 | this commit                   | ruled: no BEAM legacy; S01 dashboard + masthead HUD; P0 rewritten; cold-start handoff |

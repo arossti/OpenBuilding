@@ -1,144 +1,105 @@
 /**
- * BEAMweb reference data — inline copies of small, static reference datasets
- * so the app never has to fetch them at runtime and the CSV files can be deleted.
- *
- * Sources (now deleted from docs/csv files from BEAM/):
- *   ENERGY_GHG: 2023 Canadian grid + fuel GHG-intensity factors (13 provinces
- *     and territories, 5 energy sources). Informational reference only.
- *   GLOSSARY:  Embodied carbon glossary. 48 terms and definitions.
- *
- * When we get a newer Canadian National Inventory Report update, bump the
- * numbers in place. Project-level overrides will land in Phase 1 once the
- * state manager is in (user can override any province or add a custom row).
+ * OBJECTIVE 4.0 reference data — the S22 Glossary, inline so the page never
+ * fetches it. OBJECTIVE's own terms first (source: "OBJECTIVE"), then the
+ * embodied-carbon vocabulary.
  */
 
-export const ENERGY_GHG = {
-  units: {
-    electricity: "kgCO2e per kWh",
-    natural_gas: "kgCO2e per m³",
-    oil: "kgCO2e per L",
-    propane: "kgCO2e per L",
-    wood: "kgCO2e per kg"
-  },
-  source: "2023 Canadian grid and fuel GHG intensities (informational reference)",
-  factors: [
-    {
-      province: "Newfoundland and Labrador",
-      electricity_kgco2e_per_kwh: 3.4e-5,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Prince Edward Island",
-      electricity_kgco2e_per_kwh: 0.000276,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Nova Scotia",
-      electricity_kgco2e_per_kwh: 0.00074,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "New Brunswick",
-      electricity_kgco2e_per_kwh: 0.000276,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Quebec",
-      electricity_kgco2e_per_kwh: 1.62e-6,
-      natural_gas_kgco2e_per_m3: 0.001898355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Ontario",
-      electricity_kgco2e_per_kwh: 3.4e-5,
-      natural_gas_kgco2e_per_m3: 0.001899355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Manitoba",
-      electricity_kgco2e_per_kwh: 2.66e-6,
-      natural_gas_kgco2e_per_m3: 0.001897355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Saskatchewan",
-      electricity_kgco2e_per_kwh: 0.000752,
-      natural_gas_kgco2e_per_m3: 0.001840355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Alberta",
-      electricity_kgco2e_per_kwh: 0.000802,
-      natural_gas_kgco2e_per_m3: 0.001939355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "British Columbia",
-      electricity_kgco2e_per_kwh: 1.158e-5,
-      natural_gas_kgco2e_per_m3: 0.001937355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Yukon",
-      electricity_kgco2e_per_kwh: 5.36e-5,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Northwest Territories",
-      electricity_kgco2e_per_kwh: 0.000232,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    },
-    {
-      province: "Nunavut",
-      electricity_kgco2e_per_kwh: 0.000782,
-      natural_gas_kgco2e_per_m3: 0.001912355,
-      oil_kgco2e_per_l: 0.002755438,
-      propane_kgco2e_per_l: 0.001547859,
-      wood_kgco2e_per_kg: 0.00035826
-    }
-  ]
-};
-
 export const GLOSSARY = [
+  // OBJECTIVE 4.0's own terms (source: "OBJECTIVE"), then the BEAM vocabulary.
+  {
+    abbr: "TEUI",
+    full: "Total Energy Use Intensity",
+    desc: "A building's total annual energy use per m² of conditioned floor area, kWh/m²/yr. Key value T.3; worked out in S15.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "TEDI",
+    full: "Thermal Energy Demand Intensity",
+    desc: "The annual space-heating energy the envelope and ventilation demand, per m² of conditioned floor area, before the heating system's efficiency, kWh/m²/yr. S14.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Lifetime Carbon",
+    full: "Lifetime emissions intensity (T.1)",
+    desc: "Embodied carbon spread over the service life, plus a year's operational emissions, per m² of floor area.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Annual Carbon",
+    full: "Annual operational emissions intensity (T.2)",
+    desc: "A year's operational greenhouse-gas emissions per m² of floor area, kgCO2e/m²/yr.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Reference",
+    full: "Reference building",
+    desc: "The same building built to the chosen reference standard. OBJECTIVE works it out beside the design, so every key value has a 100 % baseline.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Target",
+    full: "Targeted (design) building",
+    desc: "The building as designed, from the values entered; its key values are read against the Reference.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Actual",
+    full: "Actual (utility bills)",
+    desc: "The building's measured performance, worked out from its utility bills when the project's use type is Utility Bills.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Facing",
+    full: "Wall orientation",
+    desc: "The compass direction a wall faces. In 4.0 every above-grade wall has one, and its windows' solar gains follow it.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Hosted opening",
+    full: "Window, door or skylight in its host",
+    desc: "In 4.0 a window or door sits in a named wall, and a skylight in a roof: its area is its width × height, it faces the way its wall faces, and the wall's area is net of it.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "Overhang H / D",
+    full: "Shading device height and depth",
+    desc: "H is the overhang's height above the window head, D its projection from the wall. Together they set the window's summer shading by CSA F280 Annex A.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "CSA F280",
+    full: "Required capacity of residential space heating and cooling appliances",
+    desc: "The Canadian standard for sizing a house's heating and cooling equipment from its design heat loss and heat gain. S21.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "ASHRAE 140",
+    full: "Method of test for building energy simulation programs",
+    desc: "The standard test suite an hourly energy model is checked against; 4.0's bridge to hourly analysis aims at it.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "AIM-2",
+    full: "Alberta Infiltration Model",
+    desc: "The air-leakage model OBJECTIVE uses: it turns a measured airtightness into infiltration under wind and stack effect.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "BASESIMP",
+    full: "Basement heat-loss correlations",
+    desc: "The correlations OBJECTIVE uses for the heat lost through basements and slabs to the ground.",
+    source: "OBJECTIVE"
+  },
+  {
+    abbr: "WOMBAT",
+    full: "3D Thermal Topology (S19)",
+    desc: "S19's 3D view of the thermal envelope, drawn from the section inputs.",
+    source: "OBJECTIVE"
+  },
   {
     abbr: "Assemblies",
     full: "Building envelope assemblies",
     desc: "Assembly of building materials to form a wall, floor or roof unit. Can be prefabricated or site-built. May or may not include vapor, air, and water barriers."
-  },
-  {
-    abbr: "BfCA",
-    full: "Builders for Climate Action",
-    desc: "A non-profit division of the Endeavour Centre and the developers of this tool."
   },
   {
     abbr: "Carbon Storage or CO2e Storage",
@@ -276,11 +237,6 @@ export const GLOSSARY = [
     desc: ""
   },
   {
-    abbr: "MCE",
-    full: "Material Carbon Emissions",
-    desc: "MCE is sometimes referred to informally as embodied carbon. MCEs differ from full embodied carbon in that MCEs include only the product-manufacturing stages (A1-A3) of the building lifecycle (with a few exceptions), while embodied carbon includes all phases of the lifecycle except B6 (operational emissions) and B7 (operational water use)."
-  },
-  {
     abbr: "MgO",
     full: "Magnesium Oxide",
     desc: ""
@@ -359,15 +315,5 @@ export const GLOSSARY = [
     abbr: "EC",
     full: "Embodied Carbon",
     desc: "The lifecycle carbon emissions of the building materials.  Includes emissions from all lifecycle phases of the building except for B6 (operational emissions) and B7 (operational water use)."
-  },
-  {
-    abbr: "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources, 2023",
-    full: "",
-    desc: ""
-  },
-  {
-    abbr: "© Sa Majesté le Roi du chef du Canada, représentée par le ministre de Ressources naturelles, 2023",
-    full: "",
-    desc: ""
   }
 ];

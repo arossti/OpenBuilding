@@ -3,17 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BfCA — Dependency Manifest</title>
-    <link rel="icon" type="image/png" href="graphics/BFCA-LOGO-sm.png" />
+    <title>OpenBuilding.ca — Dependency Manifest</title>
+    <link rel="icon" type="image/svg+xml" href="graphics/ob-favicon.svg" />
+    <link rel="icon" type="image/png" href="graphics/ob-logo-sm.png" />
     <meta name="robots" content="noindex,nofollow" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="bfcastyles.css" />
+    <link rel="stylesheet" href="obstyles.css" />
   </head>
   <body>
     <div class="dep-app">
       <!-- ── Header ──────────────────────────────────── -->
       <header class="site-header dep-header">
-        <img src="graphics/BFCA-LOGO-sm.png" alt="BfCA" class="header-logo" />
+        <img src="graphics/ob-mark-small.svg" alt="OpenBuilding.ca" class="header-logo" />
         <div>
           <h1 class="dep-title">Dependency Manifest</h1>
           <span class="dep-subtitle"
@@ -23,10 +24,9 @@
         </div>
         <div style="flex: 1"></div>
         <a href="index.html" class="nav-btn" target="_blank" rel="noopener">Home</a>
-        <a href="pdfparser.html" class="nav-btn" target="_blank" rel="noopener">PDF-Parser</a>
-        <a href="matrix.html" class="nav-btn" target="_blank" rel="noopener">Matrix</a>
+        <a href="takeoffeh.html" class="nav-btn" target="_blank" rel="noopener">Take Off, Eh!</a>
         <a href="database.html" class="nav-btn" target="_blank" rel="noopener">Database</a>
-        <a href="beamweb.html" class="nav-btn" target="_blank" rel="noopener">BEAM</a>
+        <a href="objectivepro.html" class="nav-btn" target="_blank" rel="noopener">OBJECTIVE</a>
       </header>
 
       <!-- ── Probe status bar ───────────────────────── -->
@@ -105,7 +105,7 @@
         <section class="dep-section">
           <h2>3. Per-app usage matrix</h2>
           <p class="lede">
-            Which dependencies each app loads at boot. Gaps are intentional (e.g., PDF-Parser does not need Bootstrap
+            Which dependencies each app loads at boot. Gaps are intentional (e.g., Take Off, Eh! does not need Bootstrap
             JS).
           </p>
           <table class="dep-table" id="matrix-table">
@@ -132,7 +132,7 @@
               <tr>
                 <td>Bootstrap Icons</td>
                 <td>
-                  BfCA apps standardise on <code>1.11.3</code>. OBJECTIVE (sibling repo at
+                  OpenBuilding.ca apps standardise on <code>1.11.3</code>. OBJECTIVE (sibling repo at
                   <code>openbuilding-ca/objective</code>) still uses <code>1.10.3</code> — plan to bump on next
                   OBJECTIVE rev.
                 </td>
@@ -140,7 +140,7 @@
               <tr>
                 <td>Bootstrap CSS/JS</td>
                 <td>
-                  Loaded by BEAMweb only (modal, dropdown, tab, btn-group). PDF-Parser / Matrix / Database do their UI
+                  Loaded by BEAMweb only (modal, dropdown, tab, btn-group). Take Off, Eh! / Database do their UI
                   without Bootstrap; Database viewer is a good reference for how far you can go with raw CSS.
                 </td>
               </tr>
@@ -155,7 +155,7 @@
               <tr>
                 <td>PDF.js</td>
                 <td>
-                  PDF-Parser uses <code>4.9.155</code> loaded locally from <code>lib/</code> (not CDN). Keep local to
+                  Take Off, Eh! uses <code>4.9.155</code> loaded locally from <code>lib/</code> (not CDN). Keep local to
                   avoid CDN downtime for the core feature.
                 </td>
               </tr>
@@ -182,11 +182,11 @@
           <h2>5. Quick boilerplate — new app scaffold</h2>
           <p class="lede">Drop-in head/body stubs for scaffolding a new app that joins the ecosystem.</p>
           <details class="dep-details" open>
-            <summary>HTML head block (BfCA dark-theme app)</summary>
+            <summary>HTML head block (OpenBuilding.ca dark-theme app)</summary>
             <pre id="boilerplate-dark"></pre>
           </details>
           <details class="dep-details">
-            <summary>HTML head block (BfCA app needing Bootstrap + xlsx, like BEAMweb)</summary>
+            <summary>HTML head block (OpenBuilding.ca app needing Bootstrap + xlsx, like BEAMweb)</summary>
             <pre id="boilerplate-bootstrap"></pre>
           </details>
           <details class="dep-details">
@@ -213,11 +213,11 @@
     <script type="module">
       /**
        * Dependency manifest — single source of truth for every external and
-       * internal dependency in the BfCA app ecosystem. Edit MANIFEST + INTERNAL
+       * internal dependency in the OpenBuilding.ca app ecosystem. Edit MANIFEST + INTERNAL
        * below to add / remove / bump versions.
        */
 
-      const USED_BY_APPS = ["Landing", "PDF-Parser", "Matrix", "Database", "BEAM", "Deps"];
+      const USED_BY_APPS = ["Landing", "Take Off, Eh!", "Database", "BEAM", "Deps"];
 
       const MANIFEST = [
         {
@@ -226,7 +226,7 @@
           url: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css",
           kind: "css",
           purpose: "Icon font — toolbar, nav, inline indicators.",
-          usedBy: ["PDF-Parser", "Database", "BEAM", "Deps", "Landing"]
+          usedBy: ["Take Off, Eh!", "Database", "BEAM", "Deps", "Landing"]
         },
         {
           name: "Bootstrap",
@@ -259,16 +259,16 @@
           url: "lib/pdf.min.mjs",
           kind: "script-local",
           purpose:
-            "PDF rendering + text/path extraction. Kept local (not CDN) to keep the core PDF-Parser feature robust to CDN downtime.",
-          usedBy: ["PDF-Parser"]
+            "PDF rendering + text/path extraction. Kept local (not CDN) to keep the core Take Off, Eh! feature robust to CDN downtime.",
+          usedBy: ["Take Off, Eh!"]
         },
         {
           name: "PDF.js (worker)",
           version: "4.9.155",
           url: "lib/pdf.worker.min.mjs",
           kind: "script-local",
-          purpose: "PDF.js worker thread. Loaded by PDF-Parser's ES module flow.",
-          usedBy: ["PDF-Parser"]
+          purpose: "PDF.js worker thread. Loaded by Take Off, Eh!'s ES module flow.",
+          usedBy: ["Take Off, Eh!"]
         },
         {
           name: "Chart.js",
@@ -284,10 +284,10 @@
 
       const INTERNAL = [
         {
-          path: "bfcastyles.css",
+          path: "obstyles.css",
           purpose:
-            "Single-file CSS source for every BfCA app. Sections: reset · shared tokens · shared header · dark theme · light theme · PDF-Parser · Matrix · Database · BEAMweb · Landing · Deps. Rules scoped by html class (theme-dark / theme-light / app-*). Roadmap: unify duplicated patterns into shared utilities; goal is a single ~1500-line file serving the whole ecosystem.",
-          usedBy: ["Landing", "PDF-Parser", "Matrix", "Database", "BEAM", "Deps"]
+            "Single-file CSS source for every OpenBuilding.ca app. Sections: reset · shared tokens · shared header · dark theme · Take Off, Eh! · Database · BEAMweb · Landing · Deps. Rules scoped by html class (theme-dark / app-*). Roadmap: unify duplicated patterns into shared utilities; goal is a single ~1500-line file serving the whole ecosystem.",
+          usedBy: ["Landing", "Take Off, Eh!", "Database", "BEAM", "Deps"]
         },
         {
           path: "index.html",
@@ -296,9 +296,9 @@
           usedBy: []
         },
         {
-          path: "pdfparser.html",
+          path: "takeoffeh.html",
           purpose:
-            "PDF-Parser app — area + volume takeoff from construction PDFs. Formerly index.html before the landing page was added.",
+            "Take Off, Eh! app — area + volume takeoff from construction PDFs. Formerly index.html before the landing page was added.",
           usedBy: []
         },
         {
@@ -308,7 +308,7 @@
           usedBy: ["Database"]
         },
         {
-          path: "js/beamweb.mjs",
+          path: "js/objective4.mjs",
           purpose: "BEAMweb app entry + tab router. Global namespace window.BEAM.*; Phase 0 shell is live.",
           usedBy: ["BEAM"]
         },
@@ -472,23 +472,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BfCA — My App</title>
+    <title>OpenBuilding.ca — My App</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="bfcastyles.css" />
+    <link rel="stylesheet" href="obstyles.css" />
   </head>
   <body>
     <header class="site-header">
-      <img src="graphics/BFCA-LOGO-sm.png" alt="BfCA" class="header-logo" />
+      <img src="graphics/ob-mark-small.svg" alt="OpenBuilding.ca" class="header-logo" />
       <h1>My App</h1>
       <div style="flex:1"></div>
       <a href="index.html" class="nav-btn">Home</a>
-      <a href="pdfparser.html" class="nav-btn">PDF-Parser</a>
-      <a href="matrix.html" class="nav-btn">Matrix</a>
+      <a href="takeoffeh.html" class="nav-btn">Take Off, Eh!</a>
       <a href="database.html" class="nav-btn">Database</a>
-      <a href="beamweb.html" class="nav-btn">BEAM</a>
+      <a href="objectivepro.html" class="nav-btn">OBJECTIVE</a>
     </header>
     <!-- app here -->
-    <!-- Then add your app-specific section to bfcastyles.css under §11+
+    <!-- Then add your app-specific section to obstyles.css under §11+
          scoped with html.app-myapp — the single-file CSS convention. -->
     <script type="module" src="js/my-app.mjs"><\/script>
   </body>
@@ -503,10 +502,9 @@
 `;
 
       const navBlock = `<a href="index.html" class="nav-btn" target="_blank" rel="noopener">Home</a>
-<a href="pdfparser.html" class="nav-btn" target="_blank" rel="noopener">PDF-Parser</a>
-<a href="matrix.html" class="nav-btn" target="_blank" rel="noopener">Matrix</a>
+<a href="takeoffeh.html" class="nav-btn" target="_blank" rel="noopener">Take Off, Eh!</a>
 <a href="database.html" class="nav-btn" target="_blank" rel="noopener">Database</a>
-<a href="beamweb.html" class="nav-btn" target="_blank" rel="noopener">BEAM</a>
+<a href="objectivepro.html" class="nav-btn" target="_blank" rel="noopener">OBJECTIVE</a>
 `;
 
       document.querySelector("#boilerplate-dark").textContent = darkHead;
@@ -520,10 +518,9 @@
       //   miss  — app loads dep not in manifest
       //   ok    — everything lines up
       const APP_FILES = {
-        "PDF-Parser": "pdfparser.html",
-        Matrix: "matrix.html",
+        "Take Off, Eh!": "takeoffeh.html",
         Database: "database.html",
-        BEAM: "beamweb.html",
+        BEAM: "objectivepro.html",
         Deps: "dependencies.html",
         Landing: "index.html"
       };

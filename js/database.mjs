@@ -1,11 +1,11 @@
 /**
- * BfCA Material Database viewer.
+ * OpenBuilding.ca Material Database viewer.
  *
  * Fetches the sparse catalogue at data/schema/materials/index.json (staged via
  * `npm run stage:data` locally or the Pages deploy workflow). Renders a sortable
  * filterable table; lazy-loads per-group full records when a row is expanded.
  *
- * Tone mirrors the rest of PDF-Parser: vanilla JS, no framework, no build step.
+ * Tone mirrors the rest of TakeOffEh: vanilla JS, no framework, no build step.
  */
 
 /* eslint-disable no-undef */
@@ -119,7 +119,7 @@ async function boot() {
     console.error(err);
     setStatus(`Failed to load catalogue: ${err.message}`, "error");
     document.getElementById("db-rows").innerHTML =
-      `<tr><td colspan="8" class="db-empty-state">Failed to load <code>${INDEX_URL}</code>.<br><br>If you are running locally, make sure you ran <code>npm run stage:data</code> in the <code>PDF-Parser/</code> directory.</td></tr>`;
+      `<tr><td colspan="8" class="db-empty-state">Failed to load <code>${INDEX_URL}</code>.<br><br>If you are running locally, make sure you ran <code>npm run stage:data</code> in the <code>TakeOffEh/</code> directory.</td></tr>`;
   }
 }
 
@@ -1014,7 +1014,7 @@ async function handleTrust(sourceFile) {
   }
 
   // Duplicate detection — workplan db-side bug. EPD-Parser candidates
-  // arrive with id=null (beam_id is BfCA-internal per §5.5), so prior
+  // arrive with id=null (beam_id is BEAM-internal per §5.5), so prior
   // logic minted a fresh id every Trust click and re-importing the same
   // EPD created a duplicate row. Now we look for a likely-match against
   // in-session committed records (full-record match on manufacturer +
