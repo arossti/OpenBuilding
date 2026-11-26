@@ -18,11 +18,22 @@
 
 ## 0. Cold-start handoff (read this first)
 
-### ▶ START HERE (handoff 2026-11-25 night, laptop)
+### ▶ START HERE (handoff 2026-11-26, laptop)
 
-**SHIPPED + LIVE: PR #21, merge `188169c`, deployed to https://arossti.github.io/OpenBuilding/** (Andy's word).
-Live smoke: `objectivepro.html` renders S01–S22, the key values equal V3 (190.1 / 93.1 / 93.1 / 49 %), no errors.
-This branch, `objective-reference-model`, is cut from that `main` for the next arc (pushed, no PR).
+**LIVE: `main` `6ee071a` (PR #22), deployed to https://arossti.github.io/OpenBuilding/.** `objectivepro.html` renders
+S01–S22 on V3's engine; all 16 Load Sample cases (12 + the 4 CSA F280 Review Format rows) show 2146 / 2146 values
+identical to andy-rnd's V3 page (2026-11-26, WebKit). **This branch is `Reference-Port`**, cut from that `main`
+(it replaces `objective-reference-model`, whose two roadmap commits it carries).
+
+**Done 2026-11-26:**
+
+- **V4-5 ✅ F280-1 hosted** (andy-rnd #26 merged, `74bd575`): §4. The F280 harness and its cases stay in andy-rnd.
+- **PR #22 ✅ the V4 table format** (`obstyles.css` §8b; captions in `src/sections`): a row is one line (a row's
+  controls side by side, an input box a fixed 28 px), S11 fits a 1440 px window with its Surface (°C) column in
+  view and its dropdowns grow past that, the sidebar's S01–S22 show without scrolling, every header's unit is in
+  brackets in its own case, + and − side by side, and the sliders and pill toggles are ARTexplorer's (`art.css`)
+  in cyan. ⚠ `src/sections/*.js` now differs from andy-rnd by its header captions only (51 strings): a section
+  file copied over from andy-rnd again must keep them.
 
 **What is where:** OBJECTIVE = V3's engine + sections verbatim in `src/` + `climate/` (from andy-rnd `5e0b2f0`);
 `js/objective4.mjs` (router, HUD, cards), `js/objective-boot.js` (V3's init.js start-up), `obstyles.css` §8b (V4
@@ -31,8 +42,25 @@ styling of V3's markup). Trust = `js/beam/pdf-bridge-import.mjs` (`V3_TARGETS`, 
 
 **NEXT, in order:**
 
-1. **The Reference model** (block below, "TONIGHT"): V3's Target / Reference toggle on this page; HUD + sections +
-   S16 follow it.
+1. **THE REFERENCE PORT (this branch).** Andy 2026-11-26: *"finish the port with the Reference model UI, and a
+   toggle in the header's button row to toggle them back and forth like V3. When V3 goes into Reference mode it is
+   obvious to the user because the styling for all frames goes red. We need to consider a nice way to do that in
+   the dark theme of V4."*
+   - **Already here:** `src/core/ReferenceToggle.js` is loaded and initialized by `js/objective-boot.js`; it sets
+     `body.viewing-reference-inputs` / `.reference-mode` and re-stamps every section from the Reference model.
+     The engine computes both models (the HUD's Reference column already reads it).
+   - **To build:** (a) a Target / Reference toggle in the button row (New · Open · Save · Trust … Reset), driving
+     `ReferenceToggle` as V3's header button does; (b) V3's Reference menu beside it (Mirror All Inputs, Mirror
+     Geometry, the standard's defaults) as far as V3 offers it; (c) the HUD marks which model the sections show;
+     (d) THE LOOK, below; (e) S16's Sankey follows the toggle (item 3).
+   - **The look in the dark theme (to settle with Andy before styling; V3's rules are `body.viewing-reference-inputs`
+     in andy-rnd `src/styles.css`, about line 1660):** V3 reddens every frame, header and tab. Candidates here, all
+     driven by that one body class: the cards' borders and header bands in the Reference red already used for
+     Reference values (`--reference-value-color`, #ff8a8a); the sidebar's active tab and the toggle itself in the
+     same red instead of cyan; a thin red rule under the masthead with the word REFERENCE; locked (standard-set)
+     cells ghosted as V3's `.reference-locked`. Cyan = Target, red = Reference, nothing else changes colour.
+   - **Witnesses:** andy-rnd's `ghostedReference`, `referenceDefaults` and `hoverOnScreenModel` specs describe the
+     behaviour to match; the 2146-value parity probe run in Reference mode on both pages.
 2. **m_10 "Unavailable"** after Trust on a 4-opening fixture (block below, ⚠ OPEN).
 3. **S16 Sankey** views (block below).
 
