@@ -20,22 +20,64 @@
 
 ### ▶ START HERE (handoff 2026-11-26 evening, laptop) — written for a cold start after a /clear
 
-**LIVE: `main` `998cb84` (PR #26), deployed to https://arossti.github.io/OpenBuilding/.** **This branch is
-`S05-Assembly-Carbon`**, cut from that `main`: §10 B5 is built on it (below) and waits for Andy's smoke and the merge.
-**Everything Andy asked for on 2026-11-26 is shipped or on this branch; what REMAINS is the short list just below.**
+**Written 2026-11-26 late afternoon (laptop) for tonight's arc, after a /clear.** **LIVE: `main` after PR #27**
+(B5; this handoff is its last commit), deployed to https://arossti.github.io/OpenBuilding/. No branch is open:
+**cut a fresh one from `main` for tonight's arc** (Andy names it, or name it for item 1 below). Everything Andy
+asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and bring a list. **Tonight: plan REMAINS
+1 – 6 with Andy before building** (he said: _"we can plan 1-6 for tonight's arc after a clear"_).
 
-**REMAINS, in order** (the detail of each is in the numbered items further down):
+**How to work here (a cold start needs these):**
 
-1. **Reference remainders** (item 3): S19's own Reference display; S21 (❓ Andy's); three andy-rnd behaviours to check.
-2. **m_10 "Unavailable"** after Trust on a 4-opening fixture (item 4, ⚠ OPEN).
-3. **ABCD BUGLIST #266** (item 5): until it is fixed the Assembly Builder here is the 2026-10-22 library.
+- This repo's `CLAUDE.md`: a merge to `main` redeploys Pages, so merge only on Andy's word in the session; one
+  branch = one PR. The memory for this work is `~/.claude/projects/-Users-andrewthomson-Documents-OpenBuilding/memory`
+  (its `MEMORY.md`); 2026-11-26 was run from the ABCD.EARTH window, so that memory was not updated today.
+- **Three repos, all under `~/Documents`:** `OpenBuilding/OpenBuilding` (this one: the site); `OpenBuilding/andy-rnd`
+  (V3, the parity reference and where Playwright is installed); `ABCD.EARTH` (the Builders' SOURCE,
+  `artex-osx/docs/mockups/`: edit a Builder page THERE on a branch, its pre-push gate runs ~5 min, PR to
+  `arossti/ARTexplorer-private`, then `npm run builders:publish` here AFTER the commit so `BUILD.json` names it).
+- **Serve and test:** `test/witness/README.md` (new today) has the servers, the five probes and what each must
+  show. After a big CSS/JS change use a new port: Chrome caches stale modules.
+- **The Builder computes, OBJECTIVE receives** (§10.2): never derive an RSI, U or carbon figure from layers here.
+
+**REMAINS, in order** (Andy's numbering for tonight; the older detail of 2 – 4 is in the items further down):
+
+1. **REFERENCE / TARGET INDEPENDENCE — the first thing to fix.** Andy 2026-11-26: _"because of our Ref/Target
+   independence rule, a user can and may set a different assembly in the Reference model or the Target as a
+   comparison. Often users will set AS-IS values for renovavation models, and then the target model only adds to
+   that, or in other cases we may wish to test a high carbon steel or concrete building as the reference model
+   against a Target model that is all mass timbe (low carbon) to compare the tow - so be sure we did not block that
+   with reference model reads or locked assemblies in S10 or S11."_
+   - ⚠ **WE DID BLOCK IT, in today's own code** (measured before this handoff): V3 itself does not. In Reference
+     mode S11's `f_85`, `f_86`, `f_94`, `g_89` and `d_86` are `contenteditable="true"` and a typed value goes to
+     `ref_<field>`. The block is three `isReference()` guards in `js/objective-builders.mjs`: `onActivate` (the row
+     IDs do nothing in Reference mode), the `focusout` handler (a typed value does not clear the link), and
+     `renderCarbon` (E.3.5 shows a dash); and `obstyles.css` §8e greys the IDs under `body.reference-mode`.
+   - **What it needs:** every read and write in that module by the model on screen: the link `ref_ca_<row>`
+     beside `ca_<row>`, the value `ref_f_<row>` / `ref_g_<row>`, the areas and hosts in `tallyCarbon`
+     (`ref_d_`, `ref_ch_`), the type in `openBuilder` (`ref_c_<row>`), `decorate`'s name chip and tooltip, and
+     E.3.5 showing the Reference's own tally in Reference mode (so the two can be compared). V3's own pattern for
+     "the value in the mode on screen" is `getModeValue` in `Section11.js`. Then the file: `exportToCSV` already
+     writes `ref_<id>` for every listed id, so `Openings.addedFields`' in-use test must also see `ref_ca_`;
+     `FileHandler`'s `isStoredKeyWithoutField` branch is taken only for non-`ref_` keys today, so read how a
+     `ref_` key without a field is stored before assuming it round-trips. Witness: apply one assembly in Target and
+     a different one in Reference on the same row; each mode shows its own name, RSI and E.3.5; save, reload, both
+     return; Copy from Target carries the Target's across.
+   - **S19 (Andy, same message):** _"Presently S19 shows whatever in Reference mode as was set in Target, they
+     should maintain independence, whatever a user may have changed on the Reference or target side inputs."_
+     WOMBAT must draw the model on screen.
+   - Also here: S21 (Andy: _"may show the Reference model vs. Target model, I have not considered that case yet"_,
+     ❓ his); andy-rnd's `ghostedReference`, `referenceDefaults` and `hoverOnScreenModel` behaviours checked on this
+     page; and a read through S10 and S11 for anything else that reads the Target's value while Reference is shown.
+2. **m_10 "Unavailable"** after Trust on a 4-opening fixture (item 4 below, ⚠ OPEN).
+3. **ABCD BUGLIST #266** (item 5): until it is fixed the Assembly Builder here is the 2026-10-22 library, 115
+   assemblies, with the old blue accent and month-old baked HFT.
 4. **A light mode** (item 6, second tier).
-5. **From §10:** isotherms baked for the Section and Opening Builders (never built, ABCD.EARTH work); whether an
-   opening's W × H and an SHGC should come across with its U; whether S05's new E.3.5 may later be chosen as E.3.2's
-   source. None is started; each waits for Andy's word.
+5. **From §10, none started, each on Andy's word:** isotherms baked for the Section and Opening Builders (never
+   built; ABCD.EARTH work: a fixture written by the app's solver, as `hft-fixture.json` is for assemblies); whether
+   an opening's W × H and an SHGC come across with its U; whether S05's E.3.5 may be chosen as E.3.2's source.
 6. **The port's own open items**, §8 and §9.2, unchanged today.
 
-Local servers (they die on reboot): `python3 schema/scripts/nocache-serve.py 8822` here, `node test/static-server.cjs 8791`
+Local servers (they die on reboot): `python3 schema/scripts/nocache-serve.py 8831` here, `node test/static-server.cjs 8791`
 in andy-rnd for the V3 page.
 
 **SHIPPED 2026-11-26 (all merged):**
@@ -45,6 +87,8 @@ in andy-rnd for the V3 page.
   Disclaimer button; only S01 open at launch; a subtitle on every section. Detail: item 1 below.
 - **PR #25 — Styling-Tweaks**: the print footer's logos; the Opening Builder on the homepage; the Section Builder's
   plan fills (ABCD.EARTH #1032). Detail: item 2 below.
+- **PR #27 — §10 B5**: S05's E.3.5, the embodied carbon of the assemblies applied in S11, in a row of its own
+  (running tally, then the sum); `test/witness/` and this handoff.
 - **PR #26 — the Builders inside OBJECTIVE, §10 B1–B4**: S11's row IDs open the Assembly Builder (opaque rows) or the
   Opening Builder (doors, windows, skylights) in a popup; Apply Selected writes the row's RSI or U; what was applied
   is saved with the project; the button row's project name is S02's B.2 (ABCD.EARTH #1033, #1034). Detail: §10.
@@ -109,7 +153,7 @@ in andy-rnd for the V3 page.
    §8c follow. Check then: the Sankey's forced-light labels, the input box's sunken fill, the slider track, Reference
    red on white.
 
-7. **THE BUILDERS INSIDE OBJECTIVE — ✅ B1–B4 in PR #26; B5 on `S05-Assembly-Carbon`.** The plan and what was built
+7. **THE BUILDERS INSIDE OBJECTIVE — ✅ B1–B4 in PR #26; B5 in PR #27.** The plan and what was built
    are §10.
 
 **What is where:** OBJECTIVE = V3's engine + sections verbatim in `src/` + `climate/` (from andy-rnd `5e0b2f0`);
@@ -464,7 +508,8 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
 > carbon in S05 can later be calculated from the Sum of the embodied carbon of all assemblies multiplied by their
 > area."_
 
-**Status 2026-11-26: B1 – B4 are merged (PR #26); B5 is built on `S05-Assembly-Carbon`, waiting for Andy's smoke.** Andy answered §10.6 (all four as recommended) and said to go on B1.
+**Status 2026-11-26: B1 – B5 are merged (PRs #26, #27), Andy-smoked. ⚠ All of it is TARGET-ONLY today: the
+Reference model cannot take an assembly, which breaks Reference / Target independence (§0 REMAINS 1).** Andy answered §10.6 (all four as recommended) and said to go on B1.
 
 ### 10.1 What is there today (read from the code, 2026-11-26)
 
