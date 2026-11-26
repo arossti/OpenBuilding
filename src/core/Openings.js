@@ -609,6 +609,8 @@
         `dh_${o.s11}`,
         `dq_${o.s11}`,
         ...(o.kind === "door" ? [] : [`eh_${o.s10}`, `ed_${o.s10}`]),
+        // its product, as the Opening Builder's Apply Selected left it (OBJECTIVE 4.0, schema.md §10 B4)
+        ...(!onlyInUse || window.TEUI.StateManager?.getValue(`ca_${o.s11}`) ? [`ca_${o.s11}`] : []),
       ]),
       ...OPAQUE.flatMap(o => [
         `c_${o.s11}`,

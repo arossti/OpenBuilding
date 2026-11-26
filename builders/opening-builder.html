@@ -383,6 +383,27 @@ button:hover{background:#333338}
   .note .sec { color: var(--blue); }
   .note .q { color: var(--warn); }
   @media (max-width: 760px) { .body { flex-direction: column; } .list-col { width: 100%; border-right: none; border-bottom: 1px solid var(--line); } .asm-list { max-height: 260px; } }
+
+  /* ---------- EMBED MODE (?embed=1) — the palette alone, filling a host page's popup frame; OBJECTIVE opens it
+     from S11's door, window and skylight rows (OpenBuilding schema/schema.md §10 B4), as the Assembly Builder's.
+     The title bar never scrolls; the library list and the editor scroll each on its own. Without ?embed the
+     page is unchanged. ---------- */
+  #embed-apply, #embed-cancel { display: none; }
+  html.embed, html.embed body { height: 100%; overflow: hidden; }
+  html.embed body { padding: 0; gap: 0; display: block; font-size: 12px; }
+  html.embed .embed-hide { display: none !important; }
+  html.embed .window { max-width: none; height: 100vh; display: flex; flex-direction: column; border: none; border-radius: 0; box-shadow: none; }
+  html.embed .titlebar { flex: none; }
+  html.embed .body { flex: 1; min-height: 0; }
+  html.embed .list-col { width: 250px; min-height: 0; }
+  html.embed .asm-list { max-height: none; min-height: 0; }
+  html.embed .editor { overflow-y: auto; padding: 10px 14px 12px; }
+  html.embed .titlebar .dots, html.embed .titlebar .close,
+  html.embed #lib-export, html.embed #lib-import, html.embed #lib-cancel, html.embed #reset { display: none; }
+  html.embed #embed-apply, html.embed #embed-cancel { display: inline-flex; }
+  html.embed #embed-apply { background: var(--blue); border-color: var(--blue); color: #101014; font-weight: 600; padding: 3px 12px; }
+  /* the provenance strip and the page's own footer line are the standalone page's: the popup is for choosing */
+  html.embed .prov, html.embed .win-foot { display: none; }
 </style>
 
 <p class="caption"><b>Opening Builder — the OPENING product, reading THE library.</b>
@@ -404,6 +425,8 @@ Pick an opening, switch the list to <b>Materials</b> and click a wood, metal or 
       <button type="button" id="lib-import" title="Load an openings JSON — the app's file or a sidecar — read-only; nothing on disk changes">import</button><input type="file" id="lib-import-file" accept="application/json,.json" hidden>
       <button type="button" id="lib-cancel" title="Revert to the last export (this session)">cancel</button>
       <button type="button" id="reset" title="Forget the edits saved in this browser and start from the seed defaults">reset</button>
+      <button type="button" id="embed-apply" title="Send this opening's U-values to the page that opened the Builder">Apply Selected</button>
+      <button type="button" id="embed-cancel" title="Close the Builder; nothing is applied">cancel</button>
     </div>
     <div class="close">✕</div>
   </div>
@@ -5073,9 +5096,42 @@ const BUILDERS = (() => {
     renderAll();
   }
 
+
+  /* ---------- EMBED MODE (?embed=1[&group=Window|Door|Skylight][&pick=<opening id>]) ----------
+     THE BUILDER COMPUTES, THE HOST RECEIVES (OpenBuilding schema/schema.md §10 B4). Apply Selected posts ONE
+     message for the opening as this page shows it: the whole-window U this page computes (EN 673 glazing, the
+     frame as a solid first pass) AND the certificate's own Uw where the product has one, each named, so the
+     host says which it used. Same origin only. */
+  const EMBED = new URLSearchParams(location.search);
+  const hostOrigin = location.origin === "null" ? "*" : location.origin;
+  const EMBED_SEED = {};
+  function embedMessage() {
+    const o = openings[selIdx], mx = metrics(o), c = o.cert || null;
+    return { type: "ob-builder-apply", kind: "opening", id: o.id || null, name: o.name, cls: o.cls,
+      uw_computed: mx.Uw, ug_computed: mx.Ug, uf_computed: mx.Uf,
+      uw_certified: c && c.uw_w_m2k ? c.uw_w_m2k : null, certified_by: c ? c.body || null : null,
+      w_mm: o.w, h_mm: o.h, edited: !o.id || EMBED_SEED[o.id] !== JSON.stringify(o) };
+  }
+  function applyEmbed() {
+    if (!EMBED.has("embed")) return;
+    document.documentElement.classList.add("embed");
+    [...document.body.children].forEach(c => { if (!c.classList.contains("window") && c.tagName !== "SCRIPT") c.classList.add("embed-hide"); });
+    const pick = EMBED.get("pick"), group = EMBED.get("group");
+    let i = pick ? openings.findIndex(o => o.id === pick) : -1;
+    if (i < 0 && group) i = openings.findIndex(o => o.cls === group);
+    if (i >= 0 && i !== selIdx) { selIdx = i; renderAll(); }
+    const list = $("list"), row = list.querySelector(".asm-row.sel");
+    if (row) { const g = pick ? null : row.previousElementSibling, to = g && g.classList.contains("asm-group") ? g : row;
+      list.scrollTop += to.getBoundingClientRect().top - list.getBoundingClientRect().top - (pick ? 40 : 0); }
+    $("embed-apply").addEventListener("click", () => window.parent.postMessage(embedMessage(), hostOrigin));
+    $("embed-cancel").addEventListener("click", () => window.parent.postMessage({ type: "ob-builder-cancel" }, hostOrigin));
+  }
+  window.__embedMessage = embedMessage;   // the witness reads what Apply would send
+  const embedSeed = () => openings.forEach(o => { if (o.id) EMBED_SEED[o.id] = JSON.stringify(o); });
+
   if (EMBEDDED_MATERIALS) {
     boot(EMBEDDED_MATERIALS, EMBEDDED_OPENINGS, "embedded at build (build_opening_builder.py)", EMBEDDED_ASSEMBLIES);
-    restoreSaved(); histReset();
+    embedSeed(); restoreSaved(); applyEmbed(); histReset();
   } else {
     Promise.all([
       fetch("materials.json").then(r => r.json()),
@@ -5085,7 +5141,7 @@ const BUILDERS = (() => {
     ]).then(([m, o, t, a]) => {
       if (t && t.materials) { TILES = t.materials; PEN_MM_TO_PX = t.pen_mm_to_px || 3.75; }
       boot(m, o, "fetched beside this page" + (t ? "" : " — fill_tiles.json missing, parts draw flat"), a);
-      restoreSaved(); histReset();
+      embedSeed(); restoreSaved(); applyEmbed(); histReset();
     }).catch(err => { $("store-line").textContent = "Could not load materials.json beside this page (" + err + ") — build with the library embedded, or serve the seed files alongside."; });
   }
 })();

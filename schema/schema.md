@@ -94,8 +94,8 @@ in andy-rnd for the V3 page.
 
 7. **THE BUILDERS INSIDE OBJECTIVE** (branch `Builders-In-OBJECTIVE`, Andy 2026-11-26): the Assembly Builder as a popup from
    S11's row IDs, Apply Selected writing the row's RSI; then the Opening Builder for windows; then S05's embodied
-   carbon. **The plan is §10. B1–B3 are built (the popup, the row buttons, Apply Selected, saved with the project);
-   B4, the Opening Builder for windows, is next**, on this branch.
+   carbon. **The plan is §10. B1–B4 are built and in PR #26** (both Builders as popups, Apply Selected, saved with
+   the project); **B5, S05's embodied carbon in its own new field, is next**, on Andy's word.
 
 **What is where:** OBJECTIVE = V3's engine + sections verbatim in `src/` + `climate/` (from andy-rnd `5e0b2f0`);
 `js/objective4.mjs` (router, HUD, cards), `js/objective-boot.js` (V3's init.js start-up), `obstyles.css` §8b (V4
@@ -449,7 +449,7 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
 > carbon in S05 can later be calculated from the Sum of the embodied carbon of all assemblies multiplied by their
 > area."_
 
-**Status 2026-11-26: B1, B2 and B3 are built; B4 (the Opening Builder for windows) is next.** Andy answered §10.6 (all four as recommended) and said to go on B1.
+**Status 2026-11-26: B1 – B4 are built (PR #26); B5 (S05's embodied carbon, in its own new field) is next, on Andy's word.** Andy answered §10.6 (all four as recommended) and said to go on B1.
 
 ### 10.1 What is there today (read from the code, 2026-11-26)
 
@@ -531,9 +531,18 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
     RSI and U equal the Builder's (3.84 / 0.260 for `Wg | R22 8" ICF`); reopening returns to the row's assembly;
     the saved CSV carries `ca_86 ca_94 ca_95` and loading it restores them; another project clears them; the
     table's width is unchanged at 1440 px; parity 2146 / 2146 on all 16 cases.
-- **B4 — windows, doors and skylights open the Opening Builder.** The same embed mode and message in
-  `opening-builder.html`; the opening rows' ID cells (B.7, B.8) become buttons; Apply writes the U-value (`g_<row>`).
-  What else an opening should carry across (SHGC to S10, width × height) is read from that page before this is built.
+- **B4 — windows, doors and skylights open the Opening Builder — ✅ BUILT.** `opening-builder.html` has the same embed
+  mode (ABCD.EARTH `1e2b30ab1`): `?embed=1&group=Window|Door|Skylight&pick=<opening id>`; its Apply posts
+  `{ type: "ob-builder-apply", kind: "opening", id, name, cls, uw_computed, ug_computed, uf_computed, uw_certified,
+  certified_by, w_mm, h_mm, edited }`. In `js/objective-builders.mjs` the door (B.7), window (B.8) and skylight
+  (B.8.5) rows' IDs are buttons too; Apply writes the U-value into `g_<row>` (3 decimals) and the row's product
+  into `ca_<row>` (`id, name, cls, u, basis, uw_computed, uw_certified, w, h, edited`), saved and restored as an
+  assembly's is. **Which U:** the certificate's Uw where the product has one (`basis: "certified"`), else the
+  Builder's computed Uw (`"computed"`: its frame is a solid first pass); the ID's tooltip says which. ❓ Andy's to
+  confirm. **Not applied:** the opening's W × H and any SHGC (the Builder computes none); S10 is untouched.
+  Witnessed in WebKit: B.8.1 → Window, B.7.0 → Door, B.8.5 → Skylight, each opening unscrolled; EnerSign primus
+  writes 0.600 (certified; computed 0.638), a skylight with no certificate its computed 1.394; save, typed U,
+  reload and reopen behave; the assembly rows still open the Assembly Builder; parity 2146 / 2146.
 - **B5 — S05's embodied carbon from the assemblies.** Σ (assembly carbon intensity × the row's area) over S11's rows,
   divided by the conditioned area, shown in a **new field of its own in S05** (Andy 2026-11-26: _"we should consider a
   new field in S05 that holds this running tally and sum when done... so it does not interfere with current
