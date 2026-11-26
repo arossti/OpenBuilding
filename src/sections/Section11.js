@@ -92,39 +92,39 @@ window.TEUI.SectionModules.sect11 = (function () {
       cells: {
         c: { content: "", classes: ["section-subheader"] },
         d: {
-          content: "Areas m²",
+          content: "Areas\n(m²)",
           classes: ["section-subheader", "align-center"],
         },
         e: {
-          content: "Rimp ft²F•hr/Btu",
+          content: "Rimp (ft²·\n°F·hr/Btu)",
           classes: ["section-subheader", "align-center"],
         },
         f: {
-          content: "RSI K•m²/W",
+          content: "RSI\n(K·m²/W)",
           classes: ["section-subheader", "align-center"],
         },
         g: {
-          content: "U-Value W/m²•K",
+          content: "U-Value\n(W/m²·K)",
           classes: ["section-subheader", "align-center"],
         },
         h: {
-          content: "% of Ae & Ag",
+          content: "% of\nAe & Ag",
           classes: ["section-subheader", "align-center"],
         },
         i: {
-          content: "Heatloss\nkWh/Heating",
+          content: "Heatloss\n(kWh/htg.)",
           classes: ["section-subheader", "align-center"],
         },
         j: {
-          content: "Heatloss %",
+          content: "Heatloss\n(%)",
           classes: ["section-subheader", "align-center"],
         },
         k: {
-          content: "Heatgain\nkWh/Cooling",
+          content: "Heatgain\n(kWh/clg.)",
           classes: ["section-subheader", "align-center"],
         },
         l: {
-          content: "Heatgain %",
+          content: "Heatgain\n(%)",
           classes: ["section-subheader", "align-center"],
         },
         m: {
@@ -136,7 +136,7 @@ window.TEUI.SectionModules.sect11 = (function () {
           classes: ["section-subheader", "align-center"],
         }, // Updated label
         o: {
-          content: "Surface °C",
+          content: "Surface\n(°C)",
           classes: ["section-subheader", "align-center"],
         },
       },
@@ -1575,8 +1575,8 @@ window.TEUI.SectionModules.sect11 = (function () {
   // L and H under the Areas heading, in the width B.12's slider already gives the column (Andy
   // 2026-11-20: "that whitespace under 'Areas'"); the slider spans all three
   Object.assign(sectionRows.header.cells, {
-    dl: { content: "L or W m", classes: ["section-subheader", "align-center"] }, // a wall's length, an opening's width
-    dh: { content: "× H m", classes: ["section-subheader", "align-center"] },
+    dl: { content: "L or W\n(m)", classes: ["section-subheader", "align-center"] }, // a wall's length, an opening's width
+    dh: { content: "× H\n(m)", classes: ["section-subheader", "align-center"] },
   });
   sectionRows[97].cells.dl = { ...sectionRows[97].cells.d, span: 3 };
   delete sectionRows[97].cells.d;

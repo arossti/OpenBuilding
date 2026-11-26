@@ -2415,7 +2415,7 @@ body {
   margin-bottom: 20px;
 }
 .op-v3-card > .bw-asm-group-body {
-  padding: 6px 8px 10px;
+  padding: 6px 2px 10px;
 }
 .op-v3 {
   --primary-text: var(--text);
@@ -2451,7 +2451,7 @@ body {
 .op-v3 .data-table {
   width: 100% !important; /* Andy: "take full advantage of 100% of available browser width" */
   border-collapse: separate;
-  border-spacing: 6px 5px;
+  border-spacing: 2px 4px; /* tight: S11 shows its Surface column without scrolling sideways (Andy 2026-11-26) */
   font-size: 13px;
 }
 .op-v3 .data-table td,
@@ -2459,7 +2459,7 @@ body {
   background: transparent !important;
   border: 0 !important;
   color: var(--text);
-  padding: 4px 6px;
+  padding: 3px 3px;
   vertical-align: middle;
   line-height: 1.35;
 }
@@ -2474,10 +2474,63 @@ body {
   color: var(--text-dim) !important;
   font-size: 10px;
   font-weight: 600;
-  text-transform: uppercase;
+  /* as written, never forced to capitals: a unit keeps its case, (m) not (M), (kWh/m²) (Andy 2026-11-26) */
+  text-transform: none;
   letter-spacing: 0.04em;
   white-space: pre-line;
   padding-bottom: 2px;
+}
+/* S11's captions each read on one line (a caption's own line break kept), and L and H are one size. */
+.op-v3#envelopeTransmissionLosses .data-table td.section-header,
+.op-v3#envelopeTransmissionLosses .data-table td.section-subheader,
+#envelopeTransmissionLosses .op-v3 .data-table td.section-subheader {
+  white-space: pre;
+}
+#envelopeTransmissionLosses td[data-field-id^="dl_"],
+#envelopeTransmissionLosses td[data-field-id^="dh_"] {
+  width: 46px;
+  min-width: 46px;
+}
+.op-v3 .data-table td.description-cell select.opening-host {
+  margin-left: 6px;
+}
+/* The squeeze that brings S11's last columns into view: values a size down, narrow id and control columns. */
+.op-v3 .data-table {
+  font-size: 12px;
+}
+.op-v3 .data-table td.description-cell select {
+  font-size: 11.5px;
+}
+.op-v3 .host-add-btn,
+.op-v3 .host-remove-btn {
+  padding: 1px 4px;
+  font-size: 10px;
+  margin-right: 2px;
+}
+.op-v3 .data-table td.description-cell .opaque-net {
+  font-size: 10px;
+  margin: 0;
+}
+.op-v3 .data-table td.description-cell select,
+.op-v3 .data-table td.description-cell .form-select,
+.op-v3 .data-table td.description-cell .host-add {
+  margin-right: 2px;
+}
+.op-v3 .data-table td.id-cell {
+  padding-left: 0;
+  padding-right: 2px;
+  font-size: 10px;
+}
+/* S11's values never wrap: the moisture icon stays beside its surface temperature. */
+#envelopeTransmissionLosses .data-table td:not(.section-header):not(.section-subheader) {
+  white-space: nowrap;
+}
+/* A group's + and − sit side by side. */
+.op-v3 .expandable-controls {
+  display: inline-flex;
+  flex-direction: row;
+  gap: 3px;
+  white-space: nowrap;
 }
 .op-v3 .id-cell {
   font-family: var(--font-mono);
@@ -2541,12 +2594,229 @@ body {
   border-color: var(--accent) !important;
   box-shadow: 0 0 0 2px var(--accent-lt);
 }
+/* A row is ONE line (Andy 2026-11-26: "the row's numeric input cells stay anchored to their row and do not
+   inflate with size as a row doubles for related inputs"). A row's own controls (S11's type, facing, host,
+   quantity, + window / + door; S10's overhang) sit side by side in its name cell, never stacked. */
+.op-v3 .data-table td.description-cell {
+  white-space: nowrap;
+}
+.op-v3 .data-table td.description-cell select,
+.op-v3 .data-table td.description-cell .form-select {
+  display: inline-block;
+  width: auto;
+  /* tight at a 1440 px window, where S11 just fits; past that the dropdowns breathe into the name column's
+     spare width (Andy 2026-11-26), up to their full labels */
+  max-width: clamp(112px, calc(112px + (100vw - 1440px) * 0.6), 290px);
+  vertical-align: middle;
+  margin: 0 2px 0 0;
+}
+.op-v3 .data-table td.description-cell select.opaque-facing,
+.op-v3 .data-table td.description-cell select.opening-qty {
+  max-width: clamp(46px, calc(46px + (100vw - 1440px) * 0.1), 64px);
+}
+.op-v3 .data-table td.description-cell select.opening-host {
+  max-width: clamp(128px, calc(128px + (100vw - 1440px) * 0.6), 230px);
+}
+.op-v3 .data-table td.description-cell select {
+  padding-right: 20px;
+  background-position: right 6px center !important;
+}
+.op-v3 .data-table td.description-cell .host-add,
+.op-v3 .data-table td.description-cell .opaque-net,
+.op-v3 .data-table td.description-cell .host-remove-btn,
+.op-v3 .data-table td.description-cell .overhang {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 2px 0 0;
+}
+.op-v3 .host-add-btn,
+.op-v3 .host-remove-btn {
+  background: var(--bg-panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 11px;
+  line-height: 1.3;
+  margin-right: 3px;
+  cursor: pointer;
+}
+.op-v3 .data-table td.description-cell .overhang,
+.op-v3 .data-table td.description-cell .opening-host-note {
+  margin-left: 8px;
+}
+.op-v3 .data-table td.description-cell .overhang-lead {
+  margin-right: 4px;
+}
+.op-v3 .data-table td.description-cell input.overhang-input {
+  width: 58px;
+  margin-right: 3px;
+}
+/* And an input box is never taller than one line, whatever its row's height: the cell stays a cell, the box
+   is drawn behind its text at a fixed height, centred as the cell's text is. */
+.op-v3 .data-table td.user-input,
+.op-v3 .data-table td.editable,
+.op-v3 .data-table td[contenteditable="true"] {
+  position: relative;
+  z-index: 0;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  line-height: 18px;
+  padding: 4px 6px !important;
+}
+.op-v3 .data-table td.user-input::after,
+.op-v3 .data-table td.editable::after,
+.op-v3 .data-table td[contenteditable="true"]::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 28px;
+  transform: translateY(-50%);
+  box-sizing: border-box;
+  background: var(--bg-sunken, rgba(0, 0, 0, 0.2));
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  pointer-events: none;
+}
+.op-v3 .data-table td.editing-intent::after,
+.op-v3 .data-table td[contenteditable="true"]:focus::after {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-lt);
+}
 .op-v3 option {
   background: var(--bg-panel);
   color: var(--text);
 }
+/* Sliders and toggles, from ARTexplorer's art.css (the ABCD web app's "HiFi" controls; Andy 2026-11-26:
+   "excellent CSS for the toggles and sliders we can steal"), in the web's cyan: a recessed track, a dark
+   thumb with a lit dot; a checkbox is a pill switch whose thumb lights when on. */
 .op-v3 input[type="range"] {
-  accent-color: var(--accent-lit);
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: #14181d !important; /* the box rule above paints every input */
+  border: 0 !important;
+  padding: 0 !important;
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.5),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.07);
+  cursor: pointer;
+  outline: none;
+  margin: 6px 4px;
+  vertical-align: middle;
+}
+/* Bootstrap's .form-range paints its own light track: ours shows through instead */
+.op-v3 input[type="range"]::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 6px;
+  border-radius: 3px;
+}
+.op-v3 input[type="range"]::-moz-range-track {
+  background: transparent;
+  height: 6px;
+}
+.op-v3 input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background:
+    radial-gradient(circle at center, var(--accent-lit) 0, var(--accent-lit) 3px, transparent 3px),
+    linear-gradient(145deg, #3a3f46, #2a2e34);
+  box-shadow:
+    2px 2px 5px rgba(0, 0, 0, 0.5),
+    -1px -1px 2px rgba(255, 255, 255, 0.03),
+    inset 0 0 6px rgba(34, 211, 238, 0.3);
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  margin-top: -5px; /* centred on the 6 px track */
+}
+.op-v3 input[type="range"]::-webkit-slider-thumb:hover {
+  background:
+    radial-gradient(circle at center, #67e8f9 0, #67e8f9 3px, transparent 3px),
+    linear-gradient(145deg, #444a52, #32373e);
+}
+.op-v3 input[type="range"]::-webkit-slider-thumb:active {
+  background: radial-gradient(circle at center, #a5f3fc 0, #a5f3fc 3px, transparent 3px), #14181d;
+  box-shadow:
+    inset 1px 1px 3px rgba(0, 0, 0, 0.5),
+    0 0 8px rgba(103, 232, 249, 0.5);
+}
+.op-v3 input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background:
+    radial-gradient(circle at center, var(--accent-lit) 0, var(--accent-lit) 3px, transparent 3px),
+    linear-gradient(145deg, #3a3f46, #2a2e34);
+  box-shadow:
+    2px 2px 5px rgba(0, 0, 0, 0.5),
+    inset 0 0 6px rgba(34, 211, 238, 0.3);
+  cursor: pointer;
+}
+/* a slider the model sets (a window's overhang): the dot goes dark */
+.op-v3 input[type="range"]:disabled {
+  cursor: default;
+}
+.op-v3 input[type="range"]:disabled::-webkit-slider-thumb {
+  background: linear-gradient(145deg, #3a3f46, #2a2e34);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+.op-v3 input[type="range"]:disabled::-moz-range-thumb {
+  background: linear-gradient(145deg, #3a3f46, #2a2e34);
+}
+.op-v3 input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  width: 32px;
+  height: 16px;
+  border-radius: 8px;
+  background: #14181d;
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.5),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.07);
+  cursor: pointer;
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin: 0 6px 0 2px;
+  transition: all 0.15s ease-out;
+}
+.op-v3 input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #505762, #40464f);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease-out;
+}
+.op-v3 input[type="checkbox"]:checked {
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.5),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.07),
+    0 0 0 1px rgba(34, 211, 238, 0.3);
+}
+.op-v3 input[type="checkbox"]:checked::before {
+  left: 18px;
+  background:
+    radial-gradient(circle at center, var(--accent-lit) 0, var(--accent-lit) 2px, transparent 2px),
+    linear-gradient(145deg, #555c67, #454b54);
+  box-shadow:
+    2px 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 6px rgba(34, 211, 238, 0.5);
 }
 .op-v3 .btn-outline-secondary,
 .op-v3 .btn-light,
@@ -2800,17 +3070,18 @@ body {
 }
 
 #beam-sidebar {
-  width: 220px;
+  width: 200px;
   background: var(--bg-panel);
   border-right: 1px solid var(--border);
   flex-shrink: 0;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 4px 0;
 }
 .beam-tab-button {
   display: block;
   width: 100%;
-  padding: 8px 14px;
+  padding: 3px 8px; /* half of what it was: S01–S22 on one screen (Andy 2026-11-26) */
+  line-height: 1.3;
   background: transparent;
   border: 0;
   border-left: 3px solid transparent;
@@ -2833,19 +3104,19 @@ body {
 }
 .beam-tab-button .beam-tab-num {
   display: inline-block;
-  width: 22px;
+  width: 20px;
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--text-dim);
   text-align: right;
-  margin-right: 8px;
+  margin-right: 5px;
 }
 .beam-tab-button.active .beam-tab-num {
   color: var(--accent-lit);
 }
 
 .beam-tab-group-header {
-  padding: 12px 14px 4px;
+  padding: 6px 8px 2px;
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -2853,7 +3124,7 @@ body {
   font-weight: 600;
 }
 .beam-tab-group-header:first-child {
-  padding-top: 4px;
+  padding-top: 2px;
 }
 
 /* Sidebar footer — results snapshot */
@@ -2879,7 +3150,7 @@ body {
 #beam-content {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 28px;
+  padding: 16px 14px;
   background: var(--bg);
 }
 

@@ -153,7 +153,7 @@ window.TEUI.SectionModules.sect10 = (function () {
       label: "RG-Unts",
       cells: {
         c: { content: "" }, // Empty column for row labels
-        d: { content: "Area m² (RO)" }, // Empty column for row labels
+        d: { content: "Area\n(m², RO)" }, // Empty column for row labels
         e: {
           content: "Orientation",
           classes: ["section-subheader", "align-center"],
@@ -175,27 +175,27 @@ window.TEUI.SectionModules.sect10 = (function () {
           style: "white-space: pre-line;",
         },
         i: {
-          content: "Heatgain\nkWh/Heating Season",
+          content: "Heatgain\n(kWh/heating season)",
           classes: ["section-subheader", "align-right"],
           style: "white-space: pre-line;",
         },
         j: {
-          content: "Heatgain %",
+          content: "Heatgain\n(%)",
           classes: ["section-subheader", "align-right"],
           style: "white-space: pre-line;",
         },
         k: {
-          content: "Heatgain\nkWh/Cool Season",
+          content: "Heatgain\n(kWh/cool season)",
           classes: ["section-subheader", "align-right"],
           style: "white-space: pre-line;",
         },
         l: {
-          content: "Heatgain %",
+          content: "Heatgain\n(%)",
           classes: ["section-subheader", "align-right"],
           style: "white-space: pre-line;",
         },
         m: {
-          content: "G-Factor kWh/m²/yr",
+          content: "G-Factor\n(kWh/m²/yr)",
           classes: ["section-subheader", "align-right"],
           style: "white-space: pre-line;",
         },
