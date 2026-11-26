@@ -2541,6 +2541,89 @@ body {
   border-color: var(--accent) !important;
   box-shadow: 0 0 0 2px var(--accent-lt);
 }
+/* A row is ONE line (Andy 2026-11-26: "the row's numeric input cells stay anchored to their row and do not
+   inflate with size as a row doubles for related inputs"). A row's own controls (S11's type, facing, host,
+   quantity, + window / + door; S10's overhang) sit side by side in its name cell, never stacked. */
+.op-v3 .data-table td.description-cell {
+  white-space: nowrap;
+}
+.op-v3 .data-table td.description-cell select,
+.op-v3 .data-table td.description-cell .form-select {
+  display: inline-block;
+  width: auto;
+  max-width: 190px;
+  vertical-align: middle;
+  margin: 0 4px 0 0;
+}
+.op-v3 .data-table td.description-cell select.opaque-facing,
+.op-v3 .data-table td.description-cell select.opening-qty {
+  max-width: 64px;
+}
+.op-v3 .data-table td.description-cell .host-add,
+.op-v3 .data-table td.description-cell .opaque-net,
+.op-v3 .data-table td.description-cell .host-remove-btn,
+.op-v3 .data-table td.description-cell .overhang {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 4px 0 0;
+}
+.op-v3 .host-add-btn,
+.op-v3 .host-remove-btn {
+  background: var(--bg-panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 11px;
+  line-height: 1.3;
+  margin-right: 3px;
+  cursor: pointer;
+}
+.op-v3 .data-table td.description-cell .overhang,
+.op-v3 .data-table td.description-cell .opening-host-note {
+  margin-left: 8px;
+}
+.op-v3 .data-table td.description-cell .overhang-lead {
+  margin-right: 4px;
+}
+.op-v3 .data-table td.description-cell input.overhang-input {
+  width: 58px;
+  margin-right: 3px;
+}
+/* And an input box is never taller than one line, whatever its row's height: the cell stays a cell, the box
+   is drawn behind its text at a fixed height, centred as the cell's text is. */
+.op-v3 .data-table td.user-input,
+.op-v3 .data-table td.editable,
+.op-v3 .data-table td[contenteditable="true"] {
+  position: relative;
+  z-index: 0;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  line-height: 18px;
+}
+.op-v3 .data-table td.user-input::after,
+.op-v3 .data-table td.editable::after,
+.op-v3 .data-table td[contenteditable="true"]::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 28px;
+  transform: translateY(-50%);
+  box-sizing: border-box;
+  background: var(--bg-sunken, rgba(0, 0, 0, 0.2));
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  pointer-events: none;
+}
+.op-v3 .data-table td.editing-intent::after,
+.op-v3 .data-table td[contenteditable="true"]:focus::after {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-lt);
+}
 .op-v3 option {
   background: var(--bg-panel);
   color: var(--text);
@@ -2805,12 +2888,13 @@ body {
   border-right: 1px solid var(--border);
   flex-shrink: 0;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 4px 0;
 }
 .beam-tab-button {
   display: block;
   width: 100%;
-  padding: 8px 14px;
+  padding: 3px 14px; /* half of what it was: S01–S22 on one screen (Andy 2026-11-26) */
+  line-height: 1.3;
   background: transparent;
   border: 0;
   border-left: 3px solid transparent;
@@ -2845,7 +2929,7 @@ body {
 }
 
 .beam-tab-group-header {
-  padding: 12px 14px 4px;
+  padding: 6px 14px 2px;
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -2853,7 +2937,7 @@ body {
   font-weight: 600;
 }
 .beam-tab-group-header:first-child {
-  padding-top: 4px;
+  padding-top: 2px;
 }
 
 /* Sidebar footer — results snapshot */
