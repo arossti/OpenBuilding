@@ -188,9 +188,11 @@ it as it was."_ (a link to the live site). Assembly RSIs and U-values: ❓ §5.
 **V4-4 — the file says its version.** A v4 CSV carries `objective_version` = 4, so a later v4 opens its own files
 whole and only a v3 file takes V4-3's path.
 
-**V4-5 — the cases.** F280-1 re-expressed with its windows hosted and their overhangs (the old phase D): it must
-hold `test/f280-results.json` (±1 W; the folded slider equals the plain fraction plus the north credit, so it
-can). Other case studies are re-entered from their drawings as Andy has time; until then the Load Sample Projects
+**V4-5 — the cases.** ✅ 2026-11-26 (andy-rnd branch `f280-1-hosted`, where the F280 harness lives): F280-1
+re-expressed in V4 form - walls by facing (Table G.1.8 a)), every window and door hosted with W × H × count, each
+window's overhang O and drop D, the app's own Annex A on each. It holds Annex J: loss 11 684 W (99.1 %), gain 7362 W
+(100.6 %), and the 8.3.8 turns, which now turn the walls and everything hosted in them, read 99.4–102.0 % of
+Annex J's change (93.7–95.8 % before). Andy 2026-11-26: *"V3 will just ignore fields it does not have in the .CSV format"*. Other case studies are re-entered from their drawings as Andy has time; until then the Load Sample Projects
 list shows only the v4 ones.
 
 **V4-6 — say it is 4.0.** The header and the CSV both read OBJECTIVE 4.0.
