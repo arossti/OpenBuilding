@@ -141,8 +141,13 @@ will read as unavailable until the required inputs are in.
 1. Is the choice saved in the project file? Andy: _"not sure. We don't want to box a user in. But they may wish
    to save a partially completed model."_ Claude's recommendation: save it as a label only. It names what the
    Reference is when the file reopens and locks nothing; the user changes it from the same menu.
-2. For a renovation, where do S04's bills live today: one set for the project, or one per model? To be read
-   from the code before choice B is built.
+2. **S04's bills are held per model today, and the Actual column reads the Target's** (run on the page
+   2026-11-26: a bill of 500,000 typed on the Reference side left Actual at 93.1). S.2 (Targeted Use / Utility
+   Bills) is per model too: the default project has the Target at Utility Bills and the Reference at Targeted
+   Use. Andy's answer 3 puts a renovation's bills on the Reference side, where Actual does not read them. His
+   to rule: one set of bills for the project, or Actual reads the side that holds them.
+3. Seen on the way: after a switch to Reference and back, S04's bill shows without its thousands separators
+   (132938 for 132,938.00). Display only.
 
 ## Easy and Expert modes, and Guide Me (Andy 2026-11-26)
 
@@ -154,18 +159,25 @@ of text."_ The Reference question above is one case of a wider one, so it is pla
 - **Guide Me** is the wizard: a short set of questions in a modal at the start of a project. "What is your
   Reference?" is its first.
 - **The spreadsheet's column letters go** (the L, M, N, O in the headers), in both modes. Andy: _"We can lose all
-  of them."_ Row IDs (B.5, T.6.10) stay: hovers, messages and this roadmap name rows by them.
+  of them."_ and _"I agree the cruft can be cleaned out for Expert and Easy."_ Row IDs (B.5, T.6.10) stay: hovers, messages and this roadmap name rows by them.
 
-How Claude would build it:
+How it is built (Andy 2026-11-26: _"yes, build the stub after #28 merges. We can go section by section and
+determine what is essential."_):
 
 1. **Easy mode is display only.** One class on the page hides things; no input, no calculation and no saved
    file changes with the mode. Parity against the case studies is then unaffected by construction.
-2. **Easy mode never hides an input.** It hides calculated columns, intermediate values and explanatory text. An
-   input out of sight still drives the answer, and nobody can see why.
-3. **The stub first:** the pill, the class, the column letters gone, and nothing else hidden yet. Then one
-   section at a time, Andy marking what is essential in each (22 sections; this curation is the real cost).
-4. **The mode is remembered** in the browser, not in the project file. A first visit opens in Easy.
+2. **Easy mode never hides an input, with one exception.** Andy: _"The ONLY inputs that can hide are Utility
+   Bill Actual Columns IF the user has selected 'Targeted Use'."_ Everything else it hides is a calculated
+   column, an intermediate value or explanatory text.
+3. **The stub first, on its own branch after PR #28 merges:** the pill, the class, the column letters gone, and
+   nothing else hidden yet. Then one section at a time, Andy marking what is essential in each (22 sections;
+   this curation is the real cost).
+4. **The page launches in Easy** (Andy: _"And yes, launch in Easy."_). The mode is remembered in the browser,
+   not in the project file.
 5. **Print** shows the full report whatever the mode, unless Andy rules otherwise.
+
+The column letters are the section headers' cells whose whole caption is one letter (S10 to S15 have 26 of
+them: N, L, I, G, F, E, M, K, J, H, D). Captions that carry a unit or a name stay.
 
 In the build order above, this stub comes before step 1: the line that says what the Reference is and the
 drift marker are new things on screen, and they should be designed for Easy mode from the start.
