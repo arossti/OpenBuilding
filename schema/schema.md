@@ -71,8 +71,14 @@ styling of V3's markup). Trust = `js/beam/pdf-bridge-import.mjs` (`V3_TARGETS`, 
      draws both (its two lines, red and blue); S20 Notes & Debug *"is for our internal use, it will hide with the
      final build"* and needs nothing; S21 *"may show the Reference model vs. Target model, I have not considered
      that case yet"* — ❓ open, Andy's.
-   - **Still to do:** the HUD marks which model the sections show; V3's ghosting of standard-set cells
-     (`.reference-locked`) restyled for the dark theme; S16 and S19 in Reference mode; the witnesses below.
+   - **✅ 2026-11-26, second pass:** S16's Cooling and Show Emissions work in both models (the handlers were
+     attached twice here, so a click toggled and toggled back: `Section16.js` `initializeEventHandlers` now wires
+     once; Target 6 775 / Reference 13 834 kg CO2e on case 01). S18's and S19's control rows are one line as V3's
+     (buttons, legend, the view buttons at the right; Activate padded). Reference mode ghosts
+     `.reference-locked` / `.disabled-input` / `.ghosted` cells: dim italic, a dashed box, not typable. The HUD
+     and Key Values take no marker (Andy: they already show both models, as S18 does).
+   - **Still to do:** see the ghosting on a case that locks cells (not yet looked at); S19 in Reference mode;
+     S21 (Andy's ❓); the three Copy from Target items clicked; the witnesses below.
    - **Witnesses:** andy-rnd's `ghostedReference`, `referenceDefaults` and `hoverOnScreenModel` specs describe the
      behaviour to match; the 2146-value parity probe run in Reference mode on both pages.
 2. **m_10 "Unavailable"** after Trust on a 4-opening fixture (block below, ⚠ OPEN).

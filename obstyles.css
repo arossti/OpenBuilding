@@ -4758,6 +4758,107 @@ details.dep-details pre {
   color: #4ade80;
 }
 
+/* S18's and S19's control rows: one line, as V3's (its .parallel-coordinates-controls and .wombat-controls
+   rules, restated dark) — buttons, then the legend, the view buttons pushed to the right. */
+.op-v3 .parallel-coordinates-controls-wrapper,
+.op-v3 .parallel-coordinates-info-wrapper,
+.op-v3 .wombat-controls-wrapper {
+  padding: 0;
+  background: transparent;
+}
+.op-v3 .parallel-coordinates-controls,
+.op-v3 .wombat-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.op-v3 .parallel-coordinates-controls .btn-sm,
+.op-v3 .wombat-controls .btn-sm {
+  font-size: 12px;
+  padding: 4px 12px;
+}
+.op-v3 #s18ActivateBtn,
+.op-v3 #wombat-activate-btn {
+  flex-shrink: 0;
+  margin-right: 6px;
+  min-width: 160px;
+  padding: 4px 14px;
+}
+.op-v3 .parallel-coordinates-controls button:disabled:not(#s18ActivateBtn),
+.op-v3 .wombat-controls button:disabled:not(#wombat-activate-btn) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.op-v3 .parallel-coordinates-controls > div:last-child,
+.op-v3 .wombat-controls > div:last-child {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin-left: auto;
+}
+.op-v3 .wombat-controls > span {
+  color: var(--text-dim) !important;
+  font-size: 12px !important;
+}
+.op-v3 .pc-btn-decarbonize {
+  font-weight: 500;
+}
+.op-v3 .pc-btn-optimize {
+  background-color: #20c997;
+  border-color: #20c997;
+  color: #06241b;
+  font-weight: 500;
+}
+.op-v3 .pc-btn-super-optimize {
+  background-color: #ff8c00;
+  border-color: #ff8c00;
+  color: #2b1700;
+  font-weight: 500;
+}
+.op-v3 .pc-btn-passivhaus {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #7a1320;
+  font-weight: 500;
+}
+.op-v3 #s18-feedback-console,
+.op-v3 #s19-feedback-console {
+  color: var(--accent-lit);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  margin-left: 10px;
+}
+.op-v3 .pc-legend-container {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin: 0 12px;
+  padding-left: 14px;
+  border-left: 1px solid var(--border);
+  font-size: 12px;
+}
+.op-v3 .pc-line-legend,
+.op-v3 .pc-node-legend {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.op-v3 .pc-node-legend {
+  padding-left: 14px;
+  border-left: 1px solid var(--border);
+}
+.op-v3 .pc-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 /* ── §8c The model on screen: Target is cyan, Reference is red ──────────────
    V3 reddens every frame in Reference mode (Andy 2026-11-26: "it is obvious to the user because the styling for
    all frames goes red. We need to consider a nice way to do that in the dark theme of V4"). Here one class does
@@ -4884,4 +4985,30 @@ body.reference-mode #beam-content::before {
   font-weight: 600;
   letter-spacing: 0.08em;
   border-bottom: 1px solid rgba(255, 107, 107, 0.6);
+}
+
+/* In Reference mode a cell the standard sets, or one that does not apply, is ghosted: no box, dim italic,
+   not typable (V3's .reference-locked / .disabled-input; WebKit needs user-modify off as well). A live
+   Reference input keeps its box, ringed red when focused. */
+body.reference-mode .op-v3 .data-table td.reference-locked,
+body.reference-mode .op-v3 .data-table td.disabled-input,
+body.reference-mode .op-v3 .data-table td.ghosted {
+  color: var(--text-dim) !important;
+  font-style: italic;
+  opacity: 0.6;
+  cursor: not-allowed;
+  -webkit-user-modify: read-only;
+  user-select: none;
+}
+body.reference-mode .op-v3 .data-table td.reference-locked::after,
+body.reference-mode .op-v3 .data-table td.disabled-input::after,
+body.reference-mode .op-v3 .data-table td.ghosted::after {
+  background: transparent;
+  border-style: dashed;
+  border-color: rgba(255, 138, 138, 0.3);
+}
+body.reference-mode .op-v3 select:disabled,
+body.reference-mode .op-v3 input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
