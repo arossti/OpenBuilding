@@ -5146,7 +5146,7 @@ input.op-pill:checked::before {
    WHAT EASY HIDES GOES HERE, one section at a time as Andy marks what is essential, each rule written as
    `html.op-easy <selector>` INSIDE `@media screen`: print shows the full report whatever the view. Easy never
    hides an input, with one exception (S04's Actual columns while S.2 is at Targeted Use). Hidden so far: the
-   Cell IDs; S03's secondary climate values. */
+   Cell IDs; S03's secondary climate values; S04's Actual columns at Targeted Use and its derived totals. */
 /* A field's help popover is Bootstrap's light card; its title took the page's light heading colour and read
    washed out on the card's pale band (Andy 2026-11-27). */
 .app-beamweb .popover-header {
@@ -5251,6 +5251,25 @@ input.op-pill:checked::before {
   }
   html.op-easy #climateCalculations tr[data-id="L.3.3"]:has(td.f280-hidden-cell) {
     display: none;
+  }
+
+  /* S04 Actual vs. Target.
+     RULED (Andy 2026-11-26): at Targeted Use the Actual columns are not shown, "otherwise a user might think
+     they need to enter something there": the bills, their units, Actual Net and the Actual emissions (columns
+     D to G, in every row, so the table closes up and the Target's columns sit beside the fuels). It is the one
+     case where Easy hides an input. op-targeted-use is the model on screen's S.2 (objective4.mjs `syncUse`). */
+  html.op-easy.op-targeted-use #actualTargetEnergy .data-table td:is(.col-d, .col-e, .col-f, .col-g) {
+    display: none;
+  }
+  /* PROPOSED (Claude 2026-11-27, for Andy's ruling): Easy keeps the fuel table and its subtotals whole, and
+     does not show what is derived from them below: the total net energy in GJ, the per-capita energy, the
+     primary energy and its intensity, the nuclear waste produced and the PER factor. The nuclear waste FACTOR
+     is an input and stays, on the emission factors' column. */
+  html.op-easy #actualTargetEnergy tr:is([data-id="T.3.7"], [data-id="T.3.8"], [data-id="T.3.9"]) {
+    display: none;
+  }
+  html.op-easy #actualTargetEnergy tr[data-id="T.3.6"] > td:is(.col-c, .col-d, .col-e, .col-h, .col-i) {
+    visibility: hidden;
   }
 }
 

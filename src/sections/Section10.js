@@ -204,8 +204,8 @@ window.TEUI.SectionModules.sect10 = (function () {
 
     // Row 73: G.7 Doors
     73: {
-      id: "G.7.1",
-      rowId: "G.7.1",
+      id: "G.7.0",
+      rowId: "G.7.0",
       label: "Door",
       cells: {
         c: { label: "Door" },

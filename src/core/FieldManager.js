@@ -447,7 +447,8 @@ TEUI.FieldManager = (function () {
   // style and Easy view can hide them all (obstyles.css §8e). Two forms: a cell that holds an ID and nothing
   // else (T.6.1 beside its value), and an ID that leads a caption ("M.1.1 HSPF"), which goes in a span.
   // Only a static cell is touched: one with a field, a control or its own markup is left as it is.
-  const CELL_ID = /^[A-Z]{1,3}\.\d+[A-Za-z]?(?:\.\d+[A-Za-z]?)*$/;
+  // (a last part may be a letter alone: S07's W.2.W)
+  const CELL_ID = /^[A-Z]{1,3}\.\d+[A-Za-z]?(?:\.(?:\d+[A-Za-z]?|[A-Z]))*$/;
   // (the ID may carry a full stop of its own, as S13's "M.1.5. CEER" does)
   const CELL_ID_LEADS = /^(\s*)([A-Z]{1,3}\.\d+[A-Za-z]?(?:\.\d+[A-Za-z]?)*\.?)(\s+)(\S[\s\S]*)$/;
   const STATIC_NUMBER = /^[-−]?\$?[\d,]*\.?\d+%?$/;

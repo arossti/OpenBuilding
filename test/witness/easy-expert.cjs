@@ -71,7 +71,7 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
         (e) => e.textContent.trim() && e.closest("tr").getClientRects().length > 0
       );
       const shown = all.filter((e) => e.getClientRects().length > 0 && parseFloat(getComputedStyle(e).fontSize) > 0);
-      const RX = /^[A-Z]{1,3}\.\d+[A-Za-z]?(\.\d+[A-Za-z]?)*$/;
+      const RX = /^[A-Z]{1,3}\.\d+[A-Za-z]?(\.(\d+[A-Za-z]?|[A-Z]))*$/;
       const unmarked = [...document.querySelectorAll("#beam-main .data-table td:not(.id-cell):not(.cell-id)")]
         .filter((c) => !c.children.length && RX.test(c.textContent.trim()))
         .map((c) => c.textContent.trim());
@@ -102,8 +102,9 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
         const id = el.getAttribute("data-field-id") + (el.tagName === "TD" ? "" : ":" + el.tagName);
         values[id] = el.tagName === "SELECT" || el.tagName === "INPUT" ? el.value : el.textContent.trim();
       });
-      // (a row Easy takes away whole is left out of the count: S03's winter average)
-      const cells = [...document.querySelectorAll("#beam-main .data-table td")].filter((c) => !c.closest('#climateCalculations tr[data-id="L.3.3"]'));
+      // (a row Easy takes away whole is left out of the count: S03's winter average, S04's derived totals)
+      const gone = '#climateCalculations tr[data-id="L.3.3"], #actualTargetEnergy tr:is([data-id="T.3.7"], [data-id="T.3.8"], [data-id="T.3.9"])';
+      const cells = [...document.querySelectorAll("#beam-main .data-table td")].filter((c) => !c.closest(gone));
       return { values, cells: cells.length, shown: cells.filter((c) => c.getClientRects().length > 0).length };
     });
   const save = async () => {
@@ -222,6 +223,26 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
     await p.selectOption('#buildingInfo select[data-field-id="d_14"]', value);
     await p.waitForTimeout(900);
   };
+  // S04: what shows of the bills, the Target's columns, the factors and the derived totals
+  const s04 = () =>
+    p.evaluate(() => {
+      const seen = (id) => {
+        const td = document.querySelector(`#actualTargetEnergy td[data-field-id="${id}"]`);
+        return !!td && td.getClientRects().length > 0 && getComputedStyle(td).visibility === "visible";
+      };
+      const n = (ids) => ids.filter(seen).length + "/" + ids.length;
+      return {
+        bills: n(["d_27", "d_28", "d_29", "d_30", "d_31"]),
+        actual: n(["f_27", "g_27", "f_32", "g_32"]),
+        target: n(["h_27", "j_27", "k_27", "j_32", "k_32"]),
+        factors: n(["l_28", "l_29", "l_30", "l_31", "l_33"]),
+        derived: n(["d_33", "h_33", "d_34", "f_34", "h_34", "j_34", "l_34", "d_35", "f_35", "j_35", "l_35", "f_36", "j_36"]),
+        captions: [...document.querySelectorAll('#actualTargetEnergy tr[data-id="04-ID"] > td')].filter((c) => c.getClientRects().length).map((c) => c.textContent.trim().split(/\s/)[0]).join(" ")
+      };
+    });
+  let c4 = await s04();
+  ok("S04 in Easy at Utility Bills: the fuel table whole, the derived totals not shown", c4.bills === "5/5" && c4.actual === "4/4" && c4.target === "5/5" && c4.factors === "5/5" && c4.derived === "0/13", JSON.stringify(c4));
+
   let pr = await prices();
   const gasPrice = pr.gas;
   ok("Utility Bills: all five prices show", pr.use === "Utility Bills" && !pr.flag && pr.electricity && pr.fuels === 4, JSON.stringify(pr));
@@ -240,6 +261,14 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   await p.waitForTimeout(2200);
   pr = await prices();
   ok("the Reference follows its own S.2", pr.use === "Targeted Use" && pr.flag && pr.electricity && pr.fuels === 0, JSON.stringify(pr));
+  c4 = await s04();
+  ok("S04 in Easy at Targeted Use: no Actual column, the Target's and the factors stay", c4.bills === "0/5" && c4.actual === "0/4" && c4.target === "5/5" && c4.factors === "5/5" && !/ACTUAL/.test(c4.captions) && /TARGET/.test(c4.captions), JSON.stringify(c4));
+  await p.click("#op-view-expert");
+  await p.waitForTimeout(300);
+  c4 = await s04();
+  ok("S04 in Expert at Targeted Use: all of it shows", c4.bills === "5/5" && c4.actual === "4/4" && c4.derived === "13/13" && /ACTUAL/.test(c4.captions), JSON.stringify(c4));
+  await p.click("#op-view-easy");
+  await p.waitForTimeout(300);
   // the IDs are the rows' own, so the Reference shows the Target's
   const refIds = await ids();
   await p.click("#op-model-target");
@@ -260,7 +289,7 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
     const at = (id) => (where[id] || []).join(", ");
     return {
       twice,
-      placed: { "G.2": at("G.2"), "G.3": at("G.3"), "T.3": at("T.3"), "T.3.1": at("T.3.1"), "C.1": at("C.1"), "C.2": at("C.2"), "L.2.6": at("L.2.6"), "L.3.4": at("L.3.4"), "M.2.6": at("M.2.6"), "V.1.5": at("V.1.5"), "T.4.8": at("T.4.8"), "T.5.5": at("T.5.5"), "T.6.13": at("T.6.13"), "B.18.5.2": at("B.18.5.2"), "W.6.2": at("W.6.2") },
+      placed: { "G.2": at("G.2"), "G.3": at("G.3"), "T.3": at("T.3"), "T.3.1": at("T.3.1"), "C.1": at("C.1"), "C.2": at("C.2"), "L.2.6": at("L.2.6"), "L.3.4": at("L.3.4"), "M.2.6": at("M.2.6"), "V.1.5": at("V.1.5"), "T.4.8": at("T.4.8"), "T.5.5": at("T.5.5"), "T.6.13": at("T.6.13"), "B.18.5.2": at("B.18.5.2"), "W.6.2": at("W.6.2"), "W.2.W": at("W.2.W"), "W.5.3": at("W.5.3"), "G.7.0": at("G.7.0"), "G.7.1": at("G.7.1"), "B.7.0": at("B.7.0") },
       gone: ["W.X", "L", "A.1", "TEUI-imp", "Heat Load Imp"].filter((t) => [...document.querySelectorAll("#beam-main .data-table td")].some((c) => c.textContent.trim().replace(/\.$/, "") === t)),
       captions: [...document.querySelectorAll("#teuiSummary td")].filter((c) => c.textContent.trim() === "Peak Heating Imp").length
     };
@@ -271,7 +300,9 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
     "the new numbers are where they were put",
     pl["G.2"] === "occupantInternalGains row" && pl["G.3"] === "envelopeRadiantGains row" && pl["T.3"] === "teuiSummary row" && pl["T.3.1"] === "actualTargetEnergy row" &&
       ["C.1", "C.2"].every((k) => pl[k] === "buildingInfo") && ["L.2.6", "L.3.4"].every((k) => pl[k] === "climateCalculations") && ["M.2.6", "V.1.5"].every((k) => pl[k] === "mechanicalLoads") &&
-      ["T.4.8", "T.5.5"].every((k) => pl[k] === "tediSummary") && pl["T.6.13"] === "teuiSummary" && pl["B.18.5.2"] === "volumeSurfaceMetrics" && pl["W.6.2"] === "waterUse",
+      ["T.4.8", "T.5.5"].every((k) => pl[k] === "tediSummary") && pl["T.6.13"] === "teuiSummary" && pl["B.18.5.2"] === "volumeSurfaceMetrics" && pl["W.6.2"] === "waterUse" &&
+      // as the Sankey names them: SHW Wasted is W.2.W, the first door G.7.0 beside S11's B.7.0
+      pl["W.2.W"] === "waterUse" && pl["W.5.3"] === "" && pl["G.7.0"] === "envelopeRadiantGains row" && pl["G.7.1"] === "" && pl["B.7.0"] === "envelopeTransmissionLosses row",
     JSON.stringify(pl)
   );
   ok("the stray IDs and the two wrong captions are gone", numbered.gone.length === 0 && numbered.captions === 1, `${numbered.gone.join(" ")} | Peak Heating Imp ×${numbered.captions}`);

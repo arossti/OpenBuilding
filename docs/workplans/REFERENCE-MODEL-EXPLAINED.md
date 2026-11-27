@@ -229,6 +229,13 @@ HDD, CDD, the Coldest and Hottest Days and the two set-points in °C, and the tw
 twins, the ground-facing degree days, the Summer Night Mean and Mean RH, the Winter Average Temp. and the two
 set-point limits. With F280 Mode On the foundation's inputs all show.
 
+**S04 (2026-11-27, PR #41).** The ruled rule is wired: at Targeted Use the Actual columns (D to G) are not
+shown in Easy. Claude's proposed cut is built with it for Andy's smoke: Easy keeps the fuel table and its
+subtotals and does not show the derived totals below (net energy in GJ, per-capita energy, primary energy and
+its intensity, nuclear waste produced, the PER factor). Open: whether the Actual columns hide in Expert too.
+
+**Later, its own pass (Andy 2026-11-27):** collapsing the empty columns and rows that hiding leaves.
+
 **How a section is curated, as it has gone:** Claude lists the section's inputs and its calculated values with
 a recommended cut; Andy rules; the rules go in `obstyles.css` §8e and each gets a check in the witness.
 

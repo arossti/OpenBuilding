@@ -27,7 +27,39 @@ HOLDS" is next below. **The next task: Easy mode section by section, with Andy**
 That curation is his; an agent does not choose what a section hides. The F280 work below is waiting on other
 people: read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11-27), and otherwise leave it.
 
-**BUILT, NOT MERGED: PR #40 (branch `Easy-S03`, to be smoked by Andy): S03 in Easy** (Andy 2026-11-27, "yes"
+**BUILT, NOT MERGED: PR #41 (branch `Easy-S04`, to be smoked by Andy).** Display only.
+
+- **Two names brought to the Sankey's** (Andy 2026-11-27, "yes to both"):
+  - S07's SHW Wasted reads **W.2.W** in its ID cell (it read W.5.3, with "(W.2.W)" only in the caption), as the
+    Sankey's "W.2.W SHW Wasted", which draws that value (`j_53`). `markCellId` now takes an ID whose last part is
+    a letter alone.
+  - S10's first door is **G.7.0** (it read G.7.1), as the Sankey's "G.7.0 Doors" and S11's B.7.0
+    (`Openings.js` `s10RowId`, `Section10.js`). ⚠ **Only the first door moved.** Claude had told Andy that all
+    of S10's doors would shift down by one; that was wrong: S11's doors run B.7.0, B.7.2, B.7.3 (there is no
+    B.7.1), so G.7.2 onward were already in step. Told to him.
+  - Left for S13's cleanup: the Sankey's "M.2.1.S Sink" and "M.2.1.D Energy Input".
+- **S04 in Easy.**
+  - **RULED (Andy 2026-11-26): at Targeted Use the Actual columns are not shown** (the bills, their units,
+    Actual Net and the Actual emissions: columns D to G in every row, so the table closes up). The one case
+    where Easy hides an input. It follows the model on screen's S.2 (`op-targeted-use`).
+    ❓ Andy: in Expert too, as S02's fuel prices are? Built for Easy only, as ruled.
+  - **PROPOSED by Claude, built for Andy's smoke, his to rule:** Easy keeps the fuel table and its subtotals
+    whole (bills, Target, Net, emissions, the emission factors) and does not show what is derived below it:
+    Total Net Energy (GJ), Annual Percapita Energy, Primary Energy and its intensity, the nuclear waste
+    produced and the PER factor. The nuclear waste FACTOR is an input and stays. One block of
+    `obstyles.css` §8e, marked PROPOSED; removing it undoes it.
+  - ⚠ **Seen, not changed (a calculation):** S15's ∑ Other Energy (`EnergyNodes.js` `energy.cost.otherFuel`)
+    multiplies the fuel BILLS by the fuel prices with no test of S.2, so at Targeted Use it still carries
+    whatever bills were typed, now that both are out of sight there.
+- **LATER, a design refinement of its own (Andy 2026-11-27):** _"we can consider how to collapse empty space
+  as a separate design refinement later (ie. collapse empty columns could be an easy rule, collapse empty rows,
+  similarly)."_ Where Easy leaves gaps today: S03's Elevation alone on its row; S04's Nuclear Waste alone on
+  its row; the columns emptied by hidden values in S03.
+- **Witnesses:** `test/witness/easy-expert.cjs` (ALL OK, 54 checks); parity against V3 2146 / 2146 on all 16
+  cases; the rest as before.
+- **NEXT: S05 in Easy.**
+
+**LIVE: PR #40 (`e497b7b`, merged on Andy's word 2026-11-27): S03 in Easy** (Andy 2026-11-27, "yes"
 to the cut proposed). `obstyles.css` §8e, on screen only, display only:
 
 - **Easy keeps** the seven inputs (Province, City, Current or Future Values, Capacitance and its slider, Days
@@ -37,12 +69,10 @@ to the cut proposed). `obstyles.css` §8e, on screen only, display only:
   and Mean RH, the Winter Average Temp. and the two set-point limits beside the ✓. A cell keeps its place; the
   winter-average row goes whole, unless F280 Mode puts the foundation's configuration on it. With F280 Mode On
   no S03 input is hidden.
-- ❓ Andy, seen in the result: Elevation is left alone on its row (the ground-facing degree days beside it are
-  hidden). Moving it up is a layout change in `Section03.js`, not done.
+- Elevation is left alone on its row (the ground-facing degree days beside it are hidden): for the later pass on
+  empty space, above.
 - **Witness:** `test/witness/easy-expert.cjs`, 51 checks. Parity was not re-run: nothing but the stylesheet and
   the witness changed since #39's 2146 / 2146.
-- **NEXT: S04 in Easy.** Its one ruled rule is ready to wire: the Actual columns hide while the model on screen
-  is at Targeted Use (`op-targeted-use` exists since #39).
 
 **LIVE: PR #39 (`c9c91b0`, merged on Andy's word 2026-11-27).** Two things Andy ruled, neither a calculation:
 
@@ -558,8 +588,8 @@ in andy-rnd for the V3 page.
   `src/core/FileHandler.js` and `src/core/ui/DOMBridge.js` (text kept as text; the record's defaults).
   A ninth (2026-11-27, the Easy / Expert stub): the header rows of `src/sections/Section02.js`, `03`, `05` – `09`,
   `12` – `15` and `19` without their 80 column-letter captions.
-  An eleventh (2026-11-27, PR #39): the renumbered IDs and two S15 captions, in `Section02.js`, `03`, `07`,
-  `10`, `12` – `15` and `16C.js`.
+  An eleventh (2026-11-27, PR #39, and #41 for W.2.W and G.7.0): the renumbered IDs and two S15 captions, in
+  `Section02.js`, `03`, `07`, `10`, `12` – `15`, `16C.js` and `src/core/Openings.js` `s10RowId`.
   A tenth (2026-11-27): `src/core/FieldManager.js` `markCellId` (the class `cell-id` on a Cell ID outside the ID
   column, a row's repeat of its own ID left undrawn, `static-number`) and `markNumberHeads` (`num-head` on a
   caption over a column of numbers).
