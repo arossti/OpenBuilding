@@ -20,12 +20,10 @@
 
 ### ▶ START HERE (handoff 2026-11-27, evening, the laptop `M2max`) — written for a cold start after a /clear
 
-**Where things stand.** `main` is **`b3c0f2f`** (PR #45), deployed to https://arossti.github.io/OpenBuilding/.
-**PR #46 (branch `Easy-S09`) is open, not merged: Andy smokes it, merge only on his word.** It holds S09's Easy
-cut (Claude's proposal, his to rule), the paler Ae blue and this handoff. Everything of 2026-11-27 is display
-only: no calculation changed all day. Parity against V3 on this branch: 2146 / 2146 on all 16 cases; every
-witness of `test/witness/README.md` passes (V3's 8 Reference specs last run at #41, no file under `src/`
-changed since).
+**Where things stand.** `main` is **`5c4deb2`** (PR #46: S09 in Easy, RULED as proposed; the paler Ae blue;
+this handoff), deployed to https://arossti.github.io/OpenBuilding/. **PR #47 (branch `S09-Cooling-Caption`) is
+open: one caption, below.** Everything of 2026-11-27 is display only: no calculation changed all day. Parity
+against V3: 2146 / 2146 on all 16 cases; every witness of `test/witness/README.md` passes.
 
 **THE NEXT ARC, in Andy's words (2026-11-27):** _"the next arc can consider refactoring the CSS which may have a
 lot of duplicated or separate style rules by now, it would be nice to standardize button sizes, toggles,
@@ -62,23 +60,26 @@ rules on it at his smoke. His rules so far:
 - Renaming or renumbering: bring him the list first (_"verify with me in a list before changing"_). The Sankey
   names nodes by row ID, so it arbitrates; M is Mechanical, V Ventilation, T totals.
 
-| Section   | Easy   | Notes                                                                                                          |
-| --------- | ------ | -------------------------------------------------------------------------------------------------------------- |
-| S02       | done   | nothing hidden; fuel prices follow S.2                                                                         |
-| S03       | done   |                                                                                                                |
-| S04       | done   | Actual columns follow S.2                                                                                      |
-| S05       | done   | E.3.5 is the Builders'                                                                                         |
-| S06       | done   | nothing to hide                                                                                                |
-| S07       | done   |                                                                                                                |
-| S08       | done   |                                                                                                                |
-| S09       | PR #46 | proposed                                                                                                       |
-| S10 – S15 | to do  | **S13 is "a hot mess"** (Andy): it gets a cleanup plan of its own, with vertical rules to group related fields |
-| S16 – S21 | to do  | outputs and compliance; S21 shows only under F280 Mode                                                         |
+| Section   | Easy  | Notes                                                                                                          |
+| --------- | ----- | -------------------------------------------------------------------------------------------------------------- |
+| S02       | done  | nothing hidden; fuel prices follow S.2                                                                         |
+| S03       | done  |                                                                                                                |
+| S04       | done  | Actual columns follow S.2                                                                                      |
+| S05       | done  | E.3.5 is the Builders'                                                                                         |
+| S06       | done  | nothing to hide                                                                                                |
+| S07       | done  |                                                                                                                |
+| S08       | done  |                                                                                                                |
+| S09       | done  |                                                                                                                |
+| S10 – S15 | to do | **S13 is "a hot mess"** (Andy): it gets a cleanup plan of its own, with vertical rules to group related fields |
+| S16 – S21 | to do | outputs and compliance; S21 shows only under F280 Mode                                                         |
 
 **Open with Andy (none blocks the next arc):**
 
-- S09's caption over the cooling-gain percentages reads "Htg Gain (%)" a second time; the fields under it are
-  cooling gains (`l_64` "Occupant Cooling Gain: %"). ❓ "Cooling Gain (%)"? Not changed.
+- **Fixed in PR #47 (Andy: "a longstanding typo"):** S09's caption over the cooling-gain percentages read
+  "Htg Gain (%)" a second time; it reads "Cooling Gain (%)" (`Section09.js`; one table serves both models, so
+  the Reference shows it too). A scan of every header for a caption heading two columns found no other of the
+  kind. Seen, not changed: S10 captions both its percentage columns "Heatgain (%)", one after the heating
+  season's kWh and one after the cooling season's; not wrong, but "Heating (%)" / "Cooling (%)" would say more.
 - S14's note "T.4.1 Includes V.5 Net Vent'l. & T.7.3 CEDI Ae Losses": there is no V.5 and T.7.3 is S15's
   "∑ Other Energy". His wording wanted.
 - The Sankey's "M.2.1.S Sink" and "M.2.1.D Energy Input" name no row of S13 (it has M.1.4 Sink and M.2.1 Heating
@@ -100,9 +101,9 @@ must show (`export NODE_PATH=../andy-rnd/node_modules` in the same shell, or Pla
 
 ### The record of 2026-11-27, newest first (PR #37 – #46: Easy / Expert, the IDs, the reading aids)
 
-**PR #46 (branch `Easy-S09`, open).**
+**PR #46 (`5c4deb2`, merged on Andy's word 2026-11-27: "Colours read much better").**
 
-- **S09 in Easy, PROPOSED by Claude, built for Andy's smoke.** Easy keeps the seven inputs (occupants, hours,
+- **S09 in Easy, RULED as proposed.** Easy keeps the seven inputs (occupants, hours,
   bedrooms / units, activity, lighting, the equipment spec, elevators), each load's energy and its gains to
   heating and cooling with their dots, the DHW losses, the totals and the ✓. It does not show: the share of the
   reference beside the ✓ and its caption; the two steps behind the occupants' gain (annual occupied hours
