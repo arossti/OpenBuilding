@@ -98,6 +98,7 @@ const state = {
 // Boot
 // ──────────────────────────────────────────────────────────────────────
 function boot() {
+  syncView(); // before anything renders: the page launches in the view last chosen, Easy the first time
   StateManager.loadState();
   renderSidebar();
   renderContentShell();
@@ -516,6 +517,27 @@ function syncModelToggle() {
   document.querySelectorAll(".op-model-label").forEach((l) => l.classList.toggle("active", l.dataset.model === mode));
 }
 
+// Easy / Expert (docs/workplans/REFERENCE-MODEL-EXPLAINED.md, "Easy and Expert modes"): how much of each section
+// shows. DISPLAY ONLY: the class op-easy on <html> is all there is to it, so no input, no calculation and no
+// saved file can change with the view. The page launches in Easy (Andy 2026-11-26); the choice is remembered in
+// this browser, never in the project file. What Easy hides is obstyles.css §8e, one section at a time.
+const VIEW_KEY = "objective4View";
+function currentView() {
+  return localStorage.getItem(VIEW_KEY) === "expert" ? "expert" : "easy";
+}
+function showView(view) {
+  const v = view === "expert" ? "expert" : "easy";
+  localStorage.setItem(VIEW_KEY, v);
+  syncView();
+}
+function syncView() {
+  const v = currentView();
+  document.documentElement.classList.toggle("op-easy", v === "easy");
+  const pill = document.getElementById("op-view-switch");
+  if (pill) pill.checked = v === "expert";
+  document.querySelectorAll(".op-view-label").forEach((l) => l.classList.toggle("active", l.dataset.view === v));
+}
+
 function handleReset() {
   const SM = window.TEUI?.StateManager;
   if (!SM?.revertToLastImportedState) return;
@@ -544,7 +566,9 @@ function wireActionBar() {
     "beam-reset": handleReset,
     "op-toggle-all": toggleAllCards,
     "op-model-target": () => showModel("target"),
-    "op-model-reference": () => showModel("reference")
+    "op-model-reference": () => showModel("reference"),
+    "op-view-easy": () => showView("easy"),
+    "op-view-expert": () => showView("expert")
   };
   for (const [id, fn] of Object.entries(handlers)) {
     const el = document.getElementById(id);
@@ -555,6 +579,12 @@ function wireActionBar() {
   // V3's own switches (S01's Key Values toggle, a file import) change the mode too: follow the body's class
   syncModelToggle();
   new window.MutationObserver(syncModelToggle).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  const viewPill = document.getElementById("op-view-switch");
+  if (viewPill) viewPill.addEventListener("change", () => showView(viewPill.checked ? "expert" : "easy"));
+  // another tab of this browser changed the view: follow it
+  window.addEventListener("storage", (e) => {
+    if (e.key === VIEW_KEY) syncView();
+  });
 }
 const READY_MSG = "Ready · OBJECTIVE 4.0";
 

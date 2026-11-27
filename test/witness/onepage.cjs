@@ -4,6 +4,7 @@ const S = process.argv[2], URL = "http://localhost:8831/objectivepro.html";
   const b = await chromium.launch({ channel: "chrome" });
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
   const p = await ctx.newPage();
+  await p.addInitScript(() => localStorage.setItem("objective4DisclaimerSeen", "true")); // the launch modal covers the page
   const errs = []; p.on("pageerror", (e) => errs.push(String(e))); p.on("console", (m) => m.type() === "error" && errs.push(m.text()));
   await p.goto(URL); await p.waitForTimeout(5000);
   await p.screenshot({ path: `${S}/a-top.png` });

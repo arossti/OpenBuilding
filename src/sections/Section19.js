@@ -61,10 +61,6 @@ window.TEUI.SectionModules.sect19 = (function () {
           content: "Options related to Section12",
           classes: ["section-subheader"],
         },
-        e: { content: "E", classes: ["section-subheader"] },
-        f: { content: "F", classes: ["section-subheader"] },
-        g: { content: "G", classes: ["section-subheader"] },
-        h: { content: "H", classes: ["section-subheader"] },
       },
     },
 

@@ -188,6 +188,21 @@ determine what is essential."_):
 The column letters are the section headers' cells whose whole caption is one letter (S10 to S15 have 26 of
 them: N, L, I, G, F, E, M, K, J, H, D). Captions that carry a unit or a name stay.
 
+**The stub is built (2026-11-27, branch `Easy-Expert-Stub`, PR #37; to be smoked by Andy).** What it holds:
+
+- The pill after Copy from Target, Easy · pill · Expert. Easy is the class `op-easy` on `<html>`; the choice is
+  kept in the browser as `objective4View`. The page launches in Easy. Nothing is hidden yet.
+- **Where the next step goes:** `obstyles.css` §8e. Each thing Easy hides is one rule, `html.op-easy <selector>`,
+  inside `@media screen`, so print keeps the full report.
+- The column letters, counted on the page: **80 in 12 sections** (S02, S03, S05 to S09, S12 to S15, S19), not
+  the 26 estimated above. The rule applied: a header cell whose whole caption is its own column's letter. They
+  are deleted from the section definitions (`src/sections/`), so they are gone in both views and in print.
+  One-letter units (W, m) and row IDs stay.
+- Still open, Andy's to rule: the header rows' own ids (`02-ID`, `15-ID`, `S19-HEADER`). S15's header row held
+  only letters and now shows `15-ID` alone.
+- The witness: `test/witness/easy-expert.cjs`. It must keep passing as sections are curated, with one change:
+  its "nothing hidden yet" check becomes a count of what each section hides.
+
 In the build order above, this stub comes before step 1: the line that says what the Reference is and the
 drift marker are new things on screen, and they should be designed for Easy mode from the start.
 

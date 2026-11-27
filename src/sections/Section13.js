@@ -62,11 +62,6 @@ window.TEUI.SectionModules.sect13 = (function () {
           content: "(kWh/yr)",
           classes: ["section-subheader", "flex-cell", "align-center"],
         },
-        e: { content: "E", classes: ["section-subheader", "flex-cell"] },
-        f: { content: "F", classes: ["section-subheader", "flex-cell"] },
-        g: { content: "G", classes: ["section-subheader", "flex-cell"] },
-        h: { content: "H", classes: ["section-subheader", "flex-cell"] },
-        i: { content: "I", classes: ["section-subheader", "flex-cell"] },
         j: {
           content: "(kWh/yr)",
           classes: ["section-subheader", "flex-cell", "align-center"],
@@ -75,9 +70,6 @@ window.TEUI.SectionModules.sect13 = (function () {
           content: "Reference",
           classes: ["section-subheader", "flex-cell", "align-center"],
         },
-        l: { content: "L", classes: ["section-subheader", "flex-cell"] },
-        m: { content: "M", classes: ["section-subheader", "flex-cell"] },
-        n: { content: "N", classes: ["section-subheader", "flex-cell"] },
       },
     },
 

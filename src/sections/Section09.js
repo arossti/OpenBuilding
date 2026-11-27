@@ -52,9 +52,6 @@ window.TEUI.SectionModules.sect09 = (function () {
       cells: {
         c: { content: "C", classes: ["section-subheader"] },
         d: { content: "Unit Qty", classes: ["section-subheader"] },
-        e: { content: "E", classes: ["section-subheader"] },
-        f: { content: "F", classes: ["section-subheader"] },
-        g: { content: "G", classes: ["section-subheader"] },
         h: { content: "Annual\n(kWh/yr)", classes: ["section-subheader"] },
         i: {
           content: "Htg Gain\n(kWh/yr)",
@@ -64,7 +61,6 @@ window.TEUI.SectionModules.sect09 = (function () {
         k: { content: "Cooling Gain\n(kWh/yr)", classes: ["section-subheader"] },
         l: { content: "Htg Gain\n(%)", classes: ["section-subheader"] },
         m: { content: "Reference", classes: ["section-subheader"] },
-        n: { content: "N", classes: ["section-subheader"] },
       },
     },
 

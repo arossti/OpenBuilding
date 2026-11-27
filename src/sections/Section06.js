@@ -38,16 +38,8 @@ window.TEUI.SectionModules.sect06 = (function () {
       cells: {
         c: { content: "C", classes: ["section-subheader"] },
         d: { content: "(kWh/yr)", classes: ["section-subheader"] },
-        e: { content: "E", classes: ["section-subheader"] },
-        f: { content: "F", classes: ["section-subheader"] },
-        g: { content: "G", classes: ["section-subheader"] },
-        h: { content: "H", classes: ["section-subheader"] },
         i: { content: "(kWh/yr)", classes: ["section-subheader"] },
-        j: { content: "J", classes: ["section-subheader"] },
-        k: { content: "K", classes: ["section-subheader"] },
-        l: { content: "L", classes: ["section-subheader"] },
         m: { content: "(kWh/yr)", classes: ["section-subheader"] },
-        n: { content: "N", classes: ["section-subheader"] },
       },
     },
     43: {
