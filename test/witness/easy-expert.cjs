@@ -206,6 +206,38 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   ok("typed words stay left-justified", al.projectName === "left" && al.certifier === "left", `${al.projectName} ${al.certifier}`);
   ok("a caption over numbers is right-justified, over words it is not", al.s14Caption === "right" && al.s11Caption === "right" && al.textCaption !== "right", `${al.s14Caption} ${al.s11Caption} ${al.textCaption}`);
 
+  // V3's reading aids (checked in 2g, and in the Reference below): inputs in the accent, Ae / Ag in their
+  // colours, the dots, a hairline under each row
+  const aids = () =>
+    p.evaluate(() => {
+      const col = (sel, pseudo) => {
+        const e = document.querySelector(sel);
+        if (!e) return "none";
+        const c = getComputedStyle(e, pseudo);
+        return pseudo ? c.backgroundColor : c.color;
+      };
+      const rows = [...document.querySelectorAll("#envelopeTransmissionLosses .data-table > tbody > tr")].filter((t) => t.getClientRects().length);
+      return {
+        typed: col('#buildingInfo td[data-field-id="h_15"]'),
+        chosen: col('#buildingInfo select[data-field-id="d_12"]'),
+        calculated: col('#teuiSummary td[data-field-id="d_135"]'),
+        air: col("#envelopeTransmissionLosses td.text-air-facing"),
+        ground: col("#envelopeTransmissionLosses td.text-ground-facing"),
+        lossHigh: col("#envelopeTransmissionLosses td.loss-high", "::before"),
+        lossLow: col("#envelopeTransmissionLosses td.loss-low", "::before"),
+        gainHigh: col("#beam-main td.gain-high", "::before"),
+        gainLow: col("#beam-main td.gain-low", "::before"),
+        medium: col("#beam-main td.gain-medium, #beam-main td.loss-medium", "::before"),
+        // every cell of a row draws its piece of the line, and the columns touch
+        ruled: rows.every((t) => [...t.children].every((c) => /1px 0px 0px/.test(getComputedStyle(c).boxShadow))),
+        spacing: getComputedStyle(document.querySelector("#envelopeTransmissionLosses .data-table")).borderSpacing
+      };
+    });
+  const CYAN = "rgb(34, 211, 238)";
+  const RED = "rgb(239, 68, 68)";
+  const GREEN = "rgb(34, 197, 94)";
+  let ra;
+
   // 2d. S02's prices of gas, propane, wood and oil show only while S.2 is at Utility Bills, in both views and per
   // model; the price of electricity always shows (S15 and S18 read it at Targeted Use too)
   const prices = () =>
@@ -228,7 +260,7 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
     p.evaluate(() => {
       const seen = (id) => {
         const td = document.querySelector(`#actualTargetEnergy td[data-field-id="${id}"]`);
-        return !!td && td.getClientRects().length > 0 && getComputedStyle(td).visibility === "visible";
+        return !!td && td.getClientRects().length > 0 && getComputedStyle(td).visibility === "visible" && !/, 0\)$/.test(getComputedStyle(td).color);
       };
       const n = (ids) => ids.filter(seen).length + "/" + ids.length;
       return {
@@ -268,10 +300,12 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   c4 = await s04();
   // (of the 13 derived values, those in the Actual columns go with them)
   ok("S04 in Expert at Targeted Use: no Actual column either, the rest shows", c4.bills === "0/5" && c4.actual === "0/4" && c4.target === "5/5" && c4.factors === "5/5" && !/ACTUAL/.test(c4.captions) && parseInt(c4.derived) >= 7, JSON.stringify(c4));
-  const other = () => p.evaluate(() => getComputedStyle(document.querySelector('#teuiSummary td[data-field-id="l_141"]')).visibility === "visible");
+  const other = () => p.evaluate(() => !/, 0\)$/.test(getComputedStyle(document.querySelector('#teuiSummary td[data-field-id="l_141"]')).color));
   ok("S15's ∑ Other Energy is not shown at Targeted Use", (await other()) === false);
   await p.click("#op-view-easy");
   await p.waitForTimeout(300);
+  ra = await aids();
+  ok("in the Reference a typed or chosen value is red, as the accent is", ra.typed === "rgb(255, 138, 138)" && ra.chosen === "rgb(255, 138, 138)", JSON.stringify([ra.typed, ra.chosen]));
   // the IDs are the rows' own, so the Reference shows the Target's
   const refIds = await ids();
   await p.click("#op-model-target");
@@ -285,7 +319,7 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
     p.evaluate(() => {
       const seen = (sel) => {
         const td = document.querySelector("#emissions " + sel);
-        return !!td && td.getClientRects().length > 0 && getComputedStyle(td).visibility === "visible";
+        return !!td && td.getClientRects().length > 0 && getComputedStyle(td).visibility === "visible" && !/, 0\)$/.test(getComputedStyle(td).color);
       };
       const f = (id) => `td[data-field-id="${id}"]`;
       const n = (ids) => ids.filter((id) => seen(f(id))).length + "/" + ids.length;
@@ -297,7 +331,7 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
     p.evaluate(() => {
       const seen = (sec, id) => {
         const td = document.querySelector(`#${sec} td[data-field-id="${id}"]`);
-        return !!td && td.getClientRects().length > 0 && getComputedStyle(td).visibility === "visible";
+        return !!td && td.getClientRects().length > 0 && getComputedStyle(td).visibility === "visible" && !/, 0\)$/.test(getComputedStyle(td).color);
       };
       const n = (sec, ids) => ids.filter((id) => seen(sec, id)).length + "/" + ids.length;
       return {
@@ -352,12 +386,12 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
     p.evaluate(() => {
       const seen = (id) => {
         const td = document.querySelector(`#climateCalculations td[data-field-id="${id}"]`);
-        return !!td && td.getClientRects().length > 0 && getComputedStyle(td).visibility === "visible";
+        return !!td && td.getClientRects().length > 0 && getComputedStyle(td).visibility === "visible" && !/, 0\)$/.test(getComputedStyle(td).color);
       };
       const inputs = ["d_19", "h_19", "h_20", "h_21", "i_21", "m_19", "l_22", "l_24"];
       const kept = ["j_19", "d_20", "d_21", "d_23", "d_24", "h_23", "h_24", "n_23", "n_24"];
       const secondary = ["e_23", "e_24", "e_25", "i_23", "i_24", "d_22", "h_22", "l_20", "l_21", "d_25", "m_23", "m_24"];
-      const captions = [...document.querySelectorAll('#climateCalculations tr[data-id="03-ID"] > td')].filter((c) => c.textContent.trim() && getComputedStyle(c).visibility === "visible").map((c) => c.textContent.trim());
+      const captions = [...document.querySelectorAll('#climateCalculations tr[data-id="03-ID"] > td')].filter((c) => c.textContent.trim() && !/, 0\)$/.test(getComputedStyle(c).color)).map((c) => c.textContent.trim());
       return { inputs: inputs.filter(seen).length + "/" + inputs.length, kept: kept.filter(seen).length + "/" + kept.length, secondary: secondary.filter(seen).length + "/" + secondary.length, captions: captions.join(" ") };
     });
   let c3 = await s03();
@@ -380,6 +414,13 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   ok("S03 in Easy with F280 Mode On: no input hidden", on.seen === on.inputs && on.inputs >= 14 && on.row, JSON.stringify(on));
   const off = await f280("Off");
   ok("and Off again: the F280 inputs go, the row with them", off.seen < off.inputs && !off.row, JSON.stringify(off));
+
+  // 2g. V3's reading aids, in the Target (the Reference's were read above)
+  ra = await aids();
+  ok("a typed or chosen value is cyan in the Target, a calculated one is not", ra.typed === CYAN && ra.chosen === CYAN && ra.calculated !== CYAN, JSON.stringify([ra.typed, ra.chosen, ra.calculated]));
+  ok("Ae is sky blue and Ag brown in S11", ra.air === "rgb(125, 211, 252)" && ra.ground === "rgb(208, 154, 99)", `${ra.air} ${ra.ground}`);
+  ok("the dots: a high loss red, a low loss green; a high gain green, a low gain red; medium yellow", ra.lossHigh === RED && ra.lossLow === GREEN && ra.gainHigh === GREEN && ra.gainLow === RED && ra.medium === "rgb(250, 204, 21)", JSON.stringify([ra.lossHigh, ra.lossLow, ra.gainHigh, ra.gainLow, ra.medium]));
+  ok("a hairline under every row, unbroken", ra.ruled && /^0px/.test(ra.spacing), `${ra.ruled} ${ra.spacing}`);
 
   // 3. Expert shows the same page: the view changes no value and moves no cell
   const easy = await snap();
@@ -453,7 +494,7 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   await p.emulateMedia({ media: "print" });
   const printed = await p.evaluate(() => {
     const size = (sel) => parseFloat(getComputedStyle(document.querySelector(sel)).fontSize);
-    const vis = (id) => getComputedStyle(document.querySelector(`#climateCalculations td[data-field-id="${id}"]`)).visibility;
+    const vis = (id) => (/, 0\)$/.test(getComputedStyle(document.querySelector(`#climateCalculations td[data-field-id="${id}"]`)).color) ? "blank" : "visible");
     const row = getComputedStyle(document.querySelector('#climateCalculations tr[data-id="L.3.3"]')).display;
     return [size('#teuiSummary tr[data-id="T.6.0"] td.id-cell'), size("#teuiSummary td.cell-id"), getComputedStyle(document.querySelector("#beam-main span.cell-id")).display, vis("e_23"), vis("d_22"), vis("d_25"), row];
   });

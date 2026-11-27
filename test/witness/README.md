@@ -66,7 +66,7 @@ What each must show:
   `f280-summary.html` in its own tab, whose first page is the summary sheet laid out as Annex D's Figure D.1
   (thirteen blocks, one printed page) ahead of the supplement. With `<out>` it also writes the print PDF by the
   machine's Chrome.
-- `easy-expert.cjs <out>`: 61 lines of `ok`, then `ALL OK`. A first launch is in Easy (the class `op-easy` on
+- `easy-expert.cjs <out>`: 66 lines of `ok`, then `ALL OK`. A first launch is in Easy (the class `op-easy` on
   `<html>`), the pill follows Copy from Target, no header cell's caption is its own column's letter in either
   view while row IDs, one-letter units (W, m) and named captions stay. Easy shows no Cell ID but S11's Builder
   buttons and S10's opening rows; Expert shows all of them in one style, the ID column's; no row draws its own
@@ -82,5 +82,7 @@ What each must show:
   print, and no input is hidden with F280 Mode On. S04 in Easy shows the fuel table whole at Utility Bills and
   not its derived totals; at Targeted Use its Actual columns go, in both views, and so does S15's ∑ Other
   Energy. S05 in Easy drops its note and its bare compliance percentages and keeps the ✓. S06 shows whole in Easy; S07
-  shows its inputs, results and ✓ and not the steps between. With `<out>` it writes three
+  shows its inputs, results and ✓ and not the steps between. V3's reading aids: a typed or chosen value is cyan in
+  the Target and red in the Reference, Ae is sky blue and Ag brown in S11, the loss and gain dots take their
+  colours, and every row has an unbroken hairline. With `<out>` it writes three
   pictures of the button row.

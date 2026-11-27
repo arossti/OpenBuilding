@@ -247,7 +247,11 @@ outputs would be too, fine to hide."_
 **S07 (2026-11-27, PR #43).** Proposed and built for Andy's smoke: Easy keeps the six inputs, the water used,
 the hot water's energy, the net demands, the emissions and the ✓; it does not show the compliance percentages,
 COPdhw (the slider's own value again), Net Demand-Recovered, SHW Wasted, or the row of system losses, exhaust
-and oil demand.
+and oil demand. Andy ruled yes.
+
+**How Easy hides a value since PR #44:** it blanks the ink (`color: transparent`, no pointer, no selection) and
+keeps the cell, so the row's hairline runs on under it. A whole row still goes with `display: none`; an input
+that must not be reached (S02's fuel prices at Targeted Use) keeps `visibility: hidden`.
 
 **Later, its own pass (Andy 2026-11-27):** collapsing the empty columns and rows that hiding leaves.
 

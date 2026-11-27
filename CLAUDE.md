@@ -59,7 +59,8 @@ shared with the Builders (cyan on the web). No per-app `.css` files.
 - Easy / Expert (the pill after Copy from Target): `js/objective4.mjs` `showView` sets the class `op-easy` on
   `<html>`, kept in the browser as `objective4View`. Display only; what Easy hides is `obstyles.css` §8e (so
   far the Cell IDs: the ID column and the cells `FieldManager.js` `markCellId` marks `cell-id`). The Help button
-  beside it switches V3's field popovers, one setting per view (`objective4Help`).
+  beside it switches V3's field popovers, one setting per view (`objective4Help`). Easy hides a value by
+  blanking its ink (`color: transparent`), never `visibility`, so the row's hairline (§8g) runs on under it.
 - `js/shared/*.mjs` — cross-page utilities (`state-manager.mjs`, `file-handler.mjs`, `indexed-db-store.mjs`, …)
 - Global namespace: `window.BEAM.*` (to become OBJECTIVE's `window.TEUI.*` in the port).
 

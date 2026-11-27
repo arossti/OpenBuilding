@@ -27,14 +27,43 @@ HOLDS" is next below. **The next task: Easy mode section by section, with Andy**
 That curation is his; an agent does not choose what a section hides. The F280 work below is waiting on other
 people: read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11-27), and otherwise leave it.
 
-**BUILT, NOT MERGED: PR #43 (branch `Easy-S06`, to be smoked by Andy).** Stylesheet and witness only.
+**BUILT, NOT MERGED: PR #44 (branch `V3-Reading-Aids`, to be smoked by Andy).** Stylesheet and witness only.
+Andy 2026-11-27, with a picture of V3's S11: _"these features did enhance user comprehension and a visual
+overview ... I wanted to consider adding back some of these features in V4 as a usability UX/UI improvement in
+both Expert and Easy modes."_ The classes were on the cells all along; 4.0's stylesheet had no rule for them.
+`obstyles.css` §8g, in both views and in print:
+
+1. **What the user types or chooses reads in the accent** (V3's blue): typed values, dropdowns and slider
+   values are cyan in the Target and red in the Reference, where the accent itself turns. A value not yet typed
+   stays dim; a locked one stays ghosted.
+2. **Ae sky blue, Ag brown** in S11's "% of Ae & Ag" (`text-air-facing`, `text-ground-facing`). S12 carries no
+   such class in V3 or here: nothing coloured there. ❓ Andy: which S12 values should take the two colours?
+3. **The dots** before each share of loss or gain in S09, S10 and S11: a high loss red, medium yellow, low
+   green; a high usable gain green, a low one red, as V3 had them.
+4. **A hairline under every row.** Each cell draws its piece just below itself, so the columns now touch
+   (`border-spacing: 0 4px`, the 2 px that stood between them moved inside the cells) and the pieces join.
+   - A row cannot draw the line: Safari does not let a table row hold a positioned line (tried; it landed
+     against the page).
+   - A cell hidden with `visibility` draws no piece, so **Easy now blanks a hidden value's ink**
+     (`color: transparent`) instead: the cell and its hairline stay. S02's hidden fuel prices are inputs and
+     keep `visibility: hidden` (they must not take the Tab key), so the line stops under them.
+   - **Not done: vertical rules** for S13 or other dense sections (Andy: "possibly some verticals"). For S13's
+     cleanup.
+
+- A totals row reads a little heavier again (`total-row-text`).
+- **S07's Easy cut is RULED** (Andy, "yes and yes"), and #43 merged.
+- **Witness:** `test/witness/easy-expert.cjs`, 66 checks. S09 – S12 still fit their cards at 1440, 1512 and
+  1728 px wide. Parity not re-run: no file under `src/` changed since #41's 2146 / 2146.
+- **NEXT: S08 in Easy.**
+
+**LIVE: PR #43 (`1ec227e`, merged on Andy's word 2026-11-27).** Stylesheet and witness only.
 
 - **A rule for every section (Andy 2026-11-27):** _"There is no harm done if inputs are not relevant than
   related outputs would be too, fine to hide."_ Where an input does not apply, what is computed from it need not
   show either. (S15's ∑ Other Energy at Targeted Use is the first case; ruled, display only, no engine change.)
 - **S05's Easy cut is RULED** (Andy, "yes").
 - **S06 in Easy: nothing to hide.** It holds seven inputs, two subtotals and one unit conversion.
-- **S07 in Easy, PROPOSED by Claude, built for Andy's smoke.** Easy keeps the six inputs (the method and its
+- **S07 in Easy, RULED as proposed.** Easy keeps the six inputs (the method and its
   value, the energy source, the efficiency, the drain water heat recovery), the water used, the hot water's
   energy, the net thermal and electrical demand, the emissions and the ✓. It does not show: the four
   compliance percentages beside the ✓ and their "Ref" caption; COPdhw, which repeats the efficiency slider; the
@@ -42,7 +71,6 @@ people: read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11
   exhaust and oil demand, which holds no input.
 - **Witness:** `test/witness/easy-expert.cjs`, 61 checks. Parity not re-run: no file under `src/` changed since
   #41's 2146 / 2146.
-- **NEXT: S08 in Easy.**
 
 **LIVE: PR #42 (`8cc38d3`, merged on Andy's word 2026-11-27).** Stylesheet and witness only.
 
