@@ -22,6 +22,7 @@ Run from this repo's root; `<out>` is any folder for screenshots:
     node test/witness/host-per-model.cjs           # Trust's 4-opening write: the Reference still computes
     node test/witness/display-format.cjs           # typed numbers across a model switch; S21's rounding
     ../andy-rnd/node_modules/.bin/playwright test --config=test/witness/v3-reference/pw.config.cjs
+    node test/witness/f280-run.cjs <case inputs dir> <out dir> --annexj ../andy-rnd/test/fixtures/f280-annex-j.json
 
 What each must show:
 
@@ -42,5 +43,12 @@ What each must show:
 - `host-per-model.cjs`: after Trust's write the Reference reads 190.1 with no hosts, the Target 82.8 and
   m_10 `49%` (it read `Unavailable`); the reloaded file shows the same; Copy from Target → All Inputs gives
   the Reference the Target's four hosts.
+- `f280-run.cjs`: the qualified operator's run (CSA F280-12 Cl. 8.2) of the verification agent's case files.
+  It opens each file of `<case inputs dir>/run_list.csv` in a fresh context, as the page's Open does, and writes
+  `<out dir>/f280-results.json` and `.csv`: design heat loss and nominal gain with their terms, for the Target
+  and the Reference (a variant file's Reference row is the base case), every field of the file against what the
+  page holds, and every hosted opening against its wall and overhang. **The case files, the Annex J fixture and
+  the results are private (values derived from CSA F280-12): keep all three outside this public repository.**
+  The script holds none of them. `--only <regex>` runs some cases, `--jobs <n>` sets the parallel contexts.
 - `display-format.cjs`: `Target changed by a round trip: 0 | Reference: 0` and `long decimals shown: 0` on the
   default project and on case 03 (F280); S04's bill reads `132,938.00`, S21's wall U `0.149`.
