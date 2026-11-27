@@ -16,7 +16,8 @@
 //     import cut to their leading number before 2026-11-26;
 //   - Copy from Target, All Inputs carries the record to the Reference;
 //   - F280 Mode Off hides the record and the button;
-//   - the button opens the sheet in its own tab, which draws the 64 fields and has a Print button.
+//   - the button opens the sheet in its own tab: first the summary sheet laid out as Annex D's Figure D.1, one
+//     page, then the supplement, which draws the 64 fields; the tab has a Print button.
 const { webkit, chromium } = require("playwright");
 const fs = require("fs");
 const URL = process.argv.find((a) => /^https?:/.test(a)) || "http://localhost:8831/objectivepro.html";
@@ -204,6 +205,24 @@ async function start(browser) {
   });
   check("the button opens f280-summary.html in its own tab", drawn.url === "f280-summary.html", drawn.title);
   check("the tab draws fields 1 to 64", covered.size === 64 && [...covered].every((n) => n >= 1 && n <= 64), covered.size);
+  // page 1: the summary sheet laid out as Annex D's Figure D.1 (one page), ahead of the supplement
+  const form = await tab.evaluate(() => {
+    const f = document.getElementById("fs-form");
+    const line = (label) => [...f.querySelectorAll(".ff-box")].find((b) => b.querySelector(".ff-label")?.textContent === label)?.querySelector(".ff-text")?.textContent;
+    return {
+      first: f && !f.hidden && f.compareDocumentPosition(document.getElementById("fs-sheet")) & Node.DOCUMENT_POSITION_FOLLOWING ? true : false,
+      title: f.querySelector(".ff-title-text")?.textContent,
+      bands: [...f.querySelectorAll(".ff-band")].map((b) => b.textContent),
+      labels: f.querySelectorAll(".ff-label").length,
+      address: line("Address:"),
+      site: line("Site:"),
+      shading: line("Internal shading:"),
+      lot: line("Lot:"),
+    };
+  });
+  const BANDS = ["Building location", "Calculations based on", "Heating design conditions", "Cooling design conditions", "Above grade walls", "Below grade walls", "Floors on soil", "Ceilings", "Exposed floors", "Doors", "Windows", "Skylights", "Calculations performed by"];
+  check("the summary sheet comes first, with Figure D.1's thirteen blocks", form.first && form.title === "Heat loss and gain calculation summary sheet" && BANDS.every((b) => form.bands.includes(b)) && form.bands.length === 13, form.bands.length);
+  check("its lines hold the record; one left empty stays empty; the shading line points to the schedule", form.address === "496 Fake Street" && form.lot === "16" && form.site === "" && form.shading === "see the window schedule", [form.address, form.lot, form.site, form.shading]);
   check("the tab shows the model's record, one field not carried, and a Print button", drawn.address === "496 Fake Street" && drawn.notCarried === 1 && drawn.print, drawn);
   check("no page error", errs.length === 0, errs);
   if (OUT) {
@@ -224,7 +243,12 @@ async function start(browser) {
     await t2.waitForTimeout(600);
     const pdf = await t2.pdf({ path: `${OUT}/f280-summary.pdf`, preferCSSPageSize: true, printBackground: true });
     const pages = (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) || []).length;
-    check("the sheet prints (Chrome, the page's own size and margins)", pdf.length > 20000 && pages >= 1, `${pages} pages, ${pdf.length} bytes -> ${OUT}/f280-summary.pdf`);
+    // the summary sheet is one page: with the supplement hidden, the print is exactly one sheet
+    await t2.addStyleTag({ content: "#fs-sheet { display: none !important; }" });
+    const alone = await t2.pdf({ preferCSSPageSize: true, printBackground: true });
+    const formPages = (alone.toString("latin1").match(/\/Type\s*\/Page[^s]/g) || []).length;
+    check("the summary sheet alone prints on one page", formPages === 1, formPages);
+    check("the sheet prints (Chrome, the page's own size and margins)", pdf.length > 20000 && pages >= 2, `${pages} pages, ${pdf.length} bytes -> ${OUT}/f280-summary.pdf`);
     await cb.close();
   }
 

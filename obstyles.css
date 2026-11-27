@@ -5442,6 +5442,7 @@ html.app-f280sheet body {
   --fs-line-soft: #dedee2;
   --fs-band: #f1f1f3;
   --fs-flag: #9a3412;
+  --fs-entry: #1e3a8a;
   box-sizing: border-box;
   width: 100%;
   max-width: 8.5in;
@@ -5603,6 +5604,137 @@ html.app-f280sheet body {
   white-space: nowrap;
 }
 
+/* Part 1: the summary sheet as Annex D's Figure D.1 lays it out (Andy 2026-11-27: "mirror the sample report
+   page as CSA formatted it"). One page: a 12-column grid of boxes, each a small label and its line; grey bands
+   for the blocks. Sized to fit a letter sheet's 10 in between the margins with every line present. */
+.fs-form {
+  margin-bottom: 24px;
+}
+.ff-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  border-top: 1.5px solid var(--fs-ink);
+  border-left: 1.5px solid var(--fs-ink);
+  font-size: 8pt;
+  line-height: 1.25;
+}
+.ff-grid > *,
+.ff-by > * {
+  border-right: 1.5px solid var(--fs-ink);
+  border-bottom: 1px solid var(--fs-ink);
+}
+.ff-by {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 0 !important;
+  border-right: 0 !important;
+}
+.ff-by > * {
+  flex: 1;
+}
+.ff-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 6px;
+  background: var(--fs-band);
+}
+.ff-title-text {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-head);
+  font-size: 11pt;
+  font-weight: 700;
+}
+.ff-title-form {
+  max-width: 12em;
+  font-size: 6.5pt;
+  font-weight: 700;
+  text-align: right;
+}
+.ff-band {
+  padding: 2px 6px;
+  background: var(--fs-band);
+  font-family: var(--font-head);
+  font-weight: 700;
+  text-align: center;
+}
+.ff-box {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-height: 1.85em;
+  padding: 2px 5px;
+  overflow: hidden;
+}
+.ff-stack {
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.ff-issued {
+  flex-direction: column;
+  gap: 1px;
+}
+.ff-issued-line {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.ff-tall {
+  min-height: 3.4em;
+}
+.ff-label {
+  flex: none;
+  font-size: 6.5pt;
+  color: var(--fs-dim);
+}
+.ff-text {
+  color: var(--fs-entry); /* what was entered, in blue as Figure D.1's sample shows it; the form's own words in ink */
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.ff-issued-line .ff-text {
+  flex: 1;
+  border-bottom: 1px solid var(--fs-ink);
+  text-align: center;
+}
+.ff-units {
+  white-space: pre;
+  color: var(--fs-ink);
+  font-weight: 400;
+}
+.ff-stamp {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+}
+.ff-stamp-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  background: var(--fs-band);
+  color: var(--fs-dim);
+  font-weight: 700;
+  text-align: center;
+}
+.ff-stamp-held {
+  font-size: 7.5pt;
+  font-weight: 600;
+  text-align: center;
+}
+.ff-foot {
+  margin: 6px 0 0;
+  font-size: 7pt;
+  color: var(--fs-dim);
+}
+
 /* The sheet's @page (portrait) is in f280-summary.html's own head: @page cannot be scoped to an html class, and
    here it would turn OBJECTIVE's landscape report (§8d) portrait too. */
 @media print {
@@ -5624,6 +5756,11 @@ html.app-f280sheet body {
     padding: 0;
     box-shadow: none;
     font-size: 9pt;
+  }
+  html.app-f280sheet .fs-form {
+    margin: 0;
+    font-size: 9.5pt;
+    break-after: page; /* the summary sheet is page 1, alone; the supplement starts page 2 */
   }
   html.app-f280sheet .fs-section {
     margin-top: 9px;

@@ -20,7 +20,7 @@
 
 ### ▶ START HERE (handoff 2026-11-26 / 27 overnight, the laptop `M2max`) — written for a cold start after a /clear
 
-**LIVE: `main` after PR #32** (the F280 calculation summary sheet; this handoff is its last commit), deployed to
+**LIVE: `main` after PR #32** (the F280 calculation summary sheet), deployed to
 https://arossti.github.io/OpenBuilding/. Before it: #30 (`ab7c9c2`, the runner and the Garage facing) and #31
 (docs). andy-rnd `main` is **`645784e`** (#28, F280-1's ceiling). Andy's word for the night, 2026-11-26: _"you
 may PR and merge and self-smoke w/o me"_; that covered #28 and #32 and is not a standing rule.
@@ -53,8 +53,24 @@ may PR and merge and self-smoke w/o me"_; that covered #28 and #32 and is not a 
 - **CSA:** Andy has written to CSA's store for the update copy. A firmer email, **drafted for Kieran to send**
   (in #27 and in his note), asks for the erratum, the Archetype 3 inputs, Table 6F and Cl. 8.3.8 b), with a
   reply by 2026-12-03. Its recipient is blank and its escalation paragraph is Andy's and Kieran's to keep.
-- A suggestion not yet acted on: ask HVAC Designers of Canada how their verifications treated the misprinted
-  row; they may hold the corrected value.
+- **HVAC Designers of Canada is the lead for both open items, not yet acted on (❓ Andy: who writes to them).**
+  They are the body that verifies software to Section 8: https://hvacdc.ca/f280-12-software/ lists eight
+  products "verified by HVAC Designers of Canada as meeting the requirements of section 8 of CSA F280-12", first
+  verified October 2023, the work funded by NRCan's LEEP team, and the three condition sheets read say
+  "Conditions: None". Eight products cannot have matched a misprinted row, so HVAC-DC must hold either a
+  corrected value or a ruling on it, and the same for the end unit's inputs. Contact as their site gives it:
+  info@hvacdc.ca. The F280 package that came with the Standard (NRCan's method spreadsheets and their test
+  cases) holds no archetype inputs: checked 2026-11-27.
+- **I19, a second diagnostic (2026-11-27, Andy's question; never an input to adopt):** the highest ceiling is a
+  lever of the same size as the ELA10. Raised by a tenth on all 16 Archetype 3 and 4 files, every one of them is
+  inside the band, the four that fail included; by a twentieth, two still fail. It does not explain the gap:
+  the end unit then sits low and the middle unit high, as before. The height is Kieran's ruling (I18), read
+  from NRCan's help: "the vertical distance from ground level to the highest elevation that house air can rise
+  to ... When the foundation is a walkout basement, ground level is actually at the top of the basement floor
+  slab." ❓ Kieran: does Annex G show anything for Archetypes 3 and 4 that puts ground level lower? Results:
+  private folder, `diagnostics/i19-ceiling-height-scan.csv`. Not the cause, by the code: the weather station's
+  elevation (AIM-2 takes none; its air density is fixed) and the flow exponent as a separate input (it is
+  derived from the ACH50, the volume and the ELA10).
 
 **NEXT, in this order.** What is ruled and what is not: **the order inside B is Andy's ruling** of 2026-11-26.
 **A1 and A2 first is ruled too** (Andy 2026-11-26: _"yes, do the F280-1 fix and the verification report
@@ -122,7 +138,12 @@ futzing can happen after we validate compliance."_
   - The envelope "styles" are S11's rows grouped by construction (the same RSI and the same applied assembly),
     doors by U, windows by U and SHGC. After the 64: the qualification, the further inputs the calculation
     used (AIM-2, BASESIMP, the volume), **the schedule of every envelope row and opening**, the design loads.
-  - The field NAMES are the Standard's; the layout and every other word are ours (no facsimile of CSA's form).
+  - **Its first page is the summary sheet laid out as Annex D's Figure D.1, one page (PR #33;** Andy 2026-11-27:
+    _"Can we mirror the sample report page as CSA formatted it, and then append any extra pages needed so we do
+    not diverge so far from what building officials are used to receiving?"_**).** The same thirteen blocks in
+    the same places, the same labels, entries in blue, a line left empty where nothing was entered. Each field
+    has a `short` line for it (`F280Summary.js`); a group with more styles than the form has lines says so on
+    its last line. Everything listed above follows it as **the supplement**, from page 2.
 - **S21's record, F.41 – F.58:** the 18 fields the sheet asks for that no other section held (client, address,
   site, lot, postal code, the drawings used, front facing and whether assumed, whether the air tightness is
   assumed, attachments, notes, the designer's address and contact). Per model, saved with the project, in no
@@ -134,12 +155,14 @@ futzing can happen after we validate compliance."_
     (`FileHandler.js`, both import passes; `Section21.js` `getFields`);
   - a file without the columns kept the previous project's record: `FileHandler.js` `addedDefaults`.
 - **Known and left:** an empty Reference field shows the Target's text (every Reference input does this:
-  `ComputationIntegration` `populateReferenceModel`). The print is 4 – 5 sheets, portrait; its `@page` is in the
-  page's own head because `@page` cannot be scoped and OBJECTIVE's report is landscape.
+  `ComputationIntegration` `populateReferenceModel`). The print is the one-page sheet plus 4 – 5 sheets of
+  supplement, portrait; its `@page` is in the page's own head because `@page` cannot be scoped and OBJECTIVE's
+  report is landscape.
 - **Witnesses:** `test/witness/f280-summary.cjs` (ALL PASS, 26 checks, and the print PDF by Chrome); Kieran's 45
   files give the tagged results unchanged (35 476 values, only the run's time, commit and branch differ);
   parity against V3 2146 / 2146 on all 16 cases (+18 fields only here: the record); `garage-facing.cjs` and
-  `display-format.cjs` as before.
+  `display-format.cjs` as before. With #33 the witness has 29 checks: the form comes first, holds Figure D.1's
+  thirteen blocks, and prints alone on one page.
 - ⚠ **An eighth way `src/` differs from andy-rnd** (the list is further down): the sheet and the record.
 
 **WHAT PR #30 SHIPPED** (merged on Andy's word after his smoke):
