@@ -103,7 +103,7 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
         values[id] = el.tagName === "SELECT" || el.tagName === "INPUT" ? el.value : el.textContent.trim();
       });
       // (a row Easy takes away whole is left out of the count: S03's winter average, S04's derived totals)
-      const gone = '#climateCalculations tr[data-id="L.3.3"], #actualTargetEnergy tr:is([data-id="T.3.7"], [data-id="T.3.8"], [data-id="T.3.9"]), #waterUse tr[data-id="W.6.1"], #indoorAirQuality tr[data-id="A.6"]';
+      const gone = '#climateCalculations tr[data-id="L.3.3"], #actualTargetEnergy tr:is([data-id="T.3.7"], [data-id="T.3.8"], [data-id="T.3.9"]), #waterUse tr[data-id="W.6.1"], #indoorAirQuality tr[data-id="A.6"], #occupantInternalGains tr[data-id="G.2"]';
       const cells = [...document.querySelectorAll("#beam-main .data-table td")].filter((c) => !c.closest(gone));
       return { values, cells: cells.length, shown: cells.filter((c) => c.getClientRects().length > 0).length };
     });
@@ -223,6 +223,8 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
         calculated: col('#teuiSummary td[data-field-id="d_135"]'),
         air: col("#envelopeTransmissionLosses td.text-air-facing"),
         ground: col("#envelopeTransmissionLosses td.text-ground-facing"),
+        s12air: col('#volumeSurfaceMetrics td[data-field-id="d_101"]'),
+        s12ground: col('#volumeSurfaceMetrics td[data-field-id="d_102"]'),
         lossHigh: col("#envelopeTransmissionLosses td.loss-high", "::before"),
         lossLow: col("#envelopeTransmissionLosses td.loss-low", "::before"),
         gainHigh: col("#beam-main td.gain-high", "::before"),
@@ -342,7 +344,10 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
         steps: n("waterUse", ["m_49", "m_50", "m_52", "m_53", "e_52", "j_52", "j_53", "d_54", "j_54", "k_54"]),
         s08inputs: n("indoorAirQuality", ["d_56", "d_57", "d_58", "d_59", "g_59", "i_59"]),
         s08kept: n("indoorAirQuality", ["k_56", "k_57", "k_58", "k_59", "n_56", "n_57", "n_58", "n_59"]),
-        s08gone: n("indoorAirQuality", ["m_56", "m_57", "m_58", "m_59", "d_60"])
+        s08gone: n("indoorAirQuality", ["m_56", "m_57", "m_58", "m_59", "d_60"]),
+        s09inputs: n("occupantInternalGains", ["d_63", "g_63", "l_63", "d_64", "d_66", "g_67", "d_68"]),
+        s09kept: n("occupantInternalGains", ["h_64", "i_64", "j_64", "k_64", "l_64", "d_65", "h_65", "h_66", "d_67", "h_67", "h_69", "h_71", "i_71", "k_71", "n_65", "n_66", "n_67"]),
+        s09gone: n("occupantInternalGains", ["m_65", "m_66", "m_67", "i_63", "g_64", "h_70", "i_70", "k_70"])
       };
     });
   let c7 = await s0607();
@@ -350,6 +355,8 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   ok("S07 in Easy: inputs, results and ✓ show; the steps between do not", c7.inputs === "6/6" && c7.results === "10/10" && c7.marks === "4/4" && c7.steps === "0/10", JSON.stringify(c7));
 
   ok("S08 in Easy: inputs, limits and ✓ show; the shares of the limit and the wood offset do not", c7.s08inputs === "6/6" && c7.s08kept === "8/8" && c7.s08gone === "0/5", JSON.stringify([c7.s08inputs, c7.s08kept, c7.s08gone]));
+
+  ok("S09 in Easy: inputs, each load's energy and gains, totals and ✓ show; the steps and the subtotal do not", c7.s09inputs === "7/7" && c7.s09kept === "17/17" && c7.s09gone === "0/8", JSON.stringify([c7.s09inputs, c7.s09kept, c7.s09gone]));
 
   let c5 = await s05();
   ok("S05 in Easy: inputs, results and ✓ show; the note and the bare percentages do not", c5.inputs === "2/2" && c5.results === "7/7" && c5.marks === "4/4" && c5.percents === "0/4" && !c5.note, JSON.stringify(c5));
@@ -423,7 +430,8 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   // 2g. V3's reading aids, in the Target (the Reference's were read above)
   ra = await aids();
   ok("a typed or chosen value is cyan in the Target, a calculated one is not", ra.typed === CYAN && ra.chosen === CYAN && ra.calculated !== CYAN, JSON.stringify([ra.typed, ra.chosen, ra.calculated]));
-  ok("Ae is sky blue and Ag brown in S11", ra.air === "rgb(125, 211, 252)" && ra.ground === "rgb(208, 154, 99)", `${ra.air} ${ra.ground}`);
+  ok("Ae is pale blue and Ag brown in S11, and in S12 as V3 marks them", ra.s12air === "rgb(186, 230, 253)" && ra.s12ground === "rgb(208, 154, 99)", `${ra.s12air} ${ra.s12ground}`);
+  ok("Ae is pale blue and Ag brown in S11", ra.air === "rgb(186, 230, 253)" && ra.ground === "rgb(208, 154, 99)", `${ra.air} ${ra.ground}`);
   ok("the dots: a high loss red, a low loss green; a high gain green, a low gain red; medium yellow", ra.lossHigh === RED && ra.lossLow === GREEN && ra.gainHigh === GREEN && ra.gainLow === RED && ra.medium === "rgb(250, 204, 21)", JSON.stringify([ra.lossHigh, ra.lossLow, ra.gainHigh, ra.gainLow, ra.medium]));
   ok("a hairline under every row, unbroken", ra.ruled && /^0px/.test(ra.spacing), `${ra.ruled} ${ra.spacing}`);
 
@@ -442,7 +450,7 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   ok("every value the same in both views", dv.length === 0, `${Object.keys(easy.values).length} values; differ: ${dv.slice(0, 5).join(" ")}`);
   ok("every cell keeps its place", easy.shown === expert.shown && easy.cells === expert.cells, `${easy.shown} of ${easy.cells} cells laid out in Easy, ${expert.shown} of ${expert.cells} in Expert`);
   c7 = await s0607();
-  ok("S07 and S08 in Expert: all of it shows", c7.steps === "10/10" && c7.inputs === "6/6" && c7.s06 === "10/10" && c7.s08gone === "5/5" && c7.s08kept === "8/8", JSON.stringify(c7));
+  ok("S07, S08 and S09 in Expert: all of it shows", c7.steps === "10/10" && c7.inputs === "6/6" && c7.s06 === "10/10" && c7.s08gone === "5/5" && c7.s08kept === "8/8" && c7.s09gone === "8/8" && c7.s09kept === "17/17", JSON.stringify(c7));
   c5 = await s05();
   ok("S05 in Expert: all of it shows", c5.percents === "4/4" && c5.note && c5.marks === "4/4", JSON.stringify(c5));
   c3 = await s03();

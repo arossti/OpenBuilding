@@ -252,6 +252,14 @@ and oil demand. Andy ruled yes.
 **S08 (2026-11-27, PR #45).** Proposed and built for Andy's smoke: Easy keeps the six inputs, each guidance
 limit and the ✓; it does not show the share of the limit or the Wood Emissions Offset row.
 
+Andy ruled yes to S08's cut.
+
+**S09 (2026-11-27, PR #46).** Proposed and built for Andy's smoke: Easy keeps the seven inputs, each load's
+energy and gains with their dots, the DHW losses, the totals and the ✓; it does not show the share of the
+reference, the two steps behind the occupants' gain, or the plug / light / equipment subtotal.
+
+**Where the curation stands and what comes next: the roadmap, `schema/schema.md` §0 "START HERE".**
+
 **How Easy hides a value since PR #44:** it blanks the ink (`color: transparent`, no pointer, no selection) and
 keeps the cell, so the row's hairline runs on under it. A whole row still goes with `display: none`; an input
 that must not be reached (S02's fuel prices at Targeted Use) keeps `visibility: hidden`.

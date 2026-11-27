@@ -18,7 +18,101 @@
 
 ## 0. Cold-start handoff (read this first)
 
-### ▶ START HERE (handoff 2026-11-27, the laptop `M2max`) — written for a cold start after a /clear
+### ▶ START HERE (handoff 2026-11-27, evening, the laptop `M2max`) — written for a cold start after a /clear
+
+**Where things stand.** `main` is **`b3c0f2f`** (PR #45), deployed to https://arossti.github.io/OpenBuilding/.
+**PR #46 (branch `Easy-S09`) is open, not merged: Andy smokes it, merge only on his word.** It holds S09's Easy
+cut (Claude's proposal, his to rule), the paler Ae blue and this handoff. Everything of 2026-11-27 is display
+only: no calculation changed all day. Parity against V3 on this branch: 2146 / 2146 on all 16 cases; every
+witness of `test/witness/README.md` passes (V3's 8 Reference specs last run at #41, no file under `src/`
+changed since).
+
+**THE NEXT ARC, in Andy's words (2026-11-27):** _"the next arc can consider refactoring the CSS which may have a
+lot of duplicated or separate style rules by now, it would be nice to standardize button sizes, toggles,
+sliders, fonts and other style formats if they are extensive/differnt."_
+
+- `obstyles.css` is one file of about 6200 lines, scoped by html class under `§N  APP: name` banners. OBJECTIVE's
+  part is §8 (§8b the V3 sections restyled, §8c the Reference look, §8d print, §8e what Easy hides, §8f what
+  applies only to utility bills, §8g V3's reading aids). Rules were added where each feature landed, so the
+  same thing is often said twice (alignment in §8b and again per section; paddings re-set in §8g; `!important`
+  fighting `!important`).
+- **Start with an audit, not edits:** list the distinct button, pill / toggle, slider, select, input and font
+  treatments actually in use across `objectivepro.html`, `takeoffeh.html`, `index.html`, `f280-summary.html`
+  and the Builders' `builders/tokens.css` (published from ABCD.EARTH: never edited here), and bring Andy the
+  list with a proposed standard. He rules; then refactor one family at a time.
+- **The guard for a refactor is pictures and the witness.** `test/witness/easy-expert.cjs` (69 checks) reads
+  computed colours, alignments, hairlines and what each view shows; `onepage.cjs` prints. Before touching a
+  rule, screenshot every section in Easy and Expert, Target and Reference, at 1280, 1512 and 1728 px wide; after,
+  compare. Measure in WebKit (Andy's browser is Safari-class) and in Chrome.
+- A push to `main` redeploys; one branch = one PR; a refactor PR should change no pixel it does not name.
+
+**THEN: Easy mode goes on from S10.** How a section is curated, as it went for S02 – S09: Claude lists the
+section's inputs and calculated values, builds a recommended cut on a branch with a witness check, and Andy
+rules on it at his smoke. His rules so far:
+
+- Easy hides no input. The one exception: what applies only to utility bills, at Targeted Use (S02's fuel
+  prices, S04's Actual columns, S15's ∑ Other Energy), and that goes in BOTH views.
+- _"There is no harm done if inputs are not relevant than related outputs would be too, fine to hide."_
+- What Easy has dropped so far, section after section: the bare percentage beside a ✓ (the ✓ stays),
+  intermediate steps, values that repeat an input, unit twins (°F), derived totals below a table.
+- Easy hides a value by blanking its ink (`color: transparent`), never `visibility`, so the row's hairline runs
+  on; a whole row goes with `display: none`. On screen only: print shows the full report.
+- **A calculation change needs Andy to understand what it refers to first** (_"I'm wary about calculation
+  engine changes without understanding what it refers to"_): prefer a display rule, explain, ask.
+- Renaming or renumbering: bring him the list first (_"verify with me in a list before changing"_). The Sankey
+  names nodes by row ID, so it arbitrates; M is Mechanical, V Ventilation, T totals.
+
+| Section   | Easy   | Notes                                                                                                          |
+| --------- | ------ | -------------------------------------------------------------------------------------------------------------- |
+| S02       | done   | nothing hidden; fuel prices follow S.2                                                                         |
+| S03       | done   |                                                                                                                |
+| S04       | done   | Actual columns follow S.2                                                                                      |
+| S05       | done   | E.3.5 is the Builders'                                                                                         |
+| S06       | done   | nothing to hide                                                                                                |
+| S07       | done   |                                                                                                                |
+| S08       | done   |                                                                                                                |
+| S09       | PR #46 | proposed                                                                                                       |
+| S10 – S15 | to do  | **S13 is "a hot mess"** (Andy): it gets a cleanup plan of its own, with vertical rules to group related fields |
+| S16 – S21 | to do  | outputs and compliance; S21 shows only under F280 Mode                                                         |
+
+**Open with Andy (none blocks the next arc):**
+
+- S09's caption over the cooling-gain percentages reads "Htg Gain (%)" a second time; the fields under it are
+  cooling gains (`l_64` "Occupant Cooling Gain: %"). ❓ "Cooling Gain (%)"? Not changed.
+- S14's note "T.4.1 Includes V.5 Net Vent'l. & T.7.3 CEDI Ae Losses": there is no V.5 and T.7.3 is S15's
+  "∑ Other Energy". His wording wanted.
+- The Sankey's "M.2.1.S Sink" and "M.2.1.D Energy Input" name no row of S13 (it has M.1.4 Sink and M.2.1 Heating
+  System Demand). For S13's cleanup.
+- S15's ∑ Other Energy is hidden at Targeted Use, not zeroed: the engine still multiplies typed bills by prices
+  there. Nothing reads it.
+- **Later passes Andy named:** collapsing the empty columns and rows that hiding leaves (S03's Elevation and
+  S04's Nuclear Waste sit alone on their rows); the Builders inside OBJECTIVE brought up to ABCD.EARTH's
+  refinements (_"just not yet"_; until then leave them alone, S11's ID buttons and S05's E.3.5 included).
+
+**The F280 verification is where it was: waiting on other people.** Nothing came back on andy-rnd#27 during
+2026-11-27. Its state, and the private folder it lives in, are further down ("Where the F280 claim stands",
+"WAITING ON OTHERS"). Check #27 at the start of a session and otherwise leave it.
+
+**To start:** `hostname` (the laptop is `M2max`); `git -C ~/.claude/projects/-Users-andrewthomson-Documents-OpenBuilding/memory pull -q`;
+here `git checkout main && git pull`; serve with `python3 schema/scripts/nocache-serve.py 8831` and
+`(cd ../andy-rnd && node test/static-server.cjs 8791)`; `test/witness/README.md` has every probe and what it
+must show (`export NODE_PATH=../andy-rnd/node_modules` in the same shell, or Playwright is not found).
+
+### The record of 2026-11-27, newest first (PR #37 – #46: Easy / Expert, the IDs, the reading aids)
+
+**PR #46 (branch `Easy-S09`, open).**
+
+- **S09 in Easy, PROPOSED by Claude, built for Andy's smoke.** Easy keeps the seven inputs (occupants, hours,
+  bedrooms / units, activity, lighting, the equipment spec, elevators), each load's energy and its gains to
+  heating and cooling with their dots, the DHW losses, the totals and the ✓. It does not show: the share of the
+  reference beside the ✓ and its caption; the two steps behind the occupants' gain (annual occupied hours
+  "/ 8760", watts per person); and the subtotal of plug, light and equipment, which the totals row sums again.
+- **The Ae blue is paler** (`#bae6fd`; Andy: _"too close to our cyan now"_).
+- **Ae / Ag in S12 and S19 were already coloured:** V3's own code puts the two classes on S12's Ae and Ag areas
+  and U-values (`d_101`, `g_101`, `d_102`, `g_102`) and S19's (`d_152`, `g_152`, `d_153`, `g_153`) as it runs,
+  and §8g's rule colours them. Claude had told Andy S12 carried no class: wrong, it looked in the section's
+  definition and not on the running page. V3's page, asked directly, colours exactly these and S11's column.
+- Witness: 69 checks.
 
 **▶ EASY / EXPERT IS LIVE: the stub (PR #37, `1e4d21b`) and its first step (PR #38, branch
 `Easy-Cell-IDs-Help`), both merged on Andy's word 2026-11-27, #38 after the nits of his smoke.** "WHAT PR #38
@@ -27,7 +121,8 @@ HOLDS" is next below. **The next task: Easy mode section by section, with Andy**
 That curation is his; an agent does not choose what a section hides. The F280 work below is waiting on other
 people: read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11-27), and otherwise leave it.
 
-**BUILT, NOT MERGED: PR #44 (branch `V3-Reading-Aids`, to be smoked by Andy).** Stylesheet and witness only.
+**LIVE: PR #44 (`ecff35b`) and PR #45 (`b3c0f2f`), merged on Andy's word 2026-11-27** (_"That's SO much better
+now!"_). Stylesheet and witness only.
 Andy 2026-11-27, with a picture of V3's S11: _"these features did enhance user comprehension and a visual
 overview ... I wanted to consider adding back some of these features in V4 as a usability UX/UI improvement in
 both Expert and Easy modes."_ The classes were on the cells all along; 4.0's stylesheet had no rule for them.
@@ -36,8 +131,8 @@ both Expert and Easy modes."_ The classes were on the cells all along; 4.0's sty
 1. **What the user types or chooses reads in the accent** (V3's blue): typed values, dropdowns and slider
    values are cyan in the Target and red in the Reference, where the accent itself turns. A value not yet typed
    stays dim; a locked one stays ghosted.
-2. **Ae sky blue, Ag brown** in S11's "% of Ae & Ag" (`text-air-facing`, `text-ground-facing`). S12 carries no
-   such class in V3 or here: nothing coloured there. ❓ Andy: which S12 values should take the two colours?
+2. **Ae sky blue, Ag brown** in S11's "% of Ae & Ag" (`text-air-facing`, `text-ground-facing`), and in S12 and
+   S19 where V3's code sets the classes as it runs (see PR #46 above; the blue made paler there).
 3. **The dots** before each share of loss or gain in S09, S10 and S11: a high loss red, medium yellow, low
    green; a high usable gain green, a low one red, as V3 had them.
 4. **A hairline under every row.** Each cell draws its piece just below itself, so the columns now touch
@@ -54,12 +149,10 @@ both Expert and Easy modes."_ The classes were on the cells all along; 4.0's sty
 - **S07's Easy cut is RULED** (Andy, "yes and yes"), and #43 merged.
 - **Witness:** `test/witness/easy-expert.cjs`, 66 checks. S09 – S12 still fit their cards at 1440, 1512 and
   1728 px wide. Parity not re-run: no file under `src/` changed since #41's 2146 / 2146.
-- **PR #45 (branch `Easy-S08`, stacked on #44; merge #44 first): S08 in Easy, PROPOSED by Claude, built for
-  Andy's smoke.** Easy keeps the six inputs (radon, CO2, TVOC, the two humidity sliders and their method), the
+- **PR #45: S08 in Easy, RULED as proposed (Andy, "yes to both").** Easy keeps the six inputs (radon, CO2, TVOC, the two humidity sliders and their method), the
   guidance limit beside each and the ✓. It does not show the share of the limit (the limit and the ✓ already
   say it) nor the Wood Emissions Offset row (computed from S04's wood; not a measure of the air). Witness: 67
   checks.
-- **NEXT: S09 in Easy.**
 
 **LIVE: PR #43 (`1ec227e`, merged on Andy's word 2026-11-27).** Stylesheet and witness only.
 

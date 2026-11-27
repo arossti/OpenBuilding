@@ -5147,7 +5147,8 @@ input.op-pill:checked::before {
    `html.op-easy <selector>` INSIDE `@media screen`: print shows the full report whatever the view. Easy never
    hides an input, with one exception (S04's Actual columns while S.2 is at Targeted Use). Hidden so far: the
    Cell IDs; S03's secondary climate values; S04's derived totals; S05's note and compliance percentages; S07's
-   intermediate steps; S08's shares of the limit and its wood offset. */
+   intermediate steps; S08's shares of the limit and its wood offset; S09's
+   steps and subtotal. */
 /* A field's help popover is Bootstrap's light card; its title took the page's light heading colour and read
    washed out on the card's pale band (Andy 2026-11-27). */
 .app-beamweb .popover-header {
@@ -5314,7 +5315,7 @@ input.op-pill:checked::before {
     display: none;
   }
 
-  /* S08 Indoor Air Quality (PROPOSED, Claude 2026-11-27, for Andy's ruling). Easy keeps the six inputs (radon,
+  /* S08 Indoor Air Quality (Andy 2026-11-27, "yes" to the cut proposed). Easy keeps the six inputs (radon,
      CO2, TVOC, the two humidity sliders and their method), the guidance limit beside each and the ✓. It does
      not show the share of the limit, which the limit and the ✓ already say, nor the wood emissions offset,
      which is computed from S04's wood and is not a measure of the air. */
@@ -5327,6 +5328,32 @@ input.op-pill:checked::before {
     user-select: none;
   }
   html.op-easy #indoorAirQuality tr[data-id="A.6"] {
+    display: none;
+  }
+
+  /* S09 Occupant & Internal Gains (PROPOSED, Claude 2026-11-27, for Andy's ruling). Easy keeps the seven
+     inputs (occupants, hours, bedrooms / units, activity, lighting, the equipment spec, elevators), each
+     load's energy and its gains to heating and cooling with their dots, the DHW losses and the totals, and the
+     ✓. It does not show: the share of the reference beside the ✓ and its caption; the two steps behind the
+     occupants' gain (annual occupied hours "/ 8760", watts per person); and the subtotal of plug, light and
+     equipment, which the totals row sums again. */
+  html.op-easy
+    #occupantInternalGains
+    td:is(
+      [data-field-id="m_65"],
+      [data-field-id="m_66"],
+      [data-field-id="m_67"],
+      [data-field-id="i_63"],
+      [data-field-id="g_64"]
+    ),
+  html.op-easy #occupantInternalGains tr[data-id="09-ID"] > td.col-m,
+  html.op-easy #occupantInternalGains tr[data-id="G.1.1"] > td.col-j,
+  html.op-easy #occupantInternalGains tr[data-id="G.1.2"] > td.col-f {
+    color: transparent !important;
+    pointer-events: none;
+    user-select: none;
+  }
+  html.op-easy #occupantInternalGains tr[data-id="G.2"] {
     display: none;
   }
 }
@@ -5373,9 +5400,11 @@ html.op-targeted-use #teuiSummary tr[data-id="T.7.1"] > td:is(.col-j, .col-k, .c
   color: var(--accent-lit) !important;
 }
 
-/* 2. What a surface loses its heat to (S11's "% of Ae & Ag"): the air in sky blue, the ground in brown. */
+/* 2. What a surface loses its heat to: the air in a pale blue, the ground in brown. S11's "% of Ae & Ag", and
+   the cells V3's own code marks in S12 (the Ae and Ag areas and U-values) and S19. The blue is paler than
+   sky blue so it does not read as the cyan of an input (Andy 2026-11-27: "too close to our cyan"). */
 .op-v3 .data-table td.text-air-facing {
-  color: #7dd3fc !important;
+  color: #bae6fd !important;
 }
 .op-v3 .data-table td.text-ground-facing {
   color: #d09a63 !important;
