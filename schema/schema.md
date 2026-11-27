@@ -98,8 +98,21 @@ may PR and merge and self-smoke w/o me"_; that covered #28 and #32 and is not a 
     ELA10 at Archetype 2's ratio, **all eight end and middle units of those vintages are inside the band.**
     A diagnostic, not an input: it says the row houses' ELA10 was derived from another volume or exponent than
     the one specified, and it still does not explain why the end unit sits below the middle one.
-  - Results and scripts: private folder, `diagnostics/i19-same-nrl50-as-middle-unit.csv`,
-    `i19-ela-per-m3-as-archetype-2.csv`. Not yet sent to Kieran (❓ Andy).
+  - **Each unit at its own leakage rate, the ELA10 left blank for OBJECTIVE to derive** (Andy's follow-up): the
+    1980s models close and the 1960s models do not. The derived ELA10 takes the flow exponent of AIM-2's nearest
+    prescribed type, which sits well above the printed ELA10 for the 1980s' ACH50 and barely above it for the
+    1960s'.
+  - **What the reference behaves as if it used:** the end unit equals Annex J with its ELA10 about 5 to 6 %
+    above the printed value, the middle unit with about 1 to 2 %. So the reference's end unit looks 4 to 5 %
+    leakier than its middle unit, although the Standard prints one value for both.
+  - The scanned NRCan report in the package (Lew 1993, "Evaluation of AIM-2 for HOT2000") is now readable:
+    private folder `tools/ocr/` (the macOS text recogniser, a 40-line Swift tool, and its output). It treats
+    "a semi-detached or row house" as one class and house type as a matter of the leakage SPLIT only.
+  - **All of it went to Kieran on andy-rnd#27, 2026-11-27** (Andy: "yes, send both to Kieran on #27"), with two
+    questions: whether the tables Annex L.1.2 cites for the ELAs exist in his copy, and whether Annex G gives
+    the row houses another volume for the leakage area.
+  - Results and scripts: private folder `diagnostics/` (`i19-same-nrl50-as-middle-unit.csv`,
+    `i19-ela-derived-by-objective.csv`, `i19-ela-per-m3-as-archetype-2.csv`, each comment as sent).
 - **The N-factor and AIM-2 do not compete in the F280 loads (2026-11-27, Andy's question).** S21's design loss and
   gain take AIM-2's design rates in either F280 Mode (`F280ComplianceNodes.js`); the N-factor (ACH50 / N by
   zone, shielding and storeys, `VolumeMetricsNodes.js`) is read by the ANNUAL figures alone. Where both exist
