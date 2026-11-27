@@ -38,7 +38,7 @@ F280 requires for the heating and cooling system peak design loads, that is the 
 UI niceties and calculation futzing can happen after we validate compliance."_
 
 - **Review Kieran's harness first; change no calculation until it is reviewed.** Kieran is the F280
-  verification agent (Cl. 8.2). His material, as found 2026-11-26 and not yet read by Claude, is in the folder
+  verification agent (Cl. 8.2). His material, as found 2026-11-26 (read and run since, below), is in the folder
   `KT F280 Validation Runs` under `~/Documents/OpenBuilding/` (in no repo): `F280_RTM_r1_2026-11-26.pdf`,
   `F280_case_inputs.zip`, `F280_model_specification.md`, `Objective 4.0 Requirements Matrix.txt`. The case
   inputs in the zip are the harness: Andy 2026-11-26, _"that is the CSV fiels Kieran prepared for us to run as
@@ -48,6 +48,35 @@ UI niceties and calculation futzing can happen after we validate compliance."_
   F280 Mode (§11) is second to that.
 - The F280 specs and case files this repo's engine came from are in andy-rnd (`test/f280*.cjs`,
   `docs/f280/README.md`).
+
+**✅ THE OPERATOR'S RUN — DONE 2026-11-26 evening (desktop), on `F280-Validation`. No calculation changed.**
+
+- **RULED (Andy 2026-11-26, "yes, keep the data out of the public repo"):** Kieran's case files, the Annex J
+  values and every result stay out of this repository. Only the runner is here; it holds none of them.
+- **The runner:** `test/witness/f280-run.cjs` (its README entry says how to run it). It opens each of Kieran's 45
+  case files in a fresh context as the page's Open does, and records loss and nominal gain with their terms for
+  the Target and the Reference, plus an import check.
+- **Everything else is private, in `~/Documents/OpenBuilding/KT F280 Validation Runs/`:** the case files
+  unzipped (`F280_case_inputs/`), and `QO_run_2026-11-26/` holding the results (`f280-results.csv`, `.json`),
+  the I19 diagnostics and **the report for Kieran with the triage list T1 – T13, `QO-F280-RUN-01.md`**. Read that
+  report first next session; the figures are there and nowhere in this repo.
+- **What came out:** all 45 ran with no page error and no row missing. The base case reads the loss Kieran's
+  own import test gave. All 13 variants are inside the Cl. 8.4.1 band. Of the 31 other models, 26 are inside on
+  both loss and gain; the four Archetype 3 models of the 1960s and 1980s are low on loss (Kieran's I19), and one
+  is the suspected erratum in Annex J. The V3 page (andy-rnd `74bd575`) gives identical figures, 270 of 270.
+- **I19, a diagnostic for Kieran:** Archetype 3's ELA10 raised 5 %, nothing else changed, puts all four inside
+  the band. The inputs are his to re-check.
+- **Garage walls (Andy's question, 2026-11-26), read from the documents:** F280 Cl. 4.3 puts an enclosed
+  unheated space at the outdoor design temperature, Cl. 5.2.2 Note 1 treats elements abutting an unheated garage
+  as above-grade elements, and Table 3 gives "Interior partitions and fully shaded exterior walls and doors"
+  their own solar correction. So: full loss for heating at the wall's own RSI, a shaded wall for cooling. SB-12
+  3.1.1.1.(5) treats the wall to a storage garage as exterior; NBC 2020 9.36.2.4.(4) allows 0.16 off the required
+  RSI and 9.36.5.10.(4) gives it no solar. Today a garage wall here is an ordinary wall row with a compass
+  facing: heating right, cooling takes the facing's correction. Proposed, not built: a facing "Garage (unheated
+  space)" for S11's wall rows (triage T3).
+- **NEXT, Andy's to rule (❓):** tag the run commit; T1 (`g_112` = 5.99 in andy-rnd's F280-1 and `build_case.py`);
+  T3 (the garage facing, then F280-1's garage walls split out, which needs the plans); T8 (the Annex D / Table
+  E.1 verification report from S21). Send Kieran the report.
 
 **THEN, each on its own branch cut from `main`, in this order (RULED, Andy 2026-11-26):**
 
