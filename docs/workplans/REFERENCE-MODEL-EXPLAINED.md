@@ -232,7 +232,11 @@ set-point limits. With F280 Mode On the foundation's inputs all show.
 **S04 (2026-11-27, PR #41).** The ruled rule is wired: at Targeted Use the Actual columns (D to G) are not
 shown in Easy. Claude's proposed cut is built with it for Andy's smoke: Easy keeps the fuel table and its
 subtotals and does not show the derived totals below (net energy in GJ, per-capita energy, primary energy and
-its intensity, nuclear waste produced, the PER factor). Open: whether the Actual columns hide in Expert too.
+its intensity, nuclear waste produced, the PER factor). Andy ruled yes to that cut, and yes to the Actual
+columns going in Expert too (PR #42).
+
+**S05 (2026-11-27, PR #42).** Proposed and built for Andy's smoke: Easy drops only the explanatory note and the
+four unlabelled compliance percentages beside the ✓. Everything else in S05 is an input or a headline result.
 
 **Later, its own pass (Andy 2026-11-27):** collapsing the empty columns and rows that hiding leaves.
 
