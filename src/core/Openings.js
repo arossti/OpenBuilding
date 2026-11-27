@@ -242,6 +242,7 @@
     NorthWest: "NW",
     Average: "Avg",
     Skylight: "Sky",
+    Garage: "Garage",
   };
   const FACINGS = [
     "North",
@@ -253,7 +254,16 @@
     "West",
     "NorthWest",
     "Average",
+    "Garage",
   ];
+  // A WALL TO AN ATTACHED, UNHEATED GARAGE (Andy 2026-11-26): a facing, not a compass point. It loses heat as
+  // any exterior wall does, at its own RSI (CSA F280-12 Cl. 4.3: an enclosed unheated space is at the outdoor
+  // design temperature; Cl. 5.2.2 Note 1; SB-12 3.1.1.1.(5)). It sees no sun and no sky: no solar on the wall
+  // or through an opening hosted in it, and F280 Table 3's "interior partitions and fully shaded exterior
+  // walls and doors" row for the design gain. The tooltip is Andy's wording.
+  const GARAGE = "Garage";
+  const GARAGE_NOTE =
+    'NBC 2020 9.36.2.4.(4): the required RSI "is permitted to be reduced by 0.16 (m²·K)/W"; 9.36.5.10.(4) gives such assemblies a solar heat gain coefficient of 0.';
 
   // ------------------------------------------------------------------------------------------------
   // Which rows show: a slot row shows when + revealed it this session, or when it is IN USE in either model
@@ -642,6 +652,8 @@
     ABOVE_TYPES,
     BELOW_TYPES,
     FACINGS,
+    GARAGE,
+    GARAGE_NOTE,
     GROUPS,
     SHORT,
     isSlot,

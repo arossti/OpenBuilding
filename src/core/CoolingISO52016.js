@@ -160,6 +160,8 @@
 
   /** Month m's irradiation on a surface, kWh/m²; "Average" = the mean of the 8 verticals. */
   function irradiation(months, orientation, m) {
+    // a wall to an attached garage, and an opening in it: no sun (Openings.js GARAGE)
+    if (orientation === "Garage") return 0;
     const key = SOLAR_KEY[orientation];
     if (key) return months[key][m];
     return VERTICALS.reduce((s, k) => s + months[k][m], 0) / VERTICALS.length;
@@ -231,10 +233,11 @@
     let sky = 0;
     for (const e of b.air) {
       const rse = e.U / (H_CE + H_RE); // R_se x U: the outer surface's share
+      // a wall inside an attached garage does not see the sky: no radiative loss to credit against cooling
       const fSky =
         e.tilt === "roof"
           ? F_SKY_HORIZONTAL
-          : e.tilt === "wall"
+          : e.tilt === "wall" && e.orientation !== "Garage"
             ? F_SKY_VERTICAL
             : 0;
       sky += (rse * e.A * H_RE * fSky * D_THETA_SKY * t) / 1000;

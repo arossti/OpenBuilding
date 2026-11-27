@@ -437,6 +437,8 @@
     };
     const LATITUDE_CORRECTED = new Set(["South", "SouthEast", "SouthWest"]);
     const f280Solar = (facing, lFactor) => {
+      // an opening in a wall to an attached garage: no design solar (Openings.js GARAGE)
+      if (facing === "Garage") return 0;
       if (facing === "Average") {
         const compass = Object.keys(F280_SOLAR0).filter((k) => k !== "Skylight");
         return compass.reduce((sum, k) => sum + f280Solar(k, lFactor), 0) / compass.length;
@@ -522,13 +524,18 @@
     // Table 3 by the opaque ROW (Openings.js, Andy 2026-11-20): a roof the roofs' column, an exposed floor
     // the floors', a WALL its facing's (Average: the compass mean, every wall's before) - a house's walls
     // by facing turn with it (Kieran's open #1). The doors: the compass mean.
+    // Table 3, "Interior partitions and fully shaded exterior walls and doors": a wall to an attached garage,
+    // and a door hosted in one (Andy 2026-11-26; Cl. 4.3 keeps its heat LOSS at the outdoor design temperature)
+    const SC_SHADED = [-3.3, -6.1];
     const SC_BY_TYPE = {
       roof: (col) => [15.0, 12.2][col], // roofs and top storey ceilings
-      walls: (col, facing) => (F280_SC_WALLS[facing] ? F280_SC_WALLS[facing][col] : scWallsAverage(col)),
+      walls: (col, facing) =>
+        facing === "Garage" ? SC_SHADED[col] : F280_SC_WALLS[facing] ? F280_SC_WALLS[facing][col] : scWallsAverage(col),
       exposedFloor: (col) => [-3.3, -6.1][col] // floors over non-conditioned rooms; fully shaded
     };
     const OPAQUE_ROWS = window.TEUI.Openings.ABOVE;
     const DOOR_IDS = window.TEUI.Openings.DOORS.map(o => o.id);
+    const DOOR_FACING = Object.fromEntries(window.TEUI.Openings.DOORS.map(o => [o.id, `radiantGains.row${o.s10}.orientation`]));
     const typeOfRow = (o, inputs) =>
       SC_BY_TYPE[inputs[`transmissionLoss.${o.id}.type`]] ? inputs[`transmissionLoss.${o.id}.type`] : o.type;
 
@@ -543,7 +550,7 @@
         "climate.cooling.setpoint",
         "transmissionLoss.thermalBridgePenalty",
         ...OPAQUE_ROWS.flatMap((o) => ["area", "uValue", "type", "facing"].map((k) => `transmissionLoss.${o.id}.${k}`)),
-        ...DOOR_IDS.flatMap((id) => [`transmissionLoss.${id}.area`, `transmissionLoss.${id}.uValue`])
+        ...DOOR_IDS.flatMap((id) => [`transmissionLoss.${id}.area`, `transmissionLoss.${id}.uValue`, DOOR_FACING[id]])
       ],
       label: "F280 Solar Correction on Opaque Assemblies (W)",
       compute: (inputs) => {
@@ -560,7 +567,8 @@
         OPAQUE_ROWS.forEach((o) =>
           add(o.id, SC_BY_TYPE[typeOfRow(o, inputs)](col, inputs[`transmissionLoss.${o.id}.facing`] || "Average"))
         );
-        DOOR_IDS.forEach((id) => add(id, scWallsAverage(col)));
+        // a door: the compass mean, as before, unless its wall is the garage's
+        DOOR_IDS.forEach((id) => add(id, inputs[DOOR_FACING[id]] === "Garage" ? SC_SHADED[col] : scWallsAverage(col)));
         return total;
       }
     });

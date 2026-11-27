@@ -38,14 +38,85 @@ F280 requires for the heating and cooling system peak design loads, that is the 
 UI niceties and calculation futzing can happen after we validate compliance."_
 
 - **Review Kieran's harness first; change no calculation until it is reviewed.** Kieran is the F280
-  verification agent (Cl. 8.2). His material, as found 2026-11-26 and not yet read by Claude, is in the folder
+  verification agent (Cl. 8.2). His material, as found 2026-11-26 (read and run since, below), is in the folder
   `KT F280 Validation Runs` under `~/Documents/OpenBuilding/` (in no repo): `F280_RTM_r1_2026-11-26.pdf`,
-  `F280_case_inputs.zip`, `F280_model_specification.md`, `Objective 4.0 Requirements Matrix.txt`. Ask Andy
-  where the harness itself lives and for Kieran's questions verbatim.
+  `F280_case_inputs.zip`, `F280_model_specification.md`, `Objective 4.0 Requirements Matrix.txt`. The case
+  inputs in the zip are the harness: Andy 2026-11-26, _"that is the CSV fiels Kieran prepared for us to run as
+  the F280 'Operator' as required"_ (Cl. 8.2: Andy and Claude run them as the operator, Kieran verifies). Ask
+  Andy for Kieran's questions verbatim.
 - **What "F280 On" must deliver:** the peak design heating and cooling loads F280 requires. The annual TEUI under
   F280 Mode (§11) is second to that.
 - The F280 specs and case files this repo's engine came from are in andy-rnd (`test/f280*.cjs`,
   `docs/f280/README.md`).
+
+**✅ THE OPERATOR'S RUN — DONE 2026-11-26 evening (the laptop, `M2max`), on `F280-Validation`. No calculation changed.**
+
+- **RULED (Andy 2026-11-26, "yes, keep the data out of the public repo"):** Kieran's case files, the Annex J
+  values and every result stay out of this repository. Only the runner is here; it holds none of them.
+- **The runner:** `test/witness/f280-run.cjs` (its README entry says how to run it). It opens each of Kieran's 45
+  case files in a fresh context as the page's Open does, and records loss and nominal gain with their terms for
+  the Target and the Reference, plus an import check.
+- **Everything else is private, in `~/Documents/OpenBuilding/KT F280 Validation Runs/` ON THE LAPTOP (in no repo, so not on the desktop):** the case files
+  unzipped (`F280_case_inputs/`), and `QO_run_2026-11-26/` holding the results (`f280-results.csv`, `.json`),
+  the I19 diagnostics and **the report for Kieran with the triage list T1 – T13, `QO-F280-RUN-01.md`**. Read that
+  report first next session; the figures are there and nowhere in this repo.
+- **What came out:** all 45 ran with no page error and no row missing. The base case reads the loss Kieran's
+  own import test gave. All 13 variants are inside the Cl. 8.4.1 band. Of the 31 other models, 26 are inside on
+  both loss and gain; the four Archetype 3 models of the 1960s and 1980s are low on loss (Kieran's I19), and one
+  is the suspected erratum in Annex J. The V3 page (andy-rnd `74bd575`) gives identical figures, 270 of 270.
+- **I19, a diagnostic for Kieran:** Archetype 3's ELA10 raised 5 %, nothing else changed, puts all four inside
+  the band. The inputs are his to re-check.
+- **Garage walls (Andy's question, 2026-11-26), read from the documents:** F280 Cl. 4.3 puts an enclosed
+  unheated space at the outdoor design temperature, Cl. 5.2.2 Note 1 treats elements abutting an unheated garage
+  as above-grade elements, and Table 3 gives "Interior partitions and fully shaded exterior walls and doors"
+  their own solar correction. So: full loss for heating at the wall's own RSI, a shaded wall for cooling. SB-12
+  3.1.1.1.(5) treats the wall to a storage garage as exterior; NBC 2020 9.36.2.4.(4) allows 0.16 off the required
+  RSI and 9.36.5.10.(4) gives it no solar. Today a garage wall here is an ordinary wall row with a compass
+  facing: heating right, cooling takes the facing's correction. That was the state at the tagged run.
+- **✅ THE RUN IS TAGGED: `f280-run-2026-11-26` = `dbd20df`** (Andy 2026-11-26, "yes, tag it and push the tag").
+  Everything below it on this branch is after the run.
+- **✅ THE GARAGE FACING — BUILT after the tag (Andy 2026-11-26: _"we should make these tweaks for garage walls
+  as a new type ... It need not be a new row per-se, but a new facing type from the dropdown"_), to be smoked.**
+  - S11's wall-facing dropdown has **Garage** after Avg (`src/core/Openings.js` `FACINGS`, `GARAGE`). Its hover
+    is Andy's wording (`GARAGE_NOTE`): the NBC 2020 9.36.2.4.(4) and 9.36.5.10.(4) note. No RSI is changed.
+  - **Heating: unchanged.** The wall is still in the air-facing loss at its own RSI.
+  - **No solar**, the wall's or through an opening hosted in it (the opening takes the facing, as it takes any
+    host's): S10's gain factor 0 (`RadiantGainsNodes.js`), the ISO 52016 irradiation 0 and no sky term
+    (`CoolingISO52016.js`, `CoolingNodes.js`), F280's design solar 0 (`F280ComplianceNodes.js`).
+  - **F280 Table 3:** the wall, and a door hosted in it, take the shaded row. A door elsewhere keeps the compass
+    mean, so no existing result moves.
+  - S19 draws an opening in a garage wall on no facade (`wombatWindows.js`); S10's orientation lists carry
+    Garage so a hosted row shows it.
+  - **Witnesses:** `test/witness/garage-facing.cjs` (ALL OK, the Table 3 figure by hand). Kieran's 45 files give
+    the tagged results unchanged (20 330 figures). Parity against V3: 2146 / 2146 on all 16 cases.
+  - ⚠ **A seventh way `src/` differs from andy-rnd `74bd575`**, to keep if a file is copied over again: the
+    seven files named above. andy-rnd (V3) does not have the facing.
+  - **Not done:** the Reference model's code-minimum RSI is not reduced by NBC's 0.16; the hover only says it
+    is permitted.
+- **THE REPLY TO KIERAN — SENT 2026-11-26 as GitHub issues** (Andy: _"message Kieran directly through the
+  Repo's own Github Issues"_), both assigned to him (`k1eranth0m`):
+  - **openbuilding-ca/andy-rnd#27 (private): the reply, the report (Rev. B) and the results table.** Anything
+    that quotes the Standard's values goes there.
+  - **#29 here (public): a notice with no figures**, pointing at it. This repository's issues are public.
+  - The same reply is appended to Kieran's own note, `Objective 4.0 Requirements Matrix.txt`, in the private
+    folder.
+  - **RULED (Andy 2026-11-26, "yes, send as written"):** no input and no reference value is adjusted to close
+    a gap. The four Archetype 3 results and the suspect Annex J row stand as run, with the findings beside them.
+  - **CSA's current copy, read 2026-11-26 in Andy's CSA OnDemand viewer:** CSA F280:12 (reaffirmed 2025),
+    "Revised October 2025". Its one new Revision History entry is the cover, the National Standard of Canada
+    text, the title page and the preface; nothing technical after Update No. 3 (March 2023), which is what
+    Andy's own copy holds. The suspect Annex J row and Table H.1.2's ELA10 for "Archetypes 3 and 4" are printed
+    there as in ours (the figures are in andy-rnd#27's addendum). Andy has written to CSA for the update copy.
+  - **How it was read:** that viewer renders pages legibly where the PDF does not. Safari on the laptop, the
+    library's "View Online", pages turned and captured from the shell; the captures were not kept. The tool is
+    saved in the private folder, `tools/csa-viewer/` (its README has the URIs and the page map); Andy signs in
+    to CSA OnDemand again when the session has expired.
+  - **A draft email to CSA, for Kieran to send,** is in andy-rnd#27 and in his note: the erratum for the suspect
+    Annex J row, and clarifications of Archetype 3's air-leakage inputs, Table 6F and Cl. 8.3.8 b), with a reply
+    asked for by 2026-12-03.
+- **PR #30 is this branch.** To smoke before a merge: the Garage facing in S11 (the PR lists what to look at).
+- **NEXT:** T1 (`g_112` = 5.99 in andy-rnd's F280-1 and `build_case.py`); F280-1's garage walls split out, which
+  needs the plans; T2 (a build stamp on the page); T8 (the Annex D / Table E.1 verification report from S21).
 
 **THEN, each on its own branch cut from `main`, in this order (RULED, Andy 2026-11-26):**
 
@@ -181,6 +252,9 @@ in andy-rnd for the V3 page.
   A fifth (REMAINS 2): the host input's class in `src/sections/nodes/TransmissionLossNodes.js`.
   A sixth: display formats, `src/core/ui/DOMBridge.js` `stampInputsForMode` and `src/sections/Section21.js`
   `displayText`.
+  A seventh (2026-11-26): the Garage facing, `src/core/Openings.js`, `CoolingISO52016.js`, `wombatWindows.js`,
+  `src/sections/Section10.js`, `Section11.js`, `nodes/RadiantGainsNodes.js`, `nodes/CoolingNodes.js`,
+  `nodes/F280ComplianceNodes.js`.
 
 **The day's items as they were worked** (✅ = shipped; the unticked ones are REMAINS, above):
 

@@ -37,6 +37,7 @@ window.TEUI.WombatWindows = (function () {
     NorthWest: { north: 0.5, west: 0.5 },
     Average: { north: 0.25, east: 0.25, south: 0.25, west: 0.25 },
     Skylight: {},
+    Garage: {}, // in a wall to an attached garage: on no drawn facade
   };
 
   /**
