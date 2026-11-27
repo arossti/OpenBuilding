@@ -346,7 +346,7 @@ window.TEUI.SectionModules.sect02 = (function () {
         },
         e: { content: "" }, // Empty but needed for alignment
         f: {
-          content: "A.1",
+          content: "C.1",
           classes: ["label-prefix", "text-right", "no-wrap"],
         },
         g: {
@@ -381,7 +381,7 @@ window.TEUI.SectionModules.sect02 = (function () {
 
     // Row 17: License Number
     17: {
-      id: "L",
+      id: "", // it read "L", which is no row's ID; the row holds C.2 alone
       rowId: "L",
       label: "",
       cells: {
@@ -389,7 +389,7 @@ window.TEUI.SectionModules.sect02 = (function () {
         d: { content: "" }, // Empty but needed for alignment
         e: { content: "" }, // Empty but needed for alignment
         f: {
-          content: "A.2",
+          content: "C.2",
           classes: ["label-prefix", "text-right", "no-wrap"],
         },
         g: {

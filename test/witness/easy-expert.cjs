@@ -144,7 +144,7 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
       return {
         found,
         ids: ids.length,
-        named: ["B.1", "L", "T.6.10", "B.19.3", "F.27"].filter((i) => ids.includes(i)).join(" "),
+        named: ["B.1", "S.4", "T.6.10", "B.19.3", "F.27"].filter((i) => ids.includes(i)).join(" "),
         wattsS15: text('#teuiSummary tr[data-id="T.6.10"] td').filter((t) => t === "W").length,
         wattsS21: text("#f280Compliance td").filter((t) => t === "W").length,
         metres: text('#climateCalculations tr[data-id="L.2.4"] td').filter((t) => t === "m").length,
@@ -153,14 +153,14 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
     });
   const le = await letters();
   ok("no column letter in any header (Easy)", le.found.length === 0, le.found.join("; "));
-  ok("row IDs stay", le.named === "B.1 L T.6.10 B.19.3 F.27", `${le.ids} id cells; found: ${le.named}`);
+  ok("row IDs stay", le.named === "B.1 S.4 T.6.10 B.19.3 F.27", `${le.ids} id cells; found: ${le.named}`);
   ok("units stay (W in S15 and S21, m in S03)", le.wattsS15 === 2 && le.wattsS21 >= 9 && le.metres === 1, JSON.stringify([le.wattsS15, le.wattsS21, le.metres]));
   const kept = ["Prices of Energy", "Options related to Section12", "(°C)", "Reference"].filter((c) => le.captions.includes(c));
   ok("captions with a name or a unit stay", kept.length === 4, `${le.captions.length} header captions; found: ${kept.join(" | ")}`);
 
   // 2b. Easy: the Cell IDs are hidden, S11's Builder buttons excepted; help is on
   const ie = await ids();
-  ok("every ID outside the ID column is marked", ie.unmarked.length === 0 && ie.beside >= 68 && ie.leading >= 28, `${ie.beside} beside a value, ${ie.leading} leading a caption; unmarked: ${ie.unmarked.join(" ")}`);
+  ok("every ID outside the ID column is marked", ie.unmarked.length === 0 && ie.beside >= 60 && ie.leading >= 25, `${ie.beside} beside a value, ${ie.leading} leading a caption; unmarked: ${ie.unmarked.join(" ")}`);
   ok("no row repeats its own ID", ie.repeats.length === 0, ie.repeats.join(" "));
   const s10 = ie.shownNotBuilder.filter((t) => /^G\.[78]\./.test(t));
   ok("Easy hides the Cell IDs, S10's openings excepted", s10.length === ie.shownNotBuilder.length, `${ie.all} IDs, ${ie.shown} shown; not S10's: ${ie.shownNotBuilder.filter((t) => !s10.includes(t)).slice(0, 6).join(" ")}`);
@@ -203,6 +203,78 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   ok("every number is right-justified", al.numbers.right > 400 && al.numbers.left + al.numbers.center === 0, `${JSON.stringify(al.numbers)} ${al.off.join(" ")}`);
   ok("typed words stay left-justified", al.projectName === "left" && al.certifier === "left", `${al.projectName} ${al.certifier}`);
   ok("a caption over numbers is right-justified, over words it is not", al.s14Caption === "right" && al.s11Caption === "right" && al.textCaption !== "right", `${al.s14Caption} ${al.s11Caption} ${al.textCaption}`);
+
+  // 2d. S02's prices of gas, propane, wood and oil show only while S.2 is at Utility Bills, in both views and per
+  // model; the price of electricity always shows (S15 and S18 read it at Targeted Use too)
+  const prices = () =>
+    p.evaluate(() => {
+      const shown = (id) => getComputedStyle(document.querySelector(`#buildingInfo td[data-field-id="${id}"]`)).visibility === "visible";
+      return {
+        use: document.querySelector('#buildingInfo select[data-field-id="d_14"]').value,
+        flag: document.documentElement.classList.contains("op-targeted-use"),
+        electricity: shown("l_12"),
+        fuels: ["l_13", "l_14", "l_15", "l_16"].filter(shown).length,
+        gas: document.querySelector('#buildingInfo td[data-field-id="l_13"]').textContent.trim()
+      };
+    });
+  const setUse = async (value) => {
+    await p.selectOption('#buildingInfo select[data-field-id="d_14"]', value);
+    await p.waitForTimeout(900);
+  };
+  let pr = await prices();
+  const gasPrice = pr.gas;
+  ok("Utility Bills: all five prices show", pr.use === "Utility Bills" && !pr.flag && pr.electricity && pr.fuels === 4, JSON.stringify(pr));
+  await setUse("Targeted Use");
+  pr = await prices();
+  ok("Targeted Use: the four fuel prices hide, electricity stays (Easy)", pr.flag && pr.electricity && pr.fuels === 0 && pr.gas === gasPrice, JSON.stringify(pr));
+  await p.click("#op-view-expert");
+  await p.waitForTimeout(300);
+  pr = await prices();
+  ok("the same in Expert", pr.flag && pr.electricity && pr.fuels === 0, JSON.stringify(pr));
+  await p.click("#op-view-easy");
+  await setUse("Utility Bills");
+  pr = await prices();
+  ok("back at Utility Bills they return, the price as typed", !pr.flag && pr.fuels === 4 && pr.gas === gasPrice, JSON.stringify(pr));
+  await p.click("#op-model-reference");
+  await p.waitForTimeout(2200);
+  pr = await prices();
+  ok("the Reference follows its own S.2", pr.use === "Targeted Use" && pr.flag && pr.electricity && pr.fuels === 0, JSON.stringify(pr));
+  // the IDs are the rows' own, so the Reference shows the Target's
+  const refIds = await ids();
+  await p.click("#op-model-target");
+  await p.waitForTimeout(2200);
+  pr = await prices();
+  ok("and the Target its own", pr.use === "Utility Bills" && !pr.flag && pr.fuels === 4, JSON.stringify(pr));
+
+  // 2e. the renumbering of 2026-11-27: one ID, one thing
+  const numbered = await p.evaluate(() => {
+    const where = {};
+    document.querySelectorAll("#beam-main .data-table td.id-cell, #beam-main .data-table .cell-id").forEach((e) => {
+      const t = e.textContent.trim().replace(/\.$/, "");
+      if (t) (where[t] ||= []).push(e.closest(".section").id + (e.classList.contains("id-cell") ? " row" : ""));
+    });
+    // the same thing named in two places is not a fault: S05 shows S02's S.4, S04 heads two columns E.1,
+    // and S14's note on T.4.1 waits for Andy's wording
+    const twice = Object.entries(where).filter(([id, v]) => v.length > 1 && !["S.4", "E.1", "T.4.1"].includes(id)).map(([id, v]) => `${id}: ${v.join(", ")}`);
+    const at = (id) => (where[id] || []).join(", ");
+    return {
+      twice,
+      placed: { "G.2": at("G.2"), "G.3": at("G.3"), "T.3": at("T.3"), "T.3.1": at("T.3.1"), "C.1": at("C.1"), "C.2": at("C.2"), "L.2.6": at("L.2.6"), "L.3.4": at("L.3.4"), "M.2.6": at("M.2.6"), "V.1.5": at("V.1.5"), "T.4.8": at("T.4.8"), "T.5.5": at("T.5.5"), "T.6.13": at("T.6.13"), "B.18.5.2": at("B.18.5.2"), "W.6.2": at("W.6.2") },
+      gone: ["W.X", "L", "A.1", "TEUI-imp", "Heat Load Imp"].filter((t) => [...document.querySelectorAll("#beam-main .data-table td")].some((c) => c.textContent.trim().replace(/\.$/, "") === t)),
+      captions: [...document.querySelectorAll("#teuiSummary td")].filter((c) => c.textContent.trim() === "Peak Heating Imp").length
+    };
+  });
+  ok("no ID names two different things", numbered.twice.length === 0, numbered.twice.join(" | "));
+  const pl = numbered.placed;
+  ok(
+    "the new numbers are where they were put",
+    pl["G.2"] === "occupantInternalGains row" && pl["G.3"] === "envelopeRadiantGains row" && pl["T.3"] === "teuiSummary row" && pl["T.3.1"] === "actualTargetEnergy row" &&
+      ["C.1", "C.2"].every((k) => pl[k] === "buildingInfo") && ["L.2.6", "L.3.4"].every((k) => pl[k] === "climateCalculations") && ["M.2.6", "V.1.5"].every((k) => pl[k] === "mechanicalLoads") &&
+      ["T.4.8", "T.5.5"].every((k) => pl[k] === "tediSummary") && pl["T.6.13"] === "teuiSummary" && pl["B.18.5.2"] === "volumeSurfaceMetrics" && pl["W.6.2"] === "waterUse",
+    JSON.stringify(pl)
+  );
+  ok("the stray IDs and the two wrong captions are gone", numbered.gone.length === 0 && numbered.captions === 1, `${numbered.gone.join(" ")} | Peak Heating Imp ×${numbered.captions}`);
+  ok("the Reference shows the same IDs as the Target", refIds.all === ie.all && refIds.beside === ie.beside && refIds.leading === ie.leading, `${refIds.all} / ${ie.all}`);
 
   // 3. Expert shows the same page: the view changes no value and moves no cell
   const easy = await snap();

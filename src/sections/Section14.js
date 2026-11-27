@@ -166,7 +166,7 @@ window.TEUI.SectionModules.sect14 = (function () {
         },
         i: { content: "" },
         j: {
-          content: "T.5.2",
+          content: "T.4.8",
           classes: ["label-prefix", "text-left", "no-wrap"],
         },
         k: {
@@ -263,7 +263,7 @@ window.TEUI.SectionModules.sect14 = (function () {
         },
         i: { content: "" },
         j: {
-          content: "T.5.2",
+          content: "T.5.5",
           classes: ["label-prefix", "text-left", "no-wrap"],
         },
         k: {
