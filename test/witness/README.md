@@ -25,7 +25,7 @@ Run from this repo's root; `<out>` is any folder for screenshots:
     node test/witness/garage-facing.cjs            # a wall to an attached garage: the Garage facing
     node test/witness/f280-run.cjs <case inputs dir> <out dir> --annexj ../andy-rnd/test/fixtures/f280-annex-j.json
     node test/witness/f280-summary.cjs <out>       # S21's calculation summary sheet (F280 Annex D / Table E.1)
-    node test/witness/easy-expert.cjs <out>        # the Easy / Expert pill; the column letters gone
+    node test/witness/easy-expert.cjs <out>        # Easy / Expert: the pill, the Cell IDs, Help; no column letters
 
 What each must show:
 
@@ -66,8 +66,13 @@ What each must show:
   `f280-summary.html` in its own tab, whose first page is the summary sheet laid out as Annex D's Figure D.1
   (thirteen blocks, one printed page) ahead of the supplement. With `<out>` it also writes the print PDF by the
   machine's Chrome.
-- `easy-expert.cjs <out>`: 18 lines of `ok`, then `ALL OK`. A first launch is in Easy (the class `op-easy` on
+- `easy-expert.cjs <out>`: 35 lines of `ok`, then `ALL OK`. A first launch is in Easy (the class `op-easy` on
   `<html>`), the pill follows Copy from Target, no header cell's caption is its own column's letter in either
-  view while row IDs, one-letter units (W, m) and named captions stay; Expert shows the same values, the same
-  cells and the same saved file (the view hides nothing yet and is not in the file); the view survives a reload
-  and New, and does not move the model on screen. With `<out>` it writes three pictures of the button row.
+  view while row IDs, one-letter units (W, m) and named captions stay. Easy shows no Cell ID but S11's Builder
+  buttons and S10's opening rows; Expert shows all of them in one style, the ID column's; no row draws its own
+  ID twice; print shows the IDs in Easy too. Every number is right-justified (more than 400 on the default
+  project, none left or centred), typed words are left-justified, a caption over numbers is right-justified.
+  Help is on in Easy and off in Expert at first (a field's popover opens, with a dark title, or does not), and
+  each view keeps its own setting across a reload. Expert shows the same values, the same cells and the same
+  saved file (the view and the help setting are not in the file); the view survives a reload and New, and does
+  not move the model on screen. With `<out>` it writes three pictures of the button row.

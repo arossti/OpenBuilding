@@ -536,6 +536,51 @@ function syncView() {
   const pill = document.getElementById("op-view-switch");
   if (pill) pill.checked = v === "expert";
   document.querySelectorAll(".op-view-label").forEach((l) => l.classList.toggle("active", l.dataset.view === v));
+  syncHelp();
+}
+
+// Interactive help: V3's Help button, the popovers TooltipManager puts on the fields (hover or focus). Each
+// view has its own setting, ON in Easy and OFF in Expert until the user changes it (Andy 2026-11-27), kept in
+// this browser. TooltipManager holds the one switch; this sets it to the view's setting whenever the view or
+// the setting changes. A popover made later takes the manager's state as it is then.
+const HELP_KEY = "objective4Help";
+const HELP_DEFAULT = { easy: true, expert: false };
+function helpSettings() {
+  let stored = null;
+  try {
+    stored = JSON.parse(localStorage.getItem(HELP_KEY));
+  } catch {
+    stored = null;
+  }
+  const s = { ...HELP_DEFAULT };
+  for (const v of Object.keys(s)) if (stored && typeof stored[v] === "boolean") s[v] = stored[v];
+  return s;
+}
+function toggleHelp() {
+  const s = helpSettings();
+  const v = currentView();
+  s[v] = !s[v];
+  localStorage.setItem(HELP_KEY, JSON.stringify(s));
+  syncHelp();
+}
+function syncHelp() {
+  const v = currentView();
+  const on = helpSettings()[v];
+  const TM = window.TEUI && window.TEUI.TooltipManager;
+  if (TM && TM.isEnabled() !== on) {
+    if (on) TM.enableTooltips();
+    else TM.disableTooltips();
+  }
+  const btn = document.getElementById("op-help-toggle");
+  if (!btn) return;
+  btn.setAttribute("aria-pressed", String(on));
+  btn.classList.toggle("on", on);
+  const icon = btn.querySelector("i");
+  if (icon) icon.className = on ? "bi bi-question-circle-fill" : "bi bi-question-circle";
+  const name = v === "expert" ? "Expert" : "Easy";
+  btn.title = on
+    ? `Interactive help is on in ${name} view: rest the pointer on a field to read about it. Click to turn it off.`
+    : `Interactive help is off in ${name} view. Click to turn it on: rest the pointer on a field to read about it.`;
 }
 
 function handleReset() {
@@ -568,7 +613,8 @@ function wireActionBar() {
     "op-model-target": () => showModel("target"),
     "op-model-reference": () => showModel("reference"),
     "op-view-easy": () => showView("easy"),
-    "op-view-expert": () => showView("expert")
+    "op-view-expert": () => showView("expert"),
+    "op-help-toggle": toggleHelp
   };
   for (const [id, fn] of Object.entries(handlers)) {
     const el = document.getElementById(id);
@@ -583,7 +629,7 @@ function wireActionBar() {
   if (viewPill) viewPill.addEventListener("change", () => showView(viewPill.checked ? "expert" : "easy"));
   // another tab of this browser changed the view: follow it
   window.addEventListener("storage", (e) => {
-    if (e.key === VIEW_KEY) syncView();
+    if (e.key === VIEW_KEY || e.key === HELP_KEY) syncView();
   });
 }
 const READY_MSG = "Ready · OBJECTIVE 4.0";

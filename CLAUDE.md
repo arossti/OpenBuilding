@@ -57,7 +57,9 @@ shared with the Builders (cyan on the web). No per-app `.css` files.
 - `src/core/F280Summary.js` + `js/f280-summary.mjs` — the F280 calculation summary sheet (CSA F280-12 Annex D,
   Table E.1): S21's button builds it for the model on screen and `f280-summary.html` draws it; the browser prints it.
 - Easy / Expert (the pill after Copy from Target): `js/objective4.mjs` `showView` sets the class `op-easy` on
-  `<html>`, kept in the browser as `objective4View`. Display only; what Easy hides is `obstyles.css` §8e.
+  `<html>`, kept in the browser as `objective4View`. Display only; what Easy hides is `obstyles.css` §8e (so
+  far the Cell IDs: the ID column and the cells `FieldManager.js` `markCellId` marks `cell-id`). The Help button
+  beside it switches V3's field popovers, one setting per view (`objective4Help`).
 - `js/shared/*.mjs` — cross-page utilities (`state-manager.mjs`, `file-handler.mjs`, `indexed-db-store.mjs`, …)
 - Global namespace: `window.BEAM.*` (to become OBJECTIVE's `window.TEUI.*` in the port).
 

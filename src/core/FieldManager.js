@@ -443,6 +443,93 @@ TEUI.FieldManager = (function () {
    * @param {string} sectionId - Section ID
    * @param {Object} layoutDefinition - Layout definition
    */
+  // 4.0: a Cell ID outside the ID column is marked with the class cell-id, so every ID takes the ID column's
+  // style and Easy view can hide them all (obstyles.css §8e). Two forms: a cell that holds an ID and nothing
+  // else (T.6.1 beside its value), and an ID that leads a caption ("M.1.1 HSPF"), which goes in a span.
+  // Only a static cell is touched: one with a field, a control or its own markup is left as it is.
+  const CELL_ID = /^[A-Z]{1,3}\.\d+[A-Za-z]?(?:\.\d+[A-Za-z]?)*$/;
+  // (the ID may carry a full stop of its own, as S13's "M.1.5. CEER" does)
+  const CELL_ID_LEADS = /^(\s*)([A-Z]{1,3}\.\d+[A-Za-z]?(?:\.\d+[A-Za-z]?)*\.?)(\s+)(\S[\s\S]*)$/;
+  const STATIC_NUMBER = /^[-−]?\$?[\d,]*\.?\d+%?$/;
+  // A row does not repeat its own ID (Andy 2026-11-27: "let's be sure ... we don't duplicate ID row and
+  // name"): where the ID beside a value or leading a caption is the row's own, it is not drawn again.
+  function markCellId(cellElement, rowId) {
+    if (
+      cellElement.classList.contains("id-cell") ||
+      cellElement.hasAttribute("data-field-id") ||
+      cellElement.children.length > 0
+    ) {
+      return;
+    }
+    const text = cellElement.textContent;
+    // a number written into the layout itself (S11's 0.00 beside the thermal bridge penalty) is a number
+    if (STATIC_NUMBER.test(text.trim())) {
+      cellElement.classList.add("static-number");
+      return;
+    }
+    if (CELL_ID.test(text.trim())) {
+      if (text.trim() === rowId) cellElement.textContent = "";
+      else cellElement.classList.add("cell-id");
+      return;
+    }
+    const led = text.match(CELL_ID_LEADS);
+    if (!led) return;
+    if (led[2].replace(/\.$/, "") === rowId) {
+      cellElement.textContent = led[4];
+      return;
+    }
+    const idElement = document.createElement("span");
+    idElement.className = "cell-id";
+    idElement.textContent = led[2];
+    cellElement.textContent = "";
+    cellElement.appendChild(idElement);
+    // the gap is the span's own margin, so it goes when the ID is hidden
+    cellElement.appendChild(document.createTextNode(led[4]));
+  }
+
+  // 4.0: a caption over a column of numbers is marked num-head, so it sits right-justified over them
+  // (obstyles.css, "Accounting style"). A header row speaks for the rows down to the next header row; a
+  // column is a column of numbers when more of its cells hold a value (calculated, derived or typed) than
+  // hold words or a control. A caption that spans columns is left alone.
+  const NUMBER_CELL =
+    "td.calculated-value:not(.checkmark):not(.warning), td.derived-value, td.number-input-cell, " +
+    "td.user-input:not(.wide-text):not(.f280-text), td.disabled-input[data-field-id]:not(.dropdown-cell), " +
+    "td.static-number";
+  function markNumberHeads(tbody) {
+    let heads = null;
+    let counts = {};
+    const settle = () => {
+      if (!heads) return;
+      heads.forEach(head => {
+        const column = (head.className.match(/\bcol-([a-z])\b/) || [])[1];
+        const count = counts[column];
+        head.classList.toggle("num-head", !!count && count.numbers > count.words);
+      });
+    };
+    Array.from(tbody.children).forEach(row => {
+      if (row.querySelector("td.section-subheader")) {
+        settle();
+        // every caption of the row from column D on (S10's Area caption carries no class of its own)
+        heads = Array.from(row.children).filter(
+          head =>
+            !/\bcol-[abc]\b/.test(head.className) &&
+            head.colSpan === 1 &&
+            head.textContent.trim()
+        );
+        counts = {};
+        return;
+      }
+      Array.from(row.children).forEach(cell => {
+        const column = (cell.className.match(/\bcol-([a-z])\b/) || [])[1];
+        if (!column) return;
+        const count = counts[column] || (counts[column] = { numbers: 0, words: 0 });
+        if (cell.matches(NUMBER_CELL)) count.numbers++;
+        else if (cell.textContent.trim() || cell.children.length > 0) count.words++;
+      });
+    });
+    settle();
+  }
+
   function generateSectionContent(sectionId, layoutDefinition) {
     const sectionElement = document.getElementById(sectionId);
 
@@ -805,11 +892,13 @@ TEUI.FieldManager = (function () {
             }
           }
 
+          markCellId(cellElement, rowDef.id);
           rowElement.appendChild(cellElement);
         });
 
         tbody.appendChild(rowElement);
       });
+      markNumberHeads(tbody);
     }
 
     // Add event listeners for dropdowns with dependencies
