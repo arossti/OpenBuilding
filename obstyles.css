@@ -5201,7 +5201,9 @@ input.op-pill:checked::before {
   margin-right: 0.5em;
 }
 
-/* WHAT EASY HIDES. On screen only: print shows the full report whatever the view. */
+/* WHAT EASY HIDES. On screen only: print shows the full report whatever the view. A value or caption that is
+   not shown keeps its cell and loses its ink (`color: transparent`), so the row's hairline runs on under it;
+   a whole row goes with `display: none`. */
 @media screen {
   /* Cell IDs (Andy 2026-11-27: "we should however hide Cell ID's"): the ID column and the IDs beside a value
      or leading a caption. A cell keeps its place in the row and its text takes no room, so a column of IDs
@@ -5248,7 +5250,9 @@ input.op-pill:checked::before {
   html.op-easy #climateCalculations tr[data-id="L.2.4"] > td:is(.col-c, .col-e, .col-g, .col-i),
   html.op-easy #climateCalculations tr:is([data-id="L.2.1"], [data-id="L.2.3"]) > td:is(.col-k, .col-m),
   html.op-easy #climateCalculations tr[data-id="L.3.3"] > td.col-c {
-    visibility: hidden;
+    color: transparent !important;
+    pointer-events: none;
+    user-select: none;
   }
   html.op-easy #climateCalculations tr[data-id="L.3.3"]:has(td.f280-hidden-cell) {
     display: none;
@@ -5263,7 +5267,9 @@ input.op-pill:checked::before {
     display: none;
   }
   html.op-easy #actualTargetEnergy tr[data-id="T.3.6"] > td:is(.col-c, .col-d, .col-e, .col-h, .col-i) {
-    visibility: hidden;
+    color: transparent !important;
+    pointer-events: none;
+    user-select: none;
   }
 
   /* S05 CO2e Emissions (Andy 2026-11-27, "yes" to the cut proposed): a small section, nearly all of it
@@ -5273,7 +5279,9 @@ input.op-pill:checked::before {
   html.op-easy
     #emissions
     td:is([data-field-id="m_38"], [data-field-id="m_39"], [data-field-id="m_40"], [data-field-id="m_41"]) {
-    visibility: hidden;
+    color: transparent !important;
+    pointer-events: none;
+    user-select: none;
   }
 
   /* S06 Renewable Energy: seven inputs, two subtotals and one conversion. Nothing to hide.
@@ -5298,7 +5306,9 @@ input.op-pill:checked::before {
   html.op-easy #waterUse tr[data-id="S07-ID"] > td.col-m,
   html.op-easy #waterUse tr[data-id="W.4.1"] > td:is(.col-f, .col-h),
   html.op-easy #waterUse tr[data-id="W.5.1"] > td.col-h {
-    visibility: hidden;
+    color: transparent !important;
+    pointer-events: none;
+    user-select: none;
   }
   html.op-easy #waterUse tr[data-id="W.6.1"] {
     display: none;
@@ -5327,7 +5337,95 @@ html.op-targeted-use #actualTargetEnergy .data-table td:is(.col-d, .col-e, .col-
    it, so it is simply not shown there; the engine is not changed (Andy 2026-11-27: "wary about calculation
    engine changes"). */
 html.op-targeted-use #teuiSummary tr[data-id="T.7.1"] > td:is(.col-j, .col-k, .col-l) {
-  visibility: hidden;
+  color: transparent !important;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── §8g V3's reading aids, in 4.0's colours ────────────────────────────────
+   Four things V3 did for the eye that 4.0's own stylesheet had no rule for (Andy 2026-11-27: "these features
+   did enhance user comprehension and a visual overview"); the classes were on the cells all along. In both
+   views and in print. */
+
+/* 1. What the user types or chooses reads in the accent (V3's blue): cyan in the Target, and red in the
+   Reference, where the accent itself turns. A value not yet typed stays dim; a locked one stays ghosted. */
+.op-v3 td.user-input.user-modified:not(.disabled-input),
+.op-v3 td.editable.user-modified:not(.disabled-input),
+.op-v3 select:not(:disabled),
+.op-v3 .form-select:not(:disabled),
+.op-v3 .slider-value {
+  color: var(--accent-lit) !important;
+}
+
+/* 2. What a surface loses its heat to (S11's "% of Ae & Ag"): the air in sky blue, the ground in brown. */
+.op-v3 .data-table td.text-air-facing {
+  color: #7dd3fc !important;
+}
+.op-v3 .data-table td.text-ground-facing {
+  color: #d09a63 !important;
+}
+
+/* 3. High, medium, low at a glance: a dot before each share of loss or gain (S09, S10, S11). A high LOSS is
+   red; a high usable GAIN is green, as V3 had them. */
+.op-v3 .data-table td.loss-indicator,
+.op-v3 .data-table td.gain-indicator {
+  position: relative;
+  padding-left: 13px;
+}
+.op-v3 .data-table td.loss-indicator::before,
+.op-v3 .data-table td.gain-indicator::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+.op-v3 .data-table td.loss-high::before,
+.op-v3 .data-table td.gain-low::before {
+  background: #ef4444;
+}
+.op-v3 .data-table td.loss-medium::before,
+.op-v3 .data-table td.gain-medium::before {
+  background: #facc15;
+}
+.op-v3 .data-table td.loss-low::before,
+.op-v3 .data-table td.gain-high::before {
+  background: #22c55e;
+}
+/* a totals row reads a little heavier */
+.op-v3 .data-table td.total-row-text {
+  font-weight: 600;
+}
+
+/* 4. A hairline under each row, so the eye can follow a long one. Each cell draws its own piece just below
+   itself, in the gap between rows, so the columns now touch (the 2px that stood between them is inside the
+   cells) and the pieces join into one line. A row cannot draw it: Safari does not let a table row hold a
+   positioned line. A cell hidden with `visibility` draws none, which is why Easy blanks a value's ink instead
+   (§8e). */
+.op-v3 .data-table {
+  border-spacing: 0 4px;
+}
+.op-v3 .data-table td,
+.op-v3 .data-table th {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.op-v3 .data-table td.user-input::after,
+.op-v3 .data-table td.editable::after,
+.op-v3 .data-table td[contenteditable="true"]::after {
+  left: 1px;
+  right: 1px;
+}
+.op-v3 .data-table > tbody > tr > td[class] {
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.07) !important;
+}
+@media print {
+  .op-v3 .data-table > tbody > tr > td[class] {
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.14) !important;
+  }
 }
 
 input.op-view-pill:checked {
