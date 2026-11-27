@@ -203,15 +203,19 @@ them: N, L, I, G, F, E, M, K, J, H, D). Captions that carry a unit or a name sta
 - The witness: `test/witness/easy-expert.cjs`. It must keep passing as sections are curated; each thing Easy
   hides gets a check of its own there.
 
-**The first thing Easy hides: the Cell IDs (2026-11-27, branch `Easy-Cell-IDs-Help`, PR #38; to be smoked by
-Andy).** Andy: _"we should however hide Cell ID's. In Expert mode, the cell ID's should in fact use the same
+**The first thing Easy hides: the Cell IDs (2026-11-27, PR #38, merged on Andy's word after his nits).** Andy: _"we should however hide Cell ID's. In Expert mode, the cell ID's should in fact use the same
 styling (CSS) ... make all the same as T.6.0 across all sections please."_
 
 - A Cell ID is the ID column's cell, an ID beside its value (T.6.1) or an ID leading a caption ("M.1.1 HSPF").
   The renderer marks the last two with the class `cell-id` (`FieldManager.js` `markCellId`).
 - Expert shows all of them in the ID column's style. Easy hides them on screen; print shows them.
-- **The exception: S11's row IDs that open a Builder stay in Easy.** They are buttons, and rule 2 above says Easy
-  never hides an input. Still open, Andy's to rule: whether those rows get another button in Easy.
+- **Two exceptions stay in Easy.** S11's row IDs that open a Builder: they are buttons, and rule 2 above says
+  Easy never hides an input (Andy 2026-11-27: leave the Builders alone for now; ABCD.EARTH's refinements come
+  later). And S10's opening rows (G.7.x, G.8.x), so a window keeps its number in both sections (Andy: _"to
+  maintain a visual correlation between unique windows and their ID's"_).
+- No row draws its own ID twice (Andy: _"we don't duplicate ID row and name"_).
+- **Both views: accounting style.** A number is right-justified, words are left-justified, a caption follows
+  its column (Andy 2026-11-27; V3's rule, which 4.0's stylesheet had dropped). `obstyles.css` §8b.
 
 **Interactive help (same PR).** Andy: _"unlike V3, we have no way to switch On/Off interactive help, let's add
 that for Easy mode and Expert mode, On by default in Easy, Off by default in Expert."_

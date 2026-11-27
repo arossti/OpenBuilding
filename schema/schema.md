@@ -20,13 +20,12 @@
 
 ### ▶ START HERE (handoff 2026-11-27, the laptop `M2max`) — written for a cold start after a /clear
 
-**▶ EASY / EXPERT: THE STUB IS LIVE (PR #37, `1e4d21b`, merged on Andy's word 2026-11-27). ITS FIRST STEP IS
-BUILT, NOT MERGED (branch `Easy-Cell-IDs-Help`, PR #38, to be smoked by Andy):** Easy hides the Cell IDs, Expert
-shows every ID in one style, and interactive help has its own switch. "WHAT PR #38 HOLDS" is next below.
-**The next task after it: Easy mode section by section, with Andy** marking what is essential in each (the plan
-and every ruling: `docs/workplans/REFERENCE-MODEL-EXPLAINED.md`, "Easy and Expert modes, and Guide Me"). That
-curation is his; an agent does not choose what a section hides. The F280 work below is waiting on other people:
-read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11-27), and otherwise leave it.
+**▶ EASY / EXPERT IS LIVE: the stub (PR #37, `1e4d21b`) and its first step (PR #38, branch
+`Easy-Cell-IDs-Help`), both merged on Andy's word 2026-11-27, #38 after the nits of his smoke.** "WHAT PR #38
+HOLDS" is next below. **The next task: Easy mode section by section, with Andy** marking what is essential in each
+(the plan and every ruling: `docs/workplans/REFERENCE-MODEL-EXPLAINED.md`, "Easy and Expert modes, and Guide Me").
+That curation is his; an agent does not choose what a section hides. The F280 work below is waiting on other
+people: read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11-27), and otherwise leave it.
 
 **WHAT PR #38 HOLDS** (Andy 2026-11-27, on smoking #37: _"no need to remove the header ids - we should however
 hide Cell ID's. In Expert mode, the cell ID's should in fact use the same styling (CSS) ... make all the same as
@@ -34,28 +33,54 @@ T.6.0 across all sections please. Also, unlike V3, we have no way to switch On/O
 that for Easy mode and Expert mode, On by default in Easy, Off by default in Expert."_):
 
 - **Every Cell ID is marked.** Outside the ID column an ID sat in the body font: 70 beside a value (T.6.1, D.1)
-  and 33 leading a caption ("M.1.1 HSPF", "B.18.3 Shielding"). `FieldManager.js` `markCellId` gives each the
+  and 33 leading a caption ("M.1.1 HSPF", "B.18.4 n-Factor"). `FieldManager.js` `markCellId` gives each the
   class `cell-id` as the section renders (a cell alone, or a span around the leading ID); S05's E.3.5, which
   the Builders draw, carries it in `js/objective-builders.mjs`. An ID named inside a sentence is left as text.
-- **Expert: one style for all 233 IDs,** the ID column's (monospace, 10 px, dim), the header rows' own ids
+- **Expert: one style for every ID,** the ID column's (monospace, 10 px, dim), the header rows' own ids
   included. The header ids stay (ruled).
+- **No row draws its own ID twice** (Andy: _"let's be sure like my 3rd screenshot we don't duplicate ID row and
+  name"_): seven rows did (B.11, whose name began with it; G.4, B.18.1, B.18.2, B.18.3 in a caption; T.6.4 and
+  T.6.8 beside a second value). `markCellId` leaves the repeat undrawn.
+  - ⚠ **Not changed, Andy's to renumber: one ID on two different things.** On two rows of the ID column: T.3.1
+    (S04 and S15), G.2 (S09 and S10). Beside two values: L.2.2 (S03), M.2.5 (S13: AFUE and Exhaust), V.1.7 (S13,
+    two rows), T.5.2 (S14, three places), T.6.6 (S15), B.18.3 (S12: also on Ae₁₀ Zone in row B.18.4), T.4.1
+    (S14). A row ID repeated in another section as a cross-reference (S.4, A.2, L.3.3, T.3.2, T.3.3) is not a
+    fault.
 - **Easy hides them** (`obstyles.css` §8e, on screen only: print shows them). A hidden ID's cell keeps its
   place and takes no room, so a column of IDs closes up and several sections get shorter.
-  - ⚠ **Not hidden: S11's row IDs that open a Builder** (11 on the default project). They are buttons, and
-    Easy never hides an input. ❓ Andy: leave them as IDs in Easy, or give those rows another button there?
+  - **Not hidden: S11's row IDs that open a Builder** (11 on the default project). They are buttons, and Easy
+    never hides an input. **RULED (Andy 2026-11-27): leave the Builders alone for now;** ABCD.EARTH has since
+    refined them (the assemblies' IDs among them) and OBJECTIVE's copies are to be updated later, not yet.
+  - **Not hidden: S10's opening rows (G.7.x, G.8.x),** Andy's suggestion: without them Easy reads Window,
+    Window, Window, and G.8.2 is S11's B.8.2, the same window.
+- **Accounting style is back: a number is right-justified, words are left-justified, in both views and in
+  print** (Andy 2026-11-27: _"We had a general CSS rul in V3 that text cells left justify and numeric cells
+  right justify so number columns line up vertically, accounting style."_). 4.0's stylesheet had dropped V3's
+  rule: all 418 values on the default project and all 65 typed numbers were left-justified. Now
+  (`obstyles.css` §8b, "Accounting style"): calculated, derived and typed values are right-justified with
+  tabular figures; typed words stay left (the project's name, the certifier, the licence number, S21's record);
+  a caption follows its column, right over numbers (`FieldManager.js` `markNumberHeads` marks it `num-head`),
+  else as its section asked (V3's `align-right` / `text-right` / `align-center` classes, which 4.0 had no rule
+  for); a number written into a layout is marked `static-number`.
+- **The popover's title is dark** on Bootstrap's pale band (it had the page's light heading colour).
 - **Help, the button after the pill** (V3's Help button: the 130 field popovers of `TooltipManager.js`, on
   hover or focus). Each view keeps its own setting, on in Easy and off in Expert until changed, in this browser
   (`objective4Help`); `js/objective4.mjs` `syncHelp` sets V3's one switch to it. The browser's own hover
   captions (the Garage note, a Builder row's name) are not popovers and stay on, as in V3.
 - **The button row** still keeps one line down to 1280 px: below 1360 px its gaps close and Help shows its icon
   alone.
-- **Seen, left:** an ID in monospace is a few px wider than it was in the body font, so at about 1500 px wide
-  S15 wraps three rows in Expert that it did not after #37 (it wrapped five before #37). Easy wraps none.
-- **Witnesses:** `test/witness/easy-expert.cjs` (ALL OK, 30 checks; it now opens a popover to prove help is on
-  or off, and emulates print); parity against V3 2146 / 2146 on all 16 cases; `onepage.cjs`, the four
+- **What wraps, for Andy's smoke** (a cell whose text runs onto a second line; measured in WebKit):
+  - at 1728 px wide: only S19 (rows 19.Ae, 19.Ag, 19.1), in both views;
+  - at 1512 px: S03 (L.1.1, L.2.1; Expert also L.2.3, L.3.3), S08 (A.5.1, A.6), S13 (M.2.1, V.1.6, V.3.3; Expert
+    also M.2.2, V.1.4), S19, and in Expert only S12 (B.16, B.17, B.18.4) and S15 (T.6.8, T.7.1, T.7.4, T.3.1,
+    T.8.1). Some captions wrap in S08, S10, S12 and S13;
+  - at 1280 px nearly every section wraps, and S11 and S12 scroll sideways.
+- **Witnesses:** `test/witness/easy-expert.cjs` (ALL OK, 35 checks; it opens a popover to prove help is on or
+  off, emulates print, and counts the numbers by the side they sit on); parity against V3 2146 / 2146 on all 16 cases; `onepage.cjs`, the four
   `builders-*`, `s19-reference`, `host-per-model`, `display-format`, `garage-facing`, `f280-summary` and V3's 8
   Reference specs as before.
-- ⚠ **A tenth way `src/` differs from andy-rnd** (the list is further down): `markCellId`.
+- ⚠ **A tenth way `src/` differs from andy-rnd** (the list is further down): `markCellId` and
+  `markNumberHeads`.
 
 **WHAT THE STUB IS (PR #37, live)** (Andy 2026-11-26: _"yes, build the stub after #28 merges. We can go section by section and
 determine what is essential."_; it changes no calculation):
@@ -226,7 +251,7 @@ B. **THEN, each on its own branch cut from `main` (RULED, Andy 2026-11-26):**
 
 1. **F280 Mode: gains to the heat balance only** (§11 is the plan, read it whole first). It changes the
    calculation engine. The validation review it waited for is done. Nothing of it is built.
-2. **The Easy / Expert stub: LIVE (PR #37); the Cell IDs and Help: BUILT (PR #38, to be smoked by Andy).** The pill after Copy from Target, the page
+2. **The Easy / Expert stub: LIVE (PR #37); the Cell IDs, Help and accounting style: LIVE (PR #38).** The pill after Copy from Target, the page
    launching in Easy, the spreadsheet's column letters gone in both modes, nothing else hidden yet.
    **Then section by section with Andy.** The plan and every ruling:
    `docs/workplans/REFERENCE-MODEL-EXPLAINED.md` Part 2.
@@ -480,8 +505,9 @@ in andy-rnd for the V3 page.
   `src/core/FileHandler.js` and `src/core/ui/DOMBridge.js` (text kept as text; the record's defaults).
   A ninth (2026-11-27, the Easy / Expert stub): the header rows of `src/sections/Section02.js`, `03`, `05` – `09`,
   `12` – `15` and `19` without their 80 column-letter captions.
-  A tenth (2026-11-27): `src/core/FieldManager.js` `markCellId`, the class `cell-id` on a Cell ID outside the ID
-  column.
+  A tenth (2026-11-27): `src/core/FieldManager.js` `markCellId` (the class `cell-id` on a Cell ID outside the ID
+  column, a row's repeat of its own ID left undrawn, `static-number`) and `markNumberHeads` (`num-head` on a
+  caption over a column of numbers).
 
 **The day's items as they were worked** (✅ = shipped; the unticked ones are REMAINS, above):
 

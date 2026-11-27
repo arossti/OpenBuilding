@@ -2469,6 +2469,42 @@ body {
   background: transparent !important;
 }
 
+/* Accounting style: a number is right-justified, so a column of 2-decimal values stacks; words are
+   left-justified. V3's rule (its styles.css "UNIVERSAL RULE 1 / 2"), lost when 4.0 took its own stylesheet:
+   every number on the page was left-justified until Andy asked for it back (2026-11-27). A number is a
+   calculated or derived value, or a typed value; a typed field that holds words is named below. */
+.op-v3 .data-table td.calculated-value:not(.checkmark):not(.warning),
+.op-v3 .data-table td.derived-value,
+.op-v3 .data-table td.number-input-cell,
+.op-v3 .data-table td.user-input,
+.op-v3 .data-table td.disabled-input[data-field-id]:not(.dropdown-cell),
+.op-v3 .data-table td.static-number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.op-v3 .data-table td.user-input.wide-text,
+.op-v3 .data-table td.user-input.f280-text,
+.op-v3 .data-table td.user-input[data-field-id="i_16"],
+.op-v3 .data-table td.user-input[data-field-id="i_17"],
+.op-v3 .data-table td.user-input[data-field-id^="f280_"] {
+  text-align: left;
+}
+/* A caption follows its column: right over a column of numbers (FieldManager marks it num-head), else as its
+   section asked (V3's alignment classes, which 4.0 had no rule for), else left. */
+.op-v3 .data-table td.align-right,
+.op-v3 .data-table td.text-right {
+  text-align: right;
+}
+.op-v3 .data-table td.align-center {
+  text-align: center;
+}
+.op-v3 .data-table td.text-left:not(.user-input) {
+  text-align: left;
+}
+.op-v3 .data-table td.num-head {
+  text-align: right !important;
+}
+
 /* The header row: column captions, small and dim, like the form's labels. */
 .op-v3 .data-table td.section-header,
 .op-v3 .data-table td.section-subheader,
@@ -5111,6 +5147,13 @@ input.op-pill:checked::before {
    `html.op-easy <selector>` INSIDE `@media screen`: print shows the full report whatever the view. Easy never
    hides an input, with one exception (S04's Actual columns while S.2 is at Targeted Use). Hidden so far: the
    Cell IDs. */
+/* A field's help popover is Bootstrap's light card; its title took the page's light heading colour and read
+   washed out on the card's pale band (Andy 2026-11-27). */
+.app-beamweb .popover-header {
+  color: #1f2328;
+  font-weight: 600;
+}
+
 /* Interactive help, on or off (V3's Help button): lit when on. Each view keeps its own setting. */
 #beam-action-bar .op-help-btn {
   color: var(--text-dim);
@@ -5161,8 +5204,15 @@ input.op-pill:checked::before {
 @media screen {
   /* Cell IDs (Andy 2026-11-27: "we should however hide Cell ID's"): the ID column and the IDs beside a value
      or leading a caption. A cell keeps its place in the row and its text takes no room, so a column of IDs
-     closes up. NOT hidden: S11's row IDs that open a Builder, which are buttons (Easy never hides an input). */
-  html.op-easy .op-v3 .data-table td.id-cell:not(.op-asm-btn):not(:has(*)),
+     closes up. NOT hidden: S11's row IDs that open a Builder, which are buttons (Easy never hides an input);
+     and S10's opening rows, which would else read Window, Window, Window: G.8.2 is S11's B.8.2, the same
+     window (Andy 2026-11-27: "to maintain a visual correlation between unique windows and their ID's"). */
+  html.op-easy
+    .op-v3
+    .data-table
+    td.id-cell:not(.op-asm-btn):not(:has(*)):not(
+      #envelopeRadiantGains tr:is([data-id^="G.7."], [data-id^="G.8."]) > td
+    ),
   html.op-easy .op-v3 .data-table td.cell-id {
     font-size: 0;
     padding-left: 0;
