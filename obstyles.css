@@ -3115,6 +3115,24 @@ body {
   align-items: center;
   gap: 5px;
 }
+/* In the button row a caption stays on one line. When the row is tight the project's name gives way first
+   (240 px down to 90, with an ellipsis), so the row is one line down to about 1260 px; narrower than that,
+   what does not fit goes to a second line instead of off the page. */
+#beam-action-bar {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+#beam-action-bar .beam-action-btn,
+#beam-action-bar .op-model-toggle,
+#beam-action-bar .op-view-toggle {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+#beam-action-bar input.beam-project-name {
+  flex: 1 1 90px;
+  min-width: 90px;
+  max-width: 240px;
+}
 .beam-action-btn:hover {
   border-color: var(--accent-lit);
 }
@@ -5003,12 +5021,14 @@ details.dep-details pre {
    it, body.reference-mode (set by V3's ReferenceToggle): below the masthead the accent itself turns red, so
    every card, header band, active tab, focus ring and slider dot follows, and a band names the model. The
    masthead's key values keep their own colours: they show both models at once. */
-.op-model-toggle {
+.op-model-toggle,
+.op-view-toggle {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
-.op-model-label {
+.op-model-label,
+.op-view-label {
   background: transparent;
   border: 0;
   padding: 0 2px;
@@ -5017,9 +5037,11 @@ details.dep-details pre {
   font-family: var(--font);
   cursor: pointer;
 }
-.op-model-label:hover {
+.op-model-label:hover,
+.op-view-label:hover {
   color: var(--text);
 }
+.op-view-label.active,
 .op-model-label.active[data-model="target"] {
   color: var(--ob-accent);
   font-weight: 600;
@@ -5079,6 +5101,28 @@ input.op-pill:checked::before {
 }
 .op-reference-menu {
   font-size: 12px;
+}
+
+/* ── §8e Easy / Expert: how much of each section shows ──────────────────────
+   The pill after Copy from Target (docs/workplans/REFERENCE-MODEL-EXPLAINED.md, "Easy and Expert modes"). It is
+   cyan at both ends: red belongs to the Reference model. Easy is the class op-easy on <html> and nothing else,
+   so it can change no input, no calculation and no saved file.
+   WHAT EASY HIDES GOES HERE, one section at a time as Andy marks what is essential, each rule written as
+   `html.op-easy <selector>` INSIDE `@media screen`: print shows the full report whatever the view. Easy never
+   hides an input, with one exception (S04's Actual columns while S.2 is at Targeted Use). Nothing is hidden yet. */
+input.op-view-pill:checked {
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.5),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.07),
+    0 0 0 1px rgba(34, 211, 238, 0.3);
+}
+input.op-view-pill:checked::before {
+  background:
+    radial-gradient(circle at center, var(--ob-accent) 0, var(--ob-accent) 2.5px, transparent 2.5px),
+    linear-gradient(145deg, #555c67, #454b54);
+  box-shadow:
+    2px 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 6px rgba(34, 211, 238, 0.5);
 }
 
 body.reference-mode #beam-main {

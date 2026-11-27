@@ -41,19 +41,12 @@ window.TEUI.SectionModules.sect05 = (function () {
       cells: {
         c: { content: "C", classes: ["section-subheader"] },
         d: { content: "Metric Tons (MT)", classes: ["section-subheader"] },
-        e: { content: "E", classes: ["section-subheader"] },
-        f: { content: "F", classes: ["section-subheader"] },
         g: { content: "(kgCO2e/m²/yr)", classes: ["section-subheader"] },
         h: { content: "", classes: ["section-subheader", "spacer"] },
         i: {
           content: "(kgCO2e/m²·Service Life)",
           classes: ["section-subheader"],
         },
-        j: { content: "J", classes: ["section-subheader"] },
-        k: { content: "K", classes: ["section-subheader"] },
-        l: { content: "L", classes: ["section-subheader"] },
-        m: { content: "M", classes: ["section-subheader"] },
-        n: { content: "N", classes: ["section-subheader"] },
       },
     },
 

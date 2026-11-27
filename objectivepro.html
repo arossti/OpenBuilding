@@ -172,6 +172,35 @@
           </ul>
         </div>
 
+        <!-- Easy / Expert: how much of each section shows. Display only (the class op-easy on <html>): no input,
+             no calculation and no saved file changes with it. Remembered in the browser, not in the project. -->
+        <div class="op-view-toggle" role="group" aria-label="Easy or Expert view">
+          <button
+            class="op-view-label"
+            id="op-view-easy"
+            data-view="easy"
+            title="Easy: the inputs and the most essential values of each section"
+          >
+            Easy
+          </button>
+          <input
+            type="checkbox"
+            class="op-pill op-view-pill"
+            id="op-view-switch"
+            role="switch"
+            aria-label="Expert view"
+            title="Easy or Expert: how much of each section shows. It changes no value."
+          />
+          <button
+            class="op-view-label"
+            id="op-view-expert"
+            data-view="expert"
+            title="Expert: every column and value of each section"
+          >
+            Expert
+          </button>
+        </div>
+
         <input
           type="text"
           class="beam-project-name"

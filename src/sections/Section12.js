@@ -57,7 +57,6 @@ window.TEUI.SectionModules.sect12 = (function () {
           content: "Reference",
           classes: ["section-subheader", "align-right"],
         },
-        n: { content: "N", classes: ["section-subheader", "align-center"] },
         o: {
           content: "MRT\n(°C)",
           classes: ["section-subheader", "align-right"],
