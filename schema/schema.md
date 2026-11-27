@@ -49,14 +49,14 @@ UI niceties and calculation futzing can happen after we validate compliance."_
 - The F280 specs and case files this repo's engine came from are in andy-rnd (`test/f280*.cjs`,
   `docs/f280/README.md`).
 
-**✅ THE OPERATOR'S RUN — DONE 2026-11-26 evening (desktop), on `F280-Validation`. No calculation changed.**
+**✅ THE OPERATOR'S RUN — DONE 2026-11-26 evening (the laptop, `M2max`), on `F280-Validation`. No calculation changed.**
 
 - **RULED (Andy 2026-11-26, "yes, keep the data out of the public repo"):** Kieran's case files, the Annex J
   values and every result stay out of this repository. Only the runner is here; it holds none of them.
 - **The runner:** `test/witness/f280-run.cjs` (its README entry says how to run it). It opens each of Kieran's 45
   case files in a fresh context as the page's Open does, and records loss and nominal gain with their terms for
   the Target and the Reference, plus an import check.
-- **Everything else is private, in `~/Documents/OpenBuilding/KT F280 Validation Runs/`:** the case files
+- **Everything else is private, in `~/Documents/OpenBuilding/KT F280 Validation Runs/` ON THE LAPTOP (in no repo, so not on the desktop):** the case files
   unzipped (`F280_case_inputs/`), and `QO_run_2026-11-26/` holding the results (`f280-results.csv`, `.json`),
   the I19 diagnostics and **the report for Kieran with the triage list T1 – T13, `QO-F280-RUN-01.md`**. Read that
   report first next session; the figures are there and nowhere in this repo.
@@ -102,8 +102,13 @@ UI niceties and calculation futzing can happen after we validate compliance."_
     folder.
   - **RULED (Andy 2026-11-26, "yes, send as written"):** no input and no reference value is adjusted to close
     a gap. The four Archetype 3 results and the suspect Annex J row stand as run, with the findings beside them.
-  - Andy holds no CSA update later than his copy (sold 2025-10-29, "Revised March 2023", which includes Update
-    No. 3). A web search found nothing published since; CSA's store refuses automated reading.
+  - **CSA's current copy, read 2026-11-26 in Andy's CSA OnDemand viewer:** CSA F280:12 (reaffirmed 2025),
+    "Revised October 2025". Its one new Revision History entry is the cover, the National Standard of Canada
+    text, the title page and the preface; nothing technical after Update No. 3 (March 2023), which is what
+    Andy's own copy holds. The suspect Annex J row and Table H.1.2's ELA10 for "Archetypes 3 and 4" are printed
+    there as in ours (the figures are in andy-rnd#27's addendum). Andy has written to CSA for the update copy.
+  - **How it was read:** that viewer renders pages legibly where the PDF does not. Safari on the laptop, the
+    library's "View Online", pages turned and captured from the shell; the captures were not kept.
 - **NEXT:** T1 (`g_112` = 5.99 in andy-rnd's F280-1 and `build_case.py`); F280-1's garage walls split out, which
   needs the plans; T2 (a build stamp on the page); T8 (the Annex D / Table E.1 verification report from S21).
 
