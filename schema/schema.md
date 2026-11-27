@@ -76,6 +76,30 @@ may PR and merge and self-smoke w/o me"_; that covered #28 and #32 and is not a 
   - not the cause, by the code: the weather station's elevation (AIM-2 takes none; its air density is fixed) and
     the flow exponent as a separate input (it is derived from the ACH50, the volume and the ELA10).
   - Results and the scripts: private folder, `diagnostics/i19-ceiling-height-scan.csv`.
+- **I19, a third and fourth diagnostic: leakage by exposed surface, and the printed ELA10s themselves
+  (2026-11-27, Andy's question: is the volume-based ACH50, not a surface-based NRL50, at the root of it?).**
+  - **Not the cause, though the physics is his.** The Standard gives the end and the middle unit one ACH50, so
+    by OBJECTIVE's own air-facing areas the end unit is taken to be about a fifth tighter per m² (its exposed
+    area is 1.28 times the middle unit's). Given the middle unit's leakage per m² instead (the same NRL50), the
+    four failing end units land 6 to 9 % ABOVE Annex J: inside the band, but as far over as they were under.
+    The reference's end unit leaks 6 to 9 % more than its middle unit, not 28 %.
+  - **Nothing in the Standard or in AIM-2 scales leakage by surface** (an Explore agent's read of the text
+    extract, NRCan's help and implementation notes, and our code): no normalized leakage term anywhere; AIM-2's
+    preset types take their ELA from the volume; its house types are Detached and Semi-Detached only, and the
+    type changes the ceiling / wall / floor leakage split, nothing else. Annex L.1.2 says the specified ELAs
+    were entered in AIM2 and does not say how they were obtained.
+  - **OBJECTIVE's surface path works, and the case files bypass it.** A chosen NRL50 becomes AIM-2's ACH50
+    through the air-facing area (`VolumeMetricsNodes.js` `airTightness.ach50Target`), so the same NRL50 gives an
+    end unit more leakage, when the ELA is left to be derived. A file that types the ACH50 and the ELA10, as the
+    Standard's do, goes straight to AIM-2.
+  - ⚠ **Found: the Standard's printed ELA10s do not share one ratio to volume.** At one ACH50 and one flow
+    exponent, ELA10 / volume must be the same for every house. Across the four archetypes it differs by up to
+    3.9 %, and the row houses are the low ones (the same pattern in both typed vintages). With the row houses'
+    ELA10 at Archetype 2's ratio, **all eight end and middle units of those vintages are inside the band.**
+    A diagnostic, not an input: it says the row houses' ELA10 was derived from another volume or exponent than
+    the one specified, and it still does not explain why the end unit sits below the middle one.
+  - Results and scripts: private folder, `diagnostics/i19-same-nrl50-as-middle-unit.csv`,
+    `i19-ela-per-m3-as-archetype-2.csv`. Not yet sent to Kieran (❓ Andy).
 - **The N-factor and AIM-2 do not compete in the F280 loads (2026-11-27, Andy's question).** S21's design loss and
   gain take AIM-2's design rates in either F280 Mode (`F280ComplianceNodes.js`); the N-factor (ACH50 / N by
   zone, shielding and storeys, `VolumeMetricsNodes.js`) is read by the ANNUAL figures alone. Where both exist
