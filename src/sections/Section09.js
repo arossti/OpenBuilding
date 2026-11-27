@@ -59,7 +59,7 @@ window.TEUI.SectionModules.sect09 = (function () {
         },
         j: { content: "Htg Gain\n(%)", classes: ["section-subheader"] },
         k: { content: "Cooling Gain\n(kWh/yr)", classes: ["section-subheader"] },
-        l: { content: "Htg Gain\n(%)", classes: ["section-subheader"] },
+        l: { content: "Cooling Gain\n(%)", classes: ["section-subheader"] },
         m: { content: "Reference", classes: ["section-subheader"] },
       },
     },

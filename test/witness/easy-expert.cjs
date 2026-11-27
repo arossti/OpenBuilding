@@ -150,13 +150,16 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
         wattsS15: text('#teuiSummary tr[data-id="T.6.10"] td').filter((t) => t === "W").length,
         wattsS21: text("#f280Compliance td").filter((t) => t === "W").length,
         metres: text('#climateCalculations tr[data-id="L.2.4"] td').filter((t) => t === "m").length,
-        captions: text("#beam-main .data-table td.section-subheader").filter(Boolean)
+        captions: text("#beam-main .data-table td.section-subheader").filter(Boolean),
+        // S09's two percentage columns: heating, then cooling (the second read "Htg Gain (%)" until 2026-11-27)
+        s09: ["j", "l"].map((c) => document.querySelector(`#occupantInternalGains tr[data-id="09-ID"] td.col-${c}`).textContent.replace(/\s+/g, " ").trim()).join(" | ")
       };
     });
   const le = await letters();
   ok("no column letter in any header (Easy)", le.found.length === 0, le.found.join("; "));
   ok("row IDs stay", le.named === "B.1 S.4 T.6.10 B.19.3 F.27", `${le.ids} id cells; found: ${le.named}`);
   ok("units stay (W in S15 and S21, m in S03)", le.wattsS15 === 2 && le.wattsS21 >= 9 && le.metres === 1, JSON.stringify([le.wattsS15, le.wattsS21, le.metres]));
+  ok("S09's percentage columns are captioned heating, then cooling", le.s09 === "Htg Gain (%) | Cooling Gain (%)", le.s09);
   const kept = ["Prices of Energy", "Options related to Section12", "(°C)", "Reference"].filter((c) => le.captions.includes(c));
   ok("captions with a name or a unit stay", kept.length === 4, `${le.captions.length} header captions; found: ${kept.join(" | ")}`);
 

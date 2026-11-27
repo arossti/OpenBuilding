@@ -66,7 +66,7 @@ What each must show:
   `f280-summary.html` in its own tab, whose first page is the summary sheet laid out as Annex D's Figure D.1
   (thirteen blocks, one printed page) ahead of the supplement. With `<out>` it also writes the print PDF by the
   machine's Chrome.
-- `easy-expert.cjs <out>`: 69 lines of `ok`, then `ALL OK`. A first launch is in Easy (the class `op-easy` on
+- `easy-expert.cjs <out>`: 70 lines of `ok`, then `ALL OK`. A first launch is in Easy (the class `op-easy` on
   `<html>`), the pill follows Copy from Target, no header cell's caption is its own column's letter in either
   view while row IDs, one-letter units (W, m) and named captions stay. Easy shows no Cell ID but S11's Builder
   buttons and S10's opening rows; Expert shows all of them in one style, the ID column's; no row draws its own
