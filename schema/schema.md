@@ -98,6 +98,15 @@ asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and brin
        any other number at no more than 2. The graph and the saved file keep the full value. So S21's U-values
        and its long decimals no longer match V3's page character for character.
      - Witness `test/witness/display-format.cjs`.
+   - **⚠ FOUND, NOT CHANGED — F280 Mode On drops a model's annual electricity** (Andy's Collingwood question,
+     2026-11-26 night). Under On, S09 holds F280's design gains (lighting 0 in effect, equipment 0, plug loads
+     max(4 W/m², 800 W), 70 W a person), and S09's densities are also the electricity the annual model bills. So
+     the Reference of the four Part 9 F280 cases loses its lighting and equipment energy. Target → Reference
+     TEUI: 02 Collingwood 103.5 → 84.7 (plug subtotal −24.1 kWh/m², heating +6.4, cooling −1.1); 10 Duplex 64.1
+     → 39.0 (−24.1, +2.7, −3.7); 12 PHI Low Energy 84.1 → 67.3 (−15.7, +4.5, −5.7); 03 PHI Classic 53.8 → 54.0
+     (−5.8, +6.4: its 800 W floor is 5.3 W/m² against the Target's 2.1, so plug energy rises and cancels).
+     **RULED (Andy):** _"yes, gains to the heat balance only, keep S09's electricity"_, then _"do nothing to the
+     calculation engine yet, investigate first."_ Nothing in the engine is changed.
 3. **ABCD BUGLIST #266** (item 5): until it is fixed the Assembly Builder here is the 2026-10-22 library, 115
    assemblies, with the old blue accent and month-old baked HFT.
 4. **A light mode** (item 6, second tier).
