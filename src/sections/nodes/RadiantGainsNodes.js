@@ -49,7 +49,7 @@
     // ========================================================================
     // INPUTS - Glazing properties by orientation (rows 73-78)
     // ========================================================================
-    // Every opening row (Openings.js: doors G.7.1-G.7.4, windows G.8.1-G.8.12). The first six keep
+    // Every opening row (Openings.js: doors G.7.0, G.7.2-G.7.4, windows G.8.1-G.8.12). The first six keep
     // their labels and default orientations; a row after them starts North (a window) or Average (a door).
     const FIRST = { 73: "Average/Doors", 74: "North", 75: "East", 76: "South", 77: "West", 78: "Skylight" };
     const rows = window.TEUI.Openings.ALL.map(o => ({

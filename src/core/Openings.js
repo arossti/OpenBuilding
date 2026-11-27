@@ -217,7 +217,10 @@
     below: { rows: BELOW, label: "below-grade element", sections: ["S11"] },
   };
 
-  const s10RowId = o => (o.kind === "door" ? `G.7.${o.n}` : `G.8.${o.n}`);
+  // The first door is G.7.0, as S11's is B.7.0 and as the Sankey names it ("G.7.0 Doors"); it read G.7.1
+  // until 2026-11-27. The doors after it were already in step: G.7.2 is B.7.2.
+  const s10RowId = o =>
+    o.kind === "door" ? (o.n === 1 ? "G.7.0" : `G.7.${o.n}`) : `G.8.${o.n}`;
   function s11RowId(o) {
     if (o.kind === "opaque") return isSlot(o) ? `B.${o.s11}` : TYPES[o.type].b;
     return o.kind === "door"

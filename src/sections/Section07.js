@@ -331,8 +331,10 @@ window.TEUI.SectionModules.sect07 = (function () {
           label: "Energy Recovered: kWh/yr",
         },
         f: { content: "kWh/yr", classes: ["text-left"] },
-        g: { content: "W.5.3", classes: ["text-left"] },
-        h: { content: "(W.2.W) SHW Wasted", classes: ["text-left"] },
+        // W.2.W, as the Sankey names it ("W.2.W SHW Wasted"); the ID cell read W.5.3 and the caption
+        // carried "(W.2.W)" until 2026-11-27
+        g: { content: "W.2.W", classes: ["text-left"] },
+        h: { content: "SHW Wasted", classes: ["text-left"] },
         j: {
           fieldId: "j_53",
           semanticPath: "waterHeating.shwWasted",
