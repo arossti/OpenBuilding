@@ -20,7 +20,8 @@
 
 ### ▶ START HERE (handoff 2026-11-26 / 27 overnight, the laptop `M2max`) — written for a cold start after a /clear
 
-**LIVE: `main` after PR #32** (the F280 calculation summary sheet), deployed to
+**LIVE: `main` after PR #33 (`d93c99d`)** (the F280 calculation summary sheet, #32, and its first page laid
+out as Figure D.1, #33), deployed to
 https://arossti.github.io/OpenBuilding/. Before it: #30 (`ab7c9c2`, the runner and the Garage facing) and #31
 (docs). andy-rnd `main` is **`645784e`** (#28, F280-1's ceiling). Andy's word for the night, 2026-11-26: _"you
 may PR and merge and self-smoke w/o me"_; that covered #28 and #32 and is not a standing rule.
@@ -53,24 +54,36 @@ may PR and merge and self-smoke w/o me"_; that covered #28 and #32 and is not a 
 - **CSA:** Andy has written to CSA's store for the update copy. A firmer email, **drafted for Kieran to send**
   (in #27 and in his note), asks for the erratum, the Archetype 3 inputs, Table 6F and Cl. 8.3.8 b), with a
   reply by 2026-12-03. Its recipient is blank and its escalation paragraph is Andy's and Kieran's to keep.
-- **HVAC Designers of Canada is the lead for both open items, not yet acted on (❓ Andy: who writes to them).**
-  They are the body that verifies software to Section 8: https://hvacdc.ca/f280-12-software/ lists eight
-  products "verified by HVAC Designers of Canada as meeting the requirements of section 8 of CSA F280-12", first
-  verified October 2023, the work funded by NRCan's LEEP team, and the three condition sheets read say
-  "Conditions: None". Eight products cannot have matched a misprinted row, so HVAC-DC must hold either a
-  corrected value or a ruling on it, and the same for the end unit's inputs. Contact as their site gives it:
-  info@hvacdc.ca. The F280 package that came with the Standard (NRCan's method spreadsheets and their test
-  cases) holds no archetype inputs: checked 2026-11-27.
-- **I19, a second diagnostic (2026-11-27, Andy's question; never an input to adopt):** the highest ceiling is a
-  lever of the same size as the ELA10. Raised by a tenth on all 16 Archetype 3 and 4 files, every one of them is
-  inside the band, the four that fail included; by a twentieth, two still fail. It does not explain the gap:
-  the end unit then sits low and the middle unit high, as before. The height is Kieran's ruling (I18), read
-  from NRCan's help: "the vertical distance from ground level to the highest elevation that house air can rise
-  to ... When the foundation is a walkout basement, ground level is actually at the top of the basement floor
-  slab." ❓ Kieran: does Annex G show anything for Archetypes 3 and 4 that puts ground level lower? Results:
-  private folder, `diagnostics/i19-ceiling-height-scan.csv`. Not the cause, by the code: the weather station's
-  elevation (AIM-2 takes none; its air density is fixed) and the flow exponent as a separate input (it is
-  derived from the ACH50, the volume and the ELA10).
+- **HVAC Designers of Canada is the lead for both open items.** They are the body that verifies software to
+  Section 8: https://hvacdc.ca/f280-12-software/ lists eight products "verified by HVAC Designers of Canada as
+  meeting the requirements of section 8 of CSA F280-12", first verified October 2023, the work funded by NRCan's
+  LEEP team, and the three condition sheets read say "Conditions: None". Eight products cannot have matched a
+  misprinted row, so HVAC-DC must hold either a corrected value or a ruling on it, and the same for the end
+  unit's inputs. **Andy writes to them himself, in a friendly tone, and only after Kieran's reading** (his words,
+  2026-11-27: _"Kieran's reading is vital before we go at this all guns blazing"_). A draft is in the private
+  folder (`DRAFT-email-to-HVAC-Designers-of-Canada.md`); nothing is sent. The F280 package that came with the
+  Standard (NRCan's method spreadsheets and their test cases) holds no archetype inputs: checked 2026-11-27.
+- **I19, a second diagnostic: the highest ceiling (2026-11-27, Andy's question; never an input to adopt).
+  Sent to Kieran on andy-rnd#27 as a question on his I18 ruling.** 84 runs on the 16 Archetype 3 and 4 files:
+  - **any one height from 6.45 m to 8.03 m puts all 16 inside the band,** loss and gain (the ruled height is
+    6.00 m; 8.03 m is the height taken from the basement slab). The band's upper limit is 120 %, so raising the
+    middle units with the end units pushes none out;
+  - it does not explain the gap: the failing end units equal Annex J at 6.6 – 7.0 m, the middle units of the
+    same vintages at 6.1 – 6.3 m, and the two newer vintages are already above it at 6.00 m;
+  - the reason it might be legitimate: NRCan's help defines the height "from ground level to the highest
+    elevation that house air can rise to ... When the foundation is a walkout basement, ground level is actually
+    at the top of the basement floor slab", and both row houses carry garage walls. Kieran's to read in Annex G;
+  - not the cause, by the code: the weather station's elevation (AIM-2 takes none; its air density is fixed) and
+    the flow exponent as a separate input (it is derived from the ACH50, the volume and the ELA10).
+  - Results and the scripts: private folder, `diagnostics/i19-ceiling-height-scan.csv`.
+- **The N-factor and AIM-2 do not compete in the F280 loads (2026-11-27, Andy's question).** S21's design loss and
+  gain take AIM-2's design rates in either F280 Mode (`F280ComplianceNodes.js`); the N-factor (ACH50 / N by
+  zone, shielding and storeys, `VolumeMetricsNodes.js`) is read by the ANNUAL figures alone. Where both exist
+  they agree in kind: on F280-1 the N-factor's rate is within a tenth of AIM-2's heating-season mean, and both
+  are well under AIM-2's design-hour rate, as they should be. Our AIM-2 is NRCan's AIM2.xls to the last digit.
+  - ⚠ **One inconsistency found, not changed (a calculation; it belongs to §11):** under F280 Mode On the annual
+    HEATING leakage switches to AIM-2's seasonal rate, but the annual COOLING need (ISO 52016,
+    `CoolingNodes.js` `leakLs`) still takes the N-factor's flow. No F280 load reads it.
 
 **NEXT, in this order.** What is ruled and what is not: **the order inside B is Andy's ruling** of 2026-11-26.
 **A1 and A2 first is ruled too** (Andy 2026-11-26: _"yes, do the F280-1 fix and the verification report
@@ -89,9 +102,9 @@ A. **What the claim still needs from our side** (the report's triage; none of it
      structures out: F280-1 would read 5.54 m against the ruled 5.99 m. F280-1 and all 45 of Kieran's files type
      the height, so no result depends on it today.
 2. **T8: the first cut is SHIPPED (PR #32);** "WHAT PR #32 SHIPPED" below says what it is. What is left of it:
-   - **Kieran's review** (Cl. 8.3.2 a) – b)). F280-1's own sheet, Target and Reference, is printed and waiting
-     in the private folder, `QO_run_2026-11-26/reports/` (PDF and the sheet's data as JSON). **Not yet sent to
-     him: Andy sends it** (andy-rnd#27), with the question below.
+   - **Kieran's review** (Cl. 8.3.2 a) – b)). **Sent to him 2026-11-27 on andy-rnd#27** (Andy: "yes, send it to
+     Kieran on #27"): F280-1's sheet, with the question below. The printed PDFs (6 pages each, Target and
+     Reference) and the comment as sent are in the private folder, `QO_run_2026-11-26/reports/`.
    - **The one field the sheet marks "not carried": the interior shading category** (Table E.1 field 21;
      Figure D.1's notes 3 – 4 ask that it be recorded). OBJECTIVE has no such input: a window's summer shading %
      is its one shading input. Giving it one is a calculation change (Table 4's factor), so it belongs with
