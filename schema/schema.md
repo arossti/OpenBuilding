@@ -21,7 +21,9 @@
 ### ▶ START HERE (handoff 2026-11-26 late night, the laptop `M2max`) — written for a cold start after a /clear
 
 **LIVE: `main` after PR #30 (`ab7c9c2`)**, deployed to https://arossti.github.io/OpenBuilding/. This handoff is
-on branch `F280-Handoff` (docs only). The session was the F280 validation Andy asked for, and nothing else.
+the last commit of PR #31 (docs only). The session was the F280 validation Andy asked for, and nothing else.
+**To start:** `git checkout main && git pull` here; `git -C ../andy-rnd status` should show `main`, clean, at
+`74bd575`; cut each task's branch from `main` in the repo it touches.
 
 **Where the F280 claim stands: it cannot be made yet, and two of the reasons are not ours.**
 
@@ -52,7 +54,9 @@ on branch `F280-Handoff` (docs only). The session was the F280 validation Andy a
 - A suggestion not yet acted on: ask HVAC Designers of Canada how their verifications treated the misprinted
   row; they may hold the corrected value.
 
-**NEXT, in this order. A is Claude's recommendation, not yet ruled (❓ Andy); B is Andy's ruling of 2026-11-26.**
+**NEXT, in this order.** What is ruled and what is not: **the order inside B is Andy's ruling** of 2026-11-26.
+**List A, and doing A before B, is Claude's recommendation and is not ruled (❓ Andy).** Ask him before starting
+anything larger than A1.
 
 A. **What the claim still needs from our side** (the report's triage; none of it waits for CSA):
 
@@ -61,20 +65,40 @@ A. **What the claim still needs from our side** (the report's triage; none of it
      (with its derivation in the note beside it: change both to the ruling, grade to the ceiling with the two
      floor structures included). Run the script; it rewrites
      `test/computation/case-studies/F280-1-Archetype1-2010s-Ottawa.csv` and `docs/f280/F280-1-crosswalk.md`.
-   - Re-record the harness with `F280_RECORD=1` set (the command is at the top of
-     `test/f280WholeHouse.spec.cjs`), and update `docs/f280/README.md`'s figures.
+   - Re-record the harness (it serves the app itself), then update `docs/f280/README.md`'s figures:
+
+     ```bash
+     F280_RECORD=1 npx playwright test test/f280WholeHouse.spec.cjs --config=playwright.config.cjs
+     ```
+
      `test/aim2FromHouse.test.cjs` uses 5.53 as a typed example: leave it.
-   - The rebuilt file must equal Kieran's `case_files/F280-1.csv` field for field (it differed in `g_112` alone).
-   - andy-rnd's rules: commit and push on a feature branch; a merge needs Andy's word; its CI must be green.
+
+   - The rebuilt file must equal Kieran's `F280_case_inputs/case_files/F280-1.csv` (private folder) field for
+     field. Both are the same three-line case file, a header of 418 `id: label` columns, the Target row and the
+     Reference row: compare them by header id. On 2026-11-26 they differed in `g_112` alone, on both rows.
+   - The ruling covers every model, but Kieran's 45 files already carry each archetype's height: T1 is only our
+     own copy of F280-1.
+   - andy-rnd's rules: it is on `main` at `74bd575`, clean; cut the branch from there; commit and push on the
+     feature branch; a merge needs Andy's word. Its CI is `.github/workflows/test.yml` (Playwright WebKit on
+     Ubuntu): `npm run test:unit` locally, then `gh pr checks <n>` green before asking for the merge.
+
 2. **T8: a verification report from S21**, the Annex D summary sheet and the Table E.1 fields (Cl. 8.3.2
    a) – b)). Nothing produces it today. This is the largest piece, so start by showing Andy a plan.
    - **What the clause asks:** the base case's verification reports are reviewed against Annex D's "Heat loss
      and gain calculation summary sheet" (normative; Kieran's matrix counts 49 fields in Figure D.1) and against
      Annex E's Table E.1 (informative; 50 fields). Where ours diverge, Kieran lists the divergences.
-   - **Read Annexes D and E first**, from the page images: the private folder's `tools/csa-viewer/` (Annex D
-     is near printed p. 75 and Annex E near p. 78 in the 2025 copy; PDF page = printed + 7), or the text extract
-     named in memory `reference_f280_pdf_unreadable`. The form's wording is CSA's: reproduce field NAMES and
-     our values, not the form's layout or text.
+   - **Read Annexes D and E first.** The text extract named in memory `reference_f280_pdf_unreadable` has both
+     (its prose is sound; its tables shift columns). For the page images use the private folder's
+     `tools/csa-viewer/`: Andy must be signed in to CSA OnDemand in Safari with the document open, and the
+     captures are deleted after reading. **The pages are not yet located in the 2025 copy:** the 2023 copy has
+     Annex D at printed p. 71 and Table E.1 at pp. 74 – 78, and the 2025 copy's numbers run 3 – 4 later (PDF
+     page = printed + 7), so look around PDF pages 81 – 90 and add what you find to that tool's README.
+   - **The field list:** Kieran's matrix (`F280_RTM_r1_2026-11-26.pdf`, rows F280-8.3.2a and b) gives the
+     counts only. His register of the fields is in his own files, which we do not hold: ask him on andy-rnd#27,
+     or list them from the annexes.
+   - The form's wording is CSA's: reproduce field NAMES and our values, not the form's layout or text. The
+     feature is public; **F280-1's own printed report is not** (its inputs come from the Standard): it goes to
+     Kieran through the private folder and andy-rnd#27.
    - **Where it goes:** S21 is `src/sections/Section21.js` (F280's own section); the report is the browser's
      print, as every other report here (`obstyles.css` §8d). A first cut: an S21 block that lists each Annex D
      field with the value OBJECTIVE holds and where it comes from, and marks a field we do not carry.
@@ -101,7 +125,7 @@ simplified Easy/Expert UI moves?"_ Claude's recommendation, his to rule: A1 and 
 Kieran's Cl. 8.3.2 review cannot be done without A2); then **the Easy / Expert stub ahead of §11**, because it
 touches no calculation while the verification is open, and §11 changes the engine; §11 after Kieran signs.
 
-Andy's reason for A before B, 2026-11-26: _"F280 on means, a user gets what F280 requires for the heating and
+Why A is recommended first: Andy's own statement of the priority, 2026-11-26 (a priority, not a ruling on list A): _"F280 on means, a user gets what F280 requires for the heating and
 cooling system peak design loads, that is the critical path today and tomorrow. UI niceties and calculation
 futzing can happen after we validate compliance."_
 
@@ -149,7 +173,9 @@ futzing can happen after we validate compliance."_
 - **The OBC makes F280 mandatory:** Div. B 9.33.4.1.(1)(b) and 9.33.5.1.(3) (2024 Code); NBC 2020 9.33.5.1.(1).
 
 **Where the private material is: `~/Documents/OpenBuilding/KT F280 Validation Runs/`, ON THE LAPTOP ONLY** (in
-no repo, so not on the desktop unless Andy copies it). **RULED (Andy 2026-11-26, "yes, keep the data out of the
+no repo, so not on the desktop unless Andy copies it). **On the desktop** (`hostname` = `iByte-M2-Pro`) the
+folder, Excel and the CSA session are absent: T1's build and re-record and T8's plan can still be done there,
+but T1's comparison with Kieran's file and anything needing the results cannot; say so to Andy, do not guess. **RULED (Andy 2026-11-26, "yes, keep the data out of the
 public repo"):** the case files, the Annex J values and every result stay out of this repository and out of its
 issues, which are public; anything quoting them goes to andy-rnd (private).
 
