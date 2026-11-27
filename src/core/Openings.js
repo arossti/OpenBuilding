@@ -600,6 +600,9 @@
    * { inUse: true } (the export): a door / window row after the first only when it is in use - an area
    * or a host in either model - so forty window rows do not make every file forty rows wide.
    */
+  // a row's assembly or product, in either model (the Reference's is its own: ref_ca_<row>)
+  const hasBuilderLink = o =>
+    !!(window.TEUI.StateManager?.getValue(`ca_${o.s11}`) || window.TEUI.StateManager?.getValue(`ref_ca_${o.s11}`));
   function addedFields({ inUse: onlyInUse = false } = {}) {
     return [
       ...ALL.filter(o => !onlyInUse || !isSlot(o) || inUse(o)).flatMap(o => [
@@ -610,7 +613,7 @@
         `dq_${o.s11}`,
         ...(o.kind === "door" ? [] : [`eh_${o.s10}`, `ed_${o.s10}`]),
         // its product, as the Opening Builder's Apply Selected left it (OBJECTIVE 4.0, schema.md §10 B4)
-        ...(!onlyInUse || window.TEUI.StateManager?.getValue(`ca_${o.s11}`) ? [`ca_${o.s11}`] : []),
+        ...(!onlyInUse || hasBuilderLink(o) ? [`ca_${o.s11}`] : []),
       ]),
       ...OPAQUE.flatMap(o => [
         `c_${o.s11}`,
@@ -620,7 +623,7 @@
         ...(isSlot(o) ? [`d_${o.s11}`, `f_${o.s11}`] : []),
         // its assembly, as the Assembly Builder's Apply Selected left it (OBJECTIVE 4.0, schema.md
         // §10 B3): saved only for a row that has one
-        ...(!onlyInUse || window.TEUI.StateManager?.getValue(`ca_${o.s11}`) ? [`ca_${o.s11}`] : []),
+        ...(!onlyInUse || hasBuilderLink(o) ? [`ca_${o.s11}`] : []),
       ]),
     ];
   }

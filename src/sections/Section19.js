@@ -1694,9 +1694,29 @@ window.TEUI.SectionModules.sect19 = (function () {
     stampFloorplate(isReference);
   }
 
+  /** A field's StateManager key in the model on screen (V3's ref_ prefix for the Reference). */
+  function onScreenKey(fieldId) {
+    return window.TEUI.ReferenceToggle?.isReferenceMode?.() ? `ref_${fieldId}` : fieldId;
+  }
+
+  /**
+   * S19's own controls show the model on screen (Andy 2026-11-26: "S19 shows whatever in Reference mode as
+   * was set in Target, they should maintain independence"). Roof type and Windows are not graph inputs, so
+   * DOMBridge.stampInputsForMode does not reach them (it does stamp the aspect slider, a graph input).
+   */
+  function stampOwnControls(isReference) {
+    [FIELDS.ROOF_TYPE, FIELDS.WINDOWS].forEach(fieldId => {
+      const select = document.querySelector(`#wombat select[data-dropdown-id="dd_${fieldId}"]`);
+      const value = getModeAwareValue(fieldId, isReference);
+      if (select && value !== null && value !== undefined) select.value = value;
+    });
+  }
+
   /** DOMBridge.runPostStamp: after an import or a recalculation, in the model on screen. */
   function postStamp() {
-    stampS12Rows(!!window.TEUI.ReferenceToggle?.isReferenceMode?.());
+    const isReference = !!window.TEUI.ReferenceToggle?.isReferenceMode?.();
+    stampS12Rows(isReference);
+    stampOwnControls(isReference);
   }
 
   function updateVisualization(mode = "target") {
@@ -2118,7 +2138,7 @@ window.TEUI.SectionModules.sect19 = (function () {
           field.textContent = formattedValue;
 
           // Publish to StateManager directly
-          window.TEUI.StateManager.setValue(fieldId, String(numValue), "user-modified");
+          window.TEUI.StateManager.setValue(onScreenKey(fieldId), String(numValue), "user-modified");
           if (isActivated) {
             calculateAll();
           }
@@ -2175,8 +2195,8 @@ window.TEUI.SectionModules.sect19 = (function () {
         const value = e.target.value;
         console.log(`[WOMBAT] Aspect ratio slider changed: d_154 = ${value}`);
 
-        // Publish to StateManager directly
-        window.TEUI.StateManager.setValue("d_154", value, "user-modified");
+        // Publish to the model on screen (the Reference's own aspect is ref_d_154)
+        window.TEUI.StateManager.setValue(onScreenKey("d_154"), value, "user-modified");
 
         // Recalculate geometry with new aspect ratio (runs dual-engine + updates viz)
         calculateAll();
@@ -2309,6 +2329,7 @@ window.TEUI.SectionModules.sect19 = (function () {
    */
   function onModeSwitch(mode) {
     stampFloorplate(mode === "reference");
+    stampOwnControls(mode === "reference");
     if (isActivated) {
       updateVisualization(mode);
     }

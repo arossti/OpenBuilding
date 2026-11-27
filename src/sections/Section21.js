@@ -1820,6 +1820,19 @@ window.TEUI.SectionModules.sect21 = (function () {
    * 2. SM via reverse-lookup (semanticPath → fieldId) — for values computed
    *    by section calculateAll but not yet registered as graph nodes
    */
+  /**
+   * A mirrored number as S21 shows it: a U-value at 3 places, as S11 shows its own, and any other number at
+   * no more than 2 (Andy 2026-11-26: "we can keep the sigdigs but round for display"; a wall's U read
+   * 0.14947683109118085). Display only: the graph and the saved file keep the full value.
+   */
+  function displayText(displayId, value) {
+    var n = typeof value === "number" || /^-?\d+(\.\d+)?$/.test(String(value)) ? Number(value) : NaN;
+    if (!Number.isFinite(n)) return value;
+    if (displayId.endsWith(".uValue")) return window.TEUI.formatNumber(n, "number-3dp");
+    var decimals = (String(n).split(".")[1] || "").length;
+    return decimals > 2 ? window.TEUI.formatNumber(n, "number-2dp") : value;
+  }
+
   function stampDisplayFields() {
     var section = document.getElementById("f280Compliance");
     if (!section) return;
@@ -1850,7 +1863,7 @@ window.TEUI.SectionModules.sect21 = (function () {
 
       var el = section.querySelector('[data-field-id="' + displayId + '"]');
       if (el) {
-        el.textContent = value;
+        el.textContent = displayText(displayId, value);
         if (value === "\u2713") el.dataset.status = "pass";
         else if (value === "\u2717") el.dataset.status = "fail";
       }

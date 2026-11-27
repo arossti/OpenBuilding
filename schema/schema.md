@@ -18,13 +18,46 @@
 
 ## 0. Cold-start handoff (read this first)
 
-### ▶ START HERE (handoff 2026-11-26 evening, laptop) — written for a cold start after a /clear
+### ▶ START HERE (handoff 2026-11-26 night, laptop) — written for a cold start after a /clear
 
-**Written 2026-11-26 late afternoon (laptop) for tonight's arc, after a /clear.** **LIVE: `main` after PR #27**
-(B5; this handoff is its last commit), deployed to https://arossti.github.io/OpenBuilding/. No branch is open:
-**cut a fresh one from `main` for tonight's arc** (Andy names it, or name it for item 1 below). Everything Andy
-asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and bring a list. **Tonight: plan REMAINS
-1 – 6 with Andy before building** (he said: _"we can plan 1-6 for tonight's arc after a clear"_).
+**Rewritten 2026-11-26 night (laptop) at the end of the session, for a cold start.** **LIVE: `main` after
+PR #27**, deployed to https://arossti.github.io/OpenBuilding/. **PR #28 (`Reference-Independence`) was merged
+on Andy's word at the end of that session**; this handoff is its last commit.
+
+**What PR #28 shipped** (detail under REMAINS 1 and 2 below):
+
+- The Builders, S19 and an opening's host wall are each one per model (Reference / Target independence).
+- S01's `m_10` no longer reads "Unavailable" after Trust; Trust names the Target model.
+- A typed number keeps its format across a model switch; S21 rounds its mirrored numbers for display.
+- Two documents: `docs/workplans/REFERENCE-MODEL-EXPLAINED.md` and §11 below. No calculation changed for them.
+
+**⛔ THE VERY NEXT SESSION — F280 VALIDATION, AND ONLY THAT** (branch `F280-Validation`, cut from `main` after
+#28 merged). Andy 2026-11-26: _"Kieran has completed his validation harness for F280, so the very next session
+should review just that, before we make any changes to calculation methodology. F280 on means, a user gets what
+F280 requires for the heating and cooling system peak design loads, that is the critical path today and tomorrow.
+UI niceties and calculation futzing can happen after we validate compliance."_
+
+- **Review Kieran's harness first; change no calculation until it is reviewed.** Kieran is the F280
+  verification agent (Cl. 8.2). His material, as found 2026-11-26 and not yet read by Claude, is in the folder
+  `KT F280 Validation Runs` under `~/Documents/OpenBuilding/` (in no repo): `F280_RTM_r1_2026-11-26.pdf`,
+  `F280_case_inputs.zip`, `F280_model_specification.md`, `Objective 4.0 Requirements Matrix.txt`. Ask Andy
+  where the harness itself lives and for Kieran's questions verbatim.
+- **What "F280 On" must deliver:** the peak design heating and cooling loads F280 requires. The annual TEUI under
+  F280 Mode (§11) is second to that.
+- The F280 specs and case files this repo's engine came from are in andy-rnd (`test/f280*.cjs`,
+  `docs/f280/README.md`).
+
+**THEN, each on its own branch cut from `main`, in this order (RULED, Andy 2026-11-26):**
+
+1. **F280 Mode: gains to the heat balance only** (§11 is the plan, read it whole first). It changes the
+   calculation engine, so it waits for the validation review above. Nothing of it is built.
+2. **The Easy / Expert stub** (Andy: _"yes, build the stub after #28 merges"_): the pill after Copy from Target,
+   the page launching in Easy, the spreadsheet's column letters gone in both modes, nothing else hidden yet.
+   Then section by section with Andy. The plan and every ruling:
+   `docs/workplans/REFERENCE-MODEL-EXPLAINED.md` Part 2.
+3. **An opening's W × H comes across on Apply Selected** (REMAINS 5).
+4. The rest of REMAINS 3 – 6, and Andy's list of CSS and UI nits from his smoke (he called it a later arc; the
+   list is his, not yet written down).
 
 **How to work here (a cold start needs these):**
 
@@ -39,42 +72,79 @@ asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and brin
   show. After a big CSS/JS change use a new port: Chrome caches stale modules.
 - **The Builder computes, OBJECTIVE receives** (§10.2): never derive an RSI, U or carbon figure from layers here.
 
-**REMAINS, in order** (Andy's numbering for tonight; the older detail of 2 – 4 is in the items further down):
+**REMAINS** (Andy's numbering of 2026-11-26; 1 and 2 are done on PR #28, the older detail of 2 – 4 is in the
+items further down):
 
-1. **REFERENCE / TARGET INDEPENDENCE — the first thing to fix.** Andy 2026-11-26: _"because of our Ref/Target
-   independence rule, a user can and may set a different assembly in the Reference model or the Target as a
-   comparison. Often users will set AS-IS values for renovavation models, and then the target model only adds to
-   that, or in other cases we may wish to test a high carbon steel or concrete building as the reference model
-   against a Target model that is all mass timbe (low carbon) to compare the tow - so be sure we did not block that
-   with reference model reads or locked assemblies in S10 or S11."_
-   - ⚠ **WE DID BLOCK IT, in today's own code** (measured before this handoff): V3 itself does not. In Reference
-     mode S11's `f_85`, `f_86`, `f_94`, `g_89` and `d_86` are `contenteditable="true"` and a typed value goes to
-     `ref_<field>`. The block is three `isReference()` guards in `js/objective-builders.mjs`: `onActivate` (the row
-     IDs do nothing in Reference mode), the `focusout` handler (a typed value does not clear the link), and
-     `renderCarbon` (E.3.5 shows a dash); and `obstyles.css` §8e greys the IDs under `body.reference-mode`.
-   - **What it needs:** every read and write in that module by the model on screen: the link `ref_ca_<row>`
-     beside `ca_<row>`, the value `ref_f_<row>` / `ref_g_<row>`, the areas and hosts in `tallyCarbon`
-     (`ref_d_`, `ref_ch_`), the type in `openBuilder` (`ref_c_<row>`), `decorate`'s name chip and tooltip, and
-     E.3.5 showing the Reference's own tally in Reference mode (so the two can be compared). V3's own pattern for
-     "the value in the mode on screen" is `getModeValue` in `Section11.js`. Then the file: `exportToCSV` already
-     writes `ref_<id>` for every listed id, so `Openings.addedFields`' in-use test must also see `ref_ca_`;
-     `FileHandler`'s `isStoredKeyWithoutField` branch is taken only for non-`ref_` keys today, so read how a
-     `ref_` key without a field is stored before assuming it round-trips. Witness: apply one assembly in Target and
-     a different one in Reference on the same row; each mode shows its own name, RSI and E.3.5; save, reload, both
-     return; Copy from Target carries the Target's across.
-   - **S19 (Andy, same message):** _"Presently S19 shows whatever in Reference mode as was set in Target, they
-     should maintain independence, whatever a user may have changed on the Reference or target side inputs."_
-     WOMBAT must draw the model on screen.
-   - Also here: S21 (Andy: _"may show the Reference model vs. Target model, I have not considered that case yet"_,
-     ❓ his); andy-rnd's `ghostedReference`, `referenceDefaults` and `hoverOnScreenModel` behaviours checked on this
-     page; and a read through S10 and S11 for anything else that reads the Target's value while Reference is shown.
-2. **m_10 "Unavailable"** after Trust on a 4-opening fixture (item 4 below, ⚠ OPEN).
+1. **REFERENCE / TARGET INDEPENDENCE.** Andy 2026-11-26: _"because of our Ref/Target independence rule, a user can
+   and may set a different assembly in the Reference model or the Target as a comparison. Often users will set
+   AS-IS values for renovavation models, and then the target model only adds to that, or in other cases we may wish
+   to test a high carbon steel or concrete building as the reference model against a Target model that is all mass
+   timbe (low carbon) to compare the tow - so be sure we did not block that with reference model reads or locked
+   assemblies in S10 or S11."_
+   - **✅ THE BUILDERS — BUILT on `Reference-Independence`, to be smoked by Andy** (he asked for it the same day:
+     _"Let's fix it now"_). It had been blocked by today's own code, not by V3 (S11's Reference cells are editable).
+     Now `js/objective-builders.mjs` reads and writes THE MODEL ON SCREEN (`pre()` / `getM` / `setM`, V3's `ref_`
+     prefix): a row's assembly is `ca_<row>` in the Target and `ref_ca_<row>` in the Reference, Apply writes
+     `f_` / `g_` or `ref_f_` / `ref_g_`, the row IDs are live in both models, a typed value clears that model's
+     link only, and S05's E.3.5 is each model's own tally. Saved and restored for both (`Openings.addedFields`
+     lists a row when EITHER model has one; a `ref_` key imports without a field). **Copy from Target**
+     (`followMirror`): V3's mirror copies only the fields FieldManager lists, so where it carried the Target's value
+     across the Target's assembly follows, and a Reference row whose value is no longer its assembly's forgets it.
+     Also changed: an applied RSI is stored at 2 decimals, as the Builder shows it and as V3 stores a typed one.
+     Witness `test/witness/builders-reference.cjs`: Target `Wa | R36 2x6` (RSI 5.72, E.3.5 29.92 kgCO2e/m²) against
+     Reference `Wa | 203mm Concrete` (0.25, 48.81) on B.5, and a certified window against an aluminium one on
+     B.8.1; another project clears both, the saved file returns both, Copy from Target → All Inputs carries the
+     Target's across. The other three Builders witnesses and parity (2146 / 2146) still pass.
+   - **✅ S19 — BUILT on `Reference-Independence` (2026-11-26 night), to be smoked by Andy.** Andy, same message:
+     _"Presently S19 shows whatever in Reference mode as was set in Target, they should maintain independence,
+     whatever a user may have changed on the Reference or target side inputs."_ What was wrong (V3's code, so
+     andy-rnd has it too): the aspect slider's handler wrote `d_154` whatever the model, so an edit in the
+     Reference moved the Target's footprint; Roof type and Windows are not graph inputs, so a model switch left
+     the other model's choice showing in the dropdowns; `wombatRender.js` read the Target's Windows show / hide
+     for both drawings. Now `Section19.js` writes the model on screen (`onScreenKey`) and `stampOwnControls`
+     restamps the two dropdowns on a switch and after each stamp; the drawing itself already solved per model.
+     Witness `test/witness/s19-reference.cjs`: the Reference takes a hip roof, aspect 2 and hidden windows; the
+     Target keeps its gable, −2 and windows, its SVG identical to the byte; the saved file returns both.
+   - **✅ CHECKED, nothing to change:** andy-rnd's `ghostedReference`, `referenceDefaults` and
+     `hoverOnScreenModel` specs pass on this page (8 / 8; adapted to its start-up and kept in
+     `test/witness/v3-reference/`). S10, S11 and `Openings.js` read through: every state read and write there
+     goes through the mode-aware helper or is a deliberate both-models write.
+   - **STILL OPEN:** S21 (Andy: _"may show the Reference model vs. Target model, I have not considered that case
+     yet"_, ❓ his).
+2. **✅ `m_10` "Unavailable" after Trust — FIXED on `Reference-Independence` (2026-11-26 night), to be smoked.**
+   - **What it was:** the REFERENCE went Unavailable (`e_10`; `m_10` inherits it). An opening's host (`ch_` + its
+     row) left empty in the Reference took the Target's, so Trust's Target-only write hosted the Reference's
+     159 m² South window in a wall the Reference holds at 0 m², and that wall had no area left.
+   - **The fix:** the host is per model (`TransmissionLossNodes.js`: class C, `copyToReference: false`), as S11's
+     dropdown and `Openings.add` already treat it.
+   - **Witness** `test/witness/host-per-model.cjs`: after the write the Reference is 190.1 with no hosts, the
+     Target 82.8, `m_10` 49 %; the saved file returns each model's hosts; Copy from Target → All Inputs carries
+     them across. Parity 2146 / 2146.
+   - **Left as it is:** an opening's H (`dh_` + its row) is still class G (the Reference takes the Target's when
+     its own is empty); no failure seen.
+   - **RULED (Andy 2026-11-26, "yes"):** Trust writes the Target only, and says so: both buttons' hovers, the status line and the Trust + Verify modal's title name the Target model.
+   - **Also on this branch (Andy's smoke, 2026-11-26 night):**
+     - **A typed number keeps its format across a model switch.** `DOMBridge.stampInputsForMode` stamped the
+       stored value raw, so 48 inputs on the default project changed after a switch (S04's bill 132,938.00 →
+       132938, a U-value 0.900 → 0.9, $0.1300 → 0.13). It now formats as `stampAll` does.
+     - **S21 rounds its mirrored numbers for display** (`Section21.js` `displayText`): a U-value at 3 places,
+       any other number at no more than 2. The graph and the saved file keep the full value. So S21's U-values
+       and its long decimals no longer match V3's page character for character.
+     - Witness `test/witness/display-format.cjs`.
+   - **⚠ FOUND, NOT CHANGED — F280 Mode On drops a model's annual electricity** (Andy's Collingwood question).
+     The finding, the numbers, Andy's ruling and the plan are §11.
 3. **ABCD BUGLIST #266** (item 5): until it is fixed the Assembly Builder here is the 2026-10-22 library, 115
    assemblies, with the old blue accent and month-old baked HFT.
 4. **A light mode** (item 6, second tier).
-5. **From §10, none started, each on Andy's word:** isotherms baked for the Section and Opening Builders (never
-   built; ABCD.EARTH work: a fixture written by the app's solver, as `hft-fixture.json` is for assemblies); whether
-   an opening's W × H and an SHGC come across with its U; whether S05's E.3.5 may be chosen as E.3.2's source.
+5. **From §10, RULED by Andy 2026-11-26 (_"Yes on 2/3"_), none started:**
+   - **YES — isotherms baked for the Section and Opening Builders** (never built; ABCD.EARTH work: a fixture written
+     by the app's solver, as `hft-fixture.json` is for assemblies, and an Isothermal View in each page).
+   - **YES — an opening's W × H and an SHGC come across with its U** on Apply Selected. The message already carries
+     `w_mm` and `h_mm`; they would go to the row's W and H (`dl_`, `dh_`) and its S10 twin's area, as
+     `pdf-bridge-import.mjs` `writeEnvelope` does. The Opening Builder computes NO SHGC today: that is ABCD.EARTH
+     work first, then S10's SHGC.
+   - **NEVER — E.3.5 as E.3.2's source.** Andy: _"E.3.5 should never be chosen as E.3.2's source because
+     Typology-based caps are set by Standards like Toronto's TGS4, etc."_ E.3.5 stays a row that nothing reads.
 6. **The port's own open items**, §8 and §9.2, unchanged today.
 
 Local servers (they die on reboot): `python3 schema/scripts/nocache-serve.py 8831` here, `node test/static-server.cjs 8791`
@@ -107,16 +177,20 @@ in andy-rnd for the V3 page.
 - ⚠ **`src/` now differs from andy-rnd `5e0b2f0`** in two ways, both to keep if a file is copied over again: the 51
   header captions with bracketed units (`src/sections/*.js`), and `Section16.js` `initializeEventHandlers` wiring once.
   A third since (§10 B3): `ca_<row>` in `src/core/Openings.js` `addedFields` and `src/core/FileHandler.js`.
+  A fourth (REMAINS 1): S19's own inputs per model, `src/sections/Section19.js` and `src/core/wombatRender.js`.
+  A fifth (REMAINS 2): the host input's class in `src/sections/nodes/TransmissionLossNodes.js`.
+  A sixth: display formats, `src/core/ui/DOMBridge.js` `stampInputsForMode` and `src/sections/Section21.js`
+  `displayText`.
 
 **The day's items as they were worked** (✅ = shipped; the unticked ones are REMAINS, above):
 
-1. **ONEPAGE — ✅ PR #24, smoked by Andy.** Andy 2026-11-26: *"each page gets a S18
+1. **ONEPAGE — ✅ PR #24, smoked by Andy.** Andy 2026-11-26: _"each page gets a S18
    title which is then duplicated in the radiused, collapsible header ... We will keep the radiused, collapsible
    headers, add the subheader text to them ... then we can move ALL collapsable header sections into one container
    instead of each one getting its own container. Then it will function like V3, where we can toggle ALL sections
    On/Off with the same +/- button to the far right of the main header, and then the masthead menu will just anchor
    scroll to the relevant section. This will let us use the browser's print function to print all sections, like our
-   V3 does, as a formatted report. We lean 100% on the browser's print functions. Nothing fancy."*
+   V3 does, as a formatted report. We lean 100% on the browser's print functions. Nothing fancy."_
    - **What is there:** `js/objective4.mjs` `renderContentShell` builds ONE `.op-onepage` holding 22 cards
      (`sectionCard`: the radiused, collapsible header carries the name and, where `PANEL_SUBTITLES` has one, the
      subtitle; the page title is gone). `#op-toggle-all` at the far right of the button row is − (collapse all) / +
@@ -142,13 +216,13 @@ in andy-rnd for the V3 page.
 2. **THE OPENING BUILDER on the splash page — ✅ PR #25.** `publish_builders.py` (ABCD.EARTH #1032, merged) has it in `PAGES`: rebuilt from today's seed,
    its six-face witness passing (33 certified sides), `openings.json` in the seed stamp. `builders/opening-builder.html`
    is published and `index.html`'s sixth tile opens it (13 openings).
-3. **Reference remainders:** S19's own Reference display; S21 (Andy: *"may show the Reference model vs. Target model,
-   I have not considered that case yet"* — ❓ his); andy-rnd's `ghostedReference`, `referenceDefaults` and
+3. **Reference remainders:** S19's own Reference display; S21 (Andy: _"may show the Reference model vs. Target model,
+   I have not considered that case yet"_ — ❓ his); andy-rnd's `ghostedReference`, `referenceDefaults` and
    `hoverOnScreenModel` behaviours checked on this page.
-4. **m_10 "Unavailable"** after Trust on a 4-opening fixture (block below, ⚠ OPEN).
+4. **m_10 "Unavailable"** after Trust on a 4-opening fixture: ✅ fixed, REMAINS 2 above.
 5. **ABCD BUGLIST #266**, so the Assembly Builder is rebuilt from today's seed.
-6. **SECOND TIER — a LIGHT MODE** (Andy 2026-11-26: *"switches the screen to white, and the headers to black/grey like
-   the V3 (for familiarity). Dark/Light mode can be another header toggle."*): a second pill in the button row, one
+6. **SECOND TIER — a LIGHT MODE** (Andy 2026-11-26: _"switches the screen to white, and the headers to black/grey like
+   the V3 (for familiarity). Dark/Light mode can be another header toggle."_): a second pill in the button row, one
    body class re-pointing the tokens (`tokens.css` neutrals; `obstyles.css` `--bg-*`, `--text*`, `--border`), so §8b /
    §8c follow. Check then: the Sankey's forced-light labels, the input box's sunken fill, the slider track, Reference
    red on white.
@@ -252,7 +326,7 @@ opening like a window). ✅ Facing per elevation sheet (sheet panel dropdown, ti
 _"add doors to the Trust process"_): host, W, H, qty on the S11 row; area (W × H) and facing on its S10 twin, as
 Section11.js `applyOpeningGeometry` does. Witness: West wall + 2 windows + 1 door, North wall + 1 window → rows
 B.7.0 / B.8.1 / B.8.2 hosted in 86, B.8.3 in 87a, areas 1.89 / 1.5 / 1.08 / 1.44, facings West / North.
-⚠ **OPEN:** on that 4-opening fixture S01's m_10 (Actual vs Target %, the default case is Utility Bills) reads
+✅ **FIXED 2026-11-26 night (REMAINS 2 in §0: the host is per model).** As found: on that 4-opening fixture S01's m_10 (Actual vs Target %, the default case is Utility Bills) reads
 "Unavailable" though h_10 = 82.8; single-opening and door-only runs give 49 %. Trace before relying on Trust's %.
 **✅ SHIPPED 2026-11-26 (PR #23) — the Reference model** (Andy: _"note Reference Model in the workplan so we can port that later tonight"_):
 V3's Target / Reference toggle (`src/core/ReferenceToggle.js`, its header button and `body.viewing-reference-inputs`
@@ -317,7 +391,7 @@ whole and only a v3 file takes V4-3's path.
 re-expressed in V4 form - walls by facing (Table G.1.8 a)), every window and door hosted with W × H × count, each
 window's overhang O and drop D, the app's own Annex A on each. It holds Annex J: loss 11 684 W (99.1 %), gain 7362 W
 (100.6 %), and the 8.3.8 turns, which now turn the walls and everything hosted in them, read 99.4–102.0 % of
-Annex J's change (93.7–95.8 % before). Andy 2026-11-26: *"V3 will just ignore fields it does not have in the .CSV format"*. Other case studies are re-entered from their drawings as Andy has time; until then the Load Sample Projects
+Annex J's change (93.7–95.8 % before). Andy 2026-11-26: _"V3 will just ignore fields it does not have in the .CSV format"_. Other case studies are re-entered from their drawings as Andy has time; until then the Load Sample Projects
 list shows only the v4 ones.
 
 **V4-6 — say it is 4.0.** The header and the CSV both read OBJECTIVE 4.0.
@@ -508,8 +582,9 @@ This reopens v4 (frozen at andy-rnd `main` until now). The source is andy-rnd `m
 > carbon in S05 can later be calculated from the Sum of the embodied carbon of all assemblies multiplied by their
 > area."_
 
-**Status 2026-11-26: B1 – B5 are merged (PRs #26, #27), Andy-smoked. ⚠ All of it is TARGET-ONLY today: the
-Reference model cannot take an assembly, which breaks Reference / Target independence (§0 REMAINS 1).** Andy answered §10.6 (all four as recommended) and said to go on B1.
+**Status 2026-11-26: B1 – B5 are merged (PRs #26, #27), Andy-smoked. On `Reference-Independence` (not merged) the
+Builders work in BOTH models, each row holding one assembly per model (§0 REMAINS 1); where B2 – B5 below say
+"inert in Reference mode", "a dash" or 4 decimals, that branch supersedes them.** Andy answered §10.6 (all four as recommended) and said to go on B1.
 
 ### 10.1 What is there today (read from the code, 2026-11-26)
 
@@ -546,13 +621,13 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
 
 **Type to group** (which part of the library the Builder opens at):
 
-| S11 type (`c_<row>`)            | Assembly Builder group  |
-| ------------------------------- | ----------------------- |
-| Roof                            | `Ra` Roof Exterior      |
-| Wall above grade                | `Wa` Wall Exterior      |
-| Exposed floor                   | `Fa` Floor Exterior     |
-| Wall below grade (conditioned)  | `Wg` Wall Foundation    |
-| Slab (conditioned)              | `Fg` Floor on Ground    |
+| S11 type (`c_<row>`)           | Assembly Builder group |
+| ------------------------------ | ---------------------- |
+| Roof                           | `Ra` Roof Exterior     |
+| Wall above grade               | `Wa` Wall Exterior     |
+| Exposed floor                  | `Fa` Floor Exterior    |
+| Wall below grade (conditioned) | `Wg` Wall Foundation   |
+| Slab (conditioned)             | `Fg` Floor on Ground   |
 
 ### 10.3 Phases
 
@@ -562,7 +637,7 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
   bar shows **Apply Selected** and **cancel** in place of export / import / cancel / reset. Apply posts, to its own
   origin only:
   `{ type: "ob-builder-apply", kind: "assembly", id, name, group, cls, rsi_eff, u_eff, rsi_method, eci_kgco2e_m2,
-  bio_kgco2e_m2, thickness_mm, edited }`; cancel posts `{ type: "ob-builder-cancel" }`. Where HFT has no result for
+bio_kgco2e_m2, thickness_mm, edited }`; cancel posts `{ type: "ob-builder-cancel" }`. Where HFT has no result for
   the assembly nothing is sent and the page says to choose NBC or ISO 6946. Without `?embed` the page is unchanged.
   Witnessed in WebKit through this site: Ra, Wa, Fa, Wg and Fg open at their group with only the palette visible,
   the posted values equal the ones shown, and the standalone page still agrees with the app on all 115 assemblies.
@@ -594,7 +669,7 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
 - **B4 — windows, doors and skylights open the Opening Builder — ✅ BUILT.** `opening-builder.html` has the same embed
   mode (ABCD.EARTH `1e2b30ab1`): `?embed=1&group=Window|Door|Skylight&pick=<opening id>`; its Apply posts
   `{ type: "ob-builder-apply", kind: "opening", id, name, cls, uw_computed, ug_computed, uf_computed, uw_certified,
-  certified_by, w_mm, h_mm, edited }`. In `js/objective-builders.mjs` the door (B.7), window (B.8) and skylight
+certified_by, w_mm, h_mm, edited }`. In `js/objective-builders.mjs` the door (B.7), window (B.8) and skylight
   (B.8.5) rows' IDs are buttons too; Apply writes the U-value into `g_<row>` (3 decimals) and the row's product
   into `ca_<row>` (`id, name, cls, u, basis, uw_computed, uw_certified, w, h, edited`), saved and restored as an
   assembly's is. **Which U:** the certificate's Uw where the product has one (`basis: "certified"`), else the
@@ -640,9 +715,117 @@ output from ABCD.EARTH (§5.2): everything the Builder pages need is added at th
 2. **Below grade, the Builder's Effective RSI of the assembly alone** is applied; OBJECTIVE adds the ground as it does
    today.
 3. **An assembly the user edited in the Builder may be applied**: the message carries what the page shows (`edited:
-   true`) and the row's name is marked "edited".
+true`) and the row's name is marked "edited".
 4. **B5's partial sum** is shown with the count of rows it covers, in its own new S05 field (10.3 B5), so the typed
    `i_41` and today's defaults are untouched.
+
+## 11. F280 Mode: gains to the heat balance only (PLAN, nothing built; waits for the F280 validation review, §0)
+
+Written 2026-11-26 night. Andy: _"ok, now fix step 2: gains to heat balance only"_ and _"We should spell this out
+in our workplan first"_, _"before we make any changes ot the calculation engine"_.
+
+### 11.1 What an F280 case file is
+
+Each Part 9 case study comes as two files, and they hold two different References.
+
+- **The regular file** (`02-residence-sb12-net-zero.csv`): the Reference is the code-minimum building.
+- **The F280 variant** (`…-f280.csv`): the Reference is the Target's own house (same walls, roof, windows,
+  airtightness and equipment) with F280 Mode On. Andy: _"we were using it to compare the Reference (F280) to our
+  Target models, NOT an F280+OBC Mininmum value, so the insulation values remain high, airthightness high"_.
+
+So the Reference's S01 TEUI falls in two steps between the two files. Only step 2 is a fault.
+
+| Case              | Regular file (code minimum) | F280 file, Mode Off (= the Target) | F280 file, Mode On | Actual |
+| ----------------- | --------------------------- | ---------------------------------- | ------------------ | ------ |
+| 02 Collingwood    | 179.5                       | 103.4                              | 84.7               | 103.5  |
+| 03 PHI Classic    | 296.0                       | 57.1                               | 57.3               | 56.3   |
+| 10 SB-12 Duplex   | 188.4                       | 13.2                               | −11.8              | 14.8   |
+| 12 PHI Low Energy | 181.3                       | 63.4                               | 46.6               | 57.8   |
+
+### 11.2 The fault (step 2)
+
+Under F280 Mode On, S09 holds F280's internal gains (`window.TEUI.F280Gains`; `InternalGainsNodes.js` `f280On`):
+people at 70 W each (Cl. 6.2.4), plug loads at the larger of 4 W/m² or 800 W (Cl. 6.2.5), lighting 0 in effect
+and equipment 0 (both are inside the plug figure).
+
+In OBJECTIVE one S09 density is two things: the heat the load gives the room, and the electricity it uses. So the
+annual model also stops billing the lighting and equipment electricity, and bills the plug loads at F280's
+figure. F280 is a sizing standard; it gives no annual consumption.
+
+The Reference's own change, Mode Off → On, in kWh/m² (run on the page 2026-11-26):
+
+| Case              | Lighting | Equipment | Plug loads | Heating | Cooling | Net   |
+| ----------------- | -------- | --------- | ---------- | ------- | ------- | ----- |
+| 02 Collingwood    | −6.6     | −13.1     | −4.4       | +6.4    | −1.1    | −18.8 |
+| 10 SB-12 Duplex   | −6.6     | −13.1     | −4.4       | +2.7    | −3.7    | −25.1 |
+| 12 PHI Low Energy | −6.6     | −13.1     | +4.0       | +4.5    | −5.7    | −16.8 |
+| 03 PHI Classic    | −6.6     | −13.1     | +13.9      | +6.0    | 0       | +0.2  |
+
+The first three columns are electricity that goes missing or appears. Heating and Cooling are the real effect of
+F280's gains on the heat balance, with F280's ground and infiltration methods inside Heating (between −3.9 and
++1.8). PHI Classic hides the fault: it is small, so the 800 W floor is 5.3 W/m² against its own 2.1.
+
+### 11.3 The ruling
+
+Andy 2026-11-26: _"yes, gains to the heat balance only, keep S09's electricity"_. Under F280 Mode On:
+
+- **The heat balance uses F280's gains**, as now: the annual heating and cooling balance, and S21's design loads.
+- **The electricity billed is OBJECTIVE's**: lighting, equipment and plug loads at the densities S09 holds with
+  the mode Off.
+
+### 11.4 What changes in the engine
+
+Today (`src/sections/nodes/InternalGainsNodes.js`):
+
+- Four nodes take F280's figure under On: `internal.plugLoadDensity` (`d_65`), `internal.equipmentDensity`
+  (`d_67`), `internal.lightingDensity.inEffect`, `internal.occupants.wattsPerPerson` (`g_64`).
+- The annual nodes `internal.plugLoads.annual` (`h_65`), `internal.lighting.annual` (`h_66`) and
+  `internal.equipment.annual` (`h_67`) are computed from those densities.
+- `energy.plugLoads.subtotal` (`h_70`) sums the three, and feeds BOTH `energy.total.targeted` (electricity) and
+  `internal.heatingGains` (`i_71`) and the usable gains (heat).
+
+The change: each load gets two annual figures where it has one.
+
+1. **Electricity**: from the density with the mode ignored. `energy.total.targeted` reads this sum.
+2. **Gain**: from the density in effect (F280's under On). The heating gains, the cooling balance and the gain
+   percentages read this sum.
+
+With the mode Off the two are the same number, so no result moves for any model at Off.
+
+To read in the code before building (not yet read): every node that depends on `energy.plugLoads.subtotal` or on
+one of the three annual nodes, sorted into "electricity" or "gain"; what `cooling.iso52016` reads for its internal
+gains; the S04 / S15 rows that show the plug subtotal.
+
+### 11.5 What must come out
+
+Estimates from §11.2's table (the electricity columns put back). The build confirms them by running.
+
+| Case              | Reference, Mode On, today | Expected after | Target (= Mode Off) |
+| ----------------- | ------------------------- | -------------- | ------------------- |
+| 02 Collingwood    | 84.7                      | about 108.8    | 103.4               |
+| 10 SB-12 Duplex   | −11.8                     | about 12.3     | 13.2                |
+| 12 PHI Low Energy | 46.6                      | about 62.3     | 63.4                |
+| 03 PHI Classic    | 57.3                      | about 63.1     | 57.1                |
+
+Witnesses to write with it:
+
+- For each of the four F280 files, the Reference's `energy.plugLoads.subtotal` electricity is the same with its
+  mode Off and On, and its TEUI moves only by the Heating and Cooling columns.
+- Every model at Mode Off is unchanged: the 12 regular case files, and the Target of the four F280 files.
+- S21's design heat loss and nominal cooling capacity are unchanged in all four.
+- **Parity against V3 will no longer match on the four F280 files' Reference values**, by design (V3 has the
+  fault). `test/witness/parity.cjs` then needs those values listed as expected differences, each with its
+  number, never a blanket skip.
+
+### 11.6 Open, Andy's
+
+1. **What S09 shows under Mode On — RULED (Andy 2026-11-26, "yes"):** the density cells keep showing F280's
+   gains (they are the gains in effect); the kWh/yr column shows electricity at S09's own densities, and its
+   hover under On says so: "electricity at S09's own densities; gains follow F280".
+2. **PHI Classic rises to about 63**, above its Target's 57.1, because F280's 800 W of plug gain is less heat
+   than the 6.6 W/m² the house has with the mode Off. That is the ruling working as written; noted so it is not
+   a surprise.
+3. The Duplex's Actual (14.8) and Target (13.2) are far below the other cases'. Not looked into.
 
 ## Appendix — Changelog
 

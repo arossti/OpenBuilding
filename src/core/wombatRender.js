@@ -322,7 +322,7 @@ window.TEUI.WombatRender = (function () {
 
     // Render windows (Phase 1: Facade windows)
     if (geometry.windows && geometry.windows.length > 0) {
-      renderWindows(svg, geometry, scale, centerX, centerY);
+      renderWindows(svg, geometry, scale, centerX, centerY, isReference);
     }
 
     // Add title annotation
@@ -780,10 +780,10 @@ window.TEUI.WombatRender = (function () {
    * @param {number} centerX - Canvas center X
    * @param {number} centerY - Canvas center Y
    */
-  function renderWindows(svg, geometry, scale, centerX, centerY) {
-    // Check if windows should be shown (d_160 dropdown)
+  function renderWindows(svg, geometry, scale, centerX, centerY, isReference = false) {
+    // Check if windows should be shown (d_160 dropdown, in the model being drawn)
     const windowVisibility =
-      window.TEUI?.StateManager?.getValue("d_160") || "show";
+      window.TEUI?.StateManager?.getValue(isReference ? "ref_d_160" : "d_160") || "show";
     if (windowVisibility === "hide") {
       return; // Skip rendering if hidden
     }

@@ -34,10 +34,17 @@ async function read(browser, url, file) {
   const run = async (file) => {
     const [a, b] = await Promise.all([read(browser, OURS, file), read(browser, V3, file)]);
     const ids = Object.keys(b.vals);
-    const diff = ids.filter((id) => a.vals[id] !== b.vals[id]);
+    // S21 rounds its mirrored numbers for display since 2026-11-26 (Section21.js displayText): there, ours
+    // must be V3's value rounded to the places we show (0.149 for 0.14947683109118085), exactly.
+    const same = (id) => a.vals[id] === b.vals[id] ||
+      (id.startsWith("f280.") && /^-?\d+\.\d+$/.test(a.vals[id] || "") && /^-?\d+(\.\d+)?$/.test(b.vals[id] || "") &&
+        Number(b.vals[id]).toFixed(a.vals[id].split(".")[1].length) === a.vals[id]);
+    const rounded = ids.filter((id) => a.vals[id] !== b.vals[id] && same(id)).length;
+    const diff = ids.filter((id) => !same(id));
     const extra = Object.keys(a.vals).filter((id) => !(id in b.vals));
     if (diff.length || a.errors.length) bad++;
     console.log(`${file}: ${ids.length - diff.length} / ${ids.length}` + (extra.length ? ` (+${extra.length} only here)` : "") +
+      (rounded ? ` (${rounded} of S21's rounded for display)` : "") +
       (diff.length ? `  DIFF ${diff.slice(0, 8).map((id) => `${id}: ${a.vals[id]} vs ${b.vals[id]}`).join("; ")}` : "") +
       (a.errors.length ? `  ERRORS ${a.errors.slice(0, 3).join(" | ")}` : ""));
   };
