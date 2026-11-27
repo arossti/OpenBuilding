@@ -108,7 +108,13 @@ UI niceties and calculation futzing can happen after we validate compliance."_
     Andy's own copy holds. The suspect Annex J row and Table H.1.2's ELA10 for "Archetypes 3 and 4" are printed
     there as in ours (the figures are in andy-rnd#27's addendum). Andy has written to CSA for the update copy.
   - **How it was read:** that viewer renders pages legibly where the PDF does not. Safari on the laptop, the
-    library's "View Online", pages turned and captured from the shell; the captures were not kept.
+    library's "View Online", pages turned and captured from the shell; the captures were not kept. The tool is
+    saved in the private folder, `tools/csa-viewer/` (its README has the URIs and the page map); Andy signs in
+    to CSA OnDemand again when the session has expired.
+  - **A draft email to CSA, for Kieran to send,** is in andy-rnd#27 and in his note: the erratum for the suspect
+    Annex J row, and clarifications of Archetype 3's air-leakage inputs, Table 6F and Cl. 8.3.8 b), with a reply
+    asked for by 2026-12-03.
+- **PR #30 is this branch.** To smoke before a merge: the Garage facing in S11 (the PR lists what to look at).
 - **NEXT:** T1 (`g_112` = 5.99 in andy-rnd's F280-1 and `build_case.py`); F280-1's garage walls split out, which
   needs the plans; T2 (a build stamp on the page); T8 (the Annex D / Table E.1 verification report from S21).
 
