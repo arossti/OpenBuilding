@@ -2072,6 +2072,7 @@ window.TEUI.SectionModules.sect11 = (function () {
    * (fields without a column: FieldManager renders none in column C). The selects carry their field IDs,
    * so a stamp (FieldManager.updateFieldDisplay) finds them as it finds any dropdown.
    */
+  const FACING_TITLE = "Wall facing (F280 Table 3, the cooling calculation's solar)";
   function installOpaqueControls() {
     const makeSelect = (fieldId, cls, title, options) => {
       const select = document.createElement("select");
@@ -2101,10 +2102,12 @@ window.TEUI.SectionModules.sect11 = (function () {
           makeSelect(
             `cf_${o.s11}`,
             "opaque-facing",
-            "Wall facing (F280 Table 3, the cooling calculation's solar)",
+            FACING_TITLE,
             OPENINGS.FACINGS.map(f => [f, OPENINGS.SHORT[f]])
           )
         );
+      const garage = cell.querySelector(`select[data-field-id="cf_${o.s11}"] option[value="${OPENINGS.GARAGE}"]`);
+      if (garage) garage.title = OPENINGS.GARAGE_NOTE;
     });
     // The door / window rows: host and quantity beside the name
     OPENINGS.ALL.forEach(o => {
@@ -2324,6 +2327,9 @@ window.TEUI.SectionModules.sect11 = (function () {
         const value = getModeValue(`cf_${o.s11}`);
         if (value && facing.value !== value) facing.value = value;
         facing.style.display = type === "walls" ? "" : "none";
+        // a wall to an attached garage: the hover says what the codes allow it
+        const hover = facing.value === OPENINGS.GARAGE ? OPENINGS.GARAGE_NOTE : FACING_TITLE;
+        if (facing.title !== hover) facing.title = hover;
       }
       // its + : a wall takes a window or a door, a roof a skylight; a floor or a slab nothing
       const hostAdd = document.querySelector(`tr[data-id="${OPENINGS.s11RowId(o)}"] .host-add`);

@@ -39,6 +39,8 @@
   }
 
   function getGainFactor(orientation, climateZone) {
+    // an opening in a wall to an attached garage sees no sun (Openings.js GARAGE; NBC 2020 9.36.5.10.(4))
+    if (orientation === "Garage") return 0;
     const factors = climateZone > 6 ? GAIN_FACTORS.northern : GAIN_FACTORS.southern;
     return factors[orientation] || factors["Average"];
   }

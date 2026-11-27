@@ -72,11 +72,32 @@ UI niceties and calculation futzing can happen after we validate compliance."_
   their own solar correction. So: full loss for heating at the wall's own RSI, a shaded wall for cooling. SB-12
   3.1.1.1.(5) treats the wall to a storage garage as exterior; NBC 2020 9.36.2.4.(4) allows 0.16 off the required
   RSI and 9.36.5.10.(4) gives it no solar. Today a garage wall here is an ordinary wall row with a compass
-  facing: heating right, cooling takes the facing's correction. Proposed, not built: a facing "Garage (unheated
-  space)" for S11's wall rows (triage T3).
-- **NEXT, Andy's to rule (❓):** tag the run commit; T1 (`g_112` = 5.99 in andy-rnd's F280-1 and `build_case.py`);
-  T3 (the garage facing, then F280-1's garage walls split out, which needs the plans); T8 (the Annex D / Table
-  E.1 verification report from S21). Send Kieran the report.
+  facing: heating right, cooling takes the facing's correction. That was the state at the tagged run.
+- **✅ THE RUN IS TAGGED: `f280-run-2026-11-26` = `dbd20df`** (Andy 2026-11-26, "yes, tag it and push the tag").
+  Everything below it on this branch is after the run.
+- **✅ THE GARAGE FACING — BUILT after the tag (Andy 2026-11-26: _"we should make these tweaks for garage walls
+  as a new type ... It need not be a new row per-se, but a new facing type from the dropdown"_), to be smoked.**
+  - S11's wall-facing dropdown has **Garage** after Avg (`src/core/Openings.js` `FACINGS`, `GARAGE`). Its hover
+    is Andy's wording (`GARAGE_NOTE`): the NBC 2020 9.36.2.4.(4) and 9.36.5.10.(4) note. No RSI is changed.
+  - **Heating: unchanged.** The wall is still in the air-facing loss at its own RSI.
+  - **No solar**, the wall's or through an opening hosted in it (the opening takes the facing, as it takes any
+    host's): S10's gain factor 0 (`RadiantGainsNodes.js`), the ISO 52016 irradiation 0 and no sky term
+    (`CoolingISO52016.js`, `CoolingNodes.js`), F280's design solar 0 (`F280ComplianceNodes.js`).
+  - **F280 Table 3:** the wall, and a door hosted in it, take the shaded row. A door elsewhere keeps the compass
+    mean, so no existing result moves.
+  - S19 draws an opening in a garage wall on no facade (`wombatWindows.js`); S10's orientation lists carry
+    Garage so a hosted row shows it.
+  - **Witnesses:** `test/witness/garage-facing.cjs` (ALL OK, the Table 3 figure by hand). Kieran's 45 files give
+    the tagged results unchanged (20 330 figures). Parity against V3: 2146 / 2146 on all 16 cases.
+  - ⚠ **A seventh way `src/` differs from andy-rnd `74bd575`**, to keep if a file is copied over again: the
+    seven files named above. andy-rnd (V3) does not have the facing.
+  - **Not done:** the Reference model's code-minimum RSI is not reduced by NBC's 0.16; the hover only says it
+    is permitted.
+- **THE REPLY TO KIERAN is appended to his own note**, `Objective 4.0 Requirements Matrix.txt` in the private
+  folder, for Andy to send with `QO_run_2026-11-26/`. The report there is Rev. B. Our position, as written to
+  him and Andy's to change: no input and no reference value is adjusted to close a gap.
+- **NEXT:** T1 (`g_112` = 5.99 in andy-rnd's F280-1 and `build_case.py`); F280-1's garage walls split out, which
+  needs the plans; T2 (a build stamp on the page); T8 (the Annex D / Table E.1 verification report from S21).
 
 **THEN, each on its own branch cut from `main`, in this order (RULED, Andy 2026-11-26):**
 
@@ -212,6 +233,9 @@ in andy-rnd for the V3 page.
   A fifth (REMAINS 2): the host input's class in `src/sections/nodes/TransmissionLossNodes.js`.
   A sixth: display formats, `src/core/ui/DOMBridge.js` `stampInputsForMode` and `src/sections/Section21.js`
   `displayText`.
+  A seventh (2026-11-26): the Garage facing, `src/core/Openings.js`, `CoolingISO52016.js`, `wombatWindows.js`,
+  `src/sections/Section10.js`, `Section11.js`, `nodes/RadiantGainsNodes.js`, `nodes/CoolingNodes.js`,
+  `nodes/F280ComplianceNodes.js`.
 
 **The day's items as they were worked** (✅ = shipped; the unticked ones are REMAINS, above):
 

@@ -22,6 +22,7 @@ Run from this repo's root; `<out>` is any folder for screenshots:
     node test/witness/host-per-model.cjs           # Trust's 4-opening write: the Reference still computes
     node test/witness/display-format.cjs           # typed numbers across a model switch; S21's rounding
     ../andy-rnd/node_modules/.bin/playwright test --config=test/witness/v3-reference/pw.config.cjs
+    node test/witness/garage-facing.cjs            # a wall to an attached garage: the Garage facing
     node test/witness/f280-run.cjs <case inputs dir> <out dir> --annexj ../andy-rnd/test/fixtures/f280-annex-j.json
 
 What each must show:
@@ -43,6 +44,10 @@ What each must show:
 - `host-per-model.cjs`: after Trust's write the Reference reads 190.1 with no hosts, the Target 82.8 and
   m_10 `49%` (it read `Unavailable`); the reloaded file shows the same; Copy from Target → All Inputs gives
   the Reference the Target's four hosts.
+- `garage-facing.cjs`: 14 lines of `ok`, then `ALL OK`. A West wall with a window and a door turns to the
+  Garage facing: the F280 design loss does not move, the window's solar goes to zero in F280's design solar,
+  S10's annual gain and the ISO 52016 cooling, the wall and its door take F280 Table 3's shaded row (checked
+  by hand in the script), the hover is the NBC note, the Reference does not move, the saved file returns it.
 - `f280-run.cjs`: the qualified operator's run (CSA F280-12 Cl. 8.2) of the verification agent's case files.
   It opens each file of `<case inputs dir>/run_list.csv` in a fresh context, as the page's Open does, and writes
   `<out dir>/f280-results.json` and `.csv`: design heat loss and nominal gain with their terms, for the Target

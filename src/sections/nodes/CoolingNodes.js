@@ -265,6 +265,8 @@
             : s10 && inputs[`radiantGains.row${s10}.orientation`] === "Skylight" ? "roof" : tilt,
           // a wall's facing reaches the opaque solar; every wall before 2026-11-20 faced Average
           ...(row && typeOf(row) === "walls" ? { orientation: inputs[`transmissionLoss.${row.id}.facing`] || "Average" } : {}),
+          // an opening in a wall to an attached garage sees no sky either (CoolingISO52016.js monthGains)
+          ...(s10 && inputs[`radiantGains.row${s10}.orientation`] === "Garage" ? { orientation: "Garage" } : {}),
           opaque,
           A: parseNum(inputs[`transmissionLoss.${key}.area`]),
           U: parseNum(inputs[`transmissionLoss.${key}.uValue`])
