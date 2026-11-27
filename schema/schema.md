@@ -18,15 +18,19 @@
 
 ## 0. Cold-start handoff (read this first)
 
-### ▶ START HERE (handoff 2026-11-27, evening, the laptop `M2max`) — written for a cold start after a /clear
+### ▶ START HERE (handoff 2026-11-27, late afternoon, the laptop `M2max`) — written for a cold start after a /clear
 
-**Where things stand.** `main` is **`5c4deb2`** (PR #46: S09 in Easy, RULED as proposed; the paler Ae blue;
-this handoff), deployed to https://arossti.github.io/OpenBuilding/. **PR #47 (branch `S09-Cooling-Caption`) is
-open: one caption, below.** Everything of 2026-11-27 is display only: no calculation changed all day. Parity
-against V3: 2146 / 2146 on all 16 cases; every witness of `test/witness/README.md` passes.
+**Where things stand.** `main` is **`11b440a`** (PR #47, S09's cooling caption, merged) plus this handoff,
+deployed to https://arossti.github.io/OpenBuilding/. No other PR is open. Everything of 2026-11-27 in this
+repository is display only: no calculation changed all day. Parity against V3: 2146 / 2146 on all 16 cases;
+every witness of `test/witness/README.md` passes.
 
-**THE NEXT ARC, in Andy's words (2026-11-27):** _"the next arc can consider refactoring the CSS which may have a
-lot of duplicated or separate style rules by now, it would be nice to standardize button sizes, toggles,
+**THE NEXT TASK, in Andy's words (2026-11-27, after the CSA work below):** _"we can return to the 'Easy' arc for
+S10+ after the handoff."_ So Easy mode from S10 comes next: "Easy mode goes on from S10" below is how. **RULED the
+same day: _"Easy first then the CSS audit"_.** The audit below has not been started.
+
+**AFTER EASY, the CSS arc, in Andy's words (2026-11-27, morning):** _"the next arc can consider refactoring the CSS which may
+have a lot of duplicated or separate style rules by now, it would be nice to standardize button sizes, toggles,
 sliders, fonts and other style formats if they are extensive/differnt."_
 
 - `obstyles.css` is one file of about 6200 lines, scoped by html class under `§N  APP: name` banners. OBJECTIVE's
@@ -44,7 +48,7 @@ sliders, fonts and other style formats if they are extensive/differnt."_
   compare. Measure in WebKit (Andy's browser is Safari-class) and in Chrome.
 - A push to `main` redeploys; one branch = one PR; a refactor PR should change no pixel it does not name.
 
-**THEN: Easy mode goes on from S10.** How a section is curated, as it went for S02 – S09: Claude lists the
+**Easy mode goes on from S10.** How a section is curated, as it went for S02 – S09: Claude lists the
 section's inputs and calculated values, builds a recommended cut on a branch with a witness check, and Andy
 rules on it at his smoke. His rules so far:
 
@@ -75,7 +79,7 @@ rules on it at his smoke. His rules so far:
 
 **Open with Andy (none blocks the next arc):**
 
-- **Fixed in PR #47 (Andy: "a longstanding typo"):** S09's caption over the cooling-gain percentages read
+- **Fixed in PR #47, merged (Andy: "a longstanding typo"):** S09's caption over the cooling-gain percentages read
   "Htg Gain (%)" a second time; it reads "Cooling Gain (%)" (`Section09.js`; one table serves both models, so
   the Reference shows it too). A scan of every header for a caption heading two columns found no other of the
   kind. Seen, not changed: S10 captions both its percentage columns "Heatgain (%)", one after the heating
@@ -90,9 +94,31 @@ rules on it at his smoke. His rules so far:
   S04's Nuclear Waste sit alone on their rows); the Builders inside OBJECTIVE brought up to ABCD.EARTH's
   refinements (_"just not yet"_; until then leave them alone, S11's ID buttons and S05's E.3.5 included).
 
-**The F280 verification is where it was: waiting on other people.** Nothing came back on andy-rnd#27 during
-2026-11-27. Its state, and the private folder it lives in, are further down ("Where the F280 claim stands",
-"WAITING ON OTHERS"). Check #27 at the start of a session and otherwise leave it.
+**The F280 verification: the email to CSA is ready and waits on one file from Kieran.** On 2026-11-27 Andy
+softened the CSA email on his building-science advisor's advice, and it now goes from Andy himself as
+qualified operator (_"Email will be from Andrew Thomson, not Kieran"_), with Kieran in Cc. Its state:
+
+- **The email** is in the private folder, `KT F280 Validation Runs/CSA_technical_note/EMAIL-to-CSA-2026-11-27.txt`,
+  and in its comment on andy-rnd#27 (the firm draft there was replaced in place). No deadline and no
+  escalation paragraph; it aims to conclude by January 2027. Item 2 names, for CSA's information only, the
+  leakage-area value that reproduces the four Archetype 3 rows, says it is not adopted, and says we expect to
+  meet those rows with no adjustment once the reference's inputs or corrected values are known. The ruling of
+  2026-11-26 stands: no input is adjusted to close a gap.
+- **A technical note goes with it** (`CSA-F280-technical-note.pdf` there, 9 pages, built by `build-note.py
+--final` from the Annex J fixture and the tagged run's results): each item as Location, As printed, Basis and
+  what is requested, in tables, with a blank table for CSA to return the reference's AIM2.xls inputs. Andy's
+  rules for it: page 1 states that the Standard's values are reproduced only to communicate suspected errata
+  directly to CSA Group; and it is written in direct voice, third person ("Information requested", never "What
+  we ask").
+- **Read from CSA's current copy that day:** Table 6F and Table 6G, Clause 8.3.8 and Annex L. Kieran's Table 6F
+  item holds on the page. Two small cross-reference slips were added to the note. The page map is in
+  `tools/csa-viewer/README.md` in the private folder.
+- **Waiting on Kieran:** his list of 21 suspected misprints (`suspected_errata.csv`), which the email attaches
+  and which we do not hold. Asked on andy-rnd#27 on 2026-11-27. He had answered none of the notes there by then.
+- **Andy's to do:** read the note and the email, add his telephone and email to the signature, send.
+
+The rest of its state, and the private folder it lives in, are further down ("Where the F280 claim stands",
+"WAITING ON OTHERS"). Check #27 at the start of a session.
 
 **To start:** `hostname` (the laptop is `M2max`); `git -C ~/.claude/projects/-Users-andrewthomson-Documents-OpenBuilding/memory pull -q`;
 here `git checkout main && git pull`; serve with `python3 schema/scripts/nocache-serve.py 8831` and
@@ -389,9 +415,9 @@ may PR and merge and self-smoke w/o me"_; that covered #28 and #32 and is not a 
     Cl. 8.3.2 review, with the interior-shading question; the ceiling height as a question on his I18 ruling;
     the leakage findings, with two questions on Annex G; and a summary of the whole matter written for Andy's
     building-science advisor, whose advice Andy is seeking before anything goes to HVAC-DC, NRCan or CSA.
-- **CSA:** Andy has written to CSA's store for the update copy. A firmer email, **drafted for Kieran to send**
-  (in #27 and in his note), asks for the erratum, the Archetype 3 inputs, Table 6F and Cl. 8.3.8 b), with a
-  reply by 2026-12-03. Its recipient is blank and its escalation paragraph is Andy's and Kieran's to keep.
+- **CSA:** Andy has written to CSA's store for the update copy. The firm email first drafted for Kieran to send
+  was replaced on 2026-11-27 by a softened one from Andy, with a technical note: see "The F280 verification" in
+  START HERE above. It asks for the erratum, the Archetype 3 inputs, Table 6F and Cl. 8.3.8 b). Not sent yet.
 - **HVAC Designers of Canada is the lead for both open items.** They are the body that verifies software to
   Section 8: https://hvacdc.ca/f280-12-software/ lists eight products "verified by HVAC Designers of Canada as
   meeting the requirements of section 8 of CSA F280-12", first verified October 2023, the work funded by NRCan's
