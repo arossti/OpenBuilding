@@ -18,10 +18,16 @@
 
 ## 0. Cold-start handoff (read this first)
 
-### ▶ START HERE (handoff 2026-11-26 / 27 overnight, the laptop `M2max`) — written for a cold start after a /clear
+### ▶ START HERE (handoff 2026-11-27, the laptop `M2max`) — written for a cold start after a /clear
 
-**LIVE: `main` after PR #33 (`d93c99d`)** (the F280 calculation summary sheet, #32, and its first page laid
-out as Figure D.1, #33), deployed to
+**▶ THE NEXT TASK IS THE EASY / EXPERT STUB (RULED, Andy 2026-11-27:** _"We can clear after that is in and then a
+fresh agent can build the Easy / Expert stub next"_**).** It is item B2 below; its plan and every ruling are in
+`docs/workplans/REFERENCE-MODEL-EXPLAINED.md`, the section "Easy and Expert modes, and Guide Me". It touches no
+calculation. The F280 work below is waiting
+on other people: read "WAITING ON OTHERS", check andy-rnd#27 for replies, and otherwise leave it.
+
+**LIVE: `main` after PR #35 (`f646b34`).** The last code is #33 (`d93c99d`: the F280 calculation summary sheet,
+#32, with its first page laid out as Figure D.1); #34 and #35 are docs. Deployed to
 https://arossti.github.io/OpenBuilding/. Before it: #30 (`ab7c9c2`, the runner and the Garage facing) and #31
 (docs). andy-rnd `main` is **`645784e`** (#28, F280-1's ceiling). Andy's word for the night, 2026-11-26: _"you
 may PR and merge and self-smoke w/o me"_; that covered #28 and #32 and is not a standing rule.
@@ -51,6 +57,10 @@ may PR and merge and self-smoke w/o me"_; that covered #28 and #32 and is not a 
   current copy, the AIM2.xls witness and a draft email to CSA. **#29** in this repo is the public notice, with
   no figures. His to rule: I19; whether to reissue the Archetype 3 and 4 files on the Garage facing; which
   Archetype 1 walls face the garage (I9, needs the plans); his own run of AIM2.xls.
+  - **Added 2026-11-27, four notes on andy-rnd#27, none answered yet:** F280-1's summary sheet for his
+    Cl. 8.3.2 review, with the interior-shading question; the ceiling height as a question on his I18 ruling;
+    the leakage findings, with two questions on Annex G; and a summary of the whole matter written for Andy's
+    building-science advisor, whose advice Andy is seeking before anything goes to HVAC-DC, NRCan or CSA.
 - **CSA:** Andy has written to CSA's store for the update copy. A firmer email, **drafted for Kieran to send**
   (in #27 and in his note), asks for the erratum, the Archetype 3 inputs, Table 6F and Cl. 8.3.8 b), with a
   reply by 2026-12-03. Its recipient is blank and its escalation paragraph is Andy's and Kieran's to keep.
@@ -165,9 +175,9 @@ B. **THEN, each on its own branch cut from `main` (RULED, Andy 2026-11-26):**
 4. The rest of REMAINS 3 – 6, and Andy's list of CSS and UI nits from his smoke (he called it a later arc; the
    list is his, not yet written down).
 
-**Asked, not yet ruled (Andy 2026-11-26, after the reply went to Kieran):** _"Should the next arc be on our
-simplified Easy/Expert UI moves?"_ Claude's recommendation, his to rule: A1 and A2 first (done); then **the Easy / Expert stub ahead of §11**, because it
-touches no calculation while the verification is open, and §11 changes the engine; §11 after Kieran signs.
+**The order, RULED (Andy 2026-11-27):** A1 and A2 are done; **the Easy / Expert stub (B2) is next, ahead of
+§11 (B1)**. The stub touches no calculation while the verification is open; §11 changes the engine and waits
+for Kieran.
 
 Why A is recommended first: Andy's own statement of the priority, 2026-11-26 (a priority, not a ruling on list A): _"F280 on means, a user gets what F280 requires for the heating and
 cooling system peak design loads, that is the critical path today and tomorrow. UI niceties and calculation
