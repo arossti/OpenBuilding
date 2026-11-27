@@ -26,11 +26,10 @@ repository is display only: no calculation changed all day. Parity against V3: 2
 every witness of `test/witness/README.md` passes.
 
 **THE NEXT TASK, in Andy's words (2026-11-27, after the CSA work below):** _"we can return to the 'Easy' arc for
-S10+ after the handoff."_ So Easy mode from S10 comes next: "Easy mode goes on from S10" below is how. The CSS
-audit that follows here has not been started, and he has not said where it now falls: ask him once, and
-otherwise take it after Easy.
+S10+ after the handoff."_ So Easy mode from S10 comes next: "Easy mode goes on from S10" below is how. **RULED the
+same day: _"Easy first then the CSS audit"_.** The audit below has not been started.
 
-**The CSS arc, in Andy's words (2026-11-27, morning):** _"the next arc can consider refactoring the CSS which may
+**AFTER EASY, the CSS arc, in Andy's words (2026-11-27, morning):** _"the next arc can consider refactoring the CSS which may
 have a lot of duplicated or separate style rules by now, it would be nice to standardize button sizes, toggles,
 sliders, fonts and other style formats if they are extensive/differnt."_
 
