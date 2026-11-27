@@ -40,8 +40,10 @@ UI niceties and calculation futzing can happen after we validate compliance."_
 - **Review Kieran's harness first; change no calculation until it is reviewed.** Kieran is the F280
   verification agent (Cl. 8.2). His material, as found 2026-11-26 and not yet read by Claude, is in the folder
   `KT F280 Validation Runs` under `~/Documents/OpenBuilding/` (in no repo): `F280_RTM_r1_2026-11-26.pdf`,
-  `F280_case_inputs.zip`, `F280_model_specification.md`, `Objective 4.0 Requirements Matrix.txt`. Ask Andy
-  where the harness itself lives and for Kieran's questions verbatim.
+  `F280_case_inputs.zip`, `F280_model_specification.md`, `Objective 4.0 Requirements Matrix.txt`. The case
+  inputs in the zip are the harness: Andy 2026-11-26, _"that is the CSV fiels Kieran prepared for us to run as
+  the F280 'Operator' as required"_ (Cl. 8.2: Andy and Claude run them as the operator, Kieran verifies). Ask
+  Andy for Kieran's questions verbatim.
 - **What "F280 On" must deliver:** the peak design heating and cooling loads F280 requires. The annual TEUI under
   F280 Mode (§11) is second to that.
 - The F280 specs and case files this repo's engine came from are in andy-rnd (`test/f280*.cjs`,
