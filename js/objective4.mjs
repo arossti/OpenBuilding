@@ -114,6 +114,7 @@ function boot() {
   showDisclaimerOnFirstLaunch();
   initBuilders();
   wireProjectName();
+  wireUse();
 }
 
 // The project's name in the button row IS S02's B.2 (h_14): each follows the other (Andy 2026-11-26). The row's
@@ -581,6 +582,30 @@ function syncHelp() {
   btn.title = on
     ? `Interactive help is on in ${name} view: rest the pointer on a field to read about it. Click to turn it off.`
     : `Interactive help is off in ${name} view. Click to turn it on: rest the pointer on a field to read about it.`;
+}
+
+// The model on screen at Targeted Use (S02's S.2, d_14): what is read only against utility bills is not shown,
+// in either view (Andy 2026-11-27: "IF S.2 = Utility Bills, show, Else Off in Expert and Easy modes"). The
+// class op-targeted-use on <html> says so; the test is the engine's own (BuildingInfoNodes.js
+// `building.isTargetMode`: anything but "Utility Bills"), made on the S.2 the reader sees, so it is the Target's
+// in the Target and the Reference's in the Reference. What it hides is obstyles.css §8f.
+function syncUse() {
+  const select = document.querySelector('#buildingInfo select[data-field-id="d_14"]');
+  if (!select) return;
+  document.documentElement.classList.toggle("op-targeted-use", select.value !== "Utility Bills");
+}
+function wireUse() {
+  // S.2 changes by the reader's hand, by a file or a sample, by Copy from Target, and with the model on screen
+  // (V3 restamps the select without an event): look again after each, once V3 has finished writing.
+  const later = () => [0, 150, 600, 1500].forEach((ms) => setTimeout(syncUse, ms));
+  document.addEventListener("change", (e) => {
+    if (e.target && e.target.matches && e.target.matches('select[data-field-id="d_14"]')) syncUse();
+  });
+  const SM = window.TEUI && window.TEUI.StateManager;
+  if (SM && SM.addListener) for (const id of ["d_14", "ref_d_14"]) SM.addListener(id, later);
+  new window.MutationObserver(later).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  later();
+  setTimeout(syncUse, 4000); // the default project arrives a few seconds after the page
 }
 
 function handleReset() {

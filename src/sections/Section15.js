@@ -150,7 +150,7 @@ window.TEUI.SectionModules.sect15 = (function () {
           classes: ["label-prefix", "text-right", "no-wrap"],
         },
         g: {
-          content: "TEUI-imp",
+          content: "Peak Heating Imp",
           classes: ["label-main", "text-left", "no-wrap"],
         },
         h: { content: "" }, // Removed fieldId, no calculation for h_137
@@ -294,8 +294,9 @@ window.TEUI.SectionModules.sect15 = (function () {
           content: "T.6.8",
           classes: ["label-prefix", "text-right", "no-wrap"],
         },
+        // (the caption "Heat Load Imp" stood here beside h_140, which is the Max. Cooling Load Intensity)
         g: {
-          content: "Heat Load Imp",
+          content: "",
           classes: ["label-main", "text-left", "no-wrap"],
         },
         h: {
@@ -308,7 +309,7 @@ window.TEUI.SectionModules.sect15 = (function () {
           section: "teuiSummary",
         },
         i: { content: "" }, // Unit removed as it's W/m2
-        j: { content: "T.6.6 Mx. Cool Intsty in W/m\u00B2 (Enclosure Only)" },
+        j: { content: "T.6.13 Mx. Cool Intsty in W/m\u00B2 (Enclosure Only)" },
         k: { content: "" },
         l: { content: "" }, // l_140 removed, no formula in CSV
         m: { content: "" },
@@ -473,10 +474,11 @@ window.TEUI.SectionModules.sect15 = (function () {
       },
     },
 
-    // Row 143: T.3.1 TEUI Reference / T.3.2 Targeted TEUI / T.3.3 Actual
+    // Row 143: T.3, S01's TEUI row shown again: Reference, Targeted, Actual. (It was T.3.1 / T.3.2 / T.3.3,
+    // which are S04's Electricity, Fossil Gas and Propane rows.)
     143: {
-      id: "T.3.1",
-      rowId: "T.3.1",
+      id: "T.3",
+      rowId: "T.3",
       label: "TEUI Reference (Performance Gap)",
       cells: {
         c: { label: "TEUI Reference (Performance Gap)" },
@@ -491,7 +493,7 @@ window.TEUI.SectionModules.sect15 = (function () {
         },
         e: { content: "Reference" },
         f: {
-          content: "T.3.2",
+          content: "",
           classes: ["label-prefix", "text-right", "no-wrap"],
         },
         g: {
@@ -508,7 +510,7 @@ window.TEUI.SectionModules.sect15 = (function () {
           section: "teuiSummary",
         },
         i: { content: "Target (Design)" },
-        j: { content: "T.3.3" },
+        j: { content: "" },
         k: { content: "Actual" },
         l: {
           fieldId: "l_143",

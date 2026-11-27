@@ -210,7 +210,7 @@ window.TEUI.SectionModules.sect03 = (function () {
           section: "climateCalculations",
           dependencies: ["d_20"],
         },
-        k: { content: "L.3.3", classes: ["label-prefix"] },
+        k: { content: "L.3.4", classes: ["label-prefix"] },
         l: { content: "Days Cooling", classes: ["label-main"] },
         m: {
           fieldId: "m_19",
@@ -330,7 +330,7 @@ window.TEUI.SectionModules.sect03 = (function () {
         // NEW: Summer RH% field (l_21) - Cooling Refactor Phase 5.1.1
         // Replaces: j_21 "CDD Reference Lookup" and k "CDD - Energy Star"
         // TODO: Add tooltips with links to HDD/CDD reference resources later
-        j: { content: "L.2.2", classes: ["label-prefix"] },
+        j: { content: "L.2.6", classes: ["label-prefix"] },
         k: { content: "Summer Mean RH", classes: ["label-main"] },
         l: {
           fieldId: "l_21",

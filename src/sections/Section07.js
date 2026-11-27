@@ -375,7 +375,7 @@ window.TEUI.SectionModules.sect07 = (function () {
           label: "System Losses (Equipment Gains): kWh/yr",
         },
         f: { content: "kWh/yr", classes: ["text-left"] },
-        g: { content: "W.X", classes: ["text-right"] },
+        g: { content: "W.6.2", classes: ["text-right"] },
         h: { content: "Exhaust (if Gas or Oil)", classes: ["text-left"] },
         j: {
           fieldId: "j_54",

@@ -713,7 +713,7 @@ window.TEUI.SectionModules.sect12 = (function () {
           dependencies: ["j_19", "d_103", "g_103"],
           label: "n-Factor for Air Leakage Calculation",
         },
-        h: { content: "B.18.3 Ae₁₀ Zone", classes: ["text-center"] },
+        h: { content: "B.18.5.2 Ae₁₀ Zone", classes: ["text-center"] },
         i: {
           fieldId: "i_110",
           semanticPath: "airLeakage.climateZone",

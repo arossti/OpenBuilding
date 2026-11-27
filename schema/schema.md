@@ -27,6 +27,44 @@ HOLDS" is next below. **The next task: Easy mode section by section, with Andy**
 That curation is his; an agent does not choose what a section hides. The F280 work below is waiting on other
 people: read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11-27), and otherwise leave it.
 
+**BUILT, NOT MERGED: PR #39 (branch `ID-Renumber-S02-Prices`, to be smoked by Andy).** Two things Andy ruled
+on 2026-11-27, neither a calculation:
+
+- **One ID, one thing** (Andy: _"I agree with your proposed ID rename/new list, next available numbers"_; the
+  IDs are the rows' own, so the Reference shows the Target's). In `src/sections/`:
+  - S10's Gains Utilization Factor **G.2 → G.3** (G.2 is S09's Plug/Light/Eqpt. Subtotals and the Sankey's
+    "G.2 Plug Light Equipment"; Andy: _"G.2 is a mistake of mine"_). Its "G.3 nGains" caption reads "nGains".
+  - S15's TEUI row **T.3.1 / T.3.2 / T.3.3 → T.3**, S01's own row shown again (T.3.1 – T.3.3 are S04's fuels).
+  - S03: Summer Mean RH **L.2.2 → L.2.6**; Days Cooling **L.3.3 → L.3.4**.
+  - S02: Certifier **A.1 → C.1**, Licence **A.2 → C.2** (A.2 – A.6 are S08's rows); the row that read "L" has
+    no ID.
+  - S13: Exhaust **M.2.5 → M.2.6**; Summer Boost **V.1.7 → V.1.5**; "M.1.5." loses its full stop.
+  - S14: "less Free Cool. & Vent. Exhaust" **T.5.2 → T.4.8**; TELI/TEDI Ratio **T.5.2 → T.5.5** (TELI keeps
+    T.5.2). ⚠ The cooling Sankey named the first "T.5.2 CED less Free Cool - VX": renamed with it to T.4.8
+    (`Section16C.js`), so one name holds. Found after Andy approved the list; told to him.
+  - S15: "Mx. Cool Intsty" **T.6.6 → T.6.13**; the caption "TEUI-imp" beside the peak heating load in BTU/hr
+    reads **"Peak Heating Imp"**; "Heat Load Imp", which stood beside the Max. Cooling Load Intensity, is gone.
+  - S12: Ae₁₀ Zone **B.18.3 → B.18.5.2**. S07: **"W.X" → W.6.2**.
+  - **Still Andy's to word:** S14's note "T.4.1 Includes V.5 Net Vent'l. & T.7.3 CEDI Ae Losses" (there is no
+    V.5; T.7.3 is "∑ Other Energy"); and three Sankey names the sections do not use: "G.7.0 Doors" (S10's row
+    is G.7.1), "W.2.W SHW Wasted" (S07's ID there is W.5.3), "M.2.1.S Sink" / "M.2.1.D Energy Input" (S13 has
+    M.1.4 Sink and M.2.1 Heating System Demand).
+- **S02's prices of energy and S.2** (Andy: _"IF S.2 = Utility Bills, show, Else Off in Expert and Easy
+  modes"_). While the model on screen has S.2 at Targeted Use, the prices of **gas, propane, wood and oil** are
+  not shown, in either view; each model follows its own S.2. `js/objective4.mjs` `syncUse` sets the class
+  `op-targeted-use` on `<html>` by the engine's own test (`building.isTargetMode`); `obstyles.css` §8f hides.
+  The same class is there for S04's Actual columns when S04 is curated.
+  - ⚠ **The price of ELECTRICITY stays visible, against the letter of the ruling.** The engine reads it at
+    Targeted Use too: S15's annual cost of electricity, before and after the heat pump (`EnergyNodes.js`
+    d_141 = d_135 × l_12, h_141 = d_136 × l_12), hence the ROI, and S18's financials (`pcFinancials.js`). The
+    four fuels are read only against their bills (`energy.cost.otherFuel`). Hiding it would leave a live input
+    out of reach (the house rule: grey out by the engine's own predicate). ❓ Andy.
+- **S02 in Easy is otherwise done** (Andy: move on to S03): it holds inputs and one derived value.
+- **Witnesses:** `test/witness/easy-expert.cjs` (ALL OK, 45 checks); parity against V3 2146 / 2146 on all 16
+  cases; the rest as before.
+- **NEXT: S03 in Easy.** Its inventory and Claude's recommended cut are with Andy (2026-11-27); nothing of it is
+  built.
+
 **WHAT PR #38 HOLDS** (Andy 2026-11-27, on smoking #37: _"no need to remove the header ids - we should however
 hide Cell ID's. In Expert mode, the cell ID's should in fact use the same styling (CSS) ... make all the same as
 T.6.0 across all sections please. Also, unlike V3, we have no way to switch On/Off interactive help, let's add
@@ -41,11 +79,7 @@ that for Easy mode and Expert mode, On by default in Easy, Off by default in Exp
 - **No row draws its own ID twice** (Andy: _"let's be sure like my 3rd screenshot we don't duplicate ID row and
   name"_): seven rows did (B.11, whose name began with it; G.4, B.18.1, B.18.2, B.18.3 in a caption; T.6.4 and
   T.6.8 beside a second value). `markCellId` leaves the repeat undrawn.
-  - ⚠ **Not changed, Andy's to renumber: one ID on two different things.** On two rows of the ID column: T.3.1
-    (S04 and S15), G.2 (S09 and S10). Beside two values: L.2.2 (S03), M.2.5 (S13: AFUE and Exhaust), V.1.7 (S13,
-    two rows), T.5.2 (S14, three places), T.6.6 (S15), B.18.3 (S12: also on Ae₁₀ Zone in row B.18.4), T.4.1
-    (S14). A row ID repeated in another section as a cross-reference (S.4, A.2, L.3.3, T.3.2, T.3.3) is not a
-    fault.
+  - One ID on two different things: found here, renumbered in PR #39 (above).
 - **Easy hides them** (`obstyles.css` §8e, on screen only: print shows them). A hidden ID's cell keeps its
   place and takes no room, so a column of IDs closes up and several sections get shorter.
   - **Not hidden: S11's row IDs that open a Builder** (11 on the default project). They are buttons, and Easy
@@ -505,6 +539,8 @@ in andy-rnd for the V3 page.
   `src/core/FileHandler.js` and `src/core/ui/DOMBridge.js` (text kept as text; the record's defaults).
   A ninth (2026-11-27, the Easy / Expert stub): the header rows of `src/sections/Section02.js`, `03`, `05` – `09`,
   `12` – `15` and `19` without their 80 column-letter captions.
+  An eleventh (2026-11-27, PR #39): the renumbered IDs and two S15 captions, in `Section02.js`, `03`, `07`,
+  `10`, `12` – `15` and `16C.js`.
   A tenth (2026-11-27): `src/core/FieldManager.js` `markCellId` (the class `cell-id` on a Cell ID outside the ID
   column, a row's repeat of its own ID left undrawn, `static-number`) and `markNumberHeads` (`num-head` on a
   caption over a column of numbers).

@@ -208,7 +208,7 @@ window.TEUI.SectionModules.sect13 = (function () {
         },
         h: {},
         i: {
-          content: "M.1.5. CEER",
+          content: "M.1.5 CEER",
           classes: ["label-prefix"],
         },
         j: {
@@ -294,7 +294,7 @@ window.TEUI.SectionModules.sect13 = (function () {
           label: "AFUE (Annual Fuel Utilization Efficiency)",
         },
         k: {
-          content: "M.2.5 Exhaust",
+          content: "M.2.6 Exhaust",
           classes: ["label-prefix"],
         },
         l: {
@@ -614,7 +614,7 @@ window.TEUI.SectionModules.sect13 = (function () {
           content: "m3/hr",
           classes: ["label"],
         },
-        j: { content: "V.1.7", classes: ["label-prefix"] },
+        j: { content: "V.1.5", classes: ["label-prefix"] },
         k: {
           content: "Summer Boost",
           classes: ["label"],

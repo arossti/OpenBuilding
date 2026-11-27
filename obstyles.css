@@ -5223,6 +5223,19 @@ input.op-pill:checked::before {
   }
 }
 
+/* ── §8f What applies only to utility bills ─────────────────────────────────
+   Shown only while the model on screen has S.2 at Utility Bills, in BOTH views (Andy 2026-11-27: "IF S.2 =
+   Utility Bills, show, Else Off in Expert and Easy modes"); objective4.mjs `syncUse` sets op-targeted-use.
+   S02's prices of gas, propane, wood and oil: the engine reads each only against that fuel's bill (S15's
+   ∑ Other Energy, EnergyNodes.js `energy.cost.otherFuel`). The price of ELECTRICITY stays: S15's annual cost
+   of electricity and S18's financials read it at Targeted Use too. A hidden cell keeps its place. */
+html.op-targeted-use
+  #buildingInfo
+  tr:is([data-id="S.1"], [data-id="S.2"], [data-id="S.3"], [data-id="S.4"])
+  > td:is(.col-k, .col-l, .col-m) {
+  visibility: hidden;
+}
+
 input.op-view-pill:checked {
   box-shadow:
     inset 2px 2px 4px rgba(0, 0, 0, 0.5),

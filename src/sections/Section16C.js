@@ -36,7 +36,7 @@ window.TEUI.CoolingSankey = (function () {
       { name: "DHW System Losses", color: "#FFB6A3" }, // [21] - Hot water system losses
 
       // RIGHT SIDE - ENERGY REMOVED (Blue Hues)
-      { name: "T.5.2 CED less Free Cool - VX", color: "#A5D3ED" }, // [22] - Cooling energy demand
+      { name: "T.4.8 CED less Free Cool - VX", color: "#A5D3ED" }, // [22] - Cooling energy demand
       { name: "B.9 Walls BG (Removal)", color: "#A5D3ED" }, // [23] - Below grade cooling benefit
       { name: "B.10 Floor Slab (Removal)", color: "#A5D3ED" }, // [24] - Floor slab cooling benefit
       { name: "Ventilation Free Cooling/Vent Capacity", color: "#B0E0E6" }, // [25] - Free cooling
@@ -313,7 +313,7 @@ window.TEUI.CoolingSankey = (function () {
         target: 22,
         value: getStateValue("m_129"),
         id: "BuildingToCED",
-      }, // T.5.2 CED less Free Cool
+      }, // T.4.8 CED less Free Cool
       {
         source: 0,
         target: 26,

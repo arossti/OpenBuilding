@@ -217,7 +217,14 @@ styling (CSS) ... make all the same as T.6.0 across all sections please."_
 - **Both views: accounting style.** A number is right-justified, words are left-justified, a caption follows
   its column (Andy 2026-11-27; V3's rule, which 4.0's stylesheet had dropped). `obstyles.css` §8b.
 
-**Interactive help (same PR).** Andy: _"unlike V3, we have no way to switch On/Off interactive help, let's add
+**S02 (2026-11-27, PR #39).** It holds inputs and one derived value, so Easy hides nothing there. One rule
+came of it, for both views (Andy: _"IF S.2 = Utility Bills, show, Else Off in Expert and Easy modes"_): the
+prices of gas, propane, wood and oil show only while the model on screen has S.2 at Utility Bills. The price of
+electricity stays, because the engine reads it at Targeted Use too (S15's annual cost, S18's financials); that
+exception is Claude's and waits for Andy's word. The class is `op-targeted-use` on `<html>`
+(`js/objective4.mjs` `syncUse`), ready for S04's Actual columns.
+
+**Interactive help (PR #38).** Andy: _"unlike V3, we have no way to switch On/Off interactive help, let's add
 that for Easy mode and Expert mode, On by default in Easy, Off by default in Expert."_
 
 - The Help button after the pill switches V3's field popovers. Each view keeps its own setting, in the browser

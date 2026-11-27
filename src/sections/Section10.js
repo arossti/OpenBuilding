@@ -1068,10 +1068,11 @@ window.TEUI.SectionModules.sect10 = (function () {
       },
     },
 
-    // Row 80: G.2 Gains Utilization Factor (n-Factor)
+    // Row 80: G.3 Gains Utilization Factor (n-Factor). It was G.2, which is S09's Plug/Light/Eqpt. Subtotals
+    // and the Sankey's "G.2 Plug Light Equipment" (Andy 2026-11-27: "G.2 is a mistake of mine").
     80: {
-      id: "G.2",
-      rowId: "G.2",
+      id: "G.3",
+      rowId: "G.3",
       label: "Gains Utilization Factor (n-Factor)",
       cells: {
         c: { label: "Gains Utilization Factor (n-Factor)" },
@@ -1122,7 +1123,7 @@ window.TEUI.SectionModules.sect10 = (function () {
           label: "Net Usable Gains kWh/yr",
         },
         j: {
-          content: "G.3 nGains",
+          content: "nGains",
           classes: ["tooltip-cell"],
           "data-tooltip": "G.3 Net Usable Gains by Method Selected",
         },
