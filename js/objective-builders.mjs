@@ -246,7 +246,7 @@ function renderCarbon() {
     tr.innerHTML = `<td class="col-a"></td><td class="col-b id-cell"></td>
       <td class="col-c description-cell">Embodied Carbon of Applied Assemblies (A1-3)</td>
       <td class="col-d calculated-value" data-op-field="asm_carbon_total"></td><td class="col-e">MT CO2e</td>
-      <td class="col-f label-prefix">${CARBON_ROW}</td><td class="col-g label-main">From S11's Assemblies (A1-3)</td>
+      <td class="col-f label-prefix cell-id">${CARBON_ROW}</td><td class="col-g label-main">From S11's Assemblies (A1-3)</td>
       <td class="col-h"></td><td class="col-i calculated-value" data-op-field="asm_carbon_intensity"></td>
       <td class="col-j" colspan="5" data-op-field="asm_carbon_status"></td>`;
     tr.title =

@@ -188,7 +188,7 @@ determine what is essential."_):
 The column letters are the section headers' cells whose whole caption is one letter (S10 to S15 have 26 of
 them: N, L, I, G, F, E, M, K, J, H, D). Captions that carry a unit or a name stay.
 
-**The stub is built (2026-11-27, branch `Easy-Expert-Stub`, PR #37; to be smoked by Andy).** What it holds:
+**The stub is live (2026-11-27, PR #37, merged on Andy's word).** What it holds:
 
 - The pill after Copy from Target, Easy · pill · Expert. Easy is the class `op-easy` on `<html>`; the choice is
   kept in the browser as `objective4View`. The page launches in Easy. Nothing is hidden yet.
@@ -198,10 +198,26 @@ them: N, L, I, G, F, E, M, K, J, H, D). Captions that carry a unit or a name sta
   the 26 estimated above. The rule applied: a header cell whose whole caption is its own column's letter. They
   are deleted from the section definitions (`src/sections/`), so they are gone in both views and in print.
   One-letter units (W, m) and row IDs stay.
-- Still open, Andy's to rule: the header rows' own ids (`02-ID`, `15-ID`, `S19-HEADER`). S15's header row held
-  only letters and now shows `15-ID` alone.
-- The witness: `test/witness/easy-expert.cjs`. It must keep passing as sections are curated, with one change:
-  its "nothing hidden yet" check becomes a count of what each section hides.
+- **Ruled (Andy 2026-11-27): the header rows' own ids (`02-ID`, `15-ID`, `S19-HEADER`) stay.** _"no need to
+  remove the header ids"_.
+- The witness: `test/witness/easy-expert.cjs`. It must keep passing as sections are curated; each thing Easy
+  hides gets a check of its own there.
+
+**The first thing Easy hides: the Cell IDs (2026-11-27, branch `Easy-Cell-IDs-Help`, PR #38; to be smoked by
+Andy).** Andy: _"we should however hide Cell ID's. In Expert mode, the cell ID's should in fact use the same
+styling (CSS) ... make all the same as T.6.0 across all sections please."_
+
+- A Cell ID is the ID column's cell, an ID beside its value (T.6.1) or an ID leading a caption ("M.1.1 HSPF").
+  The renderer marks the last two with the class `cell-id` (`FieldManager.js` `markCellId`).
+- Expert shows all of them in the ID column's style. Easy hides them on screen; print shows them.
+- **The exception: S11's row IDs that open a Builder stay in Easy.** They are buttons, and rule 2 above says Easy
+  never hides an input. Still open, Andy's to rule: whether those rows get another button in Easy.
+
+**Interactive help (same PR).** Andy: _"unlike V3, we have no way to switch On/Off interactive help, let's add
+that for Easy mode and Expert mode, On by default in Easy, Off by default in Expert."_
+
+- The Help button after the pill switches V3's field popovers. Each view keeps its own setting, in the browser
+  (`objective4Help`), not in the project file.
 
 In the build order above, this stub comes before step 1: the line that says what the Reference is and the
 drift marker are new things on screen, and they should be designed for Easy mode from the start.

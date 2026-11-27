@@ -20,14 +20,44 @@
 
 ### ▶ START HERE (handoff 2026-11-27, the laptop `M2max`) — written for a cold start after a /clear
 
-**▶ THE EASY / EXPERT STUB IS BUILT (2026-11-27, branch `Easy-Expert-Stub`, PR #37), TO BE SMOKED BY ANDY;
-it is not merged.** "WHAT THE STUB IS" below says what it holds. **The next task after it: Easy mode section by
-section, with Andy** marking what is essential in each (the plan and every ruling:
-`docs/workplans/REFERENCE-MODEL-EXPLAINED.md`, "Easy and Expert modes, and Guide Me"). That curation is his; an
-agent does not choose what a section hides. The F280 work below is waiting on other people: read "WAITING ON
-OTHERS", check andy-rnd#27 for replies (none by 2026-11-27, the stub's session), and otherwise leave it.
+**▶ EASY / EXPERT: THE STUB IS LIVE (PR #37, `1e4d21b`, merged on Andy's word 2026-11-27). ITS FIRST STEP IS
+BUILT, NOT MERGED (branch `Easy-Cell-IDs-Help`, PR #38, to be smoked by Andy):** Easy hides the Cell IDs, Expert
+shows every ID in one style, and interactive help has its own switch. "WHAT PR #38 HOLDS" is next below.
+**The next task after it: Easy mode section by section, with Andy** marking what is essential in each (the plan
+and every ruling: `docs/workplans/REFERENCE-MODEL-EXPLAINED.md`, "Easy and Expert modes, and Guide Me"). That
+curation is his; an agent does not choose what a section hides. The F280 work below is waiting on other people:
+read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11-27), and otherwise leave it.
 
-**WHAT THE STUB IS** (Andy 2026-11-26: _"yes, build the stub after #28 merges. We can go section by section and
+**WHAT PR #38 HOLDS** (Andy 2026-11-27, on smoking #37: _"no need to remove the header ids - we should however
+hide Cell ID's. In Expert mode, the cell ID's should in fact use the same styling (CSS) ... make all the same as
+T.6.0 across all sections please. Also, unlike V3, we have no way to switch On/Off interactive help, let's add
+that for Easy mode and Expert mode, On by default in Easy, Off by default in Expert."_):
+
+- **Every Cell ID is marked.** Outside the ID column an ID sat in the body font: 70 beside a value (T.6.1, D.1)
+  and 33 leading a caption ("M.1.1 HSPF", "B.18.3 Shielding"). `FieldManager.js` `markCellId` gives each the
+  class `cell-id` as the section renders (a cell alone, or a span around the leading ID); S05's E.3.5, which
+  the Builders draw, carries it in `js/objective-builders.mjs`. An ID named inside a sentence is left as text.
+- **Expert: one style for all 233 IDs,** the ID column's (monospace, 10 px, dim), the header rows' own ids
+  included. The header ids stay (ruled).
+- **Easy hides them** (`obstyles.css` §8e, on screen only: print shows them). A hidden ID's cell keeps its
+  place and takes no room, so a column of IDs closes up and several sections get shorter.
+  - ⚠ **Not hidden: S11's row IDs that open a Builder** (11 on the default project). They are buttons, and
+    Easy never hides an input. ❓ Andy: leave them as IDs in Easy, or give those rows another button there?
+- **Help, the button after the pill** (V3's Help button: the 130 field popovers of `TooltipManager.js`, on
+  hover or focus). Each view keeps its own setting, on in Easy and off in Expert until changed, in this browser
+  (`objective4Help`); `js/objective4.mjs` `syncHelp` sets V3's one switch to it. The browser's own hover
+  captions (the Garage note, a Builder row's name) are not popovers and stay on, as in V3.
+- **The button row** still keeps one line down to 1280 px: below 1360 px its gaps close and Help shows its icon
+  alone.
+- **Seen, left:** an ID in monospace is a few px wider than it was in the body font, so at about 1500 px wide
+  S15 wraps three rows in Expert that it did not after #37 (it wrapped five before #37). Easy wraps none.
+- **Witnesses:** `test/witness/easy-expert.cjs` (ALL OK, 30 checks; it now opens a popover to prove help is on
+  or off, and emulates print); parity against V3 2146 / 2146 on all 16 cases; `onepage.cjs`, the four
+  `builders-*`, `s19-reference`, `host-per-model`, `display-format`, `garage-facing`, `f280-summary` and V3's 8
+  Reference specs as before.
+- ⚠ **A tenth way `src/` differs from andy-rnd** (the list is further down): `markCellId`.
+
+**WHAT THE STUB IS (PR #37, live)** (Andy 2026-11-26: _"yes, build the stub after #28 merges. We can go section by section and
 determine what is essential."_; it changes no calculation):
 
 - **The pill, after Copy from Target: Easy · pill · Expert** (`objectivepro.html`; `js/objective4.mjs`
@@ -35,16 +65,15 @@ determine what is essential."_; it changes no calculation):
 - **Easy is one class, `op-easy` on `<html>`, and nothing else**, so it can change no input, no calculation and no
   saved file. **The page launches in Easy;** the choice is kept in this browser (`localStorage`
   `objective4View`), not in the project file: a reload and New both keep it.
-- **Nothing is hidden yet.** What Easy hides goes in `obstyles.css` §8e, each rule as `html.op-easy <selector>`
+- **The stub hid nothing** (PR #38 hides the Cell IDs). What Easy hides goes in `obstyles.css` §8e, each rule as `html.op-easy <selector>`
   inside `@media screen` (print shows the full report whatever the view). Easy never hides an input, with the one
   exception Andy named (S04's Actual columns while S.2 is at Targeted Use).
 - **The spreadsheet's column letters are gone, in both views: 80 captions in 12 sections** (S02, S03, S05 – S09,
   S12 – S15, S19), deleted from each section's header row in `src/sections/`. The rule applied: a header cell
   whose whole caption is its own column's letter. Row IDs stay, and so do one-letter units (W, m).
   - S15's header row held nothing but letters, so it now shows its `15-ID` alone, and S15's rows no longer wrap
-    (its last column, which held only "N", takes no width). ❓ Andy: should the header rows' own ids (`02-ID`,
-    `15-ID`, `S19-HEADER`) go as well? They name no row a hover or a message refers to. Not done: the ruling was
-    for the letters.
+    (its last column, which held only "N", takes no width). **RULED (Andy 2026-11-27): the header rows' own
+    ids (`02-ID`, `15-ID`, `S19-HEADER`) stay:** _"no need to remove the header ids"_.
 - **The button row keeps one line down to about 1260 px** (the pill would have wrapped it at 1280, where "Trust
   - Verify" and "Load Sample" already broke over two lines): a caption no longer wraps, the project's name gives
     way first (240 px down to 90), and narrower than that the rest goes to a second line, where before the last
@@ -197,7 +226,7 @@ B. **THEN, each on its own branch cut from `main` (RULED, Andy 2026-11-26):**
 
 1. **F280 Mode: gains to the heat balance only** (§11 is the plan, read it whole first). It changes the
    calculation engine. The validation review it waited for is done. Nothing of it is built.
-2. **The Easy / Expert stub: BUILT (PR #37, to be smoked by Andy).** The pill after Copy from Target, the page
+2. **The Easy / Expert stub: LIVE (PR #37); the Cell IDs and Help: BUILT (PR #38, to be smoked by Andy).** The pill after Copy from Target, the page
    launching in Easy, the spreadsheet's column letters gone in both modes, nothing else hidden yet.
    **Then section by section with Andy.** The plan and every ruling:
    `docs/workplans/REFERENCE-MODEL-EXPLAINED.md` Part 2.
@@ -451,6 +480,8 @@ in andy-rnd for the V3 page.
   `src/core/FileHandler.js` and `src/core/ui/DOMBridge.js` (text kept as text; the record's defaults).
   A ninth (2026-11-27, the Easy / Expert stub): the header rows of `src/sections/Section02.js`, `03`, `05` – `09`,
   `12` – `15` and `19` without their 80 column-letter captions.
+  A tenth (2026-11-27): `src/core/FieldManager.js` `markCellId`, the class `cell-id` on a Cell ID outside the ID
+  column.
 
 **The day's items as they were worked** (✅ = shipped; the unticked ones are REMAINS, above):
 

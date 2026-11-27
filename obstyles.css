@@ -5109,7 +5109,70 @@ input.op-pill:checked::before {
    so it can change no input, no calculation and no saved file.
    WHAT EASY HIDES GOES HERE, one section at a time as Andy marks what is essential, each rule written as
    `html.op-easy <selector>` INSIDE `@media screen`: print shows the full report whatever the view. Easy never
-   hides an input, with one exception (S04's Actual columns while S.2 is at Targeted Use). Nothing is hidden yet. */
+   hides an input, with one exception (S04's Actual columns while S.2 is at Targeted Use). Hidden so far: the
+   Cell IDs. */
+/* Interactive help, on or off (V3's Help button): lit when on. Each view keeps its own setting. */
+#beam-action-bar .op-help-btn {
+  color: var(--text-dim);
+}
+#beam-action-bar .op-help-btn.on {
+  color: var(--ob-accent);
+  border-color: rgba(34, 211, 238, 0.45);
+}
+/* A laptop's width: the row closes up so it stays on one line (Help keeps its icon, its hover says the rest). */
+@media (max-width: 1360px) {
+  #beam-action-bar {
+    gap: 6px;
+  }
+  #beam-action-bar .beam-action-sep {
+    margin: 0;
+  }
+  #beam-action-bar .op-help-label {
+    display: none;
+  }
+}
+
+/* A Cell ID outside the ID column (FieldManager marks it cell-id: T.6.1 beside its value, or the ID that leads
+   a caption, "M.1.1 HSPF") takes the ID column's own style (Andy 2026-11-27: "make all the same as T.6.0
+   across all sections"). */
+.op-v3 .data-table td.cell-id,
+.op-v3 .data-table span.cell-id {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: normal;
+  color: var(--text-dim) !important;
+}
+/* a header row's own id (02-ID, 15-ID) is an ID like the rest, not a caption */
+.op-v3 .data-table tr:has(td.section-subheader) td.id-cell {
+  font-weight: 400;
+  letter-spacing: normal;
+}
+/* as the ID column: no room given away beside an ID */
+.op-v3 .data-table td.cell-id {
+  padding-left: 0;
+  padding-right: 2px;
+}
+.op-v3 .data-table span.cell-id {
+  margin-right: 0.5em;
+}
+
+/* WHAT EASY HIDES. On screen only: print shows the full report whatever the view. */
+@media screen {
+  /* Cell IDs (Andy 2026-11-27: "we should however hide Cell ID's"): the ID column and the IDs beside a value
+     or leading a caption. A cell keeps its place in the row and its text takes no room, so a column of IDs
+     closes up. NOT hidden: S11's row IDs that open a Builder, which are buttons (Easy never hides an input). */
+  html.op-easy .op-v3 .data-table td.id-cell:not(.op-asm-btn):not(:has(*)),
+  html.op-easy .op-v3 .data-table td.cell-id {
+    font-size: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  html.op-easy .op-v3 .data-table span.cell-id {
+    display: none;
+  }
+}
+
 input.op-view-pill:checked {
   box-shadow:
     inset 2px 2px 4px rgba(0, 0, 0, 0.5),
