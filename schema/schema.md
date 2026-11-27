@@ -18,14 +18,31 @@
 
 ## 0. Cold-start handoff (read this first)
 
-### ▶ START HERE (handoff 2026-11-26 evening, laptop) — written for a cold start after a /clear
+### ▶ START HERE (handoff 2026-11-26 night, laptop) — written for a cold start after a /clear
 
-**Written 2026-11-26 late afternoon (laptop) for tonight's arc, after a /clear.** **LIVE: `main` after PR #27**
-(B5; this handoff is its last commit), deployed to https://arossti.github.io/OpenBuilding/. **Tonight's branch is
-`Reference-Independence`**, cut from that `main` and pushed: the Builders' AND S19's Reference / Target independence
-are BUILT on it (REMAINS 1) and not yet smoked by Andy or merged. Continue on this branch; no PR is open. Everything Andy
-asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and bring a list. **Tonight: plan REMAINS
-1 – 6 with Andy before building** (he said: _"we can plan 1-6 for tonight's arc after a clear"_).
+**Rewritten 2026-11-26 night (laptop) at the end of the session, for a cold start.** **LIVE: `main` after
+PR #27**, deployed to https://arossti.github.io/OpenBuilding/. **PR #28 is OPEN** (branch `Reference-Independence`,
+pushed): Andy is smoking it; it merges on his word in the session, and not before.
+
+**What PR #28 holds** (detail under REMAINS 1 and 2 below):
+
+- The Builders, S19 and an opening's host wall are each one per model (Reference / Target independence).
+- S01's `m_10` no longer reads "Unavailable" after Trust; Trust names the Target model.
+- A typed number keeps its format across a model switch; S21 rounds its mirrored numbers for display.
+- Two documents: `docs/workplans/REFERENCE-MODEL-EXPLAINED.md` and §11 below. No calculation changed for them.
+
+**NEXT, each on its own branch cut from `main` after #28 merges** (❓ Andy to confirm which of 1 and 2 goes
+first; Claude recommends 2, the F280 fault, because it is a wrong number in four shipped case files):
+
+1. **The Easy / Expert stub** (RULED, Andy: _"yes, build the stub after #28 merges"_): the pill after Copy from
+   Target, the page launching in Easy, the spreadsheet's column letters gone in both modes, nothing else hidden
+   yet. Then section by section with Andy. The plan and every ruling:
+   `docs/workplans/REFERENCE-MODEL-EXPLAINED.md` Part 2.
+2. **F280 Mode: gains to the heat balance only** (RULED; §11 is the plan, read it whole first). It changes the
+   calculation engine: nothing of it is built.
+3. **An opening's W × H comes across on Apply Selected** (REMAINS 5).
+4. The rest of REMAINS 3 – 6, and Andy's list of CSS and UI nits from his smoke (he called it a later arc; the
+   list is his, not yet written down).
 
 **How to work here (a cold start needs these):**
 
@@ -40,7 +57,8 @@ asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and brin
   show. After a big CSS/JS change use a new port: Chrome caches stale modules.
 - **The Builder computes, OBJECTIVE receives** (§10.2): never derive an RSI, U or carbon figure from layers here.
 
-**REMAINS, in order** (Andy's numbering for tonight; the older detail of 2 – 4 is in the items further down):
+**REMAINS** (Andy's numbering of 2026-11-26; 1 and 2 are done on PR #28, the older detail of 2 – 4 is in the
+items further down):
 
 1. **REFERENCE / TARGET INDEPENDENCE.** Andy 2026-11-26: _"because of our Ref/Target independence rule, a user can
    and may set a different assembly in the Reference model or the Target as a comparison. Often users will set
@@ -98,16 +116,8 @@ asked for on 2026-11-26 is shipped; Andy will do a thorough smoke of it and brin
        any other number at no more than 2. The graph and the saved file keep the full value. So S21's U-values
        and its long decimals no longer match V3's page character for character.
      - Witness `test/witness/display-format.cjs`.
-   - **⚠ FOUND, NOT CHANGED — F280 Mode On drops a model's annual electricity** (Andy's Collingwood question,
-     2026-11-26 night). Under On, S09 holds F280's design gains (lighting 0 in effect, equipment 0, plug loads
-     max(4 W/m², 800 W), 70 W a person), and S09's densities are also the electricity the annual model bills. So
-     the Reference of the four Part 9 F280 cases loses its lighting and equipment energy. The Reference's S01
-     TEUI with its F280 Mode Off → On (Off, it equals the Target in all four): 02 Collingwood 103.4 → 84.7
-     (lighting, plug and equipment −24.1 kWh/m², heating +6.4, cooling −1.1); 10 Duplex 13.2 → −11.8 (−24.1,
-     +2.7, −3.7); 12 PHI Low Energy 63.4 → 46.6 (−15.7, +4.5, −5.7); 03 PHI Classic 57.1 → 57.3 (−5.8, +6.0:
-     its 800 W floor is 5.3 W/m² against its own 2.1, so plug energy rises and cancels).
-     **RULED (Andy):** _"yes, gains to the heat balance only, keep S09's electricity"_, then _"do nothing to the
-     calculation engine yet, investigate first."_ Nothing in the engine is changed.
+   - **⚠ FOUND, NOT CHANGED — F280 Mode On drops a model's annual electricity** (Andy's Collingwood question).
+     The finding, the numbers, Andy's ruling and the plan are §11.
 3. **ABCD BUGLIST #266** (item 5): until it is fixed the Assembly Builder here is the 2026-10-22 library, 115
    assemblies, with the old blue accent and month-old baked HFT.
 4. **A light mode** (item 6, second tier).
@@ -693,6 +703,116 @@ certified_by, w_mm, h_mm, edited }`. In `js/objective-builders.mjs` the door (B.
 true`) and the row's name is marked "edited".
 4. **B5's partial sum** is shown with the count of rows it covers, in its own new S05 field (10.3 B5), so the typed
    `i_41` and today's defaults are untouched.
+
+## 11. F280 Mode: gains to the heat balance only (PLAN, nothing built)
+
+Written 2026-11-26 night. Andy: _"ok, now fix step 2: gains to heat balance only"_ and _"We should spell this out
+in our workplan first"_, _"before we make any changes ot the calculation engine"_.
+
+### 11.1 What an F280 case file is
+
+Each Part 9 case study comes as two files, and they hold two different References.
+
+- **The regular file** (`02-residence-sb12-net-zero.csv`): the Reference is the code-minimum building.
+- **The F280 variant** (`…-f280.csv`): the Reference is the Target's own house (same walls, roof, windows,
+  airtightness and equipment) with F280 Mode On. Andy: _"we were using it to compare the Reference (F280) to our
+  Target models, NOT an F280+OBC Mininmum value, so the insulation values remain high, airthightness high"_.
+
+So the Reference's S01 TEUI falls in two steps between the two files. Only step 2 is a fault.
+
+| Case              | Regular file (code minimum) | F280 file, Mode Off (= the Target) | F280 file, Mode On | Actual |
+| ----------------- | --------------------------- | ---------------------------------- | ------------------ | ------ |
+| 02 Collingwood    | 179.5                       | 103.4                              | 84.7               | 103.5  |
+| 03 PHI Classic    | 296.0                       | 57.1                               | 57.3               | 56.3   |
+| 10 SB-12 Duplex   | 188.4                       | 13.2                               | −11.8              | 14.8   |
+| 12 PHI Low Energy | 181.3                       | 63.4                               | 46.6               | 57.8   |
+
+### 11.2 The fault (step 2)
+
+Under F280 Mode On, S09 holds F280's internal gains (`window.TEUI.F280Gains`; `InternalGainsNodes.js` `f280On`):
+people at 70 W each (Cl. 6.2.4), plug loads at the larger of 4 W/m² or 800 W (Cl. 6.2.5), lighting 0 in effect
+and equipment 0 (both are inside the plug figure).
+
+In OBJECTIVE one S09 density is two things: the heat the load gives the room, and the electricity it uses. So the
+annual model also stops billing the lighting and equipment electricity, and bills the plug loads at F280's
+figure. F280 is a sizing standard; it gives no annual consumption.
+
+The Reference's own change, Mode Off → On, in kWh/m² (run on the page 2026-11-26):
+
+| Case              | Lighting | Equipment | Plug loads | Heating | Cooling | Net   |
+| ----------------- | -------- | --------- | ---------- | ------- | ------- | ----- |
+| 02 Collingwood    | −6.6     | −13.1     | −4.4       | +6.4    | −1.1    | −18.8 |
+| 10 SB-12 Duplex   | −6.6     | −13.1     | −4.4       | +2.7    | −3.7    | −25.1 |
+| 12 PHI Low Energy | −6.6     | −13.1     | +4.0       | +4.5    | −5.7    | −16.8 |
+| 03 PHI Classic    | −6.6     | −13.1     | +13.9      | +6.0    | 0       | +0.2  |
+
+The first three columns are electricity that goes missing or appears. Heating and Cooling are the real effect of
+F280's gains on the heat balance, with F280's ground and infiltration methods inside Heating (between −3.9 and
++1.8). PHI Classic hides the fault: it is small, so the 800 W floor is 5.3 W/m² against its own 2.1.
+
+### 11.3 The ruling
+
+Andy 2026-11-26: _"yes, gains to the heat balance only, keep S09's electricity"_. Under F280 Mode On:
+
+- **The heat balance uses F280's gains**, as now: the annual heating and cooling balance, and S21's design loads.
+- **The electricity billed is OBJECTIVE's**: lighting, equipment and plug loads at the densities S09 holds with
+  the mode Off.
+
+### 11.4 What changes in the engine
+
+Today (`src/sections/nodes/InternalGainsNodes.js`):
+
+- Four nodes take F280's figure under On: `internal.plugLoadDensity` (`d_65`), `internal.equipmentDensity`
+  (`d_67`), `internal.lightingDensity.inEffect`, `internal.occupants.wattsPerPerson` (`g_64`).
+- The annual nodes `internal.plugLoads.annual` (`h_65`), `internal.lighting.annual` (`h_66`) and
+  `internal.equipment.annual` (`h_67`) are computed from those densities.
+- `energy.plugLoads.subtotal` (`h_70`) sums the three, and feeds BOTH `energy.total.targeted` (electricity) and
+  `internal.heatingGains` (`i_71`) and the usable gains (heat).
+
+The change: each load gets two annual figures where it has one.
+
+1. **Electricity**: from the density with the mode ignored. `energy.total.targeted` reads this sum.
+2. **Gain**: from the density in effect (F280's under On). The heating gains, the cooling balance and the gain
+   percentages read this sum.
+
+With the mode Off the two are the same number, so no result moves for any model at Off.
+
+To read in the code before building (not yet read): every node that depends on `energy.plugLoads.subtotal` or on
+one of the three annual nodes, sorted into "electricity" or "gain"; what `cooling.iso52016` reads for its internal
+gains; the S04 / S15 rows that show the plug subtotal.
+
+### 11.5 What must come out
+
+Estimates from §11.2's table (the electricity columns put back). The build confirms them by running.
+
+| Case              | Reference, Mode On, today | Expected after | Target (= Mode Off) |
+| ----------------- | ------------------------- | -------------- | ------------------- |
+| 02 Collingwood    | 84.7                      | about 108.8    | 103.4               |
+| 10 SB-12 Duplex   | −11.8                     | about 12.3     | 13.2                |
+| 12 PHI Low Energy | 46.6                      | about 62.3     | 63.4                |
+| 03 PHI Classic    | 57.3                      | about 63.1     | 57.1                |
+
+Witnesses to write with it:
+
+- For each of the four F280 files, the Reference's `energy.plugLoads.subtotal` electricity is the same with its
+  mode Off and On, and its TEUI moves only by the Heating and Cooling columns.
+- Every model at Mode Off is unchanged: the 12 regular case files, and the Target of the four F280 files.
+- S21's design heat loss and nominal cooling capacity are unchanged in all four.
+- **Parity against V3 will no longer match on the four F280 files' Reference values**, by design (V3 has the
+  fault). `test/witness/parity.cjs` then needs those values listed as expected differences, each with its
+  number, never a blanket skip.
+
+### 11.6 Open, Andy's
+
+1. **What S09 shows under Mode On.** Today its density cells show F280's figures as calculated values (black),
+   and the kWh/yr column follows them. After the change the kWh/yr column is electricity at OBJECTIVE's
+   densities, beside a density cell showing F280's gain. Claude's recommendation: keep the density cells as they
+   are (they are the gains in effect), and label the kWh/yr column's hover under On "electricity at S09's own
+   densities; gains follow F280".
+2. **PHI Classic rises to about 63**, above its Target's 57.1, because F280's 800 W of plug gain is less heat
+   than the 6.6 W/m² the house has with the mode Off. That is the ruling working as written; noted so it is not
+   a surprise.
+3. The Duplex's Actual (14.8) and Target (13.2) are far below the other cases'. Not looked into.
 
 ## Appendix — Changelog
 
