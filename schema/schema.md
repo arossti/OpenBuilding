@@ -27,7 +27,24 @@ HOLDS" is next below. **The next task: Easy mode section by section, with Andy**
 That curation is his; an agent does not choose what a section hides. The F280 work below is waiting on other
 people: read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11-27), and otherwise leave it.
 
-**BUILT, NOT MERGED: PR #42 (branch `Easy-S05`, to be smoked by Andy).** Stylesheet and witness only.
+**BUILT, NOT MERGED: PR #43 (branch `Easy-S06`, to be smoked by Andy).** Stylesheet and witness only.
+
+- **A rule for every section (Andy 2026-11-27):** _"There is no harm done if inputs are not relevant than
+  related outputs would be too, fine to hide."_ Where an input does not apply, what is computed from it need not
+  show either. (S15's ∑ Other Energy at Targeted Use is the first case; ruled, display only, no engine change.)
+- **S05's Easy cut is RULED** (Andy, "yes").
+- **S06 in Easy: nothing to hide.** It holds seven inputs, two subtotals and one unit conversion.
+- **S07 in Easy, PROPOSED by Claude, built for Andy's smoke.** Easy keeps the six inputs (the method and its
+  value, the energy source, the efficiency, the drain water heat recovery), the water used, the hot water's
+  energy, the net thermal and electrical demand, the emissions and the ✓. It does not show: the four
+  compliance percentages beside the ✓ and their "Ref" caption; COPdhw, which repeats the efficiency slider; the
+  two steps between the demand and the drain (Net Demand-Recovered, SHW Wasted); and the row of system losses,
+  exhaust and oil demand, which holds no input.
+- **Witness:** `test/witness/easy-expert.cjs`, 61 checks. Parity not re-run: no file under `src/` changed since
+  #41's 2146 / 2146.
+- **NEXT: S08 in Easy.**
+
+**LIVE: PR #42 (`8cc38d3`, merged on Andy's word 2026-11-27).** Stylesheet and witness only.
 
 - **S04's Actual columns go at Targeted Use in Expert too** (Andy 2026-11-27, "yes"): the rule moved from
   Easy's block to `obstyles.css` §8f, beside S02's fuel prices.
@@ -39,13 +56,12 @@ people: read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11
   only). Andy said yes to making it zero at Targeted Use and, in the same message, _"I'm wary about calculation
   engine changes without understanding what it refers to"_: so it is hidden where its inputs are hidden, and
   the calculation waits for his word.
-- **S05 in Easy, PROPOSED by Claude, built for Andy's smoke:** a small section, nearly all headline results.
+- **S05 in Easy, RULED as proposed:** a small section, nearly all headline results.
   Easy drops only the note "(B6 Annual Emissions \* Service Life)" and the four unlabelled compliance
   percentages beside the ✓; the ✓, the two inputs (the typology, the modelled value) and every result stay.
   E.3.5 is the Builders' and is left alone.
 - **Witness:** `test/witness/easy-expert.cjs`, 58 checks. Parity not re-run: no file under `src/` changed since
   #41's 2146 / 2146.
-- **NEXT: S06 in Easy.**
 
 **LIVE: PR #41 (`8f684ee`, merged on Andy's word 2026-11-27).** Display only.
 

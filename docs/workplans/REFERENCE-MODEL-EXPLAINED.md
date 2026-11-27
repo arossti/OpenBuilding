@@ -237,6 +237,17 @@ columns going in Expert too (PR #42).
 
 **S05 (2026-11-27, PR #42).** Proposed and built for Andy's smoke: Easy drops only the explanatory note and the
 four unlabelled compliance percentages beside the ✓. Everything else in S05 is an input or a headline result.
+Andy ruled yes.
+
+**A rule for every section (Andy 2026-11-27):** _"There is no harm done if inputs are not relevant than related
+outputs would be too, fine to hide."_
+
+**S06 (2026-11-27).** Seven inputs, two subtotals, one conversion: nothing to hide.
+
+**S07 (2026-11-27, PR #43).** Proposed and built for Andy's smoke: Easy keeps the six inputs, the water used,
+the hot water's energy, the net demands, the emissions and the ✓; it does not show the compliance percentages,
+COPdhw (the slider's own value again), Net Demand-Recovered, SHW Wasted, or the row of system losses, exhaust
+and oil demand.
 
 **Later, its own pass (Andy 2026-11-27):** collapsing the empty columns and rows that hiding leaves.
 

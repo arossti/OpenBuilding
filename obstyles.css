@@ -5146,7 +5146,8 @@ input.op-pill:checked::before {
    WHAT EASY HIDES GOES HERE, one section at a time as Andy marks what is essential, each rule written as
    `html.op-easy <selector>` INSIDE `@media screen`: print shows the full report whatever the view. Easy never
    hides an input, with one exception (S04's Actual columns while S.2 is at Targeted Use). Hidden so far: the
-   Cell IDs; S03's secondary climate values; S04's derived totals; S05's note and compliance percentages. */
+   Cell IDs; S03's secondary climate values; S04's derived totals; S05's note and compliance percentages; S07's
+   intermediate steps. */
 /* A field's help popover is Bootstrap's light card; its title took the page's light heading colour and read
    washed out on the card's pale band (Andy 2026-11-27). */
 .app-beamweb .popover-header {
@@ -5265,7 +5266,7 @@ input.op-pill:checked::before {
     visibility: hidden;
   }
 
-  /* S05 CO2e Emissions (PROPOSED, Claude 2026-11-27, for Andy's ruling): a small section, nearly all of it
+  /* S05 CO2e Emissions (Andy 2026-11-27, "yes" to the cut proposed): a small section, nearly all of it
      headline results, so Easy drops only the explanatory note beside the operational intensity and the four
      unlabelled compliance percentages beside the ✓ (the ✓ stay). S05's E.3.5 is the Builders': left alone. */
   html.op-easy #emissions tr[data-id="E.1.2"] > td.col-j,
@@ -5273,6 +5274,34 @@ input.op-pill:checked::before {
     #emissions
     td:is([data-field-id="m_38"], [data-field-id="m_39"], [data-field-id="m_40"], [data-field-id="m_41"]) {
     visibility: hidden;
+  }
+
+  /* S06 Renewable Energy: seven inputs, two subtotals and one conversion. Nothing to hide.
+
+     S07 Water Use (PROPOSED, Claude 2026-11-27, for Andy's ruling). Easy keeps the six inputs (the method and
+     its value, the energy source, the efficiency, the drain water heat recovery), the water used, the hot
+     water's energy, the net thermal and electrical demand, the emissions and the ✓. It does not show: the
+     four compliance percentages beside the ✓ and their "Ref" caption; COPdhw, which repeats the efficiency
+     slider; the two steps between the demand and the drain (Net Demand-Recovered, SHW Wasted); and the row of
+     system losses, exhaust and oil demand, which holds no input. */
+  html.op-easy
+    #waterUse
+    td:is(
+      [data-field-id="m_49"],
+      [data-field-id="m_50"],
+      [data-field-id="m_52"],
+      [data-field-id="m_53"],
+      [data-field-id="e_52"],
+      [data-field-id="j_52"],
+      [data-field-id="j_53"]
+    ),
+  html.op-easy #waterUse tr[data-id="S07-ID"] > td.col-m,
+  html.op-easy #waterUse tr[data-id="W.4.1"] > td:is(.col-f, .col-h),
+  html.op-easy #waterUse tr[data-id="W.5.1"] > td.col-h {
+    visibility: hidden;
+  }
+  html.op-easy #waterUse tr[data-id="W.6.1"] {
+    display: none;
   }
 }
 

@@ -103,7 +103,7 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
         values[id] = el.tagName === "SELECT" || el.tagName === "INPUT" ? el.value : el.textContent.trim();
       });
       // (a row Easy takes away whole is left out of the count: S03's winter average, S04's derived totals)
-      const gone = '#climateCalculations tr[data-id="L.3.3"], #actualTargetEnergy tr:is([data-id="T.3.7"], [data-id="T.3.8"], [data-id="T.3.9"])';
+      const gone = '#climateCalculations tr[data-id="L.3.3"], #actualTargetEnergy tr:is([data-id="T.3.7"], [data-id="T.3.8"], [data-id="T.3.9"]), #waterUse tr[data-id="W.6.1"]';
       const cells = [...document.querySelectorAll("#beam-main .data-table td")].filter((c) => !c.closest(gone));
       return { values, cells: cells.length, shown: cells.filter((c) => c.getClientRects().length > 0).length };
     });
@@ -291,6 +291,27 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
       const n = (ids) => ids.filter((id) => seen(f(id))).length + "/" + ids.length;
       return { inputs: n(["d_39", "i_41"]), results: n(["d_38", "g_38", "i_38", "i_39", "d_40", "i_40", "d_41"]), marks: n(["n_38", "n_39", "n_40", "n_41"]), percents: n(["m_38", "m_39", "m_40", "m_41"]), note: seen('tr[data-id="E.1.2"] > td.col-j') };
     });
+  // S06 holds inputs and subtotals: Easy hides none of it. S07: the inputs and the results show, the steps
+  // between do not
+  const s0607 = () =>
+    p.evaluate(() => {
+      const seen = (sec, id) => {
+        const td = document.querySelector(`#${sec} td[data-field-id="${id}"]`);
+        return !!td && td.getClientRects().length > 0 && getComputedStyle(td).visibility === "visible";
+      };
+      const n = (sec, ids) => ids.filter((id) => seen(sec, id)).length + "/" + ids.length;
+      return {
+        s06: n("onSiteEnergy", ["d_43", "i_43", "m_43", "d_44", "i_44", "d_45", "i_45", "k_45", "d_46", "i_46"]),
+        inputs: n("waterUse", ["d_49", "e_49", "e_50", "d_51", "d_52", "d_53"]),
+        results: n("waterUse", ["h_49", "i_49", "k_49", "h_50", "i_50", "j_50", "e_51", "j_51", "k_51", "e_53"]),
+        marks: n("waterUse", ["n_49", "n_50", "n_52", "n_53"]),
+        steps: n("waterUse", ["m_49", "m_50", "m_52", "m_53", "e_52", "j_52", "j_53", "d_54", "j_54", "k_54"])
+      };
+    });
+  let c7 = await s0607();
+  ok("S06 in Easy: all of it shows", c7.s06 === "10/10", c7.s06);
+  ok("S07 in Easy: inputs, results and ✓ show; the steps between do not", c7.inputs === "6/6" && c7.results === "10/10" && c7.marks === "4/4" && c7.steps === "0/10", JSON.stringify(c7));
+
   let c5 = await s05();
   ok("S05 in Easy: inputs, results and ✓ show; the note and the bare percentages do not", c5.inputs === "2/2" && c5.results === "7/7" && c5.marks === "4/4" && c5.percents === "0/4" && !c5.note, JSON.stringify(c5));
 
@@ -374,6 +395,8 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   const dv = same(easy.values, expert.values);
   ok("every value the same in both views", dv.length === 0, `${Object.keys(easy.values).length} values; differ: ${dv.slice(0, 5).join(" ")}`);
   ok("every cell keeps its place", easy.shown === expert.shown && easy.cells === expert.cells, `${easy.shown} of ${easy.cells} cells laid out in Easy, ${expert.shown} of ${expert.cells} in Expert`);
+  c7 = await s0607();
+  ok("S07 in Expert: all of it shows", c7.steps === "10/10" && c7.inputs === "6/6" && c7.s06 === "10/10", JSON.stringify(c7));
   c5 = await s05();
   ok("S05 in Expert: all of it shows", c5.percents === "4/4" && c5.note && c5.marks === "4/4", JSON.stringify(c5));
   c3 = await s03();
