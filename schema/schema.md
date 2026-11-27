@@ -27,7 +27,27 @@ HOLDS" is next below. **The next task: Easy mode section by section, with Andy**
 That curation is his; an agent does not choose what a section hides. The F280 work below is waiting on other
 people: read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11-27), and otherwise leave it.
 
-**BUILT, NOT MERGED: PR #41 (branch `Easy-S04`, to be smoked by Andy).** Display only.
+**BUILT, NOT MERGED: PR #42 (branch `Easy-S05`, to be smoked by Andy).** Stylesheet and witness only.
+
+- **S04's Actual columns go at Targeted Use in Expert too** (Andy 2026-11-27, "yes"): the rule moved from
+  Easy's block to `obstyles.css` §8f, beside S02's fuel prices.
+- **S04's Easy cut is RULED** (Andy, "yes"): the derived totals below the fuel table are not shown in Easy.
+- **S15's T.7.3 "∑ Other Energy" is not shown at Targeted Use, in both views. The engine is NOT changed.** It
+  is `l_141` in S15's row T.7.1: gas bill × gas price + propane bill × its price + wood × its price + oil × its
+  price (S04's bills, S02's prices), the yearly cost of the fuels other than electricity as billed. **Nothing
+  reads it** (no node depends on `energy.cost.otherFuel`; the heat pump's ROI reads the two electricity costs
+  only). Andy said yes to making it zero at Targeted Use and, in the same message, _"I'm wary about calculation
+  engine changes without understanding what it refers to"_: so it is hidden where its inputs are hidden, and
+  the calculation waits for his word.
+- **S05 in Easy, PROPOSED by Claude, built for Andy's smoke:** a small section, nearly all headline results.
+  Easy drops only the note "(B6 Annual Emissions \* Service Life)" and the four unlabelled compliance
+  percentages beside the ✓; the ✓, the two inputs (the typology, the modelled value) and every result stay.
+  E.3.5 is the Builders' and is left alone.
+- **Witness:** `test/witness/easy-expert.cjs`, 58 checks. Parity not re-run: no file under `src/` changed since
+  #41's 2146 / 2146.
+- **NEXT: S06 in Easy.**
+
+**LIVE: PR #41 (`8f684ee`, merged on Andy's word 2026-11-27).** Display only.
 
 - **Two names brought to the Sankey's** (Andy 2026-11-27, "yes to both"):
   - S07's SHW Wasted reads **W.2.W** in its ID cell (it read W.5.3, with "(W.2.W)" only in the caption), as the
@@ -42,12 +62,11 @@ people: read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11
   - **RULED (Andy 2026-11-26): at Targeted Use the Actual columns are not shown** (the bills, their units,
     Actual Net and the Actual emissions: columns D to G in every row, so the table closes up). The one case
     where Easy hides an input. It follows the model on screen's S.2 (`op-targeted-use`).
-    ❓ Andy: in Expert too, as S02's fuel prices are? Built for Easy only, as ruled.
-  - **PROPOSED by Claude, built for Andy's smoke, his to rule:** Easy keeps the fuel table and its subtotals
+    In Expert too since PR #42.
+  - **RULED (Andy 2026-11-27, "yes"), as Claude proposed:** Easy keeps the fuel table and its subtotals
     whole (bills, Target, Net, emissions, the emission factors) and does not show what is derived below it:
     Total Net Energy (GJ), Annual Percapita Energy, Primary Energy and its intensity, the nuclear waste
-    produced and the PER factor. The nuclear waste FACTOR is an input and stays. One block of
-    `obstyles.css` §8e, marked PROPOSED; removing it undoes it.
+    produced and the PER factor. The nuclear waste FACTOR is an input and stays.
   - ⚠ **Seen, not changed (a calculation):** S15's ∑ Other Energy (`EnergyNodes.js` `energy.cost.otherFuel`)
     multiplies the fuel BILLS by the fuel prices with no test of S.2, so at Targeted Use it still carries
     whatever bills were typed, now that both are out of sight there.
@@ -57,7 +76,6 @@ people: read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11
   its row; the columns emptied by hidden values in S03.
 - **Witnesses:** `test/witness/easy-expert.cjs` (ALL OK, 54 checks); parity against V3 2146 / 2146 on all 16
   cases; the rest as before.
-- **NEXT: S05 in Easy.**
 
 **LIVE: PR #40 (`e497b7b`, merged on Andy's word 2026-11-27): S03 in Easy** (Andy 2026-11-27, "yes"
 to the cut proposed). `obstyles.css` §8e, on screen only, display only:

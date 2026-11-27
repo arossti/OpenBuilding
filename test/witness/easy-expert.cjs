@@ -266,7 +266,10 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   await p.click("#op-view-expert");
   await p.waitForTimeout(300);
   c4 = await s04();
-  ok("S04 in Expert at Targeted Use: all of it shows", c4.bills === "5/5" && c4.actual === "4/4" && c4.derived === "13/13" && /ACTUAL/.test(c4.captions), JSON.stringify(c4));
+  // (of the 13 derived values, those in the Actual columns go with them)
+  ok("S04 in Expert at Targeted Use: no Actual column either, the rest shows", c4.bills === "0/5" && c4.actual === "0/4" && c4.target === "5/5" && c4.factors === "5/5" && !/ACTUAL/.test(c4.captions) && parseInt(c4.derived) >= 7, JSON.stringify(c4));
+  const other = () => p.evaluate(() => getComputedStyle(document.querySelector('#teuiSummary td[data-field-id="l_141"]')).visibility === "visible");
+  ok("S15's ∑ Other Energy is not shown at Targeted Use", (await other()) === false);
   await p.click("#op-view-easy");
   await p.waitForTimeout(300);
   // the IDs are the rows' own, so the Reference shows the Target's
@@ -275,6 +278,21 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   await p.waitForTimeout(2200);
   pr = await prices();
   ok("and the Target its own", pr.use === "Utility Bills" && !pr.flag && pr.fuels === 4, JSON.stringify(pr));
+  ok("S15's ∑ Other Energy shows at Utility Bills", (await other()) === true);
+
+  // S05 in Easy: the note and the bare compliance percentages go, the ✓ and everything else stay
+  const s05 = () =>
+    p.evaluate(() => {
+      const seen = (sel) => {
+        const td = document.querySelector("#emissions " + sel);
+        return !!td && td.getClientRects().length > 0 && getComputedStyle(td).visibility === "visible";
+      };
+      const f = (id) => `td[data-field-id="${id}"]`;
+      const n = (ids) => ids.filter((id) => seen(f(id))).length + "/" + ids.length;
+      return { inputs: n(["d_39", "i_41"]), results: n(["d_38", "g_38", "i_38", "i_39", "d_40", "i_40", "d_41"]), marks: n(["n_38", "n_39", "n_40", "n_41"]), percents: n(["m_38", "m_39", "m_40", "m_41"]), note: seen('tr[data-id="E.1.2"] > td.col-j') };
+    });
+  let c5 = await s05();
+  ok("S05 in Easy: inputs, results and ✓ show; the note and the bare percentages do not", c5.inputs === "2/2" && c5.results === "7/7" && c5.marks === "4/4" && c5.percents === "0/4" && !c5.note, JSON.stringify(c5));
 
   // 2e. the renumbering of 2026-11-27: one ID, one thing
   const numbered = await p.evaluate(() => {
@@ -356,6 +374,8 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   const dv = same(easy.values, expert.values);
   ok("every value the same in both views", dv.length === 0, `${Object.keys(easy.values).length} values; differ: ${dv.slice(0, 5).join(" ")}`);
   ok("every cell keeps its place", easy.shown === expert.shown && easy.cells === expert.cells, `${easy.shown} of ${easy.cells} cells laid out in Easy, ${expert.shown} of ${expert.cells} in Expert`);
+  c5 = await s05();
+  ok("S05 in Expert: all of it shows", c5.percents === "4/4" && c5.note && c5.marks === "4/4", JSON.stringify(c5));
   c3 = await s03();
   ok("S03 in Expert: all of it shows", c3.inputs === "8/8" && c3.kept === "9/9" && c3.secondary === "12/12" && /°F/.test(c3.captions), JSON.stringify(c3));
   const ix = await ids();
