@@ -30,19 +30,20 @@ handoff. New workplans start from `docs/workplans/WORKPLAN-TEMPLATE.md`.
 
 The workflow stages a clean `_site/` (HTML, CSS, `js/`, `graphics/`, `lib/`, `builders/`, runtime data) and uploads it.
 
-| URL                  | File                | Role                                                                                          |
-| -------------------- | ------------------- | --------------------------------------------------------------------------------------------- |
-| `/`                  | `index.html`        | Landing page / tools directory                                                                |
-| `/objectivepro.html` | `objectivepro.html` | OBJECTIVE 4.0: sidebar S01–S21 + S22 Glossary, the S01 key values in the masthead             |
-| `/takeoffeh.html`    | `takeoffeh.html`    | Take Off, Eh! — area + volume takeoff from drawings                                           |
-| (local only)         | `database.html`     | The BEAM material catalogue viewer (821 records, BfCA data): kept in the repo, never deployed |
-| `/builders/*.html`   | `builders/`         | Material, Section, Opening and Assembly Builders (published from ABCD.EARTH)                  |
-| `/dependencies.html` | `dependencies.html` | Dev dependency manifest (not nav-linked)                                                      |
+| URL                  | File                | Role                                                                                               |
+| -------------------- | ------------------- | -------------------------------------------------------------------------------------------------- |
+| `/`                  | `index.html`        | Landing page / tools directory                                                                     |
+| `/objectivepro.html` | `objectivepro.html` | OBJECTIVE 4.0: sidebar S01–S21 + S22 Glossary, the S01 key values in the masthead                  |
+| `/f280-summary.html` | `f280-summary.html` | OBJECTIVE's F280 calculation summary sheet: opened from S21 in its own tab, printed by the browser |
+| `/takeoffeh.html`    | `takeoffeh.html`    | Take Off, Eh! — area + volume takeoff from drawings                                                |
+| (local only)         | `database.html`     | The BEAM material catalogue viewer (821 records, BfCA data): kept in the repo, never deployed      |
+| `/builders/*.html`   | `builders/`         | Material, Section, Opening and Assembly Builders (published from ABCD.EARTH)                       |
+| `/dependencies.html` | `dependencies.html` | Dev dependency manifest (not nav-linked)                                                           |
 
 ### Styling — one file plus the shared tokens
 
 `obstyles.css` holds every page's styles, scoped by html class (`app-takeoffeh`, `app-database`, `app-beamweb` for
-OBJECTIVE, `app-deps`, `app-landing`) under `§N  APP: name` banners. `builders/tokens.css` (published from ABCD.EARTH) is the one set of design tokens
+OBJECTIVE, `app-deps`, `app-landing`, `app-f280sheet`) under `§N  APP: name` banners. `builders/tokens.css` (published from ABCD.EARTH) is the one set of design tokens
 shared with the Builders (cyan on the web). No per-app `.css` files.
 
 ### JS — ES modules, no build
@@ -53,6 +54,8 @@ shared with the Builders (cyan on the web). No per-app `.css` files.
 - `js/beam/*.mjs` — `pdf-bridge-import.mjs` (Trust / Trust + Verify) and `reference-data.mjs` (S22 Glossary).
 - `js/objective-builders.mjs` — the Builders inside OBJECTIVE: S11's row IDs open the Assembly Builder in a popup;
   Apply Selected writes the row's RSI (roadmap §10).
+- `src/core/F280Summary.js` + `js/f280-summary.mjs` — the F280 calculation summary sheet (CSA F280-12 Annex D,
+  Table E.1): S21's button builds it for the model on screen and `f280-summary.html` draws it; the browser prints it.
 - `js/shared/*.mjs` — cross-page utilities (`state-manager.mjs`, `file-handler.mjs`, `indexed-db-store.mjs`, …)
 - Global namespace: `window.BEAM.*` (to become OBJECTIVE's `window.TEUI.*` in the port).
 

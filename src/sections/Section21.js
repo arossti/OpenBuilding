@@ -41,6 +41,26 @@ window.TEUI.SectionModules.sect21 = (function () {
     certNumber:                   "f280_cert_num",
     serviceOrg:                   "f280_svc_org",
     attestation:                  "f280_attest",
+    // The calculation summary sheet's record (CSA F280-12 Cl. 7.1 a), Annex D / Table E.1): what the sheet
+    // asks for that no other section holds. Text, per model, saved with the project; none enters a calculation.
+    issuedFor:                    "f280_issued_for",
+    projectAddress:               "f280_address",
+    projectCity:                  "f280_proj_city",
+    projectSite:                  "f280_site",
+    projectLot:                   "f280_lot",
+    projectPostal:                "f280_postal",
+    dimensionsSource:             "f280_dims_src",
+    frontFacing:                  "f280_front_facing",
+    frontFacingAssumed:           "f280_facing_assumed",
+    airTightnessAssumed:          "f280_tight_assumed",
+    attachedDocuments:            "f280_attached",
+    sheetNotes:                   "f280_notes",
+    designerAddress:              "f280_dsgn_addr",
+    designerCity:                 "f280_dsgn_city",
+    designerPostal:               "f280_dsgn_postal",
+    designerPhone:                "f280_dsgn_phone",
+    designerFax:                  "f280_dsgn_fax",
+    designerEmail:                "f280_dsgn_email",
 
     // === DISPLAY MIRRORS (read-only, sourced from other sections) ===
     // Design conditions (S03)
@@ -107,6 +127,21 @@ window.TEUI.SectionModules.sect21 = (function () {
     FIELDS.designerCompany,
     FIELDS.certNumber,
     FIELDS.serviceOrg,
+    FIELDS.issuedFor,
+    FIELDS.projectAddress,
+    FIELDS.projectCity,
+    FIELDS.projectSite,
+    FIELDS.projectLot,
+    FIELDS.projectPostal,
+    FIELDS.dimensionsSource,
+    FIELDS.attachedDocuments,
+    FIELDS.sheetNotes,
+    FIELDS.designerAddress,
+    FIELDS.designerCity,
+    FIELDS.designerPostal,
+    FIELDS.designerPhone,
+    FIELDS.designerFax,
+    FIELDS.designerEmail,
   ]);
 
   const sectionRows = {
@@ -1471,6 +1506,68 @@ window.TEUI.SectionModules.sect21 = (function () {
   // 2. ACCESSOR METHODS (FieldManager Integration)
   //==========================================================================
 
+  // ---- Group 9: the calculation summary sheet (CSA F280-12 Cl. 7.1 a); Annex D, Table E.1) ----
+  // S21 holds the sheet's record; the sheet itself opens in its own tab (src/core/F280Summary.js,
+  // f280-summary.html) and the browser prints it (Andy 2026-11-26: "a popup/modal or open in a new tab and use
+  // the browser's print functionality, no fancy add-ons", "With the button to produce it in S21").
+  const SHEET_BUTTON_ID = "f280SummaryOpen";
+  const blanks = columns => Object.fromEntries(columns.map(col => [col, {}]));
+  sectionRows.subheader_sheet = {
+    id: "F.0I",
+    rowId: "F.0I",
+    label: "Calculation Summary Sheet",
+    cells: {
+      c: { content: "Calculation Summary Sheet (Annex D)", classes: ["group-header"] },
+      d: {
+        type: "button",
+        content: "Open the sheet",
+        buttonId: SHEET_BUTTON_ID,
+        classes: ["f280-sheet-button"],
+        span: 3,
+      },
+      g: { content: "opens in its own tab, for the model on screen; print it from the browser", span: 8 },
+    },
+  };
+  // [row, field, label, kind]: text spans the value columns; a choice is a dropdown with "Not recorded" first
+  const NOT_RECORDED = "Not recorded";
+  const SHEET_RECORD = [
+    [41, FIELDS.issuedFor, "Drawings Issued For", "text"],
+    [42, FIELDS.projectAddress, "Building Address", "text"],
+    [43, FIELDS.projectCity, "Building City and Province", "text"],
+    [44, FIELDS.projectSite, "Site", "text"],
+    [45, FIELDS.projectLot, "Lot", "text"],
+    [46, FIELDS.projectPostal, "Building Postal Code", "text"],
+    [47, FIELDS.dimensionsSource, "Dimensional Information Based On", "text"],
+    [48, FIELDS.frontFacing, "Front Facing", ["North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest"]],
+    [49, FIELDS.frontFacingAssumed, "Front Facing Assumed?", ["Yes", "No"]],
+    [50, FIELDS.airTightnessAssumed, "Air Tightness Assumed?", ["Yes", "No"]],
+    [51, FIELDS.attachedDocuments, "Attached Documents", "text"],
+    [52, FIELDS.sheetNotes, "Notes for the Sheet", "text"],
+    [53, FIELDS.designerAddress, "Designer Address", "text"],
+    [54, FIELDS.designerCity, "Designer City and Province", "text"],
+    [55, FIELDS.designerPostal, "Designer Postal Code", "text"],
+    [56, FIELDS.designerPhone, "Designer Telephone", "text"],
+    [57, FIELDS.designerFax, "Designer Fax", "text"],
+    [58, FIELDS.designerEmail, "Designer E-mail", "text"],
+  ];
+  SHEET_RECORD.forEach(([n, fieldId, label, kind]) => {
+    const choice = Array.isArray(kind);
+    sectionRows[n] = {
+      id: `F.${n}`,
+      rowId: `F.${n}`,
+      label,
+      cells: {
+        c: { label },
+        d: choice
+          ? { fieldId, type: "dropdown", dropdownId: fieldId, value: NOT_RECORDED, label, options: [NOT_RECORDED, ...kind], span: 3 }
+          : { fieldId, type: "editable", text: true, value: "", classes: ["user-input", "f280-text"], label, span: 8 },
+        ...blanks(choice ? ["g", "h", "i", "j", "k", "l", "m", "n"] : ["l", "m", "n"]),
+      },
+    };
+  });
+  const SHEET_TEXT = SHEET_RECORD.filter(row => row[3] === "text").map(row => row[1]);
+  const SHEET_CHOICES = SHEET_RECORD.filter(row => Array.isArray(row[3])).map(row => row[1]);
+
   function getFields() {
     const fields = {};
     Object.values(sectionRows).forEach(row => {
@@ -1483,6 +1580,8 @@ window.TEUI.SectionModules.sect21 = (function () {
             defaultValue: cell.value || "",
             section: "f280Compliance",
           };
+          // a text field: an imported value is kept as typed, never read as a number (FileHandler)
+          if (cell.text || TEXT_FIELDS.has(cell.fieldId)) fields[cell.fieldId].text = true;
           if (cell.dropdownId)
             fields[cell.fieldId].dropdownId = cell.dropdownId;
           if (cell.options) fields[cell.fieldId].options = cell.options;
@@ -1522,6 +1621,7 @@ window.TEUI.SectionModules.sect21 = (function () {
     "subheader_equipment", 32, 33,
     "subheader_designer", 34, 35, 36, 37, 38, 39,
     "subheader_overall", 40,
+    "subheader_sheet", 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58,
   ];
 
   function getLayout() {
@@ -1575,6 +1675,8 @@ window.TEUI.SectionModules.sect21 = (function () {
     FIELDS.certNumber,
     FIELDS.serviceOrg,
     FIELDS.attestation,
+    ...SHEET_TEXT,
+    ...SHEET_CHOICES,
   ];
 
   // Display-only field IDs (read from StateManager, rendered in section)
@@ -1946,6 +2048,7 @@ window.TEUI.SectionModules.sect21 = (function () {
       FIELDS.installedHeatingCapacity, FIELDS.installedCoolingCapacity,
       FIELDS.designerName, FIELDS.designerCompany,
       FIELDS.certNumber, FIELDS.serviceOrg,
+      ...SHEET_TEXT,
     ];
 
     editableFieldIds.forEach(function (fieldId) {
@@ -1980,6 +2083,16 @@ window.TEUI.SectionModules.sect21 = (function () {
         dropdown.hasDropdownListener = true;
       }
     });
+
+    // The summary sheet: built for the model on screen, opened in its own tab
+    var sheetButton = sectionElement.querySelector("#" + SHEET_BUTTON_ID);
+    if (sheetButton && !sheetButton.hasSheetListener) {
+      sheetButton.addEventListener("click", function () {
+        document.activeElement?.blur?.(); // a field still being typed is stored first
+        window.TEUI.F280Summary?.open();
+      });
+      sheetButton.hasSheetListener = true;
+    }
 
     // Display field updates handled by DOMBridge.stampAll() via graph recomputation
   }

@@ -684,6 +684,19 @@
             String(this.fieldManager.getField(id)?.defaultValue ?? ""),
           ])
         ),
+        // S21's record (the project, the designer, the summary sheet; the sheet's fields added 2026-11-26):
+        // a file without a column never keeps the previous project's address, client or designer, which
+        // the next project's summary sheet would print and its next save would carry
+        ...Object.fromEntries(
+          ["f280_proj_num", "f280_dsgn_name", "f280_dsgn_co", "f280_cert_type", "f280_cert_num", "f280_svc_org",
+            "f280_attest", "f280_issued_for", "f280_address", "f280_proj_city", "f280_site", "f280_lot",
+            "f280_postal", "f280_dims_src", "f280_front_facing", "f280_facing_assumed", "f280_tight_assumed",
+            "f280_attached", "f280_notes", "f280_dsgn_addr", "f280_dsgn_city", "f280_dsgn_postal",
+            "f280_dsgn_phone", "f280_dsgn_fax", "f280_dsgn_email"].map(id => [
+            id,
+            String(this.fieldManager.getField(id)?.defaultValue ?? ""),
+          ])
+        ),
         // The envelope rows' fields (added 2026-11-20, Openings.addedFields), every one at its own
         // default: a file without them has no extra rows (area 0), its opaque rows their old types (B.5
         // facing Average), no L or H - and a row + shows later starts clean, never the previous project's
@@ -757,7 +770,12 @@
             // These are S03 dropdown fields, not FieldManager-rendered fields
             const isS03LocationField = ["d_19", "h_19"].includes(fieldId);
 
-            if (
+            if (fieldDef.type === "editable" && fieldDef.text) {
+              // A text field (S21's project, designer and summary-sheet record) is kept as typed. Read as a
+              // number, "496 Fake Street" came back "496" and project no. "0402-96" came back "402"
+              // (found 2026-11-26; the Reference's values were never parsed, so only the Target's were cut).
+              parsedValue = String(value);
+            } else if (
               fieldDef.type === "editable" ||
               fieldDef.type === "year_slider" ||
               fieldDef.type === "percentage" ||
@@ -878,7 +896,12 @@
             // These are S03 dropdown fields, not FieldManager-rendered fields
             const isS03LocationField = ["d_19", "h_19"].includes(fieldId);
 
-            if (
+            if (fieldDef.type === "editable" && fieldDef.text) {
+              // A text field (S21's project, designer and summary-sheet record) is kept as typed. Read as a
+              // number, "496 Fake Street" came back "496" and project no. "0402-96" came back "402"
+              // (found 2026-11-26; the Reference's values were never parsed, so only the Target's were cut).
+              parsedValue = String(value);
+            } else if (
               fieldDef.type === "editable" ||
               fieldDef.type === "year_slider" ||
               fieldDef.type === "percentage" ||
@@ -1379,6 +1402,25 @@
           "f280_cert_num",
           "f280_svc_org",
           "f280_attest",
+          // the calculation summary sheet's record (F280-12 Cl. 7.1 a), Annex D / Table E.1; 2026-11-26)
+          "f280_issued_for",
+          "f280_address",
+          "f280_proj_city",
+          "f280_site",
+          "f280_lot",
+          "f280_postal",
+          "f280_dims_src",
+          "f280_front_facing",
+          "f280_facing_assumed",
+          "f280_tight_assumed",
+          "f280_attached",
+          "f280_notes",
+          "f280_dsgn_addr",
+          "f280_dsgn_city",
+          "f280_dsgn_postal",
+          "f280_dsgn_phone",
+          "f280_dsgn_fax",
+          "f280_dsgn_email",
 
           // Section 15: Summary
           "d_142",

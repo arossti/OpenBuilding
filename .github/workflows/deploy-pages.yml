@@ -41,7 +41,7 @@ jobs:
           mkdir -p _site/data
 
           # Deployable app surface
-          cp index.html takeoffeh.html objectivepro.html dependencies.html _site/
+          cp index.html takeoffeh.html objectivepro.html f280-summary.html dependencies.html _site/
           cp obstyles.css _site/
           cp -r js graphics lib builders src climate _site/
 
