@@ -18,12 +18,14 @@
 
 ## 0. Cold-start handoff (read this first)
 
-### ▶ START HERE (handoff 2026-11-26 late night, the laptop `M2max`) — written for a cold start after a /clear
+### ▶ START HERE (handoff 2026-11-26 / 27 overnight, the laptop `M2max`) — written for a cold start after a /clear
 
-**LIVE: `main` after PR #30 (`ab7c9c2`)**, deployed to https://arossti.github.io/OpenBuilding/. This handoff is
-the last commit of PR #31 (docs only). The session was the F280 validation Andy asked for, and nothing else.
+**LIVE: `main` after PR #32** (the F280 calculation summary sheet; this handoff is its last commit), deployed to
+https://arossti.github.io/OpenBuilding/. Before it: #30 (`ab7c9c2`, the runner and the Garage facing) and #31
+(docs). andy-rnd `main` is **`645784e`** (#28, F280-1's ceiling). Andy's word for the night, 2026-11-26: _"you
+may PR and merge and self-smoke w/o me"_; that covered #28 and #32 and is not a standing rule.
 **To start:** `git checkout main && git pull` here; `git -C ../andy-rnd status` should show `main`, clean, at
-`74bd575`; cut each task's branch from `main` in the repo it touches.
+`645784e`; cut each task's branch from `main` in the repo it touches.
 
 **Where the F280 claim stands: it cannot be made yet, and two of the reasons are not ours.**
 
@@ -55,54 +57,31 @@ the last commit of PR #31 (docs only). The session was the F280 validation Andy 
   row; they may hold the corrected value.
 
 **NEXT, in this order.** What is ruled and what is not: **the order inside B is Andy's ruling** of 2026-11-26.
-**List A, and doing A before B, is Claude's recommendation and is not ruled (❓ Andy).** Ask him before starting
-anything larger than A1.
+**A1 and A2 first is ruled too** (Andy 2026-11-26: _"yes, do the F280-1 fix and the verification report
+first"_), and both are done. The rest of list A is Claude's recommendation.
 
 A. **What the claim still needs from our side** (the report's triage; none of it waits for CSA):
 
-1. **T1:** `g_112` = 5.99 m in andy-rnd's own F280-1 (Kieran's I18 ruling; the run used his file, which has it).
-   - In `~/Documents/OpenBuilding/andy-rnd`, on a new branch: `tools/f280/build_case.py` line 223 puts 5.53
-     (with its derivation in the note beside it: change both to the ruling, grade to the ceiling with the two
-     floor structures included). Run the script; it rewrites
-     `test/computation/case-studies/F280-1-Archetype1-2010s-Ottawa.csv` and `docs/f280/F280-1-crosswalk.md`.
-   - Re-record the harness (it serves the app itself), then update `docs/f280/README.md`'s figures:
-
-     ```bash
-     F280_RECORD=1 npx playwright test test/f280WholeHouse.spec.cjs --config=playwright.config.cjs
-     ```
-
-     `test/aim2FromHouse.test.cjs` uses 5.53 as a typed example: leave it.
-
-   - The rebuilt file must equal Kieran's `F280_case_inputs/case_files/F280-1.csv` (private folder) field for
-     field. Both are the same three-line case file, a header of 418 `id: label` columns, the Target row and the
-     Reference row: compare them by header id. On 2026-11-26 they differed in `g_112` alone, on both rows.
-   - The ruling covers every model, but Kieran's 45 files already carry each archetype's height: T1 is only our
-     own copy of F280-1.
-   - andy-rnd's rules: it is on `main` at `74bd575`, clean; cut the branch from there; commit and push on the
-     feature branch; a merge needs Andy's word. Its CI is `.github/workflows/test.yml` (Playwright WebKit on
-     Ubuntu): `npm run test:unit` locally, then `gh pr checks <n>` green before asking for the merge.
-
-2. **T8: a verification report from S21**, the Annex D summary sheet and the Table E.1 fields (Cl. 8.3.2
-   a) – b)). Nothing produces it today. This is the largest piece, so start by showing Andy a plan.
-   - **What the clause asks:** the base case's verification reports are reviewed against Annex D's "Heat loss
-     and gain calculation summary sheet" (normative; Kieran's matrix counts 49 fields in Figure D.1) and against
-     Annex E's Table E.1 (informative; 50 fields). Where ours diverge, Kieran lists the divergences.
-   - **Read Annexes D and E first.** The text extract named in memory `reference_f280_pdf_unreadable` has both
-     (its prose is sound; its tables shift columns). For the page images use the private folder's
-     `tools/csa-viewer/`: Andy must be signed in to CSA OnDemand in Safari with the document open, and the
-     captures are deleted after reading. **The pages are not yet located in the 2025 copy:** the 2023 copy has
-     Annex D at printed p. 71 and Table E.1 at pp. 74 – 78, and the 2025 copy's numbers run 3 – 4 later (PDF
-     page = printed + 7), so look around PDF pages 81 – 90 and add what you find to that tool's README.
-   - **The field list:** Kieran's matrix (`F280_RTM_r1_2026-11-26.pdf`, rows F280-8.3.2a and b) gives the
-     counts only. His register of the fields is in his own files, which we do not hold: ask him on andy-rnd#27,
-     or list them from the annexes.
-   - The form's wording is CSA's: reproduce field NAMES and our values, not the form's layout or text. The
-     feature is public; **F280-1's own printed report is not** (its inputs come from the Standard): it goes to
-     Kieran through the private folder and andy-rnd#27.
-   - **Where it goes:** S21 is `src/sections/Section21.js` (F280's own section); the report is the browser's
-     print, as every other report here (`obstyles.css` §8d). A first cut: an S21 block that lists each Annex D
-     field with the value OBJECTIVE holds and where it comes from, and marks a field we do not carry.
-   - Done when Kieran can review F280-1's report against both annexes without asking us for a value.
+1. **T1: DONE (andy-rnd #28, `645784e`).** `g_112` = 5.99 m in andy-rnd's own F280-1 and in
+   `tools/f280/build_case.py`. The rebuilt file is byte for byte Kieran's `F280-1.csv`; the harness is
+   re-recorded and andy-rnd's `docs/f280/README.md` carries the new figures. Left as they are, on purpose: the
+   Excel witness `test/fixtures/aim2-workbooks.json` and `test/aim2FromHouse.test.cjs`, where 5.53 is a typed
+   input and not the case.
+   - ⚠ **Seen on the way, not changed (it is a calculation; ❓ Andy and Kieran):** with S12 B.19.4 left blank,
+     the height taken from S11's walls is the tallest wall plus the basement above grade
+     (`VolumeMetricsNodes.js`). Where the rim joists are their own row, as in F280-1, that leaves the floor
+     structures out: F280-1 would read 5.54 m against the ruled 5.99 m. F280-1 and all 45 of Kieran's files type
+     the height, so no result depends on it today.
+2. **T8: the first cut is SHIPPED (PR #32);** "WHAT PR #32 SHIPPED" below says what it is. What is left of it:
+   - **Kieran's review** (Cl. 8.3.2 a) – b)). F280-1's own sheet, Target and Reference, is printed and waiting
+     in the private folder, `QO_run_2026-11-26/reports/` (PDF and the sheet's data as JSON). **Not yet sent to
+     him: Andy sends it** (andy-rnd#27), with the question below.
+   - **The one field the sheet marks "not carried": the interior shading category** (Table E.1 field 21;
+     Figure D.1's notes 3 – 4 ask that it be recorded). OBJECTIVE has no such input: a window's summer shading %
+     is its one shading input. Giving it one is a calculation change (Table 4's factor), so it belongs with
+     §11, after Kieran signs. ❓ Kieran: a divergence to list, or a blocker?
+   - S21's record of the building and the designer is empty on F280-1 (an archetype has no address). Andy's
+     own name, company and contact go in F.34 – F.58 before a sheet is issued for a real project.
 3. **T2:** a build stamp on the page (the footer reads "OBJECTIVE 4.0 dev"; the run is identified by its tag).
 4. **T9:** Andy's signed qualification statement as the operator (Cl. 3.1). His.
 5. **F280-1's garage walls and headers split out** at their own Annex I values, on the new Garage facing. Waits
@@ -121,13 +100,47 @@ B. **THEN, each on its own branch cut from `main` (RULED, Andy 2026-11-26):**
    list is his, not yet written down).
 
 **Asked, not yet ruled (Andy 2026-11-26, after the reply went to Kieran):** _"Should the next arc be on our
-simplified Easy/Expert UI moves?"_ Claude's recommendation, his to rule: A1 and A2 first (they are ours, and
-Kieran's Cl. 8.3.2 review cannot be done without A2); then **the Easy / Expert stub ahead of §11**, because it
+simplified Easy/Expert UI moves?"_ Claude's recommendation, his to rule: A1 and A2 first (done); then **the Easy / Expert stub ahead of §11**, because it
 touches no calculation while the verification is open, and §11 changes the engine; §11 after Kieran signs.
 
 Why A is recommended first: Andy's own statement of the priority, 2026-11-26 (a priority, not a ruling on list A): _"F280 on means, a user gets what F280 requires for the heating and
 cooling system peak design loads, that is the critical path today and tomorrow. UI niceties and calculation
 futzing can happen after we validate compliance."_
+
+**WHAT PR #32 SHIPPED** (2026-11-26 / 27, merged on Andy's word for the night, smoked by Claude):
+
+- **The F280 calculation summary sheet** (CSA F280-12 Cl. 7.1 a): "a list of the input data contained in the
+  Heat loss and gain calculation summary sheet shown in Annex D"; Table E.1 numbers the same fields 1 to 64).
+  Andy's shape for it: _"If we make our own version of this form, it should be a popup/modal or open in a new
+  tab and use the browser's print functionality, no fancy add-ons"_, _"With the button to produce it in S21"_.
+  - **S21 F.0I "Open the sheet"** builds it for the model on screen (`src/core/F280Summary.js` `build()`), leaves
+    it in `localStorage` and opens **`f280-summary.html`** in its own tab (`js/f280-summary.mjs` draws it; §11
+    of `obstyles.css`). The browser prints it, or saves it as PDF. It calculates nothing.
+  - **Every one of the 64 fields is on it**, each as one of: a value with the place it is entered; **"not
+    entered"** (ours to hold, left empty); **"not carried"** (one field, the interior shading, with what
+    OBJECTIVE holds instead); or "not needed" (the sheet's spare style lines). It never invents a value.
+  - The envelope "styles" are S11's rows grouped by construction (the same RSI and the same applied assembly),
+    doors by U, windows by U and SHGC. After the 64: the qualification, the further inputs the calculation
+    used (AIM-2, BASESIMP, the volume), **the schedule of every envelope row and opening**, the design loads.
+  - The field NAMES are the Standard's; the layout and every other word are ours (no facsimile of CSA's form).
+- **S21's record, F.41 – F.58:** the 18 fields the sheet asks for that no other section held (client, address,
+  site, lot, postal code, the drawings used, front facing and whether assumed, whether the air tightness is
+  assumed, attachments, notes, the designer's address and contact). Per model, saved with the project, in no
+  calculation. F280 Mode Off hides them with the rest of S21.
+- **Three faults in S21's text fields, fixed** (they predate the sheet; found by its witness):
+  - a typed value starting with digits was shown and then stored as a number ("496 Fake Street" → "496.00",
+    project no. "0402-96" → "402.00"): `DOMBridge.js` `FORMAT` now holds S21's text fields as `raw`;
+  - opening a file read the Target's text as a number the same way: a field flagged `text` is kept as typed
+    (`FileHandler.js`, both import passes; `Section21.js` `getFields`);
+  - a file without the columns kept the previous project's record: `FileHandler.js` `addedDefaults`.
+- **Known and left:** an empty Reference field shows the Target's text (every Reference input does this:
+  `ComputationIntegration` `populateReferenceModel`). The print is 4 – 5 sheets, portrait; its `@page` is in the
+  page's own head because `@page` cannot be scoped and OBJECTIVE's report is landscape.
+- **Witnesses:** `test/witness/f280-summary.cjs` (ALL PASS, 26 checks, and the print PDF by Chrome); Kieran's 45
+  files give the tagged results unchanged (35 476 values, only the run's time, commit and branch differ);
+  parity against V3 2146 / 2146 on all 16 cases (+18 fields only here: the record); `garage-facing.cjs` and
+  `display-format.cjs` as before.
+- ⚠ **An eighth way `src/` differs from andy-rnd** (the list is further down): the sheet and the record.
 
 **WHAT PR #30 SHIPPED** (merged on Andy's word after his smoke):
 
@@ -320,6 +333,9 @@ in andy-rnd for the V3 page.
   A seventh (2026-11-26): the Garage facing, `src/core/Openings.js`, `CoolingISO52016.js`, `wombatWindows.js`,
   `src/sections/Section10.js`, `Section11.js`, `nodes/RadiantGainsNodes.js`, `nodes/CoolingNodes.js`,
   `nodes/F280ComplianceNodes.js`.
+  An eighth (2026-11-26): the F280 summary sheet, `src/core/F280Summary.js` (new), `src/sections/Section21.js`
+  (F.0I, F.41 – F.58, the `text` flag), `nodes/F280ComplianceNodes.js` (the record's inputs),
+  `src/core/FileHandler.js` and `src/core/ui/DOMBridge.js` (text kept as text; the record's defaults).
 
 **The day's items as they were worked** (✅ = shipped; the unticked ones are REMAINS, above):
 

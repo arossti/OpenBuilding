@@ -30,6 +30,14 @@
 
     // S02 metadata/text fields
     h_14: "raw", i_16: "raw", i_17: "raw",
+    // S21's text fields: the project, the designer and the summary sheet's record. Stamped as numbers, a
+    // typed "496 Fake Street" showed "496.00" and project no. "0402-96" showed "402.00" (found 2026-11-26)
+    ...Object.fromEntries(
+      ["f280_proj_num", "f280_code_ref", "f280_dsgn_name", "f280_dsgn_co", "f280_cert_num", "f280_svc_org",
+        "f280_issued_for", "f280_address", "f280_proj_city", "f280_site", "f280_lot", "f280_postal",
+        "f280_dims_src", "f280_attached", "f280_notes", "f280_dsgn_addr", "f280_dsgn_city", "f280_dsgn_postal",
+        "f280_dsgn_phone", "f280_dsgn_fax", "f280_dsgn_email"].map(id => [id, "raw"])
+    ),
     l_12: "cad-4dp", l_13: "cad-4dp", l_14: "cad-4dp", l_15: "cad-2dp", l_16: "cad-4dp",
 
     // S03 Climate

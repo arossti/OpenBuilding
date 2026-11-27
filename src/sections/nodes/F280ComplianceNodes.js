@@ -186,7 +186,37 @@
         classification: "A",
         label: "Code Reference",
         defaultValue: "NBC 2020: 9.33.5.1, 9.36.3.2, 9.36.5.15(5), 9.36.8.9"
-      }
+      },
+
+      // The calculation summary sheet's record (CSA F280-12 Cl. 7.1 a); Annex D, Table E.1): what the sheet
+      // asks for that no other section holds. Per model; no node reads them (src/core/F280Summary.js does).
+      ...[
+        ["issuedFor", "f280_issued_for", "Drawings Issued For", ""],
+        ["address", "f280_address", "Building Address", ""],
+        ["city", "f280_proj_city", "Building City and Province", ""],
+        ["site", "f280_site", "Site", ""],
+        ["lot", "f280_lot", "Lot", ""],
+        ["postalCode", "f280_postal", "Building Postal Code", ""],
+        ["dimensionsSource", "f280_dims_src", "Dimensional Information Based On", ""],
+        ["frontFacing", "f280_front_facing", "Front Facing", "Not recorded"],
+        ["frontFacingAssumed", "f280_facing_assumed", "Front Facing Assumed?", "Not recorded"],
+        ["airTightnessAssumed", "f280_tight_assumed", "Air Tightness Assumed?", "Not recorded"],
+        ["attachedDocuments", "f280_attached", "Attached Documents", ""],
+        ["notes", "f280_notes", "Notes for the Sheet", ""],
+        ["designerAddress", "f280_dsgn_addr", "Designer Address", ""],
+        ["designerCity", "f280_dsgn_city", "Designer City and Province", ""],
+        ["designerPostalCode", "f280_dsgn_postal", "Designer Postal Code", ""],
+        ["designerTelephone", "f280_dsgn_phone", "Designer Telephone", ""],
+        ["designerFax", "f280_dsgn_fax", "Designer Fax", ""],
+        ["designerEmail", "f280_dsgn_email", "Designer E-mail", ""]
+      ].map(([key, legacyId, label, defaultValue]) => ({
+        id: `f280.sheet.${key}`,
+        legacyId,
+        section: "SF280",
+        classification: "A",
+        label,
+        defaultValue
+      }))
     ];
 
     graph.registerInputs(inputs);

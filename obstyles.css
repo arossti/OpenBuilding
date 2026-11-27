@@ -9,6 +9,7 @@
      <html class="theme-dark app-beamweb">     BEAMweb
      <html class="theme-dark app-deps">        Dependencies manifest
      <html class="theme-dark app-landing">     Landing / app directory
+     <html class="theme-dark app-f280sheet">   OBJECTIVE's F280 calculation summary (its own tab, printed by the browser)
 
    ## File map (§ numbers match the section banners below)
      §1  Reset
@@ -20,6 +21,7 @@
      §8  APP: BEAMweb (embodied carbon calculator)
      §9  APP: Landing (app directory)
      §10 APP: Deps (dev dependency manifest)
+     §11 APP: F280 sheet (OBJECTIVE's heat loss and gain calculation summary)
 
    ## Roadmap — "one file" goal
    Phase 0 (today): consolidate four app CSS files into this one, grouped by
@@ -5394,5 +5396,245 @@ body.reference-mode .op-v3 input:disabled {
     font-size: 50px;
     line-height: 1;
     color: #6c757d;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════
+   §11  APP: F280 sheet — the heat loss and gain calculation summary (f280-summary.html)
+   Opened from OBJECTIVE's S21 in its own tab; the browser prints it (Andy 2026-11-26: "use the browser's print
+   functionality, no fancy add-ons"). On screen a sheet of paper on the app's ground; in print the sheet alone.
+   The sheet is ink on white in both, so its colours are its own and not the theme's.
+   ═════════════════════════════════════════════════════════════ */
+
+/* S21's side of it: the record's text cells read left, and the button that opens the sheet */
+.op-v3 td.f280-text {
+  text-align: left;
+}
+.op-v3 button.f280-sheet-button {
+  white-space: nowrap;
+}
+
+html.app-f280sheet body {
+  overflow: auto;
+}
+.fs-bar {
+  padding: 12px 20px;
+  gap: 14px;
+}
+.fs-bar-title {
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+.fs-bar-sub,
+.fs-bar-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.fs-ground {
+  padding: 24px 16px 48px;
+}
+.fs-sheet {
+  --fs-ink: #18181b;
+  --fs-dim: #52525b;
+  --fs-line: #b4b4bb;
+  --fs-line-soft: #dedee2;
+  --fs-band: #f1f1f3;
+  --fs-flag: #9a3412;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 8.5in;
+  margin: 0 auto;
+  padding: 0.5in;
+  background: #fff;
+  color: var(--fs-ink);
+  font-family: var(--font-body);
+  font-size: 9.5pt;
+  line-height: 1.35;
+  box-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
+}
+.fs-empty {
+  margin: 0;
+  color: var(--fs-dim);
+}
+.fs-head {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--fs-ink);
+}
+.fs-title {
+  margin: 0 0 4px;
+  font-family: var(--font-head);
+  font-size: 15pt;
+  font-weight: 700;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+.fs-sub {
+  margin: 0;
+  max-width: 48ch;
+  font-size: 8.5pt;
+  color: var(--fs-dim);
+}
+.fs-facts {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 1px 10px;
+  margin: 0;
+  font-size: 8.5pt;
+  white-space: nowrap;
+}
+.fs-facts dt {
+  color: var(--fs-dim);
+}
+.fs-facts dd {
+  margin: 0;
+  font-weight: 600;
+}
+.fs-count,
+.fs-warn,
+.fs-foot {
+  margin: 8px 0 0;
+  font-size: 8.5pt;
+  color: var(--fs-dim);
+}
+.fs-warn {
+  color: var(--fs-flag);
+  font-weight: 600;
+}
+.fs-section {
+  margin-top: 12px; /* a section may run over a sheet: its rows and its heading are what stay whole */
+}
+.fs-keep {
+  break-inside: avoid;
+}
+.fs-group {
+  margin: 0;
+  padding: 3px 6px;
+  background: var(--fs-band);
+  border-top: 1px solid var(--fs-line);
+  border-bottom: 1px solid var(--fs-line);
+  font-family: var(--font-head);
+  font-size: 9pt;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  break-after: avoid;
+}
+.fs-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.fs-table td,
+.fs-table th {
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--fs-line-soft);
+  vertical-align: top;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.fs-table tr {
+  break-inside: avoid;
+}
+.fs-no {
+  width: 3.4em;
+  white-space: nowrap;
+  color: var(--fs-dim);
+  font-variant-numeric: tabular-nums;
+  text-align: right !important;
+}
+.fs-name {
+  width: 30%;
+}
+.fs-from {
+  width: 21%;
+  font-size: 8pt;
+  color: var(--fs-dim);
+}
+.fs-held-text {
+  font-weight: 600;
+}
+.fs-tag {
+  font-size: 8pt;
+  font-style: italic;
+  color: var(--fs-dim);
+}
+.fs-tag-none {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--fs-flag);
+}
+.fs-note {
+  display: block;
+  font-size: 8pt;
+  color: var(--fs-dim);
+}
+.fs-grid {
+  table-layout: auto;
+  font-size: 8pt;
+}
+.fs-grid td,
+.fs-grid th {
+  padding: 3px 5px;
+  overflow-wrap: normal;
+}
+.fs-grid td:first-child {
+  white-space: nowrap;
+}
+.fs-unused,
+.fs-row-unused .fs-name,
+.fs-row-unused .fs-no {
+  font-size: 8pt;
+  color: var(--fs-dim);
+}
+.fs-grid th {
+  font-weight: 700;
+  color: var(--fs-dim);
+  border-bottom: 1px solid var(--fs-line);
+  vertical-align: bottom;
+}
+.fs-grid .fs-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The sheet's @page (portrait) is in f280-summary.html's own head: @page cannot be scoped to an html class, and
+   here it would turn OBJECTIVE's landscape report (§8d) portrait too. */
+@media print {
+  html.app-f280sheet,
+  html.app-f280sheet body {
+    height: auto;
+    overflow: visible;
+    background: #fff !important;
+    color-scheme: light;
+  }
+  html.app-f280sheet .fs-bar {
+    display: none !important;
+  }
+  html.app-f280sheet .fs-ground {
+    padding: 0;
+  }
+  html.app-f280sheet .fs-sheet {
+    max-width: none;
+    padding: 0;
+    box-shadow: none;
+    font-size: 9pt;
+  }
+  html.app-f280sheet .fs-section {
+    margin-top: 9px;
+  }
+  html.app-f280sheet .fs-table td,
+  html.app-f280sheet .fs-table th {
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+  html.app-f280sheet .fs-sheet * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 }

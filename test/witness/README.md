@@ -24,6 +24,7 @@ Run from this repo's root; `<out>` is any folder for screenshots:
     ../andy-rnd/node_modules/.bin/playwright test --config=test/witness/v3-reference/pw.config.cjs
     node test/witness/garage-facing.cjs            # a wall to an attached garage: the Garage facing
     node test/witness/f280-run.cjs <case inputs dir> <out dir> --annexj ../andy-rnd/test/fixtures/f280-annex-j.json
+    node test/witness/f280-summary.cjs <out>       # S21's calculation summary sheet (F280 Annex D / Table E.1)
 
 What each must show:
 
@@ -57,3 +58,8 @@ What each must show:
   The script holds none of them. `--only <regex>` runs some cases, `--jobs <n>` sets the parallel contexts.
 - `display-format.cjs`: `Target changed by a round trip: 0 | Reference: 0` and `long decimals shown: 0` on the
   default project and on case 03 (F280); S04's bill reads `132,938.00`, S21's wall U `0.149`.
+- `f280-summary.cjs <out>`: `ALL PASS`. The sheet lists Table E.1's 64 fields in order, each with a value, not
+  entered, not carried (one: the interior shading) or not needed; its values are the sections' own; S21's
+  record is per model and moves no design load; the saved file brings both models' record back as typed
+  ("496 Fake Street" and "0402-96" whole); F280 Mode Off hides the record and the button; the button opens
+  `f280-summary.html` in its own tab. With `<out>` it also writes the sheet's print PDF by the machine's Chrome.

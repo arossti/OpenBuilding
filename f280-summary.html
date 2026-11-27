@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" class="theme-dark app-f280sheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OBJECTIVE 4.0 — Heat loss and gain calculation summary</title>
+    <link rel="icon" type="image/svg+xml" href="graphics/ob-favicon.svg" />
+    <link rel="icon" type="image/png" href="graphics/ob-logo-sm.png" />
+    <meta name="robots" content="noindex,nofollow" />
+    <link rel="stylesheet" href="obstyles.css" />
+    <!-- The one rule kept out of obstyles.css (its §11 says why): this page's sheet is portrait, and @page
+         cannot be scoped, so it has to come after OBJECTIVE's landscape @page and only on this page. -->
+    <style>
+      @page {
+        size: portrait;
+        margin: 0.5in;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Opened from OBJECTIVE's S21 ("Open the sheet"), which hands this page the sheet for the model on screen
+         (src/core/F280Summary.js). The browser prints it: Print, then Save as PDF there if a file is wanted. -->
+    <header class="site-header fs-bar">
+      <img src="graphics/ob-mark-small.svg" alt="OpenBuilding.ca" class="header-logo" />
+      <div>
+        <h1 class="fs-bar-title">Heat loss and gain calculation summary</h1>
+        <span class="fs-bar-sub" id="fs-bar-sub">OBJECTIVE 4.0 · CSA F280-12</span>
+      </div>
+      <div style="flex: 1"></div>
+      <span class="fs-bar-hint">Your browser prints this page. Choose Save as PDF there for a file.</span>
+      <button type="button" class="nav-btn" id="fs-print">Print</button>
+    </header>
+    <main class="fs-ground">
+      <article class="fs-sheet" id="fs-sheet">
+        <p class="fs-empty" id="fs-empty">
+          Nothing to show yet. Open OBJECTIVE, turn F280 Mode on in section 21, and press "Open the sheet" there.
+        </p>
+      </article>
+    </main>
+    <script type="module" src="js/f280-summary.mjs"></script>
+  </body>
+</html>
