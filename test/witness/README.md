@@ -62,4 +62,6 @@ What each must show:
   entered, not carried (one: the interior shading) or not needed; its values are the sections' own; S21's
   record is per model and moves no design load; the saved file brings both models' record back as typed
   ("496 Fake Street" and "0402-96" whole); F280 Mode Off hides the record and the button; the button opens
-  `f280-summary.html` in its own tab. With `<out>` it also writes the sheet's print PDF by the machine's Chrome.
+  `f280-summary.html` in its own tab, whose first page is the summary sheet laid out as Annex D's Figure D.1
+  (thirteen blocks, one printed page) ahead of the supplement. With `<out>` it also writes the print PDF by the
+  machine's Chrome.

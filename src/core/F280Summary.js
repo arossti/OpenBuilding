@@ -12,8 +12,10 @@
  * sheet's "window and door schedule"), and the design loads with their terms.
  *
  * open() hands the sheet to f280-summary.html in a new tab, which the browser prints (Andy 2026-11-26: "a
- * popup/modal or open in a new tab and use the browser's print functionality, no fancy add-ons"). The field
- * NAMES are the Standard's; the layout and every other word are ours.
+ * popup/modal or open in a new tab and use the browser's print functionality, no fancy add-ons"). Its first
+ * page is laid out as Figure D.1 is, one page, so a building official sees the sheet they are used to (Andy
+ * 2026-11-27: "mirror the sample report page as CSA formatted it, and then append any extra pages needed");
+ * a field's `short` is its line on that page. The pages after it are ours.
  *
  * Nothing here calculates: every number is read from the graph or the state as the sections show it.
  */
@@ -81,15 +83,16 @@
    * numbers: Table E.1's field numbers for this group's styles, in order; a model with more styles than the
    * sheet has lines lists them all, the extra ones without a number.
    */
-  function styles(group, numbers, rows, describe, empty) {
+  function styles(group, numbers, rows, describe, empty, brief) {
     const byKey = new Map();
     rows.forEach(row => {
       if (!byKey.has(row.key)) byKey.set(row.key, []);
       byKey.get(row.key).push(row);
     });
-    const fields = [...byKey.values()].map((members, i) =>
-      field(numbers[i] ?? null, `Style ${letter(i)}`, describe(members), members[0].from)
-    );
+    const fields = [...byKey.values()].map((members, i) => ({
+      ...field(numbers[i] ?? null, `Style ${letter(i)}`, describe(members), members[0].from),
+      short: brief(members), // the form's one line; the rows are in the schedule
+    }));
     // the sheet's remaining lines stay on the report, empty, so its field count is the Standard's
     for (let i = fields.length; i < numbers.length; i++) {
       fields.push({
@@ -98,6 +101,7 @@
         value: "",
         from: "",
         note: i === 0 ? empty : "",
+        short: i === 0 ? "None" : "",
         state: i === 0 ? "held" : "unused",
       });
     }
@@ -193,6 +197,23 @@
     };
     const foundation =
       basesimp && !basesimp.error && basesimp.configuration ? `BASESIMP ${basesimp.configuration} (S03 G.4.4)` : "";
+    // The form's one line per style (Figure D.1): the construction and its area; the rows are in the schedule
+    const briefOpaque = extra => members =>
+      [members[0].assembly, rsiText(members[0].rsi), areaText(members), extra].filter(Boolean).join(", ");
+    const briefOpening = members => {
+      const m = members[0];
+      const count = members.reduce((sum, x) => sum + (x.quantity > 0 ? x.quantity : 1), 0);
+      return [
+        m.assembly,
+        m.u > 0 ? `U ${fix(m.u, 3)}` : "",
+        m.kind !== "door" && Number.isFinite(m.shgc) ? `SHGC ${fix(m.shgc, 2)}` : "",
+        areaText(members),
+        `${count} ${m.kind}${count === 1 ? "" : "s"}`,
+      ]
+        .filter(Boolean)
+        .join(", ");
+    };
+    const foundationBrief = basesimp && !basesimp.error && basesimp.configuration ? `BASESIMP ${basesimp.configuration}` : "";
 
     // ---- the sheet's fields, in Table E.1's order ----------------------------------------------
     const stories = inp("d_103");
@@ -326,14 +347,14 @@
           field(30, "Summer mean daily temperature range", weather ? withUnit(weather.summerRange, "°C", 1) : "", "F280's weather table", "Table E.1 only; Figure D.1 has no such line"),
         ],
       },
-      styles("Above grade walls", [31, 32, 33, 34], rowsOf("walls"), describeOpaque(""), "none in this model"),
-      styles("Below grade walls", [35, 36, 37, 38], rowsOf("wallsBelowGrade"), describeOpaque(foundation), "none in this model"),
-      styles("Floors on soil", [39, 40], rowsOf("slabOnGrade"), describeOpaque(foundation), "none in this model"),
-      styles("Ceilings", [41, 42, 43], rowsOf("roof"), describeOpaque(""), "none in this model"),
-      styles("Exposed floors", [44, 45], rowsOf("exposedFloor"), describeOpaque(""), "none in this model"),
-      styles("Doors", [46, 47, 48], openings.filter(x => x.kind === "door"), describeOpening, "none in this model"),
-      styles("Windows", [49, 50, 51, 52], openings.filter(x => x.kind === "window"), describeOpening, "none in this model"),
-      styles("Skylights", [53, 54], openings.filter(x => x.kind === "skylight"), describeOpening, "none in this model"),
+      styles("Above grade walls", [31, 32, 33, 34], rowsOf("walls"), describeOpaque(""), "none in this model", briefOpaque("")),
+      styles("Below grade walls", [35, 36, 37, 38], rowsOf("wallsBelowGrade"), describeOpaque(foundation), "none in this model", briefOpaque(foundationBrief)),
+      styles("Floors on soil", [39, 40], rowsOf("slabOnGrade"), describeOpaque(foundation), "none in this model", briefOpaque(foundationBrief)),
+      styles("Ceilings", [41, 42, 43], rowsOf("roof"), describeOpaque(""), "none in this model", briefOpaque("")),
+      styles("Exposed floors", [44, 45], rowsOf("exposedFloor"), describeOpaque(""), "none in this model", briefOpaque("")),
+      styles("Doors", [46, 47, 48], openings.filter(x => x.kind === "door"), describeOpening, "none in this model", briefOpening),
+      styles("Windows", [49, 50, 51, 52], openings.filter(x => x.kind === "window"), describeOpening, "none in this model", briefOpening),
+      styles("Skylights", [53, 54], openings.filter(x => x.kind === "skylight"), describeOpening, "none in this model", briefOpening),
       {
         title: "Attachments and notes",
         fields: [
@@ -444,8 +465,20 @@
     ];
 
     const all = groups.flatMap(g => g.fields);
+    // The form's short lines (Figure D.1 gives most fields half a line): the full value stays in the supplement
+    const shorts = {
+      13: ventRate > 0 ? "Included" : "Not included",
+      14: sre > 0 || atre > 0 ? `Yes, ${recoveryType || "HRV"}` : "No",
+      15: Number.isFinite(atre) ? `${trim(atre, 1)} %` : "",
+      18: [tightness, ach50 > 0 ? `${trim(ach50, 2)} ACH50` : ""].filter(has).join(", "),
+      20: [terrain, wallShield].filter(has).join("; "),
+      21: "see the window schedule",
+    };
+    all.forEach(f => {
+      if (shorts[f.no] !== undefined) f.short = shorts[f.no];
+    });
     return {
-      version: 1,
+      version: 2,
       model: r.reference ? "Reference" : "Target",
       project: has(inp("h_14")) ? String(inp("h_14")) : "",
       mode,
