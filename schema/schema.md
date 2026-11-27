@@ -54,7 +54,12 @@ both Expert and Easy modes."_ The classes were on the cells all along; 4.0's sty
 - **S07's Easy cut is RULED** (Andy, "yes and yes"), and #43 merged.
 - **Witness:** `test/witness/easy-expert.cjs`, 66 checks. S09 – S12 still fit their cards at 1440, 1512 and
   1728 px wide. Parity not re-run: no file under `src/` changed since #41's 2146 / 2146.
-- **NEXT: S08 in Easy.**
+- **PR #45 (branch `Easy-S08`, stacked on #44; merge #44 first): S08 in Easy, PROPOSED by Claude, built for
+  Andy's smoke.** Easy keeps the six inputs (radon, CO2, TVOC, the two humidity sliders and their method), the
+  guidance limit beside each and the ✓. It does not show the share of the limit (the limit and the ✓ already
+  say it) nor the Wood Emissions Offset row (computed from S04's wood; not a measure of the air). Witness: 67
+  checks.
+- **NEXT: S09 in Easy.**
 
 **LIVE: PR #43 (`1ec227e`, merged on Andy's word 2026-11-27).** Stylesheet and witness only.
 
