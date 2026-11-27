@@ -93,9 +93,17 @@ UI niceties and calculation futzing can happen after we validate compliance."_
     seven files named above. andy-rnd (V3) does not have the facing.
   - **Not done:** the Reference model's code-minimum RSI is not reduced by NBC's 0.16; the hover only says it
     is permitted.
-- **THE REPLY TO KIERAN is appended to his own note**, `Objective 4.0 Requirements Matrix.txt` in the private
-  folder, for Andy to send with `QO_run_2026-11-26/`. The report there is Rev. B. Our position, as written to
-  him and Andy's to change: no input and no reference value is adjusted to close a gap.
+- **THE REPLY TO KIERAN — SENT 2026-11-26 as GitHub issues** (Andy: _"message Kieran directly through the
+  Repo's own Github Issues"_), both assigned to him (`k1eranth0m`):
+  - **openbuilding-ca/andy-rnd#27 (private): the reply, the report (Rev. B) and the results table.** Anything
+    that quotes the Standard's values goes there.
+  - **#29 here (public): a notice with no figures**, pointing at it. This repository's issues are public.
+  - The same reply is appended to Kieran's own note, `Objective 4.0 Requirements Matrix.txt`, in the private
+    folder.
+  - **RULED (Andy 2026-11-26, "yes, send as written"):** no input and no reference value is adjusted to close
+    a gap. The four Archetype 3 results and the suspect Annex J row stand as run, with the findings beside them.
+  - Andy holds no CSA update later than his copy (sold 2025-10-29, "Revised March 2023", which includes Update
+    No. 3). A web search found nothing published since; CSA's store refuses automated reading.
 - **NEXT:** T1 (`g_112` = 5.99 in andy-rnd's F280-1 and `build_case.py`); F280-1's garage walls split out, which
   needs the plans; T2 (a build stamp on the page); T8 (the Annex D / Table E.1 verification report from S21).
 
