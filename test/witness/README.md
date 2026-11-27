@@ -66,7 +66,7 @@ What each must show:
   `f280-summary.html` in its own tab, whose first page is the summary sheet laid out as Annex D's Figure D.1
   (thirteen blocks, one printed page) ahead of the supplement. With `<out>` it also writes the print PDF by the
   machine's Chrome.
-- `easy-expert.cjs <out>`: 45 lines of `ok`, then `ALL OK`. A first launch is in Easy (the class `op-easy` on
+- `easy-expert.cjs <out>`: 51 lines of `ok`, then `ALL OK`. A first launch is in Easy (the class `op-easy` on
   `<html>`), the pill follows Copy from Target, no header cell's caption is its own column's letter in either
   view while row IDs, one-letter units (W, m) and named captions stay. Easy shows no Cell ID but S11's Builder
   buttons and S10's opening rows; Expert shows all of them in one style, the ID column's; no row draws its own
@@ -77,5 +77,7 @@ What each must show:
   saved file (the view and the help setting are not in the file); the view survives a reload and New, and does
   not move the model on screen. S02's prices of gas, propane, wood and oil show only while S.2 is at Utility
   Bills, in both views and per model, and electricity's always. No ID names two different things, the numbers
-  of 2026-11-27 are where they were put, and the Reference shows the Target's IDs. With `<out>` it writes three
+  of 2026-11-27 are where they were put, and the Reference shows the Target's IDs. S03 in Easy shows its
+  inputs and essential values and not its secondary ones (the °F twins among them), all of it in Expert and in
+  print, and no input is hidden with F280 Mode On. With `<out>` it writes three
   pictures of the button row.

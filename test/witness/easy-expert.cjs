@@ -102,7 +102,8 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
         const id = el.getAttribute("data-field-id") + (el.tagName === "TD" ? "" : ":" + el.tagName);
         values[id] = el.tagName === "SELECT" || el.tagName === "INPUT" ? el.value : el.textContent.trim();
       });
-      const cells = [...document.querySelectorAll("#beam-main .data-table td")];
+      // (a row Easy takes away whole is left out of the count: S03's winter average)
+      const cells = [...document.querySelectorAll("#beam-main .data-table td")].filter((c) => !c.closest('#climateCalculations tr[data-id="L.3.3"]'));
       return { values, cells: cells.length, shown: cells.filter((c) => c.getClientRects().length > 0).length };
     });
   const save = async () => {
@@ -276,6 +277,40 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   ok("the stray IDs and the two wrong captions are gone", numbered.gone.length === 0 && numbered.captions === 1, `${numbered.gone.join(" ")} | Peak Heating Imp ×${numbered.captions}`);
   ok("the Reference shows the same IDs as the Target", refIds.all === ie.all && refIds.beside === ie.beside && refIds.leading === ie.leading, `${refIds.all} / ${ie.all}`);
 
+  // 2f. S03 in Easy: the inputs and the essential values show, the secondary values do not
+  const s03 = () =>
+    p.evaluate(() => {
+      const seen = (id) => {
+        const td = document.querySelector(`#climateCalculations td[data-field-id="${id}"]`);
+        return !!td && td.getClientRects().length > 0 && getComputedStyle(td).visibility === "visible";
+      };
+      const inputs = ["d_19", "h_19", "h_20", "h_21", "i_21", "m_19", "l_22", "l_24"];
+      const kept = ["j_19", "d_20", "d_21", "d_23", "d_24", "h_23", "h_24", "n_23", "n_24"];
+      const secondary = ["e_23", "e_24", "e_25", "i_23", "i_24", "d_22", "h_22", "l_20", "l_21", "d_25", "m_23", "m_24"];
+      const captions = [...document.querySelectorAll('#climateCalculations tr[data-id="03-ID"] > td')].filter((c) => c.textContent.trim() && getComputedStyle(c).visibility === "visible").map((c) => c.textContent.trim());
+      return { inputs: inputs.filter(seen).length + "/" + inputs.length, kept: kept.filter(seen).length + "/" + kept.length, secondary: secondary.filter(seen).length + "/" + secondary.length, captions: captions.join(" ") };
+    });
+  let c3 = await s03();
+  ok("S03 in Easy: every input and the essential values show", c3.inputs === "8/8" && c3.kept === "9/9", JSON.stringify(c3));
+  ok("S03 in Easy: the secondary values and the °F captions do not", c3.secondary === "0/12" && !/°F/.test(c3.captions) && /°C/.test(c3.captions), JSON.stringify(c3));
+
+  // F280 Mode On puts the foundation's inputs in S03: Easy hides none of them, and the winter-average row,
+  // which carries the foundation's configuration, comes back
+  const f280 = async (mode) => {
+    await p.selectOption('#f280Compliance select[data-field-id="f280_mode"]', mode);
+    await p.waitForTimeout(1500);
+    return p.evaluate(() => {
+      const s = document.getElementById("climateCalculations");
+      const seen = (e) => e.getClientRects().length > 0 && getComputedStyle(e).visibility === "visible";
+      const inputs = [...s.querySelectorAll("td.user-input, td.dropdown-cell, td.slider-cell")];
+      return { inputs: inputs.length, seen: inputs.filter(seen).length, row: s.querySelector('tr[data-id="L.3.3"]').getClientRects().length > 0 };
+    });
+  };
+  const on = await f280("On");
+  ok("S03 in Easy with F280 Mode On: no input hidden", on.seen === on.inputs && on.inputs >= 14 && on.row, JSON.stringify(on));
+  const off = await f280("Off");
+  ok("and Off again: the F280 inputs go, the row with them", off.seen < off.inputs && !off.row, JSON.stringify(off));
+
   // 3. Expert shows the same page: the view changes no value and moves no cell
   const easy = await snap();
   const easyCsv = await save();
@@ -290,6 +325,8 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   const dv = same(easy.values, expert.values);
   ok("every value the same in both views", dv.length === 0, `${Object.keys(easy.values).length} values; differ: ${dv.slice(0, 5).join(" ")}`);
   ok("every cell keeps its place", easy.shown === expert.shown && easy.cells === expert.cells, `${easy.shown} of ${easy.cells} cells laid out in Easy, ${expert.shown} of ${expert.cells} in Expert`);
+  c3 = await s03();
+  ok("S03 in Expert: all of it shows", c3.inputs === "8/8" && c3.kept === "9/9" && c3.secondary === "12/12" && /°F/.test(c3.captions), JSON.stringify(c3));
   const ix = await ids();
   ok("Expert shows every Cell ID", ix.shown === ix.all && ix.all > 200 && ix.repeats.length === 0, `${ix.shown} of ${ix.all}`);
   ok("every ID in one style, the ID column's", ix.styles.length === 1 && ix.styles[0] === ix.rowId, `${ix.styles.length} style(s): ${ix.styles.join(" || ")}`);
@@ -342,10 +379,13 @@ const URL = process.env.OBJ_URL || "http://localhost:8831/objectivepro.html";
   await p.emulateMedia({ media: "print" });
   const printed = await p.evaluate(() => {
     const size = (sel) => parseFloat(getComputedStyle(document.querySelector(sel)).fontSize);
-    return [size('#teuiSummary tr[data-id="T.6.0"] td.id-cell'), size("#teuiSummary td.cell-id"), getComputedStyle(document.querySelector("#beam-main span.cell-id")).display];
+    const vis = (id) => getComputedStyle(document.querySelector(`#climateCalculations td[data-field-id="${id}"]`)).visibility;
+    const row = getComputedStyle(document.querySelector('#climateCalculations tr[data-id="L.3.3"]')).display;
+    return [size('#teuiSummary tr[data-id="T.6.0"] td.id-cell'), size("#teuiSummary td.cell-id"), getComputedStyle(document.querySelector("#beam-main span.cell-id")).display, vis("e_23"), vis("d_22"), vis("d_25"), row];
   });
   await p.emulateMedia({ media: "screen" });
   ok("print shows the IDs in Easy", v.easy && printed[0] > 0 && printed[1] > 0 && printed[2] !== "none", JSON.stringify(printed));
+  ok("print shows S03 whole in Easy", printed[3] === "visible" && printed[4] === "visible" && printed[5] === "visible" && printed[6] !== "none", JSON.stringify(printed.slice(3)));
 
   ok("no page error", errs.length === 0, errs.slice(0, 3).join(" | "));
   console.log(fails ? `${fails} FAILED` : "ALL OK");
