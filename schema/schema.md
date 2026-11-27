@@ -21,25 +21,40 @@
 ### ▶ START HERE (handoff 2026-11-26 night, laptop) — written for a cold start after a /clear
 
 **Rewritten 2026-11-26 night (laptop) at the end of the session, for a cold start.** **LIVE: `main` after
-PR #27**, deployed to https://arossti.github.io/OpenBuilding/. **PR #28 is OPEN** (branch `Reference-Independence`,
-pushed): Andy is smoking it; it merges on his word in the session, and not before.
+PR #27**, deployed to https://arossti.github.io/OpenBuilding/. **PR #28 (`Reference-Independence`) was merged
+on Andy's word at the end of that session**; this handoff is its last commit.
 
-**What PR #28 holds** (detail under REMAINS 1 and 2 below):
+**What PR #28 shipped** (detail under REMAINS 1 and 2 below):
 
 - The Builders, S19 and an opening's host wall are each one per model (Reference / Target independence).
 - S01's `m_10` no longer reads "Unavailable" after Trust; Trust names the Target model.
 - A typed number keeps its format across a model switch; S21 rounds its mirrored numbers for display.
 - Two documents: `docs/workplans/REFERENCE-MODEL-EXPLAINED.md` and §11 below. No calculation changed for them.
 
-**NEXT, each on its own branch cut from `main` after #28 merges** (❓ Andy to confirm which of 1 and 2 goes
-first; Claude recommends 2, the F280 fault, because it is a wrong number in four shipped case files):
+**⛔ THE VERY NEXT SESSION — F280 VALIDATION, AND ONLY THAT** (branch `F280-Validation`, cut from `main` after
+#28 merged). Andy 2026-11-26: _"Kieran has completed his validation harness for F280, so the very next session
+should review just that, before we make any changes to calculation methodology. F280 on means, a user gets what
+F280 requires for the heating and cooling system peak design loads, that is the critical path today and tomorrow.
+UI niceties and calculation futzing can happen after we validate compliance."_
 
-1. **The Easy / Expert stub** (RULED, Andy: _"yes, build the stub after #28 merges"_): the pill after Copy from
-   Target, the page launching in Easy, the spreadsheet's column letters gone in both modes, nothing else hidden
-   yet. Then section by section with Andy. The plan and every ruling:
+- **Review Kieran's harness first; change no calculation until it is reviewed.** Kieran is the F280
+  verification agent (Cl. 8.2). His material, as found 2026-11-26 in `~/Documents/OpenBuilding/KT F280 Validation
+Runs/` (not in any repo, not yet read by Claude): `F280_RTM_r1_2026-11-26.pdf`, `F280_case_inputs.zip`,
+  `F280_model_specification.md`, `Objective 4.0 Requirements Matrix.txt`. Ask Andy where the harness itself lives
+  and for Kieran's questions verbatim.
+- **What "F280 On" must deliver:** the peak design heating and cooling loads F280 requires. The annual TEUI under
+  F280 Mode (§11) is second to that.
+- The F280 specs and case files this repo's engine came from are in andy-rnd (`test/f280*.cjs`,
+  `docs/f280/README.md`).
+
+**THEN, each on its own branch cut from `main`, in this order (RULED, Andy 2026-11-26):**
+
+1. **F280 Mode: gains to the heat balance only** (§11 is the plan, read it whole first). It changes the
+   calculation engine, so it waits for the validation review above. Nothing of it is built.
+2. **The Easy / Expert stub** (Andy: _"yes, build the stub after #28 merges"_): the pill after Copy from Target,
+   the page launching in Easy, the spreadsheet's column letters gone in both modes, nothing else hidden yet.
+   Then section by section with Andy. The plan and every ruling:
    `docs/workplans/REFERENCE-MODEL-EXPLAINED.md` Part 2.
-2. **F280 Mode: gains to the heat balance only** (RULED; §11 is the plan, read it whole first). It changes the
-   calculation engine: nothing of it is built.
 3. **An opening's W × H comes across on Apply Selected** (REMAINS 5).
 4. The rest of REMAINS 3 – 6, and Andy's list of CSS and UI nits from his smoke (he called it a later arc; the
    list is his, not yet written down).
@@ -704,7 +719,7 @@ true`) and the row's name is marked "edited".
 4. **B5's partial sum** is shown with the count of rows it covers, in its own new S05 field (10.3 B5), so the typed
    `i_41` and today's defaults are untouched.
 
-## 11. F280 Mode: gains to the heat balance only (PLAN, nothing built)
+## 11. F280 Mode: gains to the heat balance only (PLAN, nothing built; waits for the F280 validation review, §0)
 
 Written 2026-11-26 night. Andy: _"ok, now fix step 2: gains to heat balance only"_ and _"We should spell this out
 in our workplan first"_, _"before we make any changes ot the calculation engine"_.
@@ -804,11 +819,9 @@ Witnesses to write with it:
 
 ### 11.6 Open, Andy's
 
-1. **What S09 shows under Mode On.** Today its density cells show F280's figures as calculated values (black),
-   and the kWh/yr column follows them. After the change the kWh/yr column is electricity at OBJECTIVE's
-   densities, beside a density cell showing F280's gain. Claude's recommendation: keep the density cells as they
-   are (they are the gains in effect), and label the kWh/yr column's hover under On "electricity at S09's own
-   densities; gains follow F280".
+1. **What S09 shows under Mode On — RULED (Andy 2026-11-26, "yes"):** the density cells keep showing F280's
+   gains (they are the gains in effect); the kWh/yr column shows electricity at S09's own densities, and its
+   hover under On says so: "electricity at S09's own densities; gains follow F280".
 2. **PHI Classic rises to about 63**, above its Target's 57.1, because F280's 800 W of plug gain is less heat
    than the 6.6 W/m² the house has with the mode Off. That is the ruling working as written; noted so it is not
    a surprise.
