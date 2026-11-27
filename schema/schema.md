@@ -27,8 +27,24 @@ HOLDS" is next below. **The next task: Easy mode section by section, with Andy**
 That curation is his; an agent does not choose what a section hides. The F280 work below is waiting on other
 people: read "WAITING ON OTHERS", check andy-rnd#27 for replies (none by 2026-11-27), and otherwise leave it.
 
-**BUILT, NOT MERGED: PR #39 (branch `ID-Renumber-S02-Prices`, to be smoked by Andy).** Two things Andy ruled
-on 2026-11-27, neither a calculation:
+**BUILT, NOT MERGED: PR #40 (branch `Easy-S03`, to be smoked by Andy): S03 in Easy** (Andy 2026-11-27, "yes"
+to the cut proposed). `obstyles.css` §8e, on screen only, display only:
+
+- **Easy keeps** the seven inputs (Province, City, Current or Future Values, Capacitance and its slider, Days
+  Cooling, Elevation, Cooling Override), the Climate Zone, HDD, CDD, the Coldest and Hottest Days and the two
+  set-points in °C, and the two ✓.
+- **Easy does not show** the °F twins and their captions, the ground-facing degree days, the Summer Night Mean
+  and Mean RH, the Winter Average Temp. and the two set-point limits beside the ✓. A cell keeps its place; the
+  winter-average row goes whole, unless F280 Mode puts the foundation's configuration on it. With F280 Mode On
+  no S03 input is hidden.
+- ❓ Andy, seen in the result: Elevation is left alone on its row (the ground-facing degree days beside it are
+  hidden). Moving it up is a layout change in `Section03.js`, not done.
+- **Witness:** `test/witness/easy-expert.cjs`, 51 checks. Parity was not re-run: nothing but the stylesheet and
+  the witness changed since #39's 2146 / 2146.
+- **NEXT: S04 in Easy.** Its one ruled rule is ready to wire: the Actual columns hide while the model on screen
+  is at Targeted Use (`op-targeted-use` exists since #39).
+
+**LIVE: PR #39 (`c9c91b0`, merged on Andy's word 2026-11-27).** Two things Andy ruled, neither a calculation:
 
 - **One ID, one thing** (Andy: _"I agree with your proposed ID rename/new list, next available numbers"_; the
   IDs are the rows' own, so the Reference shows the Target's). In `src/sections/`:
@@ -58,12 +74,15 @@ on 2026-11-27, neither a calculation:
     Targeted Use too: S15's annual cost of electricity, before and after the heat pump (`EnergyNodes.js`
     d_141 = d_135 × l_12, h_141 = d_136 × l_12), hence the ROI, and S18's financials (`pcFinancials.js`). The
     four fuels are read only against their bills (`energy.cost.otherFuel`). Hiding it would leave a live input
-    out of reach (the house rule: grey out by the engine's own predicate). ❓ Andy.
+    out of reach (the house rule: grey out by the engine's own predicate). **RULED (Andy 2026-11-27): yes,
+    electricity stays.**
 - **S02 in Easy is otherwise done** (Andy: move on to S03): it holds inputs and one derived value.
 - **Witnesses:** `test/witness/easy-expert.cjs` (ALL OK, 45 checks); parity against V3 2146 / 2146 on all 16
   cases; the rest as before.
-- **NEXT: S03 in Easy.** Its inventory and Claude's recommended cut are with Andy (2026-11-27); nothing of it is
-  built.
+- **The Sankey names, corrected reading (Andy 2026-11-27):** the Sankey DOES draw "W.2.W SHW Wasted"; it is
+  S07's `j_53`. The mismatch is on S07's side: that value's ID cell reads W.5.3 and "(W.2.W)" is only in its
+  caption. Likewise "G.7.0 Doors" draws S10's first door row, which S10 numbers G.7.1 (S11's is B.7.0).
+  Andy: _"M refers to Mechanical, V to ventilation and T to totals, generally sums."_ The renames wait for him.
 
 **WHAT PR #38 HOLDS** (Andy 2026-11-27, on smoking #37: _"no need to remove the header ids - we should however
 hide Cell ID's. In Expert mode, the cell ID's should in fact use the same styling (CSS) ... make all the same as

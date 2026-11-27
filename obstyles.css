@@ -5146,7 +5146,7 @@ input.op-pill:checked::before {
    WHAT EASY HIDES GOES HERE, one section at a time as Andy marks what is essential, each rule written as
    `html.op-easy <selector>` INSIDE `@media screen`: print shows the full report whatever the view. Easy never
    hides an input, with one exception (S04's Actual columns while S.2 is at Targeted Use). Hidden so far: the
-   Cell IDs. */
+   Cell IDs; S03's secondary climate values. */
 /* A field's help popover is Bootstrap's light card; its title took the page's light heading colour and read
    washed out on the card's pale band (Andy 2026-11-27). */
 .app-beamweb .popover-header {
@@ -5219,6 +5219,37 @@ input.op-pill:checked::before {
     padding-right: 0;
   }
   html.op-easy .op-v3 .data-table span.cell-id {
+    display: none;
+  }
+
+  /* S03 Climate (Andy 2026-11-27, "yes" to the cut proposed): Easy keeps the seven inputs, the climate zone,
+     the degree days, the coldest and hottest days and the two set-points in °C, and the two ✓. It does not
+     show: the °F twins and their captions; the ground-facing degree days; the summer night mean and mean RH;
+     the winter average; the two set-point limits beside the ✓. A cell keeps its place; the winter-average row
+     goes whole unless F280 Mode puts the foundation's configuration on it. */
+  html.op-easy
+    #climateCalculations
+    td:is(
+      [data-field-id="e_23"],
+      [data-field-id="e_24"],
+      [data-field-id="e_25"],
+      [data-field-id="i_23"],
+      [data-field-id="i_24"],
+      [data-field-id="d_22"],
+      [data-field-id="h_22"],
+      [data-field-id="l_20"],
+      [data-field-id="l_21"],
+      [data-field-id="d_25"],
+      [data-field-id="m_23"],
+      [data-field-id="m_24"]
+    ),
+  html.op-easy #climateCalculations tr[data-id="03-ID"] > td:is(.col-e, .col-i),
+  html.op-easy #climateCalculations tr[data-id="L.2.4"] > td:is(.col-c, .col-e, .col-g, .col-i),
+  html.op-easy #climateCalculations tr:is([data-id="L.2.1"], [data-id="L.2.3"]) > td:is(.col-k, .col-m),
+  html.op-easy #climateCalculations tr[data-id="L.3.3"] > td.col-c {
+    visibility: hidden;
+  }
+  html.op-easy #climateCalculations tr[data-id="L.3.3"]:has(td.f280-hidden-cell) {
     display: none;
   }
 }

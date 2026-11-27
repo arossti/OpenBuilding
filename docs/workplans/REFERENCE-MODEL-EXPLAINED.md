@@ -224,6 +224,14 @@ electricity stays, because the engine reads it at Targeted Use too (S15's annual
 exception is Claude's and waits for Andy's word. The class is `op-targeted-use` on `<html>`
 (`js/objective4.mjs` `syncUse`), ready for S04's Actual columns.
 
+**S03 (2026-11-27, PR #40).** Andy said yes to the cut proposed. Easy keeps the seven inputs, the Climate Zone,
+HDD, CDD, the Coldest and Hottest Days and the two set-points in °C, and the two ✓. It does not show the °F
+twins, the ground-facing degree days, the Summer Night Mean and Mean RH, the Winter Average Temp. and the two
+set-point limits. With F280 Mode On the foundation's inputs all show.
+
+**How a section is curated, as it has gone:** Claude lists the section's inputs and its calculated values with
+a recommended cut; Andy rules; the rules go in `obstyles.css` §8e and each gets a check in the witness.
+
 **Interactive help (PR #38).** Andy: _"unlike V3, we have no way to switch On/Off interactive help, let's add
 that for Easy mode and Expert mode, On by default in Easy, Off by default in Expert."_
 
