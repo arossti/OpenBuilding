@@ -56,10 +56,29 @@ on branch `F280-Handoff` (docs only). The session was the F280 validation Andy a
 
 A. **What the claim still needs from our side** (the report's triage; none of it waits for CSA):
 
-1. **T1:** `g_112` = 5.99 m in andy-rnd's own F280-1 and `tools/f280/build_case.py`, and the andy-rnd harness
-   re-recorded (Kieran's I18 ruling; the run used his file, which has it).
+1. **T1:** `g_112` = 5.99 m in andy-rnd's own F280-1 (Kieran's I18 ruling; the run used his file, which has it).
+   - In `~/Documents/OpenBuilding/andy-rnd`, on a new branch: `tools/f280/build_case.py` line 223 puts 5.53
+     (with its derivation in the note beside it: change both to the ruling, grade to the ceiling with the two
+     floor structures included). Run the script; it rewrites
+     `test/computation/case-studies/F280-1-Archetype1-2010s-Ottawa.csv` and `docs/f280/F280-1-crosswalk.md`.
+   - Re-record the harness with `F280_RECORD=1` set (the command is at the top of
+     `test/f280WholeHouse.spec.cjs`), and update `docs/f280/README.md`'s figures.
+     `test/aim2FromHouse.test.cjs` uses 5.53 as a typed example: leave it.
+   - The rebuilt file must equal Kieran's `case_files/F280-1.csv` field for field (it differed in `g_112` alone).
+   - andy-rnd's rules: commit and push on a feature branch; a merge needs Andy's word; its CI must be green.
 2. **T8: a verification report from S21**, the Annex D summary sheet and the Table E.1 fields (Cl. 8.3.2
-   a) – b)). Nothing produces it today. This is the largest piece.
+   a) – b)). Nothing produces it today. This is the largest piece, so start by showing Andy a plan.
+   - **What the clause asks:** the base case's verification reports are reviewed against Annex D's "Heat loss
+     and gain calculation summary sheet" (normative; Kieran's matrix counts 49 fields in Figure D.1) and against
+     Annex E's Table E.1 (informative; 50 fields). Where ours diverge, Kieran lists the divergences.
+   - **Read Annexes D and E first**, from the page images: the private folder's `tools/csa-viewer/` (Annex D
+     is near printed p. 75 and Annex E near p. 78 in the 2025 copy; PDF page = printed + 7), or the text extract
+     named in memory `reference_f280_pdf_unreadable`. The form's wording is CSA's: reproduce field NAMES and
+     our values, not the form's layout or text.
+   - **Where it goes:** S21 is `src/sections/Section21.js` (F280's own section); the report is the browser's
+     print, as every other report here (`obstyles.css` §8d). A first cut: an S21 block that lists each Annex D
+     field with the value OBJECTIVE holds and where it comes from, and marks a field we do not carry.
+   - Done when Kieran can review F280-1's report against both annexes without asking us for a value.
 3. **T2:** a build stamp on the page (the footer reads "OBJECTIVE 4.0 dev"; the run is identified by its tag).
 4. **T9:** Andy's signed qualification statement as the operator (Cl. 3.1). His.
 5. **F280-1's garage walls and headers split out** at their own Annex I values, on the new Garage facing. Waits
